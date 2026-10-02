@@ -1107,9 +1107,10 @@ def load_parts(board, comps, nets, skip=()):
 def build(bdir):
     name = os.path.basename(bdir)
     lay = yaml.safe_load(open(os.path.join(bdir, "layout.yaml")))
-    if lay.get("kind") == "main":
+    if lay.get("kind") in ("main", "module"):
         import pcb_main
-        board, fps, netinfo, lay, comps, _ = pcb_main.build(bdir, lay)
+        import pcb_module
+        board, fps, netinfo, lay, comps, _ = (pcb_main if lay["kind"] == "main" else pcb_module).build(bdir, lay)
         if lay.get("fab"):
             fit_footprint_silk(board, lay["fab"])
         if not lay.get("route"):
@@ -1435,6 +1436,48 @@ def check_rules(board, bdir, name, lay):
     return bad
 
 
+def check_courtyards(board, lay):
+    """EVERY FOOTPRINT'S COURTYARD INSIDE THE BOARD (owner, 2026-10-02: "everything needs
+    to fit within the footprint of the boards"): each part's courtyard, on whichever face,
+    within the Edge.Cuts outline, its cut-outs and holes counted as outside. KiCad's DRC
+    does not test this - its courtyard tests are part against part, and its edge test is
+    copper only - so a part could hang off the side of a board and pass. A part that is
+    MEANT to overhang (a connector whose body reaches through a panel) is named in
+    layout.yaml `courtyard_overhang:` with the reason and the source that says so; an
+    entry naming a part that does not overhang is an error too, so the list cannot go
+    stale. A footprint with no courtyard (a net tie, a board-only mount) is not tested."""
+    bad = []
+    allow = lay.get("courtyard_overhang") or {}
+    for ref, why in allow.items():
+        if not isinstance(why, dict) or not why.get("reason") or not why.get("source"):
+            bad.append(f"error: [courtyard] layout.yaml courtyard_overhang: {ref} needs a reason: and a source:")
+    ol = pcbnew.SHAPE_POLY_SET()
+    if not board.GetBoardPolygonOutlines(ol):
+        return bad + ["error: [courtyard] the Edge.Cuts outline is not one closed shape, so courtyards cannot be checked against it"]
+    outline = shapely_of(ol).buffer(1e-3)
+    over = set()
+    for fp in sorted(board.GetFootprints(), key=lambda f: f.GetReference()):
+        ref = fp.GetReference()
+        for cl in (pcbnew.F_CrtYd, pcbnew.B_CrtYd):
+            cy = fp.GetCourtyard(cl)
+            if not cy.OutlineCount():
+                continue
+            out = shapely_of(cy).difference(outline)
+            if out.is_empty or out.area < 1e-4:
+                continue
+            over.add(ref)
+            if ref in allow:
+                continue
+            x0, y0, x1, y1 = out.bounds
+            bad.append(f"error: [courtyard] {ref} ({fp.GetFPID().GetLibItemName().wx_str()}): {out.area:.2f} mm2 of its "
+                       f"{'front' if cl == pcbnew.F_CrtYd else 'rear'} courtyard lies outside the board outline, over "
+                       f"({x0:.2f}, {y0:.2f})-({x1:.2f}, {y1:.2f}) - move it inside, or name it in layout.yaml "
+                       f"courtyard_overhang: with the reason it is meant to overhang and the source")
+    for ref in sorted(set(allow) - over):
+        bad.append(f"error: [courtyard] layout.yaml courtyard_overhang: {ref} lies wholly inside the board - take it off the list")
+    return bad
+
+
 def check_silk(board, fab):
     """What KiCad 9's DRC does not check (K3-2): silk LINE width (min_text_thickness is
     text only), silk to a pad's mask opening (min_silk_clearance is silk to silk, and
@@ -1757,6 +1800,7 @@ def cmd_check(bdir):
         bad.append(f"error: [parity] {v['description']} - " + "; ".join(i["description"] for i in v.get("items", [])))
     board = pcbnew.LoadBoard(pcb)
     bad += check_rules(board, bdir, name, lay)
+    bad += check_courtyards(board, lay)
     if lay.get("fab"):
         bad += check_silk(board, lay["fab"])
     bad += check_tracks(board)
@@ -1765,6 +1809,11 @@ def cmd_check(bdir):
     if lay.get("kind") == "main":
         import pcb_main
         bad += pcb_main.check_cad(board, lay, comps)
+    elif lay.get("kind") == "module":
+        import pcb_module
+        bad += pcb_module.check_cad(board, lay, comps)
+        for b in pcb_module.check_b2b(board, bdir, lay):
+            (notes if b.startswith("note:") else bad).append(b)
     else:
         bad += check_cad(board, lay, cad_geometry(lay["cluster"]), comps)
     if lay.get("planes") or lay.get("islands"):
