@@ -206,6 +206,7 @@ not_on_board:
   A1: "the Matrix: on the lid, no footprint; J-MCU is its connector"
   SW9: "sw+ spare switch: not fitted, no place in the body CAD"
   SW10: "sw- spare switch: not fitted, no place in the body CAD"
+  C41: "C-EN: USB-only programming (owner, 2026-10-03) drops EN and IO0 from J-MCU and HDR-SERVICE; the sheets lose C-EN with the Matrix branch's merge"
 
 # The mounts: every one plated on PWR_GND, pads on both faces (ADR 0022 point 6,
 # ADR 0025; the README's Open table: not _Pad_Via, whose ring of vias breaks the
@@ -261,12 +262,12 @@ led_caps: {row: C-LED, offset: [0.0, 4.5], rot: 0}
 # turns with it. The spare positions (sw+, sw-) have no switch: their T's stand
 # beside REG-RT, the same shape.
 networks:
-  pattern: {offset: [0.0, 8.5], axis: x, leg: -1, c: -1}
+  pattern: {offset: [-0.1, 8.5], axis: x, leg: -1, c: -1}
   except:
-    LT1: {at: [50.0, 10.0], leg: 1, c: 1}     # switch at 180 deg: the pattern turned with it
-    LT3: {at: [90.0, 10.0], leg: 1, c: 1}
-    RT1: {at: [158.0, 10.0], leg: 1, c: 1}
-    RT3: {at: [198.0, 10.0], leg: 1, c: 1}
+    LT1: {at: [50.1, 10.0], leg: 1, c: 1}     # switch at 180 deg: the pattern turned with it
+    LT3: {at: [90.1, 10.0], leg: 1, c: 1}
+    RT1: {at: [158.1, 10.0], leg: 1, c: 1}
+    RT3: {at: [198.1, 10.0], leg: 1, c: 1}
   spare:
     sw+: {at: [168.4, 20.2], leg: 1, c: -1}
     sw-: {at: [168.4, 11.2], leg: 1, c: 1}
@@ -277,8 +278,8 @@ keepouts:
   "ribbon left_hand": {except_rows: [J-CHAIN]}
   "ribbon right_hand": {except_rows: [J-CHAIN]}
   "regulator block": {part: REGULATOR-BLOCK, except_rows: [U-BUCK, C-BUCK-OUT]}
-  # J-MCU's mated plug and the Matrix ribbon's rise over it (pcb-geometry.echo): no part there
-  "Matrix ribbon": {except_rows: []}
+  # J-MCU's mated plug and the Matrix ribbon's rise over it (pcb-geometry.echo): no part there but J-MCU itself
+  "Matrix ribbon": {except_rows: [J-MCU]}
 
 # How tall each footprint family stands on the top face, for the height rooms
 # (pcb_main.check_heights): under the key boards, elsewhere, and under the Matrix
@@ -343,7 +344,7 @@ parts:
   R8:  [8.9, 17.65, 90]     # R-FB-REF, DC feedback: VS (foot) -> REF_MINUS (head)
   C5: [21.4, 20.3, 90]   # C-REF-OUT on REF_5V
   C7:  [21.2, 16.1, 90]   # 100 nF on REF_5V
-  C4:  [14.0, 22.5, 0]   # C-REF-OUT on REF_VIN, above U4 by pin 2 (#8-7), between U4 and U3
+  C4:  [15.0, 22.54, 0]   # C-REF-OUT on REF_VIN, above U4 by pin 2 (#8-7), between U4 and U3
   C6:  [11.65, 17.97, 270]   # 100 nF on REF_VIN across U4's pins 2 and 4 (REF_VIN up, AGND down)
   D1:  [22.5, 12.8, 0]      # D-REF-CLAMP on REF_VIN
   R6:  [27.5, 12.8, 0]      # R-REF-IN from +12 V
@@ -366,7 +367,7 @@ parts:
   R39: [288.95, 27.85, 0]   # R-SER-BREATH-INST in AGND_SENSE
   NT1: [293.0, 13.4, 90]    # NT-DIG at J-UMB pin 8 (ADR 0018)
   D2:  [286.4, 18.7, 90]    # D-REVSHUNT, across pins 3 / 6, ahead of L-BUCK-IN
-  D3:  [291.6, 22.4, 270]   # D-TVS-PWR at J-UMB's pins 3 (+12 V, its cathode) and 6 (PWR_GND), #8-9
+  D3:  [291.6, 21.8, 270]   # D-TVS-PWR at J-UMB's pins 3 (+12 V, its cathode) and 6 (PWR_GND), #8-9
   # --- Q-INRUSH and its gate network (power-entry-instrument.md §1a) in the tail strip
   # above the LED row, between LED2 and LED1 (the full-width tail's corner, which the
   # corner LED held until 2026-10-03): its source from J-UMB pin 3 past D-REVSHUNT and
@@ -385,9 +386,8 @@ parts:
   R2:  [251.6, 29.6, 90]   # R-SPI-SER MOSI
   R3:  [254.2, 29.6, 90]   # R-SPI-SER CS_MOD
   R40: [256.8, 29.6, 90]   # R-CS-PULL-INST, IO34 to 3V3 beside R-SPI-SER CS
-  # the service UART at J-MCU (service-uart.md): R46 in TXD at J-MCU pin 22, C41 on EN at pin 24
-  R46: [229.2, 16.45, 180]   # R-TXD-SER beside it, U0TXD pad up toward pin 22, TXD_HDR on to J2
-  C41: [232.9, 16.45, 0]   # C-EN, below J-MCU's pin 24 end, its EN pad up, its ground a short stub to its own via
+  # the service UART at J-MCU (service-uart.md): R46 in TXD between J-MCU pin 22 and J2
+  R46: [275.3, 8.9, 0]   # R-TXD-SER past J-MCU's plug box, U0TXD pad toward pin 22, TXD_HDR on to J2
   # U-TVS-SPI clamps the pad side of R-SPI-SER (IO35, IO36, IO34 - spi-link), so it
   # stands on the J-MCU side of the resistors, below the chain's, clear of the column mount
   U1:  [258.0, 21.5, 0]
@@ -403,7 +403,7 @@ parts:
   C11: [220.8, 45.7, 180]   # C-BUCK-IN 100 uF (5.8 mm) against the far edge at pin 1 (VIN), its + pad toward it
   L1:  [221.3, 38.0, 0]   # (moved 1.8 toward U5 for C44) L-BUCK-IN 22 uH, INST_POS12 into C11 and pin 1
   C43: [236.9, 39.3, 0]   # C-BUCK-OUT 10 uF at pin 3 (OUT), returned to its own via beside pin 2 (GND)
-  D4:  [243.0, 39.0, 180]   # D-USBOR at C43, its cathode toward J-MCU's 5 V pins
+  D4:  [244.2, 39.0, 180]   # D-USBOR at C43, its cathode toward J-MCU's 5 V pins
   C10: [206.3, 44.6, 90]   # C-STRIP-BULK-1 220 uF polymer (7.7 mm) against the far edge, off the LED row as far as the board allows, on the INST_POS12 plane beside the buck's input
   C44: [213.7, 37.6, 90]   # C-STRIP-BULK-2, its pair: between C10 and L1, as high as C11 (above it) allows; the cone note reports it
   U6:  [233.0, 11.7, 90]   # U-LVLSHIFT 74AHCT125
