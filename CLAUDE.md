@@ -258,6 +258,14 @@ disputed by me — which is worse, because a wrong finding gets caught by the
 next reviewer while a finding filed as handled does not. Verify before
 repeating, and record the verification.
 
+## Work is tracked in GitHub issues
+
+New work and every owner decision get an issue before work starts; commits
+reference it (`#9 G2: …`); the issue is commented with the outcome **by
+finding id** and its `status:` label moved, or closed. Issues cite figures by
+name and never quote them — the corpus stays the only place a value lives.
+Kinds, labels, milestones and the loop: `docs/reference/workflow.md`.
+
 ## Where the details live
 
 - **`docs/reference/repo-maintenance.md`** — which files are generated, which
@@ -317,8 +325,8 @@ repeating, and record the verification.
   next run of that tool and then disappears without a word** — the same trap
   as `MANIFEST.csv` in §4, on the most-cited file in this repository. Edit the
   fragment, then re-run the tool. A row lives with the circuit **whose page
-  derives its value**. `merge-bom.py --check` proves the master still matches,
-  and the commit hook runs it.
+  derives its value**. `merge-bom.py --check` proves the master still matches;
+  `check-staleness.py` reports it, and nothing blocks the commit.
   It is 11 columns **and CRLF**; pass `lineterminator="\r\n"` to `csv.writer`,
   or a three-row change lands as a 130-row diff.
   `hardware/unplaced.csv` holds the rows no schematic page names — a count of

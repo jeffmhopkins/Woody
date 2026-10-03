@@ -1,0 +1,21 @@
+name: Review
+description: Findings from a review (one slice or one wave)
+labels: ["kind: review", "status: queued"]
+body:
+  - type: input
+    id: rev
+    attributes:
+      label: Revision reviewed
+      description: Full commit hash, and whether tools/ was pinned.
+    validations: {required: true}
+  - type: textarea
+    id: findings
+    attributes:
+      label: Findings
+      description: One heading per finding with an id (e.g. G1), severity, node or BOM reference rather than file and line, and provenance on every claim.
+    validations: {required: true}
+  - type: textarea
+    id: checklist
+    attributes:
+      label: Checklist by id
+      description: "- [ ] G1 … — closed by id, never in prose."

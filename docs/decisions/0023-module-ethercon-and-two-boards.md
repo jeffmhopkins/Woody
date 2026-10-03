@@ -3,7 +3,8 @@
 **Status:** Accepted, 2026-09-29. Decided by the owner, from the module parts
 research (fragment R26). It settles ADR 0004's open question *which etherCON
 variant at each end* **for the module's end**. The instrument's end was settled
-by ADR 0021.
+by ADR 0021. **Amended 2026-09-29 by [ADR 0024](0024-module-panel-layout-and-stack.md)**
+(point 3: the panel has no slot for the PUSH tab), at a dated note below.
 
 ## Context
 

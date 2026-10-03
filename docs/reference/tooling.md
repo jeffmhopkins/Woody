@@ -39,8 +39,8 @@ It installs:
 | `poppler-utils` | `pdftoppm` renders sheets to PNG; `pdftotext` reads banked datasheets |
 | `librsvg2-bin` | `rsvg-convert`: `pcb.py render` turns its SVG copper plots into PNGs |
 | `shapely` (pip) | `pcb.py check`'s silkscreen and outline geometry, and the router's clearances |
-| `ngspice` (42, Ubuntu's) | `sim.py`: every circuit's SPICE simulation (§5) |
-| three KiCad 3D models (0805 resistor and capacitor, SOIC-16) | `pcb.py render`. The full `kicad-packages3D` library is 3 GB, so the script fetches only these, from the KiCad project's GitLab at tag `9.0.0`, into `/usr/share/kicad/3dmodels/`. The KS-33's model is banked in `datasheets/`, and the chain header has none |
+| `ngspice` (Ubuntu's; 42 on this setup, and 44.2 reported to give identical results — GitHub issue #10) | `sim.py`: every circuit's SPICE simulation (§5) |
+| the KiCad 3D models the boards' footprints use (the list is the loop in `setup-env.sh`) | `pcb.py render`. The full `kicad-packages3D` library is 3 GB, so the script fetches only these, from the KiCad project's GitLab at tag `9.0.0`, into `/usr/share/kicad/3dmodels/`. The KS-33's model is banked in `datasheets/`, and the chain header has none |
 
 **KiCad must be 9, not Ubuntu's 7.0.** KiCad 7's command line has no ERC, and
 the sheets are written in KiCad 9's format. The script adds the KiCad 9 archive
@@ -431,9 +431,7 @@ path at an acute angle is left out, the path already ending inside the pad;
 and the mount holes' copper keep-outs (ADR 0020) are obstacles on both layers.
 **It proves nothing about itself** — KiCad's DRC and `pcb.py check` do. It is
 for simple digital boards like the key boards; the main board uses its fanout,
-pair and moat pieces and `complete` for the rest (*The main board*, below). The module's
-own header docstring still says every single-sided ground pad gets a via;
-step 6 is what the code does.
+pair and moat pieces and `complete` for the rest (*The main board*, below).
 
 ### The main board — `kind: main` (`tools/pcb_main.py`)
 
@@ -723,6 +721,8 @@ Each render is generated; what it is rendered from is the source.
   a row's quantity is a count over all of them (ADR 0019).
 - **The commit gate.** `check-staleness.py` runs `cad.py check` but not
   `kicad.py check`, because that needs KiCad installed; run it by hand.
+  **Nothing prints that it was skipped**: a `check-staleness.py` PASS says
+  nothing about the sheets' exports, renders, ERC or `pcb.py check`.
 
 ### Ordering: JLC's stock, not LCSC's
 
@@ -927,3 +927,32 @@ circuit without a `sim/`, the answer was written nowhere.
 | `boards/module-main` | n/a | Places circuit sheets, each covered by its own row; its own parts are two connectors |
 | `boards/module-jack` | n/a | Places circuit sheets, each covered by its own row; its own part is a connector |
 | `boards/umb-adapter` | covered | Two connectors and the copper between them: all eight of the umbilical's conductors are coupled lines in `hardware/interfaces/system/sim/`, and its SPI conductors CPL lines in `hardware/interfaces/spi-link/sim/` |
+
+---
+
+## §6. Every tool, and where it is documented
+
+One row per script in `tools/`. A tool documented elsewhere is pointed at, not
+re-described here.
+
+| Tool | What it does | Documented in |
+|---|---|---|
+| `cad.py` | The body CAD: parameters, renders, DXFs, `drc.echo`, the clash check, fingerprints | §2 |
+| `render-instrument.py` | The controller's photographs in Blender (Cycles), from the body CAD's solids and the boards' `.kicad_pcb`. Run by `cad.py build`, never by hand into `mechanical/renders/`. **Needs Blender as a Python module (`bpy`)**, which `setup-env.sh` installs | its docstring; `mechanical/README.md`; `config/render.yaml` |
+| `render-module.py` | The module's photographs, the same way | §2 |
+| `panel-art.py` | The module panel's printed artwork | §2 |
+| `kicad.py` | Sheets: export, render, set fields, `check` (needs KiCad 9, run by hand) | §3 |
+| `sch.py` | A hand-written netlist built into a sheet | §3 |
+| `pcb.py`, `pcb_route.py`, `pcb_main.py`, `pcb_freeroute.py` | Board layout, routing, the main board's kind, the Freerouting round trip | §4 |
+| `lib-models.py` | 3D models drawn from banked drawings | §4 |
+| `sim.py`, `sim_coverage.py` | Circuit simulation and its coverage table | §5 |
+| `check-staleness.py` | The commit gate: figures, links and their anchors, generated files, CAD, sims | `repo-maintenance.md` §2 |
+| `check-netlist.py` | Netlists against the BOM and the drawings | `CLAUDE.md`, *Hardware conventions*; `repo-maintenance.md` |
+| `merge-bom.py` | Regenerates `hardware/bom.csv` from the fragments; `--check` | `repo-maintenance.md` §4, §6 |
+| `merge-manifests.py`, `verify-datasheets.py` | Regenerates `datasheets/MANIFEST.csv`; verifies the banked files | `repo-maintenance.md` §3, §6 |
+| `audit-notes.py` | Classifies BOM notes as live content or history (advisory) | `repo-maintenance.md` §6 |
+| `check-conservation.py` | Content conservation for a page split | `repo-maintenance.md` §6 |
+| `rewrite-paths.py` | The 2026-09-21 restructure's path rewriter | `repo-maintenance.md` §6, §7 |
+| `extract-findings.py` | Builds a review wave's `FINDINGS.csv` ledger from its reports (`<wave-dir> [--check]`) | its docstring; `CLAUDE.md`, *Review waves* |
+| `adr-index.py` | Regenerates the index in `docs/decisions/README.md` from each ADR's `**Status:**` line; `--check` runs inside `check-staleness.py` | its docstring; `docs/decisions/README.md` |
+| `setup-env.sh` | Installs everything above | §1 |

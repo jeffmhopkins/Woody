@@ -1,6 +1,14 @@
 # PCB pipeline — schematic to a board you can route
 
-**Status:** Proposed 2026-09-21, rewritten after a 13-agent review
+**Status: Superseded as a pipeline — read it for its reasoning, not its
+steps.** ADR 0019 made the KiCad sheets the source (2026-09-27), and boards are
+laid out by `tools/pcb.py` (`docs/reference/tooling.md` §4); the `module.py`
+script and the `pcb/module/` project this page describes were never built, and
+the module's boards are `hardware/boards/module-main` and `module-jack`. Its
+ranked simulations (§2), which several `sim/sims.yaml` cite, and its routing
+hazards still hold as arguments.
+
+**Originally:** Proposed 2026-09-21, rewritten after a 13-agent review
 (`docs/review/2026-09-21-pcb-pipeline-review/`). Not run as written. **The
 main board's first layout (2026-09-30) went another way**, and what it found
 bears on the argument below: `tools/pcb.py` (`kind: main`, `docs/reference/tooling.md`
@@ -261,7 +269,7 @@ Then `build_board.py` adds what `kinet2pcb` does not:
 
 ### 4. You route it
 
-Open `pcb/module/module.kicad_pcb` in KiCad 9. Everything is in there, grouped
+Open the board's `.kicad_pcb` in KiCad 9 (this page proposed `pcb/module/module.kicad_pcb`, which was never made; the module's boards are `hardware/boards/module-main` and `module-jack`). Everything is in there, grouped
 by schematic page, with the widths and rules already set.
 
 **Hand-route these first**, because nothing else in the pipeline protects them:

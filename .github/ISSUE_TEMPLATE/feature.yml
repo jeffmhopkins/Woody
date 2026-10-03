@@ -1,0 +1,21 @@
+name: Feature
+description: New capability for the instrument or module
+labels: ["kind: feature", "status: queued"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What and why
+      description: The capability and the reason for it. Name figures by their config/figures.yaml key; do not quote values.
+    validations: {required: true}
+  - type: textarea
+    id: scope
+    attributes:
+      label: Affected circuits, boards and documents
+      description: Circuit directories, boards, ADRs, CAD parameters.
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      description: The check or command that proves it, e.g. `tools/kicad.py check` passes with the part placed.
+    validations: {required: true}
