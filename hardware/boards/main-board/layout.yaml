@@ -143,13 +143,13 @@ net_classes:
 # short stub away (pcb_route.fanout); a through-hole pad meets the plane itself.
 fanout: [PWR_GND, INST_POS12, AGND_INST]
 
-# Parts the sheets carry that this board does not: A1 is the Matrix, on the lid
+# Parts the sheets carry that this board does not: A1 is the Matrix, on the right-hand key board
 # (on the sheet for its pad-to-pin map, reached through J-MCU); SW9 and SW10 are
 # the spare positions' switches, not fitted (config/key-layout.yaml
 # spare_bits_switches) and given no place by the body CAD. check reports each
 # as a note, not an error; anything else missing from the board is an error.
 not_on_board:
-  A1: "the Matrix: on the lid, no footprint; J-MCU is its connector"
+  A1: "the Matrix: on the right-hand key board (ADR 0021 amendment 2026-10-02), no footprint here; J-MCU is its connector"
   SW9: "sw+ spare switch: not fitted, no place in the body CAD"
   SW10: "sw- spare switch: not fitted, no place in the body CAD"
 

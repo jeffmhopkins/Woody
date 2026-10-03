@@ -1,14 +1,16 @@
 # Real-time carrier — schematic
 
-**Status:** **First draft 2026-09-21; §3 rebuilt the same day** after ADR 0001
-moved the shift registers back to the cluster boards. The draft was written
-against the tail-register topology and every figure that depended on it — the
-block diagram, §3, the loom count, the component table — has been redone. Not
-checked against a single datasheet — `waveshare.com`, `ti.com`, `nxp.com` and `analog.com` were all
-blocked from this sandbox. Read it as a proposal with its uncertainties marked,
-not as a design.
+**Status:** The overview of the main board's carrier circuits. **Each circuit's
+KiCad sheet is its source** (ADR 0019; `carrier.kicad_sch` and one sheet per
+circuit below), placed on the main board, which is laid out with `fab/` written
+([`../boards/main-board/README.md`](../boards/main-board/README.md) gives its
+current state and what is pending). The parts' datasheets are banked
+(`datasheets/MANIFEST.csv`, `tools/verify-datasheets.py`). **Still provisional:**
+the rows below still marked `[from memory]` (connector and ribbon envelopes,
+parts open until M4) and every item under *Still open*. The page's history is
+in git.
 
-The instrument's support circuits. They have no MCU (ADR 0013): a Waveshare
+The instrument's support circuits. They have no MCU of their own (ADR 0015): a Waveshare
 ESP32-S3-Matrix under its window at the tail (§7), mounted on the right-hand
 key board, connects to them by an IDC ribbon from that board into `J-MCU` on
 this board (ADR 0017; ADR 0021 amendment 2026-10-02), and everything else

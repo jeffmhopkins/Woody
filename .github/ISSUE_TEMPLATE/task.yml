@@ -1,0 +1,19 @@
+name: Task
+description: Defined piece of work (re-route a board, bank a datasheet, rebuild renders)
+labels: ["kind: task", "status: queued"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: Work
+    validations: {required: true}
+  - type: input
+    id: parent
+    attributes:
+      label: Parent issue
+      description: "#n of the feature or review this serves, if any"
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+    validations: {required: true}

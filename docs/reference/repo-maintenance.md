@@ -118,7 +118,10 @@ order of preference:
 Wave R8 established the convention, and it is in `datasheets/README.md`:
 
 - **DECLARED** — your `OK` row quotes the blocked row's **exact `part` string**
-  *and* contains the word `SUPERSEDES`. Opt-in, zero false positives.
+  *and* contains the word `SUPERSEDES` — or writes `RETIRES THE BLOCKED ROW
+  '<exact part>'`, the quote straight after it (a bare "retires" elsewhere in
+  the notes does not count). Opt-in, zero false positives. The summary's
+  `LIVE:` line is the count of gaps still open; the headline counts rows.
 - **LIKELY** — shared distinctive tokens, printed under `CHECK:`, never
   asserted as fact. Deliberately tuned to **refuse** `WS2812B-0807` →
   `WS2812B-2020` and the WS2815 strip → the WS2815 IC, because those are
@@ -212,7 +215,8 @@ ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
 >
 > Unlike the manifest's, this one is caught: `merge-bom.py --check`
 > regenerates into memory, byte-compares, and names the first differing line.
-> `check-staleness.py` runs it, so the commit hook fails on a hand edit.
+> `check-staleness.py` runs it and reports a hand edit as a FAIL; the hook
+> only reports, so nothing blocks the commit (`CLAUDE.md`, rule 2).
 >
 > **Edit the fragment, then re-run the tool.** A row lives with the circuit
 > **whose page derives its value** — not where it is mentioned, not where it
@@ -254,6 +258,12 @@ ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
   A8-6.)
 - **`TBD`/`open` must say what decides them.** Two rows are deliberately
   blocked on a datasheet and say so; that is correct, not a defect.
+- **`status` is held to the sheets.** `merge-bom.py --check` fails a row still
+  `candidate` or `open` when a placed symbol whose `Row` it is carries an
+  `MPN`: the sheet owns the bought part (ADR 0019), so a part a sheet names is
+  at least `selected`. Promote the row, or clear the MPN if the part is not
+  chosen. A plain run only warns, so the master still regenerates. (Since
+  2026-10-03, issue #7: 58 rows read `candidate` with their parts chosen.)
 
 ---
 
@@ -300,6 +310,8 @@ python3 tools/audit-notes.py          # BOM notes: live content vs accumulated h
 python3 tools/audit-notes.py --regrown  # ...rows that have turned back into logs
 python3 tools/audit-notes.py <REF>    # ...one row, classified segment by segment
 python3 tools/rewrite-paths.py        # restructure only; --apply/--verify/--invert
+python3 tools/extract-findings.py <wave-dir>  # a review wave's FINDINGS.csv, from its reports
+python3 tools/adr-index.py            # REGENERATES the ADR index in docs/decisions/README.md
 python3 tools/cad.py build            # body CAD: params, then every STALE render/DXF
 python3 tools/cad.py check            # ...or prove every output still matches its sources
 python3 tools/cad.py explain <name>   # which input moved since an output was built
