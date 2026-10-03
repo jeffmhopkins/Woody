@@ -6,20 +6,21 @@ behind the jack board ([`module-jack`](../module-jack/README.md)), and
 `J-B2B-MOD` joins the two. Positions, outlines and keep-outs come from the
 module CAD (ADR 0024, `mechanical/module/export/`), not from this project.
 
-> **Status: placed, routing NOT complete (2026-10-02). `pcb.py check` fails.**
-> Every part is placed inside the outline and the placement is DRC-clean, but
-> the board as placed does not route cleanly on this outline: the directional
-> router leaves 74 connections on three routing layers (94 on two), and the
-> committed board, finished by Freerouting where the directional router
-> stopped, still has 20 unrouted, 15 dangling tracks, 19 acute joins, two
-> isolation-gap and two split-crossing errors (`pcb.py check`). The owner has
-> approved a third module board (2026-10-02, *"3 boards for module is
-> correct"*); the split is the open item below. Four layers. The mask colour
-> is **not decided** (green in `layout.yaml` until the owner says; *Open*).
-> The sheets are the source and pass KiCad's ERC. Every part has a footprint,
-> and a bought part where one is selected (`Footprint`, `Manufacturer`, `MPN`,
-> `LCSC`, `Assembly` on each symbol). The parts still missing one are listed
-> under *Open*.
+> **Status: placed for the iso board, routing NOT complete (2026-10-03). `pcb.py check` fails.**
+> `U-ISO` and its filter are on [`module-iso`](../module-iso/README.md) since
+> 2026-10-03 (ADR 0023 point 2, amended: the owner, *"3 boards for module is
+> correct"*), joined here by `J-B2B-ISO` (`J5`, on this board's top face, its
+> insulator on the rear) and held by two `MECH-STANDOFF-ISO`. The board is
+> placed inside its outline and the placement is DRC-clean. Routed under the
+> owner's routing policy (`docs/reference/tooling.md`, *The routing policy*):
+> free, no direction per layer anywhere yet (`layout.yaml` `directions:
+> regions: []`). **31 connections are still unrouted** - 11 of them the DAC's
+> (`DAC_CH1`-`CH5`, `DIN`, `SYNC`, `DAC_AVDD`), the rest scattered through the
+> pitch stage, the rails and `PWR_GND` at the etherCON - with three shorts and
+> two crossings left by the router in the load switch, and five
+> `connect_first:` Kelvin/branch runs it could not lay (*Open*). Four layers.
+> The mask colour is **not decided** (green in `layout.yaml` until the owner
+> says; *Open*). The sheets are the source and pass KiCad's ERC.
 
 What each circuit does, and why, is on its page:
 - [`power-entry`](../../module/power-entry/power-entry.md)
@@ -264,6 +265,6 @@ of the two mitigations (`module/power-entry/power-entry.md`, *The DAC rail*,
 | The metal standoffs' part (the CAD's `standoff.*` still cites the polyamide spacer), and the panel spacers' (`panel_standoff.stock_l`, tbd) | The module CAD owner; the pads' nets are settled above |
 | The module CAD's envelopes against the layout: `U-ISO` and the trimmers are where the CAD holds them; the layout moved `L-CM-ISO` up 3.5 mm (to clear `J-B2B-MOD`'s pins and keep the isolation gap; still turned 45°), and put `C-ISO-BULK` and `L-ISO-IN` on the front by the input filter and the bulk caps on the rear upper right (`layout.yaml` `parts:`), so `config/module.yaml` `iso.filter` and `tall.at` no longer describe where they are and the CAD's clash and depth checks do not see them there | The module CAD owner: move the envelopes to the layout's places and re-run its checks |
 | The boards' mask colour (green in `layout.yaml` `fab:` until decided) | The owner, before the first order |
-| **The routing.** This board as placed does not route cleanly inside its outline (*Status*). The owner approved a third module board on 2026-10-02 | The split: which circuits move, its outline, its board-to-board connector, the stack against the depth budget and the trimmers' rear access - then an ADR amendment, the sheets, the module CAD and the layout |
+| **The routing** (*Status*): 31 connections, three shorts and two crossings in the load switch, five `connect_first:` runs. The DAC corner is the hard part; a `directions: regions:` entry there is the tool for it if free routing cannot close it | Finishing the route - by the router where it can, by hand-drawn tracks where it cannot (as `module-iso`'s) |
 | `U-ISO`'s supply: the RPA20 is end-of-life, 20 at DigiKey on 2026-09-30 (the row); the RP20-2412SAW drops into the same footprint with pads 4 and 6 swapped (ADR 0027) | The order — buy spares now |
 | The bus's +5 V, CV and Gate pins (11–16) are unused, on no net | Nothing: the module makes its own 5 V and takes no bus CV (ADR 0023 point 3, amended) |

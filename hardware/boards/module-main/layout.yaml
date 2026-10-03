@@ -399,7 +399,7 @@ silk:
 # layer only inside `regions:`, each with the reason it needs one; none is listed unless
 # a crossing there failed without it. Rip-up where a connection is boxed in.
 route: astar
-rip_up: 3
+rip_up: 1
 directions:
   routed: [F.Cu, In2.Cu, B.Cu]
   regions: []
