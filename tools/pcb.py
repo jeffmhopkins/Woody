@@ -981,52 +981,57 @@ def rescue(path, bdir, radii=(1.5, 3.0, 5.0)):
     for f in (path[:-len(".kicad_pcb")] + ".kicad_pro", os.path.join(bdir, "fp-lib-table"), os.path.join(bdir, "sym-lib-table")):
         if os.path.exists(f):
             shutil.copy(f, tdir)
-    progress = True
-    while progress:
-        progress = False
-        for net, pa, pb in unconnected_of(path):
-            key = (net, round(pa[0], 1), round(pa[1], 1), round(pb[0], 1), round(pb[1], 1))
-            if key in tried:
-                continue
-            tried.add(key)
-            for r in radii:
-                board = pcbnew.LoadBoard(path)
-                # round its two ends - where a connection is walled in - and, for a short
-                # hop, the ground between them
-                region = Point(pa).buffer(r).union(Point(pb).buffer(r))
-                if math.dist(pa, pb) < 10:
-                    region = region.union(box(min(pa[0], pb[0]), min(pa[1], pb[1]), max(pa[0], pb[0]), max(pa[1], pb[1])).buffer(r))
-                victims = []
-                for t in board.GetTracks():
-                    if t.IsLocked() or t.GetNetname() in planes or t.GetNetname() == net:
+    try:
+        progress = True
+        while progress:
+            progress = False
+            for net, pa, pb in unconnected_of(path):
+                key = (net, round(pa[0], 1), round(pa[1], 1), round(pb[0], 1), round(pb[1], 1))
+                if key in tried:
+                    continue
+                tried.add(key)
+                for r in radii:
+                    board = pcbnew.LoadBoard(path)
+                    # round its two ends - where a connection is walled in - and, for a short
+                    # hop, the ground between them
+                    region = Point(pa).buffer(r).union(Point(pb).buffer(r))
+                    if math.dist(pa, pb) < 10:
+                        region = region.union(box(min(pa[0], pb[0]), min(pa[1], pb[1]), max(pa[0], pb[0]), max(pa[1], pb[1])).buffer(r))
+                    victims = []
+                    for t in board.GetTracks():
+                        if t.IsLocked() or t.GetNetname() in planes or t.GetNetname() == net:
+                            continue
+                        bb = t.GetBoundingBox()
+                        if region.intersects(box(bb.GetLeft() / 1e6, bb.GetTop() / 1e6, bb.GetRight() / 1e6, bb.GetBottom() / 1e6)):
+                            victims.append(t)
+                    if not victims:
                         continue
-                    bb = t.GetBoundingBox()
-                    if region.intersects(box(bb.GetLeft() / 1e6, bb.GetTop() / 1e6, bb.GetRight() / 1e6, bb.GetBottom() / 1e6)):
-                        victims.append(t)
-                if not victims:
-                    continue
-                hit, nv = {t.GetNetname() for t in victims}, len(victims)
-                for t in victims:
-                    board.Delete(t)
-                if pcb_route.complete(board, lay, [(net, pa, pb)]):
-                    continue
-                pcbnew.SaveBoard(tmp, board)
-                _fill(tmp)
-                b2 = pcbnew.LoadBoard(tmp)
-                pcb_route.complete(b2, lay, [m for m in unconnected_of(tmp) if m[0] in hit])
-                pcb_route.tidy(b2, lay)
-                pcbnew.SaveBoard(tmp, b2)
-                _fill(tmp)
-                s2 = score(tmp)
-                if s2 < base:
-                    print(f"route: rescue - {net} ({pa[0]:.1f}, {pa[1]:.1f}): {nv} item(s) taken up within {r} mm "
-                          f"and routed again; problems {base} -> {s2}", flush=True)
-                    os.replace(tmp, path)
-                    base, kept, progress = s2, kept + 1, True
-                    break
-            if progress:
-                break           # the list moved: read it again
-    shutil.rmtree(tdir, ignore_errors=True)
+                    hit, nv = {t.GetNetname() for t in victims}, len(victims)
+                    for t in victims:
+                        board.Delete(t)
+                    if pcb_route.complete(board, lay, [(net, pa, pb)]):
+                        continue
+                    try:
+                        pcbnew.SaveBoard(tmp, board)
+                        _fill(tmp)
+                        b2 = pcbnew.LoadBoard(tmp)
+                        pcb_route.complete(b2, lay, [m for m in unconnected_of(tmp) if m[0] in hit])
+                        pcb_route.tidy(b2, lay)
+                        pcbnew.SaveBoard(tmp, b2)
+                        _fill(tmp)
+                    except subprocess.CalledProcessError:
+                        continue        # a trial the filler crashed on (KiCad 9 can segfault) is dropped
+                    s2 = score(tmp)
+                    if s2 < base:
+                        print(f"route: rescue - {net} ({pa[0]:.1f}, {pa[1]:.1f}): {nv} item(s) taken up within {r} mm "
+                              f"and routed again; problems {base} -> {s2}", flush=True)
+                        os.replace(tmp, path)
+                        base, kept, progress = s2, kept + 1, True
+                        break
+                if progress:
+                    break           # the list moved: read it again
+    finally:
+        shutil.rmtree(tdir, ignore_errors=True)
     return kept
 
 
@@ -1057,8 +1062,10 @@ def cmd_route(bdir, chunk=30):
     _fill(path)
     tried = set()
     while True:
+        # route_first: nets a crowded corner needs before its neighbours take the room
+        first = {n.lstrip("/") for n in lay.get("route_first") or []}
         miss = sorted((m for m in unconnected_of(path) if (m[0], round(m[1][0], 1), round(m[1][1], 1), round(m[2][0], 1), round(m[2][1], 1)) not in tried),
-                      key=lambda m: math.dist(m[1], m[2]))
+                      key=lambda m: (m[0].lstrip("/") not in first, math.dist(m[1], m[2])))
         if not miss:
             break
         batch = miss[:chunk]
