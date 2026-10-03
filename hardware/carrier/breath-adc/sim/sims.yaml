@@ -1,7 +1,11 @@
 # The breath ADC's input: the anti-alias filter's response and time constant (the
 # latency term latency-budget.md books), and the MCP3202's sample capacitor drawing on
 # C-AA-ADC once per loop - the page's 'sample-cap charge sharing'. Values from this
-# circuit's netlist; the MCP3202's input model from its banked datasheet. Run:
+# circuit's netlist; the MCP3202's input model from its banked datasheet. Since #12 also:
+# the power-up sequencing the page cites (adc-powerup.cir: the 5 V rail and the sensor up
+# before the dev board's 3V3, the MCP3202's input clamps carrying the difference) and the
+# R-78E5.0's switching ripple reaching the conversion through VDD, which IS its reference
+# (adc-vdd.cir: the converter, the Matrix ribbon, the Matrix's LDO and back). Run:
 #   python3 tools/sim.py run hardware/carrier/breath-adc/sim
 title: Breath ADC - anti-alias filter and sample-capacitor kickback
 values:
@@ -20,6 +24,32 @@ params:
   t_edge:   {value: 1.0e-6}
   t_end:    {value: 10.0e-3}
   f_buck:   {value: 330.0e3, source: "the R-78E5.0's switching rate, ~330 kHz (breath-adc.md, 'Anti-alias')"}
+  # --- adc-powerup.cir: the power-up sequencing (#12 item 2)
+  v12:      {value: 11.82, source: "INST_POS12 once up: 11.82 V, power-entry-instrument/sim cold-start's settled BUCK_IN at the nominal [sim], at U-ISO's +/-3.1 % (vary)"}
+  t_r12:    {value: 0.16, source: "INST_POS12's ramp from 0 V to v12, Q-INRUSH's Miller ramp: power-entry-instrument/sim puts 90 % at 108-238 ms cold and 93-182 ms hot-plugged [sim]; 0.16 s, 0.093-0.24 s at the ends (vary)"}
+  vs_ref:   {value: 5.0, source: "VS once up, the REF5050's 5.000 V buffered (breath-excitation-reference)"}
+  v_do_ref: {value: 0.2, source: "the REF5050 and its buffer following INST_POS12 less 0.2 V until it regulates [assumption: behavioural - R-DROP-REF's drop and the reference's own start-up (200 us typ turn-on, REF5050 ds) are left out, so VS is up EARLIER than it can be: the pessimistic side]"}
+  v_rest:   {value: 0.265, source: "the sensor at rest, 0.265 V at VS 5 V (breath-adc.md 'Divider', from sensor-full-scale's derivation)"}
+  blow:     {value: 0.0, source: "0: the sensor at rest; 1: at full scale (sensor-full-scale), someone blowing as the rack powers up (each sim sets it)"}
+  k_rail:   {value: 0.0, source: "0: U-BUF B follows the sensor (clipped to INST_POS12); 1: U-BUF B at its positive rail, INST_POS12, for the whole power-up - the bound on whatever an op-amp does while its supply comes up, which no macromodel is trusted to say (sim powerup-rail)"}
+  t_ss:     {value: 3.0e-3, source: "the R-78E5.0-1.0's start-up once BUCK_IN passes 8 V: NOT PUBLISHED [assumption, 1-10 ms] (vary)"}
+  v_do_ldo: {value: 0.1, source: "the Matrix's ME6217C33M5G dropout, 100 mV typ at 300 mA [datasheets/discrete-and-power/ME6217C33M5G.pdf p.4]: DEV_3V3 follows the 5 V rail less it"}
+  k_3v3:    {value: 1.0, source: "1: the dev board's 3V3 comes up behind the 5 V rail; 0: it never does (no Matrix on the ribbon, or its LDO dead) and the clamps hold ADC_IN against 0 V for good"}
+  is_clamp: {value: 8.3e-14, source: "the MCP3202's input clamp diodes: NO MODEL OR RATING IS PUBLISHED [assumption: a junction at 0.60 V and 1 mA, is = 1 mA / exp(0.60 / 25.85 mV)]; one decade either way (0.54-0.66 V at 1 mA) (vary)"}
+  i_clamp_max: {value: 1.0e-3, source: "the clamp current judged against: 1 mA, a CONSERVATIVE LIMIT STATED HERE - DS21034F prints no injection current, only 'All inputs and outputs w.r.t. VSS ... -0.6 V to VDD + 0.6 V' [datasheets/analog/MCP3202-CI-SN.pdf p.2], so v_over (ADC_IN above VDD) is reported beside it"}
+  t_end_pu: {value: 0.3, source: "past the slowest ramp's end (0.24 s) plus the slowest start (10 ms)"}
+  # --- adc-vdd.cir: the converter's ripple into VDD = VREF (#12 item 3)
+  a_rip_pp: {value: 0.12, source: "the R-78E5.0-1.0's output ripple and noise, 120 mV p-p max, 20 MHz bandwidth, with 100 nF across its output [datasheets/discrete-and-power/R-78E5.0-1.0.pdf p.1]: taken WHOLE as a sine at the switching rate on INST_5V_A, an ideal source - no credit for the converter's output impedance, D4 or C12 (pessimistic: much of the 120 mV is edge spikes that the network attenuates far more than the fundamental)"}
+  f_lo:     {value: 200.0e3, source: "the band the switching rate is searched in: RECOM publishes ~330 kHz and no tolerance [assumption: 200-500 kHz]"}
+  f_hi:     {value: 500.0e3}
+  len_rib:  {value: {drc: "Matrix ribbon length", scale: 0.001}, source: "CBL-MCU-RIBBON, the Matrix's edge to J-MCU as drawn (mechanical/drc.echo, 37.6 mm); to 150 mm for slack and build (vary)"}
+  r_rib_m:  {value: 0.34, source: "a 0.635 mm-pitch ribbon conductor, ~30 AWG, ~0.34 ohm/m (carrier.md, 'The ground count is also the ADC's', [from memory])"}
+  l_rib_m:  {value: 0.7e-6, source: "a ribbon conductor's loop inductance with an adjacent return, per metre [assumption: 0.35-1.05 uH/m] (vary)"}
+  c_vcc5:   {value: 11.1e-6, source: "the Matrix's VCC_5V, 11.1 uF in all (ADR 0014's amended note, from datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf: C4 10 uF and C3 0.1 uF at the LDO's input among them); down to half under 5 V of DC bias (vary)"}
+  c_ldo:    {value: 10.0e-6, source: "the ME6217's output capacitor on the Matrix, C2 10 uF (same schematic). The Matrix's other 3V3 capacitors (C9, C10, C13-C18, ~12 uF more) are LEFT OUT: less filtering, the pessimistic side; down to 60 % under DC bias (vary)"}
+  r_ldo:    {value: 0.05, source: "the LDO's output resistance at the switching rate, where its loop has little gain left [assumption: 50 mohm, low, so the least of the ripple is lost in it]"}
+  k_psrr:   {value: 0.1, source: "the ME6217's ripple rejection at ~330 kHz: NOT PUBLISHED - its sheet gives 65 dB at 1 kHz only [datasheets/discrete-and-power/ME6217C33M5G.pdf p.1]. BEHAVIOURAL AND CONSERVATIVE: VOUT = 3.3 V + k_psrr x (VIN ripple); -20 dB nominal, -30 to -10 dB at the ends [assumption: small CMOS LDOs typically keep 30-40 dB there with 1-10 uF out] (vary)"}
+  esr_cer:  {value: 0.005, source: "each ceramic's ESR [assumption: 5 mohm, low, the least damping]"}
 
 derived:
   t_step_e: "v['t_step'] + v['t_edge']"
@@ -31,6 +61,15 @@ derived:
   t_rst_w: "v['t_loop'] - 1.5 / v['f_clk'] - 40e-6"
   ratio: "v['R-ADCDIV-L'] / (v['R-ADCDIV-U'] + v['R-ADCDIV-L'])"
   lsb: "v['vdd'] / 4096"
+  v_sens: "v['v_fs'] if v['blow'] else v['v_rest']"
+  k_s: "v['v_sens'] / v['vs_ref']"
+  t_b0: "v['t_r12'] * 8.0 / v['v12']"
+  t_b1: "v['t_r12'] * 8.0 / v['v12'] + v['t_ss']"
+  l_rib5: "v['l_rib_m'] * v['len_rib'] / 3.0"
+  r_rib5: "v['r_rib_m'] * v['len_rib'] * (1.0 / 3.0 + 1.0 / 4.0)"
+  l_rib3: "v['l_rib_m'] * v['len_rib']"
+  r_rib3: "v['r_rib_m'] * v['len_rib'] * (1.0 + 1.0 / 4.0)"
+  k_lsb: "(v['v_fs'] * v['ratio'] / v['vdd']) / v['vdd'] * 4096"
 
 vary:
   R-ADCDIV-U: {tol: from-value}
@@ -38,6 +77,16 @@ vary:
   C-AA-ADC:   {tol: [-0.05, 0.05], source: "C0G +/-5 % [assumption: the netlist value states none]"}
   r_ss:       {tol: [-0.5, 1.0], source: "a typical only; half to twice [assumption]"}
   c_sample:   {tol: [-0.25, 0.25], source: "a typical only [assumption]"}
+  v12:        {tol: [-0.031, 0.031], source: "U-ISO's +/-3.1 %, carried through"}
+  t_r12:      {tol: [-0.42, 0.5], source: "0.093 and 0.24 s about 0.16"}
+  t_ss:       {tol: [-0.667, 2.333], source: "1 and 10 ms about 3"}
+  is_clamp:   {tol: [-0.9, 9.0], source: "a decade either way"}
+  len_rib:    {tol: [0.0, 2.99], source: "37.6 mm as drawn to 150 mm"}
+  l_rib_m:    {tol: [-0.5, 0.5]}
+  c_vcc5:     {tol: [-0.5, 0.0], source: "X5R/X7R DC-bias loss at 5 V [assumption: to half]"}
+  c_ldo:      {tol: [-0.4, 0.0], source: "DC-bias loss at 3.3 V [assumption: to 60 %]"}
+  C-ADC-BULK: {tol: [-0.4, 0.0], source: "C-ADC-BULK's DC-bias loss at 3.3 V [assumption: to 60 %]"}
+  k_psrr:     {tol: [-0.684, 2.162], source: "-30 dB (0.0316) to -10 dB (0.316) about -20 dB"}
 
 sims:
   - name: filter
@@ -68,6 +117,8 @@ sims:
     # discharged C_SAMPLE
     deck: adc.cir
     set: {k0: 1.0, k1: 1.0, t_end: 3.0e-3}
+    # the five tolerances this sim always ran over, named now that vary: holds others (#12)
+    vary: [R-ADCDIV-U, R-ADCDIV-L, C-AA-ADC, r_ss, c_sample]
     measures: [err_lsb, droop_lsb, settle_frac]
     post:
       # what C_SAMPLE holds when the last sample's window closes, against the divider's
@@ -81,3 +132,78 @@ sims:
         why: "a pure gain term, under 4 LSB at every corner (adc-sample-kickback; C_SAMPLE and R_SS are typicals only). The average-current model (80 nA/V through 6 kohm) leaves out the instantaneous share each sample takes from C-AA-ADC, 20 pF/47 nF of it [calc: 0.043 %, 1.5 LSB at full scale], which the next sample finds only partly restored"
       - expr: "min['settle_frac'] > 0.9999"
         why: "C_SAMPLE charges fully inside t_SAMPLE (1.5 clocks at 900 kHz, 1.67 us against R_SS x C_SAMPLE = 20 ns): what it holds is C-AA-ADC's voltage, not a partial charge"
+  # --- #12 item 2: the power-up sequencing breath-adc.md's 'Why the upper leg is >=10 kohm'
+  # cites. INST_POS12 ramps through Q-INRUSH; VS and the sensor follow it as soon as the
+  # reference can; the 5 V rail (and behind it the dev board's 3V3) waits for BUCK_IN to pass
+  # the R-78E5.0's 8 V. Until then the divider drives ADC_IN against a VDD at 0 V and the
+  # MCP3202's clamp carries the difference into its VDD rail (held at 0 V: the most current).
+  - name: powerup-rest
+    deck: adc-powerup.cir
+    set: {blow: 0}
+    vary: [v12, t_r12, t_ss, is_clamp, R-ADCDIV-U, R-ADCDIV-L]
+    measures: &pu_measures [i_clamp_peak, i_clamp_end, v_over_peak, t_window]
+    post: &pu_post
+      i_clamp_peak: "peak(w['iclamp'], 0, p['t_end_pu'])"
+      i_clamp_end: "at(w['iclamp'], p['t_end_pu'] - 1e-4)"
+      v_over_peak: "peak(w['vover'], 0, p['t_end_pu'])"
+      # how long ADC_IN sits above VDD + 0.3 V (the clamp beginning to conduct)
+      t_window: "(min(cross(w['vover'], 0.3, cross(w['vover'], 0.3, 0) + 1e-9), p['t_end_pu']) - cross(w['vover'], 0.3, 0)) if peak(w['vover'], 0, p['t_end_pu']) > 0.3 else 0.0"
+    asserts:
+      - expr: "max['v_over_peak'] < 0.6 and max['i_clamp_peak'] < 1e-6"
+        why: "at rest the divider holds ADC_IN at ~0.16 V, so through the whole power-up the pin stays inside the datasheet's VDD + 0.6 V even with VDD at 0, and the clamp carries nothing (under 1 uA) - the page's 'At rest ... inside the window even with 3V3 at zero'"
+  - name: powerup-blow
+    deck: adc-powerup.cir
+    set: {blow: 1}
+    vary: [v12, t_r12, t_ss, is_clamp, R-ADCDIV-U, R-ADCDIV-L]
+    measures: *pu_measures
+    post: *pu_post
+    asserts:
+      - expr: "max['i_clamp_peak'] < p['i_clamp_max']"
+        why: "someone blowing at full scale as the rack powers up: until the dev board's 3V3 is up, the clamp carries the divider's current, under the 1 mA judged against (i_clamp_max says why it is a stated limit, not a datasheet one) - the page's 416 uA"
+      - expr: "max['i_clamp_end'] < 1e-6"
+        why: "and once 3V3 is up it carries nothing: full scale, 2.92 V at ADC_IN, is under VDD"
+  - name: powerup-blow-no3v3
+    # the dev board's 3V3 never comes up (no Matrix on the ribbon, or its LDO dead) while the
+    # umbilical powers the instrument: the clamp holds the pin for good
+    deck: adc-powerup.cir
+    set: {blow: 1, k_3v3: 0}
+    vary: [v12, is_clamp, R-ADCDIV-U, R-ADCDIV-L]
+    measures: [i_clamp_peak, i_clamp_end, v_over_peak]
+    post: *pu_post
+    asserts:
+      - expr: "max['i_clamp_peak'] < p['i_clamp_max']"
+        why: "with no 3V3 at all and the sensor at full scale, the clamp's steady current stays under the 1 mA judged against"
+  - name: powerup-rail
+    # the bound: U-BUF B at INST_POS12 for the whole power-up, whatever the op-amp does
+    deck: adc-powerup.cir
+    set: {k_rail: 1}
+    vary: [v12, t_r12, t_ss, is_clamp, R-ADCDIV-U, R-ADCDIV-L]
+    measures: *pu_measures
+    post: *pu_post
+    asserts:
+      - expr: "max['i_clamp_peak'] < p['i_clamp_max']"
+        why: "even if U-BUF B sat at its positive rail through the whole power-up, the clamp current stays under the 1 mA judged against at every ramp and start corner: the question the page leaves open ('Whether the buffer swings high during power-up') does not need an answer"
+      - expr: "max['i_clamp_end'] < p['i_clamp_max']"
+        why: "and with it stuck there once 3V3 is up - the page's 'fails high' case, (0.6 x INST_POS12 - V_F - 3.3 V) / 6 kohm"
+  # --- #12 item 3: the converter's ripple reaching the conversion. The MCP3202's VDD is its
+  # reference, and it is the dev board's 3V3, regulated from the 5 V rail the R-78E5.0 makes:
+  # INST_5V_A -> CBL-MCU-RIBBON's three 5 V conductors (and its four grounds back) -> the
+  # Matrix's VCC_5V -> the ME6217 -> its one 3V3 conductor -> C-ADC-BULK and C-DEC-ADC at
+  # U-ADC. A code error ratiometric to the input: (V_in / VREF) x (dVREF / VREF) x 4096.
+  - name: vdd-ripple
+    deck: adc-vdd.cir
+    vary: [len_rib, l_rib_m, c_vcc5, c_ldo, C-ADC-BULK, k_psrr]
+    measures: [h_fbuck_db, h_band_db, f_band_peak, vdd_pp_mv, lsb_pp, lsb_pp_fbuck, rip_budget_mv]
+    post:
+      h_fbuck_db: "20 * math.log10(at(w['hmag'], p['f_buck']))"
+      h_band_db: "20 * math.log10(peak(w['hmag'], p['f_lo'], p['f_hi']))"
+      f_band_peak: "argpeak(w['hmag'], p['f_lo'], p['f_hi'])"
+      vdd_pp_mv: "1000 * p['a_rip_pp'] * peak(w['hmag'], p['f_lo'], p['f_hi'])"
+      lsb_pp: "p['a_rip_pp'] * peak(w['hmag'], p['f_lo'], p['f_hi']) * p['k_lsb']"
+      lsb_pp_fbuck: "p['a_rip_pp'] * at(w['hmag'], p['f_buck']) * p['k_lsb']"
+      # what E9 can hold the bench to: the largest p-p ripple at the switching rate on INST_5V_A
+      # that keeps 2 LSB at this corner (the same network and k_psrr)
+      rip_budget_mv: "1000 * 2.0 / (peak(w['hmag'], p['f_lo'], p['f_hi']) * p['k_lsb'])"
+    asserts:
+      - expr: "max['lsb_pp'] <= 2.0"
+        why: "the converter's ripple on VDD = VREF moves a full-scale reading (sensor-full-scale through the divider, 2.92 V) by at most 2 LSB p-p - E9's budget (breath-adc.md) - at every corner, at the worst frequency in 200-500 kHz, with the whole 120 mV p-p taken as the fundamental"

@@ -159,7 +159,7 @@ them, and each is `[sim]`. "Worst" is the worst corner.
 
 | Scenario | Pitch jack | Breath jack | Other |
 |---|---|---|---|
-| `led-pwm` | 0.0038 cents p-p nominal, 0.013 at the worst corner (`led-pwm-pitch`) | 0.07 mV p-p, 0.24 worst | header ±12 V 1.0 mV p-p, 4.1 worst; the instrument's ground against the module's 6.4 mV, 18 worst |
+| `led-pwm` | 0.0038 cents p-p nominal, 0.013 at the worst corner (`led-pwm-pitch`) | 0.07 mV p-p, 0.24 worst | header ±12 V 1.0 mV p-p, 4.1 worst; the instrument's ground against the module's 6.9 mV, 19 worst |
 | `led-pattern`, 200 Hz | 0.031 cents p-p, 0.062 worst | 5.8 mV p-p, 12.5 worst | header ±12 V 14 mV p-p, 31 worst |
 | `led-off` | 1 × 10⁻⁸ cents | 0.6 µV | the deck's floor |
 | `burst` | 0.025 cents | 0.22 mV | the in-amp's output 0.22 mV; mod 1 swings 3.5 V |

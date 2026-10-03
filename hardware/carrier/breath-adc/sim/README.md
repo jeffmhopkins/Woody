@@ -1,8 +1,10 @@
 # Breath ADC — simulation
 
 `sims.yaml` says what is simulated and what every run must show; `adc-ac.cir`
-(the anti-alias filter, small-signal) and `adc.cir` (the input with the
-MCP3202 sampling it) are the decks; `results.yaml` is **generated** by
+(the anti-alias filter, small-signal), `adc.cir` (the input with the
+MCP3202 sampling it), `adc-powerup.cir` (the input through the power-up, #12)
+and `adc-vdd.cir` (the converter's ripple into VDD, which is the reference,
+#12) are the decks; `results.yaml` is **generated** by
 `python3 tools/sim.py run hardware/carrier/breath-adc/sim`.
 `docs/reference/tooling.md` §5 explains the tool.
 
@@ -20,6 +22,11 @@ case, the sample capacitor discharged by each conversion.
 | `filter` | 564 Hz; 55 dB at the buck's ~330 kHz | **564 Hz** (532–600 Hz at the 1 %/5 % corners); **55.3 dB** (54.8 dB worst) |
 | `step` | τ = 282 µs, the latency term | **283 µs** (266–300 µs at the corners); the sampling does not move it |
 | `kickback` | 480 µV/V, "a pure gain term" | **2.6 LSB** at the nominal, **3.3 LSB** at the worst corner, proportional to the input: a gain term, as the page says, and larger. The sample capacitor charges fully inside its window at every corner (R_SS × C_SAMPLE = 20 ns against 1.67 µs) |
+| `powerup-rest` | "At rest the divider sits at 0.16 V … inside the −0.6 V … +0.6 V window even with 3V3 at zero" | **Holds**: ADC_IN 0.16 V over VDD at most through the whole power-up; the clamp carries under 1 nA |
+| `powerup-blow` | 416 µA into the clamp while 3V3 is down, at full scale | **0.39 mA** nominal, **0.40 mA** worst, for 56–158 ms of the ramp (until the dev board's 3V3 is up); nothing once it is |
+| `powerup-blow-no3v3` | — (no 3V3 ever: no Matrix, or its LDO dead) | 0.39–0.40 mA, held for as long as the sensor reads full scale |
+| `powerup-rail` | "Whether the buffer swings high during power-up" (left open) | **Bounded without answering it**: U-BUF B at INST_POS12 for the whole power-up gives **0.72 mA** peak, **0.59 mA** stuck there once 3V3 is up — under the 1 mA judged against at every corner |
+| `vdd-ripple` | none — the page's 55 dB (`filter`) is on ADC_IN's path, which the converter's ripple does not take (#11 Finding 2) | **FAILS its 2 LSB budget on the conservative model**: 13 mV p-p on VDD, **14.6 LSB** at full scale nominal; 2.8–115 LSB across the corners. See below |
 
 ## What it says that the page does not
 
@@ -31,6 +38,54 @@ the run measures. It stays invisible for the page's reason — the zero is
 tracked in firmware and the span is a panel knob — so nothing changes but the
 number.
 
+## The power-up, and the converter's ripple (#12)
+
+**The power-up sequencing the page cites now exists** (`adc-powerup.cir`).
+`INST_POS12` ramps through `Q-INRUSH` (0.093–0.24 s, from
+`power-entry-instrument/sim`'s start times); `VS` and the sensor follow it as
+soon as the reference can (behaviourally, *earlier* than the REF5050 can);
+the 5 V rail waits for the buck's input to pass 8 V and starts over 1–10 ms
+(the R-78E5.0 publishes no start-up time); the dev board's 3V3 follows it. The
+MCP3202's clamps are diodes to an ideal VDD — the most current — and, because
+the datasheet prints no injection rating, **the 1 mA they are judged against
+is a limit stated here, not Microchip's**. Every case is under it, including
+the bound that answers the page's open question without a macromodel: the
+buffer at its positive rail for the whole power-up, 0.72 mA. What the run also
+shows: with the sensor at full scale while 3V3 is down, ADC_IN sits
+**0.52–0.64 V over VDD** (the clamp's own drop, varied a decade either way) —
+at the weak-clamp corner just past the datasheet's "VDD + 0.6 V" absolute
+maximum, current-limited to 0.4 mA by `R-ADCDIV-U`. It is reported, not
+asserted: the real clamp's drop is unpublished.
+
+**The converter's ripple through VDD is not shown to be small** (`adc-vdd.cir`).
+The MCP3202's VDD is its reference, so ripple there is a gain error on every
+reading: (V_in / VREF) × (ΔVREF / VREF) × 4096, 1.1 LSB per mV p-p at full
+scale. The path is `INST_5V_A` → the ribbon's three 5 V conductors → the
+Matrix's 11.1 µF → its ME6217 → its 10 µF → the ribbon's one 3V3 conductor →
+`C-ADC-BULK` and `C-DEC-ADC`. Two numbers the run needs are not published, so
+it takes both pessimistically and says so: the R-78E5.0's whole 120 mV p-p
+ripple-and-noise maximum as a sine at the switching rate from an ideal source
+(no credit for its output impedance, `D4` or `C12`), and the ME6217's
+rejection at ~330 kHz as a flat −20 dB (−30 to −10 dB at the ends; its sheet
+gives 65 dB at 1 kHz only). On that model the assertion **fails at every
+corner** — 14.6 LSB nominal, 2.8 at the best corner, 115 at the worst, where
+the ribbon's inductance resonates with the capacitors at either end inside
+the 200–500 kHz band searched. The drawn ribbon is 37.6 mm, ~26 nH: it
+filters nothing at 330 kHz, which is why #11's ~1 LSB estimate (on 150 nH)
+does not survive.
+
+It is not a demonstrated failure either: the two unpublished numbers carry
+it. `rip_budget_mv` says what the bench has to show — the largest 330 kHz
+ripple on `INST_5V_A` that keeps 2 LSB on this network: **16.5 mV p-p** at the
+nominal (−20 dB rejection), 2.1 mV at the worst corner. **E9 decides**, and
+needs a line it does not have: scope `INST_5V_A` and U-ADC pin 8 at 20 MHz
+bandwidth, and log the reading's p-p at a steady **full-scale** blow with the
+LEDs off — the existing off-against-sweeping comparison cancels a ripple that
+is there either way. If it fails, the fix is local and cheap: a small series
+resistance into `C-ADC-BULK` (a few tens of ohms against the MCP3202's
+~0.4 mA) puts a pole near 1 kHz in front of the reference, at a
+millivolt-level DC drop the auto-zero and span knob already absorb.
+
 ## In the register
 
 This README owns, in `config/figures.yaml`:
@@ -41,4 +96,8 @@ This README owns, in `config/figures.yaml`:
 
 A screen: the sampling model is the datasheet's typical, with an assumed
 spread and a pessimistic reset. The filter and time constant are the
-netlist's RC and exact.
+netlist's RC and exact. The power-up is behavioural at every source and
+bounds the op-amp rather than modelling it. The ripple run is linear and
+exact on its network, and its two inputs that matter — the converter's
+fundamental and the LDO's rejection at 330 kHz — are pessimistic assumptions,
+not data: it shows the budget is not guaranteed, not that it is broken.

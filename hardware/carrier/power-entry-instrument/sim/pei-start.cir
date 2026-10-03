@@ -12,6 +12,8 @@
 * switch's FET is enhanced with nothing on its output, and the +12 V conductor makes contact
 * at t_plug (a hot-plug); t_un and t_re, where a sim sets them, pull the plug and put it
 * back. D-REVSHUNT is left out: reverse-biased (the run measures the input's peak).
+* Waveforms: vinst is the BUCK's input (C-BUCK-IN, net BUCK_IN); vpos12 is INST_POS12
+* itself (C-STRIP-BULK, the LED row's VDD); vin is J-UMB's +12 V pin.
 VSET set 0 PWL(0 {{v_set0}} {{t_iso}} {{v_bus}})
 BISO 0 isx I = min({{i_ocp}}, max(0, (V(set) - V(vcc)) / {{r_bus}}))
 VIM isx vcc DC 0
@@ -72,6 +74,7 @@ BBUCK cb ig I = {{p_buck}} / max(V(cb,ig), 1) * 0.5 * (1 + tanh((V(cb,ig) - {{v_
 tran 5u {{t_end}} 0 20u
 wrdata vinst.dat v(cb) - v(ig)
 wrdata vin.dat v(inp) - v(ig)
+wrdata vpos12.dat v(ins) - v(ig)
 wrdata iiso.dat i(VIM)
 wrdata latch.dat v(xu.latch)
 wrdata timer.dat v(timer)
