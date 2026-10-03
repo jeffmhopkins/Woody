@@ -1,0 +1,225 @@
+(footprint "PinHeader_1x10_P2.54mm_Vertical_SMD_Hanxia_PZ2.54-TP-YQ"
+	(version 20241229)
+	(generator "woody")
+	(layer "F.Cu")
+	(descr "hanxia HX PZ2.54-1x10P TP-YQ: 1x10 2.54 mm vertical pin header, surface mount, staggered feet, Type A (YQ: odd pins' feet one side, even pins' the other). From the banked drawing (datasheets/connectors/HANXIA-HX-PZ2.54-1x10P-TP-YQ.pdf): insulator 2.50 high and 2.54 wide, posts 3.20 above it, feet 5.00 +/- 0.25 across; recommended pads 1.02 x 3.20 at 6.40 outside, here 1.02 x 2.80 at 6.00 outside (each pad 0.20 shorter at its toe, still 0.25 past the longest foot) so the 5V..IO1 row keeps the Matrix carrier's edge clearance from its USB-C notch")
+	(tags "pin header 2.54mm SMD vertical staggered hanxia PZ2.54 1x10")
+	(property "Reference" "REF**"
+		(at 0 -3.0 0)
+		(layer "F.SilkS")
+		(uuid "7e6658c4-2ed6-5be9-94e6-c1b351cd67b8")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "HX PZ2.54-1x10P TP-YQ"
+		(at 0 25.9 0)
+		(layer "F.Fab")
+		(uuid "d78dc8a0-5cc5-5c8b-8ae9-b92a6b0fb1cf")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "ca968558-71b4-5f03-9923-671f23e6d5b0")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "a9a2b964-1803-5fc1-b56f-e49c6d518523")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_line
+		(start -1.27 -1.27)
+		(end 1.27 -1.27)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "c571d5c6-b0f8-51ed-808f-915296c9f20d")
+	)
+	(fp_line
+		(start 1.27 -1.27)
+		(end 1.27 24.13)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "23e62725-bd47-5d6f-97b8-1e492e254fa2")
+	)
+	(fp_line
+		(start 1.27 24.13)
+		(end -1.27 24.13)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "3e6c41cc-f86b-5400-be4e-1202059198f2")
+	)
+	(fp_line
+		(start -1.27 24.13)
+		(end -1.27 -1.27)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "d7ad56a5-a3d6-5024-b48c-c3bd8f5f7eb0")
+	)
+	(fp_line
+		(start -3.25 -1.77)
+		(end 3.25 -1.77)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "a8b61ce8-a90a-5dfb-97c9-0e0d38791298")
+	)
+	(fp_line
+		(start 3.25 -1.77)
+		(end 3.25 24.63)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "70e6b6de-dcd7-5a8e-81fb-bc4846fd7eb3")
+	)
+	(fp_line
+		(start 3.25 24.63)
+		(end -3.25 24.63)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "ad13272b-f486-50af-a0a3-6d04e3e1c0fe")
+	)
+	(fp_line
+		(start -3.25 24.63)
+		(end -3.25 -1.77)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "81635fe5-01e0-54db-859c-abf19f1a5c31")
+	)
+	(fp_line
+		(start -1.33 -1.33)
+		(end 1.33 -1.33)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "a15674f9-e8b6-54cc-9b19-57d254bd562a")
+	)
+	(fp_line
+		(start -1.33 24.19)
+		(end 1.33 24.19)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "acee3477-b147-53a2-a9af-df10ae1c00b9")
+	)
+	(fp_line
+		(start 3.2 -0.8)
+		(end 3.2 0.8)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "4eb8776a-9b92-5c12-96a1-2dec203fd642")
+	)
+	(pad "1" smd rect
+		(at 1.6 0.0)
+		(size 2.8 1.02)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "a1a65aac-56eb-5c53-8eee-5ce3808e682c")
+	)
+	(pad "2" smd rect
+		(at -1.6 2.54)
+		(size 2.8 1.02)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "c828b220-3d33-51e8-9a88-03e0128cc91c")
+	)
+	(pad "3" smd rect
+		(at 1.6 5.08)
+		(size 2.8 1.02)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "8fc9c377-177c-5692-ab29-9d8103e64983")
+	)
+	(pad "4" smd rect
+		(at -1.6 7.62)
+		(size 2.8 1.02)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "d5cca1f7-4cf5-5097-a59c-a3d4e491cf2b")
+	)
+	(pad "5" smd rect
+		(at 1.6 10.16)
+		(size 2.8 1.02)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "a5e9b5b0-5e18-52ab-9a64-6aed718a01ed")
+	)
+	(pad "6" smd rect
+		(at -1.6 12.7)
+		(size 2.8 1.02)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "c6cd3dbf-2bb7-5767-a967-2c70412614fb")
+	)
+	(pad "7" smd rect
+		(at 1.6 15.24)
+		(size 2.8 1.02)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "e0ce6ad3-1be4-5edc-827d-5395d8ce68bf")
+	)
+	(pad "8" smd rect
+		(at -1.6 17.78)
+		(size 2.8 1.02)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "c65384ef-dc07-5c76-881a-51a4327a7d95")
+	)
+	(pad "9" smd rect
+		(at 1.6 20.32)
+		(size 2.8 1.02)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "8230033b-2325-5170-8576-da09fdfaf02d")
+	)
+	(pad "10" smd rect
+		(at -1.6 22.86)
+		(size 2.8 1.02)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "9f849c4a-0850-55a8-a00c-a19fe6468248")
+	)
+	(embedded_fonts no)
+)

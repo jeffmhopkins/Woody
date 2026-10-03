@@ -37,7 +37,7 @@ tools/cad.py for the body. It also runs tools/pcb.py check on every board
 with a layout, holds each key board's J-CHAIN pins to the ribbon's netlist
 (hardware/interfaces/key-chain-loom), and fails on any render or fab/ file
 the ledger does not know - a stray Gerber is uploaded with the rest. It holds the
-right-hand key board's Matrix connectors (J-MCU-KB, HDR-MATRIX, W-MATRIX) to the
+Matrix carrier's connectors (J-MCU-C, HDR-MATRIX) to the
 carrier's J-MCU and U-MCU-RT the same way (check_matrix).
 
 Circuits not yet migrated keep a hand-written netlist.yaml and are untouched.
@@ -786,21 +786,22 @@ def check_umbilical(board_docs):
     return problems
 
 
-# THE MATRIX ON THE RIGHT-HAND KEY BOARD (ADR 0021 amendment 2026-10-02). The carrier's sheet
-# holds the Matrix (U-MCU-RT, its pads) and J-MCU, netted as one node per conductor; the key
-# board draws the parts between them: J-MCU-KB, the ribbon's other end, hung upside down so its
-# pin k is J-MCU's pin 25 - k; HDR-MATRIX x2, pins through the Matrix's pad rows; W-MATRIX, the
-# wires to its other pads. Each of those pins is named for what it meets (a J-MCU pin number, or
-# a U-MCU-RT pin name in its Pins field) and must be on the net the carrier puts that on.
+# THE MATRIX ON ITS OWN CARRIER BOARD (ADR 0021 amendment 2026-10-03; until then on the
+# right-hand key board's rails). The carrier circuit's sheet holds the Matrix (U-MCU-RT, its
+# pads) and J-MCU, netted as one node per conductor; the matrix-carrier board draws the parts
+# between them: J-MCU-C, the ribbon's other end, hung upside down so its pin k is J-MCU's pin
+# 25 - k; HDR-MATRIX x2, headers through the Matrix's pad rows. Each of those pins is named for
+# what it meets (a J-MCU pin number, or a U-MCU-RT pin name in its Pins field) and must be on
+# the net the carrier puts that on.
 CARRIER = os.path.join(ROOT, "hardware", "carrier", "netlist.yaml")
-MATRIX_BOARD = "key-board-rh"
-MATRIX_ROWS = {"J-MCU-KB": 1, "HDR-MATRIX": 2, "W-MATRIX": 1}
-MATRIX_ALIAS = {"GND_CHAIN": "PWR_GND"}
+MATRIX_BOARD = "matrix-carrier"
+MATRIX_ROWS = {"J-MCU-C": 1, "HDR-MATRIX": 2}
+MATRIX_ALIAS = {}
 
 
 def check_matrix(board_docs):
-    """The Matrix's connectors on its board against the carrier's sheet: J-MCU-KB pin k on the
-    net of J-MCU pin 25 - k, each HDR-MATRIX and W-MATRIX pin on the net of the U-MCU-RT pin
+    """The Matrix's connectors on its board against the carrier's sheet: J-MCU-C pin k on the
+    net of J-MCU pin 25 - k, each HDR-MATRIX pin on the net of the U-MCU-RT pin
     it is named for (a pad the carrier leaves on no net may be left open). A part missing, or
     on another board, is a failure: the Matrix would have no way in."""
     docs = dict(board_docs)
@@ -808,6 +809,8 @@ def check_matrix(board_docs):
     rel = os.path.relpath(CARRIER, ROOT)
     cnet = {}
     for net, nodes in carrier["nets"].items():
+        if len(nodes) < 2:      # a lone no-connect pin is exported as a net of its own, named for it: no net
+            continue
         for n in nodes:
             if isinstance(n, str):
                 cnet[n] = net
@@ -825,8 +828,7 @@ def check_matrix(board_docs):
     for net, members in doc["nets"].items():
         for p in members:
             if isinstance(p, str):
-                # the key board's pour is the main board's ground by another name (GND_CHAIN,
-                # hardware/nets.yaml), and the Matrix's grounds join it there
+                # (a board whose ground goes by another name maps it here, MATRIX_ALIAS)
                 got[p] = (MATRIX_ALIAS.get(net.lstrip("/"), net.lstrip("/")), len(members))
     for row, n in MATRIX_ROWS.items():
         refs = [r for r, c in doc["components"].items() if c.get("of") == row]
@@ -834,7 +836,7 @@ def check_matrix(board_docs):
             problems.append(f"matrix: {MATRIX_BOARD} has {len(refs)} {row} part(s), not {n}")
         for ref in refs:
             for pin in doc["components"][ref]["pins"]:
-                key = f"J-MCU.{25 - int(pin)}" if row == "J-MCU-KB" else f"U-MCU-RT.{pin}"
+                key = f"J-MCU.{25 - int(pin)}" if row == "J-MCU-C" else f"U-MCU-RT.{pin}"
                 want = cnet.get(key)
                 net, size = got.get(f"{ref}.{pin}", (None, 0))
                 if want is None:

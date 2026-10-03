@@ -25,10 +25,6 @@ components:
     - P3V3
     - P5V
     - GND
-    - TP2
-    - TP3
-    - EN
-    - IO0
     sheet: carrier
   C1:
     of: C-AA-ADC
@@ -317,13 +313,6 @@ components:
     - 1
     - 2
     sheet: power-entry-instrument
-  C41:
-    of: C-EN
-    value: 1uF
-    pins:
-    - 1
-    - 2
-    sheet: service-uart
   C42:
     of: C-ADC-VDD
     value: 22uF
@@ -605,13 +594,11 @@ components:
     sheet: carrier
   J2:
     of: HDR-SERVICE
-    value: 1x5
+    value: 1x3
     pins:
     - 1
     - 2
     - 3
-    - 4
-    - 5
     sheet: service-uart
   J4:
     of: J-CHAIN
@@ -1264,11 +1251,6 @@ nets:
   /DIG_GND:
   - J6.8
   - NT1.1
-  /EN:
-  - A1.EN
-  - C41.1
-  - J1.24
-  - J2.4
   /HOP_LH_LT:
   - J4.8
   - U7.SER
@@ -1283,10 +1265,6 @@ nets:
   - J5.8
   - U11.CH4
   - U8.SER
-  /IO0:
-  - A1.IO0
-  - J1.23
-  - J2.5
   /IO1:
   - A1.IO1
   - J1.4
@@ -1642,7 +1620,6 @@ nets:
   - U8.VCC
   INST_5V_A:
   - A1.P5V
-  - A1.TP2
   - C12.1
   - D4.K
   - J1.1
@@ -1685,6 +1662,10 @@ nets:
   - R43.2
   - R6.1
   - U3.V+
+  J1.23:
+  - J1.23
+  J1.24:
+  - J1.24
   J4.11:
   - J4.11
   J4.12:
@@ -1695,7 +1676,6 @@ nets:
   - J5.12
   PWR_GND:
   - A1.GND
-  - A1.TP3
   - C10.2
   - C11.2
   - C12.2
@@ -1727,7 +1707,6 @@ nets:
   - C36.2
   - C37.2
   - C38.2
-  - C41.2
   - C43.2
   - D10.GND
   - D11.GND
@@ -1867,6 +1846,8 @@ external_endpoints:
 - D7.1
 - D8.1
 - D9.1
+- J1.23
+- J1.24
 - J4.11
 - J4.12
 - J5.11

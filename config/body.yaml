@@ -548,23 +548,10 @@ boards:
     status: settled
     source: "J-MCU's tails past its seating plane, 2.10 [ds XKB-X1270WR-2x12A-9TV01.pdf rev A1 side view; repo hardware/lib/README.md]"
   mcu_conn_at:
-    value: [262.27, 12.29, 90]
+    value: [262.27, 14.9, 90]
     status: nominal
-    source: "J-MCU's place, ONE figure: its insulator's centre along and across the body, and the way its mouth faces (0 the tail, 90 the far side, 270 the near side). Off the LED row (the owner, 2026-10-03: 'This connector needs moved to the side so that it doesn't cause coverage of the led'): turned along the body at the near edge, its tails at the edge and its mouth toward the row, in the tail strip between column mount H8 and the tail's end mount. Along the body, the least x that keeps its insulator out of the near tail column's nut keep-out (drc.echo 'columns vertical: the main board's mounts under the key boards''); drc.echo 'J-MCU, its plug and the Matrix ribbon off the LED row' holds it across"
-    decided_by: "the main board's layout, with J-MCU-KB (boards.mcu_kb_conn_at)"
-  mcu_kb_conn_at:
-    value: [260.0, 15.29, 90]
-    status: nominal
-    source: "J-MCU-KB's place on the right-hand key board's underside, as boards.mcu_conn_at, its mouth the same way so the ribbon rises from one socket's back to the other's. NOT straight above J-MCU: between the board's near tail column and HDR-MATRIX's first pin there is less room along the body than the 21.54 insulator, so it stands 3.0 farther across, where only its narrower pad rows pass beside the column's standoff, and short of HDR-MATRIX's carrier along the body. drc.echo 'J-MCU-KB clear of the right-hand key board's tail column and HDR-MATRIX' prints both gaps; the closed ribbon's folds take the offset (drc.echo 'Matrix ribbon closed')"
-    decided_by: "the right-hand key board's layout (pcb.py check: courtyards)"
-  mcu_conn_body_d:
-    value: 5.40
-    status: settled
-    source: "J-MCU's insulator, mouth to back, the depth that stands on the board; behind it only its pins run down to the pad rows [ds XKB-X1270WR-2x12A-9TV01.pdf rev A1 side view] (boards.mcu_conn_w is this with the tails)"
-  mcu_conn_tails_l:
-    value: 15.04
-    status: settled
-    source: "J-MCU's pad rows' length along the rows, behind the insulator: 11 pitches of 1.27 and one pad's 1.07 [calc; repo hardware/lib/woody.pretty/IDC-Header_2x12_P1.27mm_XKB_X1270WR_Horizontal.kicad_mod]"
+    source: "J-MCU's place, ONE figure: its insulator's centre along and across the body, and the way its mouth faces (0 the tail, 90 the far side, 270 the near side). Off the LED row (the owner, 2026-10-03: 'This connector needs moved to the side so that it doesn't cause coverage of the led'): turned along the body at the near edge, its tails at the edge and its mouth toward the row, in the tail strip between column mount H8 and the tail's end mount. Along the body, the least x that keeps its insulator out of the near tail column's nut keep-out (drc.echo 'columns vertical: the main board's mounts under the key boards''); drc.echo 'J-MCU, its plug and the Matrix ribbon off the LED row' holds it across. Across the body, 14.9 rather than hard against the edge (2026-10-03, coordinator's go): the 1.27 mm back row has 0.2 mm between its pads, so its lines must leave behind it, toward the edge, and both the main board and the carrier need five lanes a face there; at the edge-most place the back row stood 0.31 from the board edge and no line fitted"
+    decided_by: "the main board's layout; the Matrix carrier's J-MCU-C stands straight above it"
   tall_at_x:
     value: 222.19
     status: nominal
@@ -572,20 +559,20 @@ boards:
   service_hdr_at:
     value: [284.0, 9.3]
     status: nominal
-    source: "HDR-SERVICE's pin 1, body frame, its five pins running toward the tail (+x): on the tongue between the right-hand key board's end and the tongue's end mounts, where the lid comes off over it - the first layout's place (hardware/boards/main-board/layout.yaml J2, 2026-10-01), taken here so the bottom plate's window under its tails is cut where it stands. The layout keeps it here or moves this"
+    source: "HDR-SERVICE's pin 1, body frame, its three pins running toward the tail (+x): on the tongue between the right-hand key board's end and the tongue's end mounts, where the lid comes off over it - the first layout's place (hardware/boards/main-board/layout.yaml J2, 2026-10-01), taken here so the bottom plate's window under its tails is cut where it stands. The layout keeps it here or moves this"
     decided_by: "M4 main board layout"
   service_hdr_h:
     value: 8.5
     status: nominal
     source: "HDR-SERVICE's pins above the board, the 2.54 mm header's [from memory]; the service lead's plug goes on with the lid off. For the LEDs' cone NOTE (drc.echo 'tall parts in the LEDs' cone')"
   service_hdr_pins:
-    value: 5
+    value: 3
     status: settled
-    source: "HDR-SERVICE, a 1x5 2.54 mm header (ADR 0018; hardware/carrier/service-uart/service-uart.md)"
+    source: "HDR-SERVICE, a 1x3 2.54 mm header: TXD, RXD, GND (hardware/carrier/service-uart/service-uart.md). Five pins until the owner chose to program the Matrix over its own USB-C only (2026-10-03), which took EN and IO0 off it"
   service_hdr_tail:
     value: 3.0
     status: settled
-    source: "HDR-SERVICE's tails below its seating plane, 3.00 +/-0.2 [ds HANXIA-HX-PZ2.54-1x5P-ZZ.pdf, drawing]"
+    source: "HDR-SERVICE's tails below its seating plane, 3.00 +/-0.2 [ds HANXIA-HX-PZ2.54-1x5P-ZZ.pdf, drawing - the same family; the 1x3, C32713269: 'Length of End Connection Pin=3mm', web: JLC parts listing 2026-10-03, its own drawing datasheets/connectors/HANXIA-HX-PZ2.54-1x3P-ZZ.pdf]"
   buck_tail:
     value: 4.1
     status: settled
@@ -648,32 +635,37 @@ boards:
     source: "[ds 3D] datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-3D.stp - the board spans z -0.8 to 0.8"
   # THE LED MATRIX IS ON THE TOP FACE, just past the last key (owner,
   # 2026-09-26), face up under its window in the oak top, the key plate
-  # ending short of it. SINCE 2026-10-02 IT IS MOUNTED ON THE RIGHT-HAND KEY
-  # BOARD (owner: "I think d is right for the matrix vs hand soldering"; ADR
-  # 0021 amendment "the Matrix on the right-hand key board"): that board runs
-  # on past its tail columns as two rails, one under each of the Matrix's pad
-  # rows, with the middle open for its back-side parts and the USB-C plug.
-  # Bare header pins join each pad row to its rail through a shim; a plain IDC
-  # ribbon runs from a header under the key board down to J-MCU.
+  # ending short of it. SINCE 2026-10-03 IT IS ON A CARRIER BOARD OF ITS OWN
+  # (owner: "So now the rh top board should not be extended, but back to
+  # original length I think", then option (c), a separate small carrier, and
+  # "Hang from the lid"; ADR 0021 amendment 2026-10-03): two 1x10 headers join
+  # its pad rows to the carrier, which hangs from the oak top on four spacers
+  # and carries J-MCU-C straight above J-MCU. hardware/boards/matrix-carrier/.
   matrix_mount:
-    value: "key_board_rh"
+    value: "carrier"
     status: settled
-    source: "owner, 2026-10-02: 'I think d is right for the matrix vs hand soldering' - option (d) of ADR 0021's 2026-10-02 study, the Matrix on an extension of the right-hand key board. It replaces the 24-way ribbon soldered to the Matrix's pads (hardware/carrier/bom.csv CBL-MCU-RIBBON is now an IDC ribbon crimped at both ends)"
-  matrix_rail_in:
-    value: 1.3
+    source: "owner, 2026-10-03: option (c), 'SEPARATE SMALL MATRIX CARRIER', and 'Hang from the lid' (ADR 0021 amendment 2026-10-03). It replaces 'key_board_rh' (2026-10-02, option d), dropped because the owner wants the right-hand key board back at its original length"
+  matrix_hdr_h:
+    value: 2.5
+    status: settled
+    source: "HDR-MATRIX's plastic, which the Matrix sits on and so sets the gap between the carrier's top face and the Matrix's underside: insulation height 2.5 [ds connectors/HANXIA-HX-PZ2.54-1x10P-TP-YQ.pdf]"
+  matrix_under_rest_h:
+    value: 1.75
     status: nominal
-    source: "how far each rail of the right-hand key board's extension runs inward past its pad row's centre: the pin's pad, boards.pin_pad / 2 = 0.85, and 0.45 of board beyond it, over the layout's 0.3 edge clearance [calc]. The rest of the middle stays open for the Matrix's back-side parts (matrix_under_h, drawn 19 mm square) and the USB-C plug; drc.echo 'Matrix on the right-hand key board's rails' prints the gaps"
-    decided_by: "calipers on the Matrix's back-side parts, with matrix_under_h"
-  matrix_shim_t:
-    value: 0.8
+    source: "the deepest of the Matrix's back-side parts OVER the carrier, its two buttons beside the USB-C receptacle (the receptacle, boards.matrix_under_h, is over the carrier's notch); everything else is 1.12 or less (the ESP32-S3 module 0.92) [3D, datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-3D.stp, per-solid bounding boxes, 2026-10-03]. drc.echo 'Matrix's back-side parts clear the carrier'"
+    decided_by: "calipers on the Matrix in hand"
+  matrix_carrier_past:
+    value: 0.5
     status: nominal
-    source: "one strip under each pad row, between the rail and the Matrix, drilled on the pins: 0.8 mm FR-4, a standard board thickness [from memory]. The gap it stands in is derived (drc.echo 'Matrix shim on the extension's rails'): the Matrix's top against the oak less the key board's top. Thinner than the gap, so the Matrix stands that far under the oak, which takes the pins cut flush on its top face (its pad rows are under the oak, outside the window's opening) and the boards' thickness tolerance (boards.pcb_t_tol); a thicker stack bends the rails up against the oak and no further"
-    decided_by: "the first Matrix assembled on its board"
-  matrix_support:
-    value: "none"
+    source: "how far the carrier runs past the Matrix's two edges along the body (and the arm past J-MCU-C's insulator): HDR-MATRIX's end pads stand 1.07 in from the Matrix's edge, and the carrier keeps its edge clearance from them [drawing convention]"
+  matrix_mount_dxy:
+    value: [7.3, 17.0]
     status: nominal
-    source: "[calc] the Matrix's 37 mm cantilever past the tail columns needs no standoff. Two rails of 1.6 mm FR-4, each ~10.9 mm wide (the board's side to the pad row plus matrix_rail_in): I = 2 x 10.9 x 1.6^3 / 12 = 7.4 mm^4; with E ~20 GPa [from memory, FR-4 flexural] k = 3EI / L^3 = 3 x 20000 x 7.4 / 36.7^3 = 9.0 N/mm at the Matrix's centre. The Matrix ~4 g [from memory] and the rails' effective ~0.7 g sag 0.005 mm at 1 g and 0.26 mm under a 50 g jolt (9 MPa in the rails, against FR-4's ~400 MPa [from memory]); upward the oak top stops it at the shim's clearance. First mode ~0.22 kHz [calc: sqrt(9000 / 0.0047) / 2 pi], far above the shakes and jabs the IMU on the Matrix reads (ADR 0007) - but not stiff the way the lid was, so a key-click transient can ring it. 'standoff' = a pair of M2.5 standoffs from the main board (which runs full width under the rails since boards.main_tail 'full') to the rails' tips"
-    decided_by: "E-test on the first instrument assembled: tap the body and the keys with the IMU logging; a mode inside the gesture band, or ringing the firmware's filter does not remove, makes it 'standoff'"
+    source: "the carrier's hanging mounts (matrix_mount_corners says which), at the Matrix's centre +/- these along and across the body: across, past the Matrix's edge (12.5) by a spacer's radius and a little, and inside the carrier's own edge; along, the mouth-end pair clear of J-MCU-C's insulator under the arm (its tail end at J-MCU's x1) by the washer's radius and board_clear. drc.echo 'Matrix carrier's mounts clear' prints every gap"
+  matrix_mount_corners:
+    value: [[1, -1], [-1, 1], [1, 1]]
+    status: nominal
+    source: "which of the four places matrix_mount_dxy gives carry a mount, as [along, across] signs (+1 the tail and the far side): THREE, not four. The near mouth-end corner has none: every one of J-MCU-C's lines to HDR-MATRIX runs along the carrier's near strip past it, between J-MCU-C and the near header row, and a mount there left room for six of the fifteen a face (pcb.py layout, 2026-10-03). Three mounts hold the carrier; J-MCU-C's arm is held at its root"
   mcu_plug_proud:
     value: 1.5
     status: nominal
@@ -727,6 +719,10 @@ openings:
     status: tbd
     source: "oak lip the acrylic rests on, per side - the rebate is the opening plus twice this"
     decided_by: "M4, with the acrylic's cut size"
+  matrix_relief_d:
+    value: 0.5
+    status: nominal
+    source: "a shallow pocket routed into the oak top's underside over the Matrix (its square and 0.5 round it), which its top face rises into: the Matrix carrier's stack (hardware.mx_spacer_l under the oak, boards.matrix_hdr_h) puts the Matrix's top 0.1 above the oak's underside, and the relief leaves it 0.4 of air and the LEDs 2.0 under the acrylic (drc.echo 'Matrix carrier hangs from the oak', 'LED tops under the frosted window'). It thins the window's lip by as much (drc.echo 'oak lip under the frosted window') [drawing convention]"
   matrix_acrylic_t:
     value: 3.0
     status: tbd
@@ -1059,6 +1055,49 @@ hardware:
     status: tbd
     source: "the least wood left between a pocket and a cap slot, a side groove or the window's rebate [from memory - no banked figure] (drc.echo 'column screw pockets clear of the wood top's cuts'; the tail corners set boards.kb_tail_margin, 'key-board tail margin, least')"
     decided_by: "M2 - pocket a scrap of the chosen wood beside a slot"
+  # THE MATRIX CARRIER HANGS FROM THE OAK TOP (owner, 2026-10-03: "Hang from the
+  # lid"; ADR 0021 amendment 2026-10-03). At each of its three mounts, from the
+  # top: a threaded insert set in the oak's underside; a spacer; the carrier; a
+  # washer; and a low-head screw up through them into the insert. The stack
+  # sets the Matrix's height (boards.matrix_hdr_h above the carrier), so the
+  # carrier lifts off with the lid and unplugs at J-MCU. drc.echo 'Matrix
+  # carrier hangs from the oak' holds the thread, the wood and the height.
+  mx_insert_l:
+    value: 4.0
+    status: nominal
+    source: "MECH-MX-INSERT, CNC Kitchen M2.5 x 4.0 brass threaded insert: L 4.0, D1 4.6, D2 3.9 [web: datasheets/mechanical/CNCKITCHEN-M2.5x4-THREADED-INSERT-3DJAKE.html]. The shortest stocked M2.5 insert: the 5.7 mm ruthex one would leave 0.3 of the 6 mm oak over it. Set flush with the oak's underside"
+    decided_by: "an insert set in a scrap of the chosen oak and pulled"
+  mx_insert_od:
+    value: 4.6
+    status: nominal
+    source: "the same insert's knurl, D1 4.6 [web: datasheets/mechanical/CNCKITCHEN-M2.5x4-THREADED-INSERT-3DJAKE.html]. Its hole in the oak is the maker's D3, 4.0, the knurl pressed or epoxied into the wood"
+  mx_insert_hole:
+    value: 4.0
+    status: nominal
+    source: "the insert's hole in the oak, the maker's recommended D3, 4.0, drilled mx_insert_l deep from the underside (oak-inserts.dxf) [web: datasheets/mechanical/CNCKITCHEN-M2.5x4-THREADED-INSERT-3DJAKE.html]"
+    decided_by: "an insert set in a scrap of the chosen oak"
+  mx_spacer_l:
+    value: 4.0
+    status: settled
+    source: "MECH-MX-SPACER, Ettinger 5.52.043, brass spacer for M2.5, D 4.5, d 2.6, L 4.0 [ds mechanical/ETTINGER-CATALOG-2024-P79-DISTANZHUELSEN-MESSING.html] - the series MECH-KB-SPACER is from, bought at length, not faced"
+  mx_spacer_od:
+    value: 4.5
+    status: settled
+    source: "the same spacer's D [ds mechanical/ETTINGER-CATALOG-2024-P79-DISTANZHUELSEN-MESSING.html]"
+  mx_washer_t:
+    value: 0.5
+    status: nominal
+    source: "MECH-MX-WASHER, DIN 433 M2.5 washer, h 0.5, d2 5.0 [from memory: DIN 433 table] - under the screw's head, on the carrier's underside; with it the screw's thread in the insert lands between thread_engage_min and the insert's length (drc.echo 'Matrix carrier hangs from the oak'). Under the head, not above the carrier, so the carrier stands as high as it can and the Matrix ribbon's folds have room under it"
+    decided_by: "the washer bought, measured"
+  mx_washer_od:
+    value: 5.0
+    status: nominal
+    source: "the same washer's d2 [from memory: DIN 433 M2.5]; it bears on the carrier's underside, which keeps that circle clear of other copper (the mounts' underside bearing; the spacer's is the top's)"
+    decided_by: "as mx_washer_t"
+  mx_screw_l:
+    value: 10
+    status: settled
+    source: "MECH-MX-SCREW, the column's M2.5 x 10 low-head screw (col_screw_l, MECH-COL-SCREW's part), up through the washer, the carrier and the spacer into the insert: 10 - 0.5 - 1.6 - 4.0 = 3.9 of thread in the insert's 4.0 [calc]"
   mb_nut_e:
     value: 5.77
     status: nominal
@@ -1175,10 +1214,9 @@ routing:
     source: "24-way 0.635 mm ribbon for a 1.27 mm dual-row header [calc: 24 x 0.635]: allocation in hardware/carrier/bom.csv CBL-MCU-RIBBON (ADR 0018)"
     decided_by: "M4"
   mcu_ribbon_t:
-    value: 0.8
-    status: tbd
-    source: "fine-pitch ribbon thickness [from memory]"
-    decided_by: "M4"
+    value: 0.64
+    status: settled
+    source: "CBL-MCU-RIBBON's flat cable, 3M 3754 (0.025 in pitch, 30 AWG): .025 +/- .003 in thick [ds connectors/3M-3754-FLAT-CABLE-0.025IN-30AWG-PVC.pdf, sheet 2]"
   chain_ribbon_w:
     value: 7.62
     status: nominal

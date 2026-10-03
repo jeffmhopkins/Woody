@@ -26,12 +26,6 @@ parts:
   SW1-n:     "S{ref} {1} {2} ctl 0 kswitch"  # every switch on one control
   U-KEYS:    "X{ref} {VCC} {GND} {A} {B} {C} {D} {E} {F} {G} {H} {SER} {CLK} {SHLD} {CLKINH} hcs165_inputs"
   J-CHAIN:   ""
-  # The Matrix's connectors (ADR 0021 amendment 2026-10-02): wiring between the
-  # Matrix and J-MCU, on nets that never meet the key chain's on this board
-  # but at GND_CHAIN - nothing here for the register's DC bench to see.
-  J-MCU-KB:   ""
-  HDR-MATRIX: ""
-  W-MATRIX:   ""
 
 # The bench of Bring-up: 3V3 at J1's pin, SH/LD high, the clock low, SER tied low.
 drive:

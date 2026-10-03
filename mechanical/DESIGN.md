@@ -369,15 +369,16 @@ only as good as those envelopes. Group the report's lines by these causes
    between the two halves must cross. (The stations ran through
    the side strips until ADR 0016 removed them.)
 5. **The Matrix and the umbilical are wired onto the main board's tail
-   end** (owner, 2026-09-26). The Matrix sits on the right-hand key board's
-   rails (owner, 2026-10-02, ADR 0021 amendment): header pins through its
-   pad rows (`HDR-MATRIX`) and four short wires from its test points and
-   button pads (`W-MATRIX`). A plain 24-way IDC ribbon (allocation on
-   `CBL-MCU-RIBBON`, ADR 0018) runs from `J-MCU-KB`, hung under that board
-   straight above J-MCU, down into J-MCU beside the regulator block. It
-   plugs there with the key plate raised, as the key chain's do (*"Matrix
-   ribbon length"*), and closed it folds flat between J-MCU and the USB-C
-   plug (*"Matrix ribbon closed: its folds between J-MCU and the USB-C plug"*). **The umbilical has no cable inside the body** (ADR
+   end** (owner, 2026-09-26). The Matrix sits on a carrier board of its own
+   (owner, 2026-10-03, ADR 0021 amendment 2026-10-03), hung from the oak top
+   on three mounts (*"Matrix carrier hangs from the oak"*): two 1×10 headers
+   through its pad rows (`HDR-MATRIX`), a notch round its USB-C and the plug.
+   A plain 24-way IDC ribbon (allocation on `CBL-MCU-RIBBON`, ADR 0018) runs
+   from `J-MCU-C`, hung under the carrier straight above J-MCU, down into
+   J-MCU at the main board's near edge. It plugs there with the lid raised,
+   as the key chain's do (*"Matrix ribbon length"*), and closed it folds flat
+   between the two headers (*"Matrix ribbon closed: its folds between the
+   sockets"*). **The umbilical has no cable inside the body** (ADR
    0021): the etherCON is soldered to its adapter, and J-UMB, a right-angle
    header, is soldered into the adapter and the tongue (*"J-UMB on the main
    board's tongue…"*, *"J-UMB's row lands on the adapter clear of the

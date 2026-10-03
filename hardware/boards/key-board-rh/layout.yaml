@@ -39,16 +39,12 @@ fab:
 
 standoff_footprint: "MountingHole:MountingHole_2.7mm_M2.5"
 
-# Each key's network: the one pattern, as on the left-hand board.
+# Each key's network: the one pattern, as on the left-hand board - 9.0 from its
+# switch since the KS-33's 3.4 mm pads (wave 3, ADR 0020 Amendment 8): at 9.4 a
+# network's label lands on the bigger pads, here as there.
 networks:
-  pattern: {offset: [9.4, 0.0], axis: y, leg: -1, c: -1}
-  # RH6's T would stand where J2 (J-MCU-KB) now hangs, straight above J-MCU
-  # (2026-10-02): it moves across the body into the free square beyond RH6
-  # (no key at x 234 on the far side), the pattern's own orientation. Under
-  # the switch's near edge was tried: the strip to the board's edge is too
-  # narrow for the T beside the switch's two pins.
-  except:
-    RH6: {at: [234.0, 31.0]}
+  pattern: {offset: [9.0, 0.0], axis: y, leg: -1, c: -1}
+  except: {}
 
 # Placed as the left-hand board's, 108.0 further along the body - the key row's own
 # offset (pcb-geometry.echo) - so the register stands level with RH3, as it
@@ -78,20 +74,7 @@ parts:
   U1:  [204.0, 44.0, 90]     # U-KEYS, the register
   C7:  [197.5, 41.8, 90]     # C-DECOUPLE-165, beside pin 8 at the register's J-CHAIN end
   C8:  [178.0, 42.0, 90]     # C-BULK-CHAIN, beside J-CHAIN's 3V3 pin
-  # THE MATRIX (ADR 0021 amendment 2026-10-02; pcb-geometry.echo right_hand
-  # 'connector' J-MCU-KB, 'pins' HDR-MATRIX, 'rail'). Each entry is the
-  # footprint's pin 1, found by placing it on the bottom and matching its pads
-  # to the echo: J2's pins under J-MCU's own (pin 1 at the low-y end, its
-  # mouth toward the tail); J3 and J4 on the two pad rows, pin 1 at the
-  # Matrix's USB-C edge; J5's four wire pads on the near rail, past the key
-  # plate's end, where nothing stands over them but the oak. J5's place is
-  # nominal: the Matrix's TP2, TP3 and button pads, measured on the board in
-  # hand, decide it.
   C9:  [211.2, 46.47, 0]     # C-DECOUPLE-165-VCC, at U1's VCC (pin 16), review #6-5
-  J2:  [242.3, 21.515, 0]    # J-MCU-KB
-  J3:  [272.97, 17.07, 270]  # HDR-MATRIX, the 5V..IO1 row
-  J4:  [272.97, 39.93, 270]  # HDR-MATRIX, the IO33..RX row
-  J5:  [284.0, 8.7, 270]      # W-MATRIX, by the near rail's outer edge, below the lanes
 
 silk:
   at: [152.0, 12.5]
@@ -100,22 +83,15 @@ silk:
   rev: "A"
   date: "2026-09-28"
 
-# THE MATRIX'S NETS ARE ROUTED BY HAND (2026-10-03). pcb_route fans out at most
-# fifteen of J2's (J-MCU-KB's) 24 pins in any order, and Freerouting leaves a few
-# and adds no pours. So tools/ stays as it is and the layout is made in two
-# steps: pcb.py layout routes everything else with J2-J5's nets held out and
-# their routes kept clear, then a script draws the Matrix's routes - every pin
-# out of J2 in nested 45-degree fans, the odd row off its back on the bottom
-# face and the even row off its front, round the header's ends between it and
-# the tail columns, then along the rails, each net dropping to its pin on the
-# top face. hardware/boards/key-board-rh/README.md, *Revisions* B, names it.
 route: true
 # The two key lines from the register's far row first, as the left-hand board
 # routes KEY_LH5 first: U1.13 (RH6) is boxed in by the 12-15 strap, and routed
 # later it finds its via spots below the pin taken. Then J-CHAIN's far row (the
 # odd pins), reachable only from the header's back. KEY_RH1 last: routed early,
 # its via lands beside J-CHAIN's ground pin 4 and starves that pin's thermal.
-route_first: [/KEY_RH5, /KEY_RH6, /CHAIN_SCK, /CHAIN_SHLD, /HOP_LT_RH, /HOP_RH_RT, /KEY_RH1]
+# KEY_RH4 third since the networks moved to 9.0 (2026-10-03): later it found its way
+# out closed; README *Revisions* B names the two hand edits made after the layout.
+route_first: [/KEY_RH5, /KEY_RH6, /KEY_RH4, /CHAIN_SCK, /CHAIN_SHLD, /HOP_LT_RH, /HOP_RH_RT, /KEY_RH1]
 connect_first:
   - {pads: [C7.2, U1.8], max_mm: 15, why: "the decoupling loop's ground half, in its own track"}
   # The register's two far-row ground pins are boxed in by the far-row key lines:
@@ -127,8 +103,4 @@ connect_first:
   - {pads: [U1.15, U1.12], max_mm: 12, why: "CLK INH's strap to ground, boxed in between RH5's line and VCC"}
   - {pads: [C9.1, U1.16], max_mm: 4, why: "the second decoupler's VCC side, straight onto pin 16 (review #6-5)"}
 ground_net: GND_CHAIN
-# The Matrix's grounds are on GND_CHAIN, the pour (the sheet says why). Its
-# 5 V and 3V3 route at signal width: routed first at the power width they
-# closed the ways out of J2's two rows. Widen them in KiCad afterwards
-# (carrier.md: the 3V3 track adds to the breath ADC's reference drop).
 power_nets: [V3V3_CHAIN_RH]

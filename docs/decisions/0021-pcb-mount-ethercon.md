@@ -2,7 +2,7 @@
 
 **Status:** Accepted. Decided by the owner, 2026-09-29. It settles ADR 0004's
 open question *which etherCON variant at each end* **for the instrument's end
-only**; the module's end is [ADR 0023](0023-module-ethercon-and-two-boards.md). **Amended twice on 2026-10-02**: the main board's tail end runs full width (*Amendment* below), and the Matrix moves onto the right-hand key board, with no ESD protection added to the USB (*Amendment, 2026-10-02 (2)*).
+only**; the module's end is [ADR 0023](0023-module-ethercon-and-two-boards.md). **Amended twice on 2026-10-02**: the main board's tail end runs full width (*Amendment* below), and the Matrix moves onto the right-hand key board, with no ESD protection added to the USB (*Amendment, 2026-10-02 (2)*). **Amended again on 2026-10-03**: the Matrix moves onto a carrier board of its own, hung from the oak top, the right-hand key board goes back to its original length, and the Matrix is programmed over its own USB-C only (*Amendment, 2026-10-03*).
 
 ## Context
 
@@ -279,8 +279,9 @@ the right hand PCB?"*). Heights from the body CAD:
   `boards.matrix_t`).
 - So an extension would stand 0.9 mm below the Matrix's underside.
 - The Matrix's back-side parts (`boards.matrix_under_h`: its USB-C, the
-  ESP32-S3, the buttons) hang 3.2 mm, down to 28.2, through the board's
-  plane at 28.9–30.5.
+  ESP32-S3, the buttons) hang below that, through the board's plane at
+  28.9–30.5. The figure was `[from memory]` then; it is read off the vendor
+  STEP since 2026-10-03, and the deepest is the USB-C.
 
 The extension therefore cannot lie flat under the Matrix. It would be two
 rails under the pad rows, at 28.5 ± 11.43 across, with the middle open for
@@ -309,6 +310,12 @@ for the owner and the BOM fragment's owner, not fixed here. **Decided in the
 next amendment: no ESD protection is added.**
 
 ## Amendment, 2026-10-02 (2) — the Matrix on the right-hand key board; no USB ESD
+
+> **Superseded on 2026-10-03** by the next amendment, except item 7 (no USB ESD)
+> and item 6's plug, drawn where it really is: the Matrix is on its own carrier,
+> the right-hand key board is back at its original length, and the rails, the
+> shim, the four wires and `J-MCU-KB` are gone. Kept here as the record of what
+> was decided that day.
 
 **Decided by the owner, 2026-10-02**, on the options above:
 
@@ -351,8 +358,8 @@ next amendment: no ESD protection is added.**
    *"Matrix ribbon length"*. It plugs at `J-MCU` with the key plate held
    raised, as the key chain's ribbons do: its slack is `routing.chain_raise`
    and `routing.chain_slack`, the same figures. Closed, that slack folds flat
-   in four legs over `J-MCU`, short of the USB-C plug (*"Matrix ribbon closed:
-   its folds between J-MCU and the USB-C plug"*). This answers review #19 F4:
+   in four legs over `J-MCU` (*"Matrix ribbon closed: its folds between the
+   sockets"*, the rule's name since 2026-10-03). This answers review #19 F4:
    the slack is a figure, it lies in a checked place, and `J-MCU` is reached
    with the key plate raised, so the plate is not over it then.
 5. **The Matrix's grounds join the key board's `GND_CHAIN` pour.** That is
@@ -417,7 +424,7 @@ room. The body CAD does not draw that case yet, and asserts so.
   would put 5 V on IO pins. **Check it against the Matrix in hand before the
   key board is ordered.**
 - **The open middle's width** depends on the Matrix's back-side parts,
-  `boards.matrix_under_h`, which is still `[from memory]`. The rails' inside
+  `boards.matrix_under_h`, which was `[from memory]` that day. The rails' inside
   edges clear them by the margin the DRC above prints. Calipers on the board
   decide `boards.matrix_rail_in`.
 - **The shim.** A stack thicker than the gap bends the rails up against the
@@ -433,3 +440,113 @@ room. The body CAD does not draw that case yet, and asserts so.
 place under its window; ADR 0018's allocation. **What it leaves for others:**
 the main board's layout gains the keep-outs under the rails and the
 ribbon's fold (`pcb-geometry.echo`), with its re-layout.
+
+## Amendment, 2026-10-03 — the Matrix on a carrier of its own; program over USB only
+
+**Decided by the owner, 2026-10-03**, in four steps:
+
+> "This cut[-out] feels wrong too, the matrix led board shouldn't have to have a cutout?"
+> — then, of the study below: "2nd board then" (keep the rails)
+> — then, of three ways to join J-MCU to its mate: option 1, "ALONG"
+> — then: "So now the rh top board should not be extended, but back to original length I think"
+> — and, asked how the Matrix then mounts: a "SEPARATE SMALL MATRIX CARRIER" (option c),
+> "Hang from the lid", and "Program over USB only".
+
+### Considered and rejected: a solid extension under the Matrix
+
+The owner asked whether the right-hand key board could run on **solid**
+under the Matrix, with the Matrix standing deeper. The study (2026-10-03,
+off the vendor STEP and the body CAD):
+
+- The Matrix's deepest back-side part is its USB-C receptacle
+  (`boards.matrix_under_h`). A solid board under it puts the Matrix on pins
+  that high above the board, which lifts its LEDs **above** the acrylic's
+  underside at the key boards' fixed height: the Matrix stands higher, not
+  deeper. A thinner acrylic would take it, with the LEDs much nearer the
+  frost and the oak's lip round the window under drc.echo's minimum.
+- **The plug decides it.** Any USB-C plug's overmould is centred on the
+  receptacle's axis, so in front of the Matrix it crosses the key board's
+  plane whatever the Matrix's height. A board there needs an opening for it,
+  so "no cutout" cannot hold with the Matrix's USB-C at its mouth edge.
+- The one way to no enclosed opening: the Matrix turned so its USB faces
+  the tail, the board ending at the Matrix's tail edge with an edge notch,
+  and the body about 8–10 mm longer. Not taken.
+
+The owner kept the rails ("2nd board then"), then dropped the extension
+altogether (below).
+
+### What is decided
+
+1. **The Matrix mounts on its own carrier board**,
+   `hardware/boards/matrix-carrier/` (`PCB-MATRIX-CARRIER`,
+   `config/body.yaml` `boards.matrix_mount` `"carrier"`). The **right-hand
+   key board goes back to its original length**: its rectangle, as the
+   left-hand one, with C9 (#6-5) and the KS-33's 3.0 mm holes kept. The
+   rails, the shim (`MECH-MATRIX-SHIM`), the four wires (`W-MATRIX`) and
+   `J-MCU-KB` are gone. Item 7 of the amendment above (no USB ESD) stands.
+2. **The Matrix stays where it was, centred under its window.** Two 1×10
+   headers (`HDR-MATRIX`, Hong Cheng HC-PZ254-11.5L-1x10PZ) stand on the
+   carrier through its pad rows, and the Matrix sits on their plastic
+   (`boards.matrix_hdr_h`). That clears its back-side parts over the carrier
+   (`boards.matrix_under_rest_h`, the buttons) - drc.echo *"Matrix's
+   back-side parts clear the carrier"*. The carrier is solid under the
+   Matrix but for **a notch** in its mouth edge, under the USB-C receptacle
+   and round the plug's overmould, so review #19 F1 holds as it stood.
+3. **The carrier hangs from the oak top** ("Hang from the lid"): at each
+   mount an insert set in the oak's underside (`MECH-MX-INSERT`, CNC Kitchen
+   M2.5 × 4.0), a spacer (`MECH-MX-SPACER`, Ettinger 5.52.043), the carrier,
+   a washer and the column's screw (`MECH-MX-*`, `hardware.mx_*`). It lifts
+   off with the lid, as the key boards do, and unplugs at `J-MCU`. **Three
+   mounts, not four** (`boards.matrix_mount_corners`): every line from
+   `J-MCU-C` to the near header row runs along the carrier's near strip,
+   and a mount at its mouth-end corner left room for too few of them. The
+   stack sets the Matrix's height; its top rises into a shallow relief in
+   the oak (`openings.matrix_relief_d`, `oak-relief.dxf`), which leaves its
+   LEDs where drc.echo *"LED tops under the frosted window"* says and the
+   window's lip as *"oak lip under the frosted window"* says. The inserts
+   leave `hardware.col_pocket_skin` of oak over them, and the screw's thread
+   lands in the insert's length: drc.echo *"Matrix carrier hangs from the
+   oak"*, *"Matrix carrier's mounts clear"*. Nothing is added on the main
+   board, so the LED row's band and cone are untouched.
+4. **`J-MCU-C` hangs under the carrier's arm, straight above `J-MCU`**, its
+   mouth the same way, and pin *k* carries `J-MCU` pin 25 − *k*, as
+   `J-MCU-KB` did; `tools/kicad.py check` (`check_matrix`) now holds the
+   carrier's sheet to the carrier circuit's netlist. Closed, the ribbon's
+   service slack folds flat in four legs between the two headers, short of
+   the LED row's band (*"Matrix ribbon closed: its folds between the
+   sockets"*); its thickness is now the banked cable's
+   (`routing.mcu_ribbon_t`). `J-MCU`'s place is `boards.mcu_conn_at`, the
+   main board's (option 1, along the near edge, off the LED row).
+5. **Program over USB only.** The Matrix is programmed and recovered over
+   its own USB-C - USB-Serial-JTAG through the tail receptacle - and, when
+   that fails, with its own BOOT and RESET buttons, the lid off. **`EN` and
+   `IO0` are no longer wired out**: `J-MCU` pins 23 and 24 are on no net,
+   `HDR-SERVICE` is a 1×3 (TXD, RXD, GND; `service_hdr_pins`), and the
+   Matrix's stand-in on the carrier circuit's sheet has its pad rows only.
+   `TP2` and `TP3` are not used either: the pad row's 5 V and GND pins carry
+   its supply (`CBL-MCU-RIBBON`'s rating, `matrix-led-current`).
+6. **`C-EN` (C41) is removed**, and with it the C of Espressif's `CHIP_PU`
+   RC (#14 A2, #11 F7). `EN` keeps only the Matrix's own `R8`, with no
+   capacitor. **#14 A2's start-up RC is an accepted risk, by the owner's
+   USB-only choice** (`hardware/carrier/service-uart/service-uart.md`). What
+   would show it is a Matrix that does not start on a slow power-up; the
+   E-test is a power cycle through the umbilical's soft start. If it fails,
+   a 1 µF on the Matrix's own `EN` pad - `R8`'s node, beside Key1 - is the
+   fix, on the Matrix, not on these boards. `R-TXD-SER` (R46) and the UART on
+   `HDR-SERVICE` stay: `TX` and `RX` are on the Matrix's pad rows.
+
+### What this changes for the main board
+
+`C41` comes off its sheet. `HDR-SERVICE` (its `J2`) becomes a 1×3,
+`hanxia HX PZ2.54-1x3P ZZ` (LCSC C32713269), at `boards.service_hdr_at`.
+`J-MCU` (its `J1`) pins 23 and 24 are on no net. The Matrix's stand-in (`A1`)
+is not on the board, as before. Its root sheet loses the `EN` and `IO0` sheet
+pins between the carrier and service-uart sheets.
+
+### Open, and what decides each
+
+| Open | What decides it |
+|---|---|
+| The pad rows' side (the 5V..IO1 row on the near side with the USB-C toward the mouth) | the Matrix in hand, before the carrier is ordered |
+| The inserts in oak: they are sold for heat-setting in plastic | one set and pulled in a scrap of the chosen oak, before the lid is drilled |
+| `EN`'s start-up with no C (#14 A2) | the power-cycle E-test above |

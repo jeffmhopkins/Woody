@@ -1042,6 +1042,7 @@ circuit without a `sim/`, the answer was written nowhere.
 | `module/umbilical-load-switch` | own | |
 | `boards/key-board-lh` | own | |
 | `boards/key-board-rh` | own | |
+| `boards/matrix-carrier` | n/a | Connectors and copper only: the Matrix's two pad-row headers and J-MCU-C, each pin on the conductor `tools/kicad.py check` holds it to; the ribbon's grounds and supplies are `hardware/carrier/breath-adc/sim/`'s (`CBL-MCU-RIBBON`'s length, `drc:Matrix ribbon length`) |
 | `boards/main-board` | covered | its placed circuits, each by its own row; its root-sheet parts (`FB-CHAIN`, `R-CHAIN-SER`, `R-SER-TERM`, `U-TVS-CHAIN`) are `hardware/interfaces/key-chain-loom/sim/`'s, except `R-SER-TERM`, a static 10 kΩ pull-up on `SER`, which that sim drives instead and nothing simulates |
 | `boards/module-main` | n/a | Places circuit sheets, each covered by its own row; its own parts are two connectors |
 | `boards/module-jack` | n/a | Places circuit sheets, each covered by its own row; its own part is a connector |
