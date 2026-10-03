@@ -490,8 +490,9 @@ altogether (below).
    (`boards.matrix_hdr_h`). That clears its back-side parts over the carrier
    (`boards.matrix_under_rest_h`, the buttons) - drc.echo *"Matrix's
    back-side parts clear the carrier"*. The carrier is solid under the
-   Matrix but for **a notch** in its mouth edge, under the USB-C receptacle
-   and round the plug's overmould, so review #19 F1 holds as it stood.
+   Matrix but for **a slot** in its mouth edge under the USB-C receptacle's
+   shell, so review #19 F1 holds as it stood (*The carrier's outline*,
+   below).
 3. **The carrier hangs from the oak top** ("Hang from the lid"): at each
    mount an insert set in the oak's underside (`MECH-MX-INSERT`, CNC Kitchen
    M2.5 × 4.0), a spacer (`MECH-MX-SPACER`, Ettinger 5.52.043), the carrier,
@@ -534,6 +535,40 @@ altogether (below).
    a 1 µF on the Matrix's own `EN` pad - `R8`'s node, beside Key1 - is the
    fix, on the Matrix, not on these boards. `R-TXD-SER` (R46) and the UART on
    `HDR-SERVICE` stay: `TX` and `RX` are on the Matrix's pad rows.
+
+### The carrier's outline: option A
+
+The owner, on the first carrier layout: *"Why the cutout? And we can
+increase the width to acrylic to acrylic like the other boards?"* Shown the
+numbers (2026-10-03), the owner chose **A**:
+
+- **The width already is the key boards'**: the carrier runs side acrylic to
+  side acrylic, as they do (both `cb_y`).
+- **The arm stays narrow because the extension's plug stands beside it.**
+  The right-angle plug off the Matrix's mouth edge, its lead turned down
+  (`openings.usb_plug_turn`), comes down from the oak's pocket to below the
+  carrier, and its lead runs on to the tail under it. A carrier full width in
+  front of the Matrix would pass through the plug or its lead at any height.
+- **The carrier keeps its height.** A lower carrier would clear the shell
+  with no slot, but the Matrix ribbon's closed folds lie between `J-MCU` and
+  `J-MCU-C` under the arm, and they already fold at about the least bend
+  radius (drc.echo *"Matrix ribbon closed: its folds between the sockets"*).
+  Moving `J-MCU` under the carrier meets the main board's end mount,
+  `HDR-SERVICE` and the LED row.
+- **So the cut-out becomes a slot for the shell only** (`boards.matrix_usb`
+  plus `boards.matrix_notch_clear` each side and at its end), and the
+  carrier's mouth edge is flush with the Matrix's, behind the plug.
+- **The extension's plug is at most `openings.usb_ext_overmold_w` across**
+  (`CBL-USB-EXT`, decided with calipers on the cable as bought). The study
+  found that today's ribbon folds and `J-MCU-C`'s socket stood inside the
+  15 mm overmould allowance by up to 2.6 mm, which no rule checked. Now the
+  folds stop `board_clear` short of the plug, running back past `J-MCU`'s
+  back instead, and drc.echo *"USB-C plug clear of the Matrix ribbon and
+  J-MCU-C"* holds both.
+
+Not taken: B, the Matrix's USB-C turned to the tail, the one true no-cut-out
+rectangle, at about 8–10 mm more body; and C, the Matrix and its window moved
+2 mm toward the far side.
 
 ### What this changes for the main board
 

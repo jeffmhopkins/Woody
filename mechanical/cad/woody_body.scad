@@ -173,7 +173,7 @@ assert(openings_usb_plug_turn == "across" || !openings_matrix_usb_to_tail, "a tu
 usb_plug_d = openings_usb_plug_turn == "down" ? boards_matrix_usb[0] + openings_usb_overmold[1] : openings_usb_plug_l;   // past the board's edge, along the body
 usb_plug_h = openings_usb_plug_turn == "down" ? openings_usb_plug_l : openings_usb_slot_h;   // its height
 usb_front = openings_matrix_usb_to_tail ? 0 : usb_plug_d;
-usb_plug_w = openings_usb_plug_turn == "down" ? openings_usb_overmold[0] : openings_usb_slot_w;   // across the body
+usb_plug_w = openings_usb_plug_turn == "down" ? openings_usb_ext_overmold_w : openings_usb_slot_w;   // across the body: the extension's own plug
 equip_start_rel = plate_cutout / 2 + tail_margin + layout_tail_clear;
 tail_claims_rel = [
     top_last_rel + equip_start_rel + boards_umb_joint_d + ec_stack_d + ends_tail_cap_t,
@@ -1424,29 +1424,38 @@ mcu_rises = (mcu_zs[0] - (jm_z + boards_mcu_plug_t / 2)) + ((kbm_z - boards_mcu_
 // their plugs or the ribbon stands in it.
 led_band = [led_y - lighting_led_court[1] / 2 - boards_board_clear, led_y + lighting_led_court[1] / 2 + boards_board_clear];
 // How far forward the ribbon may reach: short of the USB-C plug by board_clear
-// when the mouths face the tail; short of the LED row's band when they face it.
-mcu_front_max = jm_dir == 0 ? usb_plug_x0 - boards_board_clear : led_band[0];
-// How far the legs reach back over J-MCU (to 1 mm short of its back) and
-// forward, at most, from mcu_us[0]. The legs run back 4 times and forward
-// twice: forward as far as a third of the spare, back the rest.
-mcu_reach_max = [mcu_us[0] - (jm_u[0] + 1), mcu_front_max - mcu_fr - routing_mcu_ribbon_t / 2 - mcu_us[0]];
+// when the mouths face the tail; short of the LED row's band when they face it,
+// and of the extension's plug where the folds pass under it (its overmould
+// comes down past the folds' height beside J-MCU; owner, 2026-10-03, option A).
+usb_plug_y0 = matrix_xy[1] - usb_plug_w / 2;     // the extension plug's near face
+usb_plug_over_mcu = jm_dir == 90 && usb_plug_x0 < jm_x1 && usb_plug_x0 + usb_plug_d - boards_matrix_usb[0] > jm_x0;
+mcu_front_max = jm_dir == 0 ? usb_plug_x0 - boards_board_clear
+              : usb_plug_over_mcu ? min(led_band[0], usb_plug_y0 - boards_board_clear) : led_band[0];
+// How far the legs reach back (facing the far side: over J-MCU and on past its
+// back, to a fold short of the board's near edge; otherwise to 1 mm short of
+// J-MCU's back) and forward, at most, from mcu_us[0]. The legs run back 4 times
+// and forward twice: forward as far as a third of the spare, back the rest.
+mcu_reach_max = [jm_dir == 90 ? mcu_us[0] - (cb_y[0] + mcu_fr + routing_mcu_ribbon_t / 2) : mcu_us[0] - (jm_u[0] + 1),
+                 mcu_front_max - mcu_fr - routing_mcu_ribbon_t / 2 - mcu_us[0]];
 mcu_spare = mcu_len - mcu_rises - 3 * PI * mcu_fr - abs(mcu_du);   // the legs' run: 4 x back + 2 x forward
 mcu_reach = let(f = min(mcu_reach_max[1], mcu_spare / 6)) [(mcu_spare - 2 * f) / 4, f];
+mcu_fold_front = mcu_us[0] + mcu_reach[1] + mcu_fr + routing_mcu_ribbon_t / 2;   // the forward folds' outside
 mcu_fold_u = [mcu_us[0] - mcu_reach[0] - mcu_fr - routing_mcu_ribbon_t / 2,
               max(mcu_us[0] + mcu_reach[1] + mcu_fr, mcu_us[1]) + routing_mcu_ribbon_t / 2];   // the closed fold's extent along u
 mcu_cw = max(routing_mcu_ribbon_w, boards_mcu_plug_l);   // its width along the rows, the sockets' or the ribbon's
 mcu_fold = mcu_rect(mcu_fold_u[0], mcu_fold_u[1], min(mcu_c) - mcu_cw / 2, max(mcu_c) + mcu_cw / 2);
 // THE MATRIX CARRIER'S OUTLINE (hardware/boards/matrix-carrier): the main
-// board's width, from just in front of the Matrix to just past it
-// (boards.matrix_carrier_past), with a notch in its mouth edge under the
-// Matrix's USB-C receptacle and round the plug's overmould (review #19 F1:
-// the plug stays where it was), and an arm along the near edge forward over
-// J-MCU, which J-MCU-C hangs from.
-mx_x0 = matrix_xy[0] - boards_matrix_board / 2 - boards_matrix_carrier_past;
+// board's width, from the Matrix's mouth edge (flush: the extension's plug
+// stands in front of it) to just past its tail edge (boards.matrix_carrier_past),
+// with a slot in its mouth edge under the Matrix's USB-C receptacle's shell
+// only (owner, 2026-10-03, option A; review #19 F1: the plug stays where it
+// was), and an arm along the near edge forward over J-MCU, beside the plug,
+// which J-MCU-C hangs from.
+mx_x0 = matrix_xy[0] - boards_matrix_board / 2;
 mx_x1 = matrix_xy[0] + boards_matrix_board / 2 + boards_matrix_carrier_past;
-mx_notch_w = max(usb_plug_w, boards_matrix_usb[2]) + 2 * boards_matrix_notch_clear;
+mx_notch_w = boards_matrix_usb[2] + 2 * boards_matrix_notch_clear;
 mx_notch = [mx_x0 - 1, matrix_xy[1] - mx_notch_w / 2,
-            matrix_xy[0] - boards_matrix_board / 2 + boards_matrix_usb[1] + boards_board_clear, matrix_xy[1] + mx_notch_w / 2];
+            matrix_xy[0] - boards_matrix_board / 2 + boards_matrix_usb[1] + boards_matrix_notch_clear, matrix_xy[1] + mx_notch_w / 2];
 mx_arm = [jk_x0 - boards_matrix_carrier_past, cb_y[0], mx_x0 + 1, jk_y + jm_sz[1] / 2 + boards_matrix_carrier_past];
 mx_mounts = [for (c = boards_matrix_mount_corners) matrix_xy + [c[0] * boards_matrix_mount_dxy[0], c[1] * boards_matrix_mount_dxy[1]]];
 module matrix_carrier_2d() {
@@ -2027,11 +2036,24 @@ module drc_report() {
     drc(undef, "Matrix ribbon length", mcu_len,
         "mm of ribbon between the sockets (CBL-MCU-RIBBON): straight from J-MCU's socket up to J-MCU-C's with the lid, which the carrier hangs from, raised routing.chain_raise, plus routing.chain_slack");
     drc(mcu_fr >= routing_chain_bend_r && mcu_reach[0] <= mcu_reach_max[0] + 0.01 && mcu_reach[1] <= mcu_reach_max[1] + 0.01
-        && mcu_fold_u[1] <= mcu_front_max + 0.01,
+        && mcu_fold_front <= mcu_front_max + 0.01,
         "Matrix ribbon closed: its folds between the sockets", [mcu_reach, mcu_reach_max, mcu_fr, mcu_fold_u, mcu_front_max, [mcu_du, mcu_dc], path_len(mcu_path)],
         str("mm: the legs' reach back over J-MCU and forward from J-MCU's socket's back; the most each may reach (1 mm short of J-MCU's back; forward, short of ",
             jm_dir == 0 ? "the USB-C plug by boards.board_clear" : "the LED row's band", "); the folds' radius (against routing.chain_bend_r); the closed fold's extent along the mouths' axis and the most its front may reach; ",
             "J-MCU-C's socket's offset from J-MCU's along that axis and along the rows (0, 0: straight above it); the closed path's length"));
+    // THE EXTENSION'S PLUG AGAINST THE MATRIX RIBBON (owner, 2026-10-03, option A):
+    // where the plug stands over J-MCU's row, its overmould comes down past the
+    // ribbon's closed folds and J-MCU-C's socket. The folds stop board_clear short
+    // of its near face; J-MCU-C's socket and the ribbon's rise into it, fixed by
+    // J-MCU's place, keep 0.3 [drawing convention].
+    let(top_mcu = jm_z + boards_mcu_plug_t / 2,
+        z_plug0 = usb_plug_top - usb_plug_h,
+        g_fold = usb_plug_y0 - mcu_fold_front,
+        g_jk = usb_plug_y0 - max(jk_plug[3], mcu_us[1] + routing_mcu_ribbon_t / 2),
+        low = top_mcu <= z_plug0)
+        drc(!usb_plug_over_mcu || (g_fold >= boards_board_clear - 0.01 && g_jk >= 0.3 && low),
+            "USB-C plug clear of the Matrix ribbon and J-MCU-C", [usb_plug_over_mcu, usb_plug_y0, g_fold, g_jk, top_mcu, z_plug0],
+            "whether the extension's plug stands over J-MCU's row, its near face (openings.usb_ext_overmold_w), then mm: the ribbon's closed folds short of it (against board_clear); J-MCU-C's socket and the ribbon's rise into it (against 0.3); J-MCU's socket's top under the overmould's bottom");
     // THE MATRIX CARRIER (boards.matrix_mount "carrier", ADR 0021 amendment
     // 2026-10-03), hung from the oak top. Its stack: the Matrix's top under the
     // oak, and the thread and the wood at each mount.
@@ -2045,11 +2067,11 @@ module drc_report() {
     let(over = boards_matrix_hdr_h - boards_matrix_under_rest_h,
         r_side = min(matrix_xy[1] - boards_matrix_usb[2] / 2 - mx_notch[1], mx_notch[3] - (matrix_xy[1] + boards_matrix_usb[2] / 2)),
         r_reach = mx_notch[2] - (matrix_xy[0] - boards_matrix_board / 2 + boards_matrix_usb[1]),
-        p_side = min(matrix_xy[1] - usb_plug_w / 2 - mx_notch[1], mx_notch[3] - (matrix_xy[1] + usb_plug_w / 2)),
+        p_side = mx_x0 - (usb_plug_x0 + usb_plug_d - boards_matrix_usb[0]),
         rows = min(mx_notch[1] - (matrix_xy[1] - matrix_row_dy + boards_matrix_hdr_reach), (matrix_xy[1] + matrix_row_dy - boards_matrix_hdr_reach) - mx_notch[3]))
         drc(over >= 0.5 && r_side >= 0.5 && r_reach >= 0.5 && p_side >= boards_matrix_notch_clear - 0.01 && rows >= 0.3, "Matrix's back-side parts clear the carrier",
             [over, r_side, r_reach, p_side, rows],
-            "mm: the deepest part over the carrier (boards.matrix_under_rest_h) above its top face (against 0.5); the notch's sides and end past the USB-C receptacle (against 0.5); its sides past the plug's overmould (against boards.matrix_notch_clear); HDR-MATRIX's pads (boards.matrix_hdr_reach) inside the notch's edges (against the boards' edge clearance, 0.3)");
+            "mm: the deepest part over the carrier (boards.matrix_under_rest_h) above its top face (against 0.5); the notch's sides and end past the USB-C receptacle (against 0.5); the carrier's mouth edge behind the extension plug's overmould (against boards.matrix_notch_clear); HDR-MATRIX's pads (boards.matrix_hdr_reach) inside the notch's edges (against the boards' edge clearance, 0.3)");
     // The mounts: the spacer beside the Matrix, inside the carrier, clear of
     // J-MCU-C under the arm (the screw's head), and the insert in the oak clear of
     // the window's rebate and the plug's pocket.

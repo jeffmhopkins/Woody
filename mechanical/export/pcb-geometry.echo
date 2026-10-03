@@ -73,7 +73,7 @@ ECHO: "PCB", "main", "keepout", "ribbon left_hand", 70.64, 35.03, 80.9, 49, 0
 ECHO: "PCB", "main", "keepout", "ribbon right_hand", 181.64, 35.03, 191.9, 49, 0
 ECHO: "PCB", "main", "keepout", "USB-C receptacle and lead", 251.3, 37.5, 299.9, 49.5, 2.62
 ECHO: "PCB", "main", "keepout", "Matrix ribbon", 251.5, 19.385, 273.04, 21.525, 0
-ECHO: "PCB", "main", "keepout", "Matrix ribbon fold", 252.55, 21.525, 271.99, 23.95, 7.30333
+ECHO: "PCB", "main", "keepout", "Matrix ribbon fold", 252.55, 21.525, 271.99, 21.525, 7.30333
 ECHO: "PCB", "main", "board", "thickness", 1.6, "smt_height_max", 2.62, "side", "parts on top; the thumb switches from below, their footprints on the underside"
 ECHO: "PCB", "matrix", "board", "thickness", 1.6, "smt_height_max", 2.5, "side", "HDR-MATRIX on top under the Matrix; J-MCU-C hung from the underside"
 ECHO: "PCB", "matrix", "connector", "J-MCU-C", 251.5, 273.04, 14.9, 8.97, 1, 90
@@ -82,4 +82,4 @@ ECHO: "PCB", "matrix", "pins", "HDR-MATRIX row 1", 272.97, 39.93, 295.83, 39.93,
 ECHO: "PCB", "matrix", "standoff", "M2.5", 291.7, 11.5, 2.7, 4.5, 5, "hang"
 ECHO: "PCB", "matrix", "standoff", "M2.5", 277.1, 45.5, 2.7, 4.5, 5, "hang"
 ECHO: "PCB", "matrix", "standoff", "M2.5", 291.7, 45.5, 2.7, 4.5, 5, "hang"
-ECHO: "PCB", "matrix", "keepout", "elsewhere", 271.4, 7.5, 297.4, 49.5, 2.5
+ECHO: "PCB", "matrix", "keepout", "elsewhere", 271.9, 7.5, 297.4, 49.5, 2.5
