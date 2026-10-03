@@ -6,7 +6,10 @@
 # C-STRIP-BULK, the LC and the buck - start cleanly, cold, hot-plugged and re-plugged,
 # without U-ISO reaching its over-current threshold. Values from every netlist the path
 # crosses; the LT1641 is umbilical-load-switch/sim's behavioural part, and its
-# datasheet parameters are imported from there (params_from), not restated. Run:
+# datasheet parameters are imported from there (params_from), not restated. Since #12 it
+# also sweeps U-ISO's output over its tolerance (the supply-* sims: INST_POS12 against the
+# LED row's 13.5 V and J-UMB against the TVS's 15 V), and drives the input LC with the LED
+# row's PWM (pei-pwm.cir, the led-pwm sims). Run:
 #   python3 tools/sim.py run hardware/carrier/power-entry-instrument/sim
 title: Instrument power entry - input LC damping and start-up behind the load switch
 values:
@@ -54,6 +57,16 @@ params:
   t_plug:  {value: 1.0e-4, source: "a hot-plug's contact, 100 us into the run"}
   t_un:    {value: 10.0, source: "the plug pulled: after the run unless a sim sets it"}
   t_re:    {value: 11.0, source: "the plug put back: after the run unless a sim sets it"}
+  # --- pei-pwm.cir: the LED row's PWM on the input LC, at the operating point (#12 item 4)
+  pw_i_swing: {value: 0.195, source: "the row's swing, blanked to full white: 0.195 A, the thirteen WS2815B-V1 at full white, the top of led-row-current (blocked on E6); 0.367 A, ADR 0005's quiescent-to-clamp-legal-worst swing - the two module/power-entry/sim's led-pwm sweeps (sweep)"}
+  pw_i_q_led: {value: 2.0e-3, source: "one WS2815B-V1 blanked, 'Quiescent Current < 2mA' [datasheets/led/WS2815B-V1.pdf p.3]: its maximum, as module/power-entry/sim takes it"}
+  pw_f:   {value: 2000.0, source: "the WS2815B-V1's PWM: 'scan frequency is of 2KHz' and 'Refresh Frequency updates to 4KHz' [datasheets/led/WS2815B-V1.pdf p.1]; no tolerance is published, so the sims sweep 2-4 kHz and the input LC's 3.39 kHz inside it (sweep)"}
+  pw_duty:   {value: 0.5, source: "the pulse's duty; 0.5 puts the most current in the fundamental, as module/power-entry/sim's led-pwm takes it"}
+  pw_t_edge:  {value: 1.0e-6, source: "the pulse's edges [assumption, as module/power-entry/sim: the datasheet gives none for the 12 V current]"}
+  pw_p_mx:    {value: 0.0, source: "the buck's input power swinging in phase with the row: 0 (the row alone), or the Matrix and dev board from typical play to the 5 V rail's clamp-legal worst, (780 - 226) mA x 5 V / 0.90 = 3.08 W [calc: 780 mA the top of power-entry-instrument.md's 'one buck' row, 226 mA typical play, ADR 0005] - in phase at the row's frequency, which the Matrix's own LEDs need not be: an upper bound (sim led-pwm-matrix sets it)"}
+  pw_t_start: {value: 5.0e-3, source: "the PWM starts 5 ms into the run, from the operating point"}
+  pw_t_end: {value: 30.0e-3, source: "the run's end; the ripple is read over its last pw_t_win, 25 ms after the PWM starts (the LC rings down in under 1 ms at Q < 4; C-STRIP-BULK behind the cable in ~0.2 ms)"}
+  pw_t_win: {value: 5.0e-3}
 
 derived:
   v_set0: "0.0 if v['cold'] else v['v_bus']"
@@ -63,8 +76,18 @@ derived:
   t_re1: "v['t_re'] + 1e-9"
   kp_q: "1.0 / (v['r_on_q'] * (4.5 + v['vto_q']))"
   r_neg: "v['v_nom']**2 / v['p_buck']"
+  # (the pw_ names are pei-pwm.cir's; prefixed because module/power-entry/sim and
+  # interfaces/system/sim import this file's params and derived, and have their own)
+  pw_r_sw: "v.get('R-ILIM', 0.0) + v['r_dson']"
+  pw_t_period: "1.0 / v['pw_f']"
+  pw_t_high: "min(v['pw_duty'] / v['pw_f'] - v['pw_t_edge'], 1.0 / v['pw_f'] - 2.0 * v['pw_t_edge'])"
+  pw_i_row_q: "13.0 * v['pw_i_q_led']"
+  pw_i_row_pk: "v['pw_i_swing'] - 13.0 * v['pw_i_q_led']"
+  pw_i_other: "max(v.get('i_12', 0.0) - v['pw_i_swing'], 0.0)"
+  pw_t_win0: "v['pw_t_end'] - v['pw_t_win']"
 
 vary:
+  v_bus:  {tol: [-0.031, 0.031], source: "U-ISO's output: +/-3.1 %, as umbilical-load-switch/sim varies it (RECOM-RPA20-AW.pdf PD-5: accuracy 2.0 % + line 0.2 % + load 0.1 % + tempco 0.02 %/K x 40 K)"}
   esr_buck: {tol: [-0.667, 6.15], source: "0.087 ohm (a third of the 100 kHz maximum) to 1.86 ohm (the 120 Hz maximum)"}
   esr_strip: {tol: [-0.5, 1.8]}
   r_cable: {tol: [0.0, 1.6]}
@@ -96,7 +119,7 @@ sims:
     deck: pei-start.cir
     set: {cold: 1}
     vary: [igate, itup, t_iso, r_cable, vto_q]
-    measures: [latched, t_up, i_iso_peak, t_at_ocp, v_in_peak, v_buck_dip, vcc_min]
+    measures: [latched, t_up, i_iso_peak, t_at_ocp, v_in_peak, v_buck_fallback, vcc_min]
     post: &start_post
       latched: "peak(w['latch'], 0, p['t_end'])"
       t_up: "cross(w['vinst'], 0.9 * p['v_bus'], 0)"
@@ -105,15 +128,19 @@ sims:
       t_at_ocp: "(min(cross(w['iiso'], 0.99 * p['i_ocp'], cross(w['iiso'], 0.99 * p['i_ocp'], 0) + 1e-9), p['t_end']) - cross(w['iiso'], 0.99 * p['i_ocp'], 0)) if peak(w['iiso'], 0, p['t_end']) > 0.99 * p['i_ocp'] else 0.0"
       vcc_min: "trough(w['vcc'], 0.05, p['t_end']) if p['cold'] else trough(w['vcc'], 1e-5, p['t_end'])"
       v_in_peak: "peak(w['vin'], 0, p['t_end'])"
-      # once the buck's input has passed its minimum by a volt, how low it goes again
-      v_buck_dip: "trough(w['vinst'], cross(w['vinst'], p['v_on'] + 1.0, 0), p['t_end'])"
+      # once the buck is drawing (its input past v_on + 0.25 V, the load fully on), how far
+      # its input ever falls back below its own running maximum: 0 if it rises monotonically.
+      # (#12 item 7: the trough this replaced started its window at v_on + 1 V and so read
+      # 9.00 V at every corner - a sag from 11.4 V to 8.6 V would have passed)
+      v_buck_fallback: "backswing(w['vinst'], p['v_on'] + 0.25, True, 0, p['t_end'])"
+      v_pos12_peak: "peak(w['vpos12'], 0, p['t_end'])"
     asserts: &start_asserts
       - expr: "max['latched'] < 0.5"
         why: "the start completes without the LT1641's fault latch at every corner"
       - expr: "max['i_iso_peak'] < 0.999 * p['i_ocp']"
         why: "U-ISO's current never reaches its lowest over-current threshold (1.84 A, hiccup), so the converter's own limit never interrupts the start"
-      - expr: "min['v_buck_dip'] > p['v_on'] + 0.5"
-        why: "once the buck is running its input never falls back towards its 8 V minimum: no start-stop chatter as the constant-power load comes on through the cable and the LC"
+      - expr: "max['v_buck_fallback'] < 0.25"
+        why: "once the buck is running its input never falls back towards its 8 V minimum: no start-stop chatter as the constant-power load comes on through the cable and the LC. It passed v_on + 0.25 V with the load fully on, so a fall-back under 0.25 V from any later maximum keeps it above v_on - strict: any sag at all after the start reads here"
       - expr: "max['v_in_peak'] < 15.0"
         why: "no overshoot at the instrument's input reaches D-TVS-PWR's 15 V standoff (SMAJ15A)"
   - name: hot-plug
@@ -123,7 +150,7 @@ sims:
     deck: pei-start.cir
     set: {cold: 0}
     vary: [igate, vhi, r_cable, vto_q, C-INRUSH-GD, c_tvs]
-    measures: [latched, t_up, i_iso_peak, t_at_ocp, v_in_peak, v_buck_dip, vcc_min, p_q_peak]
+    measures: [latched, t_up, i_iso_peak, t_at_ocp, v_in_peak, v_buck_fallback, vcc_min, p_q_peak]
     post:
       <<: *start_post
       p_q_peak: "peak(w['pq'], 0, p['t_end'])"
@@ -134,7 +161,7 @@ sims:
         why: "U-ISO stays under HALF its lowest over-current threshold (1.84 A, hiccup) on a hot-plug at every corner: Q-INRUSH keeps everything that holds charge behind a Miller ramp, so the already-enhanced load switch sees only J-UMB's node - the TVS's capacitance and the gate network - and then the ramp's current and the loads"
       - expr: "min['vcc_min'] > 9.90"
         why: "VCC at the load switch stays above the ON divider's worst-case turn-off, 9.90 V (umbilical-load-switch.md, 'The ON pin'), so the start is never interrupted by its own supply"
-      - expr: "min['v_buck_dip'] > p['v_on'] + 0.5 and max['v_in_peak'] < 15.0"
+      - expr: "max['v_buck_fallback'] < 0.25 and max['v_in_peak'] < 15.0"
         why: "the buck's input never falls back towards its minimum once running, and the ring at J-UMB when the plug makes contact stays under D-TVS-PWR's 15 V standoff (R-INRUSH-GD damps it)"
       - expr: "max['p_q_peak'] < 3.0"
         why: "Q-INRUSH's dissipation during the ramp peaks under 3 W at every corner, a quarter of the AO3401A's single-pulse rating at 50 ms (~12 W, AOS-AO3401A.pdf p.4 Figure 10, read off the curve)"
@@ -161,3 +188,67 @@ sims:
         why: "the restart completes without the fault latch and VCC stays above the ON pin's turn-off"
       - expr: "min['i_iso_peak'] > 0.99 * p['i_ocp']"
         why: "RECORDED HAZARD, not a requirement: put back within tens of milliseconds, while the bulk still holds a few volts, Q-INRUSH is still enhanced (C-INRUSH-GS holds its V_GS) and the replug reaches U-ISO's lowest over-current threshold for t_at_ocp, as every hot-plug did before Q-INRUSH. How long the window lasts depends on how fast the instrument drains, which the model's loads set: the bench at E6 decides. If this starts failing the window is gone"
+  # --- #12 item 1: U-ISO's output across its tolerance. The sims above run at its nominal
+  # 12.000 V; these move it +/-3.1 % on top of each start's own corners, and read the two
+  # nodes whose limits are absolute: INST_POS12, which is the LED row's VDD (WS2815B-V1
+  # 13.5 V absolute maximum), and J-UMB's +12 V pin against D-TVS-PWR's 15 V standoff.
+  - name: supply-cold-start
+    deck: pei-start.cir
+    set: {cold: 1}
+    vary: [v_bus, igate, itup, t_iso, r_cable, vto_q]
+    measures: [latched, i_iso_peak, v_in_peak, v_pos12_peak, v_buck_fallback]
+    post: *start_post
+    asserts: &supply_asserts
+      - expr: "max['v_pos12_peak'] < 13.5"
+        why: "INST_POS12 - the thirteen WS2815B-V1s' VDD, on it directly - stays under their 13.5 V absolute maximum [datasheets/led/WS2815B-V1.pdf, Absolute Maximum Ratings: VDD +9.5~+13.5 V] at U-ISO's +3.1 % and every start corner"
+      - expr: "max['v_in_peak'] < 15.0"
+        why: "J-UMB's +12 V pin stays under D-TVS-PWR's 15 V standoff (SMAJ15A) at U-ISO's +3.1 % and every start corner"
+      - expr: "max['latched'] < 0.5 and max['i_iso_peak'] < 0.999 * p['i_ocp'] and max['v_buck_fallback'] < 0.25"
+        why: "and the start still completes at either end of U-ISO's tolerance: no fault latch, U-ISO under its over-current threshold, the buck's input never falling back"
+  - name: supply-hot-plug
+    deck: pei-start.cir
+    set: {cold: 0}
+    vary: [v_bus, igate, vhi, r_cable, vto_q, C-INRUSH-GD, c_tvs]
+    measures: [latched, i_iso_peak, v_in_peak, v_pos12_peak, v_buck_fallback]
+    post: *start_post
+    asserts: *supply_asserts
+  - name: supply-replug-late
+    deck: pei-start.cir
+    set: {cold: 0, t_un: 0.8, t_re: 1.0, t_end: 1.5}
+    vary: [v_bus, r_cable, vto_q]
+    measures: [latched, i_iso_peak, v_in_peak, v_pos12_peak]
+    post: *start_post
+    asserts:
+      - expr: "max['v_pos12_peak'] < 13.5 and max['v_in_peak'] < 15.0"
+        why: "a replug once drained, at either end of U-ISO's tolerance: INST_POS12 under the WS2815B-V1's 13.5 V absolute maximum and J-UMB under D-TVS-PWR's 15 V standoff"
+      - expr: "max['latched'] < 0.5 and max['i_iso_peak'] < 0.5 * p['i_ocp']"
+        why: "and it still starts from off as a first plug-in does"
+  # --- #12 item 4: the LED row's PWM on the input LC (L-BUCK-IN/C-BUCK-IN, f0 = 3.39 kHz,
+  # inside the WS2815B-V1's 2-4 kHz). input-z checks the LC's small-signal peak against the
+  # buck's negative resistance; these drive it with the row's current, in phase at half
+  # duty, and read BUCK_IN (the buck's input) and INST_POS12 (the row's VDD).
+  - name: led-pwm
+    deck: pei-pwm.cir
+    sweep: {pw_f: [2000.0, 3000.0, 3390.0, 4000.0], pw_i_swing: [0.195, 0.367]}
+    vary: [v_bus, esr_buck, esr_strip, r_cable]
+    measures: &pwm_measures [buck_pp_mv, buck_min, pos12_pp_mv, pos12_max]
+    post: &pwm_post
+      buck_pp_mv: "1000 * (peak(w['vbuck'], p['pw_t_win0'], p['pw_t_end']) - trough(w['vbuck'], p['pw_t_win0'], p['pw_t_end']))"
+      buck_min: "trough(w['vbuck'], 0, p['pw_t_end'])"
+      pos12_pp_mv: "1000 * (peak(w['vpos12'], p['pw_t_win0'], p['pw_t_end']) - trough(w['vpos12'], p['pw_t_win0'], p['pw_t_end']))"
+      pos12_max: "peak(w['vpos12'], 0, p['pw_t_end'])"
+    asserts: &pwm_asserts
+      - expr: "min['buck_min'] > p['v_on'] + 0.5"
+        why: "BUCK_IN stays at least 0.5 V above the R-78E5.0-1.0's 8 V input minimum through the PWM's start and its steady ripple, at every frequency, swing and corner"
+      - expr: "max['pos12_max'] < 13.5"
+        why: "INST_POS12 stays under the WS2815B-V1's 13.5 V absolute maximum as the row switches (the row going dark kicks it up through the cable's inductance)"
+  - name: led-pwm-matrix
+    # the same, with the buck's input power swinging in phase: the Matrix's LEDs from typical
+    # play to the 5 V rail's clamp-legal worst at the row's frequency (pw_p_mx says why it bounds)
+    deck: pei-pwm.cir
+    set: {pw_p_mx: 3.08}
+    sweep: {pw_f: [2000.0, 3000.0, 3390.0, 4000.0]}
+    vary: [v_bus, esr_buck, esr_strip, r_cable]
+    measures: *pwm_measures
+    post: *pwm_post
+    asserts: *pwm_asserts

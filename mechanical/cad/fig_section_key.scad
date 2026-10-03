@@ -13,7 +13,7 @@ module lv(zv, s, dz = 0) {
     seg([xr, zv + dz, 1], [0, zv, 1], r = 0.06);
     label([xr - 1, zv + dz, 1], s, size = 1.3, halign = "right");
 }
-lv(z_plate_top + switch_keycap_top_above_seat, str("cap top at rest ", z_plate_top + switch_keycap_top_above_seat, " (tbd)"));
+lv(z_plate_top + switch_keycap_top_above_seat, str("cap top at rest ", z_plate_top + switch_keycap_top_above_seat, " (parts matched by eye)"));
 lv(T, str("top face ", T, " = cap top pressed"), -1.2);
 lv(z_plate_top, str("plate top = seat ", z_plate_top), 0.4);
 lv(z_plate_bot, str("plate under = lid under ", z_plate_bot), -0.8);

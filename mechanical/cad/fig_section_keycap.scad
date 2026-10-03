@@ -21,7 +21,7 @@ module lv(zv, s, n) {
     seg([kx + 8.6, zv, 1], [xr, top + 1.2 * n, 1], r = 0.03);
     label([xr + 0.3, top + 1.2 * n, 1], s, size = 0.5, halign = "left");
 }
-lv(top, str("cap top ", switch_keycap_top_above_seat, " above the seat (tbd)"), 5);
+lv(top, str("cap top ", switch_keycap_top_above_seat, " above the seat (parts matched by eye)"), 5);
 lv(z_plate_top + cap_sk, str("skirt, at rest: ", cap_sk), 4);
 lv(z_plate_top + switch_housing_top_above_seat, str("housing top: ", switch_housing_top_above_seat), 3);
 lv(z_plate_top + cap_sk - switch_total_travel, str("skirt, fully pressed (red): ", cap_sk - switch_total_travel), 2);

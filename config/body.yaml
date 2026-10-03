@@ -266,9 +266,9 @@ switch:
     source: "THE KEY BOARDS' (the thumb switches' main board is switch.thumb_pcb_below_seat): the board top is pressed against the switches' housing bottom (owner, 2026-09-29; ADR 0020 Amendment 6), 2.50 +/-0.05 below the seat [ds GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf sheet 6]. The mount holds it there: the stud's head is flush in the plate's top face and the spacer bears on its underside, so the board top sits the plate + hardware.kb_spacer_l below the seat [calc: 1.2 + 1.3]; drc.echo 'key-board mount sets the board depth' fails if this and the hardware disagree. Inside switch.pcb_below_seat_window"
   keycap_top_above_seat:
     value: 9.0
-    status: tbd
-    source: "the cap's top above the seat = switch.stem_top_above_seat + switch.keycap_boss_below_top - how deep the stem enters the socket, which nothing published gives; the vendor's height (switch.keycap_h) bounds only the cap itself. A guess inside that bracket"
-    decided_by: "M1 - measure a cap on a switch with calipers. It now SETS BOTH oak panel thicknesses (flush rule, stack above)"
+    status: nominal
+    source: "the cap's top above the seat = switch.stem_top_above_seat + switch.keycap_boss_below_top - how deep the stem enters the socket, which nothing published gives. CONFIRMED BY THE PARTS IN HAND, by eye at scale: the owner, 2026-10-02, holding a KS-33 with its MT165 cap at rest and fully pressed against mechanical/renders/section-keycap.png and section-key.png - 'when I visually matched up your renders to my keycaps they fit. So if they were rendered to the 9 mm, then that is correct'"
+    decided_by: "calipers on a cap on its switch (M1) would make it settled; a visual match at scale cannot resolve a few tenths, which is the oak top's thickness tolerance. It SETS BOTH oak panel thicknesses (flush rule, stack above)"
   total_travel:
     value: 3.0
     status: settled
@@ -488,6 +488,20 @@ boards:
     status: tbd
     source: "the adapter board's thickness, a standard 2-layer board [from memory]; the NE8FAV's pin tails reach through it"
     decided_by: "M4, with the board ordered"
+  # THE MAIN BOARD'S TAIL END IS FULL WIDTH (owner, 2026-10-02; ADR 0021
+  # amendment). It used to narrow past the right-hand key board to a tongue
+  # as wide as the adapter, leaving a cut-away beside it. Owner: "can you
+  # explain why we have this cut out on the bottom main board? I feel like
+  # it's not necessary" and "I feel like the USB is high enough in the bottom
+  # of the controller that we can run a cable without having to muck around
+  # with the PCB". The cut-away's reason - the lid screws the tongue was
+  # notched round - went with ADR 0025, and nothing at the board's height
+  # occupies it (drc.echo 'main board's tail end runs full width beside the
+  # etherCON adapter').
+  main_tail:
+    value: "full"
+    status: settled
+    source: "owner, 2026-10-02: 'I feel like it's not necessary, and that maybe we can get another LED down there'. full = the main board runs its whole width on to the adapter's rear face; tongue = the old outline, the adapter's width past the right-hand key board, flush on the near side"
   umb_joint_d:
     value: 2.5
     status: settled
@@ -662,7 +676,11 @@ openings:
   # the etherCON's recess and the side (drc.echo, "USB-C extension
   # receptacle beside the etherCON flange", "tail cap web between the USB-C
   # cutout and the etherCON recess"). USB-C is reversible, so the
-  # receptacle's orientation costs the user nothing.
+  # receptacle's orientation costs the user nothing. Its height is DERIVED:
+  # centred in the cavity, unless the main board runs on under its back
+  # (boards.main_tail "full", 2026-10-02), when it stands boards.board_clear
+  # above the board's parts (drc.echo 'main board's tail end runs full width
+  # beside the etherCON adapter').
   usb_slot_portrait:
     value: true
     status: tbd
