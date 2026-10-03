@@ -4,7 +4,7 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/pitch-stage/sim/sims.yaml: 5a7a138f0f32f75d
+  hardware/module/pitch-stage/sim/sims.yaml: f771094d19f91696
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/mod-channels/netlist.yaml: 00739b63d111a848
   hardware/module/breath-output-stage/netlist.yaml: 63517b01fa4c02a2
@@ -637,11 +637,11 @@ sims:
         max: 1.71728e-05
         max_at: R-OUT-PROT- v_neg+ v_pos+
     asserts:
-    - expr: max['p_rout'] < 0.5
-      why: 'R-OUT-PROT''s rating, its netlist value ''1k 1%, >=500mW'': the power it carries while the loop fights another
-        output stays inside it at every rail corner. FAILS against a stiff output at the rail (r_ext 0) - the part change
-        is the owner''s (pitch-stage.md, ''Patched to another output'')'
-      pass: false
+    - expr: max['p_rout'] < 0.66
+      why: 'RECORDED, NOT HELD TO 500 mW - the owner accepted R-OUT-PROT''s dissipation while patched to another output as
+        is (2026-10-03, ''Accept as is'', #5-6). What is still held: it stays under the fitted part''s own rating, ERJ-P08F1001V
+        0.66 W [ds PANASONIC-ERJ-P08-ANTI-SURGE-THICK-FILM.pdf p.1], so a further rise is caught'
+      pass: true
     - expr: max['i_out'] < 0.065
       why: 'the op-amp''s output current stays under the OPA2197''s 65 mA short-circuit current (typ, at +-18 V) [ds OPA2197.pdf
         p.8]: it holds the rail rather than limiting'
@@ -685,10 +685,10 @@ sims:
         max: 2.66613e-06
         max_at: nominal
     asserts:
-    - expr: max['p_rout'] < 0.5
-      why: 'R-OUT-PROT''s rating, its netlist value ''1k 1%, >=500mW'': the power it carries while the loop fights another
-        output stays inside it at every rail corner. FAILS against a stiff output at the rail (r_ext 0) - the part change
-        is the owner''s (pitch-stage.md, ''Patched to another output'')'
+    - expr: max['p_rout'] < 0.66
+      why: 'RECORDED, NOT HELD TO 500 mW - the owner accepted R-OUT-PROT''s dissipation while patched to another output as
+        is (2026-10-03, ''Accept as is'', #5-6). What is still held: it stays under the fitted part''s own rating, ERJ-P08F1001V
+        0.66 W [ds PANASONIC-ERJ-P08-ANTI-SURGE-THICK-FILM.pdf p.1], so a further rise is caught'
       pass: true
     - expr: max['i_out'] < 0.065
       why: 'the op-amp''s output current stays under the OPA2197''s 65 mA short-circuit current (typ, at +-18 V) [ds OPA2197.pdf
@@ -733,11 +733,11 @@ sims:
         max: 2.80313e-05
         max_at: R-OUT-PROT- v_neg+ v_pos-
     asserts:
-    - expr: max['p_rout'] < 0.5
-      why: 'R-OUT-PROT''s rating, its netlist value ''1k 1%, >=500mW'': the power it carries while the loop fights another
-        output stays inside it at every rail corner. FAILS against a stiff output at the rail (r_ext 0) - the part change
-        is the owner''s (pitch-stage.md, ''Patched to another output'')'
-      pass: false
+    - expr: max['p_rout'] < 0.66
+      why: 'RECORDED, NOT HELD TO 500 mW - the owner accepted R-OUT-PROT''s dissipation while patched to another output as
+        is (2026-10-03, ''Accept as is'', #5-6). What is still held: it stays under the fitted part''s own rating, ERJ-P08F1001V
+        0.66 W [ds PANASONIC-ERJ-P08-ANTI-SURGE-THICK-FILM.pdf p.1], so a further rise is caught'
+      pass: true
     - expr: max['i_out'] < 0.065
       why: 'the op-amp''s output current stays under the OPA2197''s 65 mA short-circuit current (typ, at +-18 V) [ds OPA2197.pdf
         p.8]: it holds the rail rather than limiting'
@@ -781,10 +781,10 @@ sims:
         max: 6.60757e-07
         max_at: R-OUT-PROT+ v_neg- v_pos+
     asserts:
-    - expr: max['p_rout'] < 0.5
-      why: 'R-OUT-PROT''s rating, its netlist value ''1k 1%, >=500mW'': the power it carries while the loop fights another
-        output stays inside it at every rail corner. FAILS against a stiff output at the rail (r_ext 0) - the part change
-        is the owner''s (pitch-stage.md, ''Patched to another output'')'
+    - expr: max['p_rout'] < 0.66
+      why: 'RECORDED, NOT HELD TO 500 mW - the owner accepted R-OUT-PROT''s dissipation while patched to another output as
+        is (2026-10-03, ''Accept as is'', #5-6). What is still held: it stays under the fitted part''s own rating, ERJ-P08F1001V
+        0.66 W [ds PANASONIC-ERJ-P08-ANTI-SURGE-THICK-FILM.pdf p.1], so a further rise is caught'
       pass: true
     - expr: max['i_out'] < 0.065
       why: 'the op-amp''s output current stays under the OPA2197''s 65 mA short-circuit current (typ, at +-18 V) [ds OPA2197.pdf
