@@ -2111,8 +2111,13 @@ def assembly_files(bdir, name, fab):
                 sys.exit(f"pcb: {ref} is machine-assembled but not in the placement export")
             if not f.get("LCSC"):
                 sys.exit(f"pcb: {ref} is machine-assembled but has no LCSC field on its sheet")
-            key = (comps[ref]["value"], comps[ref]["footprint"], f["LCSC"])
-            machine.setdefault(key, []).append(ref)
+            # one row per bought part - its LCSC number on its footprint - however the sheets'
+            # Value strings differ ("10k" and "10k 1%" were two rows for C17414: issue #17 D5);
+            # its Comment is the bought part's MPN, which every row of it shares (#8-12: the
+            # values' "or equivalent" read oddly on the order)
+            m = machine.setdefault((comps[ref]["footprint"], f["LCSC"]), {"refs": [], "comment": set()})
+            m["refs"].append(ref)
+            m["comment"].add(f.get("MPN") or comps[ref]["value"])
         elif how == "hand":
             hand.append((ref, comps[ref]["value"], f.get("Manufacturer", ""), f.get("MPN", "")))
         elif how != "none" and not ref.startswith("#"):
@@ -2120,14 +2125,18 @@ def assembly_files(bdir, name, fab):
     with open(os.path.join(fab, name + "-bom-jlc.csv"), "w", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(["Comment", "Designator", "Footprint", "JLCPCB Part #"])
-        for (val, fp, lcsc), refs in sorted(machine.items()):
-            w.writerow([val, ",".join(refs), fp.split(":")[-1], lcsc])
+        for (fp, lcsc), m in sorted(machine.items(), key=lambda kv: (min(kv[1]["comment"]), kv[0])):
+            if len(m["comment"]) > 1:
+                sys.exit(f"pcb: {lcsc} is bought for {','.join(sorted(m['refs']))} under {len(m['comment'])} MPNs "
+                         f"({', '.join(sorted(m['comment']))}) - one LCSC number is one part")
+            w.writerow([min(m["comment"]), ",".join(sorted(m["refs"], key=lambda r: (re.sub(r"\d", "", r), int(re.sub(r"\D", "", r) or 0)))), fp.split(":")[-1], lcsc])
     offsets = {r["lcsc"]: r for r in csv.DictReader(open(JLC_ROTATION))}
     unchecked = []
     with open(os.path.join(fab, name + "-cpl-jlc.csv"), "w", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(["Designator", "Mid X", "Mid Y", "Layer", "Rotation"])
-        for (_, fp, lcsc), refs in machine.items():
+        for (fp, lcsc), m in machine.items():
+            refs = m["refs"]
             o = offsets.get(lcsc)
             if o and o["footprint"] != fp.split(":")[-1]:
                 sys.exit(f"pcb: {lcsc}'s rotation offset in {os.path.relpath(JLC_ROTATION, ROOT)} is for "
