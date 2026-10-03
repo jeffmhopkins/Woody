@@ -173,7 +173,8 @@ per-circuit fragments, so **a direct edit survives until the next run of that
 tool and then disappears without a word.** Edit the fragment. A row lives with
 the circuit **whose page derives its value** — not where it is mentioned, not
 where it is mounted. `merge-bom.py --check` proves the master still matches
-and the commit hook runs it, so this one fails loudly rather than silently.
+and `check-staleness.py` reports it as a FAIL, loudly rather than silently —
+but the hook only reports; nothing blocks the commit (`CLAUDE.md`, rule 2).
 
 **Numbers shared between documents are not written here.** They live in
 `config/figures.yaml`, stated once by their owner and **cited by name**

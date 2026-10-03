@@ -212,7 +212,8 @@ ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
 >
 > Unlike the manifest's, this one is caught: `merge-bom.py --check`
 > regenerates into memory, byte-compares, and names the first differing line.
-> `check-staleness.py` runs it, so the commit hook fails on a hand edit.
+> `check-staleness.py` runs it and reports a hand edit as a FAIL; the hook
+> only reports, so nothing blocks the commit (`CLAUDE.md`, rule 2).
 >
 > **Edit the fragment, then re-run the tool.** A row lives with the circuit
 > **whose page derives its value** — not where it is mentioned, not where it
