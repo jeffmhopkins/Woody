@@ -561,7 +561,7 @@ def check_cad(board, lay, comps):
             if hits:
                 bad.append(f"error: [cad] {', '.join(hits)} within the U-bolt leg {j}'s {'washer and nut' if L == pcbnew.F_Cu else 'spacer'} "
                            f"keep-out on {board.GetLayerName(L)} (the leg is outside metal on the strap)")
-    bad += check_heights(board, lay, geo)
+    bad += check_heights(board, lay, geo, comps)
     return bad
 
 
@@ -574,18 +574,33 @@ def _nets_of(board):
     return list(out.items())
 
 
-def check_heights(board, lay, geo):
+def check_heights(board, lay, geo, comps=None):
     """Every top-face part inside its height room: under a key board, where none is
-    overhead, and under the Matrix ribbon's level run (pcb-geometry.echo keep-outs),
-    each part's height from layout.yaml heights: by footprint name."""
+    overhead, under the Matrix ribbon's level run, under the USB-C receptacle and its
+    lead - EVERY pcb-geometry.echo keep-out that carries a height (a zero-height one is
+    a no-parts area, which its rule area holds) - each part's height from layout.yaml
+    heights: by footprint name. And nothing on the UNDERSIDE but the rows layout.yaml
+    `underside_rows:` names (the thumb switches): the underside faces the bottom plate,
+    with no room for a part (mechanical/drc.echo "main board underside room over the
+    bottom plate"). Issue #19 F2: the check used to read only the key-board and ribbon
+    rooms and skip every flipped part, so the USB-C keep-out and the underside were held
+    by nothing."""
     bad = []
     k = geo["keepouts"]
-    rooms = [(box(*v[:4]), v[4], name) for name, v in k.items() if name.startswith("under key board") or name == "Matrix ribbon"]
+    rooms = [(box(*v[:4]), v[4], name) for name, v in k.items() if name != "elsewhere" and v[4] > 0]
     else_room = k["elsewhere"][4]
     heights = lay.get("heights") or {}
+    under_ok = set(lay.get("underside_rows") or [])
     checked = 0
     for fp in board.GetFootprints():
-        if fp.IsFlipped() or fp.GetReference().startswith("H"):
+        if fp.GetReference().startswith("H"):
+            continue
+        if fp.IsFlipped():
+            row = (comps or {}).get(fp.GetReference(), {}).get("row")
+            if comps is not None and row not in under_ok:
+                bad.append(f"error: [height] {fp.GetReference()} ({row}) is on the underside, which faces the bottom plate "
+                           f"with no room for a part (drc.echo 'main board underside room over the bottom plate'); "
+                           f"only layout.yaml underside_rows: {sorted(under_ok)} may be there")
             continue
         name = fp.GetFPID().GetLibItemName().wx_str()
         h = next((v for key, v in heights.items() if key in name), None)

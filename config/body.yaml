@@ -383,6 +383,10 @@ boards:
     value: 3.3
     status: settled
     source: "[ds] MPXV4006DP p.7 - barb OD 2.79-3.30"
+  cutout_corner_r:
+    value: 0.5
+    status: settled
+    source: "[ds] datasheets/fab/JLCPCB-PCB-CAPABILITIES.pdf - 'Rectangular holes and slots without rounded corners are not supported'; the minimum non-plated slot width is 1.0 mm, the router bit's diameter, so an internal corner is milled to its 0.5 radius. The main board's sensor-port slot is drawn with it, so the DXF and the fab agree (issue #17 D4)"
   sensor_port_z:
     value: [8.5, 1.4]
     status: nominal

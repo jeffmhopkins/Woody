@@ -1261,7 +1261,9 @@ module cb_2d() {
             translate([cb_x[1] - EPS, cb_tail_y[0]]) square([ua_x0 - cb_x[1] + EPS, cb_tail_y[1] - cb_tail_y[0]]);
         }
         // The slot in front of the sensor's lower port.
-        translate(port_slot_c - port_slot_sz / 2 - [EPS, 0]) square(port_slot_sz);
+        // Its corners rounded to the board house's mill (boards.cutout_corner_r): it cannot cut a square one.
+        translate(port_slot_c - port_slot_sz / 2 - [EPS, 0])
+            offset(r = boards_cutout_corner_r) offset(delta = -boards_cutout_corner_r) square(port_slot_sz);
         // A hole for each U-bolt leg; no edge notches (ADR 0025).
         for (u = ubolt_legs()) translate(u) circle(r = ubolt_board_hole_r);
         // the mounts' holes (ADR 0022): the board locates on its studs

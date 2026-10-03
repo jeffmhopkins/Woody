@@ -647,7 +647,8 @@ the plate and only its pins go through the board. Gateron's drawing agrees.
 - **The boards are 1.6 mm** (`boards.key_board_t`). The pins end 5.10 mm below
   the seat, so 1.0 mm shows below the board to solder [calc]. That is more
   than the 1.2 mm board at the old depth left.
-- **The pin holes are larger:** 2.2 mm on 2.8 mm pads
+- **The pin holes are larger:** 2.2 mm on 2.8 mm pads (superseded by
+  Amendment 8: 3.0 mm on 3.4 mm)
   (`hardware/lib/woody.pretty/SW_Gateron_KS33_1u`). Each pin is a 0.45 mm
   blade that flares to about 2 mm wide where it leaves the housing, and the
   hole's top now meets that flare [3D, sectioned; `hardware/lib/README.md`].
@@ -743,3 +744,27 @@ switches' solder joints, it is what the key boards hang from in the cassette
 (this ADR), and it holds the switches square to the oak's slots. Still open:
 the cap's height above the seat, by calipers on the parts in hand (M1), which
 sets the oak top's thickness exactly.
+
+## Amendment 8, 2026-10-03 — Gateron's 3.0 mm pin holes
+
+Issues #6-1 and #8-2 (the key-board and main-board layout reviews) measured
+what Amendment 6's 2.2 mm hole was sized without: **the blades are not
+centred in their holes.** Sliced at the board's top face, the root's farthest
+point is 1.162 mm from pin 2's hole centre and 1.092 mm from pin 1's [3D,
+`mechanical/cad/vendor/ks33.stl`, reproduced 2026-10-03], against the 2.2 mm
+hole's 1.10 mm radius, and Gateron gives the pins' positions with no tolerance
+of their own, so the drawing's general ±0.2 mm applies [ds
+`GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf` sheet 6].
+
+- **The holes are Gateron's own ⌀3.00** (sheet 6, *PCB Layout*), on 3.4 mm pads:
+  1.5 mm of radius against a 1.36 mm worst case [calc: 1.162 + 0.2], and a
+  0.2 mm ring, over JLC's 0.18 mm two-layer minimum [ds
+  `datasheets/fab/JLCPCB-PCB-CAPABILITIES.pdf`]. The review's 2.6 mm on 3.0
+  cleared the nominal root by 0.14 mm and not the tolerance.
+- **The footprint is shared**, so all three boards take it: the left-hand key
+  board re-laid out (its networks 9.0 mm from their switches, where 9.4 put a
+  label on the bigger pads), the right-hand one with its own re-layout, and
+  the main board's thumb switches in its wave-3 re-layout.
+- What the pin leaves to solder, the board's depth and the spacer are
+  unchanged: the hole's size moves none of them.
+

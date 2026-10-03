@@ -142,9 +142,16 @@ window, `switch.pcb_below_seat_window`, is the housing bottom's ±0.05
 (`mechanical/cad/vendor/ks33.stl`), each pin is a 0.45 mm blade. It is 1.8 mm
 wide 0.1 mm below the housing, 1.4 mm at 0.3 mm below, and 1.0 mm from 0.5 mm
 below down to the tip [3D]. A board against the housing therefore needs holes
-that pass the flare: 2.2 mm (`hardware/lib/README.md`). Gateron's layout uses
-3.0 mm. The old 1.3 mm holes passed only the 1.0 mm blade, which is why the
-board used to sit lower, at 3.2–3.6 mm.
+that pass the flare, and the blades are not centred in them: sliced at the
+board's top face, the root's farthest point is 1.162 mm from pin 2's hole
+centre and 1.092 mm from pin 1's [3D, sectioned at 0.005 mm below the housing;
+issue #6-1], before the drawing's general ±0.2 mm on the pins' positions
+[ds sheet 6, tolerance block]. The holes are Gateron's own, **3.0 mm**
+(sheet 6 *PCB Layout*, ⌀3.00), on 3.4 mm pads (`hardware/lib/README.md`):
+1.5 mm of radius against a 1.36 mm worst case [calc: 1.162 + 0.2], and 1.42
+at JLC's −0.08 finish. The old 1.3 mm holes passed only the 1.0 mm blade,
+which is why the board used to sit lower, at 3.2–3.6 mm; the 2.2 mm holes of
+2026-09-29 passed the root's width but not its offset (superseded 2026-10-03).
 
 **The board's thickness sets how much pin is left to solder**: 5.10 mm less
 the board-top depth less the thickness `[calc]`. Against the housing, a
@@ -246,7 +253,8 @@ board — not round pins.
 
 > *That held while the board sat below the root. Since ADR 0020 Amendment 6
 > the board is pressed against the housing, so the hole's top meets the 2.0 mm
-> root, and the drill is 2.2 mm (`hardware/lib/README.md`).*
+> root, and the drill is Gateron's 3.0 mm (`hardware/lib/README.md`; it was
+> 2.2 mm from 2026-09-29 until issue #6-1 measured the root's offset).*
 
 **There are no alignment posts.** The repository's combined `gateron-ks27-mx`
 footprint carries MX's two ⌀1.75 mm posts at (±5.08, 0) *and* MX's own pin
