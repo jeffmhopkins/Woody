@@ -306,7 +306,7 @@ nets:
   U0TXD:
     kind: signal
     domain: digital
-    carries: "The real-time board's console transmit, IO43, to HDR-SERVICE"
+    carries: "The real-time board's console transmit, IO43, to HDR-SERVICE through R-TXD-SER (499 ohm at J-MCU pin 22)"
     driver: carrier/carrier
     receivers: [carrier/service-uart]
 
@@ -323,7 +323,7 @@ nets:
     carries: "The Matrix's EN (its RESET net, CHIP_PU), from Key1's RESET-side terminal down CBL-MCU-RIBBON (J-MCU pin 24) to HDR-SERVICE pin 4 (ADR 0018)"
     external_driver: "whatever is plugged into the service header, pulling to ground only"
     receivers: [carrier/carrier, carrier/service-uart]
-    note: "Held up on the Matrix by R8, 10k to its 3V3, with no capacitor on it; Key1 pulls it to GND. Nothing in series"
+    note: "Held up on the Matrix by R8, 10k to its 3V3, with no capacitor there; Key1 pulls it to GND. C-EN (1 uF, carrier/service-uart) at J-MCU pin 24 is the C of Espressif's CHIP_PU RC. Nothing in series"
 
   IO0:
     kind: signal

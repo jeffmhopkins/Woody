@@ -303,6 +303,13 @@ components:
     - 1
     - 2
     sheet: power-entry-instrument
+  C41:
+    of: C-EN
+    value: 1uF
+    pins:
+    - 1
+    - 2
+    sheet: service-uart
   C5:
     of: C-REF-OUT
     value: 10uF
@@ -926,6 +933,13 @@ components:
     - 1
     - 2
     sheet: breath-adc
+  R46:
+    of: R-TXD-SER
+    value: 499R 1%
+    pins:
+    - 1
+    - 2
+    sheet: service-uart
   R5:
     of: R-ADCDIV-L
     value: 15k 1%
@@ -1206,6 +1220,7 @@ nets:
   - NT1.1
   /EN:
   - A1.EN
+  - C41.1
   - J1.24
   - J2.4
   /HOP_LH_LT:
@@ -1364,7 +1379,7 @@ nets:
   /U0TXD:
   - A1.IO43
   - J1.22
-  - J2.1
+  - R46.1
   /V3V3_CHAIN_LH:
   - FB1.2
   - J4.10
@@ -1475,6 +1490,9 @@ nets:
   /power-entry-instrument/INRUSH_MILLER:
   - C40.2
   - R43.1
+  /service-uart/TXD_HDR:
+  - J2.1
+  - R46.2
   /sw+/SWITCH_LEG:
   - R29.2
   - SW9.1
@@ -1650,6 +1668,7 @@ nets:
   - C36.2
   - C37.2
   - C38.2
+  - C41.2
   - D10.GND
   - D11.GND
   - D12.GND

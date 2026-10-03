@@ -931,7 +931,7 @@ circuit without a `sim/`, the answer was written nowhere.
 | `carrier/breath-excitation-reference` | own | |
 | `carrier/led-strip-drive` | own | |
 | `carrier/power-entry-instrument` | own | |
-| `carrier/service-uart` | n/a | One connector and no part with a value; `EN` and `IO0`'s pulls are the Matrix's own, not this BOM's |
+| `carrier/service-uart` | n/a | A connector, `R-TXD-SER` in series with a UART line and `C-EN` on `EN`: static parts with nothing to simulate against (`EN` and `IO0`'s pulls are the Matrix's own; `C-EN` against `R8` is one RC, τ = 10 ms on the page) |
 | `cluster/key-marker-and-bits` | covered | `hardware/boards/key-board-lh/sim/`: the free bit's `R-KEY-PU` is in the board deck, and `m_free_high` holds it over `V_T+` max with every key open and every key pressed |
 | `cluster/key-register` | covered | `hardware/boards/key-board-lh/sim/` (`U-KEYS`'s inputs against their thresholds) and `hardware/interfaces/key-chain-loom/sim/` (`C-DECOUPLE-165` against `U-KEYS`'s `C_pd` on the rail; `QH` over the ribbon) |
 | `cluster/key-switch-network` | own | |

@@ -8,9 +8,6 @@ circuit: carrier/service-uart
 title: Service UART header
 page: service-uart.md
 ports:
-  U0TXD:
-    dir: in
-    from: carrier/carrier
   U0RXD:
     dir: in
     from: carrier/carrier
@@ -24,7 +21,21 @@ ports:
   IO0:
     dir: in
     from: carrier/carrier
+  U0TXD:
+    dir: in
+    from: carrier/carrier
 components:
+  C-EN:
+    value: 1uF
+    pins:
+    - 1
+    - 2
+    note: 'EN''s (CHIP_PU''s) delay capacitor (#14 A2, #11 F7): Espressif advises ''an RC delay circuit at the CHIP_PU
+      pin ... usually R = 10 kohm and C = 1 uF'' [ds logic/ESP-HARDWARE-DESIGN-GUIDELINES-ESP32S3.pdf p.11]. The
+      Matrix fits the R (R8, 10k to its 3V3) and no C, and EN runs down the ribbon and across this board to HDR-SERVICE.
+      1 uF against R8 is 10 ms, past the 50 us t_STBL [ds ESP32-S3-datasheet-v2.2.pdf Table 2-13]. At J-MCU pin
+      24, returned to J-MCU''s grounds. Key1, a jumper or an adapter''s open-collector reset still pulls it low
+      at once'
   HDR-SERVICE:
     value: 1x5
     pins:
@@ -35,19 +46,33 @@ components:
     - 5
     note: 'FIVE PINS (ADR 0018): 1 TXD, 2 RXD, 3 GND, 4 EN, 5 IO0 - the ground between the UART pair and the control
       pair. EN and IO0 are pulled up on the Matrix; drive them to ground only'
+  R-TXD-SER:
+    value: 499R 1%
+    pins:
+    - 1
+    - 2
+    note: 'U0TXD''s series resistor (#14 A3, #11 F7): Espressif asks for 499 ohm in series with U0TXD ''to suppress
+      harmonics'' [ds logic/ESP-HARDWARE-DESIGN-GUIDELINES-ESP32S3.pdf p.16, 1.3.7 UART]. Here it is the first part
+      on IO43 after the ribbon, at J-MCU pin 22, and it also limits what a strike on HDR-SERVICE pin 1 can push
+      into the pin. 499 ohm against a UART receiver''s input is nothing at 115200 baud'
 nets:
   EN:
   - port: EN
+  - C-EN.1
   - HDR-SERVICE.4
   IO0:
   - port: IO0
   - HDR-SERVICE.5
   PWR_GND:
   - port: PWR_GND
+  - C-EN.2
   - HDR-SERVICE.3
+  TXD_HDR:
+  - HDR-SERVICE.1
+  - R-TXD-SER.2
   U0RXD:
   - port: U0RXD
   - HDR-SERVICE.2
   U0TXD:
   - port: U0TXD
-  - HDR-SERVICE.1
+  - R-TXD-SER.1

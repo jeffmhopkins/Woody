@@ -244,6 +244,269 @@
 		)
 		(embedded_fonts no)
 	)
+    (symbol "Device:C"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0.254)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "C"
+			(at 0.635 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "C"
+			(at 0.635 -2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 0.9652 -3.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "cap capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "C_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "C_0_1"
+			(polyline
+				(pts
+					(xy -2.032 0.762) (xy 2.032 0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.032 -0.762) (xy 2.032 -0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "C_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Device:R"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "R"
+			(at 2.032 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "R"
+			(at 0 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at -1.778 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "R res resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "R_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "R_0_1"
+			(rectangle
+				(start -1.016 -2.54)
+				(end 1.016 2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "R_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
   )
   (symbol (lib_id "Connector_Generic:Conn_01x05") (at 40.64 50.8 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
@@ -268,9 +531,7 @@
     (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/993f4837-2260-5646-9a14-8beddecedd97" (reference "J2") (unit 1))) (project "service-uart" (path "/cef56e05-f716-52bd-88f7-88ccc70bb739" (reference "HDR-SERVICE") (unit 1))))
   )
   (wire (pts (xy 35.56 45.72) (xy 33.02 45.72)) (stroke (width 0) (type default)) (uuid 8709dab3-0490-54d7-999a-b093c5313ebb))
-  (hierarchical_label "U0TXD" (shape input) (at 33.02 45.72 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 15ba5547-ac68-56ca-80a9-221c6afa3895)
-    (property "Dir" "in" (at 33.02 45.72 0) (effects (font (size 1.27 1.27)) hide))
-    (property "From" "carrier/carrier" (at 33.02 45.72 0) (effects (font (size 1.27 1.27)) hide)))
+  (label "TXD_HDR" (at 33.02 45.72 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 15ba5547-ac68-56ca-80a9-221c6afa3895))
   (wire (pts (xy 35.56 48.26) (xy 33.02 48.26)) (stroke (width 0) (type default)) (uuid 3a9411de-aec8-5efd-b65b-a733c0e55930))
   (hierarchical_label "U0RXD" (shape input) (at 33.02 48.26 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 9fd4df71-a1fb-5a8a-aed7-0e5bb3991d1e)
     (property "Dir" "in" (at 33.02 48.26 0) (effects (font (size 1.27 1.27)) hide))
@@ -288,6 +549,59 @@
   (hierarchical_label "IO0" (shape input) (at 33.02 55.88 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid fe787a53-372a-5d47-8a75-dbe2fbd0a2a6)
     (property "Dir" "in" (at 33.02 55.88 0) (effects (font (size 1.27 1.27)) hide))
     (property "From" "carrier/carrier" (at 33.02 55.88 0) (effects (font (size 1.27 1.27)) hide)))
-  (text "FROM THE HAND-WRITTEN NETLIST THIS SHEET REPLACES (verbatim; the part notes are on each part's Note field):\n\nAUTHORITATIVE for connectivity. This circuit is one header and the conductors to it, and the drawing in the\npage is a REPRESENTATION of this file. Whatever is plugged into the service header is not part of the\ninstrument, so hardware/nets.yaml marks that end with `external_driver:` rather than inventing a driver or\ncalling the net undriven." (at 205.74 38.099999999999994 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 18a0b6f3-6f29-5346-99e1-ce2c083846d6))
+  (text "FROM THE HAND-WRITTEN NETLIST THIS SHEET REPLACES (verbatim; the part notes are on each part's Note field):\n\nAUTHORITATIVE for connectivity. This circuit is one header, the conductors to it, R-TXD-SER in TXD and C-EN on\nEN (Espressif's guidelines, #14 A2/A3), and the drawing in the page is a REPRESENTATION of this file. Whatever is plugged into the service header is not part of the\ninstrument, so hardware/nets.yaml marks that end with `external_driver:` rather than inventing a driver or\ncalling the net undriven." (at 205.74 38.099999999999994 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 18a0b6f3-6f29-5346-99e1-ce2c083846d6))
+  (symbol (lib_id "Device:R") (at 101.60 50.80 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 54a011eb-ec0b-4ace-843f-10e9245dc62f)
+    (property "Reference" "R-TXD-SER" (at 104.14 49.53 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "499R 1%" (at 104.14 52.07 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 101.60 50.80 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 101.60 50.80 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-TXD-SER" (at 101.60 50.80 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 101.60 50.80 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "U0TXD's series resistor (#14 A3, #11 F7): Espressif asks for 499 ohm in series with U0TXD 'to suppress harmonics' [ds logic/ESP-HARDWARE-DESIGN-GUIDELINES-ESP32S3.pdf p.16, 1.3.7 UART]. Here it is the first part on IO43 after the ribbon, at J-MCU pin 22, and it also limits what a strike on HDR-SERVICE pin 1 can push into the pin. 499 ohm against a UART receiver's input is nothing at 115200 baud" (at 101.60 50.80 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "a two-terminal resistor" (at 101.60 50.80 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)" (at 101.60 50.80 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F4990T5E" (at 101.60 50.80 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17722" (at 101.60 50.80 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 101.60 50.80 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 049567ce-2d2e-4895-ab43-a913771c2e0b))
+    (pin "2" (uuid ac4e226e-1d3e-4350-9729-edde2cac7864))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/993f4837-2260-5646-9a14-8beddecedd97" (reference "R46") (unit 1))) (project "service-uart" (path "/cef56e05-f716-52bd-88f7-88ccc70bb739" (reference "R-TXD-SER") (unit 1))))
+  )
+  (wire (pts (xy 101.60 46.99) (xy 101.60 44.45)) (stroke (width 0) (type default)) (uuid 067d4696-8c49-4ce6-8571-b31c408c6db8))
+  (hierarchical_label "U0TXD" (shape input) (at 101.60 44.45 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid e24753a2-7640-4e37-b9d2-dd85b6452f85)
+    (property "Dir" "in" (at 101.60 44.45 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/carrier" (at 101.60 44.45 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 101.60 54.61) (xy 101.60 57.15)) (stroke (width 0) (type default)) (uuid ef65ba57-6171-48ea-b5bb-1743d0178af9))
+  (label "TXD_HDR" (at 101.60 57.15 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 39a5ee62-9967-415e-9ef3-dc249f778550))
+  (symbol (lib_id "Device:C") (at 127.00 50.80 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 32abca8e-99dc-4657-8fcf-72a57bb161c8)
+    (property "Reference" "C-EN" (at 129.54 49.53 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "1uF" (at 129.54 52.07 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 127.00 50.80 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 127.00 50.80 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-EN" (at 127.00 50.80 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 127.00 50.80 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "EN's (CHIP_PU's) delay capacitor (#14 A2, #11 F7): Espressif advises 'an RC delay circuit at the CHIP_PU pin ... usually R = 10 kohm and C = 1 uF' [ds logic/ESP-HARDWARE-DESIGN-GUIDELINES-ESP32S3.pdf p.11]. The Matrix fits the R (R8, 10k to its 3V3) and no C, and EN runs down the ribbon and across this board to HDR-SERVICE. 1 uF against R8 is 10 ms, past the 50 us t_STBL [ds ESP32-S3-datasheet-v2.2.pdf Table 2-13]. At J-MCU pin 24, returned to J-MCU's grounds. Key1, a jumper or an adapter's open-collector reset still pulls it low at once" (at 127.00 50.80 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "a two-terminal capacitor" (at 127.00 50.80 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Samsung Electro-Mechanics" (at 127.00 50.80 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "CL21B105KBFNNNE" (at 127.00 50.80 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C28323" (at 127.00 50.80 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 127.00 50.80 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 597e2df4-7853-4b6d-ab6e-a72358362e89))
+    (pin "2" (uuid 591dc592-81eb-4f5d-9b64-4a94cf6ba518))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/993f4837-2260-5646-9a14-8beddecedd97" (reference "C41") (unit 1))) (project "service-uart" (path "/cef56e05-f716-52bd-88f7-88ccc70bb739" (reference "C-EN") (unit 1))))
+  )
+  (wire (pts (xy 127.00 46.99) (xy 127.00 44.45)) (stroke (width 0) (type default)) (uuid c87f2bb4-4aeb-43b9-991d-4341cf8a70af))
+  (hierarchical_label "EN" (shape input) (at 127.00 44.45 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 31db1a45-6900-41af-9f28-b875c767c196)
+    (property "Dir" "in" (at 127.00 44.45 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/carrier" (at 127.00 44.45 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 127.00 54.61) (xy 127.00 57.15)) (stroke (width 0) (type default)) (uuid 4a3eeb2d-8d47-421c-b412-eaaa1bb37b6a))
+  (hierarchical_label "PWR_GND" (shape passive) (at 127.00 57.15 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid b097bd5b-ea33-4a19-8f42-704dceb7424f)
+    (property "Dir" "ref" (at 127.00 57.15 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 127.00 57.15 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 127.00 57.15 0) (effects (font (size 1.27 1.27)) hide)))
   (sheet_instances (path "/" (page "1")))
 )
