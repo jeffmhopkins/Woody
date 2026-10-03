@@ -512,8 +512,8 @@ CMRR falls from **70.2 dB to 60.2 dB** `[calc, A2]` against an independently
 derived requirement of 58.5 dB — and 60.2 dB is the nominal: at the worst
 tolerance corner the unmatched link is **below** the requirement
 (`breath-link-cmrr`, simulated). With `R1b` fitted the worst case clears it
-at mains; it does not hold to the 500 Hz edge of the breath channel, because
-the `C_cm` mismatch grows with frequency (same figure).
+at mains, and with `C_cm` a matched pair (below) to the 500 Hz edge of the
+breath channel as well (same figure).
 
 **The requirement's band is DC to 500 Hz** — the breath channel's band
 (ADR 0004: `BREATH` is "band-limited ~500 Hz"), because a common-mode
@@ -523,10 +523,13 @@ after the in-amp removes it. It was stated with no band until 2026-10-03
 pre-merge review reconstructs it to 0.1 dB as the `PWR_GND` drop at ADR
 0003's 350 mA (58.9 mV) held to 1 LSB of 10 V at 16 bits at the in-amp output,
 referred to its input `[calc, docs/review/2026-09-21-pre-merge-review/A1-breath-chain.md]`.
-**Against that band the worst corner fails**, from about 480 Hz to the band's
-edge, by under half a decibel (`module/breath-receive-stage/sim`,
-`cmrr-as-netlisted`). Deciding it is the owner's: a tighter `C_cm` match, or
-accepting the band's top 20 Hz. The band was not moved to make it pass. Both parts are inside a
+**With two independent ±1 % `C_cm` the worst corner failed that band**, from
+about 480 Hz to its edge, by under half a decibel. **The owner's choice,
+2026-10-03 (#5-5): "Tighten cap matching"** — `C-CM-BREATH` is bought as a
+matched pair, each within 0.5 % of the pair's mean (*And `C_cm` needs a
+tolerance*, below), and the worst corner then holds 58.5 dB across the whole
+band (`module/breath-receive-stage/sim`, `cmrr-as-netlisted`;
+`breath-link-cmrr`). The band was not moved to make it pass. Both parts are inside a
 body that is expensive to reopen (ADR 0009).
 
 > One correction to the receive page's own case for `R1b`: it claims the
@@ -582,12 +585,12 @@ section, commissioning and the `CLR` section.*
 
 | Ref | Value | Job |
 |---|---|---|
-| **R1** | 1 kΩ 1 %, **1206 ≥250 mW** | Instrument-side series protection, on the driver's output. **Not 0805** — see below |
-| **R1b** | 1 kΩ 1 %, 1206 | **Its twin in the `AGND` leg.** Free, and it is what keeps CMRR from collapsing — see below |
+| **R1** | 1 kΩ 1 %, **1206 ≥250 mW**, anti-surge (ERJ-P08, owner 2026-10-03) | Instrument-side series protection, on the driver's output. **Not 0805** — see below |
+| **R1b** | 1 kΩ 1 %, 1206, anti-surge (ERJ-P08) | **Its twin in the `AGND` leg.** Free, and it is what keeps CMRR from collapsing — see below |
 | **R2, R3** | 10 kΩ 0.1 % | Module-side series protection. **Matched** — but see below |
 | **R4, R5** | 1 MΩ | **Common-mode bias return.** Without these the in-amp's inputs float when the cable is unplugged and it saturates to a rail |
 | **C_diff** | 15 nF C0G | **~459 Hz** differential pole, **ahead of the in-amp**: 2 × 11 kΩ against 15 nF plus the two `C_cm` in series across the pair, 0.75 nF `[calc: 1/(2π × 22 kΩ × 15.75 nF)]`. Not 482 Hz, which left `C_cm` out; not 531, which had no `R1b` |
-| **C_cm** | 1.5 nF C0G ×2 | Common-mode poles, deliberately 1/10 of C_diff |
+| **C_cm** | 1.5 nF C0G ×2, a matched pair (±0.5 % about its mean) | Common-mode poles, deliberately 1/10 of C_diff |
 | **R_G** | 42.2 kΩ 0.1 % | INA828, `G = 1 + 50k/R_G` = **2.185** |
 | **REF** | buffered trimmer, **0 → +1.0 V** | Nulls the pedestal *ahead* of the gain pot, which is what makes the panel knobs independent. Range covers the sensor's whole 0.152–0.378 V spec band, not just its typical. From the DAC rail (`dac-rail`), never `VREFOUT`, and never a bare divider — see above |
 | **Output RC** | 1 kΩ + 330 nF film | ~480 Hz reconstruction at the jack |
@@ -655,9 +658,15 @@ in-amp's input is gigaohms — so a matching 1 kΩ in it changes the differentia
 gain not at all and restores the balance the 1 MΩ pair is measured against.
 One resistor, instrument-side, and therefore **unretrofittable**.
 
-**And `C_cm` needs a tolerance, which nothing specifies.** At ±5 % the
-common-mode capacitor mismatch alone gives ~46 dB; ±1 % is needed to clear 60.
-Specify **±1 % C0G** on the two 1.5 nF parts.
+**And `C_cm` needs a match, which a tolerance alone does not give.** At ±5 %
+the common-mode capacitor mismatch alone gives ~46 dB; at ±1 % each the link
+clears mains but not the band's 500 Hz top at the worst corner (above). No
+1.5 nF C0G is catalogued tighter than ±1 % `[web jlcpcb.com parts search,
+2026-10-03]`, so **the two are a matched pair**: the ±1 % C0G (Yageo
+CC0805FRNPO9BN152) from one reel, measured on one LCR meter at 1 kHz, and
+fitted by hand only as a pair whose readings are each within 0.5 % of their
+mean — the `C-CM-BREATH` row and both parts' `Note` say how. Owner,
+2026-10-03: "Tighten cap matching".
 
 ### Why the bias resistors do not break the sense return
 

@@ -657,11 +657,11 @@ figures:
     note: "Replaced a behavioural-model result (A4, 2026-09-21; docs/review/2026-09-21-preflight/A4-carrier.md) that sat outside the +-10 deg screen of this one. Both clear the page's 76 deg claim."
   - id: breath-link-cmrr
     quantity: Breath link CMRR, sensor buffer to INA828 output, worst tolerance corner at the mains fundamental
-    value: "70.5 dB worst case at 60 Hz"
+    value: "71.3 dB worst case at 60 Hz"
     status: settled
     owner: hardware/module/breath-receive-stage/sim/README.md
-    derivation: "[sim] python3 tools/sim.py run hardware/module/breath-receive-stage/sim, 2026-09-30, ngspice 42 with TI's INA828 and OPA2197 PSpice models (datasheets/analog/). Sim cmrr-as-netlisted: both netlists (interfaces/breath-sense-link R1/R1b, module/breath-receive-stage the rest), every tolerance end of R1, R1b, R2, R3, R4, R5 and both C_cm at +-1 % - 257 runs. Worst corner 70.9 dB at 50 Hz, 70.5 dB at 60 Hz, 71.7 dB at DC (the page's 73 dB bias-pair floor within 3 dB). It falls through the page's 58.5 dB requirement near 480 Hz at the worst corner (C_cm mismatch, rising with frequency). Without R1b: 60.1 dB nominal (the page's 60.2), 58.2 dB worst - below the requirement. C_cm at +-5 %: 45.5 dB worst at 500 Hz (the page's ~46 dB). A SCREEN: the macromodels carry no layout asymmetry."
-    forbidden: ["1.7 dB of margin", "1.7 dB of claimed margin"]
+    derivation: "[sim] python3 tools/sim.py run hardware/module/breath-receive-stage/sim, 2026-10-03, ngspice 42 with TI's INA828 and OPA2197 PSpice models (datasheets/analog/). Sim cmrr-as-netlisted: both netlists (interfaces/breath-sense-link R1/R1b, module/breath-receive-stage the rest), every tolerance end of R1, R1b, R2, R3, R4, R5 and both C_cm at +-0.5 % - C-CM-BREATH a matched pair, each within 0.5 % of the pair's mean (owner, 2026-10-03, 'Tighten cap matching') - 257 runs. Worst corner 71.4 dB at 50 Hz, 71.3 dB at 60 Hz, 71.7 dB at DC (the page's 73 dB bias-pair floor within 3 dB), and 62.8 dB at the least anywhere in the requirement's DC-500 Hz band (62.5 dB at 500 Hz): it first falls through the page's 58.5 dB near 830 Hz at the worst corner (C_cm mismatch, rising with frequency). With two independent 1 % parts it fell through near 480 Hz, inside the band - why the pair is matched. Without R1b: 60.1 dB nominal (the page's 60.2), 58.2 dB worst - below the requirement. C_cm at +-5 %: 45.5 dB worst at 500 Hz (the page's ~46 dB). A SCREEN: the macromodels carry no layout asymmetry."
+    forbidden: ["1.7 dB of margin", "1.7 dB of claimed margin", "70.5 dB worst case"]
   - id: pitch-mult-overshoot
     quantity: Pitch jack overshoot on an octave step, into a passive mult to another output's jack capacitor
     value: "41.6 % at 82 nF, 64.0 % at 330 nF"

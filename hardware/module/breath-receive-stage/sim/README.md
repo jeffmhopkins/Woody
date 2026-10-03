@@ -20,27 +20,30 @@ the differential gain over the common-mode gain, both at the INA828's output.
 
 **The claim is a worst case over tolerance**, so every part that sets the
 balance is a corner: `R1`, `R1b`, `R2`, `R3`, `R4`, `R5` at their netlisted
-tolerance and both `C_cm` at ±1 % (the `C-CM-BREATH` row). 257 runs per sim.
+tolerance and both `C_cm` at ±0.5 % — `C-CM-BREATH` is a matched pair, each
+within 0.5 % of the pair's mean (owner, 2026-10-03, "Tighten cap matching";
+its row says how it is matched). 257 runs per sim.
 
 | Sim | What | Holds |
 |---|---|---|
-| `cmrr-as-netlisted` | CMRR at DC, 50 Hz, 60 Hz, 500 Hz, 1 kHz, and where it first falls to 58.5 dB | the page's 58.5 dB requirement at the mains fundamental, worst corner; the page's 73 dB bias-pair floor within 3 dB |
+| `cmrr-as-netlisted` | CMRR at DC, 50 Hz, 60 Hz, 500 Hz, 1 kHz, and where it first falls to 58.5 dB | the page's 58.5 dB requirement over its whole band, DC to 500 Hz, at the worst corner (62.8 dB least; it first falls to 58.5 dB near 830 Hz); the page's 73 dB bias-pair floor within 3 dB |
 | `cmrr-without-r1b` | the same with `R1b` shorted | the page's 60.2 dB, at the nominal only |
 | `cmrr-ccm-5pct` | `C_cm` at ±5 % | the page's "~46 dB", at 500 Hz |
 
 **The result is `breath-link-cmrr`**, the worst corner at the mains
-fundamental: **70.5 dB worst case at 60 Hz**.
+fundamental: **71.3 dB worst case at 60 Hz**.
 
 Three things the run says that the page did not:
 
-- **The requirement is not met across its band.** `C_cm`'s ±1 % mismatch
-  converts common mode to differential in proportion to frequency, so at the
-  worst corner CMRR falls through 58.5 dB near 480 Hz (`f_req`). The band is
-  DC to 500 Hz, the breath channel's (`breath-sense-link.md`, defined
-  2026-10-03 for #5 finding 5), so `cmrr-as-netlisted` asserts the least CMRR
-  in it (`cmrr_band`) and **fails** at the worst corner, by under 0.5 dB at
-  the band's edge. Mains and its low harmonics clear it. The owner decides:
-  a tighter `C_cm` match, or the band's top 20 Hz accepted.
+- **The band's top is set by `C_cm`'s match.** Their mismatch converts
+  common mode to differential in proportion to frequency. The band is DC to
+  500 Hz, the breath channel's (`breath-sense-link.md`, defined 2026-10-03 for
+  #5 finding 5), and `cmrr-as-netlisted` asserts the least CMRR in it
+  (`cmrr_band`). With two independent ±1 % parts the worst corner fell through
+  58.5 dB near 480 Hz and failed by under 0.5 dB at the edge; the owner chose
+  **"Tighten cap matching"** (2026-10-03), so the pair is matched to ±0.5 %
+  about its mean and the worst corner holds **62.8 dB** across the band,
+  first reaching 58.5 dB near 830 Hz (`f_req`).
 - **Without `R1b` the margin was negative, not 1.7 dB.** 60.2 dB is the
   nominal. At the worst tolerance corner the unmatched link is 58.2 dB at DC,
   below the requirement. `R1b` is fitted, so this argues for the part, not

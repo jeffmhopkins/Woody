@@ -28,8 +28,8 @@ vary:
   R3:  {tol: from-value}
   R4:  {tol: from-value}
   R5:  {tol: from-value}
-  C-CM-IN+: {tol: [-0.01, 0.01], source: "C-CM-BREATH's '+/-1%' (bom.csv row; the netlist value states none)"}
-  C-CM-IN-: {tol: [-0.01, 0.01], source: "as C-CM-IN+"}
+  C-CM-IN+: {tol: [-0.005, 0.005], source: "C-CM-BREATH, a MATCHED PAIR: each within 0.5 % of the pair's mean (owner, 2026-10-03: 'Tighten cap matching'; the bom.csv row and the sheet's Note say how it is matched). Only the pair's mismatch converts common mode, so the corners hold the two 1 % apart at most"}
+  C-CM-IN-: {tol: [-0.005, 0.005], source: "as C-CM-IN+"}
 
 sims:
   - name: cmrr-as-netlisted
@@ -51,7 +51,7 @@ sims:
       - expr: "abs(min['cmrr_dc'] - 73) < 3"
         why: "the worst-case floor is the page's 73 dB, set by the 1 Mohm bias pair's 1 % (breath-sense-link.md, 'One correction'), within 3 dB"
       - expr: "min['cmrr_band'] > 58.5"
-        why: "THE REQUIREMENT OVER ITS BAND (#5 finding 5): 58.5 dB from DC to 500 Hz, the breath channel's band (breath-sense-link.md, 'From the instrument end'), at every corner. FAILS at the worst corner from ~480 Hz (f_req) to the band's edge: C_cm's +-1 % mismatch converts common mode in proportion to frequency. Not moved to make it pass - the owner decides between a tighter C_cm match and accepting the band's top ~20 Hz"
+        why: "THE REQUIREMENT OVER ITS BAND (#5 finding 5): 58.5 dB from DC to 500 Hz, the breath channel's band (breath-sense-link.md, 'From the instrument end'), at every corner. C_cm's mismatch converts common mode in proportion to frequency, so the band's top is the worst: with two independent 1 % parts it failed from ~480 Hz, and the owner chose a matched pair (2026-10-03, 'Tighten cap matching'), each within 0.5 % of the pair's mean"
   - name: cmrr-without-r1b
     # R1b shorted: the case the page says spends the whole budget (1 kohm unmatched)
     deck: cmrr.cir
