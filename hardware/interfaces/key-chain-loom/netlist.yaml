@@ -202,8 +202,20 @@ components:
     - CH3
     - CH4
     - GND
-    note: FITTED (ADR 0018). On the three MCU nets the ribbon connectors expose, at the left_hand J-CHAIN. The fourth
-      channel is spare
+    note: FITTED (ADR 0018). On the three MCU nets the ribbon connectors expose, at the left_hand J-CHAIN (main
+      board J4). The fourth channel is spare. U-TVS-CHAIN-RH guards the right_hand J-CHAIN (owner, 2026-10-03, D2)
+  U-TVS-CHAIN-RH:
+    of: U-TVS-CHAIN
+    value: SP0504BAHTG 4-channel 5V array
+    pins:
+    - CH1
+    - CH2
+    - CH3
+    - CH4
+    - GND
+    note: 'FITTED (owner, 2026-10-03, D2: ''Yes, all 4 channels''). The second array, AT THE right_hand J-CHAIN
+      (main board J5): CH1 CHAIN_SCK, CH2 CHAIN_SHLD, CH3 HOP_LT_RH, CH4 HOP_RH_RT, ground with a via at pin 2.
+      J5 exposes the same two MCU pins J4 does, and U-TVS-CHAIN is at J4, a board''s length away'
 nets:
   CHAIN_SCK:
   - port: CHAIN_SCK
@@ -213,6 +225,7 @@ nets:
   - J-CHAIN-MAIN-RH.2
   - R-CHAIN-SER-SCK.2
   - U-TVS-CHAIN.CH1
+  - U-TVS-CHAIN-RH.CH1
   CHAIN_SER_LH:
   - port: CHAIN_SER_LH
   - J-CHAIN-KEY-LH.7
@@ -228,6 +241,7 @@ nets:
   - J-CHAIN-MAIN-RH.4
   - R-CHAIN-SER-SHLD.2
   - U-TVS-CHAIN.CH2
+  - U-TVS-CHAIN-RH.CH2
   CHAIN_SPARE_LH_11:
   - J-CHAIN-KEY-LH.2
   - J-CHAIN-MAIN-LH.11
@@ -269,6 +283,7 @@ nets:
   - J-CHAIN-MAIN-RH.7
   - J-CHAIN-MAIN-RH.9
   - U-TVS-CHAIN.GND
+  - U-TVS-CHAIN-RH.GND
   HOP_LH_LT:
   - port: CHAIN_QH_LH
   - port: CHAIN_SER_LT
@@ -282,11 +297,13 @@ nets:
   - J-CHAIN-KEY-RH.7
   - J-CHAIN-MAIN-RH.6
   - R-HOP-SER.2
+  - U-TVS-CHAIN-RH.CH3
   HOP_RH_RT:
   - port: CHAIN_QH_RH
   - port: CHAIN_SER_RT
   - J-CHAIN-KEY-RH.5
   - J-CHAIN-MAIN-RH.8
+  - U-TVS-CHAIN-RH.CH4
   IO7:
   - port: IO7
   - R-CHAIN-SER-SHLD.1

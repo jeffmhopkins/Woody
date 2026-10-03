@@ -50,6 +50,11 @@ components:
     pins:
     - 1
     - 2
+    note: 'A MATCHED PAIR with its twin (owner, 2026-10-03: ''Tighten cap matching''): C-CM-IN+ and C-CM-IN- from
+      one reel of the 1 % C0G part, measured on one LCR meter at 1 kHz and fitted together only when each is within
+      0.5 % of the pair''s mean. Their mismatch converts the umbilical''s common mode in proportion to frequency,
+      and at 1 % each the link misses its CMRR at the breath band''s top (module/breath-receive-stage/sim cmrr-as-netlisted).
+      No catalogue C0G at 1.5 nF is sold tighter than 1 %, so the match is made by hand: fitted by hand, after measuring'
   C-CM-IN-:
     of: C-CM-BREATH
     value: 1.5nF
@@ -57,6 +62,11 @@ components:
     pins:
     - 1
     - 2
+    note: 'A MATCHED PAIR with its twin (owner, 2026-10-03: ''Tighten cap matching''): C-CM-IN+ and C-CM-IN- from
+      one reel of the 1 % C0G part, measured on one LCR meter at 1 kHz and fitted together only when each is within
+      0.5 % of the pair''s mean. Their mismatch converts the umbilical''s common mode in proportion to frequency,
+      and at 1 % each the link misses its CMRR at the breath band''s top (module/breath-receive-stage/sim cmrr-as-netlisted).
+      No catalogue C0G at 1.5 nF is sold tighter than 1 %, so the match is made by hand: fitted by hand, after measuring'
   C-DEC-INAMP-NEG:
     of: C-DECOUPLE
     value: 100nF

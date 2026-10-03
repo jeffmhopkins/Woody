@@ -310,6 +310,20 @@ components:
     - 1
     - 2
     sheet: service-uart
+  C42:
+    of: C-ADC-VDD
+    value: 22uF
+    pins:
+    - 1
+    - 2
+    sheet: breath-adc
+  C43:
+    of: C-BUCK-OUT
+    value: 10uF
+    pins:
+    - 1
+    - 2
+    sheet: power-entry-instrument
   C5:
     of: C-REF-OUT
     value: 10uF
@@ -940,6 +954,13 @@ components:
     - 1
     - 2
     sheet: service-uart
+  R47:
+    of: R-ADC-VDD
+    value: 10R 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-adc
   R5:
     of: R-ADCDIV-L
     value: 15k 1%
@@ -1063,6 +1084,15 @@ components:
     - VOUT
     - GND
     sheet: breath-sense-link
+  U11:
+    of: U-TVS-CHAIN
+    value: SP0504BAHTG 4-channel 5V array
+    pins:
+    - CH1
+    - CH2
+    - CH3
+    - CH4
+    - GND
   U2:
     of: U-ADC
     value: MCP3202-CI/SN
@@ -1197,6 +1227,7 @@ nets:
   - J4.2
   - J5.2
   - R34.2
+  - U11.CH1
   - U7.CLK
   - U8.CLK
   - U9.CH1
@@ -1209,6 +1240,7 @@ nets:
   - J4.4
   - J5.4
   - R35.2
+  - U11.CH2
   - U7.SHLD
   - U8.SHLD
   - U9.CH2
@@ -1232,8 +1264,10 @@ nets:
   /HOP_LT_RH:
   - J5.6
   - R44.2
+  - U11.CH3
   /HOP_RH_RT:
   - J5.8
+  - U11.CH4
   - U8.SER
   /IO0:
   - A1.IO0
@@ -1391,6 +1425,12 @@ nets:
   - R4.2
   - R5.1
   - U2.CH0
+  /breath-adc/ADC_VDD:
+  - C2.1
+  - C3.1
+  - C42.1
+  - R47.2
+  - U2.VDD
   /breath-excitation-reference/AC_FB_MID:
   - C9.2
   - R9.2
@@ -1478,6 +1518,7 @@ nets:
   - D8.DIN2
   - R11.2
   /power-entry-instrument/BUCK_A_OUT:
+  - C43.1
   - D4.A
   - U5.OUT
   /power-entry-instrument/INRUSH_GATE:
@@ -1508,6 +1549,7 @@ nets:
   - C204.2
   - C3.2
   - C4.2
+  - C42.2
   - C5.2
   - C6.2
   - C7.2
@@ -1517,6 +1559,7 @@ nets:
   - R39.1
   - R5.2
   - U10.GND
+  - U2.CH1
   - U2.VSS
   - U3.V-
   - U4.GND
@@ -1558,8 +1601,6 @@ nets:
   - A1.P3V3
   - C13.1
   - C14.1
-  - C2.1
-  - C3.1
   - FB1.1
   - FB2.1
   - J1.13
@@ -1578,7 +1619,7 @@ nets:
   - R37.2
   - R40.1
   - R45.1
-  - U2.VDD
+  - R47.1
   - U7.C
   - U7.VCC
   - U8.B
@@ -1669,6 +1710,7 @@ nets:
   - C37.2
   - C38.2
   - C41.2
+  - C43.2
   - D10.GND
   - D11.GND
   - D12.GND
@@ -1720,6 +1762,7 @@ nets:
   - SW8.2
   - SW9.2
   - U1.GND
+  - U11.GND
   - U5.GND
   - U6.1OE
   - U6.3OE
@@ -1754,8 +1797,6 @@ nets:
   - U10.7
   U10.8:
   - U10.8
-  U2.CH1:
-  - U2.CH1
   U4.DNC1:
   - U4.DNC1
   U4.DNC8:
@@ -1818,7 +1859,6 @@ external_endpoints:
 - U10.6
 - U10.7
 - U10.8
-- U2.CH1
 - U4.DNC1
 - U4.DNC8
 - U4.NC7
