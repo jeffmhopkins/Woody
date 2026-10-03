@@ -27,6 +27,9 @@ case, the sample capacitor discharged by each conversion.
 | `powerup-blow-no3v3` | — (no 3V3 ever: no Matrix, or its LDO dead) | 0.39–0.40 mA, held for as long as the sensor reads full scale |
 | `powerup-rail` | "Whether the buffer swings high during power-up" (left open) | **Bounded without answering it**: U-BUF B at INST_POS12 for the whole power-up gives **0.72 mA** peak, **0.59 mA** stuck there once 3V3 is up — under the 1 mA judged against at every corner |
 | `vdd-ripple` | none — the page's 55 dB (`filter`) is on ADC_IN's path, which the converter's ripple does not take (#11 Finding 2) | **FAILS its 2 LSB budget on the conservative model**: 13 mV p-p on VDD, **14.6 LSB** at full scale nominal; 2.8–115 LSB across the corners. See below |
+| `vdd-ripple-options`, `vdd-load-options` | recorded, no assertion: 4.7, 10 and 22 Ω in series ahead of `C-ADC-BULK`, each with and without 22 µF added at the pin; ripple and the conversion's own sag | every resistor alone damps the ribbon's LC (worst 2.1 / 1.0 / 0.46 LSB) but sags `VDD` by 1.7–2.3 LSB inside a conversion; with 22 µF the sag is ≤ 0.51 LSB for all three |
+| `vdd-ripple-proposed`, `vdd-load-proposed` | **the proposal for the owner, not netlisted**: 10 Ω and 22 µF | **0.22 LSB worst** ripple, 0.51 LSB worst sag — both budgets met at every corner |
+| `vdd-load` | the conversion's own sag as netlisted | 0.11 LSB worst |
 
 ## What it says that the page does not
 

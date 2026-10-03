@@ -4,15 +4,16 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/carrier/breath-adc/sim/sims.yaml: 8f5594f84cc8566b
+  hardware/carrier/breath-adc/sim/sims.yaml: 47c31089a433199c
   hardware/carrier/breath-adc/netlist.yaml: 936c53388d7b1686
   hardware/carrier/breath-adc/sim/adc-ac.cir: 92db36d52ceba839
   hardware/carrier/breath-adc/sim/adc.cir: 3d5f71307efa775a
   hardware/carrier/breath-adc/sim/adc-powerup.cir: 66ddee5fef5a915c
-  hardware/carrier/breath-adc/sim/adc-vdd.cir: 71506d20867c2676
+  hardware/carrier/breath-adc/sim/adc-vdd.cir: bfb278d8a428478a
+  hardware/carrier/breath-adc/sim/adc-vddload.cir: cc8779048cb11ad5
   drc:Matrix ribbon length: '37.6231'
   figure:sensor-full-scale: 4.86 V
-ngspice: '44.2'
+ngspice: '42'
 sims:
   filter:
     corners: 9
@@ -214,16 +215,16 @@ sims:
     corners: 65
     measures:
       h_fbuck_db:
-        nominal: -19.7157
-        min: -53.2552
+        nominal: -19.7328
+        min: -53.2563
         min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
-        max: -2.50236
+        max: -2.51629
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       h_band_db:
-        nominal: -19.1285
-        min: -33.4965
+        nominal: -19.1494
+        min: -33.5013
         min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
-        max: -1.17999
+        max: -1.19617
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       f_band_peak:
         nominal: 391291.0
@@ -232,28 +233,28 @@ sims:
         max: 498310.0
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr- l_rib_m- len_rib-
       vdd_pp_mv:
-        nominal: 13.2664
-        min: 2.53722
+        nominal: 13.2347
+        min: 2.5358
         min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
-        max: 104.757
+        max: 104.562
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       lsb_pp:
-        nominal: 14.5504
-        min: 2.78277
+        nominal: 14.5155
+        min: 2.78122
         min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
-        max: 114.895
+        max: 114.681
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       lsb_pp_fbuck:
-        nominal: 13.5993
-        min: 0.286114
+        nominal: 13.5725
+        min: 0.286078
         min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
-        max: 98.6695
+        max: 98.5114
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       rip_budget_mv:
-        nominal: 16.4944
-        min: 2.08886
+        nominal: 16.534
+        min: 2.09276
         min_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
-        max: 86.245
+        max: 86.2931
         max_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
     asserts:
     - expr: max['lsb_pp'] <= 2.0
@@ -261,3 +262,432 @@ sims:
         by at most 2 LSB p-p - E9's budget (breath-adc.md) - at every corner, at the worst frequency in 200-500 kHz, with
         the whole 120 mV p-p taken as the fundamental
       pass: false
+  vdd-ripple-options[r_filt=4.7,c_filt_x=0]:
+    corners: 65
+    measures:
+      h_band_db:
+        nominal: -56.0147
+        min: -67.0108
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: -35.8687
+        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+      f_band_peak:
+        nominal: 200678.0
+        min: 200678.0
+        min_at: nominal
+        max: 270707.0
+        max_at: C-ADC-BULK+ c_ldo- c_vcc5- k_psrr- l_rib_m+ len_rib+
+      lsb_pp:
+        nominal: 0.20824
+        min: 0.0587168
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: 2.11771
+        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+      lsb_pp_fbuck:
+        nominal: 0.137103
+        min: 0.0162646
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
+        max: 1.229
+        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
+    asserts: []
+  vdd-ripple-options[r_filt=4.7,c_filt_x=22uF]:
+    corners: 65
+    measures:
+      h_band_db:
+        nominal: -66.0036
+        min: -76.9993
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: -49.07
+        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+      f_band_peak:
+        nominal: 200678.0
+        min: 200678.0
+        min_at: nominal
+        max: 270707.0
+        max_at: C-ADC-BULK- c_ldo- c_vcc5- k_psrr- l_rib_m+ len_rib+
+      lsb_pp:
+        nominal: 0.0659357
+        min: 0.0185924
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: 0.463235
+        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+      lsb_pp_fbuck:
+        nominal: 0.0438219
+        min: 0.00519659
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
+        max: 0.272422
+        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
+    asserts: []
+  vdd-ripple-options[r_filt=10,c_filt_x=0]:
+    corners: 65
+    measures:
+      h_band_db:
+        nominal: -62.5176
+        min: -73.5133
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: -42.3186
+        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+      f_band_peak:
+        nominal: 200678.0
+        min: 200678.0
+        min_at: nominal
+        max: 270707.0
+        max_at: C-ADC-BULK+ c_ldo- c_vcc5- k_psrr- l_rib_m+ len_rib+
+      lsb_pp:
+        nominal: 0.0984963
+        min: 0.0277739
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: 1.00779
+        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+      lsb_pp_fbuck:
+        nominal: 0.0647654
+        min: 0.00773236
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
+        max: 0.581282
+        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
+    asserts: []
+  vdd-ripple-options[r_filt=10,c_filt_x=22uF]:
+    corners: 65
+    measures:
+      h_band_db:
+        nominal: -72.5091
+        min: -83.5047
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: -55.5183
+        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+      f_band_peak:
+        nominal: 200678.0
+        min: 200678.0
+        min_at: nominal
+        max: 270707.0
+        max_at: C-ADC-BULK- c_ldo- c_vcc5- k_psrr- l_rib_m+ len_rib+
+      lsb_pp:
+        nominal: 0.0311778
+        min: 0.00879155
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: 0.220489
+        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+      lsb_pp_fbuck:
+        nominal: 0.0206961
+        min: 0.00247069
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
+        max: 0.128829
+        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
+    asserts: []
+  vdd-ripple-options[r_filt=22,c_filt_x=0]:
+    corners: 65
+    measures:
+      h_band_db:
+        nominal: -69.3394
+        min: -80.335
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: -49.1143
+        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+      f_band_peak:
+        nominal: 200678.0
+        min: 200678.0
+        min_at: nominal
+        max: 270707.0
+        max_at: C-ADC-BULK+ c_ldo- c_vcc5- k_psrr- l_rib_m+ len_rib+
+      lsb_pp:
+        nominal: 0.0449086
+        min: 0.0126634
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: 0.460876
+        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+      lsb_pp_fbuck:
+        nominal: 0.0295113
+        min: 0.00353337
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
+        max: 0.265029
+        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
+    asserts: []
+  vdd-ripple-options[r_filt=22,c_filt_x=22uF]:
+    corners: 65
+    measures:
+      h_band_db:
+        nominal: -79.332
+        min: -90.3276
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: -62.3141
+        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+      f_band_peak:
+        nominal: 200678.0
+        min: 200678.0
+        min_at: nominal
+        max: 270707.0
+        max_at: C-ADC-BULK- c_ldo- c_vcc5- k_psrr- l_rib_m+ len_rib+
+      lsb_pp:
+        nominal: 0.0142134
+        min: 0.00400793
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: 0.100832
+        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+      lsb_pp_fbuck:
+        nominal: 0.00942942
+        min: 0.00112896
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
+        max: 0.0587337
+        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
+    asserts: []
+  vdd-load-options[r_filt=0,c_filt_x=0]:
+    corners: 17
+    measures:
+      droop_mv:
+        nominal: 0.03635
+        min: 0.03635
+        min_at: nominal
+        max: 0.10041
+        max_at: C-ADC-BULK- c_ldo- l_rib_m+ len_rib+
+      lsb_droop:
+        nominal: 0.039868
+        min: 0.039868
+        min_at: nominal
+        max: 0.110128
+        max_at: C-ADC-BULK- c_ldo- l_rib_m+ len_rib+
+      dc_drop_mv:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
+    asserts: []
+  vdd-load-options[r_filt=0,c_filt_x=22uF]:
+    corners: 17
+    measures:
+      droop_mv:
+        nominal: 0.03635
+        min: 0.03635
+        min_at: nominal
+        max: 0.06358
+        max_at: C-ADC-BULK- c_ldo- l_rib_m+ len_rib+
+      lsb_droop:
+        nominal: 0.039868
+        min: 0.039868
+        min_at: nominal
+        max: 0.0697333
+        max_at: C-ADC-BULK- c_ldo- l_rib_m+ len_rib+
+      dc_drop_mv:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
+    asserts: []
+  vdd-load-options[r_filt=4.7,c_filt_x=0]:
+    corners: 17
+    measures:
+      droop_mv:
+        nominal: 1.11093
+        min: 1.11089
+        min_at: C-ADC-BULK+ c_ldo+ l_rib_m- len_rib-
+        max: 1.57992
+        max_at: C-ADC-BULK- c_ldo- l_rib_m+ len_rib+
+      lsb_droop:
+        nominal: 1.21845
+        min: 1.2184
+        min_at: C-ADC-BULK+ c_ldo+ l_rib_m- len_rib-
+        max: 1.73282
+        max_at: C-ADC-BULK- c_ldo- l_rib_m+ len_rib+
+      dc_drop_mv:
+        nominal: 0.01089
+        min: 0.00073
+        min_at: C-ADC-BULK- c_ldo- l_rib_m- len_rib-
+        max: 0.01143
+        max_at: C-ADC-BULK+ c_ldo- l_rib_m- len_rib+
+    asserts: []
+  vdd-load-options[r_filt=4.7,c_filt_x=22uF]:
+    corners: 17
+    measures:
+      droop_mv:
+        nominal: 0.40085
+        min: 0.40084
+        min_at: C-ADC-BULK+ c_ldo+ l_rib_m- len_rib-
+        max: 0.45551
+        max_at: C-ADC-BULK- c_ldo- l_rib_m+ len_rib+
+      lsb_droop:
+        nominal: 0.439644
+        min: 0.439633
+        min_at: C-ADC-BULK+ c_ldo+ l_rib_m- len_rib-
+        max: 0.499594
+        max_at: C-ADC-BULK- c_ldo- l_rib_m+ len_rib+
+      dc_drop_mv:
+        nominal: 0.12122
+        min: 0.10584
+        min_at: C-ADC-BULK- c_ldo- l_rib_m- len_rib-
+        max: 0.12358
+        max_at: C-ADC-BULK+ c_ldo- l_rib_m- len_rib+
+    asserts: []
+  vdd-load-options[r_filt=10,c_filt_x=0]:
+    corners: 17
+    measures:
+      droop_mv:
+        nominal: 1.2425
+        min: 1.24249
+        min_at: C-ADC-BULK+ c_ldo+ l_rib_m- len_rib-
+        max: 1.93415
+        max_at: C-ADC-BULK- c_ldo- l_rib_m+ len_rib+
+      lsb_droop:
+        nominal: 1.36275
+        min: 1.36274
+        min_at: C-ADC-BULK+ c_ldo+ l_rib_m- len_rib-
+        max: 2.12134
+        max_at: C-ADC-BULK- c_ldo- l_rib_m+ len_rib+
+      dc_drop_mv:
+        nominal: 0.15561
+        min: 0.05239
+        min_at: C-ADC-BULK- c_ldo- l_rib_m- len_rib-
+        max: 0.15749
+        max_at: C-ADC-BULK+ c_ldo- l_rib_m- len_rib+
+    asserts: []
+  vdd-load-options[r_filt=10,c_filt_x=22uF]:
+    corners: 17
+    measures:
+      droop_mv:
+        nominal: 0.40739
+        min: 0.40739
+        min_at: nominal
+        max: 0.46474
+        max_at: C-ADC-BULK- c_ldo- l_rib_m+ len_rib+
+      lsb_droop:
+        nominal: 0.446817
+        min: 0.446817
+        min_at: nominal
+        max: 0.509718
+        max_at: C-ADC-BULK- c_ldo- l_rib_m+ len_rib+
+      dc_drop_mv:
+        nominal: 0.40809
+        min: 0.38586
+        min_at: C-ADC-BULK- c_ldo- l_rib_m- len_rib-
+        max: 0.41078
+        max_at: C-ADC-BULK+ c_ldo- l_rib_m- len_rib+
+    asserts: []
+  vdd-load-options[r_filt=22,c_filt_x=0]:
+    corners: 17
+    measures:
+      droop_mv:
+        nominal: 1.28607
+        min: 1.28607
+        min_at: nominal
+        max: 2.09391
+        max_at: C-ADC-BULK- c_ldo- l_rib_m+ len_rib+
+      lsb_droop:
+        nominal: 1.41054
+        min: 1.41054
+        min_at: nominal
+        max: 2.29656
+        max_at: C-ADC-BULK- c_ldo- l_rib_m+ len_rib+
+      dc_drop_mv:
+        nominal: 0.74634
+        min: 0.49273
+        min_at: C-ADC-BULK- c_ldo- l_rib_m+ len_rib-
+        max: 0.74893
+        max_at: C-ADC-BULK+ c_ldo- l_rib_m- len_rib+
+    asserts: []
+  vdd-load-options[r_filt=22,c_filt_x=22uF]:
+    corners: 17
+    measures:
+      droop_mv:
+        nominal: 0.41068
+        min: 0.41068
+        min_at: nominal
+        max: 0.46829
+        max_at: C-ADC-BULK- c_ldo- l_rib_m- len_rib+
+      lsb_droop:
+        nominal: 0.450426
+        min: 0.450426
+        min_at: nominal
+        max: 0.513611
+        max_at: C-ADC-BULK- c_ldo- l_rib_m- len_rib+
+      dc_drop_mv:
+        nominal: 1.05579
+        min: 1.04707
+        min_at: C-ADC-BULK- c_ldo- l_rib_m- len_rib-
+        max: 1.05814
+        max_at: C-ADC-BULK+ c_ldo- l_rib_m- len_rib+
+    asserts: []
+  vdd-ripple-proposed:
+    corners: 129
+    measures:
+      h_band_db:
+        nominal: -72.5091
+        min: -83.5047
+        min_at: C-ADC-BULK+ c_filt_x- c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: -55.5183
+        max_at: C-ADC-BULK- c_filt_x- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+      f_band_peak:
+        nominal: 200678.0
+        min: 200678.0
+        min_at: nominal
+        max: 270707.0
+        max_at: C-ADC-BULK- c_filt_x- c_ldo- c_vcc5- k_psrr- l_rib_m+ len_rib+
+      lsb_pp:
+        nominal: 0.0311778
+        min: 0.00879155
+        min_at: C-ADC-BULK+ c_filt_x- c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: 0.220489
+        max_at: C-ADC-BULK- c_filt_x- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+      lsb_pp_fbuck:
+        nominal: 0.0206961
+        min: 0.00247069
+        min_at: C-ADC-BULK+ c_filt_x- c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
+        max: 0.128829
+        max_at: C-ADC-BULK- c_filt_x- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
+    asserts:
+    - expr: max['lsb_pp'] <= 2.0
+      why: 'with the proposed 10 ohm and 22 uF the converter''s ripple moves a full-scale reading by at most 2 LSB p-p (E9''s
+        budget) at every corner vdd-ripple fails at: the resistor damps the ribbon''s LC and adds its own pole'
+      pass: true
+  vdd-load-proposed:
+    corners: 33
+    measures:
+      droop_mv:
+        nominal: 0.40739
+        min: 0.40739
+        min_at: nominal
+        max: 0.46474
+        max_at: C-ADC-BULK- c_filt_x- c_ldo- l_rib_m+ len_rib+
+      lsb_droop:
+        nominal: 0.446817
+        min: 0.446817
+        min_at: nominal
+        max: 0.509718
+        max_at: C-ADC-BULK- c_filt_x- c_ldo- l_rib_m+ len_rib+
+      dc_drop_mv:
+        nominal: 0.40809
+        min: 0.38586
+        min_at: C-ADC-BULK- c_filt_x- c_ldo- l_rib_m- len_rib-
+        max: 0.41078
+        max_at: C-ADC-BULK+ c_filt_x- c_ldo- l_rib_m- len_rib+
+    asserts:
+    - expr: max['lsb_droop'] <= 1.0
+      why: 'and U-ADC''s own conversion current - 550 uA, its 5 V maximum, for a whole 24-clock frame - sags VDD = VREF by
+        under 1 LSB of a full-scale reading inside a conversion at every corner: the filter does not trade the ripple for
+        a load error (10 ohm alone does: vdd-load-options, 1.4-2.1 LSB)'
+      pass: true
+  vdd-load:
+    corners: 17
+    measures:
+      droop_mv:
+        nominal: 0.03635
+        min: 0.03635
+        min_at: nominal
+        max: 0.10041
+        max_at: C-ADC-BULK- c_ldo- l_rib_m+ len_rib+
+      lsb_droop:
+        nominal: 0.039868
+        min: 0.039868
+        min_at: nominal
+        max: 0.110128
+        max_at: C-ADC-BULK- c_ldo- l_rib_m+ len_rib+
+      dc_drop_mv:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
+    asserts:
+    - expr: max['lsb_droop'] <= 1.0
+      why: as netlisted, U-ADC's conversion current sags VDD = VREF by under 1 LSB of a full-scale reading inside a conversion
+        at every corner
+      pass: true
