@@ -325,14 +325,16 @@ tall:
   # Each: [x, y, kind] on the rear face - an envelope for the depth and
   # clash checks, NOT a placement; the layout places them.
   at:
-    value: [[36.0, 73.0, "cap"], [44.5, 73.0, "cap"], [36.0, 83.0, "cap"], [44.5, 83.0, "cap"],
+    value: [[36.0, 88.0, "cap"], [44.5, 88.0, "cap"], [36.0, 103.5, "cap"], [44.5, 103.5, "cap"],
             [25.25, 95.0, "trim"], [14.0, 95.0, "trim"], [36.5, 95.0, "trim"], [46.0, 95.0, "trim_smd"]]
     status: nominal
-    source: "[adr 0024] representative spots for the three 3296 trimmers, TRIM-RESP's 3224W (trim_smd) and four bulk caps, so the depth check sees them; the layout moves them. Every trimmer is on the rear face and adjusted from behind with the module out of the rack (mechanical/module/drc.echo 'trimmers adjustable from behind'). The caps sit on the right (2026-09-30) because U-ISO and its filter take the left, and in two columns above L-CM-ISO (2026-10-01), which takes the right-hand room above J-PWR-EURO"
+    source: "[adr 0024] representative spots for the three 3296 trimmers, TRIM-RESP's 3224W (trim_smd) and four bulk caps, so the depth check sees them; the layout moves them. Every trimmer is on the rear face and adjusted from behind with the module out of the rack (mechanical/module/drc.echo 'trimmers adjustable from behind'). The caps sit on the right, in two columns either side of the trimmers' row (2026-10-03): the iso board (iso_board) is behind the main board's middle, up to iso_board.y1, and a 6.3 x 11 can does not fit under it"
 
-# U-ISO, the instrument's isolated supply (ADR 0027): RECOM RPA20-2412SAW on the
-# main board's REAR face - 10.2 mm of body cannot go in the boards' gap. Its
-# pins stand out of the FRONT face, toward the jack board.
+# U-ISO, the instrument's isolated supply (ADR 0027): RECOM RPA20-2412SAW and
+# its filter on THE ISO BOARD (iso_board below; ADR 0023 point 2, amended
+# 2026-10-03), on that board's REAR face, its pins' tails out of the iso
+# board's front face into the gap toward the main board. Positions are in the
+# panel frame, like every other leaf here.
 iso:
   body:
     value: [25.4, 25.4, 10.2]
@@ -348,23 +350,72 @@ iso:
     source: "[ds] RECOM-RPA20-AW.pdf PD-8: pin d1.0 +/-0.1"
   # The fitted pins (plain RPA20 SAW: 1, 2, 4, 5, 6), offsets from the body's
   # centre in the panel frame, in that order. The footprint's pattern
-  # (woody:Converter_DCDC_RECOM_RPA20-RP20-xxxxSAW_THT) turned a quarter so the
-  # input pins (1, 2) face down and the 4/5/6 row runs across the top: every
-  # tail then clears SW-POWER's lugs, which a column at either side would not.
+  # (woody:Converter_DCDC_RECOM_RPA20-RP20-xxxxSAW_THT) turned so the input pins
+  # (1, 2) face UP and the 4/5/6 row runs across the BOTTOM, beside J-B2B-ISO:
+  # the output, which leaves the iso board, has the short way to the header,
+  # and the input comes round from L-CM-ISO on the right (2026-10-03; on the
+  # main board it was turned the other way, to clear SW-POWER's lugs).
   pins:
-    value: [[-2.54, -10.16], [2.54, -10.16], [10.16, 10.16], [0.0, 10.16], [-10.16, 10.16]]
+    value: [[2.54, 10.16], [-2.54, 10.16], [-10.16, -10.16], [0.0, -10.16], [10.16, -10.16]]
     status: settled
-    source: "[ds] RECOM-RPA20-AW.pdf PD-8 recommended footprint: columns 20.32 apart, the 3/4 row 2.54 inside the body's edge; 2 and 1 at 7.62 and 12.70 from it, 4/5/6 at 0/10.16/20.32 [calc: offsets from the centre, turned 90 degrees]"
+    source: "[ds] RECOM-RPA20-AW.pdf PD-8 recommended footprint: columns 20.32 apart, the 3/4 row 2.54 inside the body's edge; 2 and 1 at 7.62 and 12.70 from it, 4/5/6 at 0/10.16/20.32 [calc: offsets from the centre, turned 270 degrees]"
   at:
-    value: [14.2, 50.6]
+    value: [14.45, 63.0]
     status: nominal
-    source: "[calc] the only 25.4 square on the rear face: its bottom edge boards.part_clear above the NE8FAV's tails (ec.y + 12.35 + 0.5 = 37.85, taken as 37.9), its left 0.5 inside the board's edge (1.5), so the centre is 1.5 + 12.7, 37.9 + 12.7; J-B2B-MOD moved up to clear its top. The layout places it"
+    source: "[calc] on the iso board's rear face, at its left: the body's left edge 0.5 inside the board's (boards.side_margin + 0.5 + 12.7 = 14.2, taken as 14.45 for the courtyard's 0.25), its bottom above J-B2B-ISO and the iso board's lower strip (63.0 - 12.7 = 50.3). The layout places it; module.scad DRCs it on the iso board"
   # U-ISO's filter parts that stand tall: [x, y, kind, diameter or side, height, refdes]
   filter:
-    value: [[6.0, 68.5, "can", 6.3, 7.7, "C-ISO-BULK"], [6.0, 76.5, "can", 6.3, 5.8, "C-ISO-OUT"], [15.0, 68.5, "box", 6.0, 2.8, "L-ISO-IN"],
-            [38.2, 59.0, "toroid", 21.6, 11.43, "L-CM-ISO", 17.78, 4.0, 45]]
+    value: [[16.0, 79.8, "can", 6.3, 7.7, "C-ISO-BULK"], [19.0, 44.0, "can", 6.3, 5.8, "C-ISO-OUT"], [33.9, 47.9, "box", 6.0, 2.8, "L-ISO-IN"],
+            [38.75, 63.0, "toroid", 21.6, 11.43, "L-CM-ISO", 17.78, 4.0, 45]]
     status: nominal
-    source: "[repo] the rows' packages: C-ISO-BULK SMD can 6.3 x 7.7, C-ISO-OUT 6.3 x 5.8, L-ISO-IN 6.0 x 6.0 x 2.8 (hardware/module/power-entry/bom.csv); placed just above U-ISO, where the layout will want them - an envelope, not a placement. L-CM-ISO (Bourns PM3700-40-RC, owner 2026-10-01): [x, y, 'toroid', span over the terminals, height, refdes, body diameter, terminal width, rotation] = 21.6 +/-0.3 over the terminals, body D17.78, 11.43 max tall, terminals 4.0 wide [ds BOURNS-PM3700-CM-CHOKE.pdf p.1, Product Dimensions]. The only rear-face room for it is right of U-ISO and above J-PWR-EURO, and there its 21.6 span leaves nothing either side, so it is TURNED 45 degrees: the terminals then reach (10.8 + 2.0) / sqrt 2 = 9.05 each way [calc], and the body 8.89. The layout keeps the turn or finds other room; mechanical/module/drc.echo checks either"
+    source: "[repo] the rows' packages: C-ISO-BULK SMD can 6.3 x 7.7, C-ISO-OUT 6.3 x 5.8, L-ISO-IN 6.0 x 6.0 x 2.8 (hardware/module/power-entry/bom.csv); on the iso board's rear face, where the layout will want them - an envelope, not a placement: C-ISO-BULK across U-ISO's input pins at the top, C-ISO-OUT beside the output row and J-B2B-ISO at the bottom, L-ISO-IN between J-B2B-ISO's input pins and L-CM-ISO (and inside the ribbon fold's height, mechanical/module/drc.echo). L-CM-ISO (Bourns PM3700-40-RC, owner 2026-10-01): [x, y, 'toroid', span over the terminals, height, refdes, body diameter, terminal width, rotation] = 21.6 +/-0.3 over the terminals, body D17.78, 11.43 max tall, terminals 4.0 wide [ds BOURNS-PM3700-CM-CHOKE.pdf p.1, Product Dimensions]. Right of U-ISO its 21.6 span leaves nothing either side, so it is TURNED 45 degrees: the terminals then reach (10.8 + 2.0) / sqrt 2 = 9.05 each way [calc], and the body 8.89. The layout keeps the turn or finds other room; mechanical/module/drc.echo checks either"
+
+# THE ISO BOARD (PCB-MODULE-ISO; ADR 0023 point 2, amended 2026-10-03 by the
+# owner: "3 boards for module is correct"): U-ISO and its filter on a board of
+# their own, parallel to the main board and BEHIND it, so the main board's
+# middle - where the DAC meets the mod channels - is not shared with a 25 mm
+# converter's pins, its isolation gap and its return pour. Held off the main
+# board's rear face by stock spacers (the gap is standoff.stock_l, uncut) and
+# joined to it by J-B2B-ISO, soldered through both like J-B2B-MOD. Its outline
+# is derived in module.scad from the boards' side edges, the NE8FAV's tails
+# (its bottom edge) and J-PWR-EURO (the notch at its lower right, which the
+# header and its mated socket stand in); only its top edge is a leaf.
+iso_board:
+  y1:
+    value: 84.0
+    status: nominal
+    source: "[adr 0023, amended 2026-10-03] the iso board's top edge: below the rear trimmers (tall.at, y 95) so each stays adjustable from behind with nothing taller over it, and below the bulk caps' envelopes (tall.at, moved above it). mechanical/module/drc.echo 'trimmers adjustable from behind' counts the iso board as a taller part"
+  # The spacers between the main board's rear face and the iso board's front:
+  # [x, y], the panel frame. Three, so U-ISO's 20 g is held at both ends.
+  standoff_at:
+    value: [[11.5, 41.8], [4.8, 80.1], [45.7, 80.1]]
+    status: nominal
+    source: "[adr 0023, amended 2026-10-03] placed by hand: the lower one in the strip under U-ISO, right of CBL-LED-PANEL's run down the main board's front (its screw head is there); the upper two in the strip above U-ISO and L-CM-ISO. module.scad DRCs each against both faces"
+  # The most the main board's rear-face parts may stand under the iso board,
+  # and the iso board's front-face parts over it: the gap is shared.
+  under_h:
+    value: 3.0
+    status: nominal
+    source: "[adr 0023, amended 2026-10-03] SMD only under the iso board (a SOIC is 1.75, an SMA diode 2.4 [from memory]); with U-ISO's tails out of the iso board's front (iso.pin_l less boards.t) the DRC 'iso board gap' wants tail + under_h + boards.part_clear inside the gap"
+
+# J-B2B-ISO, the 2 x 5 header soldered through the main board and the iso
+# board: its insulator on the main board's rear face, its posts through the iso
+# board. Pin k is one conductor through both, so both boards take the same
+# unmirrored map (as J-B2B-MOD).
+b2b_iso:
+  rows:
+    value: 2
+    status: settled
+    source: "[repo] J-B2B-ISO: 2 x 5, 2.54 mm (hardware/module/bom.csv)"
+  pins:
+    value: 5
+    status: settled
+    source: "[repo] J-B2B-ISO: four nets on two pins each, one pair left unfitted between the input and the output for the isolation gap (hardware/boards/module-iso/README.md)"
+  # centre (x, y); long axis along x
+  at:
+    value: [30.25, 42.0]
+    status: nominal
+    source: "[adr 0023, amended 2026-10-03] at the iso board's lower right, under U-ISO's output row and left of J-PWR-EURO: its insulator on the main board's rear face, inside the power ribbon's fold, which clears it (mechanical/module/drc.echo)"
 
 # ----------------------------------------------------------- panel parts ----
 # PJ398SM (J-CV) - QingPu / Thonk drawing and the banked community STEP.

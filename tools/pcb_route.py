@@ -1487,7 +1487,7 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
                     for i in range(c0[0], c1[0] + 1):
                         for j in range(c0[1], c1[1] + 1):
                             if g_.contains(Point(*grids["F"].xy((i, j)))):
-                                out |= {(L, i, j) for L in ls}
+                                out |= {(L, i, j) for L in ls if L in grids}    # a THT pad's inner layer only where it is routed
             return out
         src, dst = cells_of(pa), cells_of(pb)
         if src & dst and {c[0] for c in src | dst} != {"F"} and any(c[0] == "F" for c in src | dst):

@@ -1,0 +1,457 @@
+(kicad_sch (version 20250114) (generator "sch.py") (generator_version "9.0")
+  (uuid 6a9e14b2-5ef9-50f2-a46f-093fe2587d84)
+  (paper "A3")
+  (title_block
+    (title "Woody module iso board (hardware/boards/module-iso)")
+    (comment 7 "title: Woody module iso board (hardware/boards/module-iso)")
+    (date "")
+    (rev "")
+    (company "Woody")
+    (comment 1 "SOURCE for the board - edit in KiCad 9. board-netlist.yaml is exported from it: python3 tools/kicad.py export hardware/boards/module-iso")
+    (comment 2 "Part facts ride on each symbol: Row (BOM row), Pins + Pins_source (pin map and its datasheet), Note")
+    (comment 3 "ADR 0019, ADR 0023 (amended 2026-10-03: three boards), ADR 0027 - power-entry's iso page; J-B2B-ISO joins it to the main board")
+    (comment 4 "SOURCE - edit in KiCad 9; tools/kicad.py exports board-netlist.yaml")
+  )
+  (lib_symbols
+    (symbol "Connector_Generic:Conn_02x05_Odd_Even"
+    		(pin_names
+    			(offset 1.016)
+    			(hide yes)
+    		)
+    		(exclude_from_sim no)
+    		(in_bom yes)
+    		(on_board yes)
+    		(property "Reference" "J"
+    			(at 1.27 7.62 0)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    			)
+    		)
+    		(property "Value" "Conn_02x05_Odd_Even"
+    			(at 1.27 -7.62 0)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    			)
+    		)
+    		(property "Footprint" ""
+    			(at 0 0 0)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    				(hide yes)
+    			)
+    		)
+    		(property "Datasheet" "~"
+    			(at 0 0 0)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    				(hide yes)
+    			)
+    		)
+    		(property "Description" "Generic connector, double row, 02x05, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)"
+    			(at 0 0 0)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    				(hide yes)
+    			)
+    		)
+    		(property "ki_keywords" "connector"
+    			(at 0 0 0)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    				(hide yes)
+    			)
+    		)
+    		(property "ki_fp_filters" "Connector*:*_2x??_*"
+    			(at 0 0 0)
+    			(effects
+    				(font
+    					(size 1.27 1.27)
+    				)
+    				(hide yes)
+    			)
+    		)
+    		(symbol "Conn_02x05_Odd_Even_1_1"
+    			(rectangle
+    				(start -1.27 6.35)
+    				(end 3.81 -6.35)
+    				(stroke
+    					(width 0.254)
+    					(type default)
+    				)
+    				(fill
+    					(type background)
+    				)
+    			)
+    			(rectangle
+    				(start -1.27 5.207)
+    				(end 0 4.953)
+    				(stroke
+    					(width 0.1524)
+    					(type default)
+    				)
+    				(fill
+    					(type none)
+    				)
+    			)
+    			(rectangle
+    				(start -1.27 2.667)
+    				(end 0 2.413)
+    				(stroke
+    					(width 0.1524)
+    					(type default)
+    				)
+    				(fill
+    					(type none)
+    				)
+    			)
+    			(rectangle
+    				(start -1.27 0.127)
+    				(end 0 -0.127)
+    				(stroke
+    					(width 0.1524)
+    					(type default)
+    				)
+    				(fill
+    					(type none)
+    				)
+    			)
+    			(rectangle
+    				(start -1.27 -2.413)
+    				(end 0 -2.667)
+    				(stroke
+    					(width 0.1524)
+    					(type default)
+    				)
+    				(fill
+    					(type none)
+    				)
+    			)
+    			(rectangle
+    				(start -1.27 -4.953)
+    				(end 0 -5.207)
+    				(stroke
+    					(width 0.1524)
+    					(type default)
+    				)
+    				(fill
+    					(type none)
+    				)
+    			)
+    			(rectangle
+    				(start 3.81 5.207)
+    				(end 2.54 4.953)
+    				(stroke
+    					(width 0.1524)
+    					(type default)
+    				)
+    				(fill
+    					(type none)
+    				)
+    			)
+    			(rectangle
+    				(start 3.81 2.667)
+    				(end 2.54 2.413)
+    				(stroke
+    					(width 0.1524)
+    					(type default)
+    				)
+    				(fill
+    					(type none)
+    				)
+    			)
+    			(rectangle
+    				(start 3.81 0.127)
+    				(end 2.54 -0.127)
+    				(stroke
+    					(width 0.1524)
+    					(type default)
+    				)
+    				(fill
+    					(type none)
+    				)
+    			)
+    			(rectangle
+    				(start 3.81 -2.413)
+    				(end 2.54 -2.667)
+    				(stroke
+    					(width 0.1524)
+    					(type default)
+    				)
+    				(fill
+    					(type none)
+    				)
+    			)
+    			(rectangle
+    				(start 3.81 -4.953)
+    				(end 2.54 -5.207)
+    				(stroke
+    					(width 0.1524)
+    					(type default)
+    				)
+    				(fill
+    					(type none)
+    				)
+    			)
+    			(pin passive line
+    				(at -5.08 5.08 0)
+    				(length 3.81)
+    				(name "Pin_1"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    				(number "1"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    			)
+    			(pin passive line
+    				(at -5.08 2.54 0)
+    				(length 3.81)
+    				(name "Pin_3"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    				(number "3"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    			)
+    			(pin passive line
+    				(at -5.08 0 0)
+    				(length 3.81)
+    				(name "Pin_5"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    				(number "5"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    			)
+    			(pin passive line
+    				(at -5.08 -2.54 0)
+    				(length 3.81)
+    				(name "Pin_7"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    				(number "7"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    			)
+    			(pin passive line
+    				(at -5.08 -5.08 0)
+    				(length 3.81)
+    				(name "Pin_9"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    				(number "9"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    			)
+    			(pin passive line
+    				(at 7.62 5.08 180)
+    				(length 3.81)
+    				(name "Pin_2"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    				(number "2"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    			)
+    			(pin passive line
+    				(at 7.62 2.54 180)
+    				(length 3.81)
+    				(name "Pin_4"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    				(number "4"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    			)
+    			(pin passive line
+    				(at 7.62 0 180)
+    				(length 3.81)
+    				(name "Pin_6"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    				(number "6"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    			)
+    			(pin passive line
+    				(at 7.62 -2.54 180)
+    				(length 3.81)
+    				(name "Pin_8"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    				(number "8"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    			)
+    			(pin passive line
+    				(at 7.62 -5.08 180)
+    				(length 3.81)
+    				(name "Pin_10"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    				(number "10"
+    					(effects
+    						(font
+    							(size 1.27 1.27)
+    						)
+    					)
+    				)
+    			)
+    		)
+    		(embedded_fonts no)
+    	)
+  )
+  (symbol (lib_id "Connector_Generic:Conn_02x05_Odd_Even") (at 106.68 63.5 0) (unit 1)
+    (in_bom no) (on_board yes) (dnp no)
+    (uuid bb2ea4f0-a5ea-580b-bb73-c68f248835e2)
+    (property "Reference" "J1" (at 107.95 53.34 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "2x5 2.54mm pin header" (at 107.95 73.66 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_2x05_P2.54mm_Vertical" (at 106.68 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 106.68 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "J-B2B-ISO" (at 106.68 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 9=9 10=10" (at 106.68 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Soldered through the module main board and the iso board, no mated contact (ADR 0023, amended 2026-10-03). Its pin k is the same conductor on both boards; tools/kicad.py check holds the two sheets to that. Pairs: 1-2 PWR_GND, 3-4 ISO_POS12, 5-6 unconnected (the isolation gap), 7-8 ISO_FILT_NEG, 9-10 ISO_FB2. ON THIS BOARD ON THE TOP SIDE (F.Cu), NOT MIRRORED, though its insulator is on the main board: both KiCad top views are panel views. Buy one: this instance is Assembly none, the main board's is the one ordered. hardware/boards/module-iso/README.md" (at 106.68 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "header position n on pin n, odd/even across the two rows as a 2x5 header numbers them" (at 106.68 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Samtec" (at 106.68 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "TSW-105-09-G-D" (at 106.68 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "" (at 106.68 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "none" (at 106.68 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid b6601957-6c00-5cab-ada2-6cf6d04fbd1a))
+    (pin "2" (uuid 51c81af8-3c91-5516-beca-92f95b378927))
+    (pin "3" (uuid b9533b28-d6a5-5914-8dcd-d93dd1b9a1db))
+    (pin "4" (uuid d89d8991-bae2-55f1-a218-873d315e6734))
+    (pin "5" (uuid 7e91c7cc-021d-5ee5-9323-3622c13387ce))
+    (pin "6" (uuid 97ccde98-ef8f-55c8-b705-e37604707975))
+    (pin "7" (uuid 8c42bfb0-6399-50ae-9f32-db7c9ef67f07))
+    (pin "8" (uuid 6f5384bf-f76d-5e25-89d1-f90f5f341535))
+    (pin "9" (uuid c463d424-306d-5fbf-adec-7233c2f1044a))
+    (pin "10" (uuid a54334b4-c53b-5ee5-a9c9-fcd1fd03ff1f))
+    (instances (project "module-iso" (path "/6a9e14b2-5ef9-50f2-a46f-093fe2587d84" (reference "J1") (unit 1))))
+  )
+  (wire (pts (xy 101.60 58.42) (xy 99.06 58.42)) (stroke (width 0) (type default)) (uuid a1433cb9-3238-50f8-9b03-344b9f1b5532))
+  (label "PWR_GND" (at 99.06 58.42 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 6a19aff5-5fd6-5d0f-abfc-8d8734b3e8eb))
+  (wire (pts (xy 114.30 58.42) (xy 116.84 58.42)) (stroke (width 0) (type default)) (uuid def19022-f310-55f5-8140-11637b46de31))
+  (label "PWR_GND" (at 116.84 58.42 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 585d39ad-22d3-5d4c-bc88-76a57491c7d2))
+  (wire (pts (xy 101.60 60.96) (xy 99.06 60.96)) (stroke (width 0) (type default)) (uuid 62fcdd02-7c90-5a1d-aba1-64a6581194a6))
+  (label "ISO_POS12" (at 99.06 60.96 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 77dc540c-2261-5a6a-96c9-85a1d194dae2))
+  (wire (pts (xy 114.30 60.96) (xy 116.84 60.96)) (stroke (width 0) (type default)) (uuid 2f7e362e-3aa8-5bd3-9901-0e28863003c4))
+  (label "ISO_POS12" (at 116.84 60.96 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid ddab4c28-b945-5141-bc41-d15b07fe7e57))
+  (no_connect (at 101.60 63.50) (uuid 47b7c33b-c160-5126-a5a5-6b328fe7bb21))
+  (no_connect (at 114.30 63.50) (uuid 516cc0f9-4ad6-57b9-b72c-9e68cfc05207))
+  (wire (pts (xy 101.60 66.04) (xy 99.06 66.04)) (stroke (width 0) (type default)) (uuid cc97f70e-79a3-567c-b314-13eabe468f17))
+  (label "ISO_FILT_NEG" (at 99.06 66.04 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid e54dea4f-81dc-5289-b239-7ec45a8ee2df))
+  (wire (pts (xy 114.30 66.04) (xy 116.84 66.04)) (stroke (width 0) (type default)) (uuid 480790f9-1ab0-5495-8223-4812d1414e17))
+  (label "ISO_FILT_NEG" (at 116.84 66.04 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid a3d8c7d0-94ed-561b-b692-d2cb7120443e))
+  (wire (pts (xy 101.60 68.58) (xy 99.06 68.58)) (stroke (width 0) (type default)) (uuid 997da841-0877-57ed-a57f-184f50d41aab))
+  (label "ISO_FB2" (at 99.06 68.58 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 279b1fb7-bf30-5947-a48a-fd336cd327d0))
+  (wire (pts (xy 114.30 68.58) (xy 116.84 68.58)) (stroke (width 0) (type default)) (uuid 8ddb09fe-bce5-5d0c-984a-9396a17fb28b))
+  (label "ISO_FB2" (at 116.84 68.58 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid ebc4625c-c90e-57d4-936f-5d67eb399d05))
+  (sheet (at 203.2 50.8) (size 50.8 12.70) (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
+    (stroke (width 0.1524) (type solid)) (fill (color 0 0 0 0.0000))
+    (uuid 85b2e46c-303f-55bc-9807-d3747cb71433)
+    (property "Sheetname" "power-entry" (at 203.2 49.53 0) (effects (font (size 1.27 1.27)) (justify left bottom)))
+    (property "Sheetfile" "../../module/power-entry/power-entry.iso.kicad_sch" (at 203.2 63.50 0) (effects (font (size 1.27 1.27)) (justify left top)))
+    (pin "ISO_FB2" passive (at 203.2 53.34 180) (uuid f8cdbf75-0170-5622-98ad-28be360bbf7d) (effects (font (size 1.27 1.27)) (justify left)))
+    (pin "ISO_FILT_NEG" passive (at 203.2 55.88 180) (uuid 8e95cd22-d30b-5403-bf94-893f6f148686) (effects (font (size 1.27 1.27)) (justify left)))
+    (pin "ISO_POS12" output (at 203.2 58.42 180) (uuid 39bdc5e1-88c8-5cb6-a011-834dc1254213) (effects (font (size 1.27 1.27)) (justify left)))
+    (pin "PWR_GND" passive (at 203.2 60.96 180) (uuid b7bc0f01-f9ae-52db-b58f-118a87ed6239) (effects (font (size 1.27 1.27)) (justify left)))
+    (instances (project "module-iso" (path "/6a9e14b2-5ef9-50f2-a46f-093fe2587d84" (page "2"))))
+  )
+  (wire (pts (xy 203.2 53.34) (xy 200.66 53.34)) (stroke (width 0) (type default)) (uuid 24426c08-b965-53a2-99f7-f4e30215b1e4))
+  (label "ISO_FB2" (at 200.66 53.34 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 9bb388cc-e201-5a03-8784-a4f53db17a12))
+  (wire (pts (xy 203.2 55.88) (xy 200.66 55.88)) (stroke (width 0) (type default)) (uuid 44cbddac-7893-5ff2-a2a7-a6de6cb3a37f))
+  (label "ISO_FILT_NEG" (at 200.66 55.88 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 1a081d12-fabd-5466-a24b-5209272a4bbd))
+  (wire (pts (xy 203.2 58.42) (xy 200.66 58.42)) (stroke (width 0) (type default)) (uuid 3e95ad3d-b752-56be-a9ac-f5e2cac56560))
+  (label "ISO_POS12" (at 200.66 58.42 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 17df3b43-c95f-5ed2-97aa-1233d99ad65e))
+  (wire (pts (xy 203.2 60.96) (xy 200.66 60.96)) (stroke (width 0) (type default)) (uuid 44bd0869-45aa-54e6-a11d-8836d16f22eb))
+  (label "PWR_GND" (at 200.66 60.96 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 0b4b0034-146d-5b04-aa53-e493c43bb83d))
+  (text "THE ISO BOARD (ADR 0023 point 2, amended 2026-10-03 by the owner: \"3 boards for module is correct\"): the instrument's isolated supply, U-ISO and its filter, on a board of its own behind the main board. Power-entry's page iso, placed once; J-B2B-ISO, soldered through this board and the main board, carries its four nets, each on two pins, with pins 5-6 left open between the input and the output." (at 40.64 30.48 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid b474b6dc-a1dd-5289-a229-0895c29b16dd))
+  (sheet_instances (path "/" (page "1")))
+)

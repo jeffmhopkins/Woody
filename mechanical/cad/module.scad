@@ -1,5 +1,5 @@
 // =====================================================================
-// WOODY - EURORACK MODULE (10HP A-100 panel, two boards; ADR 0023, 0024)
+// WOODY - EURORACK MODULE (10HP A-100 panel, three boards; ADR 0023, 0024)
 //
 // DO NOT PUT NUMBERS HERE. Dimensions come from generated/module-params.scad,
 // which tools/cad.py writes from config/module.yaml - each value there carries
@@ -12,6 +12,7 @@
 //   part = "panel"         the panel as it is cut, 2D (DXF)
 //   part = "jack_board"    the jack board's outline, 2D (DXF)
 //   part = "main_board"    the main board's outline, 2D (DXF)
+//   part = "iso_board"     the iso board's outline, 2D (DXF)
 //   part = "drc"           the design-rule report, echo only
 //   part = "pcb_geom"      where every board-mounted thing is, echo only
 //   part = "art"           the printed graphics' zones and what stands on the face, echo only
@@ -172,6 +173,29 @@ function toroid_half(f) = max(f[6] / 2, let(a = f[8], t = [f[3] / 2, f[7] / 2])
 iso_filter_env = [for (f = iso_filter) [f[5], f[2] == "can" ? ["c", [f[0], f[1]], f[3] / 2]
                                           : f[2] == "toroid" ? rect_c([f[0], f[1]], 2 * toroid_half(f), 2 * toroid_half(f))
                                           : rect_c([f[0], f[1]], f[3], f[3])]];
+// THE ISO BOARD (ADR 0023 point 2, amended 2026-10-03): U-ISO and its filter on a
+// third board, BEHIND the main board, on the stock spacers uncut. Its outline is
+// derived: the boards' side edges; its bottom edge boards.part_clear above the
+// NE8FAV's tails (the same 12.35 the tails' envelope below uses); a notch at its
+// lower right that J-PWR-EURO and its mated socket stand in; its top a leaf.
+ib_gap = standoff_stock_l;                 // main board rear face to iso board front face
+ib_z1 = mb_z0 - ib_gap;                    // iso board front face (toward the main board)
+ib_z0 = ib_z1 - boards_t;                  // its rear face, where U-ISO and its filter stand
+ib_y0 = ec[1] + 12.35 + boards_part_clear;
+ib_notch = [pw[0] - power_w / 2 - boards_part_clear, pw[1] + power_l / 2 + boards_part_clear];
+ib_poly = [[b_x0, ib_y0], [ib_notch[0], ib_y0], ib_notch, [b_x1, ib_notch[1]], [b_x1, iso_board_y1], [b_x0, iso_board_y1]];
+ib_rects = [["r", [b_x0, ib_y0], [ib_notch[0], iso_board_y1]], ["r", [b_x0, ib_notch[1]], [b_x1, iso_board_y1]]];   // the L as two rectangles
+function in_rect(A, R) = A[0] == "c" ? min(A[1][0] - A[2] - R[1][0], R[2][0] - A[1][0] - A[2], A[1][1] - A[2] - R[1][1], R[2][1] - A[1][1] - A[2])
+                                     : min(A[1][0] - R[1][0], R[2][0] - A[2][0], A[1][1] - R[1][1], R[2][1] - A[2][1]);
+function in_ib(A) = max([for (R = ib_rects) in_rect(A, R)]);   // how far inside the iso board's outline (< 0: out)
+// J-B2B-ISO: 2 x b2b_iso.pins, long axis along x; insulator on the main board's rear face.
+b2bi_l = (b2b_iso_pins - 1) * b2b_pitch;   // along x
+b2bi_w = (b2b_iso_rows - 1) * b2b_pitch;   // along y
+b2bi_rect = rect_c(b2b_iso_at, b2bi_l + 2.54, b2bi_w + 2.54);
+b2bi_pin_l = b2b_tail + boards_t + ib_gap + boards_t + b2b_protrude;   // J-B2B-ISO's pins, derived
+// The power ribbon's fold over the socket: the region behind the main board's rear face it lies in, and how far back it starts.
+fold = [pw[0] + power_socket_w / 2 - power_ribbon_w, b_y0, pw[0] + power_socket_w / 2, pw[1] + power_socket_l / 2];
+fold_h = mb_z0 - pw_top;
 
 // --------------------------------------------------------------- colours ----
 C_ALU = [0.80, 0.81, 0.83];
@@ -257,6 +281,13 @@ module main_board_2d() {
         translate([b_x0, b_y0]) square([b_x1 - b_x0, b_y1 - b_y0]);
         standoff_holes_2d(standoff_at);
         standoff_holes_2d(panel_standoff_at);
+        standoff_holes_2d(iso_board_standoff_at);
+    }
+}
+module iso_board_2d() {
+    difference() {
+        polygon(ib_poly);
+        standoff_holes_2d(iso_board_standoff_at);
     }
 }
 
@@ -436,18 +467,45 @@ module main_board_3d() {
             if (t[2] == "cap") P(C_CAP, false, str("tall cap ", i + 1)) cyl([t[0], t[1]], tall_cap_d, mb_z0, mb_z0 - tall_cap_h);
             else let(sz = trim_sz(t)) P(C_TRIM, false, str("tall trimmer ", i + 1)) box(t[0] - sz[0] / 2, t[1] - sz[1] / 2, mb_z0, t[0] + sz[0] / 2, t[1] + sz[1] / 2, mb_z0 - sz[2]);
         }
-        // U-ISO, RECOM RPA20-2412SAW (ADR 0027): the body on the rear face, the pins' tails out of the front.
-        P(C_METAL, false, "U-ISO") box(iso_at[0] - iso_body[0] / 2, iso_at[1] - iso_body[1] / 2, mb_z0,
-                                       iso_at[0] + iso_body[0] / 2, iso_at[1] + iso_body[1] / 2, mb_z0 - iso_body[2]);
-        P(C_BRASS, false, "U-ISO tails") for (q = iso_pins) cyl(iso_at + q, iso_pin_d, mb_z1, mb_z1 + iso_tail, 16);
+        // J-B2B-ISO (ADR 0023, amended 2026-10-03): the insulator on the rear face, the tails out of the front.
+        P(C_BLACK, false, "J-B2B-ISO") box(b2bi_rect[1][0], b2bi_rect[1][1], mb_z0, b2bi_rect[2][0], b2bi_rect[2][1], mb_z0 - b2b_insulator_h);
+        P(C_BRASS, false, "J-B2B-ISO tails") b2bi_pins(mb_z1, mb_z1 + b2b_tail);
+        for (i = [0 : len(iso_board_standoff_at) - 1])
+            P(C_METAL, false, str("iso standoff screw front ", i + 1)) cyl(iso_board_standoff_at[i], m3_head_d, mb_z1, mb_z1 + m3_head_k);
+    }
+}
+module b2bi_pins(z0, z1) {
+    for (r = [0 : b2b_iso_rows - 1], k = [0 : b2b_iso_pins - 1])
+        translate([b2b_iso_at[0] - b2bi_l / 2 + k * b2b_pitch - 0.32, b2b_iso_at[1] - b2bi_w / 2 + r * b2b_pitch - 0.32, min(z0, z1)])
+            cube([0.64, 0.64, abs(z1 - z0)]);
+}
+
+// -- the iso board and what it carries (layer -2.5; ADR 0023 point 2, amended 2026-10-03) --
+// U-ISO, RECOM RPA20-2412SAW (ADR 0027), and its filter on the iso board's REAR
+// face; U-ISO's pins' tails out of its front face, into the gap; the spacers
+// from the main board's rear face; J-B2B-ISO's posts through it.
+module iso_board_3d() {
+    translate([0, 0, ex(-2.5)]) {
+        P(C_PCB2, false, "iso board") slab(ib_z0, ib_z1) iso_board_2d();
+        P(C_METAL, false, "U-ISO") box(iso_at[0] - iso_body[0] / 2, iso_at[1] - iso_body[1] / 2, ib_z0,
+                                       iso_at[0] + iso_body[0] / 2, iso_at[1] + iso_body[1] / 2, ib_z0 - iso_body[2]);
+        P(C_BRASS, false, "U-ISO tails") for (q = iso_pins) cyl(iso_at + q, iso_pin_d, ib_z1, ib_z1 + iso_tail, 16);
         for (f = iso_filter)
-            if (f[2] == "can") P(C_CAP, false, f[5]) cyl([f[0], f[1]], f[3], mb_z0, mb_z0 - f[4]);
+            if (f[2] == "can") P(C_CAP, false, f[5]) cyl([f[0], f[1]], f[3], ib_z0, ib_z0 - f[4]);
             // a toroid: the body, and its four terminals on a cross at the board (2 tall, an estimate - the drawing does not dimension it)
             else if (f[2] == "toroid") P(C_BLACK, false, f[5]) union() {
-                cyl([f[0], f[1]], f[6], mb_z0, mb_z0 - f[4]);
-                translate([f[0], f[1], mb_z0 - 2]) rotate(f[8]) for (r = [0, 90]) rotate(r) translate([-f[3] / 2, -f[7] / 2, 0]) cube([f[3], f[7], 2]);
+                cyl([f[0], f[1]], f[6], ib_z0, ib_z0 - f[4]);
+                translate([f[0], f[1], ib_z0 - 2]) rotate(f[8]) for (r = [0, 90]) rotate(r) translate([-f[3] / 2, -f[7] / 2, 0]) cube([f[3], f[7], 2]);
             }
-            else P(C_BLACK, false, f[5]) box(f[0] - f[3] / 2, f[1] - f[3] / 2, mb_z0, f[0] + f[3] / 2, f[1] + f[3] / 2, mb_z0 - f[4]);
+            else P(C_BLACK, false, f[5]) box(f[0] - f[3] / 2, f[1] - f[3] / 2, ib_z0, f[0] + f[3] / 2, f[1] + f[3] / 2, ib_z0 - f[4]);
+        for (i = [0 : len(iso_board_standoff_at) - 1]) {
+            P(C_METAL, false, str("iso standoff ", i + 1)) translate([iso_board_standoff_at[i][0], iso_board_standoff_at[i][1], ib_z1])
+                difference() { cylinder(d = standoff_af / cos(30), h = ib_gap, $fn = 6); translate([0, 0, -1]) cylinder(d = standoff_hole_d - 0.2, h = ib_gap + 2); }
+            P(C_METAL, false, str("iso standoff screw rear ", i + 1)) cyl(iso_board_standoff_at[i], m3_head_d, ib_z0, ib_z0 - m3_head_k);
+        }
+        // in the gap, and out of the iso board's rear for the fillet (through the board is its own hole)
+        P(C_BRASS, false, "J-B2B-ISO pins") b2bi_pins(mb_z0 - b2b_insulator_h, ib_z1);
+        P(C_BRASS, false, "J-B2B-ISO posts rear") b2bi_pins(ib_z0, ib_z0 - b2b_protrude);
     }
 }
 // The toggle is panel-mounted and wired (ADR 0023): body on the panel's rear
@@ -485,6 +543,7 @@ module assembly() {
     jack_board_3d();
     between_3d();
     main_board_3d();
+    iso_board_3d();
     toggle_3d();
     led_3d();
     power_plug_3d();
@@ -682,6 +741,9 @@ module drc_report() {
          "mm: the stud's shank behind the panel's rear face (its length code taken from the flush head, PEM FH), and what is left of the spacer's length for the main board's screw");
     drc(undef, "J-B2B-MOD pin length (derived)", b2b_pin_l,
         str("mm = ", b2b_protrude, " proud of the jack board + ", boards_t, " + the gap + ", boards_t, " + ", b2b_tail, " out of the main board"));
+    drc(undef, "J-B2B-ISO pin length (derived)", b2bi_pin_l,
+        str("mm = ", b2b_tail, " out of the main board's front + ", boards_t, " + the gap (the stock spacer, ", ib_gap, ") + ", boards_t, " + ", b2b_protrude,
+            " out of the iso board's rear; the insulator on the main board's rear face"));
 
     // ---- the boards
     drc(b_y0 >= rail_band && b_y1 <= H - rail_band, "boards inside the rail band", [b_y0, b_y1], "mm, the boards' bottom and top edges (rail.band is tbd)");
@@ -731,20 +793,44 @@ module drc_report() {
     m_edge = minv([for (s = panel_standoff_at) min(s[0] - b_x0, b_x1 - s[0], s[1] - b_y0, b_y1 - s[1]) - m3_head_d / 2]);
     drc(min(j_edge, m_edge) >= boards_copper_edge, "standoff screw heads inside the boards' edges", [j_edge, m_edge],
         "mm, a head's edge to the nearest board edge: the standoffs between the boards (on the jack board), the panel standoffs (on the main board)");
-    mb_rear = concat([["J-PWR-EURO", rect_c(pw, power_w, power_l)],
-                      ["J-UMBILICAL tails", ["r", ec + [-9.28, -11.0], ec + [9.28, 12.35]]],
-                      ["J-B2B-MOD tails", rect_c(b2b_at, b2b_w + 2.54, b2b_l + 2.54)],
-                      ["J-LED-PANEL tails", rect_c(hdr, led_header_pitch + 1.7, 2.0)]],
+    mb_tall = concat([["J-PWR-EURO", rect_c(pw, power_w, power_l)]],
                      [for (i = [0 : len(tall_at) - 1]) let(t = tall_at[i]) [str("tall ", t[2], " ", i + 1),
-                        t[2] == "cap" ? ["c", [t[0], t[1]], tall_cap_d / 2] : rect_c([t[0], t[1]], trim_sz(t)[0], trim_sz(t)[1])]],
-                     [["U-ISO", iso_rect]], iso_filter_env);
-    ie = min(iso_rect[1][0] - b_x0, b_x1 - iso_rect[2][0], iso_rect[1][1] - b_y0, b_y1 - iso_rect[2][1]);
-    drc(ie >= 0, "U-ISO on the main board", ie, "mm, its body's edge inside the board's nearest edge");
-    // U-ISO's filter parts inside the board, L-CM-ISO's pads among them
-    fe = [for (e = iso_filter_env) [e[0], e[1][0] == "c" ? min(e[1][1][0] - e[1][2] - b_x0, b_x1 - e[1][1][0] - e[1][2], e[1][1][1] - e[1][2] - b_y0, b_y1 - e[1][1][1] - e[1][2])
-                                                         : min(e[1][1][0] - b_x0, b_x1 - e[1][2][0], e[1][1][1] - b_y0, b_y1 - e[1][2][1])]];
-    drc(min([for (e = fe) e[1]]) >= boards_copper_edge, "U-ISO's filter parts on the main board", fe,
-        "mm, each envelope's edge inside the board's nearest edge, against boards.copper_edge (L-CM-ISO's turned 45 degrees: config/module.yaml iso.filter)");
+                        t[2] == "cap" ? ["c", [t[0], t[1]], tall_cap_d / 2] : rect_c([t[0], t[1]], trim_sz(t)[0], trim_sz(t)[1])]]);
+    ib_spacers = [for (i = [0 : len(iso_board_standoff_at) - 1]) [str("iso standoff ", i + 1), ["c", iso_board_standoff_at[i], standoff_af / cos(30) / 2]]];
+    mb_rear = concat(mb_tall,
+                     [["J-UMBILICAL tails", ["r", ec + [-9.28, -11.0], ec + [9.28, 12.35]]],
+                      ["J-B2B-MOD tails", rect_c(b2b_at, b2b_w + 2.54, b2b_l + 2.54)],
+                      ["J-LED-PANEL tails", rect_c(hdr, led_header_pitch + 1.7, 2.0)],
+                      ["J-B2B-ISO", b2bi_rect]], ib_spacers);
+
+    // ---- the iso board (ADR 0023 point 2, amended 2026-10-03)
+    ib_parts = concat([["U-ISO", iso_rect]], iso_filter_env);
+    ibe = [for (e = ib_parts) [e[0], in_ib(e[1])]];
+    drc(min([for (e = ibe) e[1]]) >= boards_copper_edge - 1e-6, "U-ISO and its filter on the iso board", ibe,
+        "mm, each envelope's edge inside the iso board's outline, against boards.copper_edge (L-CM-ISO's turned 45 degrees: config/module.yaml iso.filter)");
+    ib_rear = concat(ib_parts, [for (s = iso_board_standoff_at) ["iso standoff screw head", ["c", s, m3_head_d / 2]]],
+                     [["J-B2B-ISO posts", rect_c(b2b_iso_at, b2bi_l + b2b_pad_d, b2bi_w + b2b_pad_d)]]);
+    ibr = worst(ib_rear, ib_rear, true);
+    drc(ibr[0] >= boards_part_clear, "iso board rear-face parts clear of each other", ibr[0], str("mm (", ibr[1], " / ", ibr[2], ")"));
+    ibh = minv([for (s = iso_board_standoff_at) in_ib(["c", s, m3_head_d / 2])]);
+    drc(ibh >= boards_copper_edge, "iso standoff screw heads inside the iso board's edges", ibh, "mm, a head's edge to the nearest edge of the iso board");
+    ibp = in_ib(rect_c(b2b_iso_at, b2bi_l + b2b_pad_d, b2bi_w + b2b_pad_d));
+    drc(ibp >= boards_copper_edge, "J-B2B-ISO's pads inside the iso board", ibp, "mm, the pads' edge to the iso board's nearest edge");
+    drc(iso_tail + iso_board_under_h + boards_part_clear <= ib_gap, "iso board gap", [ib_gap, iso_tail, iso_board_under_h],
+        str("mm: the gap (the stock spacer, uncut), U-ISO's tails out of the iso board's front, and the most a main board rear-face part may stand under it (iso_board.under_h) - tails + parts + boards.part_clear inside the gap"));
+    drc(ib_gap > b2b_insulator_h + boards_part_clear, "J-B2B-ISO's insulator in the gap", ib_gap - b2b_insulator_h, "mm from its top to the iso board's front face");
+    // Nothing on the main board's rear face that stands taller than under_h may be under the iso board.
+    mt = [for (t = concat(mb_tall, [["J-UMBILICAL tails", ["r", ec + [-9.28, -11.0], ec + [9.28, 12.35]]]])) [t[0], -in_ib(t[1])]];
+    drc(min([for (t = mt) t[1]]) >= boards_part_clear, "main board's tall rear-face parts clear of the iso board", mt,
+        "mm in plan from each (J-PWR-EURO, the bulk caps, the trimmers, the NE8FAV's tails) to the iso board's outline");
+    // The power ribbon folds over the socket, behind the main board: where the iso board is under it, its parts must stay below the fold.
+    ib_fold = [for (e = concat(ib_parts, [["J-B2B-ISO posts", rect_c(b2b_iso_at, b2bi_l, b2bi_w)]]))
+               if (gap2(e[1], ["r", [fold[0], fold[1]], [fold[2], fold[3]]]) < 0) e[0]];
+    ib_fold_h = max(concat([0], [for (e = ib_parts) if (gap2(e[1], ["r", [fold[0], fold[1]], [fold[2], fold[3]]]) < 0)
+                                   let(f = [for (g = iso_filter) if (g[5] == e[0]) g]) len(f) ? f[0][4] : iso_body[2]],
+                           [for (x = ib_fold) if (x == "J-B2B-ISO posts") b2b_protrude]));
+    drc(ib_gap + boards_t + ib_fold_h + boards_part_clear <= fold_h, "iso board under the power ribbon's fold", [ib_fold, ib_gap + boards_t + ib_fold_h, fold_h],
+        "mm: the iso board's parts under the fold in plan, how far back the tallest of them reaches from the main board's rear face, and where the fold starts");
     hr = worst(rheads, mb_rear);
     drc(hr[0] >= boards_part_clear, "standoff screw heads clear of the main board's rear-face parts", hr[0], str("mm (", hr[2], ")"));
     rr = worst(mb_rear, mb_rear, true);
@@ -756,17 +842,17 @@ module drc_report() {
     // against each trimmer's centre (the slot is inside the body), and the
     // ribbon's fold must not be over it.
     let(tr = [for (i = [0 : len(tall_at) - 1]) let(t = tall_at[i]) if (t[2] != "cap") [i, t]],
+        // the iso board's parts stand behind the iso board: taller, from the main board's rear face, by the gap and the board
         hts = concat([for (i = [0 : len(tall_at) - 1]) let(t = tall_at[i]) t[2] == "cap" ? tall_cap_h : trim_sz(t)[2]],
-                     [iso_body[2]], [for (f = iso_filter) f[4]]),
+                     [ib_gap + boards_t + iso_body[2]], [for (f = iso_filter) ib_gap + boards_t + f[4]], [ib_gap + boards_t, ib_gap + boards_t]),
         envs = concat([for (i = [0 : len(tall_at) - 1]) let(t = tall_at[i]) t[2] == "cap" ? ["c", [t[0], t[1]], tall_cap_d / 2] : rect_c([t[0], t[1]], trim_sz(t)[0], trim_sz(t)[1])],
-                      [iso_rect], [for (e = iso_filter_env) e[1]]),
-        fold = [pw[0] + power_socket_w / 2 - power_ribbon_w, b_y0, pw[0] + power_socket_w / 2, pw[1] + power_socket_l / 2],
+                      [iso_rect], [for (e = iso_filter_env) e[1]], ib_rects),
         acc = [for (q = tr) let(t = q[1], h = trim_sz(t)[2],
                    d = min(concat([for (k = [0 : len(envs) - 1]) if (k != q[0] && hts[k] > h) gap2(["c", [t[0], t[1]], 0], envs[k])], [1e9])),
                    under = t[0] > fold[0] && t[0] < fold[2] && t[1] > fold[1] && t[1] < fold[3])
                  [str(t[2], " ", q[0] + 1), under ? -1 : d - rules_driver_d / 2]])
         drc(min([for (a = acc) a[1]]) >= 0, "trimmers adjustable from behind", acc,
-            str("mm from each trimmer's centre to the nearest TALLER rear-face part, less a ", rules_driver_d, " mm screwdriver's radius (rules.driver_d), with the module out of the rack; -1 = under the power ribbon's fold"));
+            str("mm from each trimmer's centre to the nearest TALLER rear-face part - the iso board and what stands on it counted from the main board's rear face - less a ", rules_driver_d, " mm screwdriver's radius (rules.driver_d), with the module out of the rack; -1 = under the power ribbon's fold"));
     mb_front = [["J-UMBILICAL body", ["r", ec - fl / 2, ec + fl / 2]], ["J-B2B-MOD", rect_c(b2b_at, b2b_w + 2.54, b2b_l + 2.54)]];
     sf = worst([for (s = sp) ["standoff", s[1]]], mb_front);
     drc(sf[0] >= boards_part_clear, "standoffs clear of the NE8FAV and J-B2B-MOD between the boards", sf[0], str("mm (", sf[2], ")"));
@@ -793,25 +879,27 @@ module drc_report() {
     // LED-PANEL behind the panel (ADR 0024 point 16): its nut, housing and
     // sleeved joints stand in the gap between the panel and the main board,
     // below the jack board; the lead turns down there to J-LED-PANEL.
-    iso_tails = [for (q = iso_pins) ["U-ISO tail", ["c", iso_at + q, iso_pin_d / 2]]];
+    // what stands out of the main board's front face low down: J-B2B-ISO's tails, the iso standoffs' screw heads
+    mb_front_low = concat([["J-B2B-ISO tails", rect_c(b2b_iso_at, b2bi_l + b2b_pad_d, b2bi_w + b2b_pad_d)]],
+                          [for (s = iso_board_standoff_at) ["iso standoff screw head", ["c", s, m3_head_d / 2]]]);
     drc(led_tail_room >= 3 * led_wire_d, "LED-PANEL behind the panel: in front of the main board", [led_body_l - T, led_tail_l, led_tail_room],
         str("mm: the housing behind the panel's rear face, the cut leads' sleeved joints behind it, and what is left to the main board's front face - room for the lead's wires to turn (3 x led.wire_d, ",
             3 * led_wire_d, "); uncut, the leads would reach through the board"));
     lc = worst([["LED-PANEL nut", ["c", led, led_nut_d / 2]], ["LED-PANEL tail", ["c", led, led_tail_d / 2]]],
                concat([["jack board", ["r", [b_x0, jb_y0], [b_x1, b_y1]]], ["SW-POWER body", rect_c(tog, tog_body[0], tog_body[1])],
                        ["J-UMBILICAL body", ["r", ec - fl / 2, ec + fl / 2]], ["J-LED-PANEL", hdr_rect]],
-                      [for (s = psp) ["panel standoff", s[1]]], iso_tails));
+                      [for (s = psp) ["panel standoff", s[1]]], mb_front_low));
     drc(lc[0] >= boards_part_clear, "LED-PANEL behind the panel: clear of the jack board, SW-POWER, the NE8FAV, the panel standoffs and J-LED-PANEL", lc[0],
         str("mm in plan (", lc[1], " / ", lc[2], "); led.nut_d is tbd"));
     he = min(hdr_rect[1][0] - b_x0, b_x1 - hdr_rect[2][0], hdr_rect[1][1] - b_y0);
-    hc = worst([["J-LED-PANEL", hdr_rect]], concat(iso_tails, [["J-UMBILICAL body", ["r", ec - fl / 2, ec + fl / 2]]],
+    hc = worst([["J-LED-PANEL", hdr_rect]], concat(mb_front_low, [["J-UMBILICAL body", ["r", ec - fl / 2, ec + fl / 2]]],
                                                   [for (s = panel_standoff_at) ["panel standoff head keep-out", ["c", s, m3_head_d / 2 + boards_part_clear]]]));
     drc(he >= boards_copper_edge && hc[0] >= boards_part_clear, "J-LED-PANEL on the main board's front face", [he, hc[0]],
         str("mm: the mated header's body to the board's edge (boards.copper_edge ", boards_copper_edge, "), and to the nearest front-face part (", hc[2], ")"));
     drc(hdr_room >= 3 * led_wire_d, "J-LED-PANEL's mated housing behind the panel: room for the lead to turn", [led_header[2], hdr_room],
         "mm: the B2B-XH-A with its XHP-2 mated above the main board's front face, and what is left to the panel's rear face for the wires leaving its top (3 x led.wire_d)");
     lp = ["r", [led[0] - lead_w / 2, hdr[1]], [led[0] + lead_w / 2, led[1]]];
-    lw = worst([["CBL-LED-PANEL", lp]], concat(iso_tails, [["SW-POWER body", rect_c(tog, tog_body[0], tog_body[1])]],
+    lw = worst([["CBL-LED-PANEL", lp]], concat(mb_front_low, [["SW-POWER body", rect_c(tog, tog_body[0], tog_body[1])]],
                                               [for (s = psp) ["panel standoff", s[1]]]));
     drc(lw[0] >= boards_part_clear && lead_spare >= 0, "CBL-LED-PANEL's run, LED to header", [lw[0], lead_run, lead_spare],
         str("mm: the lead's two wires, in plan, to the nearest part they pass (", lw[2], "); the run as laid, joint to crimp; and what is left of led.cable_l (",
@@ -823,7 +911,7 @@ module drc_report() {
           ["tallest bulk cap (tbd height)", mb_d + boards_t + tall_cap_h],
           ["trimmer", mb_d + boards_t + tall_trim[2]],
           ["NE8FAV tails", mb_d + ethercon_tails],
-          ["U-ISO", mb_d + boards_t + iso_body[2]]];
+          ["the iso board's tallest part", mb_d + boards_t + ib_gap + boards_t + max(concat([iso_body[2]], [for (f = iso_filter) f[4]]))]];
     dmax = max([for (d = ds) d[1]]);
     // Not a rule since 2026-09-30 - the owner: "Don't worry about module depth." Reported, not judged.
     echo("DRC", "INFO", "depth behind the panel, against the Intellijel Palette", [dmax, case_depth_max - dmax],
@@ -907,8 +995,10 @@ module panel_art() {
 module pcb_geometry() {
     for (b = [["module-jack", b_x0, jb_y0, b_x1, b_y1], ["module-main", b_x0, b_y0, b_x1, b_y1]])
         echo("PCB", b[0], "board", "outline", b[1], b[2], b[3], b[4]);
+    echo("PCB", "module-iso", "board", "outline", ib_poly);
     echo("PCB", "module-jack", "board", "thickness", boards_t, "depth", jb_d, "side", "jacks and pots on the front (toward the panel); a plain rectangle, no cut-out");
-    echo("PCB", "module-main", "board", "thickness", boards_t, "depth", mb_d, "side", "NE8FAV, J-LED-PANEL and J-B2B-MOD's insulator on the front; power header, trimmers, bulk caps on the rear");
+    echo("PCB", "module-main", "board", "thickness", boards_t, "depth", mb_d, "side", "NE8FAV, J-LED-PANEL and J-B2B-MOD's insulator on the front; power header, J-B2B-ISO's insulator, trimmers, bulk caps on the rear");
+    echo("PCB", "module-iso", "board", "thickness", boards_t, "depth", mb_d + boards_t + ib_gap, "side", "U-ISO and its filter on the REAR (away from the main board); J-B2B-ISO's posts through it; the front faces the main board's rear across the gap");
     for (j = jacks) echo("PCB", "module-jack", "jack", j[0], j[1][0], j[1][1], jsgn(j[1]) > 0 ? 180 : 0,
                          "PJ398SM on its side: the angle (deg, from +x) from the barrel to the sleeve pad; pins 3, 2, 1 at this many mm along it", [-jack_pins[0], -jack_pins[1], -jack_pins[2]]);
     for (i = [0 : 2]) echo("PCB", "module-jack", "pot", layout_pots[i], pots[i][0], pots[i][1], 0, "R0904N, pins down at dy", pot_pins[0], "pitch", pot_pins[1]);
@@ -920,6 +1010,12 @@ module pcb_geometry() {
     }
     for (i = [0 : len(panel_standoff_at) - 1])
         echo("PCB", "module-main", "standoff", str("MECH-PANEL-STANDOFF-MOD ", i + 1), panel_standoff_at[i][0], panel_standoff_at[i][1], standoff_hole_d, m3_head_d, pso_l);
+    for (i = [0 : len(iso_board_standoff_at) - 1]) for (b = ["module-main", "module-iso"])
+        echo("PCB", b, "standoff", str("MECH-STANDOFF-ISO ", i + 1), iso_board_standoff_at[i][0], iso_board_standoff_at[i][1], standoff_hole_d, m3_head_d, ib_gap);
+    for (b = ["module-main", "module-iso"])
+        echo("PCB", b, "connector", "J-B2B-ISO", b2b_iso_at[0], b2b_iso_at[1], 0, b2b_iso_rows, b2b_iso_pins, b2b_pitch,
+             b == "module-main" ? "long axis along x, pin 1 at the bottom left seen from the panel, its pair above it; TOP side (F.Cu), NOT mirrored - the insulator is on this board's rear, but each pin is one straight conductor through both boards, so both KiCad top views (panel views) take the same unmirrored pin map"
+                                : "long axis along x, pin 1 at the bottom left seen from the panel, its pair above it; top side (F.Cu), the posts through this board from the main board's side");
     for (b = ["module-jack", "module-main"])
         echo("PCB", b, "connector", "J-B2B-MOD", b2b_at[0], b2b_at[1], 0, b2b_rows, b2b_pins, b2b_pitch,
              b == "module-jack" ? "long axis along y, pin 1 at the top left; TOP side (F.Cu), NOT mirrored - the header's body is on this board's rear, but each pin is one straight conductor through both boards, so pin k sits at the same panel-frame place on both, and both KiCad top views are panel views: the same unmirrored pin map as the main board. Placed on B.Cu it mirrors, and every net lands one column over"
@@ -927,14 +1023,15 @@ module pcb_geometry() {
     echo("PCB", "module-main", "connector", "J-UMBILICAL", ec[0], ec[1], 0, "NE8FAV, latch up");
     echo("PCB", "module-main", "connector", "J-PWR-EURO", pw[0], pw[1], 0, "rear face, long axis along y, pin 1 (-12 V) at the bottom");
     for (i = [0 : len(tall_at) - 1]) echo("PCB", "module-main", "tall", tall_at[i][2], tall_at[i][0], tall_at[i][1], "rear face, an envelope - the layout places these");
-    echo("PCB", "module-main", "tall", "U-ISO", iso_at[0], iso_at[1], "rear face, RPA20-2412SAW body", iso_body, "; pins' tails out of the front face", iso_tail);
+    echo("PCB", "module-iso", "tall", "U-ISO", iso_at[0], iso_at[1], "rear face, RPA20-2412SAW body", iso_body, "; pins' tails out of the front face", iso_tail);
     for (f = iso_filter) if (f[2] == "toroid")
-        echo("PCB", "module-main", "tall", f[5], f[0], f[1], str("rear face, woody:L_CommonModeChoke_Bourns_PM3700 turned ", f[8], " degrees (its span over the terminals, ", f[3], ", does not fit square here); an envelope - the layout places it"));
-        else echo("PCB", "module-main", "tall", f[5], f[0], f[1], "rear face, an envelope - the layout places these");
+        echo("PCB", "module-iso", "tall", f[5], f[0], f[1], str("rear face, woody:L_CommonModeChoke_Bourns_PM3700 turned ", f[8], " degrees (its span over the terminals, ", f[3], ", does not fit square here); an envelope - the layout places it"));
+        else echo("PCB", "module-iso", "tall", f[5], f[0], f[1], "rear face, an envelope - the layout places these");
     echo("PCB", "module-main", "panel", "SW-POWER", tog[0], tog[1], str("panel-mounted, wired, ONE nut on the front (the body on the panel's rear face; the D4 kit's second nut not fitted); lever ON ", layout_toggle_on, ", lugs in a line along the throw; lugs end"), zd(toggle_body[2] + toggle_lugs) - mb_z1, "in front of the main board");
     // Keep-outs: what each face must leave clear, and the height it allows.
     for (j = jacks) echo("PCB", "module-jack", "keepout", str("barrel ", j[0]), j[1][0], j[1][1], 3.0, "d, no copper under the barrel (Thonk's PJ398SM note)");
-    for (b = ["module-jack", "module-main"]) for (s = b == "module-main" ? concat(standoff_at, panel_standoff_at) : standoff_at)
+    for (b = ["module-jack", "module-main", "module-iso"])
+        for (s = b == "module-main" ? concat(standoff_at, panel_standoff_at, iso_board_standoff_at) : b == "module-iso" ? iso_board_standoff_at : standoff_at)
         echo("PCB", b, "keepout", "standoff head", s[0], s[1], m3_head_d + 2 * boards_part_clear,
              b == "module-jack" ? "d, no parts and no copper but the mount's own pad, which is AGND_MOD (metal standoffs; power-entry.md Grounding)"
                                 : "d, no parts and no copper but the mount's own pad, on no net (metal standoffs; power-entry.md Grounding)");
@@ -945,8 +1042,15 @@ module pcb_geometry() {
          zd(toggle_body[2] + toggle_lugs) - mb_z1, "the lugs' ends above the front face");
     echo("PCB", "module-main", "keepout", "front: under LED-PANEL", led[0] - led_nut_d / 2, led[1] - led_nut_d / 2, led[0] + led_nut_d / 2, led[1] + led_nut_d / 2,
          led_tail_room - boards_part_clear, "max part height on the front face under the LED's housing and its sleeved joints");
-    echo("PCB", "module-main", "keepout", "rear: ribbon fold", pw[0] + power_socket_w / 2 - power_ribbon_w, b_y0, pw[0] + power_socket_w / 2, pw[1] + power_socket_l / 2,
-         mb_z0 - pw_top, "max part height on the rear face under the ribbon (the socket's back)");
+    echo("PCB", "module-main", "keepout", "rear: ribbon fold", fold[0], fold[1], fold[2], fold[3], fold_h, "max part height on the rear face under the ribbon (the socket's back)");
+    for (R = ib_rects)
+        echo("PCB", "module-main", "keepout", "rear: under the iso board", R[1][0], R[1][1], R[2][0], R[2][1], iso_board_under_h,
+             "max part height on the rear face under the iso board (iso_board.under_h); U-ISO's tails stand out of the iso board's front into the same gap");
+    for (R = ib_rects)
+        echo("PCB", "module-iso", "keepout", "front: toward the main board", R[1][0], R[1][1], R[2][0], R[2][1], iso_board_under_h,
+             "max part height on the front face (it faces the main board's rear, across the gap)");
+    echo("PCB", "module-iso", "keepout", "rear: ribbon fold", fold[0], fold[1], fold[2], fold[3], fold_h - ib_gap - boards_t - boards_part_clear,
+         "max part height on the rear face under the power ribbon's fold (it starts this far behind the iso board)");
 }
 
 // ============================================================== figure ====
@@ -958,6 +1062,7 @@ if (!figure) {
     else if (part == "panel") panel_2d();
     else if (part == "jack_board") jack_board_2d();
     else if (part == "main_board") main_board_2d();
+    else if (part == "iso_board") iso_board_2d();
     else if (part == "drc") drc_report();
     else if (part == "pcb_geom") pcb_geometry();
     else if (part == "art") panel_art();

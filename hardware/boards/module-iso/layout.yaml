@@ -1,0 +1,126 @@
+# FIRST-LAYOUT INPUT for the module iso board's PCB - tools/pcb.py layout, `kind: module`
+# (tools/pcb_module.py). Once the .kicad_pcb exists it is the source; this file records
+# how the first layout was made.
+#
+# THE ISO BOARD (ADR 0023 point 2, amended 2026-10-03 by the owner: "3 boards for
+# module is correct"): the instrument's isolated supply, U-ISO and its filter, on a
+# board of its own behind the module main board. FROM THE MODULE CAD, NOT HERE
+# (mechanical/module/export/pcb-geometry.echo, `module-iso` lines; the outline from
+# iso-board.dxf): U-ISO, J-B2B-ISO, the three standoffs and the keep-outs. Coordinates
+# are the panel frame (config/module.yaml), KiCad's top view. FRONT face (toward the
+# main board, and the panel) = F.Cu; every part but J-B2B-ISO's pins is on the REAR.
+
+kind: module
+cluster: module-iso
+outline: iso-board.dxf
+layers: 2
+
+# The other module boards' rules and board house, so one order makes every board; the
+# edge clearance is config/module.yaml boards.copper_edge (check holds it).
+rules:
+  track: 0.25
+  track_min: 0.2
+  clearance: 0.2
+  via: 0.7
+  via_drill: 0.3
+  via_min: 0.66
+  drill_min: 0.3
+  edge_clearance: 0.5
+  power_track: 0.4
+
+fab:
+  house: JLCPCB
+  hole_clearance: 0.28
+  hole_to_hole: 0.45
+  annular_min: 0.18
+  silk_text_min: 1.0
+  silk_line_min: 0.15
+  silk_to_pad: 0.15
+  finish: "HAL lead-free"
+  # The module boards' mask colour is NOT DECIDED (owner); green, the board house's
+  # default, until it is. Decided by: the owner, before the first order.
+  mask: Green
+  silk: White
+  copper_oz: 1
+
+# The three MECH-STANDOFF-ISO pads: board-only holes on NO net (hardware/unplaced.csv).
+mounts:
+  footprint: "MountingHole:MountingHole_3.2mm_M3_Pad"
+  net: null
+
+# J-B2B-ISO on the TOP face, unmirrored, as J-B2B-MOD on the jack board: pin k at the
+# same panel-frame place as the main board's pin k - check_b2b holds it against
+# hardware/boards/module-main. Only its posts are on this board; its insulator is on the
+# main board's rear face, so its courtyard is drawn on this board's front
+# (toward the main board) where it stands in the gap.
+connectors:
+  J-B2B-ISO: {row: J-B2B-ISO}
+cad_tall:
+  U-ISO: {row: U-ISO, pins: ["1", "2", "4", "5", "6"]}
+b2b:
+  - {row: J-B2B-ISO, other: hardware/boards/module-main}
+
+# U-ISO's barrier (ADR 0027): its input side - J-B2B-ISO's input pairs, the filter and
+# the converter's input pins - and its output side - the isolated +12 V and its return -
+# keep this far apart on both layers. 2.0 mm is a FUNCTIONAL gap, not a safety rating
+# [from memory]: both sides are SELV (+-12 V), DC-tied at the etherCON and the star on
+# the main board; what it keeps small is the stray capacitance across the converter
+# that L-CM-ISO and C-ISO-Y exist to manage. C-ISO-Y (C46) bridges it by design.
+isolation:
+  gap: 2.0
+  input: [ISO_FB2, ISO_FILT_POS, ISO_FILT_NEG, ISO_VIN_POS, ISO_VIN_NEG]
+  output: [ISO_POS12, PWR_GND]
+  bridge: [C46]
+
+# Net classes [calc, as the main board's: IPC-2221 outer 1 oz 10 C]: the converter's
+# output up to the LT1641's 1.10 A worst-case trip (umbilical-load-switch.md) wants
+# 0.34 mm, its input ~0.37 A per rail (power-entry.md); 0.8 on this board, which has
+# the room and nothing else to route.
+net_classes:
+  supply:
+    nets: [/ISO_POS12, /PWR_GND, /ISO_FB2, /ISO_FILT_NEG, /power-entry/ISO_FILT_POS,
+           /power-entry/ISO_VIN_POS, /power-entry/ISO_VIN_NEG]
+    track: 0.8
+
+# The filter round the converter (power-entry.md, the isolated supply): L-ISO-IN between
+# J-B2B-ISO's +12 V pair and L-CM-ISO; C-ISO-BULK (C2) and C-ISO-IN (C44) across U-ISO's
+# input pins at the top; C-ISO-OUT (C45) beside its output row and J-B2B-ISO's output
+# pairs at the bottom; C-ISO-Y (C46) across the barrier at the converter's top left.
+parts:
+  C2:   [16.0, 79.8, 0, rear]
+  C44:  [23.0, 78.5, 0, rear]
+  C45:  [19.0, 44.0, 0, rear]
+  C46:  [9.2, 77.0, 180, rear]
+  L1:   [33.9, 47.9, 0, rear]
+  L2:   [38.75, 63.0, 45, rear]
+
+# How tall each footprint stands (pcb_module.check_heights), with its source. Rooms: the
+# front faces the main board across the gap (the CAD's keep-out, iso_board.under_h);
+# the rear, the main board's rear room 25.6 [repo hardware/boards/module-main/layout.yaml
+# rooms] less the gap and this board, 8.0 + 1.6 = 16.0 [calc]. The CAD's ribbon-fold
+# keep-out is tighter where it applies.
+rooms: {rear: 16.0}
+heights:
+  Converter_DCDC_RECOM_RPA20: 10.2        # [repo config/module.yaml iso.body]
+  L_CommonModeChoke_Bourns_PM3700: 11.43  # [repo config/module.yaml iso.filter]
+  CP_Elec_6.3x7.7: 7.7                    # [repo config/module.yaml iso.filter]
+  CP_Elec_6.3x5.8: 5.8                    # [repo config/module.yaml iso.filter]
+  L_Sunlord_SWPA6028S: 2.8                # [repo config/module.yaml iso.filter]
+  PinHeader_2x05_P2.54mm: 0.0             # on this board: its posts only (the insulator is on the main board's rear face)
+  C_1206: 1.8                             # [from memory: thickest 10 uF 1206]
+  C_0805: 1.35                            # [from memory]
+  MountingHole: 0.0
+
+silk:
+  at: [[2.0, 47.0], [24.0, 82.5]]
+  title: "WOODY mod-iso"
+  search: true
+  rev: "A"
+  date: "2026-10-03"
+
+route: astar
+rip_up: 10
+directions:
+  layers: {F.Cu: vertical, B.Cu: horizontal}
+  against_cost: 6.0
+  chamfer: 0.6

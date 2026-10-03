@@ -128,6 +128,11 @@ def fixed_pads(geo, lay, comps):
             # long axis along y, pin 1 at the top left, odd pins the left column
             rows, n, p = int(c[3]), int(c[4]), c[5]
             want = {str(2 * k + 1 + j): (x + (j - 0.5) * p, y + ((n - 1) / 2 - k) * p) for k in range(n) for j in range(rows)}
+        elif name == "J-B2B-ISO":
+            # long axis along x, pin 1 at the BOTTOM left (a 2 x n header turned a quarter; at the top
+            # left it would be mirrored): pair k (pin 2k+1 under 2k+2) k pitches right
+            rows, n, p = int(c[3]), int(c[4]), c[5]
+            want = {str(2 * k + 1 + j): (x + (k - (n - 1) / 2) * p, y + (j - 0.5) * p) for k in range(n) for j in range(rows)}
         elif name == "J-PWR-EURO":
             # long axis along y, pin 1 at the bottom; layout.yaml says which column is odd
             p, n, s = 2.54, 8, spec["odd_column"]
@@ -490,34 +495,43 @@ def check_heights(board, lay, geo):
 
 
 def check_b2b(board, bdir, lay):
-    """J-B2B-MOD is one header soldered through both boards (A7-3): pin k is one straight
-    conductor, so on this board and on the other each pad k must stand at the same
-    panel-frame place, and carry the same net. Both boards place it on their TOP face,
-    unmirrored; one placed on the rear lands every net one column over. Checked against
-    the module CAD (fixed_pads, in check_cad) and here against the other board's
-    .kicad_pcb, where it exists."""
-    spec = lay.get("b2b") or {}
-    if not spec:
-        return []
+    """A header soldered through two boards - J-B2B-MOD (main and jack, A7-3), J-B2B-ISO
+    (main and iso) - is one straight conductor per pin, so on this board and on the other
+    each pad k must stand at the same panel-frame place, and carry the same net. Both
+    boards place it on their TOP face, unmirrored; one placed on the rear lands every net
+    one column over. Checked against the module CAD (fixed_pads, in check_cad) and here
+    against the other board's .kicad_pcb, where it exists. layout.yaml b2b: {other: ...}
+    (J-B2B-MOD), or a list of {row, other}."""
+    spec = lay.get("b2b") or []
+    if isinstance(spec, dict):
+        spec = [dict(spec, row=spec.get("row", "J-B2B-MOD"))]
     bad = []
-    me = board.FindFootprintByReference(pcb.ref_of(pcb.sheet_netlist(os.path.join(bdir, os.path.basename(bdir) + ".kicad_sch"))[0], "J-B2B-MOD"))
-    other = os.path.join(ROOT, spec["other"])
-    path = os.path.join(other, os.path.basename(other) + ".kicad_pcb")
-    if me.IsFlipped():
-        bad.append(f"error: [b2b] J-B2B-MOD ({me.GetReference()}) is on the rear face: it mirrors, and every net lands one column over")
-    if not os.path.exists(path):
-        return bad + [f"note: [b2b] {os.path.relpath(path, ROOT)} not laid out yet - checked against the module CAD only"]
-    ob = pcbnew.LoadBoard(path)
-    ocomps, _ = pcb.sheet_netlist(os.path.join(other, os.path.basename(other) + ".kicad_sch"))
-    them = ob.FindFootprintByReference(pcb.ref_of(ocomps, "J-B2B-MOD"))
-    a = {p.GetNumber(): (to_body(*xy_mm(p.GetPosition())), p.GetNetname().lstrip("/")) for p in me.Pads()}
-    b = {p.GetNumber(): (to_body(*xy_mm(p.GetPosition())), p.GetNetname().lstrip("/")) for p in them.Pads()}
-    if set(a) != set(b):
-        return bad + [f"error: [b2b] the two boards' J-B2B-MOD have different pads: {sorted(set(a) ^ set(b))}"]
-    for n in sorted(a, key=int):
-        (pa, na), (pb, nb) = a[n], b[n]
-        if math.hypot(pa[0] - pb[0], pa[1] - pb[1]) > 0.01:
-            bad.append(f"error: [b2b] pin {n} is at ({pa[0]:.2f}, {pa[1]:.2f}) here and ({pb[0]:.2f}, {pb[1]:.2f}) on {os.path.basename(other)} - the pins do not mate")
-        if na != nb and not (na.startswith("unconnected") and nb.startswith("unconnected")):
-            bad.append(f"error: [b2b] pin {n} is {na or 'no net'} here and {nb or 'no net'} on {os.path.basename(other)}")
+    comps = pcb.sheet_netlist(os.path.join(bdir, os.path.basename(bdir) + ".kicad_sch"))[0]
+    for s in spec:
+        row = s["row"]
+        me = board.FindFootprintByReference(pcb.ref_of(comps, row))
+        other = os.path.join(ROOT, s["other"])
+        path = os.path.join(other, os.path.basename(other) + ".kicad_pcb")
+        if me.IsFlipped():
+            bad.append(f"error: [b2b] {row} ({me.GetReference()}) is on the rear face: it mirrors, and every net lands one column over")
+        if not os.path.exists(path):
+            bad.append(f"note: [b2b] {row}: {os.path.relpath(path, ROOT)} not laid out yet - checked against the module CAD only")
+            continue
+        ob = pcbnew.LoadBoard(path)
+        ocomps, _ = pcb.sheet_netlist(os.path.join(other, os.path.basename(other) + ".kicad_sch"))
+        them = ob.FindFootprintByReference(pcb.ref_of(ocomps, row))
+        if them is None:
+            bad.append(f"error: [b2b] {row}: {os.path.relpath(path, ROOT)} has no {row} - lay it out again from its sheet")
+            continue
+        a = {p.GetNumber(): (to_body(*xy_mm(p.GetPosition())), p.GetNetname().lstrip("/")) for p in me.Pads()}
+        b = {p.GetNumber(): (to_body(*xy_mm(p.GetPosition())), p.GetNetname().lstrip("/")) for p in them.Pads()}
+        if set(a) != set(b):
+            bad.append(f"error: [b2b] the two boards' {row} have different pads: {sorted(set(a) ^ set(b))}")
+            continue
+        for n in sorted(a, key=int):
+            (pa, na), (pb, nb) = a[n], b[n]
+            if math.hypot(pa[0] - pb[0], pa[1] - pb[1]) > 0.01:
+                bad.append(f"error: [b2b] {row} pin {n} is at ({pa[0]:.2f}, {pa[1]:.2f}) here and ({pb[0]:.2f}, {pb[1]:.2f}) on {os.path.basename(other)} - the pins do not mate")
+            if na != nb and not (na.startswith("unconnected") and nb.startswith("unconnected")):
+                bad.append(f"error: [b2b] {row} pin {n} is {na or 'no net'} here and {nb or 'no net'} on {os.path.basename(other)}")
     return bad
