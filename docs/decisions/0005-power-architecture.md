@@ -1,6 +1,11 @@
 # 0005 — Power architecture
 
-**Status:** Accepted
+**Status:** Accepted. **Amended 2026-09-30** (the load switch's ramp
+specification widened to the part's guaranteed envelope, in place; the
+instrument's supply is isolated, ADR 0027, and the lights are LEDs on the main
+board, ADR 0028 — the two *Amendment* sections) **and 2026-10-01** (the 12 V
+row, the DAC rail, and the pre-layout review A3-1 and A3-11, each at a dated
+note).
 
 ## Context
 

@@ -1,6 +1,7 @@
 # 0018 — Main board wiring: five decisions
 
-**Status:** Accepted
+**Status:** Accepted. **Amended 2026-10-01** (the module end of `DIG_GND` is
+settled, *Amendment* below).
 
 Closes five items that [ADR 0017](0017-one-main-board.md)'s rework left open
 on the main board's pages. Decided by the owner, 2026-09-26, taking the
