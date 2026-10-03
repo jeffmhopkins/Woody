@@ -99,7 +99,15 @@ silk:
   rev: "A"
   date: "2026-09-28"
 
-route: true
+# FREEROUTING SINCE THE MATRIX (2026-10-02). With J2 (J-MCU-KB, 24 pins at 1.27
+# mm) on the board, pcb_route's own router (`route: true`) fanned out at most
+# fifteen of J2's nets, in every route order tried and with the Matrix's 5 V
+# and 3V3 at power width or not. Freerouting routes all but about five, which
+# differ run to run; `pcb.py finish` does not close them. TWO THINGS ARE OPEN,
+# both needing either hand work in KiCad or tools/pcb.py: those last
+# connections out of J2, and the GND_CHAIN pours, which this path does not
+# add (pcb_route adds them only with `route: true`).
+route: freerouting
 # The two key lines from the register's far row first, as the left-hand board
 # routes KEY_LH5 first: U1.13 (RH6) is boxed in by the 12-15 strap, and routed
 # later it finds its via spots below the pin taken. Then J-CHAIN's far row (the

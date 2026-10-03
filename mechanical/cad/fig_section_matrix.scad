@@ -16,7 +16,7 @@ module lv(zv, s, dz = 0) {
 lv(T, str("top face ", T, " = frosted window, flush"));
 lv(T - openings_matrix_acrylic_t, str("acrylic under = oak lip top ", T - openings_matrix_acrylic_t), 0.6);
 lv(matrix_top_z, str("LED tops ", matrix_top_z), -0.4);
-lv(z_oak_top_bot, str("Matrix board top = oak under ", z_oak_top_bot), -2.2);
+lv(matrix_board_z + boards_matrix_t, str("Matrix board top ", matrix_board_z + boards_matrix_t, ", on its shim; oak under ", z_oak_top_bot), -2.2);
 lv(cb_top + boards_umb_joint_h, str("J-UMB top, under the Matrix ", cb_top + boards_umb_joint_h), -3.2);
 lv(z_floor, str("floor ", z_floor));
 lv(0, "bottom face 0");

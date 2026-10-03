@@ -88,6 +88,7 @@ every key closed is six keys' `key-scan-current`.
 | Rev | Date | What changed | Where |
 |---|---|---|---|
 | A | 2026-09-28 | First layout, from the left-hand board's (`layout.yaml`). Not yet ordered; re-laid out 2026-09-29 for the cassette's columns (ADR 0025): the mouth end 0.6 and the tail end 0.2 longer, `J-CHAIN` 13.0 further toward the tail where the shorter ribbon lets the body CAD put it, the register, C7 and C8 following it, the switch side's title moved off the header's tails | git history of this directory |
+| B, **in progress** | 2026-10-03 | Laid out again for the Matrix's rails (ADR 0021 amendment 2026-10-02): the outline with the rails, J2-J5, RH6's T moved. **Not orderable yet:** Freerouting leaves about five of J2's connections and the board has no `GND_CHAIN` pours (`layout.yaml` says why); both are hand work in KiCad, then `pcb.py check` and `pcb.py render` | `key-board-rh.kicad_pcb`, `layout.yaml` |
 
 ## Open, and what decides each
 
