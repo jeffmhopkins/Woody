@@ -113,11 +113,20 @@ technical one.**
 
 | | MPXV4006**GP** | MPXV4006**DP** |
 |---|---|---|
-| Lifecycle | **Obsolete**, distributor stock only | **Production**, supported through at least 2028 |
+| Lifecycle — **the DP cell was NXP's commitment, and the part has been ST's since 2026-02-02; see the amendment below** | **Obsolete**, distributor stock only | **Production**, supported through at least 2028 |
 | Sensitivity | 766 mV/kPa | 766 mV/kPa |
 | Output span — **cover-page line, refuted by the transfer function inside the same document; see `sensor-full-scale`** | 0.2–4.80 V | 0.2–4.80 V |
 | Supply | 4.75–5.25 V, 10 mA | 4.75–5.25 V, 10 mA |
 | Case | 1369-01, single side port | **1351-01, dual ports, same side** |
+
+*(Amended 2026-10-03, issue #7: NXP's MEMS sensor line, the MPXV pressure
+parts included, passed to STMicroelectronics on 2026-02-02, so "supported
+through at least 2028" was NXP's promise and is not ST's. ST's own datasheet
+and longevity status are not banked (st.com unreachable,
+`datasheets/.manifest-R47-issue7-bom.csv`), and on 2026-10-03 DigiKey listed
+the ST part with none in stock. The decision — DP over GP — stands; what it
+bought is less than this table says. Supply now belongs to the `U-BREATH`
+row, which says what to buy and where.)*
 
 **The transfer function is identical**, and it verifies against this ADR's own
 figures: `Vout = VS × (0.1533·P + 0.053)` at VS = 5 V is 0.7665 V/kPa with
@@ -844,4 +853,7 @@ This used to be urgent. An earlier revision specified the MPXV4006**GP**, EOL
 since 2021 and available only from remaining distributor stock, and said to buy
 three to five immediately against the part disappearing entirely. **The DP is in
 production**, so the spares are now just spares.
+*(Amended 2026-10-03: no longer quite. The part changed owner to ST on
+2026-02-02 and distributor stock is thin — buy both spares when the board is
+ordered; the `U-BREATH` row carries the stock and the route.)*
 

@@ -215,12 +215,20 @@ ADR 0003 buys two. The spare goes in with an iron, and nothing else:
    (`firmware/README.md`), and re-null `TRIM-BREATH-ZERO` at the module for
    the jack (Note 5 `[ds p.3]`).
 
-**Soldering conditions are open:** the sheet gives none. **Decided by banking
-NXP's soldering note for its pressure-sensor packages, AN3150**, which could
-not be fetched on 2026-09-30 (`datasheets/.manifest-R32.csv`, `BLOCKED`, with
-every URL tried); it must be banked before the sensor is first soldered, at
-the main board's assembly. Until then: a modest iron temperature, one lead at
-a time, short dwell, because the body is thermoplastic (PPS, `[ds p.1]`).
+**Soldering conditions are AN3150's**, the family's soldering note
+(`datasheets/analog/MPXV-AN3150-SOLDERING-PRESSURE-SENSORS.pdf`); the sensor's
+own sheet gives none.
+
+- **245 °C maximum on the part**, for an MPXV with the DP suffix, "with
+  minimized duration" — and rework is "not recommended, but should it be
+  necessary" held to the same limit `[AN3150 p.3, Table 1]`. It is a limit on
+  the body, which is thermoplastic (PPS, `[ds p.1]`), not on the iron's tip:
+  one lead at a time, short dwell.
+- **No-clean flux, and no washing.** No pressure spray, and no ultrasonic
+  cleaning, which can break the wire bonds `[AN3150 p.1]`. If the board is
+  ever washed, cap both ports first.
+- **No vapour-phase and no IR reflow** `[AN3150 p.2]` — which is one more
+  reason the sensor is fitted by hand after the board is assembled.
 
 ### Not taken: a breakout board on 2.54 mm headers
 
