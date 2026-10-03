@@ -61,7 +61,7 @@ def is_commit(cmd):
     if not m:
         return False
     tail = cmd[m.end():].split("&&")[0].split(";")[0]
-    return not re.search(r"(^|\s)--(abort|quit)\b", tail)
+    return not re.search(r"(^|\s)--(abort|quit|no-commit|squash|dry-run)\b", tail)
 
 
 def tree_of(cmd, cwd):
@@ -202,7 +202,7 @@ def gate(cmd, cwd):
 def self_test():
     yes = ["git commit -m x", "cd /a && git commit -am 'x'", "git -C /r commit", "git merge origin/main",
            "git -c user.name=x commit --amend", "ls; git commit -F msg.txt", "(git merge --continue)"]
-    no = ["ls", "git status", "git merge-base a b", "git merge --abort", "echo git commit-tree",
+    no = ["ls", "git status", "git merge-base a b", "git merge --abort", "git merge --no-commit -q b", "git commit --dry-run", "echo git commit-tree",
           "git log --grep commit", "grep -n 'git commit' CLAUDE.md | head", "git diff --cached",
           "gh api x -f body=\"run \\`git commit\\` with Gate-Red\"", "python3 - <<'EOF'\nprint('git commit')\nEOF\nls"]
     bad = [c for c in yes if not is_commit(c)] + [c for c in no if is_commit(c)]
