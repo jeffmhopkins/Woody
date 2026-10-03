@@ -1452,6 +1452,7 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
     path crosses are taken up whole (never a plane net's, the pair's or locked copper,
     and each net at most n times), the connection laid, and theirs queued again, pad to
     pad. Returns the ones it could not route."""
+    import pcb
     obs = Obstacles(board, lay)
     classes = lay.get("net_classes") or {}
     width_of = lambda net: next((c["track"] for c in classes.values() if net in c["nets"]), lay["rules"]["track"])
@@ -1462,7 +1463,9 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
     queue = list(unconnected)
     # the layers it routes: the outer two, and layer 3 where layout.yaml directions: names it
     # (a four-layer board whose layer 3 is a routing layer, the module's)
-    routed = ["F", "B"] + (["I"] if "In2.Cu" in ((lay.get("directions") or {}).get("layers") or {}) else [])
+    dirs_ = lay.get("directions") or {}
+    routed = ["F", "B"] + (["I"] if "In2.Cu" in (dirs_.get("layers") or {}) or "In2.Cu" in (dirs_.get("routed") or []) else [])
+    via_cost = float(dirs_.get("via_cost", VIA))
     while queue:
         net, pa, pb = queue.pop(0)
         w = width_of(net)
@@ -1525,15 +1528,35 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
                 soft_of[(L, i, j)] = nets
             return soft_of[(L, i, j)]
         # layout.yaml directions: a step against its layer's preferred direction costs
-        # against_cost, a diagonal one half way between (a 45-degree corner stays cheap)
-        dirs = lay.get("directions") or {}
+        # against_cost, a diagonal one half way between (a 45-degree corner stays cheap).
+        # `layers:` holds over the whole board (the controller's boards); `regions:` only
+        # inside each region's rectangle (frame mm), free routing elsewhere - the owner's
+        # rule, 2026-10-03: one direction per layer only where a crossing needs it
+        # (docs/reference/tooling.md, the router).
+        dirs = dirs_
         ag = float(dirs.get("against_cost", 1.0))
-        way = {{"F.Cu": "F", "B.Cu": "B", "In2.Cu": "I"}[k]: v for k, v in (dirs.get("layers") or {}).items() if k in ("F.Cu", "B.Cu", "In2.Cu")}
+        LK = {"F.Cu": "F", "B.Cu": "B", "In2.Cu": "I"}
+        way = {LK[k]: v for k, v in (dirs.get("layers") or {}).items() if k in LK}
+        regions = []
+        for rg in dirs.get("regions") or []:
+            x0, y0, x1, y1 = rg["rect"]
+            (ax, ay), (bx, by) = pcb.to_pcb(x0, y0), pcb.to_pcb(x1, y1)
+            regions.append((min(ax, bx), min(ay, by), max(ax, bx), max(ay, by),
+                            {LK[k]: v for k, v in (rg.get("layers") or {}).items() if k in LK}))
 
-        def step_cost(L, di, dj, c):
-            if L not in way:
+        def way_at(L, i, j):
+            if regions:
+                x, y = grids["F"].xy((i, j))
+                for rx0, ry0, rx1, ry1, w_ in regions:
+                    if rx0 <= x <= rx1 and ry0 <= y <= ry1 and L in w_:
+                        return w_[L]
+            return way.get(L)
+
+        def step_cost(L, di, dj, c, i=0, j=0):
+            wl = way_at(L, i, j)
+            if wl is None:
                 return c
-            along = di if way[L] == "horizontal" else dj
+            along = di if wl == "horizontal" else dj
             if di and dj:
                 return c * (1 + ag) / 2
             return c if along else c * ag
@@ -1569,7 +1592,7 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
                     if di and dj and not (gr.free(i + di, j) and gr.free(i, j + dj)):
                         if not soft or softc(L, i + di, j) is None or softc(L, i, j + dj) is None:
                             continue
-                    ng = g + extra + step_cost(L, di, dj, c) + (TURN.get(steps45(pd, (di, dj)), 0) if pd else 0)
+                    ng = g + extra + step_cost(L, di, dj, c, i, j) + (TURN.get(steps45(pd, (di, dj)), 0) if pd else 0)
                     if ng < cost.get(nxt, 1e18):
                         cost[nxt], came[nxt] = ng, cur
                         heapq.heappush(openq, (ng + h(i + di, j + dj), ng, nxt, (di, dj)))
@@ -1579,7 +1602,7 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
                     nxt = (O, i, j)
                     if nxt not in seen and via_ok(i, j) and (grids[O].free(i, j) or nxt in dst
                                                              or (soft and softc(O, i, j) is not None)):
-                        ng = g + VIA
+                        ng = g + via_cost
                         if ng < cost.get(nxt, 1e18):
                             cost[nxt], came[nxt] = ng, cur
                             heapq.heappush(openq, (ng + h(i, j), ng, nxt, None))

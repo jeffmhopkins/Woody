@@ -390,17 +390,19 @@ silk:
   rev: "A"
   date: "2026-10-02"
 
-# Routing as the controller's main board, on three layers: the pair, the guard's via,
-# every plane net's fanout and connect_first: first (pcb_route.prepare); then every
-# signal connection by pcb_route.complete, one preferred direction per layer - layer 1
-# along the board (the module's long axis, vertical in KiCad), layer 3 across it,
-# layer 4 along it - a via at each turn, a step against a layer's direction costing
-# against_cost; rip-up where it is boxed in. Freerouting (route: astar) takes no
-# layer direction in batch: an autoroute_settings scope with per-layer directions made
-# it route nothing on this board (2026-10-02, as on the controller's, tooling.md §4).
+# ROUTING (the owner's rule, 2026-10-03: "the horizontal vertical should only be used when
+# required, and maybe even just in portions or sections of the board that is necessary";
+# docs/reference/tooling.md, the router). On three layers - 1, 3 and 4; layer 2 is the
+# plane - the pair, the guard's via, every plane net's fanout and connect_first: first
+# (pcb_route.prepare); then every signal connection by pcb_route.complete, FREE: the
+# shortest path, 45-degree bends, a via only where it pays (via_cost). One direction per
+# layer only inside `regions:`, each with the reason it needs one; none is listed unless
+# a crossing there failed without it. Rip-up where a connection is boxed in.
 route: astar
-rip_up: 0
+rip_up: 3
 directions:
-  layers: {F.Cu: vertical, In2.Cu: horizontal, B.Cu: vertical}
+  routed: [F.Cu, In2.Cu, B.Cu]
+  regions: []
   against_cost: 6.0
+  via_cost: 12.0
   chamfer: 0.6
