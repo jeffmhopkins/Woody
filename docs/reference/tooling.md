@@ -909,6 +909,7 @@ so.
 | the module's two 5 V rails at power-on and power-off, and `SYNC` at the DAC between them (TI's SN74AHCT125 model and the DAC8568's IBIS clamp) | `hardware/module/digital-and-supervision/sim/` |
 | the DAC8568's power-on glitch and its 3-state reference, into the pitch and mod jacks | `hardware/module/dac8568/sim/` |
 | the breath link's TVS diodes: CMRR, `PWR_GND` rejection, leakage | `hardware/interfaces/breath-sense-link/sim/` |
+| `U-BREATH`'s documented MPXV7007DP fallback, **not fitted**: the offset-and-gain stage at `U-BUF` B into the in-amp, commissioning, ratiometry and a step; and why a drop-in fails (its own directory, so no live result moves) | `hardware/interfaces/breath-sense-link/fallback-mpxv7007/sim/` |
 | the panel LED's current and its start | `hardware/module/panel-led/sim/` |
 | the whole system, instrument to jacks, from the exported netlists: the rack, `module/power-entry` with `U-ISO`, the load switch, the umbilical's eight conductors as coupled lines, the instrument's power entry with `Q-INRUSH`, its buck and LED row, the breath sensor, buffer and link, the SPI pads and receiver, and the module's breath chain, DAC stages and ground star; three scenarios — the LED row switching (ROADMAP M8's "pitch scoped while the LEDs sweep"), a burst of DAC frames, and a hot-plug — with behavioural op-amps and in-amp held to TI's models | `hardware/interfaces/system/sim/` |
 
