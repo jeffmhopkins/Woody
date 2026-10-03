@@ -1,9 +1,9 @@
-* The other side of a filter on U-ADC's VDD (#12 item 3): the MCP3202 draws its operating
+* The other side of the filter on U-ADC's VDD (#12 item 3, D1): the MCP3202 draws its operating
 * current only while it converts, so a series resistor makes VDD = VREF sag through each
 * conversion, which is a reference error inside the conversion. The network of adc-vdd.cir
 * with no ripple (the ME6217 as an ideal 3.3 V source behind r_ldo - it is the LDO's loop
 * that holds DC; nothing upstream of it matters here), and U-ADC as a current i_conv for
-* t_conv in every t_loop. r_filt and c_filt_x as adc-vdd.cir. droop is the most VDD falls
+* t_conv in every t_loop. R-ADC-VDD and C-ADC-VDD as adc-vdd.cir. droop is the most VDD falls
 * inside one conversion, from its value at the conversion's start.
 VLDO ldoi 0 DC {{vdd}}
 RLDO ldoi ldoo {{r_ldo}}

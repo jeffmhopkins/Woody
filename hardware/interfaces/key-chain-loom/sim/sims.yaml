@@ -36,6 +36,7 @@ params:
   r_drv:   {value: 35.0, source: "the ESP32-S3's GPIO at its default 20 mA setting; 17 at 40 mA (vary). Espressif publishes neither an output impedance nor IBIS [research estimate from datasheets/logic/ESP32-S3-datasheet-v2.2.pdf p.65, UNVERIFIED]"}
   tr_drv:  {value: 3.0e-9, source: "the GPIO's own edge, unpublished; 1-3 ns swept (vary) [UNVERIFIED]"}
   c_tvs:   {value: 30.0e-12, source: "U-TVS-CHAIN (SP0504BAHT) capacitance per channel, typical, at 2.5 V [datasheets/discrete-and-power/SP0504BAHT.pdf]; only a typical is given (vary)"}
+  tvs_j5:  {value: 1, source: "1: U-TVS-CHAIN-RH fitted at the right_hand J-CHAIN (J5) on SCK, SH/LD, HOP_LT_RH and HOP_RH_RT (owner, 2026-10-03, D2), c_tvs more on node m and on HOP_LT_RH's main-board end (qa); 0: one array, at J4 only"}
   c_main:  {value: 20.0e-12, source: "the main board's own load on SCK: right_thumb's and left_thumb's inputs (2 x Ci) and its trace [assumption until the main board is laid out] (vary)"}
   c_kb:    {value: 3.0e-12, source: "the key board's SCK trace, J1 to U1 [assumption: about 30 mm over the ground pour] (vary)"}
   r_qh:    {value: 80.0, source: "the SN74HCS165's output resistance: (4.5 - 4.0 V) / 6 mA at 4.5 V = 83 ohm [calc, SN74HCS165-ti-scls828a.pdf p.6]; higher at 3.3 V (vary)"}
@@ -84,6 +85,7 @@ derived:
   vt_lt: "v['vtp_min']"
   c_shape: "v['tr_qh'] / 2.2 / 1000.0"
   r_qh_hop: "v['r_qh'] + v['R-HOP-SER'] * v['hop_fit']"
+  c_tvs_j5: "max(v['c_tvs'] * v['tvs_j5'], 1e-18)"
   q0: "0.0 if v['q_up'] else v['vcc']"
   q1: "v['vcc'] if v['q_up'] else 0.0"
 

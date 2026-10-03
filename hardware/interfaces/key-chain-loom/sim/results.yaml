@@ -4,14 +4,14 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/interfaces/key-chain-loom/sim/sims.yaml: 4a7509ef24800751
+  hardware/interfaces/key-chain-loom/sim/sims.yaml: da6edd9f25f8fa10
   hardware/boards/key-board-lh/board-netlist.yaml: 83dd5aa2b99e144f
   hardware/interfaces/key-chain-loom/sim/rail.cir: 537b273e07928b72
   hardware/interfaces/key-chain-loom/sim/edge.cir: af73f23cc4332e65
   hardware/interfaces/key-chain-loom/sim/rail-ac.cir: 3bc2f2ac7bb9405b
-  hardware/interfaces/key-chain-loom/sim/sck.cir: a04949a3038b52ce
+  hardware/interfaces/key-chain-loom/sim/sck.cir: 88f751c4748b4dfa
   hardware/interfaces/key-chain-loom/sim/qh.cir: 8c6cb42b05dc8c84
-  hardware/interfaces/key-chain-loom/sim/hold.cir: 383655180bf34f85
+  hardware/interfaces/key-chain-loom/sim/hold.cir: 4ef3976a5ad38fff
   datasheets/discrete-and-power/BLM21SP601SN1-murata-spice.lib: e858b365fef2f77b
   hardware/cluster/key-switch-network/sim/sims.yaml: 28274e715669f42e
   bom:R-CHAIN-SER: 100R 1%
@@ -145,35 +145,35 @@ sims:
     corners: 17
     measures:
       bs_rise:
-        nominal: 0.018398
-        min: 0.0114874
-        min_at: c_main- c_tvs- r_drv+ tr_drv+
-        max: 0.0913323
-        max_at: c_main+ c_tvs+ r_drv- tr_drv-
+        nominal: 0.0185843
+        min: 0.0165032
+        min_at: c_main+ c_tvs+ r_drv+ tr_drv+
+        max: 0.0913146
+        max_at: c_main+ c_tvs- r_drv- tr_drv-
       bs_fall:
-        nominal: 0.0184436
-        min: 0.0114827
-        min_at: c_main- c_tvs- r_drv+ tr_drv+
-        max: 0.0912752
-        max_at: c_main+ c_tvs+ r_drv- tr_drv-
+        nominal: 0.0184696
+        min: 0.0174189
+        min_at: c_main- c_tvs+ r_drv+ tr_drv+
+        max: 0.091109
+        max_at: c_main+ c_tvs- r_drv- tr_drv-
       v_over:
-        nominal: 3.30457
-        min: 3.30174
+        nominal: 3.30583
+        min: 3.30456
         min_at: c_main- c_tvs- r_drv+ tr_drv+
-        max: 3.32782
-        max_at: c_main+ c_tvs+ r_drv- tr_drv-
+        max: 3.3298
+        max_at: c_main- c_tvs+ r_drv- tr_drv-
       v_under:
-        nominal: -0.00459262
-        min: -0.0278731
+        nominal: -0.00580989
+        min: -0.0309109
         min_at: c_main+ c_tvs+ r_drv- tr_drv-
-        max: -0.00173634
+        max: -0.0045809
         max_at: c_main- c_tvs- r_drv+ tr_drv+
       t_delay:
-        nominal: 6.73226e-09
-        min: 4.25756e-09
-        min_at: c_main- c_tvs- r_drv- tr_drv+
-        max: 8.76684e-09
-        max_at: c_main+ c_tvs+ r_drv+ tr_drv+
+        nominal: 9.50039e-09
+        min: 5.63643e-09
+        min_at: c_main- c_tvs- r_drv- tr_drv-
+        max: 1.26686e-08
+        max_at: c_main+ c_tvs+ r_drv+ tr_drv-
     asserts:
     - expr: max['bs_rise'] < p['hyst_min'] and max['bs_fall'] < p['hyst_min']
       why: 'no double clock: after SCK crosses the register''s threshold, wherever in its spread, it never swings back through
@@ -187,35 +187,35 @@ sims:
     corners: 17
     measures:
       bs_rise:
-        nominal: 0.0722766
-        min: 0.0485878
-        min_at: c_main- c_tvs- r_drv+ tr_drv+
-        max: 0.647237
-        max_at: c_main+ c_tvs- r_drv- tr_drv-
+        nominal: 0.0718472
+        min: 0.0634994
+        min_at: c_main+ c_tvs+ r_drv+ tr_drv+
+        max: 0.647469
+        max_at: c_main- c_tvs- r_drv- tr_drv-
       bs_fall:
-        nominal: 0.0722957
-        min: 0.0485867
-        min_at: c_main- c_tvs- r_drv+ tr_drv+
-        max: 0.647218
-        max_at: c_main+ c_tvs- r_drv- tr_drv-
+        nominal: 0.0717927
+        min: 0.0636238
+        min_at: c_main+ c_tvs+ r_drv+ tr_drv+
+        max: 0.64746
+        max_at: c_main- c_tvs- r_drv- tr_drv-
       v_over:
-        nominal: 3.32475
-        min: 3.31385
+        nominal: 3.32713
+        min: 3.32476
         min_at: c_main- c_tvs- r_drv+ tr_drv+
-        max: 3.56581
-        max_at: c_main+ c_tvs+ r_drv- tr_drv-
+        max: 3.56531
+        max_at: c_main+ c_tvs- r_drv- tr_drv-
       v_under:
-        nominal: -0.0247405
-        min: -0.26579
-        min_at: c_main+ c_tvs+ r_drv- tr_drv-
-        max: -0.0138456
+        nominal: -0.0271305
+        min: -0.265323
+        min_at: c_main+ c_tvs- r_drv- tr_drv-
+        max: -0.0247505
         max_at: c_main- c_tvs- r_drv+ tr_drv+
       t_delay:
-        nominal: 1.93906e-09
-        min: 8.0695e-10
+        nominal: 2.47427e-09
+        min: 9.49764e-10
         min_at: c_main- c_tvs- r_drv- tr_drv-
-        max: 2.29212e-09
-        max_at: c_main+ c_tvs+ r_drv+ tr_drv+
+        max: 3.36859e-09
+        max_at: c_main+ c_tvs+ r_drv+ tr_drv-
     asserts: []
   qh-to-main-board:
     corners: 5
@@ -262,23 +262,23 @@ sims:
     corners: 65
     measures:
       clk_skew:
-        nominal: 9.12598e-09
-        min: 5.67385e-09
-        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv+ tr_qh+
-        max: 1.21471e-08
-        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+        nominal: 1.30675e-08
+        min: 8.02953e-09
+        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv- tr_qh+
+        max: 1.73327e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh+
       ser_delay:
-        nominal: 1.79147e-08
-        min: 1.53518e-08
-        min_at: c_main- c_tvs- r_drv+ r_qh- tr_drv- tr_qh-
-        max: 1.91243e-08
+        nominal: 4.72637e-08
+        min: 3.47943e-08
+        min_at: c_main+ c_tvs- r_drv- r_qh- tr_drv+ tr_qh-
+        max: 5.88828e-08
         max_at: c_main+ c_tvs+ r_drv+ r_qh+ tr_drv- tr_qh+
       hold_margin:
-        nominal: 8.78874e-09
-        min: 3.21293e-09
-        min_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
-        max: 1.34426e-08
-        max_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+        nominal: 3.41963e-08
+        min: 2.26207e-08
+        min_at: c_main+ c_tvs- r_drv+ r_qh- tr_drv+ tr_qh-
+        max: 4.69887e-08
+        max_at: c_main- c_tvs+ r_drv- r_qh+ tr_drv- tr_qh+
       need_tpd:
         nominal: 0.0
         min: 0.0
@@ -298,23 +298,23 @@ sims:
     corners: 65
     measures:
       clk_skew:
-        nominal: 9.12598e-09
-        min: 5.67385e-09
-        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv+ tr_qh+
-        max: 1.21471e-08
-        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+        nominal: 1.30675e-08
+        min: 8.02953e-09
+        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv- tr_qh+
+        max: 1.73327e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh+
       ser_delay:
-        nominal: 2.65644e-08
-        min: 2.38141e-08
-        min_at: c_main- c_tvs- r_drv+ r_qh- tr_drv- tr_qh-
-        max: 2.79807e-08
+        nominal: 7.37633e-08
+        min: 5.49344e-08
+        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv- tr_qh-
+        max: 9.18575e-08
         max_at: c_main+ c_tvs+ r_drv+ r_qh+ tr_drv- tr_qh+
       hold_margin:
-        nominal: 1.74384e-08
-        min: 1.16752e-08
-        min_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
-        max: 2.23012e-08
-        max_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+        nominal: 6.06958e-08
+        min: 4.2763e-08
+        min_at: c_main+ c_tvs- r_drv+ r_qh- tr_drv+ tr_qh-
+        max: 7.99627e-08
+        max_at: c_main- c_tvs+ r_drv- r_qh+ tr_drv- tr_qh+
       need_tpd:
         nominal: 0.0
         min: 0.0
@@ -334,28 +334,28 @@ sims:
     corners: 65
     measures:
       clk_skew:
-        nominal: 9.12599e-09
-        min: 5.67385e-09
-        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv+ tr_qh+
-        max: 1.21471e-08
+        nominal: 1.30675e-08
+        min: 8.02939e-09
+        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv- tr_qh-
+        max: 1.73327e-08
         max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh+
       ser_delay:
-        nominal: 2.71613e-09
-        min: 1.24037e-09
-        min_at: c_main- c_tvs- r_drv+ r_qh- tr_drv- tr_qh-
-        max: 3.65213e-09
+        nominal: 4.35404e-09
+        min: 1.65783e-09
+        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv- tr_qh-
+        max: 6.71261e-09
         max_at: c_main+ c_tvs+ r_drv+ r_qh+ tr_drv- tr_qh+
       hold_margin:
-        nominal: -6.40986e-09
-        min: -1.08986e-08
+        nominal: -8.71341e-09
+        min: -1.52979e-08
         min_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
-        max: -2.02851e-09
-        max_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+        max: -2.61908e-09
+        max_at: c_main- c_tvs- r_drv- r_qh+ tr_drv- tr_qh+
       need_tpd:
-        nominal: 6.40986e-09
-        min: 2.02851e-09
-        min_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
-        max: 1.08986e-08
+        nominal: 8.71341e-09
+        min: 2.61908e-09
+        min_at: c_main- c_tvs- r_drv- r_qh+ tr_drv- tr_qh+
+        max: 1.52979e-08
         max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
     asserts:
     - expr: min['hold_margin'] < 0
@@ -366,28 +366,28 @@ sims:
     corners: 65
     measures:
       clk_skew:
-        nominal: 9.12599e-09
-        min: 5.67385e-09
-        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv+ tr_qh+
-        max: 1.21471e-08
+        nominal: 1.30675e-08
+        min: 8.02939e-09
+        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv- tr_qh-
+        max: 1.73327e-08
         max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh+
       ser_delay:
-        nominal: 3.7617e-09
-        min: 1.565e-09
-        min_at: c_main- c_tvs- r_drv+ r_qh- tr_drv- tr_qh-
-        max: 5.02505e-09
+        nominal: 6.03284e-09
+        min: 2.1599e-09
+        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv- tr_qh-
+        max: 9.1469e-09
         max_at: c_main+ c_tvs+ r_drv+ r_qh+ tr_drv- tr_qh+
       hold_margin:
-        nominal: -5.36429e-09
-        min: -1.05739e-08
+        nominal: -7.03462e-09
+        min: -1.41617e-08
         min_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
-        max: -6.56517e-10
-        max_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+        max: -7.00756e-10
+        max_at: c_main- c_tvs- r_drv- r_qh+ tr_drv- tr_qh+
       need_tpd:
-        nominal: 5.36429e-09
-        min: 6.56517e-10
-        min_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
-        max: 1.05739e-08
+        nominal: 7.03462e-09
+        min: 7.00756e-10
+        min_at: c_main- c_tvs- r_drv- r_qh+ tr_drv- tr_qh+
+        max: 1.41617e-08
         max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
     asserts:
     - expr: min['hold_margin'] < 0

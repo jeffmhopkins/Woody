@@ -1,6 +1,6 @@
 * The chain's one hop whose downstream register is clocked LATER than its upstream one:
 * left_thumb (main board) -> right_hand (key board), net HOP_LT_RH. SCK as sck.cir: the
-* GPIO behind its resistance, R-CHAIN-SER, the main board's node m (U-TVS-CHAIN, both
+* GPIO behind its resistance, R-CHAIN-SER, the main board's node m (U-TVS-CHAIN and U-TVS-CHAIN-RH, both
 * thumbs' CLK inputs, trace: left_thumb's CLK is here), and the two ribbons; right_hand's
 * CLK is at the far end of its ribbon (rxr). left_thumb's QH is launched when SCK at m
 * crosses left_thumb's own V_T+ (vt_lt), with no tpd (sims.yaml tpd_lt), as an edge of tr_qh behind the
@@ -12,6 +12,7 @@ VDRV src 0 PULSE(0 {{vcc}} 20n {{tr_drv}} {{tr_drv}} 480n 1u)
 RDRV src a {{r_drv}}
 RSER a m {{R-CHAIN-SER}}
 CTVS m 0 {{c_tvs}}
+CTVSJ5 m 0 {{c_tvs_j5}}
 CMAIN m 0 {{c_main}}
 TLH m 0 rx 0 Z0={{z0_ribbon}} TD={{td_rib}}
 CRX rx 0 {{ci}}
@@ -27,6 +28,8 @@ CSHP shp 0 {{c_shape}}
 BQ qsrc 0 V = {{q0}} + ({{q1}} - {{q0}}) * v(shp)
 RQ qsrc qa {{r_qh_hop}}
 CQA qa 0 {{c_lt_qh}}
+* U-TVS-CHAIN-RH's HOP_LT_RH channel at J5, behind R-HOP-SER (owner, 2026-10-03, D2)
+CTVSQ qa 0 {{c_tvs_j5}}
 TQH qa 0 ser 0 Z0={{z0_ribbon}} TD={{td_rib}}
 CSER ser 0 {{ci}}
 CSKB ser 0 {{c_kb}}
