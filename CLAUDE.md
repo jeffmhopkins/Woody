@@ -258,6 +258,14 @@ disputed by me — which is worse, because a wrong finding gets caught by the
 next reviewer while a finding filed as handled does not. Verify before
 repeating, and record the verification.
 
+## Work is tracked in GitHub issues
+
+New work and every owner decision get an issue before work starts; commits
+reference it (`#9 G2: …`); the issue is commented with the outcome **by
+finding id** and its `status:` label moved, or closed. Issues cite figures by
+name and never quote them — the corpus stays the only place a value lives.
+Kinds, labels, milestones and the loop: `docs/reference/workflow.md`.
+
 ## Where the details live
 
 - **`docs/reference/repo-maintenance.md`** — which files are generated, which
