@@ -2,7 +2,7 @@
 
 **Status:** Accepted. Decided by the owner, 2026-09-29. It settles ADR 0004's
 open question *which etherCON variant at each end* **for the instrument's end
-only**. The module's end is still open, as ADR 0004 left it.
+only**; the module's end is [ADR 0023](0023-module-ethercon-and-two-boards.md). **Amended 2026-10-02** (the main board's tail end runs full width, *Amendment* below).
 
 ## Context
 

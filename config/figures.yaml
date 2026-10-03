@@ -439,7 +439,7 @@ figures:
     status: settled
     owner: hardware/module/mod-channels/mod-channels.md
     derivation: "R-OUT-PROT (1k) is outside the loop, so the jack is the op-amp output x 100k/101k = 0.990 [calc]. R-MODGAIN-IN and R-MODGAIN-FB specified 0.1 % since 2026-10-01 (owner, pre-layout review A2-12): k = 2.9940-3.0060, op-amp output span 19.970-20.030 V (mod-channels.md tolerance table) x 0.990 = 19.772-19.832 V [calc]; [sim] hardware/module/mod-channels/sim range, 2026-10-01: jack -9.9009/+9.9007 V nominal, -9.8811/+9.8908 V at the low corner and -9.9207/+9.9106 V at the high one (span 19.772 and 19.831 V). On a 1 V/oct assignment: -11.9 cents/oct nominal, -13.7/-10.1 worst [calc: 1200 x span error]; the resistors alone +-1.8."
-    forbidden: ["About ±18 cents per octave", "About +/-18 cents per octave", "19.51-20.10 V", "19.51–20.10 V", "-2.46/+0.51 %", "−2.46 %/+0.51 %", "19.703–20.303", "19.703-20.303", "±50.5 mV", "∓50.5 mV", "+-50.5mV", "−29.6 to", "10k/30k 1 % discretes"]
+    forbidden: ["About ±18 cents per octave", "About +/-18 cents per octave", "19.51-20.10 V", "19.51–20.10 V", "-2.46/+0.51 %", "−2.46 %/+0.51 %", "19.703–20.303", "19.703-20.303", "±50.5 mV", "∓50.5 mV", "+-50.5mV", "−29.6 to", "10k/30k 1 % discretes", "0–10V on breath and modulation"]
     note: "Added 2026-10-01 (pre-layout review A2-1, owner: correct the docs only). The stated range had been the op-amp output's, and the cents figure the resistors' alone. Re-derived the same day at 0.1 % (A2-12, owner)."
 
   - id: pitch-compensation

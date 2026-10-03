@@ -1,7 +1,10 @@
 # Breath ADC — schematic
 
-**Status:** Split out of `carrier.md` 2026-09-21 (Phase B). Every line below was
-moved verbatim; nothing was reworded and no value was touched in the move.
+**Status:** Split out of `carrier.md` 2026-09-21 (Phase B), and edited since.
+**The KiCad sheet `breath-adc.kicad_sch` is the source** (ADR 0019); placed on
+the main board ([`../../boards/main-board/README.md`](../../boards/main-board/README.md)),
+its datasheets banked. Values still marked `[from memory]` below are
+provisional.
 
 The divider, the anti-alias capacitor and the MCP3202 that turn the buffered
 sensor output into counts for the ESP32-S3.

@@ -6,3 +6,9 @@ C49678,C_0805_2012Metric,0,"datasheets/discrete-and-power/EASYEDA-C49678-CC0805K
 C15850,C_0805_2012Metric,0,"datasheets/discrete-and-power/EASYEDA-C15850-CL21A106KAYNNNE-FOOTPRINT.json: pad 1 at -x, as KiCad's"
 C53134,C_0805_2012Metric,0,"datasheets/discrete-and-power/EASYEDA-C53134-CL21B473KBCNNNC-FOOTPRINT.json: pad 1 at -x, as KiCad's"
 C5446699,LED_WS2815B-V1_PLCC6_5.4x5.0mm_P1.6mm,0,"datasheets/led/EASYEDA-C5446699-WS2815B-V1-FOOTPRINT.json: JLC's pin 1 (the chamfered corner) at the right column's bottom at 0 deg, as this footprint's pin 1 (the chamfer, since 844320b); JLC numbers the other five pads differently, which moves no pad"
+C56997,SOIC-8_3.9x4.9mm_P1.27mm,-90,datasheets/analog/EASYEDA-C56997-MCP3202-CI-SN-FOOTPRINT.json: JLC's footprint at 0 deg has its rows along x with pin 1 bottom left; KiCad's has them along y with pin 1 top left
+C139363,SOIC-8_3.9x4.9mm_P1.27mm,-90,datasheets/analog/EASYEDA-C139363-OPA2197IDR-FOOTPRINT.json: JLC's footprint at 0 deg has its rows along x with pin 1 bottom left; KiCad's has them along y with pin 1 top left
+C24696,SOIC-8_3.9x4.9mm_P1.27mm,-90,datasheets/analog/EASYEDA-C24696-REF5050IDR-FOOTPRINT.json: JLC's footprint at 0 deg has its rows along x with pin 1 bottom left; KiCad's has them along y with pin 1 top left
+C155176,SOIC-14_3.9x8.7mm_P1.27mm,-90,datasheets/logic/EASYEDA-C155176-SN74AHCT125DR-FOOTPRINT.json: JLC's footprint at 0 deg has its rows along x with pin 1 bottom left; KiCad's has them along y with pin 1 top left
+C15127,SOT-23,180,"datasheets/discrete-and-power/EASYEDA-C15127-AO3401A-FOOTPRINT.json: JLC's pins 1 and 2 at +x and pin 3 at -x at 0 deg; KiCad's pins 1 and 2 at -x"
+C10675,SOT-23-5,180,"datasheets/discrete-and-power/EASYEDA-C10675-SP0504BAHTG-FOOTPRINT.json: JLC's pins 1-3 at +x with pin 1 at -y at 0 deg; KiCad's pins 1-3 at -x with pin 1 at +y"

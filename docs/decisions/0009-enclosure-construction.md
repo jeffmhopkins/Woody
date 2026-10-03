@@ -4,6 +4,7 @@
 [ADR 0025](0025-the-cassette.md)**: the six body fasteners are gone. The
 internals are one bonded unit, the cassette, glued into the shell with RTV and
 opened by cutting it. Each passage that ADR 0025 changes is marked in place.
+**Amended 2026-10-01** (owner): the maker's mark goes on the oak top.
 
 ## Context
 
