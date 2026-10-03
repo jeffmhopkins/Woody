@@ -301,6 +301,8 @@ python3 tools/audit-notes.py          # BOM notes: live content vs accumulated h
 python3 tools/audit-notes.py --regrown  # ...rows that have turned back into logs
 python3 tools/audit-notes.py <REF>    # ...one row, classified segment by segment
 python3 tools/rewrite-paths.py        # restructure only; --apply/--verify/--invert
+python3 tools/extract-findings.py <wave-dir>  # a review wave's FINDINGS.csv, from its reports
+python3 tools/adr-index.py            # REGENERATES the ADR index in docs/decisions/README.md
 python3 tools/cad.py build            # body CAD: params, then every STALE render/DXF
 python3 tools/cad.py check            # ...or prove every output still matches its sources
 python3 tools/cad.py explain <name>   # which input moved since an output was built

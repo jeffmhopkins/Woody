@@ -885,3 +885,32 @@ circuit without a `sim/`, the answer was written nowhere.
 | `boards/module-main` | n/a | Places circuit sheets, each covered by its own row; its own parts are two connectors |
 | `boards/module-jack` | n/a | Places circuit sheets, each covered by its own row; its own part is a connector |
 | `boards/umb-adapter` | covered | Two connectors and the copper between them: all eight of the umbilical's conductors are coupled lines in `hardware/interfaces/system/sim/`, and its SPI conductors CPL lines in `hardware/interfaces/spi-link/sim/` |
+
+---
+
+## §6. Every tool, and where it is documented
+
+One row per script in `tools/`. A tool documented elsewhere is pointed at, not
+re-described here.
+
+| Tool | What it does | Documented in |
+|---|---|---|
+| `cad.py` | The body CAD: parameters, renders, DXFs, `drc.echo`, the clash check, fingerprints | §2 |
+| `render-instrument.py` | The controller's photographs in Blender (Cycles), from the body CAD's solids and the boards' `.kicad_pcb`. Run by `cad.py build`, never by hand into `mechanical/renders/`. **Needs Blender as a Python module (`bpy`)**, which `setup-env.sh` installs | its docstring; `mechanical/README.md`; `config/render.yaml` |
+| `render-module.py` | The module's photographs, the same way | §2 |
+| `panel-art.py` | The module panel's printed artwork | §2 |
+| `kicad.py` | Sheets: export, render, set fields, `check` (needs KiCad 9, run by hand) | §3 |
+| `sch.py` | A hand-written netlist built into a sheet | §3 |
+| `pcb.py`, `pcb_route.py`, `pcb_main.py`, `pcb_freeroute.py` | Board layout, routing, the main board's kind, the Freerouting round trip | §4 |
+| `lib-models.py` | 3D models drawn from banked drawings | §4 |
+| `sim.py`, `sim_coverage.py` | Circuit simulation and its coverage table | §5 |
+| `check-staleness.py` | The commit gate: figures, links and their anchors, generated files, CAD, sims | `repo-maintenance.md` §2 |
+| `check-netlist.py` | Netlists against the BOM and the drawings | `CLAUDE.md`, *Hardware conventions*; `repo-maintenance.md` |
+| `merge-bom.py` | Regenerates `hardware/bom.csv` from the fragments; `--check` | `repo-maintenance.md` §4, §6 |
+| `merge-manifests.py`, `verify-datasheets.py` | Regenerates `datasheets/MANIFEST.csv`; verifies the banked files | `repo-maintenance.md` §3, §6 |
+| `audit-notes.py` | Classifies BOM notes as live content or history (advisory) | `repo-maintenance.md` §6 |
+| `check-conservation.py` | Content conservation for a page split | `repo-maintenance.md` §6 |
+| `rewrite-paths.py` | The 2026-09-21 restructure's path rewriter | `repo-maintenance.md` §6, §7 |
+| `extract-findings.py` | Builds a review wave's `FINDINGS.csv` ledger from its reports (`<wave-dir> [--check]`) | its docstring; `CLAUDE.md`, *Review waves* |
+| `adr-index.py` | Regenerates the index in `docs/decisions/README.md` from each ADR's `**Status:**` line; `--check` runs inside `check-staleness.py` | its docstring; `docs/decisions/README.md` |
+| `setup-env.sh` | Installs everything above | §1 |
