@@ -28,8 +28,7 @@ for p in openscad xvfb libxft2 poppler-utils librsvg2-bin python3-yaml python3-p
   have "$p" || need_apt+=("$p")
 done
 
-# --- circuit simulation (tools/sim.py): ngspice 42 from the Ubuntu archive, the version
-# sim.py pins (NGSPICE): `sim.py check` fails a results.yaml run on any other. Raw
+# --- circuit simulation (tools/sim.py): ngspice 42 from the Ubuntu archive. Raw
 # decks through subprocess; not PySpice (hardware/module/pitch-stage/sim/README.md says why).
 have ngspice || need_apt+=(ngspice)
 

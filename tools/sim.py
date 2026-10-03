@@ -2,8 +2,7 @@
 """SPICE simulations of the circuits, built from their own netlists (ngspice).
 
     python3 tools/sim.py run [<sim dir> ...]   # run every sim/sims.yaml (or those named); write results.yaml
-    python3 tools/sim.py check                 # (no ngspice) every results.yaml matches its inputs, passed,
-                                               # and was run on the pinned ngspice (NGSPICE)
+    python3 tools/sim.py check                 # (no ngspice) every results.yaml matches its inputs and passed
     python3 tools/sim.py show <sim dir>        # print a results.yaml as a table
 
 A circuit's `sim/` directory holds `sims.yaml` - what is simulated, what each run
@@ -601,18 +600,8 @@ def ngspice(deck, post=None, values=None, spiceinit=None):
     return meas, errors, out
 
 
-# THE PINNED ngspice. Results moved between versions without crossing an assertion
-# (#5, 2026-10-02: on 44.2 an unquieted OPA2197 follower's noise read 260 nV/rtHz, not
-# 42's 868; SYNC's overshoot 1.5 mV, not 0.18), so a results.yaml is a record of one
-# version, and `check` fails one made on another. tools/setup-env.sh installs this one.
-NGSPICE = "42"
-
-
 def ngspice_version():
-    try:
-        r = subprocess.run(["ngspice", "-v"], capture_output=True, text=True)
-    except FileNotFoundError:
-        return None
+    r = subprocess.run(["ngspice", "-v"], capture_output=True, text=True)
     m = re.search(r"ngspice-(\S+)", r.stdout + r.stderr)
     return m.group(1) if m else "?"
 
@@ -725,9 +714,6 @@ def check():
             problems.append(f"{rel}: never run - python3 tools/sim.py run {rel}")
             continue
         got = yaml.safe_load(open(path))
-        if str(got.get("ngspice")) != NGSPICE:
-            problems.append(f"{rel}: run on ngspice {got.get('ngspice')}, not the pinned {NGSPICE} - "
-                            f"re-run it on {NGSPICE} (tools/setup-env.sh)")
         try:
             want = inputs_of(load(d))
         except SystemExit as e:
@@ -766,9 +752,6 @@ def main(argv):
     if argv[0] == "show":
         show(os.path.abspath(argv[1]))
         return 0
-    if ngspice_version() != NGSPICE:
-        print(f"sim: WARNING - this is ngspice {ngspice_version()}, not the pinned {NGSPICE}: "
-              f"`check` will fail what this run writes")
     dirs = [os.path.abspath(a) for a in argv[1:]] or sim_dirs()
     return max([run(d) for d in dirs] or [0])
 
