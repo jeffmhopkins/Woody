@@ -10,7 +10,7 @@ inputs:
   hardware/interfaces/breath-sense-link/sim/tvs.cir: 76273b7b39e7abbb
   datasheets/analog/INA828-ti-pspice-sbomag5c.lib: 6ae6e0285c98dc1e
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
-  hardware/module/breath-receive-stage/sim/sims.yaml: 5be525e753cc5d3d
+  hardware/module/breath-receive-stage/sim/sims.yaml: 2acb3e622f585a56
 ngspice: '42'
 sims:
   with-tvs[v_sensor=1.0]:
