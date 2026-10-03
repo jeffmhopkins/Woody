@@ -128,6 +128,15 @@ the ST part with none in stock. The decision — DP over GP — stands; what it
 bought is less than this table says. Supply now belongs to the `U-BREATH`
 row, which says what to buy and where.)*
 
+*(Amended 2026-10-03, issues #7 and #30: asked in the working chat how to
+cover the thin supply, the owner chose **"Buy now + study fallback"**. The
+design stays on the MPXV4006DP. Units are bought now — LCSC's three first,
+then Maritex — and the MPXV7007DP (±7 kPa, the same case 1351-01) is worked
+out as a ready-to-apply fallback: an offset-and-gain stage at the sensor
+buffer that gives it this part's slope, and a wider `TRIM-BREATH-ZERO` range
+— `hardware/interfaces/breath-sense-link/breath-sense-link.md`, *Fallback:
+MPXV7007DP*. Its datasheet is banked.)*
+
 **The transfer function is identical**, and it verifies against this ADR's own
 figures: `Vout = VS × (0.1533·P + 0.053)` at VS = 5 V is 0.7665 V/kPa with
 0.265 V at zero — the DP's published numbers exactly. *(This line carried

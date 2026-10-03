@@ -405,6 +405,11 @@ exists to avoid.
 > `datasheets/MANIFEST.csv`, and this sentence was the only mention of either
 > part anywhere in the corpus.
 
+*(Amended 2026-10-03, issue #7: asked in the working chat whether to buy the
+LT1641-1 ahead or move to an alternative, the owner answered **"Buy 2–3 now"**.
+The latching `-1` stays, and two or three are bought from DigiKey now rather
+than with the module order. The `U-LOADSW` row says what to buy.)*
+
 Programmable ramp rate and a programmable fault timer come with the part, which
 is what the 75 ms start above needs. **Both are now programmed**:
 `C-GATE-LOADSW` and `C-TIMER-LOADSW` — the tracked figures
