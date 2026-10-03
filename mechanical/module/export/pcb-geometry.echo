@@ -23,10 +23,8 @@ ECHO: "PCB", "module-main", "standoff", "MECH-PANEL-STANDOFF-MOD 1", 6.375, 15, 
 ECHO: "PCB", "module-main", "standoff", "MECH-PANEL-STANDOFF-MOD 2", 44.125, 15, 3.2, 6, 18.3
 ECHO: "PCB", "module-main", "standoff", "MECH-STANDOFF-ISO 1", 11.5, 41.8, 3.2, 6, 8
 ECHO: "PCB", "module-iso", "standoff", "MECH-STANDOFF-ISO 1", 11.5, 41.8, 3.2, 6, 8
-ECHO: "PCB", "module-main", "standoff", "MECH-STANDOFF-ISO 2", 4.8, 80.1, 3.2, 6, 8
-ECHO: "PCB", "module-iso", "standoff", "MECH-STANDOFF-ISO 2", 4.8, 80.1, 3.2, 6, 8
-ECHO: "PCB", "module-main", "standoff", "MECH-STANDOFF-ISO 3", 45.7, 80.1, 3.2, 6, 8
-ECHO: "PCB", "module-iso", "standoff", "MECH-STANDOFF-ISO 3", 45.7, 80.1, 3.2, 6, 8
+ECHO: "PCB", "module-main", "standoff", "MECH-STANDOFF-ISO 2", 45.7, 80.1, 3.2, 6, 8
+ECHO: "PCB", "module-iso", "standoff", "MECH-STANDOFF-ISO 2", 45.7, 80.1, 3.2, 6, 8
 ECHO: "PCB", "module-main", "connector", "J-B2B-ISO", 30, 42, 0, 2, 5, 2.54, "long axis along x, pin 1 at the bottom left seen from the panel, its pair above it; TOP side (F.Cu), NOT mirrored - the insulator is on this board's rear, but each pin is one straight conductor through both boards, so both KiCad top views (panel views) take the same unmirrored pin map"
 ECHO: "PCB", "module-iso", "connector", "J-B2B-ISO", 30, 42, 0, 2, 5, 2.54, "long axis along x, pin 1 at the bottom left seen from the panel, its pair above it; top side (F.Cu), the posts through this board from the main board's side"
 ECHO: "PCB", "module-jack", "connector", "J-B2B-MOD", 25.25, 77, 0, 2, 10, 2.54, "long axis along y, pin 1 at the top left; TOP side (F.Cu), NOT mirrored - the header's body is on this board's rear, but each pin is one straight conductor through both boards, so pin k sits at the same panel-frame place on both, and both KiCad top views are panel views: the same unmirrored pin map as the main board. Placed on B.Cu it mirrors, and every net lands one column over"
@@ -60,10 +58,8 @@ ECHO: "PCB", "module-main", "keepout", "standoff head", 33.75, 114.8, 7, "d, no 
 ECHO: "PCB", "module-main", "keepout", "standoff head", 6.375, 15, 7, "d, no parts and no copper but the mount's own pad, on no net (metal standoffs; power-entry.md Grounding)"
 ECHO: "PCB", "module-main", "keepout", "standoff head", 44.125, 15, 7, "d, no parts and no copper but the mount's own pad, on no net (metal standoffs; power-entry.md Grounding)"
 ECHO: "PCB", "module-main", "keepout", "standoff head", 11.5, 41.8, 7, "d, no parts and no copper but the mount's own pad, on no net (metal standoffs; power-entry.md Grounding)"
-ECHO: "PCB", "module-main", "keepout", "standoff head", 4.8, 80.1, 7, "d, no parts and no copper but the mount's own pad, on no net (metal standoffs; power-entry.md Grounding)"
 ECHO: "PCB", "module-main", "keepout", "standoff head", 45.7, 80.1, 7, "d, no parts and no copper but the mount's own pad, on no net (metal standoffs; power-entry.md Grounding)"
 ECHO: "PCB", "module-iso", "keepout", "standoff head", 11.5, 41.8, 7, "d, no parts and no copper but the mount's own pad, on no net (metal standoffs; power-entry.md Grounding)"
-ECHO: "PCB", "module-iso", "keepout", "standoff head", 4.8, 80.1, 7, "d, no parts and no copper but the mount's own pad, on no net (metal standoffs; power-entry.md Grounding)"
 ECHO: "PCB", "module-iso", "keepout", "standoff head", 45.7, 80.1, 7, "d, no parts and no copper but the mount's own pad, on no net (metal standoffs; power-entry.md Grounding)"
 ECHO: "PCB", "module-main", "keepout", "front: under the jack board", 1, 57.5, 49.5, 118.5, 5.1, "max part height on the front face where the pots' legs are; ", 5.3, " under a jack's tails"
 ECHO: "PCB", "module-jack", "keepout", "rear: toward the main board", 1, 57.5, 49.5, 118.5, 7.2, "max part height on the rear face, less whatever the main board puts under it"

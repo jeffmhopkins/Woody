@@ -141,7 +141,7 @@ something it shows moved.
 
 ![The panel drawing: cuts, centres, legend zones, the washers' reach along their slots](renders/panel.png)
 
-![The three boards seen from the panel: the jack board a plain rectangle above the toggle and the NE8FAV, the main board with its standoffs (two between the boards, two to the panel, three to the iso board), J-B2B-MOD, J-B2B-ISO, J-LED-PANEL with the LED's nut and its lead's run outlined above it; the iso board's rear face with U-ISO and its filter, its notch round J-PWR-EURO](renders/boards.png)
+![The three boards seen from the panel: the jack board a plain rectangle above the toggle and the NE8FAV, the main board with its standoffs (two between the boards, two to the panel, two to the iso board), J-B2B-MOD, J-B2B-ISO, J-LED-PANEL with the LED's nut and its lead's run outlined above it; the iso board's rear face with U-ISO and its filter, its notch round J-PWR-EURO](renders/boards.png)
 
 ![Side section through the panel's centre, with every depth and the Palette's limit read both ways](renders/section.png)
 
@@ -184,7 +184,7 @@ than one part, so neither is left to the builder to discover
    on. Then on the main board's rear face. The header, once soldered, freezes
    the gap.
 5. **The iso board** (`PCB-MODULE-ISO`, its parts already on its rear face):
-   offer it to the main board's rear on its three spacers
+   offer it to the main board's rear on its two spacers
    (`MECH-STANDOFF-ISO`, the stock length uncut: *iso board gap*) with
    `J-B2B-ISO`'s insulator on the main board's rear face and its posts
    through the iso board, screw it home, then solder `J-B2B-ISO` on the iso

@@ -20,14 +20,15 @@ a bottom edge just above the NE8FAV's tails, a notch at its lower right that
 `J-PWR-EURO` and its mated socket stand in, and a top edge (`iso_board.y1`)
 below the rear trimmers, so each stays adjustable from behind
 (`mechanical/module/drc.echo`, *trimmers adjustable from behind*). It stands
-off the main board's rear face on three stock spacers used uncut
+off the main board's rear face on two stock spacers used uncut, at opposite corners,
 (`MECH-STANDOFF-ISO`): **the gap is the spacer** (*iso board gap*). Its parts
 stand on its **rear** face, away from the main board; on the front only
 `U-ISO`'s tails and `J-B2B-ISO`'s posts stand in the gap, over main-board
 parts no taller than `iso_board.under_h`.
 
 > **Status: laid out and routed by `tools/pcb.py` (`kind: module`), 2026-10-03.**
-> Two layers. `pcb.py check` passes: KiCad's DRC with schematic parity, nothing
+> Two layers, **a power layout drawn by hand** (2026-10-03, the owner's review of
+> the first, autorouted one; *The layout*). `pcb.py check` passes: KiCad's DRC with schematic parity, nothing
 > unrouted, every courtyard inside the board, every CAD-placed part where
 > `pcb-geometry.echo` puts it, the isolation gap, and `J-B2B-ISO` mating with
 > the main board's pin for pin (`check_b2b`). The mask colour is **not
@@ -58,20 +59,33 @@ pairs at the right, toward `L-ISO-IN` and `L-CM-ISO`.
 `layout.yaml` beside this file records how the first layout was made; the
 `.kicad_pcb` is the source now. `U-ISO` and `J-B2B-ISO` are placed by the
 module CAD, `U-ISO` turned so its output row (pins 4, 5, 6) runs along the
-bottom beside the header and its input pins (1, 2) are at the top. The layout
-put:
+bottom beside the header and its input pins (1, 2) are at the top.
 
-- **`L-CM-ISO` (`L2`) on the right, turned 45°** (`config/module.yaml`
-  `iso.filter`), `L-ISO-IN` (`L1`) under it beside the header's input pairs;
-- **`C-ISO-BULK` (`C2`) and `C-ISO-IN` (`C44`) across `U-ISO`'s input pins**
-  at the top, `C-ISO-OUT` (`C45`) beside the output row and the header;
-- **`C-ISO-Y` (`C46`) at the converter's top left**, its `PWR_GND` pad
-  outward, so the return's track keeps the gap from the `−Vin` pin;
-- **the isolation gap** (`layout.yaml` `isolation:`, 2.0 mm, functional, not
-  a safety rating): input nets and output nets this far apart on both layers,
-  `C46` bridging it by design;
-- tracks 0.8 mm for every supply net (`net_classes:`);
-- the three standoff pads on no net (`power-entry.md`, *Grounding*).
+**It is a power layout, placed and drawn by hand** — the first layout's
+autorouted, one-direction-per-layer tracks were the owner's objection
+(2026-10-03: *"the strict vertical/horizontal routing is completely
+unnecessary"*). The parts follow the current: `J-B2B-ISO`'s input pairs →
+`L-ISO-IN` (`L1`) straight above them → `L-CM-ISO` (`L2`, its IN pads down,
+OUT pads up) → `C-ISO-BULK` (`C2`) and `U-ISO`'s input pins at the top, with
+`C-ISO-IN` (`C44`) on the front between those pins; then `U-ISO`'s output row →
+`C-ISO-OUT` (`C45`) → `J-B2B-ISO`'s output pairs. `C-ISO-Y` (`C46`) is on the
+front across the barrier beside the 0V pin. `C44` and `C46` are the only
+front-face parts.
+
+- **Three pour regions, each on both faces and stitched**: `PWR_GND` under the
+  output side (the rear pour stops short of `U-ISO`'s body), `ISO_VIN_NEG`
+  over the converter's input side, `ISO_FILT_NEG` under the filter's input.
+  They are the returns; no return is a track.
+- **The supply nets are straight runs with 45° bends**, 1.2–1.5 mm wide:
+  `ISO_POS12` from +Vout through `C45`'s + pad to pair 3-4; `ISO_VIN_POS` from
+  `L2`'s OUT_POS over the top to `C2`'s + pad and down to +Vin (and on the front
+  through `C44` to `C46`); `ISO_FB2` and `ISO_FILT_POS` from the header through
+  `L1` to `L2`. One via per stitch, none in a supply run.
+- **The isolation gap** (`layout.yaml` `isolation:`, 2.0 mm, functional, not
+  a safety rating): the output region's pours stop 2 mm or more short of the
+  input regions' on both faces, across `U-ISO`'s middle and down past the
+  header's open pair 5-6; `C46` bridges it by design.
+- The two standoff pads on no net (`power-entry.md`, *Grounding*).
 
 ## Files
 

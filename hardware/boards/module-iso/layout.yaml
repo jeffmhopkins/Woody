@@ -6,7 +6,7 @@
 # module is correct"): the instrument's isolated supply, U-ISO and its filter, on a
 # board of its own behind the module main board. FROM THE MODULE CAD, NOT HERE
 # (mechanical/module/export/pcb-geometry.echo, `module-iso` lines; the outline from
-# iso-board.dxf): U-ISO, J-B2B-ISO, the three standoffs and the keep-outs. Coordinates
+# iso-board.dxf): U-ISO, J-B2B-ISO, the two standoffs and the keep-outs. Coordinates
 # are the panel frame (config/module.yaml), KiCad's top view. FRONT face (toward the
 # main board, and the panel) = F.Cu; every part but J-B2B-ISO's pins is on the REAR.
 
@@ -43,7 +43,7 @@ fab:
   silk: White
   copper_oz: 1
 
-# The three MECH-STANDOFF-ISO pads: board-only holes on NO net (hardware/unplaced.csv).
+# The two MECH-STANDOFF-ISO pads: board-only holes on NO net (hardware/unplaced.csv).
 mounts:
   footprint: "MountingHole:MountingHole_3.2mm_M3_Pad"
   net: null
@@ -55,6 +55,11 @@ mounts:
 # (toward the main board) where it stands in the gap.
 connectors:
   J-B2B-ISO: {row: J-B2B-ISO}
+# 3D models only (pcb.py render): J-B2B-ISO's insulator is on the main board's rear
+# face, the gap (config/module.yaml standoff.stock_l, 8.0) less its height (b2b.insulator_h,
+# 2.54) in front of this board's front face.
+models:
+  PinHeader_2x05_P2.54mm_Vertical: {offset: [0, 0, 5.46]}
 cad_tall:
   U-ISO: {row: U-ISO, pins: ["1", "2", "4", "5", "6"]}
 b2b:
@@ -82,17 +87,20 @@ net_classes:
            /power-entry/ISO_VIN_POS, /power-entry/ISO_VIN_NEG]
     track: 0.8
 
-# The filter round the converter (power-entry.md, the isolated supply): L-ISO-IN between
-# J-B2B-ISO's +12 V pair and L-CM-ISO; C-ISO-BULK (C2) and C-ISO-IN (C44) across U-ISO's
-# input pins at the top; C-ISO-OUT (C45) beside its output row and J-B2B-ISO's output
-# pairs at the bottom; C-ISO-Y (C46) across the barrier at the converter's top left.
+# A POWER LAYOUT, placed in the order the current flows (the owner, 2026-10-03: "the
+# strict vertical/horizontal routing is completely unnecessary" on this board): J-B2B-ISO's
+# input pairs -> L-ISO-IN (L1) straight above them -> L-CM-ISO (L2), turned so its IN
+# pads face down and its OUT pads up -> C-ISO-BULK (C2) and U-ISO's input pins at the
+# top, C-ISO-IN (C44) on the front between those pins; U-ISO's output row -> C-ISO-OUT
+# (C45) -> J-B2B-ISO's output pairs at the bottom. C-ISO-Y (C46) on the front across the
+# barrier beside the 0V pin. C44 and C46 are the only front-face parts.
 parts:
-  C2:   [16.0, 79.8, 0, rear]
-  C44:  [23.0, 78.5, 0, rear]
-  C45:  [19.0, 44.0, 0, rear]
-  C46:  [9.2, 77.0, 180, rear]
-  L1:   [33.4, 47.9, 0, rear]
-  L2:   [38.75, 63.0, 45, rear]
+  C2:   [15.2, 80.0, 180, rear]
+  C44:  [14.45, 70.0, 180]
+  C45:  [20.5, 46.0, 180, rear]
+  C46:  [4.3, 63.6, 270]
+  L1:   [33.6, 48.6, 90, rear]
+  L2:   [38.75, 63.0, 135, rear]
 
 # How tall each footprint stands (pcb_module.check_heights), with its source. Rooms: the
 # front faces the main board across the gap (the CAD's keep-out, iso_board.under_h);
@@ -118,9 +126,13 @@ silk:
   rev: "A"
   date: "2026-10-03"
 
-route: astar
-rip_up: 10
-directions:
-  layers: {F.Cu: vertical, B.Cu: horizontal}
-  against_cost: 6.0
-  chamfer: 0.6
+# THE COPPER IS DRAWN, NOT AUTOROUTED (2026-10-03): every track, via and pour is in the
+# .kicad_pcb, which is the source; pcb.py check holds it. Three regions, each poured on
+# both faces and stitched: PWR_GND under the output side (bottom left; the rear pour stops
+# short of U-ISO's body), ISO_VIN_NEG over the converter's input side (the top),
+# ISO_FILT_NEG under the filter's input (bottom right), the first 2 mm or more from the
+# other two (isolation:). The supply nets as straight runs with 45-degree bends, 1.2-1.5 mm:
+# ISO_POS12 from +Vout through C-ISO-OUT's + pad to pair 3-4; ISO_VIN_POS from L-CM-ISO's
+# OUT_POS over the top to C-ISO-BULK's + pad and down to +Vin; ISO_FB2 and ISO_FILT_POS
+# J-B2B-ISO -> L-ISO-IN -> L-CM-ISO. The returns are the pours.
+route: none

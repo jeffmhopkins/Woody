@@ -55,6 +55,10 @@ connectors:
   J-LED-PANEL: {row: J-LED-PANEL}
   J-PWR-EURO: {row: J-PWR-EURO, side: rear, odd_column: -1}
 
+# 3D models only (pcb.py render): J-B2B-ISO's insulator is on this board's rear, so the
+# stock model is turned over the x axis and dropped through the board, pin 1 kept at pin 1.
+models:
+  PinHeader_2x05_P2.54mm_Vertical: {offset: [0, -10.16, -1.6], rotate: [180, 0, 0]}
 b2b:
   - {row: J-B2B-MOD, other: hardware/boards/module-jack}
   - {row: J-B2B-ISO, other: hardware/boards/module-iso}
