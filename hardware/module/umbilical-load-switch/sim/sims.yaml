@@ -1,5 +1,10 @@
 # The umbilical load switch's start, with a BEHAVIOURAL LT1641 (lt1641.inc, built from
 # the banked datasheet 164112fc - no vendor model could be banked, see fragment R29).
+# SUPERSEDED FOR THE ORDINARY START by carrier/power-entry-instrument/sim, which runs the
+# same LT1641 through the umbilical and Q-INRUSH, as built, and owns the C-TIMER sizing
+# check (timer_peak) since #5 finding 3. This deck has neither: C-STRIP-BULK sits directly
+# on OUT. It stays as the switch's own stress case - what a plug-in does with Q-INRUSH
+# failed short, or a replug inside its window - and for the FB-unconnected history.
 # Values from both netlists the start runs through: this circuit's, and the
 # instrument's input (carrier/power-entry-instrument) that the umbilical charges. Run:
 #   python3 tools/sim.py run hardware/module/umbilical-load-switch/sim
@@ -18,7 +23,6 @@ params:
   v_bus:    {value: 12.0, source: "U-ISO's output (RECOM RPA20-2412SAW), which feeds the load switch since ADR 0027: 12 V nominal [datasheets/discrete-and-power/RECOM-RPA20-AW.pdf PD-1] (vary)"}
   r_bus:    {value: 0.007, source: "U-ISO's output resistance: load regulation +/-0.1 % for a 12 V output [ds PD-5], 12 mV across 1.67 A = 0.007 ohm [calc]. A resistance, not the converter's loop: C-ISO-OUT carries the first hundreds of microseconds (transient recovery 250 us typ for a 25 % step, PD-5)"}
   t_rise:   {value: 1.0e-3, source: "the bus rising at power-on [assumption: a PSU's soft start is slower, which is easier]"}
-  r_ilim:   {value: 0.05, source: "R-ILIM, 50 mohm 1 % (RALEC LR1206-21R050F4): its bom.csv row"}
   vhi:      {value: 47.0e-3, source: "V_SENSETRIP at V_FB >= 0.5 V, 39/47/55 mV [LT1641.pdf p.2] (vary)"}
   vlo:      {value: 12.0e-3, source: "V_SENSETRIP at V_FB = 0, 8/12/17 mV [p.2] (vary)"}
   igate:    {value: 10.0e-6, source: "I_GATEUP, 5/10/20 uA [p.2] (vary)"}
@@ -50,6 +54,7 @@ vary:
   igate: {tol: [-0.5, 1.0], source: "5 and 20 uA about 10"}
   itup:  {tol: [-0.7, 0.65], source: "24 and 132 uA about 80"}
   itdn:  {tol: [-0.5, 0.6667], source: "1.5 and 5 uA about 3"}
+  R-ILIM: {tol: from-value, source: "its value field's 1 % (this circuit's netlist), {{R-ILIM}} in the deck since #5 finding 3"}
 
 sims:
   - name: cold-start

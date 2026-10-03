@@ -4,17 +4,17 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/umbilical-load-switch/sim/sims.yaml: 85eec256fad8b2e5
+  hardware/module/umbilical-load-switch/sim/sims.yaml: c338c3bd07b25968
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
   hardware/carrier/power-entry-instrument/netlist.yaml: 2ced35d8a0373a19
   hardware/module/power-entry/netlist.yaml: 56b479e28aae437c
-  hardware/module/umbilical-load-switch/sim/loadswitch.cir: a52911857b091c78
+  hardware/module/umbilical-load-switch/sim/loadswitch.cir: a1f5bb5e89966dd8
   hardware/module/umbilical-load-switch/sim/lt1641.inc: 59be165ccd4451a6
   figure:umbilical-current: 359 mA
 ngspice: '42'
 sims:
   cold-start:
-    corners: 65
+    corners: 129
     measures:
       latched:
         nominal: 0.0
@@ -31,21 +31,21 @@ sims:
       t_up:
         nominal: 0.112905
         min: 0.0549851
-        min_at: igate+ itdn- itup- v_bus- vhi- vlo-
+        min_at: R-ILIM- igate+ itdn- itup- v_bus- vhi- vlo-
         max: 0.231678
-        max_at: igate- itdn- itup- v_bus+ vhi- vlo-
+        max_at: R-ILIM- igate- itdn- itup- v_bus+ vhi- vlo-
       i_peak:
         nominal: 0.428774
         min: 0.39401
-        min_at: igate- itdn- itup- v_bus- vhi- vlo-
+        min_at: R-ILIM- igate- itdn- itup- v_bus- vhi- vlo-
         max: 0.498294
-        max_at: igate+ itdn- itup- v_bus+ vhi- vlo-
+        max_at: R-ILIM- igate+ itdn- itup- v_bus+ vhi- vlo-
     asserts:
     - expr: max['latched'] < 0.5
       why: a cold start completes without the fault latch at every datasheet corner
       pass: true
   hot-plug:
-    corners: 65
+    corners: 129
     measures:
       latched:
         nominal: 0.0
@@ -55,34 +55,34 @@ sims:
         max_at: nominal
       timer_peak:
         nominal: 0.00382335
-        min: 0.00108047
-        min_at: igate- itdn+ itup- v_bus- vhi+ vlo+
-        max: 0.0066075
-        max_at: igate- itdn- itup+ v_bus+ vhi- vlo-
+        min: 0.00108011
+        min_at: R-ILIM+ igate- itdn+ itup- v_bus- vhi+ vlo+
+        max: 0.00661065
+        max_at: R-ILIM- igate- itdn- itup+ v_bus+ vhi- vlo-
       t_up:
         nominal: 0.0870789
-        min: 0.0420149
-        min_at: igate+ itdn- itup- v_bus- vhi+ vlo+
-        max: 0.180207
-        max_at: igate- itdn- itup- v_bus+ vhi- vlo-
+        min: 0.0419753
+        min_at: R-ILIM- igate+ itdn- itup- v_bus- vhi+ vlo+
+        max: 0.180339
+        max_at: R-ILIM+ igate- itdn- itup- v_bus+ vhi- vlo-
       i_peak:
         nominal: 147.964
-        min: 142.666
-        min_at: igate- itdn- itup+ v_bus- vhi- vlo-
-        max: 153.161
-        max_at: igate+ itdn- itup- v_bus+ vhi- vlo-
+        min: 141.437
+        min_at: R-ILIM+ igate- itdn- itup+ v_bus- vhi- vlo-
+        max: 154.518
+        max_at: R-ILIM- igate+ itdn- itup- v_bus+ vhi- vlo-
       i_after:
         nominal: 0.109241
-        min: 0.063996
-        min_at: igate- itdn- itup+ v_bus- vhi+ vlo+
-        max: 0.195956
-        max_at: igate+ itdn- itup- v_bus+ vhi- vlo-
+        min: 0.0638556
+        min_at: R-ILIM+ igate- itdn- itup+ v_bus- vhi+ vlo+
+        max: 0.196278
+        max_at: R-ILIM- igate+ itdn- itup- v_bus+ vhi- vlo-
       vcc_min:
         nominal: 11.9925
-        min: 11.6197
-        min_at: igate+ itdn- itup+ v_bus- vhi+ vlo+
-        max: 12.365
-        max_at: igate- itdn- itup- v_bus+ vhi- vlo-
+        min: 11.6196
+        min_at: R-ILIM- igate+ itdn- itup+ v_bus- vhi+ vlo+
+        max: 12.3651
+        max_at: R-ILIM+ igate- itdn- itup- v_bus+ vhi- vlo-
     asserts:
     - expr: max['latched'] < 0.5 and max['timer_peak'] < 1.233
       why: a hot-plug start completes before the TIMER reaches the fault threshold (1.233 V, p.5) on worst-case silicon -
@@ -93,7 +93,7 @@ sims:
         9.90 V (umbilical-load-switch.md, ''The ON pin''), so the start is never interrupted by its own supply'
       pass: true
   hot-plug-page-2m2:
-    corners: 65
+    corners: 129
     measures:
       latched:
         nominal: 0.0
@@ -103,22 +103,22 @@ sims:
         max_at: nominal
       timer_peak:
         nominal: 0.00476466
-        min: 0.00131842
-        min_at: igate- itdn+ itup- v_bus+ vhi+ vlo+
-        max: 0.0637804
-        max_at: igate+ itdn- itup+ v_bus- vhi- vlo-
+        min: 0.00131531
+        min_at: R-ILIM- igate- itdn+ itup- v_bus- vhi+ vlo+
+        max: 0.0663648
+        max_at: R-ILIM+ igate+ itdn- itup+ v_bus- vhi- vlo-
       t_up:
         nominal: 0.0925147
-        min: 0.0455277
-        min_at: igate+ itdn- itup- v_bus- vhi+ vlo+
-        max: 0.190452
-        max_at: igate- itdn- itup- v_bus+ vhi- vlo-
+        min: 0.0454769
+        min_at: R-ILIM- igate+ itdn- itup- v_bus- vhi+ vlo+
+        max: 0.190489
+        max_at: R-ILIM+ igate- itdn- itup- v_bus+ vhi- vlo-
       i_after:
         nominal: 0.278163
-        min: 0.156952
-        min_at: igate- itdn- itup- v_bus- vhi- vlo-
+        min: 0.156522
+        min_at: R-ILIM+ igate- itdn- itup- v_bus- vhi- vlo-
         max: 0.53667
-        max_at: igate+ itdn- itup- v_bus+ vhi- vlo+
+        max_at: R-ILIM+ igate+ itdn- itup- v_bus+ vhi- vlo+
     asserts:
     - expr: max['latched'] < 0.5 and max['timer_peak'] < 1.233
       why: even at the page's 2.2 mF the start completes on worst-case silicon
