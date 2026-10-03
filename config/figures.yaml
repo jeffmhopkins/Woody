@@ -736,11 +736,11 @@ figures:
     false_positive_note: "The first two spellings are the value before Q-INRUSH, when every hot-plug reached the threshold. A page narrating that history names the figure instead of the number."
   - id: led-pwm-pitch
     quantity: The pitch jack, held at 0 V and read against the receivers' ground (the PSU end of the bus), while the instrument's LED row switches blank-to-lit at its 2 kHz PWM, every LED in phase
-    value: "0.0038 cents p-p nominal, 0.013 at the worst corner"
+    value: "0.0041 cents p-p nominal, 0.014 at the worst corner"
     status: settled
     owner: hardware/interfaces/system/sim/README.md
-    derivation: "[sim] python3 tools/sim.py run hardware/interfaces/system/sim, 2026-10-01, ngspice 42. Sim led-pwm, 17 corners: the rack PSU's resistance (10-200 mohm), C2's ESR, C-STRIP-BULK's ESR, the umbilical's gauge (24-28 AWG); worst at a 200 mohm PSU, both ESRs high and 24 AWG. The whole system from the exported netlists, behavioural OPA2197s whose V+ rejection is pessimistic (opamp-check). About half is the jack board's AGND_MOD moving against the receivers' ground as the rail ripple's return current through the module's bulk capacitors splits between the ribbon and the patch-cable sleeves; power-entry/sim, which reads the jack against the module's own ground, has no such path."
-    forbidden: []
+    derivation: "[sim] python3 tools/sim.py run hardware/interfaces/system/sim, 2026-10-02, ngspice 42 (fourteen LEDs). Sim led-pwm, 17 corners: the rack PSU's resistance (10-200 mohm), C2's ESR, C-STRIP-BULK's ESR, the umbilical's gauge (24-28 AWG); worst at a 200 mohm PSU, both ESRs high and 24 AWG. The whole system from the exported netlists, behavioural OPA2197s whose V+ rejection is pessimistic (opamp-check). About half is the jack board's AGND_MOD moving against the receivers' ground as the rail ripple's return current through the module's bulk capacitors splits between the ribbon and the patch-cable sleeves; power-entry/sim, which reads the jack against the module's own ground, has no such path."
+    forbidden: ["0.0038 cents p-p nominal", "0.013 at the worst corner"]
   - id: loop-budget
     quantity: Real-time loop, one pass
     value: "186-227 us of 250 us"

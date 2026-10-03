@@ -159,8 +159,8 @@ them, and each is `[sim]`. "Worst" is the worst corner.
 
 | Scenario | Pitch jack | Breath jack | Other |
 |---|---|---|---|
-| `led-pwm` | 0.0038 cents p-p nominal, 0.013 at the worst corner (`led-pwm-pitch`) | 0.07 mV p-p, 0.24 worst | header ±12 V 1.0 mV p-p, 4.1 worst; the instrument's ground against the module's 6.4 mV, 18 worst |
-| `led-pattern`, 200 Hz | 0.031 cents p-p, 0.062 worst | 5.8 mV p-p, 12.5 worst | header ±12 V 14 mV p-p, 31 worst |
+| `led-pwm` | 0.0041 cents p-p nominal, 0.014 at the worst corner (`led-pwm-pitch`) | 0.08 mV p-p, 0.26 worst | header ±12 V 1.2 mV p-p, 4.5 worst; the instrument's ground against the module's 6.3 mV, 19 worst |
+| `led-pattern`, 200 Hz | 0.033 cents p-p, 0.067 worst | 6.3 mV p-p, 13.4 worst | header ±12 V 15 mV p-p, 33 worst |
 | `led-off` | 1 × 10⁻⁸ cents | 0.6 µV | the deck's floor |
 | `burst` | 0.025 cents | 0.22 mV | the in-amp's output 0.22 mV; mod 1 swings 3.5 V |
 | `burst-spi` | 0.011 cents | 0.18 mV | the SPI edges alone |
@@ -220,11 +220,11 @@ does.
 - **A light pattern inside the audio band is a different load from the
   PWM.** At 200 Hz, with the whole row switching blank to lit, nothing
   filters it:
-  - the case's ±12 V move 14 mV p-p at the header, and 31 mV with a 200 mΩ
+  - the case's ±12 V move 15 mV p-p at the header, and 33 mV with a 200 mΩ
     rack supply and 24 AWG;
-  - the breath jack moves 5.8 mV, and 12.5 mV at the worst corner: three to
-    six times its own noise, peak to peak (`breath-jack-noise`);
-  - the pitch jack moves 0.03–0.06 cents.
+  - the breath jack moves 6.3 mV, and 13.4 mV at the worst corner: three to
+    seven times its own noise, peak to peak (`breath-jack-noise`);
+  - the pitch jack moves 0.03–0.07 cents.
 
   ADR 0027 bounds the PWM, not patterns. If the firmware is to animate the row
   at tens to hundreds of hertz, the −12 V path to the breath jack (`R-OFFNEG`)
