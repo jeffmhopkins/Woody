@@ -93,21 +93,24 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 |---|---|---|
 | C1 | `C-AA-ADC` | breath-adc |
 | C2 | `C-ADC-BULK` | breath-adc |
+| C42 | `C-ADC-VDD` | breath-adc |
 | C11 | `C-BUCK-IN` | power-entry-instrument |
+| C43 | `C-BUCK-OUT` | power-entry-instrument |
+| C41 | `C-EN` | service-uart |
 | C13, C14 | `C-DECOUPLE-165` | REG-LT, REG-RT |
 | C3, C6–C8, C12, C204 | `C-DECOUPLE-CARRIER` | breath-adc, breath-excitation-reference, led-strip-drive |
 | C9 | `C-FB-REF` | breath-excitation-reference |
-| C39 | `C-INRUSH-GD` | power-entry-instrument |
-| C38 | `C-INRUSH-GS` | power-entry-instrument |
+| C40 | `C-INRUSH-GD` | power-entry-instrument |
+| C39 | `C-INRUSH-GS` | power-entry-instrument |
 | C15–C24 | `C-KEY` | LT1, LT2, LT3, LT4, RT1, RT2, RT3, RT4, sw+, sw- |
-| C25–C37 | `C-LED` | led-strip-drive |
+| C25–C38 | `C-LED` | led-strip-drive |
 | C4, C5 | `C-REF-OUT` | breath-excitation-reference |
 | C203 | `C-SENSOR-OUT` | breath-sense-link |
 | C201 | `C-SENSOR-VS-BULK` | breath-sense-link |
 | C202 | `C-SENSOR-VS-HF` | breath-sense-link |
 | C10 | `C-STRIP-BULK` | power-entry-instrument |
-| D20 | `D-INRUSH-RST` | power-entry-instrument |
-| D7–D19 | `D-LED` | led-strip-drive |
+| D21 | `D-INRUSH-RST` | power-entry-instrument |
+| D7–D20 | `D-LED` | led-strip-drive |
 | D1 | `D-REF-CLAMP` | breath-excitation-reference |
 | D2 | `D-REVSHUNT` | power-entry-instrument |
 | D5, D6 | `D-TVS-BREATH` | breath-sense-link |
@@ -122,9 +125,11 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | NT2 | `NT-AGND` | power-entry-instrument |
 | NT1 | `NT-DIG` | carrier |
 | Q1 | `Q-INRUSH` | power-entry-instrument |
+| R47 | `R-ADC-VDD` | breath-adc |
 | R5 | `R-ADCDIV-L` | breath-adc |
 | R4 | `R-ADCDIV-U` | breath-adc |
 | R34–R36 | `R-CHAIN-SER` | root |
+| R45 | `R-CS-PULL-ADC` | breath-adc |
 | R40 | `R-CS-PULL-INST` | carrier |
 | R8 | `R-FB-REF` | breath-excitation-reference |
 | R9 | `R-FBX-REF` | breath-excitation-reference |
@@ -141,6 +146,7 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | R38, R39 | `R-SER-BREATH-INST` | breath-sense-link |
 | R37 | `R-SER-TERM` | root |
 | R1–R3 | `R-SPI-SER` | carrier |
+| R46 | `R-TXD-SER` | service-uart |
 | SW1–SW10 | `SW1-n` | LT1, LT2, LT3, LT4, RT1, RT2, RT3, RT4, sw+, sw- |
 | U2 | `U-ADC` | breath-adc |
 | U10 | `U-BREATH` | breath-sense-link |
@@ -150,7 +156,7 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | U6 | `U-LVLSHIFT` | led-strip-drive |
 | A1 | `U-MCU-RT` | carrier |
 | U4 | `U-REF-BREATH` | breath-excitation-reference |
-| U9 | `U-TVS-CHAIN` | root |
+| U9, U11 | `U-TVS-CHAIN` | root |
 | U1 | `U-TVS-SPI` | carrier |
 
 ## Open, and what decides each
@@ -161,12 +167,13 @@ finish, and every other open item:
 
 | Item | Decided by |
 |---|---|
-| **The LED row's places** are the body CAD's (`pcb-geometry.echo` `main` `led`, *"LED row on the main board"* in `mechanical/drc.echo`): one row on the centreline, LED 1 at the tail end where the data arrives, the U-bolt station midway between two LEDs. Laid out as it stands, and reshuffled if the diffusion test moves count or pitch (owner's choice (b), ADR 0028 amendment). **The WS2815B-V1's chamfer marks pin 1 (NC)**; the footprint's silk triangle marks the chamfer, and JLCPCB's own footprint agrees (`hardware/lib/README.md`), so the placement preview should need no rotation offset: pass it only when the chamfer lands on the triangle | Layout; the first order's placement preview |
+| **The LED row's places** are the body CAD's (`pcb-geometry.echo` `main` `led`, *"LED row on the main board"* in `mechanical/drc.echo`): LED 1 in the tail corner beside the etherCON adapter, where the data arrives (*"LED in the tail corner clear of its neighbours"*; ADR 0028 amendment, 2026-10-02), then one row on the centreline from its tail end, the U-bolt station midway between two LEDs. The references run in the same order: `D7` is LED 1, `C25` its 100 nF. Laid out as it stands, and reshuffled if the diffusion test moves count or pitch (owner's choice (b), ADR 0028 amendment). **The WS2815B-V1's chamfer marks pin 1 (NC)**; the footprint's silk triangle marks the chamfer, and JLCPCB's own footprint agrees (`hardware/lib/README.md`), so the placement preview should need no rotation offset: pass it only when the chamfer lands on the triangle | Layout; the first order's placement preview |
 | **Passives may go on the underside** (owner, 2026-09-29). The underside faces the grounded bottom plate, `hardware.kb_spacer_l` below it, over the board's whole length since the cassette (ADR 0025). At `boards.board_clear` that leaves no room for a part (`mechanical/drc.echo` *"main board underside room over the bottom plate"*), so an underside part needs a **window cut through the bottom plate** under it, down to the oak (the second figure on that line), and must be clear of the thumb switches' housings, pins and the mounts' spacers. Through-hole tails face the plate too: the next row. The thumb switches are already underside parts | The layout; each window goes into the bottom plate's outline in the body CAD |
 | **Through-hole tails under the board** (2026-10-01): every part with plated through-hole pins pokes its tails out of the underside toward the grounded bottom plate — `J-CHAIN` ×2, `J-MCU`, `J-UMB`, `HDR-SERVICE` and `U-BUCK` (`config/body.yaml`, *THE THROUGH-HOLE TAILS UNDER THE MAIN BOARD*, says which and why these). `mechanical/drc.echo` *"through-hole tails under the main board clear of the bottom plate"* tests each against what is under it, and the body model draws them for `clash.txt`. `J-CHAIN`'s and `J-MCU`'s clear the plate as supplied. The plate ends short of `J-UMB`'s tail row, and has a window to the oak under `HDR-SERVICE` and under the regulator block (`pcb-geometry.echo` `main` `plate`). **`U-BUCK`'s pins are cut to `boards.tht_trim` below the board after soldering** — as supplied they reach the oak even through the window. `HDR-SERVICE` stands where `boards.service_hdr_at` puts it and `U-BUCK` inside the regulator block, or the window moves with them | A part moved off its window: move `boards.service_hdr_at` (or the block) and rebuild the body CAD; a new through-hole part: add it to `tht_tails` in `mechanical/cad/woody_body.scad` |
 | **The references with no clear place on the silkscreen** stay on the fabrication layer; the layout names them when it writes the board | Hand-placed in KiCad, or room made round them |
 | **The full-width tail** (ADR 0021 amendment 2026-10-02, `boards.main_tail` `full`): the body CAD's outline gained the corner beside the etherCON adapter (*"main board's tail end runs full width beside the etherCON adapter"* in `mechanical/drc.echo`) and this board has not. Take the new `main-board.dxf` outline and the USB-C keep-out, extend the pours and planes into the corner, re-check edge clearance along the old tongue's edge (ADR 0021, *What the layout has to do*). Until then `pcb.py check` fails on Edge.Cuts | A hand edit of `main-board.kicad_pcb` in KiCad, then `pcb.py check` and `render` |
 | **The revision letter on the silkscreen** reads `rev A  2026-09-30` (`layout.yaml` `silk:`, the `.kicad_pcb`), while the table below runs to D | **Decided (owner, 2026-10-03): this table's letters are design iterations only; the silkscreen reads `rev A` on the first board fabricated**, so it stays A until a board is made and the next order is B | First order |
+| **Wave 3: parts on the sheets and not yet on the board.** `main-board.kicad_pcb` predates them, so `pcb.py check` fails on schematic parity until they are placed and routed (and `fab/` re-rendered). **From the owner's decisions of 2026-10-03:** `R47` (`R-ADC-VDD`, 0805) and `C42` (`C-ADC-VDD`, 1206) — `R47` between `DEV_3V3` and the new net `ADC_VDD`, `C42` at `U2` pin 8 beside `C2` and `C3`, all three returned to `AGND_INST` at `U2` pin 4, `ADC_VDD` a short local trace (`breath-adc.md`, *The reference's filter*); `C43` (`C-BUCK-OUT`, 1206) at `U5`'s OUT pin, returned to its GND pin, inside the regulator block; `U11` (`U-TVS-CHAIN`, SOT-23-5) at `J5`, on `CHAIN_SCK`, `CHAIN_SHLD`, `HOP_LT_RH`, `HOP_RH_RT`, its pin 2 to `PWR_GND` through its own via (`key-chain-loom.md`); `U2`'s `CH1` (pin 3) now on `AGND_INST`. Part-number changes on placed footprints, same 1206 pads, `fab/` BOM only: `R1`–`R3` and `R38`, `R39` to Panasonic ERJ-P08 anti-surge. **Still unplaced from wave 2:** `R45` (`R-CS-PULL-ADC`, at `U2` pin 1), `R46` (`R-TXD-SER`, at `J2`), `C41` (`C-EN`, at `J1` pin 24) | Wave 3's placement and routing, then `pcb.py check` and `render` |
 | **The umbilical adapter** (`PCB-UMB-ADAPTER`) is a separate small board: its schematic is [`../umb-adapter/`](../umb-adapter/README.md), not laid out | With this board's layout |
 
 What the first layout settled, and where it is held:

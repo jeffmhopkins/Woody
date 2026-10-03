@@ -3,8 +3,9 @@
 `sims.yaml` says what is simulated and what every run must show; `adc-ac.cir`
 (the anti-alias filter, small-signal), `adc.cir` (the input with the
 MCP3202 sampling it), `adc-powerup.cir` (the input through the power-up, #12)
-and `adc-vdd.cir` (the converter's ripple into VDD, which is the reference,
-#12) are the decks; `results.yaml` is **generated** by
+`adc-vdd.cir` (the converter's ripple into VDD, which is the reference,
+#12) and `adc-vddload.cir` (the conversion's own current through the
+reference's filter) are the decks; `results.yaml` is **generated** by
 `python3 tools/sim.py run hardware/carrier/breath-adc/sim`.
 `docs/reference/tooling.md` §5 explains the tool.
 
@@ -26,7 +27,9 @@ case, the sample capacitor discharged by each conversion.
 | `powerup-blow` | 416 µA into the clamp while 3V3 is down, at full scale | **0.39 mA** nominal, **0.40 mA** worst, for 56–158 ms of the ramp (until the dev board's 3V3 is up); nothing once it is |
 | `powerup-blow-no3v3` | — (no 3V3 ever: no Matrix, or its LDO dead) | 0.39–0.40 mA, held for as long as the sensor reads full scale |
 | `powerup-rail` | "Whether the buffer swings high during power-up" (left open) | **Bounded without answering it**: U-BUF B at INST_POS12 for the whole power-up gives **0.72 mA** peak, **0.59 mA** stuck there once 3V3 is up — under the 1 mA judged against at every corner |
-| `vdd-ripple` | none — the page's 55 dB (`filter`) is on ADC_IN's path, which the converter's ripple does not take (#11 Finding 2) | **FAILS its 2 LSB budget on the conservative model**: 13 mV p-p on VDD, **14.6 LSB** at full scale nominal; 2.8–115 LSB across the corners. See below |
+| `vdd-ripple` | the reference's filter as netlisted (owner, 2026-10-03, D1: `R-ADC-VDD` 10 Ω, `C-ADC-VDD` 22 µF beside `C-ADC-BULK` and `C-DEC-ADC`) holds the converter's ripple under E9's 2 LSB | **0.03 LSB** at full scale nominal, **0.32 LSB** at the worst corner, on the conservative model below |
+| `vdd-load` | and the conversion's own current through `R-ADC-VDD` sags `VDD` = `VREF` under 1 LSB inside a conversion | **0.45 LSB** nominal, **0.74 LSB** worst; DC drop 0.31–0.42 mV |
+| `vdd-ripple-without-filter` | what-if, recorded: `DEV_3V3` straight to the pin, as before D1 | 13 mV p-p on VDD, **14.5 LSB** nominal, 2.8–115 LSB across the corners: why the filter is fitted (asserted to miss the budget) |
 
 ## What it says that the page does not
 
@@ -57,34 +60,38 @@ at the weak-clamp corner just past the datasheet's "VDD + 0.6 V" absolute
 maximum, current-limited to 0.4 mA by `R-ADCDIV-U`. It is reported, not
 asserted: the real clamp's drop is unpublished.
 
-**The converter's ripple through VDD is not shown to be small** (`adc-vdd.cir`).
-The MCP3202's VDD is its reference, so ripple there is a gain error on every
-reading: (V_in / VREF) × (ΔVREF / VREF) × 4096, 1.1 LSB per mV p-p at full
-scale. The path is `INST_5V_A` → the ribbon's three 5 V conductors → the
-Matrix's 11.1 µF → its ME6217 → its 10 µF → the ribbon's one 3V3 conductor →
-`C-ADC-BULK` and `C-DEC-ADC`. Two numbers the run needs are not published, so
-it takes both pessimistically and says so: the R-78E5.0's whole 120 mV p-p
-ripple-and-noise maximum as a sine at the switching rate from an ideal source
-(no credit for its output impedance, `D4` or `C12`), and the ME6217's
-rejection at ~330 kHz as a flat −20 dB (−30 to −10 dB at the ends; its sheet
-gives 65 dB at 1 kHz only). On that model the assertion **fails at every
-corner** — 14.6 LSB nominal, 2.8 at the best corner, 115 at the worst, where
-the ribbon's inductance resonates with the capacitors at either end inside
-the 200–500 kHz band searched. The drawn ribbon is 37.6 mm, ~26 nH: it
-filters nothing at 330 kHz, which is why #11's ~1 LSB estimate (on 150 nH)
-does not survive.
+**The converter's ripple through VDD** (`adc-vdd.cir`). The MCP3202's VDD is
+its reference, so ripple there is a gain error on every reading:
+(V_in / VREF) × (ΔVREF / VREF) × 4096, 1.1 LSB per mV p-p at full scale. The
+path is `INST_5V_A` → the ribbon's three 5 V conductors → the Matrix's
+11.1 µF → its ME6217 → its 10 µF → the ribbon's one 3V3 conductor →
+`R-ADC-VDD` → `ADC_VDD`, with `C-ADC-VDD`, `C-ADC-BULK` and `C-DEC-ADC` at the
+pin. Two numbers the run needs are not published, so it takes both
+pessimistically and says so: the R-78E5.0's whole 120 mV p-p
+ripple-and-noise maximum as a sine at the switching rate from an ideal
+source (no credit for its output impedance, `C-BUCK-OUT`, `D4` or `C12`),
+and the ME6217's rejection at ~330 kHz as a flat −20 dB (−30 to −10 dB at
+the ends; its sheet gives 65 dB at 1 kHz only).
 
-It is not a demonstrated failure either: the two unpublished numbers carry
-it. `rip_budget_mv` says what the bench has to show — the largest 330 kHz
-ripple on `INST_5V_A` that keeps 2 LSB on this network: **16.5 mV p-p** at the
-nominal (−20 dB rejection), 2.1 mV at the worst corner. **E9 decides**, and
-needs a line it does not have: scope `INST_5V_A` and U-ADC pin 8 at 20 MHz
-bandwidth, and log the reading's p-p at a steady **full-scale** blow with the
-LEDs off — the existing off-against-sweeping comparison cancels a ripple that
-is there either way. If it fails, the fix is local and cheap: a small series
-resistance into `C-ADC-BULK` (a few tens of ohms against the MCP3202's
-~0.4 mA) puts a pole near 1 kHz in front of the reference, at a
-millivolt-level DC drop the auto-zero and span knob already absorb.
+**Without the filter it failed at every corner** — 14.5 LSB nominal, 2.8 at
+the best corner, 115 at the worst, where the ribbon's inductance resonates
+with the capacitors at either end inside the 200–500 kHz band searched. The
+drawn ribbon is 37.6 mm, ~26 nH: it filters nothing at 330 kHz.
+**With it** (`vdd-ripple`): `R-ADC-VDD` damps that LC and makes a pole with
+the pin's capacitance, and the worst corner is 0.32 LSB. `rip_budget_mv`
+says what the bench can be held to — the largest 330 kHz ripple on
+`INST_5V_A` that keeps 2 LSB on this network: **7.7 V p-p** at the nominal
+(−20 dB rejection), 0.74 V at the worst corner, both far beyond anything the
+converter makes. **E9 still measures it**: scope `INST_5V_A` and U-ADC pin 8
+at 20 MHz bandwidth, and log the reading's p-p at a steady **full-scale**
+blow with the LEDs off.
+
+**The filter's other side** (`adc-vddload.cir`, `vdd-load`): the MCP3202
+draws its operating current only while it converts, taken here as its 5 V
+maximum, 550 µA, for the whole 24-clock frame (pessimistic at 3.3 V). Through
+`R-ADC-VDD` that is a reference error inside the conversion, and the pin's
+capacitance holds it to 0.74 LSB at the worst corner — the reason the 22 µF
+is part of the decision, not an extra.
 
 ## In the register
 
@@ -100,4 +107,5 @@ netlist's RC and exact. The power-up is behavioural at every source and
 bounds the op-amp rather than modelling it. The ripple run is linear and
 exact on its network, and its two inputs that matter — the converter's
 fundamental and the LDO's rejection at 330 kHz — are pessimistic assumptions,
-not data: it shows the budget is not guaranteed, not that it is broken.
+not data: with the filter the budget holds with an order of magnitude to
+spare on them, which is what the filter was chosen for.

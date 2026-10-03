@@ -12,6 +12,8 @@ values:
     - hardware/module/breath-output-stage/netlist.yaml
     - hardware/module/umbilical-load-switch/netlist.yaml
     - hardware/carrier/power-entry-instrument/netlist.yaml
+    # the LEDs' count (n:D-LED), for ledpwm.cir
+    - hardware/carrier/led-strip-drive/netlist.yaml
 # ledpwm.cir runs the instrument's side as power-entry-instrument/sim does: its cable, load
 # switch, U-ISO output resistance and capacitor ESRs are that sim's params (and the load
 # switch's, which it imports), not restated here
@@ -30,7 +32,6 @@ params:
   r_fb:       {value: 0.1, source: "FB-IN's DC resistance [assumption: the netlist value '600R @ 100MHz' is not a DC figure]"}
   r_load_pos: {value: 200.0, source: "the module's +12 V analog load, 60 mA [assumption: no figure registers it]"}
   r_load_neg: {value: 200.0, source: "the -12 V analog load, 60 mA [assumption]"}
-  r_dac:      {value: 4000.0, source: "DAC8568 supply, 1.25 mA at 5 V [datasheets/analog/DAC8568CIPW.pdf p.1] as a resistance"}
   r_vco:      {value: 100.0e3, source: "one VCO input [assumption, as pitch-stage/sim]"}
   # 1N5817, BEHAVIOURAL: n = 1.1 chosen, Rs and Is fitted to the two points the D-REVPOL
   # row digitised off the banked curve (0.24 V at 245 mA, 0.36 V at 612 mA) [calc:
@@ -61,9 +62,9 @@ params:
   i_mod_pos:  {value: 0.032, source: "the module's own +12 V analog load, module-own-draw (power-entry.md, 'Fuses on the rails')"}
   i_mod_neg:  {value: 0.020, source: "the module's own -12 V analog load, module-own-draw (power-entry.md, 'Fuses on the rails')"}
   i_q:        {value: 0.212, source: "the instrument at rest, 212 mA [repo, ADR 0005 load table, quiescent - an upper bound since ADR 0015]"}
-  i_swing:    {value: 0.195, source: "the breath-correlated swing: 0.195 A, the thirteen WS2815B-V1 on the main board at full white, the top of led-row-current (blocked on E6's measurement); 0.367 A, ADR 0005's quiescent-to-clamp-legal-worst swing, the one the 7-18 cent estimate used [repo] (swept)"}
+  i_swing:    {value: 0.210, source: "the breath-correlated swing: 0.210 A, every WS2815B-V1 on the main board at full white (lighting.led_count, n:D-LED), the top of led-row-current (a register range: sim.py cites only its first number, so the top is written here and moves with it by hand) (blocked on E6's measurement); 0.367 A, ADR 0005's quiescent-to-clamp-legal-worst swing, the one the 7-18 cent estimate used [repo] (swept)"}
   f_b:        {value: 2.0, source: "one breath 0 -> full -> 0 in 0.5 s [assumption: the frequency does not enter a resistive result]"}
-  eta:        {value: 0.82, source: "U-ISO at ~21 % load (umbilical-current x 12 V = 4.3 W of 20 W, 0.36 A of 1.67 A): ~81 % off the RPA20-2412SAW's efficiency curve at 24 V in and ~0.95 W off its dissipation curve (4.3 / 5.26 = 0.82) [datasheets/discrete-and-power/RECOM-RPA20-AW.pdf PD-3]"}
+  eta:        {value: 0.82, source: "U-ISO at ~22 % load (umbilical-current x 12 V = 4.5 W of 20 W, 0.37 A of 1.67 A): ~81 % off the RPA20-2412SAW's efficiency curve at 24 V in and ~0.97 W off its dissipation curve (4.5 / 5.47 = 0.82) [datasheets/discrete-and-power/RECOM-RPA20-AW.pdf PD-3]"}
   v_iso:      {value: 12.0, source: "U-ISO's output [ds PD-1]"}
   c_iso:      {value: 1.1e-9, source: "U-ISO's isolation capacitance, 1100 pF typ [ds PD-5]"}
   r_tie:      {value: 0.001, source: "NT-UMB-MOD, NT-DIG-MOD and the DIG_GND plane between them, lumped [assumption]"}
@@ -86,7 +87,7 @@ params:
   gm_dac:     {value: 10.0, source: "the pass element's error gain, A/V [assumption: stiff; the loop's dynamics are not the question]"}
   rset_fault: {value: 0, source: "0 none; 1 R-SET-DAC open; 2 C-SET-DAC shorted (SET to ground)"}
   v_dac_absmax: {value: 6.0, source: "the DAC8568's absolute maximum, AVDD to GND -0.3 to +6 V [datasheets/analog/DAC8568CIPW.pdf p.2]"}
-  r_dac_load: {value: 1300.0, source: "DAC_AVDD's load, ~4 mA (power-entry.md, The DAC rail's load) as a resistance [calc: 5.2 / 4.0e-3] (vary: 585 ohm, ~9 mA, the ceiling with U-LVL-MOD's inputs at their Delta-I_CC bound, to 2.6 kohm, ~2 mA)"}
+  r_dac_load: {value: 1300.0, source: "DAC_AVDD's load, ~4 mA (power-entry.md, The DAC rail's load) as a resistance [calc: 5.2 / 4.0e-3] (vary: 585 ohm, ~9 mA, the ceiling with U-LVL-MOD's inputs at their Delta-I_CC bound, to 2.6 kohm, ~2 mA). The one load every deck puts on DAC_AVDD since #5: poweron.cir and digital-and-supervision's seq.cir used the DAC8568's 1.25 mA alone (4 kohm)"}
   # --- cm.cir / isoin.cir: U-ISO's input, common mode and differential (A4-1) -------------
   l_leak:     {value: 3.9e-6, source: "L-CM-ISO's leakage inductance, 3.9 uH typ [datasheets/discrete-and-power/BOURNS-PM3700-CM-CHOKE.pdf p.1]: the pair's differential inductance"}
   r_cm_dcr:   {value: 0.020, source: "its DCR per winding, 0.020 ohm max [same]"}
@@ -99,11 +100,11 @@ params:
   esr_c1:     {value: 0.4, source: "C1's ESR [assumption: a 100 uF 25 V radial electrolytic]"}
   esr_c3:     {value: 0.7, source: "C3's ESR [assumption: a 47 uF 25 V radial electrolytic]"}
   l_fb_light: {value: 2.2e-6, source: "FB1 / FB3 at tens of mA, below their peak: ~2.2 uH [datasheets/discrete-and-power/MI1206K601R-10-ferrite-bead.pdf, the 0 A curve, as F3-u-iso-cm-loop read it]"}
-  l_fb_iso:   {value: 0.85e-6, source: "FB2 / FB4 at ~0.22 A: ~0.85 uH [same, the 250 mA curve]"}
+  l_fb_iso:   {value: 0.85e-6, source: "FB2 / FB4 at ~0.23 A: ~0.85 uH [same, the 250 mA curve]"}
   r_fb_peak:  {value: 650.0, source: "the beads' resistive peak [same]"}
   r_fb_dcr:   {value: 0.05, source: "the beads' DC resistance, 0.080 ohm max (FB-IN's row) [assumption: typical]"}
   r_d_light:  {value: 3.2, source: "D1 / D3's small-signal resistance at the analog rails' ~32 mA: diode-split-rationale"}
-  r_d_iso:    {value: 0.55, source: "D2 / D4's at U-ISO's ~0.22 A input: diode-split-rationale"}
+  r_d_iso:    {value: 0.53, source: "D2 / D4's at U-ISO's ~0.23 A input: diode-split-rationale"}
   r_ptc_rail: {value: 0.4, source: "PTC-POS12 / PTC-NEG12 fitted, Rmin 0.40 ohm [datasheets/discrete-and-power/BOURNS-MF-MSMF.pdf p.1]"}
   r_ptc_iso:  {value: 0.11, source: "PTC-ISO fitted, Rmin 0.11 ohm [same]"}
   r_liso:     {value: 0.05, source: "L-ISO-IN's DCR [assumption]"}
@@ -113,14 +114,14 @@ params:
   esr_rack:   {value: 0.1, source: "its ESR [assumption]"}
   l_esl_rack: {value: 20.0e-9, source: "its ESL [assumption]"}
   r_psu:      {value: 0.05, source: "the rack PSU's output resistance below a few kHz, per rail [assumption: a regulated Eurorack supply, tens of milliohms] (vary: 10 to 200 mohm)"}
-  p_iso_in:   {value: 5.26, source: "U-ISO's input power at typical play (power-entry.md, The instrument's supply)"}
+  p_iso_in:   {value: 5.47, source: "U-ISO's input power at typical play (power-entry.md, The instrument's supply)"}
   v_iso_in:   {value: 23.4, source: "U-ISO's input voltage at typical play (same)"}
   cm_bound:   {value: 10.0, source: "the owner's bound, 2026-10-01: under 10 % of the converter's common-mode current crosses the star"}
   # --- ledpwm.cir: the LED row's PWM through U-ISO onto the rails (pre-layout review A4-13) ---
   f_pwm:      {value: 2000.0, source: "the WS2815B-V1's PWM: 'scan frequency is of 2KHz' and 'Refresh Frequency updates to 4KHz' [datasheets/led/WS2815B-V1.pdf p.1]; no tolerance on its internal oscillator is published, so the sims sweep 2-4 kHz and the input LC's peak inside it (sweep)"}
   d_led:      {value: 0.5, source: "the pulse's duty, brightness / 256 (256 levels per channel [ds p.1]); 0.5 puts the most current in the fundamental (sweep)"}
-  n_lit:      {value: 13, source: "how many of the thirteen pulse; the rest sit blanked (sweep)"}
-  spread:     {value: 0.0, source: "the thirteen pulses' starts, spread x k/13 of a period apart: 0 in phase, the worst; each WS2815B-V1 runs its own oscillator [ds p.1, 'precision internal oscillator'], so in phase is a bound, not a promise (sweep)"}
+  n_lit:      {value: 14, source: "how many of the LEDs (n:D-LED) pulse; the rest sit blanked (sweep)"}
+  spread:     {value: 0.0, source: "the LEDs' pulses' starts, spread x k/n of a period apart (n = n:D-LED): 0 in phase, the worst; each WS2815B-V1 runs its own oscillator [ds p.1, 'precision internal oscillator'], so in phase is a bound, not a promise (sweep)"}
   i_q_led:    {value: 2.0e-3, source: "one WS2815B-V1 blanked, 'Quiescent Current < 2mA' [ds p.3]: its maximum"}
   t_edge:     {value: 1.0e-6, source: "the pulse's edges [assumption: the datasheet gives none usable for the 12 V LED current; C-STRIP-BULK takes everything this fast]"}
   k_row:      {value: 1, source: "1 the row at its feed, behind the instrument's C-STRIP-BULK and the umbilical, as built; 0 the row's current straight out of U-ISO, the review's bound (A4-13)"}
@@ -139,7 +140,7 @@ params:
   t_win_pwm:  {value: 10.0e-3, source: "the window the ripple is read over: 20 periods at 2 kHz"}
   t_step_pwm: {value: 2.0e-6, source: "the step: 125 points per period at 4 kHz"}
   rail_bound_mv: {value: 13.0, source: "the review's bound on the case's +-12 V, '~13 mV p-p of 2-4 kHz on the case's rails' (docs/review/2026-10-01-pre-layout-review/A4-instrument-power-lighting-grounds.md, A4-13), carried into ADR 0027's residual table"}
-  pitch_bar_cents: {value: 0.001, source: "ADR 0027's residual table: the LED PWM's share of pitch 'under 0.001 cents here'"}
+  pitch_bar_cents: {value: 0.01, source: "ADR 0027's residual section: 'Residual breath-correlated pitch error: under 0.01 cents', which the LED PWM's share must keep (it reaches ~0.001 cents at the worst corner, led-pwm-rail-ripple)"}
   bench_bar_cents: {value: 0.01, source: "ADR 0027, What the bench checks: the pitch jack with the lights sweeping full scale, 'under a hundredth of a cent'"}
   breath_bar_mv: {value: 1.0, source: "0.01 % of the breath jack's 10 V span [assumption: a tenth of the breath-frequency rail term breath-output-stage.md accepts under Offset]"}
   mod_lsb_uv: {value: 305.0, source: "one LSB of a mod channel: the op-amp output's 20 V span (mod-jack-range's derivation) over 2^16 codes [calc: 20 / 65536 = 305 uV]"}
@@ -174,8 +175,9 @@ derived:
   # ledpwm.cir (guarded the same way: an importing sim without these netlists never uses them)
   t_pwm: "1.0 / v['f_pwm']"
   t_on: "min(v['d_led'] / v['f_pwm'] - v['t_edge'], 1.0 / v['f_pwm'] - 2.0 * v['t_edge'])"
-  i_pix: "v['i_swing'] / 13.0 - v['i_q_led']"
-  i_row_q: "13.0 * v['i_q_led']"
+  n_led: "v.get('n:D-LED', 0.0)"
+  i_pix: "v['i_swing'] / max(v.get('n:D-LED', 1.0), 1.0) - v['i_q_led']"
+  i_row_q: "v.get('n:D-LED', 0.0) * v['i_q_led']"
   i_other: "max(v.get('i_12', 0.0) - v['i_swing'], 0.0)"
   r_sel_row: "1.0e-3 if v['k_row'] else 1.0e7"
   r_sel_iso: "1.0e7 if v['k_row'] else 1.0e-3"
@@ -250,7 +252,7 @@ sims:
     # ribbon and the bus. Reproduces power-entry.md's old 7-18 cent table.
     deck: groundshift.cir
     set: {topo: 0}
-    sweep: {r_bus_seg: [0.001, 0.031], i_swing: [0.195, 0.367]}
+    sweep: {r_bus_seg: [0.001, 0.031], i_swing: [0.210, 0.367]}
     vary: []
     measures: [err_cents, err_mv, rail_mv]
     post:
@@ -264,7 +266,7 @@ sims:
     # the design: U-ISO draws the instrument's power rail to rail
     deck: groundshift.cir
     set: {topo: 1}
-    sweep: {r_bus_seg: [0.001, 0.031], i_swing: [0.195, 0.367]}
+    sweep: {r_bus_seg: [0.001, 0.031], i_swing: [0.210, 0.367]}
     vary: []
     measures: [err_cents, err_mv, tie_ua, rail_mv]
     post:
@@ -279,7 +281,7 @@ sims:
     # option (b): the pitch reference on a current-free ribbon conductor
     deck: groundshift.cir
     set: {topo: 2}
-    sweep: {r_bus_seg: [0.001, 0.031], i_swing: [0.195, 0.367]}
+    sweep: {r_bus_seg: [0.001, 0.031], i_swing: [0.210, 0.367]}
     vary: []
     measures: [err_cents, err_mv, rail_mv]
     post:
@@ -293,7 +295,7 @@ sims:
     # option (c): a dummy load holding the instrument's total current constant to bal_frac
     deck: groundshift.cir
     set: {topo: 3}
-    sweep: {r_bus_seg: [0.001, 0.031], i_swing: [0.195, 0.367]}
+    sweep: {r_bus_seg: [0.001, 0.031], i_swing: [0.210, 0.367]}
     vary: []
     measures: [err_cents, err_mv, rail_mv]
     post:
@@ -359,20 +361,28 @@ sims:
     # resistance; and how much of its reflected current reaches the rack.
     deck: isoin.cir
     vary: [esr_c2, l_rib, L-CM-ISO, r_psu]
-    measures: [z_peak, f_peak, margin, rack_550k, rack_band, f_rack_band]
+    measures: [z_peak, f_peak, z_edge, margin, rack_550k, rack_band, f_rack_band, rack_edge, rack_low]
+    # WINDOW EDGES (#5 minor): a maximum read on an AC sweep's first or last point is that
+    # end of the curve, not a resonance - *_edge says which (1 = the maximum IS an end
+    # point). The sweep reaches toward DC so that a peak below the old 100 Hz edge shows.
     post:
-      z_peak: "peak(w['zmag'], 100, 2e6)"
-      f_peak: "argpeak(w['zmag'], 100, 2e6)"
-      margin: "p['r_neg_iso'] / peak(w['zmag'], 100, 2e6)"
+      z_peak: "peak(w['zmag'], 1, 2e6)"
+      f_peak: "argpeak(w['zmag'], 1, 2e6)"
+      z_edge: "1.0 if argpeak(w['zmag'], 1, 2e6) in (w['zmag'][0][0], w['zmag'][0][-1]) else 0.0"
+      margin: "p['r_neg_iso'] / peak(w['zmag'], 1, 2e6)"
       rack_550k: "at(w['rack'], 550e3)"
       rack_band: "peak(w['rack'], 1e3, 1e4)"
       f_rack_band: "argpeak(w['rack'], 1e3, 1e4)"
+      # the band's maximum at its own 1 kHz edge is the curve still rising towards DC, where
+      # all of the current comes from the rack (100 %); rack_low is the most below the band
+      rack_edge: "1.0 if argpeak(w['rack'], 1, 2e6) in (w['rack'][0][0], w['rack'][0][-1]) else 0.0"
+      rack_low: "peak(w['rack'], 1, 1e3)"
     asserts:
       - expr: "min['margin'] > 20"
         why: "the input filter stays damped with the choke's leakage added: its impedance peak is over 20x (26 dB) below the converter's -V^2/P at every ESR, ribbon and choke corner, the bar power-entry-instrument/sim holds the instrument's own input LC to"
       - expr: "max['rack_550k'] < 1.0"
         why: "under 1 % of the converter's reflected current at its 550 kHz fundamental reaches the rack's +12 V conductor"
-      - expr: "max['rack_band'] <= 100.0"
+      - expr: "max['rack_low'] <= 100.0 and max['rack_band'] <= 100.0"
         why: "NO GAIN IN THE LED ROW'S BAND: from 1 to 10 kHz the share of U-ISO's input current that reaches the rack's +12 V conductor never exceeds 100 % at any corner. L-ISO-IN and L-CM-ISO's leakage with C2 have their corner at ~3.1 kHz (power-entry.md), but D2, D4, PTC-ISO, the beads and the ribbon are in series in the same loop and hold it under critical damping - the premise of the review's '~13 mV' bound (A4-13: Q up to 1.35 on C2's ESR alone) does not hold. led-pwm runs the row's current through it"
 
   # ---- DAC_AVDD: U-REG-DAC, the LT3042, precision-set (owner, 2026-10-01) ------------------
@@ -456,7 +466,7 @@ sims:
 
 
   # ---- the LED row's PWM through U-ISO onto the rack's rails (pre-layout review A4-13) ------
-  # ledpwm.cir: the thirteen WS2815B-V1 pulsing, reflected through the instrument's bulk, the
+  # ledpwm.cir: every WS2815B-V1 on the main board pulsing, reflected through the instrument's bulk, the
   # umbilical and U-ISO into its input filter and the rack. Peak to peak over the last
   # t_win_pwm: the rails at this module's header (hdr_*) and at its bus tap, where a module
   # in the next slot sees them (tap_*); the module's analog rails (rail_*); DAC_AVDD; the
@@ -464,7 +474,7 @@ sims:
   # current. Corners: C2's ESR (its damping), the PSU's output resistance, and C-STRIP-BULK's
   # ESR (how much of the row's current the instrument keeps).
   - name: led-pwm
-    # all thirteen in phase at half duty, the most current in the fundamental, across the
+    # every LED in phase at half duty, the most current in the fundamental, across the
     # datasheet's 2-4 kHz and at L-ISO-IN's corner with C2 (power-entry.md, f0 = 3.1 kHz)
     deck: ledpwm.cir
     sweep: {f_pwm: [2000.0, 2500.0, 3100.0, 3500.0, 4000.0]}
@@ -487,13 +497,13 @@ sims:
       - expr: "max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv'] and max['tap_neg_mv'] < p['rail_bound_mv']"
         why: "the review's bound holds: the row's PWM puts under 13 mV p-p on the case's +12 V and -12 V, at this module's header and at its bus tap, at every corner (A4-13's arithmetic took C2's ESR as the input LC's only damping; D2, D4, PTC-ISO and the beads are in the same loop, and the instrument's own bulk keeps most of the row's current)"
       - expr: "max['pitch_cents'] < p['pitch_bar_cents']"
-        why: "ADR 0027's residual for the LED PWM: under 0.001 cents on the pitch jack - through the OPA2197s' supply rejection (TI's model), and DAC_AVDD's ripple passed whole to VREFOUT and the DAC's output"
+        why: "ADR 0027's residual for the LED PWM: under its 0.01 cents on the pitch jack, by about ten times - through the OPA2197s' supply rejection (TI's model), and DAC_AVDD's ripple passed whole to VREFOUT and the DAC's output"
       - expr: "max['mod_uv'] < p['mod_lsb_uv']"
         why: "under one LSB of a mod channel (20 V / 2^16) on mod 1's jack"
       - expr: "max['breath_mv'] < p['breath_bar_mv']"
         why: "under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH"
   - name: led-pwm-duty
-    # the brightness: every duty from one level of 256 to all but one, all thirteen in phase,
+    # the brightness: every duty from one level of 256 to all but one, every LED in phase,
     # at the band's bottom, where the instrument's bulk keeps the least of the row's current
     deck: ledpwm.cir
     sweep: {d_led: [0.0039, 0.1, 0.25, 0.75, 0.9, 0.9961]}
@@ -502,10 +512,10 @@ sims:
     post: *pwm_post
     asserts: *pwm_asserts
   - name: led-pwm-pattern
-    # n_lit: seven of thirteen lit, the rest blanked; spread 1: all thirteen, their pulses
-    # spread evenly over the period, as thirteen free-running oscillators would land
+    # n_lit: seven of the fourteen lit, the rest blanked; spread 1: all of them, their pulses
+    # spread evenly over the period, as free-running oscillators would land
     deck: ledpwm.cir
-    sweep: {n_lit: [7, 13], spread: [0.0, 1.0]}
+    sweep: {n_lit: [7, 14], spread: [0.0, 1.0]}
     vary: [esr_c2, r_psu, esr_strip]
     measures: *pwm_measures
     post: *pwm_post
@@ -521,6 +531,6 @@ sims:
     post: *pwm_post
     asserts:
       - expr: "max['hdr_neg_mv'] > p['rail_bound_mv']"
-        why: "RECORDED WHAT-IF: on the review's own premise - no instrument bulk - its 13 mV is not a bound: with a 200 mohm rack PSU the header reaches 14-18 mV p-p across the band, though the input LC has no gain there (iso-input-z rack_band). What holds the design well under it is C-STRIP-BULK keeping half or more of the row's current in the instrument (led-pwm's iuout_ma against this run's)"
+        why: "RECORDED WHAT-IF: on the review's own premise - no instrument bulk - its 13 mV is not a bound: with a 200 mohm rack PSU the header reaches 15-19 mV p-p across the band, though the input LC has no gain there (iso-input-z rack_band). What holds the design well under it is C-STRIP-BULK keeping half or more of the row's current in the instrument (led-pwm's iuout_ma against this run's)"
       - expr: "max['pitch_cents'] < p['bench_bar_cents']"
-        why: "and the pitch jack under the hundredth of a cent ADR 0027 tells the bench to expect (it reaches ~0.001 cents here, which is why the as-built runs, not this one, carry ADR 0027's 0.001)"
+        why: "and the pitch jack under the hundredth of a cent ADR 0027 tells the bench to expect (it reaches ~0.004 cents here, against the as-built runs' ~0.001)"

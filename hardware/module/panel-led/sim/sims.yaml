@@ -47,7 +47,7 @@ vary:
 sims:
   - name: led
     deck: led.cir
-    sweep: {i_swing: [0.195, 0.367]}
+    sweep: {i_swing: [0.210, 0.367]}
     measures: [i_led, i_led_pp, v_on_100u, v_on_1m]
     post:
       i_led: "at(w['iled'], 0.0)"

@@ -134,6 +134,8 @@ vary:
   R-BREATH-OFFNEG: {tol: from-value}
   R-BREATH-IN:     {tol: from-value}
   v_avdd:          {tol: [-0.03846, 0.05769], source: "dac-rail's floor 5.00 V to 5.50 V, the DAC8568 C grade's AVDD window (dac-rail's floor note)"}
+  v_pos: {tol: [-0.1, 0.05], source: "the analog +12 V from 10.8 V (a tripped PTC-POS12 and D1) to 12.6 V (the bus maximum), as module/power-entry/sim's v_in_dac and pitch-stage/sim; only the *-supply sims name it (#5 finding 6)"}
+  v_neg: {tol: [-0.1, 0.05], source: "the analog -12 V, -10.8 to -12.6 V"}
 
 sims:
   - name: offset
@@ -328,3 +330,37 @@ sims:
         why: "the operating point is the running reference (the reference sims' ref-startup test), not a collapsed one"
       - expr: "nom['vs_rms_10_1k'] > 2 * p['ref_en_rel'] * p['vs_nom']"
         why: "RECORDED: TI's REF5050 model (2011; its notes claim the 0.1-10 Hz noise only) is several times NOISIER at VS than the datasheet's 0.9 uVrms/V over 10 Hz-1 kHz [datasheets/analog/REF5050.pdf], almost all of it one 1.6 Mohm resistor in the model. noise.cir uses the datasheet; the README says what the jack would carry at the model's level"
+  # --- #5 finding 6: the rails at their ends, 10.8 to 12.6 V each way, not +-12.000 V.
+  # Each sim below is one above with only the rails varied, so what moves is the supply's
+  - name: offset-supply
+    # breath at rest, POT-OFFSET at the page's zero: R-BREATH-OFFNEG's leg is ON -12 V, so the
+    # rest level moves with that rail by R-BREATH-FB/R-BREATH-OFFNEG (breath-output-stage.md,
+    # 'Why -12 V is acceptable here'). out is that rest level; POT-OFFSET trims it out
+    deck: bos.cir
+    set: {t_end: 0.2e-3, t_stepsize: 2.0e-6, p_off: 0.432}
+    vary: [v_pos, v_neg]
+    measures: [out, jack, page_err]
+    post:
+      out: "at(w['out'], p['t_end'])"
+      jack: "at(w['jack'], p['t_end'])"
+      page_err: "at(w['out'], p['t_end']) + p['R-BREATH-FB'] * (p['v_avdd'] * (1 - p['p_off']) / (p['R-BREATH-OFF'] + p['POT-OFFSET'] * p['p_off'] * (1 - p['p_off'])) + p['v_neg'] / p['R-BREATH-OFFNEG'])"
+    asserts:
+      - expr: "max['page_err'] < 0.01 and min['page_err'] > -0.01"
+        why: "the page's offset arithmetic, -12 V's term included, holds within 10 mV at every rail corner: the rest level moves by exactly R-BREATH-FB/R-BREATH-OFFNEG times the -12 V rail's error, and nothing else"
+      - expr: "max['out'] < 0.6 and min['out'] > -0.6"
+        why: "the rest level stays inside +-0.6 V at every rail corner (0.42 x -1.2..+0.6 V of rail [calc]) - inside POT-OFFSET's +-5 V reach, so the player's own zero trim recovers it"
+  - name: chain-centre-supply
+    # the commissioned chain (as chain-centre) at the rails' ends: the span from rest to a
+    # hard blow, and whether the low rail clips it
+    deck: chain.cir
+    set: {p_resp: 0.5, p_gain: 0.47, p_off: 0.432}
+    vary: [v_pos, v_neg]
+    measures: [out_hard, out_rest, span_hard, clip_in]
+    post:
+      out_hard: "at(w['out'], (-p['v_hard']) * p['t_ramp'] / p['v_mag'])"
+      out_rest: "at(w['out'], 0.002 * p['t_ramp'])"
+      span_hard: "at(w['out'], (-p['v_hard']) * p['t_ramp'] / p['v_mag']) - at(w['out'], 0.002 * p['t_ramp'])"
+      clip_in: "-min(cross(w['out'], peak(w['out'], 0, p['t_ramp']) - 0.05, 0), p['t_ramp']) * p['v_mag'] / p['t_ramp']"
+    asserts:
+      - expr: "min['span_hard'] > 9.8 and max['span_hard'] < 10.2"
+        why: "rest to a hard blow is still about 10 V at every rail corner: the rails move the rest level (offset-supply), not the span, and 10.8 V does not clip a hard blow"

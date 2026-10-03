@@ -36,6 +36,14 @@ components:
     - 2
     note: 'ELECTROLYTIC, AND THE ESR IS THE POINT: the input LC''s damping calculation assumes real ESR, and a low-ESR
       ceramic raises Q until the paragraph stops being true'
+  C-BUCK-OUT:
+    value: 10uF
+    pins:
+    - 1
+    - 2
+    note: 'D1 (owner, 2026-10-03: ''10 ohm + 22 uF + 10 uF''): RECOM''s standard-application output capacitor, a
+      10 uF MLCC at U-BUCK-A''s OUT pin (R-78E5.0-1.0 datasheet p.I-4), returned to its GND pin. It lowers the converter''s
+      ripple at its source, ahead of D-USBOR-A. Well inside the part''s 220 uF capacitive-load limit'
   C-INRUSH-GD:
     value: 22nF 50V X7R
     pins:
@@ -146,6 +154,7 @@ nets:
   - port: AGND_INST
   - NT-AGND.1
   BUCK_A_OUT:
+  - C-BUCK-OUT.1
   - D-USBOR-A.A
   - U-BUCK-A.OUT
   INRUSH_GATE:
@@ -170,6 +179,7 @@ nets:
   PWR_GND:
   - port: PWR_GND
   - C-BUCK-IN.2
+  - C-BUCK-OUT.2
   - C-STRIP-BULK.2
   - D-INRUSH-RST.A
   - D-REVSHUNT.A

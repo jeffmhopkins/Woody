@@ -18,7 +18,8 @@ and the firmware do not change. What changed is where the registers sit:
   lid under the top plate (`PCB-CLUSTER`). Each key board connects to the main
   board by **one 12-conductor 1.27 mm IDC ribbon** (`CBL-CHAIN`) with a 2×6
   IDC socket at each end, plugged into a **through-hole, right-angle, shrouded
-  2×6 header** (`J-CHAIN`) on each board — `chain-connectors` in all.
+  2×6 header** (`J-CHAIN`) on each board — **four** in all (`chain-connectors`):
+  two on the main board, one on each key board.
   Through-hole because the board, not SMT pads, then takes the cable's pull
   (owner, 2026-09-27).
 
@@ -46,7 +47,7 @@ The `Dir` and `Peer` columns are defined once in
 | `3V3` (pin 10) | main → key boards | out | MCU board's 3V3 (`DEV_3V3`) → `right_thumb`/`left_thumb` direct, and → one `FB-CHAIN` per ribbon → the key board's `cluster/key-register`, `cluster/key-switch-network`, `cluster/key-marker-and-bits`; shared with `carrier/breath-adc` | `key-pullup-qty` | **It is also the MCP3202's reference** — `carrier.md` §2 carries that argument. No fuse (ADR 0018) |
 | spare ×2 (pins 11, 12) | both | — | — | `chain-conductors` | ADR 0009's rule, free in a 12-way part |
 | `J-CHAIN`, `CBL-CHAIN` | both | — | — | `chain-connectors` | This circuit's connectors and cables |
-| `R-CHAIN-SER`, `R-SER-TERM`, `R-HOP-SER`, `U-TVS-CHAIN`, `FB-CHAIN` | main | — | — | — | This circuit's parts, all on the main board |
+| `R-CHAIN-SER`, `R-SER-TERM`, `R-HOP-SER`, `U-TVS-CHAIN`, `U-TVS-CHAIN-RH`, `FB-CHAIN` | main | — | — | — | This circuit's parts, all on the main board |
 | the 32 bits | all four registers | — | `cluster/key-marker-and-bits` | `marker-bits`, `free-bits` | Allocated in `config/key-layout.yaml`. The chain order is unchanged |
 
 Pin numbers in this table are the **main-board** header's. The key board's
@@ -79,6 +80,7 @@ by a cable that is not a part. Each board draws its own parts:
 | `R-HOP-SER` | `R-HOP-SER` | `main-board` | `R44` |
 | `FB-CHAIN-RH`, `FB-CHAIN-LH` | `FB-CHAIN` | `main-board` | `FB2`, `FB1` |
 | `U-TVS-CHAIN` | `U-TVS-CHAIN` | `main-board` | `U9` |
+| `U-TVS-CHAIN-RH` | `U-TVS-CHAIN` | `main-board` | `U11` |
 | `J-CHAIN-KEY-RH` | `J-CHAIN` | `hardware/boards/key-board-rh` | `J1` |
 | `J-CHAIN-KEY-LH` | `J-CHAIN` | `hardware/boards/key-board-lh` | `J1` |
 | `CBL-CHAIN` ×2 | `CBL-CHAIN` | no board: straight conductors, netted as the pins they join | — |
@@ -90,7 +92,7 @@ root sheet.
 `J-CHAIN`, on all three boards, to this sheet's pin map (`check_chain`). On the
 main board `GND_CHAIN` is `PWR_GND` and `DEV_3V3` is itself. **The main
 board's other chain parts are held too** (`check_chain_main_parts`):
-every `R-CHAIN-SER`, `R-SER-TERM`, `R-HOP-SER`, `FB-CHAIN` and `U-TVS-CHAIN` on this sheet
+every `R-CHAIN-SER`, `R-SER-TERM`, `R-HOP-SER`, `FB-CHAIN` and `U-TVS-CHAIN` (both arrays) on this sheet
 must be one main-board part of the same row with every pin on the same net,
 one to one, so a missing part, an extra one, or two series resistors swapped
 between `IO38` and `IO7` fails `tools/kicad.py check`. The sheet is not split:
@@ -188,6 +190,8 @@ and `key-layout.yaml`'s order stands.
 
    [U-TVS-CHAIN SP0504BAHTG] on SCK, SH/LD and the chain-end SER, to GND_CHAIN,
    at the left_hand J-CHAIN; its fourth channel is spare. Fitted (ADR 0018).
+   [U-TVS-CHAIN-RH SP0504BAHTG] on SCK, SH/LD, HOP_LT_RH and HOP_RH_RT, to
+   GND_CHAIN, at the right_hand J-CHAIN. Fitted (owner, 2026-10-03, D2).
 ```
 
 ### The key-board end
@@ -391,10 +395,11 @@ The ribbon's flight is the same for `SCK` and for the hop, so it cancels. What
 is left is the thresholds: the registers' `V_T+` can sit anywhere in a band
 that is a large fraction of `VCC`, and on an RC edge that is time. With
 `left_thumb` clocking at the lowest `V_T+` and `right_hand` at the highest, the
-run gives **6–12 ns of clock skew**. With `QH` straight into the ribbon the
+run gives **8–17 ns of clock skew** (both arrays on the main board's node,
+below). With `QH` straight into the ribbon the
 hop's data reached `right_hand`'s `SER` 1–5 ns after `left_thumb`'s clock —
 before `right_hand`'s, at every corner — so the hop held only on
-`left_thumb`'s `CLK`→`QH` delay, which had to be at least ~11 ns, and **TI
+`left_thumb`'s `CLK`→`QH` delay, which had to be at least ~15 ns, and **TI
 publishes a maximum only** (16/18 ns at 4.5 V, 32/45 ns at 2 V `[ds p.7]`)
 (`hop-hold-without-series-r`, recorded).
 
@@ -402,10 +407,13 @@ publishes a maximum only** (16/18 ns at 4.5 V, 32/45 ns at 2 V `[ds p.7]`)
 `QH`, on the main board**, where `HOP_LT_QH` becomes `HOP_LT_RH` and leaves
 for the ribbon. Its RC with the ribbon and `right_hand`'s input holds the
 data past `right_hand`'s clock **with the propagation delay taken as zero**:
-by 3.2–13.4 ns on a rising bit and 11.7–22.3 ns on a falling one, at every
-corner of the driver, the clamp, the main board's load and the register's
+by 22.6–47.0 ns on a rising bit and 42.8–80.0 ns on a falling one, at every
+corner of the driver, the clamps, the main board's load and the register's
 output (`hop-hold-lt-to-rh`, asserted), and the data still reaches `SER`
-within 28 ns of the clock, against a 1 µs period. Whatever delay the part
+within 92 ns of the clock, against a 1 µs period. Those numbers include
+`U-TVS-CHAIN-RH`'s 30 pF on `HOP_LT_RH` at `J5`, behind `R-HOP-SER` (owner,
+2026-10-03, D2; #16 B2): an RC that delays the data, which widens the hold
+and spends part of the 100 ns the run allows for setup. Whatever delay the part
 really has is added margin.
 
 **E14 confirms it** on the real boards: scope `right_hand`'s `CLK` (its
@@ -474,7 +482,15 @@ and sit under the grounded plate, so in play nothing reaches them. The
 contacts are handled when the lid is off and a socket is unplugged, and a
 main-board `J-CHAIN` header then exposes three MCU pins through their 100 Ω — `SCK`,
 `SH/LD` and the chain-end `SER` — which is where the array is netted, at the
-`left_hand` `J-CHAIN`, which carries all three. The chain's `QH` into the MCU
+`left_hand` `J-CHAIN`, which carries all three.
+
+**A second array guards the `right_hand` `J-CHAIN`** (`U-TVS-CHAIN-RH`,
+main-board `U11`). The owner's answer, 2026-10-03 (#15 C2, #16 B2): **"Yes,
+all 4 channels"** — `SCK`, `SH/LD`, `HOP_LT_RH` and `HOP_RH_RT`, at `J5`,
+ground with a via at its pin. `J5` exposes the same two MCU pins `J4` does,
+and one array at `J4` is a board's length from them: a strike at `J5` reaches
+`R-CHAIN-SER` before the clamp. Its capacitance on `HOP_LT_RH` is in the hop
+hold run above, and on `SCK` in `sck-to-key-board` (`sim/`, `tvs_j5`). The chain's `QH` into the MCU
 is `right_thumb`'s and reaches no connector. **Decided: fit it** (ADR 0018).
 The exposure is real every time the lid is off, the part cannot be added once
 the board is made, and it costs pennies.
@@ -482,16 +498,18 @@ the board is made, and it costs pennies.
 **It guards the MCU's pins only, and that is accepted.** The hop nets
 (`HOP_LH_LT`, `HOP_LT_RH`, `HOP_RH_RT` in [`netlist.yaml`](netlist.yaml)) and
 every signal pin of a key board's `J-CHAIN` land on register pins, not on the
-MCU. The key board has no ESD part of its own. Those pins carry the
+MCU. The key board has no ESD part of its own; at `J5` the two hops that ride the
+`right_hand` ribbon are clamped by `U-TVS-CHAIN-RH`, at `J4` the one on the
+`left_hand` ribbon is not. Those pins carry the
 SN74HCS165's own rating, ±4000 V HBM (ANSI/ESDA/JEDEC JS-001) and ±1500 V CDM
 `[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.4]` — a component rating for
 manufacturing handling (TI's footnote to the same table: "500-V HBM allows
 safe manufacturing with a standard ESD control process"), not a system-level
 IEC 61000-4-2 rating for a contact touched with the lid off. **The exposure
 is accepted, not protected**: a register is a part on a board that can be
-replaced, where an MCU pin is not. **The fourth channel
-stays spare**: there are three hops, on two ribbons, and one channel cannot
-cover them.
+replaced, where an MCU pin is not. **`U-TVS-CHAIN`'s fourth
+channel stays spare**: `HOP_LH_LT` at `J4` is a register pin, accepted as
+above.
 
 **No fuse — the short is protected at its source.** The chain's 3V3 is the
 Matrix's 3V3 pad, from its ME6217C33M5G LDO (`DEV_3V3`, the instrument's only
@@ -536,6 +554,22 @@ So the rail does not need the bulk capacitor, and it is fitted anyway (owner,
 the bead's model for 1 MHz to 3 GHz, so at the LC's frequency it is
 extrapolated: **bring-up step 6 still scopes the key board's VCC while
 shifting**, against the simulation.
+
+**Power off before seating or unseating a `J-CHAIN` ribbon** (#15 C4). Seated
+live, an empty `C-BULK-CHAIN` is switched onto `DEV_3V3` through the bead.
+`DEV_3V3` holds about 32 µF (the Matrix's LDO output capacitor and its other
+3V3 capacitors, `C-ADC-BULK` and the decouplers here), so with nothing else
+acting, charge sharing would take it to 3.3 V × 32 / 42 ≈ 2.5 V `[calc]`. A
+scratch run of this page's own rail model with Murata's bead model and the
+LDO as its output resistance (not committed; `sim/`'s `rail` deck plus a
+switch) put the dip at 3.13 V with the typical `r_ldo` and 2.65 V at its
+0.17 Ω end, a few microseconds after contact, and the key board's own rail
+ringing up to 4.8–5.5 V, inside the SN74HCS165's 2–6 V supply range
+`[sim, scratch; ds SN74HCS165-ti-scls828a.pdf p.4]`. Below the ESP32-S3's
+3.0 V minimum `[ds ESP32-S3-datasheet-v2.2.pdf Table 5-2 p.64]` the Matrix
+may brown out and reset. Nothing is damaged, but the reading is not a
+fault to chase: unplug the instrument, or the USB, before touching a key
+ribbon. The same rule covers `CBL-MCU-RIBBON` at `J-MCU`.
 
 ---
 

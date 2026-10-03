@@ -4,17 +4,18 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/carrier/power-entry-instrument/sim/sims.yaml: a16f7f2bedcc5fd0
-  hardware/carrier/power-entry-instrument/netlist.yaml: 2ced35d8a0373a19
+  hardware/carrier/power-entry-instrument/sim/sims.yaml: 8074febf49dd842e
+  hardware/carrier/power-entry-instrument/netlist.yaml: 89f351c1b8aba0f0
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
-  hardware/module/power-entry/netlist.yaml: 56b479e28aae437c
-  hardware/carrier/power-entry-instrument/sim/pei-z.cir: a1aee2ada3397cc1
+  hardware/module/power-entry/netlist.yaml: 014e885f01a4104b
+  hardware/carrier/led-strip-drive/netlist.yaml: 466ccae220ba1302
+  hardware/carrier/power-entry-instrument/sim/pei-z.cir: 7257efe8f4f3ef30
   hardware/carrier/power-entry-instrument/sim/pei-start.cir: 514be1cedaf9a06a
-  hardware/carrier/power-entry-instrument/sim/pei-pwm.cir: c8faaade2a9390f2
+  hardware/carrier/power-entry-instrument/sim/pei-pwm.cir: d11b1384e4c86f08
   hardware/module/umbilical-load-switch/sim/lt1641.inc: 59be165ccd4451a6
-  hardware/module/umbilical-load-switch/sim/sims.yaml: 85eec256fad8b2e5
-  figure:umbilical-current: 359 mA
-ngspice: '44.2'
+  hardware/module/umbilical-load-switch/sim/sims.yaml: c338c3bd07b25968
+  figure:umbilical-current: 374 mA
+ngspice: '42'
 sims:
   input-z:
     corners: 9
@@ -23,17 +24,23 @@ sims:
         nominal: 0.570147
         min: 0.570147
         min_at: nominal
-        max: 1.85883
+        max: 1.859
         max_at: esr_buck+ esr_strip- r_cable-
       f_peak:
         nominal: 3845.92
-        min: 100.0
+        min: 1.0
         min_at: esr_buck- esr_strip- r_cable+
-        max: 1000000.0
+        max: 10000000.0
         max_at: esr_buck+ esr_strip- r_cable-
+      z_edge:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 1.0
+        max_at: esr_buck- esr_strip- r_cable+
       margin:
         nominal: 181.482
-        min: 55.6648
+        min: 55.6597
         min_at: esr_buck+ esr_strip- r_cable-
         max: 181.482
         max_at: nominal
@@ -44,7 +51,7 @@ sims:
         behind it, and lets C-BUCK-IN's ESR fall below its datasheet maximum
       pass: true
   cold-start:
-    corners: 33
+    corners: 65
     measures:
       latched:
         nominal: 0.0
@@ -53,17 +60,17 @@ sims:
         max: 0.0
         max_at: nominal
       t_up:
-        nominal: 0.16317
-        min: 0.107952
-        min_at: igate+ itup- r_cable- t_iso- vto_q-
-        max: 0.237997
-        max_at: igate- itup+ r_cable+ t_iso+ vto_q+
+        nominal: 0.163881
+        min: 0.108636
+        min_at: R-ILIM- igate+ itup- r_cable- t_iso- vto_q-
+        max: 0.238793
+        max_at: R-ILIM+ igate- itup- r_cable+ t_iso+ vto_q+
       i_iso_peak:
-        nominal: 0.514881
-        min: 0.497198
-        min_at: igate+ itup- r_cable+ t_iso+ vto_q+
-        max: 0.525351
-        max_at: igate- itup- r_cable- t_iso- vto_q-
+        nominal: 0.527967
+        min: 0.509816
+        min_at: R-ILIM+ igate+ itup- r_cable+ t_iso- vto_q+
+        max: 0.537856
+        max_at: R-ILIM- igate- itup- r_cable- t_iso- vto_q-
       t_at_ocp:
         nominal: 0.0
         min: 0.0
@@ -72,10 +79,10 @@ sims:
         max_at: nominal
       v_in_peak:
         nominal: 12.0
-        min: 11.6448
-        min_at: igate- itup- r_cable+ t_iso+ vto_q-
+        min: 11.6295
+        min_at: R-ILIM+ igate- itup- r_cable+ t_iso+ vto_q-
         max: 12.0
-        max_at: igate+ itup- r_cable- t_iso- vto_q+
+        max_at: R-ILIM- igate+ itup- r_cable- t_iso- vto_q+
       v_buck_fallback:
         nominal: 0.0
         min: 0.0
@@ -83,11 +90,17 @@ sims:
         max: 0.0
         max_at: nominal
       vcc_min:
-        nominal: 11.9964
-        min: 11.9963
-        min_at: igate- itup- r_cable- t_iso- vto_q-
-        max: 11.9965
-        max_at: igate- itup- r_cable+ t_iso- vto_q+
+        nominal: 11.9963
+        min: 11.9962
+        min_at: R-ILIM- igate- itup- r_cable- t_iso- vto_q-
+        max: 11.9964
+        max_at: R-ILIM+ igate- itup- r_cable+ t_iso- vto_q+
+      timer_peak:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
     asserts:
     - expr: max['latched'] < 0.5
       why: the start completes without the LT1641's fault latch at every corner
@@ -104,8 +117,13 @@ sims:
     - expr: max['v_in_peak'] < 15.0
       why: no overshoot at the instrument's input reaches D-TVS-PWR's 15 V standoff (SMAJ15A)
       pass: true
+    - expr: max['timer_peak'] < 0.5 * 1.233
+      why: 'C-TIMER-LOADSW''s sizing (umbilical-load-switch.md, ''The two capacitors''): the fault TIMER rises under half
+        its 1.233 V threshold at every corner, R-ILIM''s 1 % and the fastest TIMER pull-up among them - the 2x the page asks
+        of worst-case silicon, on the circuit as built (Q-INRUSH and the cable in)'
+      pass: true
   hot-plug:
-    corners: 65
+    corners: 129
     measures:
       latched:
         nominal: 0.0
@@ -114,17 +132,17 @@ sims:
         max: 0.0
         max_at: nominal
       t_up:
-        nominal: 0.134709
-        min: 0.0932808
-        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable- vhi- vto_q-
-        max: 0.181661
-        max_at: C-INRUSH-GD+ c_tvs+ igate+ r_cable+ vhi- vto_q+
+        nominal: 0.135421
+        min: 0.0939748
+        min_at: C-INRUSH-GD+ R-ILIM- c_tvs- igate- r_cable- vhi- vto_q-
+        max: 0.18247
+        max_at: C-INRUSH-GD+ R-ILIM+ c_tvs+ igate+ r_cable+ vhi- vto_q+
       i_iso_peak:
-        nominal: 0.514895
-        min: 0.490897
-        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ vhi- vto_q+
-        max: 0.544158
-        max_at: C-INRUSH-GD- c_tvs+ igate+ r_cable- vhi- vto_q-
+        nominal: 0.527965
+        min: 0.503564
+        min_at: C-INRUSH-GD+ R-ILIM+ c_tvs+ igate- r_cable+ vhi+ vto_q+
+        max: 0.55692
+        max_at: C-INRUSH-GD- R-ILIM- c_tvs- igate+ r_cable- vhi- vto_q-
       t_at_ocp:
         nominal: 0.0
         min: 0.0
@@ -132,11 +150,11 @@ sims:
         max: 0.0
         max_at: nominal
       v_in_peak:
-        nominal: 13.6651
-        min: 12.9665
-        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ vhi- vto_q-
-        max: 14.2396
-        max_at: C-INRUSH-GD- c_tvs+ igate- r_cable- vhi- vto_q-
+        nominal: 13.6682
+        min: 12.9781
+        min_at: C-INRUSH-GD+ R-ILIM- c_tvs- igate- r_cable+ vhi- vto_q+
+        max: 14.2401
+        max_at: C-INRUSH-GD- R-ILIM- c_tvs+ igate- r_cable- vhi- vto_q-
       v_buck_fallback:
         nominal: 0.0
         min: 0.0
@@ -144,17 +162,23 @@ sims:
         max: 0.0
         max_at: nominal
       vcc_min:
-        nominal: 11.9964
-        min: 11.9962
-        min_at: C-INRUSH-GD- c_tvs- igate- r_cable- vhi- vto_q-
-        max: 11.9966
-        max_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ vhi- vto_q+
+        nominal: 11.9963
+        min: 11.9961
+        min_at: C-INRUSH-GD- R-ILIM- c_tvs- igate- r_cable- vhi- vto_q-
+        max: 11.9965
+        max_at: C-INRUSH-GD+ R-ILIM+ c_tvs- igate- r_cable+ vhi- vto_q+
       p_q_peak:
-        nominal: 1.63654
-        min: 1.52024
-        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ vhi- vto_q+
-        max: 1.79256
-        max_at: C-INRUSH-GD- c_tvs- igate+ r_cable- vhi- vto_q-
+        nominal: 1.66752
+        min: 1.55043
+        min_at: C-INRUSH-GD+ R-ILIM+ c_tvs+ igate- r_cable+ vhi- vto_q+
+        max: 1.8221
+        max_at: C-INRUSH-GD- R-ILIM- c_tvs- igate+ r_cable- vhi- vto_q-
+      timer_peak:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
     asserts:
     - expr: max['latched'] < 0.5
       why: the start completes without the LT1641's fault latch at every corner
@@ -172,12 +196,16 @@ sims:
       why: the buck's input never falls back towards its minimum once running, and the ring at J-UMB when the plug makes contact
         stays under D-TVS-PWR's 15 V standoff (R-INRUSH-GD damps it)
       pass: true
+    - expr: max['timer_peak'] < 0.5 * 1.233
+      why: 'the hot-plug sizing case: the fault TIMER rises under half its 1.233 V threshold at every corner, R-ILIM''s 1
+        % among them'
+      pass: true
     - expr: max['p_q_peak'] < 3.0
       why: Q-INRUSH's dissipation during the ramp peaks under 3 W at every corner, a quarter of the AO3401A's single-pulse
         rating at 50 ms (~12 W, AOS-AO3401A.pdf p.4 Figure 10, read off the curve)
       pass: true
   replug-late:
-    corners: 5
+    corners: 9
     measures:
       latched:
         nominal: 0.0
@@ -186,11 +214,11 @@ sims:
         max: 0.0
         max_at: nominal
       i_iso_peak:
-        nominal: 0.514901
-        min: 0.49721
-        min_at: r_cable+ vto_q+
-        max: 0.52129
-        max_at: r_cable- vto_q-
+        nominal: 0.527973
+        min: 0.509822
+        min_at: R-ILIM+ r_cable+ vto_q+
+        max: 0.534309
+        max_at: R-ILIM- r_cable- vto_q-
       t_at_ocp:
         nominal: 0.0
         min: 0.0
@@ -198,18 +226,24 @@ sims:
         max: 0.0
         max_at: nominal
       vcc_min:
-        nominal: 11.9964
-        min: 11.9964
-        min_at: r_cable- vto_q-
-        max: 11.9965
-        max_at: r_cable+ vto_q+
+        nominal: 11.9963
+        min: 11.9963
+        min_at: R-ILIM- r_cable- vto_q-
+        max: 11.9964
+        max_at: R-ILIM+ r_cable+ vto_q+
+      timer_peak:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
     asserts:
     - expr: max['latched'] < 0.5 and max['i_iso_peak'] < 0.5 * p['i_ocp']
       why: 'a replug once the instrument has drained starts from off, as a first plug-in does: U-ISO under half its over-current
         threshold, no fault latch'
       pass: true
   replug-early:
-    corners: 33
+    corners: 65
     measures:
       latched:
         nominal: 0.0
@@ -224,17 +258,23 @@ sims:
         max: 1.837
         max_at: nominal
       t_at_ocp:
-        nominal: 0.000157346
-        min: 9.70094e-05
-        min_at: dvg- igate+ r_cable+ vhi- vto_q-
-        max: 0.000452873
-        max_at: dvg+ igate+ r_cable- vhi+ vto_q+
+        nominal: 0.000161155
+        min: 0.000100541
+        min_at: R-ILIM+ dvg- igate+ r_cable+ vhi- vto_q-
+        max: 0.000467847
+        max_at: R-ILIM- dvg+ igate+ r_cable- vhi+ vto_q-
       vcc_min:
-        nominal: 11.645
-        min: 10.2304
-        min_at: dvg+ igate+ r_cable- vhi+ vto_q-
+        nominal: 11.6268
+        min: 10.1612
+        min_at: R-ILIM- dvg+ igate+ r_cable- vhi+ vto_q-
         max: 11.7355
-        max_at: dvg- igate- r_cable+ vhi- vto_q+
+        max_at: R-ILIM+ dvg- igate+ r_cable+ vhi- vto_q+
+      timer_peak:
+        nominal: 0.00318396
+        min: 0.00295501
+        min_at: R-ILIM+ dvg- igate- r_cable- vhi+ vto_q-
+        max: 0.0041924
+        max_at: R-ILIM+ dvg+ igate+ r_cable+ vhi- vto_q+
     asserts:
     - expr: max['latched'] < 0.5 and min['vcc_min'] > 9.90
       why: the restart completes without the fault latch and VCC stays above the ON pin's turn-off
@@ -255,22 +295,22 @@ sims:
         max: 0.0
         max_at: nominal
       i_iso_peak:
-        nominal: 0.514881
-        min: 0.484468
+        nominal: 0.527967
+        min: 0.496789
         min_at: igate- itup- r_cable+ t_iso+ v_bus- vto_q+
-        max: 0.544001
+        max: 0.556673
         max_at: igate- itup- r_cable- t_iso- v_bus+ vto_q-
       v_in_peak:
         nominal: 12.0
-        min: 11.2728
+        min: 11.2583
         min_at: igate- itup- r_cable+ t_iso- v_bus- vto_q-
         max: 12.372
         max_at: igate+ itup- r_cable- t_iso- v_bus+ vto_q+
       v_pos12_peak:
-        nominal: 11.8258
-        min: 11.2438
+        nominal: 11.8183
+        min: 11.228
         min_at: igate- itup- r_cable+ t_iso+ v_bus- vto_q+
-        max: 12.201
+        max: 12.1937
         max_at: igate+ itup- r_cable- t_iso- v_bus+ vto_q-
       v_buck_fallback:
         nominal: 0.0
@@ -280,7 +320,7 @@ sims:
         max_at: nominal
     asserts:
     - expr: max['v_pos12_peak'] < 13.5
-      why: 'INST_POS12 - the thirteen WS2815B-V1s'' VDD, on it directly - stays under their 13.5 V absolute maximum [datasheets/led/WS2815B-V1.pdf,
+      why: 'INST_POS12 - every WS2815B-V1''s VDD, on it directly - stays under their 13.5 V absolute maximum [datasheets/led/WS2815B-V1.pdf,
         Absolute Maximum Ratings: VDD +9.5~+13.5 V] at U-ISO''s +3.1 % and every start corner'
       pass: true
     - expr: max['v_in_peak'] < 15.0
@@ -300,22 +340,22 @@ sims:
         max: 0.0
         max_at: nominal
       i_iso_peak:
-        nominal: 0.514895
-        min: 0.478836
-        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ v_bus- vhi- vto_q+
-        max: 0.559803
+        nominal: 0.527965
+        min: 0.491214
+        min_at: C-INRUSH-GD+ c_tvs+ igate- r_cable+ v_bus- vhi- vto_q+
+        max: 0.572852
         max_at: C-INRUSH-GD- c_tvs- igate+ r_cable- v_bus+ vhi- vto_q-
       v_in_peak:
-        nominal: 13.6651
-        min: 12.5636
-        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ v_bus- vhi- vto_q-
-        max: 14.6844
-        max_at: C-INRUSH-GD- c_tvs+ igate- r_cable- v_bus+ vhi- vto_q+
+        nominal: 13.6682
+        min: 12.5765
+        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ v_bus- vhi+ vto_q-
+        max: 14.685
+        max_at: C-INRUSH-GD- c_tvs+ igate- r_cable- v_bus+ vhi+ vto_q-
       v_pos12_peak:
-        nominal: 11.8266
-        min: 11.2459
+        nominal: 11.8192
+        min: 11.2302
         min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ v_bus- vhi- vto_q+
-        max: 12.2015
+        max: 12.1942
         max_at: C-INRUSH-GD- c_tvs- igate+ r_cable- v_bus+ vhi- vto_q-
       v_buck_fallback:
         nominal: 0.0
@@ -325,7 +365,7 @@ sims:
         max_at: nominal
     asserts:
     - expr: max['v_pos12_peak'] < 13.5
-      why: 'INST_POS12 - the thirteen WS2815B-V1s'' VDD, on it directly - stays under their 13.5 V absolute maximum [datasheets/led/WS2815B-V1.pdf,
+      why: 'INST_POS12 - every WS2815B-V1''s VDD, on it directly - stays under their 13.5 V absolute maximum [datasheets/led/WS2815B-V1.pdf,
         Absolute Maximum Ratings: VDD +9.5~+13.5 V] at U-ISO''s +3.1 % and every start corner'
       pass: true
     - expr: max['v_in_peak'] < 15.0
@@ -345,22 +385,22 @@ sims:
         max: 0.0
         max_at: nominal
       i_iso_peak:
-        nominal: 0.514901
-        min: 0.484475
+        nominal: 0.527973
+        min: 0.496803
         min_at: r_cable+ v_bus- vto_q+
-        max: 0.534393
+        max: 0.547678
         max_at: r_cable- v_bus+ vto_q-
       v_in_peak:
-        nominal: 13.6651
-        min: 13.2445
-        min_at: r_cable- v_bus- vto_q-
-        max: 14.448
+        nominal: 13.6682
+        min: 12.9696
+        min_at: r_cable+ v_bus- vto_q-
+        max: 14.4333
         max_at: r_cable- v_bus+ vto_q-
       v_pos12_peak:
-        nominal: 11.8305
-        min: 11.2507
+        nominal: 11.8232
+        min: 11.2352
         min_at: r_cable+ v_bus- vto_q+
-        max: 12.205
+        max: 12.1978
         max_at: r_cable- v_bus+ vto_q+
     asserts:
     - expr: max['v_pos12_peak'] < 13.5 and max['v_in_peak'] < 15.0
@@ -370,32 +410,32 @@ sims:
     - expr: max['latched'] < 0.5 and max['i_iso_peak'] < 0.5 * p['i_ocp']
       why: and it still starts from off as a first plug-in does
       pass: true
-  led-pwm[pw_f=2000.0,pw_i_swing=0.195]:
+  led-pwm[pw_f=2000.0,pw_i_swing=0.21]:
     corners: 17
     measures:
       buck_pp_mv:
-        nominal: 38.691
-        min: 36.1543
+        nominal: 41.6673
+        min: 38.9355
         min_at: esr_buck- esr_strip- r_cable- v_bus+
-        max: 68.1723
+        max: 73.4168
         max_at: esr_buck- esr_strip+ r_cable+ v_bus+
       buck_min:
-        nominal: 11.8511
-        min: 11.305
+        nominal: 11.8456
+        min: 11.2937
         min_at: esr_buck- esr_strip+ r_cable+ v_bus-
-        max: 12.226
+        max: 12.2207
         max_at: esr_buck- esr_strip- r_cable- v_bus+
       pos12_pp_mv:
-        nominal: 39.5248
-        min: 37.8596
+        nominal: 42.5651
+        min: 40.772
         min_at: esr_buck- esr_strip- r_cable- v_bus+
-        max: 89.0495
+        max: 95.8993
         max_at: esr_buck+ esr_strip+ r_cable- v_bus+
       pos12_max:
-        nominal: 11.9149
-        min: 11.432
+        nominal: 11.9139
+        min: 11.4299
         min_at: esr_buck- esr_strip- r_cable+ v_bus-
-        max: 12.3032
+        max: 12.3034
         max_at: esr_buck+ esr_strip+ r_cable- v_bus+
     asserts:
     - expr: min['buck_min'] > p['v_on'] + 0.5
@@ -410,28 +450,28 @@ sims:
     corners: 17
     measures:
       buck_pp_mv:
-        nominal: 78.0693
-        min: 72.9508
+        nominal: 77.6115
+        min: 72.5229
         min_at: esr_buck- esr_strip- r_cable- v_bus+
-        max: 137.558
+        max: 136.751
         max_at: esr_buck- esr_strip+ r_cable+ v_bus+
       buck_min:
-        nominal: 11.8161
-        min: 11.2373
+        nominal: 11.8159
+        min: 11.2366
         min_at: esr_buck- esr_strip+ r_cable+ v_bus-
-        max: 12.1923
+        max: 12.1921
         max_at: esr_buck- esr_strip- r_cable- v_bus+
       pos12_pp_mv:
-        nominal: 79.7514
-        min: 76.3916
+        nominal: 79.2837
+        min: 75.9436
         min_at: esr_buck- esr_strip- r_cable- v_bus+
-        max: 179.679
+        max: 178.625
         max_at: esr_buck+ esr_strip+ r_cable- v_bus+
       pos12_max:
-        nominal: 11.9394
-        min: 11.4875
+        nominal: 11.9385
+        min: 11.4854
         min_at: esr_buck- esr_strip- r_cable+ v_bus-
-        max: 12.3428
+        max: 12.3417
         max_at: esr_buck+ esr_strip+ r_cable- v_bus+
     asserts:
     - expr: min['buck_min'] > p['v_on'] + 0.5
@@ -442,32 +482,32 @@ sims:
       why: INST_POS12 stays under the WS2815B-V1's 13.5 V absolute maximum as the row switches (the row going dark kicks it
         up through the cable's inductance)
       pass: true
-  led-pwm[pw_f=3000.0,pw_i_swing=0.195]:
+  led-pwm[pw_f=3000.0,pw_i_swing=0.21]:
     corners: 17
     measures:
       buck_pp_mv:
-        nominal: 40.1451
-        min: 29.9722
+        nominal: 43.2334
+        min: 32.2778
         min_at: esr_buck+ esr_strip- r_cable- v_bus+
-        max: 77.5226
+        max: 83.4865
         max_at: esr_buck- esr_strip+ r_cable+ v_bus+
       buck_min:
-        nominal: 11.8504
-        min: 11.3003
+        nominal: 11.8449
+        min: 11.2887
         min_at: esr_buck- esr_strip+ r_cable+ v_bus-
-        max: 12.2291
+        max: 12.224
         max_at: esr_buck+ esr_strip- r_cable- v_bus+
       pos12_pp_mv:
-        nominal: 30.3365
-        min: 25.3912
+        nominal: 32.6701
+        min: 27.3444
         min_at: esr_buck- esr_strip- r_cable- v_bus+
-        max: 92.7724
+        max: 99.9086
         max_at: esr_buck+ esr_strip+ r_cable- v_bus+
       pos12_max:
-        nominal: 11.9149
-        min: 11.432
+        nominal: 11.9139
+        min: 11.4299
         min_at: esr_buck- esr_strip- r_cable+ v_bus-
-        max: 12.3082
+        max: 12.3088
         max_at: esr_buck+ esr_strip+ r_cable- v_bus+
     asserts:
     - expr: min['buck_min'] > p['v_on'] + 0.5
@@ -482,28 +522,28 @@ sims:
     corners: 17
     measures:
       buck_pp_mv:
-        nominal: 81.0037
-        min: 60.4769
+        nominal: 80.5286
+        min: 60.1221
         min_at: esr_buck+ esr_strip- r_cable- v_bus+
-        max: 156.426
+        max: 155.508
         max_at: esr_buck- esr_strip+ r_cable+ v_bus+
       buck_min:
-        nominal: 11.8146
-        min: 11.2278
+        nominal: 11.8144
+        min: 11.2272
         min_at: esr_buck- esr_strip+ r_cable+ v_bus-
-        max: 12.1985
+        max: 12.1983
         max_at: esr_buck+ esr_strip- r_cable- v_bus+
       pos12_pp_mv:
-        nominal: 61.2118
-        min: 51.2333
+        nominal: 60.8528
+        min: 50.9328
         min_at: esr_buck- esr_strip- r_cable- v_bus+
-        max: 187.191
+        max: 186.093
         max_at: esr_buck+ esr_strip+ r_cable- v_bus+
       pos12_max:
-        nominal: 11.9394
-        min: 11.4875
+        nominal: 11.9385
+        min: 11.4854
         min_at: esr_buck- esr_strip- r_cable+ v_bus-
-        max: 12.3529
+        max: 12.3518
         max_at: esr_buck+ esr_strip+ r_cable- v_bus+
     asserts:
     - expr: min['buck_min'] > p['v_on'] + 0.5
@@ -514,32 +554,32 @@ sims:
       why: INST_POS12 stays under the WS2815B-V1's 13.5 V absolute maximum as the row switches (the row going dark kicks it
         up through the cable's inductance)
       pass: true
-  led-pwm[pw_f=3390.0,pw_i_swing=0.195]:
+  led-pwm[pw_f=3390.0,pw_i_swing=0.21]:
     corners: 17
     measures:
       buck_pp_mv:
-        nominal: 39.4721
-        min: 27.7387
+        nominal: 42.5085
+        min: 29.8725
         min_at: esr_buck+ esr_strip- r_cable- v_bus+
-        max: 75.8191
+        max: 81.6519
         max_at: esr_buck- esr_strip+ r_cable+ v_bus+
       buck_min:
-        nominal: 11.8507
-        min: 11.3011
+        nominal: 11.8452
+        min: 11.2895
         min_at: esr_buck- esr_strip+ r_cable+ v_bus-
-        max: 12.2302
+        max: 12.2252
         max_at: esr_buck+ esr_strip- r_cable- v_bus+
       pos12_pp_mv:
-        nominal: 27.3091
-        min: 20.1994
+        nominal: 29.4097
+        min: 21.7532
         min_at: esr_buck- esr_strip- r_cable- v_bus-
-        max: 99.0321
+        max: 106.65
         max_at: esr_buck- esr_strip+ r_cable- v_bus+
       pos12_max:
-        nominal: 11.9149
-        min: 11.432
+        nominal: 11.9139
+        min: 11.4299
         min_at: esr_buck- esr_strip- r_cable+ v_bus-
-        max: 12.3107
+        max: 12.3115
         max_at: esr_buck- esr_strip+ r_cable- v_bus+
     asserts:
     - expr: min['buck_min'] > p['v_on'] + 0.5
@@ -554,28 +594,28 @@ sims:
     corners: 17
     measures:
       buck_pp_mv:
-        nominal: 79.6457
-        min: 55.9702
+        nominal: 79.1787
+        min: 55.6419
         min_at: esr_buck+ esr_strip- r_cable- v_bus+
-        max: 152.988
+        max: 152.091
         max_at: esr_buck- esr_strip+ r_cable+ v_bus+
       buck_min:
-        nominal: 11.8153
-        min: 11.2294
+        nominal: 11.8151
+        min: 11.2289
         min_at: esr_buck- esr_strip+ r_cable+ v_bus-
-        max: 12.2008
+        max: 12.2005
         max_at: esr_buck+ esr_strip- r_cable- v_bus+
       pos12_pp_mv:
-        nominal: 55.103
-        min: 40.7572
+        nominal: 54.7798
+        min: 40.5181
         min_at: esr_buck- esr_strip- r_cable- v_bus-
-        max: 199.822
+        max: 198.65
         max_at: esr_buck- esr_strip+ r_cable- v_bus+
       pos12_max:
-        nominal: 11.9394
-        min: 11.4875
+        nominal: 11.9385
+        min: 11.4854
         min_at: esr_buck- esr_strip- r_cable+ v_bus-
-        max: 12.358
+        max: 12.3568
         max_at: esr_buck- esr_strip+ r_cable- v_bus+
     asserts:
     - expr: min['buck_min'] > p['v_on'] + 0.5
@@ -586,32 +626,32 @@ sims:
       why: INST_POS12 stays under the WS2815B-V1's 13.5 V absolute maximum as the row switches (the row going dark kicks it
         up through the cable's inductance)
       pass: true
-  led-pwm[pw_f=4000.0,pw_i_swing=0.195]:
+  led-pwm[pw_f=4000.0,pw_i_swing=0.21]:
     corners: 17
     measures:
       buck_pp_mv:
-        nominal: 33.9328
-        min: 25.0268
+        nominal: 36.5431
+        min: 26.9519
         min_at: esr_buck+ esr_strip- r_cable- v_bus+
-        max: 62.7673
+        max: 67.596
         max_at: esr_buck- esr_strip+ r_cable+ v_bus+
       buck_min:
-        nominal: 11.8535
-        min: 11.3076
+        nominal: 11.8482
+        min: 11.2966
         min_at: esr_buck- esr_strip+ r_cable+ v_bus-
-        max: 12.2316
+        max: 12.2267
         max_at: esr_buck+ esr_strip- r_cable- v_bus+
       pos12_pp_mv:
-        nominal: 27.6935
-        min: 18.4067
+        nominal: 29.8237
+        min: 19.8226
         min_at: esr_buck- esr_strip- r_cable- v_bus-
-        max: 109.516
+        max: 117.94
         max_at: esr_buck- esr_strip+ r_cable- v_bus-
       pos12_max:
-        nominal: 11.9149
-        min: 11.432
+        nominal: 11.9139
+        min: 11.4299
         min_at: esr_buck- esr_strip- r_cable+ v_bus-
-        max: 12.3151
+        max: 12.3162
         max_at: esr_buck- esr_strip+ r_cable- v_bus+
     asserts:
     - expr: min['buck_min'] > p['v_on'] + 0.5
@@ -626,28 +666,28 @@ sims:
     corners: 17
     measures:
       buck_pp_mv:
-        nominal: 68.4688
-        min: 50.4982
+        nominal: 68.0672
+        min: 50.202
         min_at: esr_buck+ esr_strip- r_cable- v_bus+
-        max: 126.652
+        max: 125.909
         max_at: esr_buck- esr_strip+ r_cable+ v_bus+
       buck_min:
-        nominal: 11.8209
-        min: 11.2426
+        nominal: 11.8206
+        min: 11.2419
         min_at: esr_buck- esr_strip+ r_cable+ v_bus-
-        max: 12.2035
+        max: 12.2032
         max_at: esr_buck+ esr_strip- r_cable- v_bus+
       pos12_pp_mv:
-        nominal: 55.8784
-        min: 37.1399
+        nominal: 55.5507
+        min: 36.9221
         min_at: esr_buck- esr_strip- r_cable- v_bus-
-        max: 220.965
+        max: 219.669
         max_at: esr_buck- esr_strip+ r_cable- v_bus+
       pos12_max:
-        nominal: 11.9394
-        min: 11.4875
+        nominal: 11.9385
+        min: 11.4854
         min_at: esr_buck- esr_strip- r_cable+ v_bus-
-        max: 12.3669
+        max: 12.3657
         max_at: esr_buck- esr_strip+ r_cable- v_bus+
     asserts:
     - expr: min['buck_min'] > p['v_on'] + 0.5
@@ -662,28 +702,28 @@ sims:
     corners: 17
     measures:
       buck_pp_mv:
-        nominal: 125.625
-        min: 97.1208
+        nominal: 125.434
+        min: 98.8929
         min_at: esr_buck- esr_strip- r_cable+ v_bus+
-        max: 895.047
+        max: 892.501
         max_at: esr_buck+ esr_strip- r_cable+ v_bus-
       buck_min:
-        nominal: 11.7402
-        min: 10.7318
+        nominal: 11.7363
+        min: 10.7244
         min_at: esr_buck+ esr_strip- r_cable+ v_bus-
-        max: 12.1213
+        max: 12.1175
         max_at: esr_buck- esr_strip- r_cable- v_bus+
       pos12_pp_mv:
-        nominal: 99.4779
-        min: 91.5183
+        nominal: 102.545
+        min: 94.453
         min_at: esr_buck- esr_strip- r_cable- v_bus+
-        max: 174.039
+        max: 179.282
         max_at: esr_buck- esr_strip+ r_cable+ v_bus-
       pos12_max:
-        nominal: 11.9149
-        min: 11.432
+        nominal: 11.9139
+        min: 11.4299
         min_at: esr_buck- esr_strip- r_cable+ v_bus-
-        max: 12.2884
+        max: 12.2874
         max_at: esr_buck- esr_strip- r_cable- v_bus+
     asserts:
     - expr: min['buck_min'] > p['v_on'] + 0.5
@@ -698,28 +738,28 @@ sims:
     corners: 17
     measures:
       buck_pp_mv:
-        nominal: 165.308
-        min: 165.308
+        nominal: 165.16
+        min: 165.16
         min_at: nominal
-        max: 926.36
+        max: 924.689
         max_at: esr_buck+ esr_strip- r_cable+ v_bus-
       buck_min:
-        nominal: 11.7203
-        min: 10.7152
+        nominal: 11.7164
+        min: 10.7073
         min_at: esr_buck+ esr_strip- r_cable+ v_bus-
-        max: 12.0724
+        max: 12.0689
         max_at: esr_buck- esr_strip- r_cable- v_bus+
       pos12_pp_mv:
-        nominal: 92.6448
-        min: 76.0816
+        nominal: 95.0041
+        min: 78.4891
         min_at: esr_buck+ esr_strip- r_cable- v_bus+
-        max: 182.31
+        max: 186.594
         max_at: esr_buck- esr_strip+ r_cable+ v_bus-
       pos12_max:
-        nominal: 11.9149
-        min: 11.432
+        nominal: 11.9139
+        min: 11.4299
         min_at: esr_buck- esr_strip- r_cable+ v_bus-
-        max: 12.2884
+        max: 12.2874
         max_at: esr_buck- esr_strip- r_cable- v_bus+
     asserts:
     - expr: min['buck_min'] > p['v_on'] + 0.5
@@ -734,28 +774,28 @@ sims:
     corners: 17
     measures:
       buck_pp_mv:
-        nominal: 172.336
-        min: 172.336
+        nominal: 172.341
+        min: 172.341
         min_at: nominal
-        max: 933.929
+        max: 932.469
         max_at: esr_buck+ esr_strip- r_cable+ v_bus-
       buck_min:
-        nominal: 11.7167
-        min: 10.7112
+        nominal: 11.7128
+        min: 10.7032
         min_at: esr_buck+ esr_strip- r_cable+ v_bus-
-        max: 12.0563
+        max: 12.0506
         max_at: esr_buck- esr_strip+ r_cable- v_bus+
       pos12_pp_mv:
-        nominal: 88.6063
-        min: 70.6604
+        nominal: 90.7304
+        min: 72.907
         min_at: esr_buck+ esr_strip- r_cable- v_bus+
-        max: 168.927
+        max: 172.415
         max_at: esr_buck- esr_strip+ r_cable+ v_bus-
       pos12_max:
-        nominal: 11.9149
-        min: 11.432
+        nominal: 11.9139
+        min: 11.4299
         min_at: esr_buck- esr_strip- r_cable+ v_bus-
-        max: 12.2884
+        max: 12.2874
         max_at: esr_buck- esr_strip- r_cable- v_bus+
     asserts:
     - expr: min['buck_min'] > p['v_on'] + 0.5
@@ -770,28 +810,28 @@ sims:
     corners: 17
     measures:
       buck_pp_mv:
-        nominal: 170.191
-        min: 170.191
+        nominal: 170.571
+        min: 170.571
         min_at: nominal
-        max: 942.959
+        max: 941.75
         max_at: esr_buck+ esr_strip- r_cable+ v_bus-
       buck_min:
-        nominal: 11.7178
-        min: 10.7064
+        nominal: 11.7137
+        min: 10.6982
         min_at: esr_buck+ esr_strip- r_cable+ v_bus-
-        max: 12.0627
+        max: 12.0569
         max_at: esr_buck- esr_strip+ r_cable- v_bus+
       pos12_pp_mv:
-        nominal: 76.9041
-        min: 55.4891
+        nominal: 78.7911
+        min: 56.9126
         min_at: esr_buck- esr_strip- r_cable- v_bus+
-        max: 144.968
+        max: 149.16
         max_at: esr_buck+ esr_strip+ r_cable+ v_bus-
       pos12_max:
-        nominal: 11.9149
-        min: 11.432
+        nominal: 11.9139
+        min: 11.4299
         min_at: esr_buck- esr_strip- r_cable+ v_bus-
-        max: 12.2884
+        max: 12.2874
         max_at: esr_buck- esr_strip- r_cable- v_bus+
     asserts:
     - expr: min['buck_min'] > p['v_on'] + 0.5

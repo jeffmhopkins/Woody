@@ -8,30 +8,30 @@ circuit: module/power-entry
 title: Module power entry
 page: power-entry.md
 ports:
-  MODULE_ANALOG_POS12:
-    dir: out
-    to: module/breath-receive-stage
-  MODULE_ANALOG_NEG12:
-    dir: out
+  AGND_MOD:
+    dir: ref
     to: module/breath-receive-stage
   DAC_AVDD:
     dir: out
     to: module/dac8568
     figure: dac-rail
-  AGND_MOD:
-    dir: ref
-    to: module/breath-receive-stage
   DIG_GND:
     dir: ref
     to: module/digital-and-supervision
   LOGIC_5V:
     dir: out
     to: module/digital-and-supervision
-  ISO_POS12:
+  MODULE_ANALOG_NEG12:
     dir: out
-    to: module/umbilical-load-switch
+    to: module/breath-receive-stage
+  MODULE_ANALOG_POS12:
+    dir: out
+    to: module/breath-receive-stage
   PWR_GND:
     dir: ref
+    to: module/umbilical-load-switch
+  ISO_POS12:
+    dir: out
     to: module/umbilical-load-switch
 components:
   C-DEC-REG-IN:
@@ -184,7 +184,7 @@ components:
     pins:
     - 1
     - 2
-    note: 'U-ISO''s +12 V input leg; FB4 is its -12 V leg. They carry the converter''s input, ~0.22 A in typical
+    note: 'U-ISO''s +12 V input leg; FB4 is its -12 V leg. They carry the converter''s input, ~0.23 A in typical
       play, which puts them between the bias curve''s 0 and 250 mA traces (ferrite-bias-impedance): the two of the
       four where DC bias matters - see the FB-IN row. ORDERED AS MI1206K601R-10: JLC sources it through Global Sourcing
       / consignment (owner, 2026-10-01), so it stays machine-placed though LCSC lists 0 - see the FB-IN row'
@@ -361,34 +361,11 @@ nets:
   - U-REG-DAC.EP
   - U-REG-DAC.ILIM
   - U-REG-DAC.GND
-  BUS_GND:
-  - J-PWR-EURO.GND_3
-  - J-PWR-EURO.GND_4
-  - J-PWR-EURO.GND_5
-  - J-PWR-EURO.GND_6
-  - J-PWR-EURO.GND_7
-  - J-PWR-EURO.GND_8
-  - NT-AGND-MOD.2
-  - NT-DIG-MOD.2
-  BUS_NEG12_RAW:
-  - D4.K
-  - J-PWR-EURO.NEG12_1
-  - J-PWR-EURO.NEG12_2
-  - PTC-NEG12.1
-  BUS_POS12_RAW:
-  - J-PWR-EURO.POS12_10
-  - J-PWR-EURO.POS12_9
-  - PTC-ISO.1
-  - PTC-POS12.1
   DAC_AVDD:
   - port: DAC_AVDD
   - C-REG-OUT.1
   - U-REG-DAC.OUT
   - U-REG-DAC.OUTS
-  DAC_REG_SET:
-  - C-SET-DAC.1
-  - R-SET-DAC.1
-  - U-REG-DAC.SET
   DIG_GND:
   - port: DIG_GND
   - C-LOGIC-IN.2
@@ -402,24 +379,10 @@ nets:
   ISO_FILT_NEG:
   - FB4.2
   - L-CM-ISO.IN_NEG
-  ISO_FILT_POS:
-  - L-CM-ISO.IN_POS
-  - L-ISO-IN.2
   ISO_POS12:
   - port: ISO_POS12
   - C-ISO-OUT.1
   - U-ISO.VO
-  ISO_VIN_NEG:
-  - C-ISO-IN.2
-  - C2.2
-  - L-CM-ISO.OUT_NEG
-  - U-ISO.GND
-  ISO_VIN_POS:
-  - C-ISO-IN.1
-  - C-ISO-Y.1
-  - C2.1
-  - L-CM-ISO.OUT_POS
-  - U-ISO.VIN
   LOGIC_5V:
   - port: LOGIC_5V
   - C-LOGIC-OUT.1
@@ -442,6 +405,49 @@ nets:
   - U-REG-DAC.PGFB
   - U-REG-LOGIC.VIN
   - U-REG-LOGIC.EN
+  PWR_GND:
+  - port: PWR_GND
+  - C-ISO-OUT.2
+  - C-ISO-Y.2
+  - NT-UMB-MOD.1
+  - U-ISO.0V
+  ISO_FILT_POS:
+  - L-CM-ISO.IN_POS
+  - L-ISO-IN.2
+  ISO_VIN_NEG:
+  - C-ISO-IN.2
+  - C2.2
+  - L-CM-ISO.OUT_NEG
+  - U-ISO.GND
+  ISO_VIN_POS:
+  - C-ISO-IN.1
+  - C-ISO-Y.1
+  - C2.1
+  - L-CM-ISO.OUT_POS
+  - U-ISO.VIN
+  BUS_GND:
+  - J-PWR-EURO.GND_3
+  - J-PWR-EURO.GND_4
+  - J-PWR-EURO.GND_5
+  - J-PWR-EURO.GND_6
+  - J-PWR-EURO.GND_7
+  - J-PWR-EURO.GND_8
+  - NT-AGND-MOD.2
+  - NT-DIG-MOD.2
+  BUS_NEG12_RAW:
+  - D4.K
+  - J-PWR-EURO.NEG12_1
+  - J-PWR-EURO.NEG12_2
+  - PTC-NEG12.1
+  BUS_POS12_RAW:
+  - J-PWR-EURO.POS12_10
+  - J-PWR-EURO.POS12_9
+  - PTC-ISO.1
+  - PTC-POS12.1
+  DAC_REG_SET:
+  - C-SET-DAC.1
+  - R-SET-DAC.1
+  - U-REG-DAC.SET
   NEG12_D4:
   - D4.A
   - FB4.1
@@ -463,12 +469,6 @@ nets:
   POS12_PTC2:
   - D2.A
   - PTC-ISO.2
-  PWR_GND:
-  - port: PWR_GND
-  - C-ISO-OUT.2
-  - C-ISO-Y.2
-  - NT-UMB-MOD.1
-  - U-ISO.0V
   POS5_11:
   - J-PWR-EURO.POS5_11
   POS5_12:

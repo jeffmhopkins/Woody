@@ -828,7 +828,7 @@
 
 
   (symbol (lib_id "Connector_Generic:Conn_02x10_Odd_Even") (at 106.68 63.5 0) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no)
+    (in_bom no) (on_board yes) (dnp no)
     (uuid 748dd2f3-b9e1-53da-97a5-1612bb838916)
     (property "Reference" "J7" (at 107.95 50.8 0) (effects (font (size 1.27 1.27))))
     (property "Value" "2x10 2.54mm pin header" (at 107.95 78.74 0) (effects (font (size 1.27 1.27))))

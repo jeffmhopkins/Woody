@@ -52,7 +52,8 @@ The owner's decisions, 2026-09-30, relayed with the brief for this change:
    `[ds WS2815B-V1.pdf p.2]`.
 7. **White solder mask on the main board.** The top face is the row's first
    reflector (ADR 0016 named white mask as the cheap improvement). Recorded
-   on `PCB-CARRIER` and in `hardware/boards/main-board/README.md`.
+   on `PCB-CARRIER` and in `hardware/boards/main-board/README.md`. The key
+   boards are white too (*Amendment, 2026-10-02*).
 
 `R-LED-SER`, `R-LED-PD` and `C-STRIP-BULK` stay. The circuit, its derivation
 against the B-V1's `V_IH` and the row's current are
@@ -83,7 +84,7 @@ the current is the tracked figure `led-row-current`, blocked on E6.
   placement rule's whole margin. No switch was flipped, so no pin moved and
   no board was laid out again for it.
 - **LED 7 off the U-bolt station: the row is shifted, no station is skipped.**
-  The thirteen at `lighting.led_pitch`, centred in the span the board allows,
+  The row at `lighting.led_pitch`, centred in the span the board allows,
   would put one LED within a couple of millimetres of the station. The body
   CAD shifts the whole row toward the mouth until the station is midway
   between two LEDs, and fails if that pushes the row out of its span
@@ -118,7 +119,8 @@ the cavity as the diffuser (ADR 0014, ADR 0016). Two things move:
   table rows for the strips are upper bounds that no longer describe the
   lights; E6 measures the row.
 - **Quiescent draw is always on.** Under 2 mA per LED blanked `[ds p.3]`,
-  ~0.3 W for the row `[calc: 13 × 2 mA × 12 V]`, part of the interior's heat.
+  ~0.3 W for all of them `[calc: 14 × 2 mA × 12 V = 0.34 W]`, part of the
+  interior's heat.
 - **MSL 5a.** The LEDs must be baked before reflow `[ds p.6]`; the board
   house does this for moisture-sensitive LEDs `[web, via the study; not a
   per-order guarantee]`. After reflow they are not repairable, which is what
@@ -132,7 +134,9 @@ the cavity as the diffuser (ADR 0014, ADR 0016). Two things move:
   with a diode test on the first parts in hand.
 - **Operating range −40 to +65 °C** `[ds p.2]`, against an interior 10–20 K
   above ambient (ADR 0014). Fine in a room; worth remembering under stage
-  lights.
+  lights. The margin on a hot stage (#18 E3) was put to the owner on
+  2026-10-03 and accepted as is: ADR 0014, *The clamp, restated on thermal
+  grounds*.
 - **The LEDs are on the board from the first E-stage build**, so the
   LED-induced breath step (ADR 0014) is measured on the real layout, and E11
   runs with the lights in place.
@@ -154,5 +158,69 @@ where the body CAD puts them (`mechanical/export/pcb-geometry.echo` `main`
 `led`) — accepting that the row is reshuffled if the side-light diffusion
 test moves its count or pitch. The test is still run before the board is
 ordered; what changes is that it no longer holds up placement and routing.
-A reshuffle moves thirteen LEDs, their capacitors and the one data chain
+A reshuffle moves the row's LEDs, their capacitors and the one data chain
 between them along the centreline, which the layout keeps clear for it.
+
+## Amendment, 2026-10-02 — white mask on the key boards too
+
+**The owner, 2026-10-02:** "Keep white but we should also do it for the top
+key boards as well." Point 7 stands for the main board, and now covers both
+key boards (`hardware/boards/key-board-lh`, `key-board-rh`) as well: white
+solder mask on both faces, black legend, the same `fab:` mask and silk as the
+main board's `layout.yaml`. The key boards' undersides are what the row
+faces, so they are the cavity's second reflector — the "white solder mask on
+… the cavity side of the key … boards" that ADR 0016 named as the cheap
+improvement.
+
+The colour is held in each board's `layout.yaml` `fab:` and written into the
+board's stackup, which the Gerber job file carries to the board house;
+`tools/pcb.py check` now fails when the two disagree (`pcb.py stackup`
+rewrites it).
+
+**Open, and what decides it.** JLCPCB's Economic PCBA table lists white at
+1.6 mm only with **leaded** HASL, 5–30 boards
+`[ds datasheets/fab/JLCPCB-PCBA-CAPABILITIES.pdf, "PCB Specs for Economic
+PCB Assembly"]`, where the key boards' `fab: finish` is lead-free HASL and
+their order (`hardware/boards/key-board-lh/README.md`) is Economic. The
+quote form at order time decides: if it will not take white with lead-free
+HASL under Economic, the owner chooses between Standard PCBA and a leaded
+finish. The finish is not changed here.
+
+## Amendment, 2026-10-02 — a fourteenth LED, in the main board's tail corner
+
+**The owner, 2026-10-02: "Add it."** — answering ADR 0021's study of the
+corner the full-width tail gained beside the etherCON adapter (ADR 0021,
+amendment of the same date, *A fourteenth LED*). The row cannot light the
+tail's near side: the regulator block, 12.5 mm tall on that side in front of
+`J-MCU`, shadows the row's tail-end LED, which sees 0–4 % of the near side's
+inside face past the key board, where an LED in the corner sees all of it
+`[calc, ray cast through the body CAD's solids, in ADR 0021]`.
+
+1. **`lighting.led_count` is fourteen**: thirteen in the row as decided above,
+   and one in the corner. `config/body.yaml` `lighting.tail_led` places it,
+   three `lighting.led_pitch` past the row's tail-end LED and 13.5 mm off the
+   centreline toward the near side (x 274.7, y 42 in the body frame), and
+   `mechanical/drc.echo` *"LED in the tail corner clear of its neighbours"*
+   checks it against the board's edge, the Matrix ribbon's keep-out, `J-MCU`,
+   the regulator block, `J-UMB`'s parts band, the tongue's end-mount nuts,
+   `HDR-SERVICE` and the USB-C receptacle's keep-out height (it stands inside
+   that keep-out, which limits height: 1.65 mm under 2.62).
+2. **It is first in the data chain**, because the data arrives at the tail:
+   `R-LED-SER` → the corner LED → the row's tail end → … → the mouth end. The
+   references follow the chain: `D-LED-1` / `C-LED-1` is the corner's, and on
+   the main board `D7` / `C25` (`hardware/boards/main-board/README.md`).
+3. **The backup line is point 5 unchanged**: the corner LED's `DIN2` to GND,
+   and the row's tail-end LED's `DIN2` from the feed.
+4. **100 nF at it, as point 6.** `C-LED` is fourteen.
+5. **Power: +15 mA at full white** `[calc: 0.18 W / 12 V]`, under 1 % of
+   `U-ISO`'s rating. `led-row-current` and `umbilical-current` follow
+   (`config/figures.yaml`; ADR 0005's amendment of this date), and the sims
+   that carry the row were re-run on the new count, not scaled.
+6. **Firmware**: one more pixel, pixel 0, and a per-LED gain for it, since it
+   stands about six times nearer its acrylic than the row does
+   (`firmware/README.md`, *The lights*).
+
+The side-light diffusion test still decides the row's count and pitch, and
+now the corner LED's place and gain with them. The main board is re-laid out
+for it; its `.kicad_pcb` is the layout's to change, and `tools/pcb.py check`
+fails until it places `LED1` where the body CAD does.

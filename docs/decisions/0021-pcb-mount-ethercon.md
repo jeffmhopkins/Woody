@@ -232,8 +232,8 @@ first in the data chain, because the data arrives at the tail:
 55 mm of return across the `J-MCU` area. The backup line follows ADR 0028
 point 5: the corner LED's `DIN2` to GND, and `LED1`'s `DIN2` from the
 feed. The refdes are renumbered in chain order. Firmware: one more pixel
-(~30 µs more per frame at 800 kbit/s) and a per-LED gain for it. **Not
-added.**
+(~30 µs more per frame at 800 kbit/s) and a per-LED gain for it. **Added
+2026-10-02** by the owner ("Add it"; ADR 0028's amendment of that date).
 
 **`HDR-SERVICE` where it is, or elsewhere.** ADR 0018 point 4 puts it on the
 main board, reached with the lid off. Since ADR 0025 that means cutting the

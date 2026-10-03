@@ -2,8 +2,8 @@
 
 **One image** ([ADR 0015](../docs/decisions/0015-one-mcu-no-display.md)):
 
-- `realtime/` — the ESP32-S3-Matrix. Keys, breath, IMU, DAC loop, the LED
-  row (thirteen WS2815B-V1 on the main board, ADR 0028) and the 8×8 matrix
+- `realtime/` — the ESP32-S3-Matrix. Keys, breath, IMU, DAC loop, the LEDs
+  (WS2815B-V1 on the main board, `lighting.led_count`, ADR 0028) and the 8×8 matrix
   (the only display), USB MIDI and USB configuration. Owns all state and
   persistence. This is the instrument.
 
@@ -195,6 +195,38 @@ Pins: `SCK` IO38, `SH/LD` IO7, chain-end `SER` IO33, `QH` IO40.
   sensor's zero-pressure offset (`breath-adc.md`, the *rest* line), with it
   down it reads near zero. Gate the row on the reading sitting above about
   half the rest count, and blank it when it falls below.
+- **Cap the matrix while a USB host is attached** (owner, 2026-10-03, #18
+  E1: "Firmware cap"). With the rack up and USB plugged in, the Matrix's
+  `VCC_5V` is fed from both the buck (through `D-USBOR`) and `VBUS` (through
+  the Matrix's own `D1`, a B5819WS), and tens of millivolts decide which
+  carries it: at the corners all of it comes through `D1`
+  (`power-entry-instrument.md`, *Rack and USB together*). So whenever the
+  USB-Serial-JTAG (or, with MIDI on, the USB-OTG) peripheral reports a host
+  connected, clamp the **matrix's** LEDs to **about 120 mA** of estimated
+  current `[calc: the ~283 mA ADR 0014 derives for D1 at a 60 °C interior,
+  *Current: sparse is free, full field is not*, less ~160 mA for the
+  ESP32-S3 through the ME6217, #18 E1's table]`, scaling down as the shared
+  budget does. It applies on top of the shared lighting budget, not instead
+  of it; the LED row is fed from `INST_POS12`, not `VCC_5V`, and is not
+  touched. Lift it when the host goes away. The per-LED current behind the
+  estimate is `matrix-led-current`, still blocked on E1's measurement, so the
+  clamp is a setting E1 confirms, not a constant.
+- **Fourteen pixels, the tail corner's first.** The data line reaches the LED
+  in the main board's tail corner before the row (ADR 0028's amendment of
+  2026-10-02; `led-strip-drive.md`, *The LED in the tail corner*), so a
+  frame is pixel 0 for the corner LED, then pixels 1–13 for the row from its
+  tail end to the mouth end. One more pixel is ~30 µs more per frame
+  `[calc: 24 bits / 800 kbit/s]`. Anything drawn *along* the body (the breath
+  bar, a sweep) addresses pixels 1–13; the corner LED is not a step of it,
+  and takes the colour of the row's tail end unless a pattern sets it.
+- **A per-LED gain, and the corner LED's is about a sixth.** It stands ~9 mm
+  from the near side's acrylic where the row stands ~22.5 mm from either
+  side, so at the same drive it lights its patch about six times as brightly
+  `[calc: (22.5 / 9)² = 6.25, ADR 0021's study]`. Scale each pixel by a
+  gain table — all 1.0 but pixel 0, which starts at 0.16 — applied before
+  the shared lighting budget's clamp, so the clamp sees what is actually drawn. A
+  setting, not a constant: the side-light diffusion test (ROADMAP) sets it,
+  by eye on the real acrylic.
 
 ## The instrument must stay recoverable
 

@@ -82,12 +82,12 @@ renders:
     camera: [0, 0, 0, 0, 0, 0, 300]
     viewall: true
   - name: module-boards
-    title: Both boards seen from the panel - outlines, standoffs, J-B2B-MOD, the LED, the parts on each face
+    title: The three boards seen from the panel - outlines, standoffs, J-B2B-MOD and J-B2B-ISO, the LED, the parts on each face
     src: mechanical/cad/fig_module_boards.scad
     out: mechanical/module/renders/boards.png
     stamp: Woody module
     layout_sensitive: false
-    imgsize: [2000, 1500]
+    imgsize: [2600, 1500]
     projection: o
     camera: [0, 0, 0, 0, 0, 0, 300]
     viewall: true
@@ -98,6 +98,7 @@ exports:
   - {name: module-dxf-panel, src: mechanical/cad/module.scad, out: mechanical/module/export/panel.dxf, defines: {part: "panel"}}
   - {name: module-dxf-jack-board, src: mechanical/cad/module.scad, out: mechanical/module/export/jack-board.dxf, defines: {part: "jack_board"}}
   - {name: module-dxf-main-board, src: mechanical/cad/module.scad, out: mechanical/module/export/main-board.dxf, defines: {part: "main_board"}}
+  - {name: module-dxf-iso-board, src: mechanical/cad/module.scad, out: mechanical/module/export/iso-board.dxf, defines: {part: "iso_board"}}
   - {name: module-pcb-geometry, src: mechanical/cad/module.scad, out: mechanical/module/export/pcb-geometry.echo, defines: {part: "pcb_geom"}}
   # Every legend and graphics zone's POSITION, every keep-out on the face and
   # where each part sits: the panel artwork's and the Blender scene's input (ADR 0026).

@@ -44,19 +44,20 @@ ECHO: "PCB", "main", "plate", "window HDR-SERVICE", 260.25, 14.25, 275.11, 18.95
 ECHO: "PCB", "main", "plate", "window U-BUCK", 228.33, 32.5, 241.33, 51.8
 ECHO: "PCB", "main", "plate", "end", 293.25
 ECHO: "PCB", "main", "part", "REGULATOR-BLOCK", 234.83, 41.5, 0, 10, 15, 12.5
-ECHO: "PCB", "main", "led", "LED1", 224.685, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED2", 208.015, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED3", 191.345, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED4", 174.675, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED5", 158.005, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED6", 141.335, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED7", 124.665, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED8", 107.995, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED9", 91.325, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED10", 74.655, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED11", 57.985, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED12", 41.315, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED13", 24.645, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED1", 274.695, 42, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED2", 224.685, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED3", 208.015, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED4", 191.345, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED5", 174.675, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED6", 158.005, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED7", 141.335, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED8", 124.665, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED9", 107.995, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED10", 91.325, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED11", 74.655, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED12", 57.985, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED13", 41.315, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED14", 24.645, 28.5, 180, 7.6, 6.1, 1.65
 ECHO: "PCB", "main", "standoff", "M2.5", 40, 11.1, 2.7, 6.1735, 4.9, "column"
 ECHO: "PCB", "main", "standoff", "M2.5", 40, 45.9, 2.7, 6.1735, 4.9, "column"
 ECHO: "PCB", "main", "standoff", "M2.5", 121.7, 11.1, 2.7, 6.1735, 4.9, "column"

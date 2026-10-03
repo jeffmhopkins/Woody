@@ -218,7 +218,7 @@ costs `[calc]`:
 | **220 Ω** | **1.83–1.86 V** | **below threshold, dwelling ~20 ns per edge in the forbidden band** |
 | 100 Ω | **2.75 V** | clean single step |
 | **82 Ω** (2026-09-30) | **3.04–3.32 V** with the pad's 17–35 Ω `[calc]` | clean single step; the falling edge's first step 0.00–0.26 V |
-| 68 Ω | 3.25 V | clean, but **48 mA fault current**, above the pad's 40 mA typical drive — a characteristic, not a rating (below) |
+| 68 Ω | 3.25 V | clean; a shorted conductor draws **32–39 mA** with the pad's 17–35 Ω, on the 82 Ω row's convention (3.3 / (68 + 35) to 3.3 / (68 + 17)) `[calc]`, against 28–33 mA at 82 Ω. Not chosen because 82 Ω already passes `cs-fall-reentry` with less current, not on a rating (below) |
 
 The answer was 100 Ω until 2026-09-30, and is now **82 Ω**: the simulation
 found the falling edge was the tight one, and 82 Ω with `U-TVS-SPI` moved to
@@ -227,15 +227,19 @@ is 40 mA, the pad's typical drive at its strongest setting; the pad's own
 output resistance, 17 Ω at its strongest drive setting and 35 Ω at the
 default, brings a shorted conductor's current to 33 mA or 28 mA `[calc; ds
 ESP32-S3-datasheet-v2.2.pdf p.65]`, and 33 mA through 82 Ω is 90 mW in the
-1206's 1/4 W. **The 40 mA is not a limit** (2026-10-01, A5-12): Table 5-4
+1206's 0.66 W (14 %). **The 40 mA is not a limit** (2026-10-01, A5-12): Table 5-4
 gives it as `I_OH` typical at `PAD_DRIVER` = 3, and the absolute maximum
 ratings give only a cumulative 1500 mA across all IO, with a footnote that
 the part survived every pin shorted to ground for 24 hours `[ds p.64,
 Table 5-1]`. The 68 Ω row's rejection was argued against it; 82 Ω does not
 need it, standing on `cs-fall-reentry`. With the clamp now behind
-it, `R-SPI-SER` is also the first thing an ESD strike on a conductor meets;
-the banked resistor sheet gives no pulse rating, so the ESD test at E11
-decides whether a pulse-rated part is needed there.
+it, `R-SPI-SER` is also the first thing an ESD strike on a conductor meets,
+so it is **a pulse-rated 1206** on the same footprint (owner, 2026-10-03,
+#15 C3), and E11's result cannot force a respin: Vishay CRCW120682R0FKEAHP,
+pulse-proof thick film, 0.75 W `[ds VISHAY-CRCW-HP-E3-PULSE-PROOF.pdf]` —
+the owner's pick over Panasonic's ERJ-P08 at this value, which neither JLC
+nor LCSC stocks. `R-SER-BREATH-INST` at the same connector is the ERJ-P08 in
+1 kΩ (`breath-sense-link.md`).
 (ADR 0004's old "7.9 MHz corner" was the figure for 100 Ω all along, quoted
 against 220 Ω — the schematic review caught that separately.)
 

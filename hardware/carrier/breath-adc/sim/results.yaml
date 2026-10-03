@@ -4,13 +4,14 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/carrier/breath-adc/sim/sims.yaml: 44395020c466c80f
-  hardware/carrier/breath-adc/netlist.yaml: 936c53388d7b1686
+  hardware/carrier/breath-adc/sim/sims.yaml: cb6aafd15bc27c89
+  hardware/carrier/breath-adc/netlist.yaml: f742c4d67eea80fb
   hardware/carrier/breath-adc/sim/adc-ac.cir: 92db36d52ceba839
   hardware/carrier/breath-adc/sim/adc.cir: 3d5f71307efa775a
   hardware/carrier/breath-adc/sim/adc-powerup.cir: 66ddee5fef5a915c
-  hardware/carrier/breath-adc/sim/adc-vdd.cir: 71506d20867c2676
-  drc:Matrix ribbon length: '50.65'
+  hardware/carrier/breath-adc/sim/adc-vdd.cir: 3468717b0fc97416
+  hardware/carrier/breath-adc/sim/adc-vddload.cir: c3d7be54d359dff1
+  drc:Matrix ribbon length: '37.6231'
   figure:sensor-full-scale: 4.86 V
 ngspice: '42'
 sims:
@@ -211,53 +212,131 @@ sims:
       why: and with it stuck there once 3V3 is up - the page's 'fails high' case, (0.6 x INST_POS12 - V_F - 3.3 V) / 6 kohm
       pass: true
   vdd-ripple:
+    corners: 257
+    measures:
+      h_fbuck_db:
+        nominal: -76.0682
+        min: -94.6152
+        min_at: C-ADC-BULK+ C-ADC-VDD+ R-ADC-VDD+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
+        max: -56.9654
+        max_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
+      h_band_db:
+        nominal: -72.5091
+        min: -83.5907
+        min_at: C-ADC-BULK+ C-ADC-VDD+ R-ADC-VDD+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: -52.2176
+        max_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+      f_band_peak:
+        nominal: 200678.0
+        min: 200678.0
+        min_at: nominal
+        max: 270707.0
+        max_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- c_vcc5- k_psrr- l_rib_m+ len_rib+
+      vdd_pp_mv:
+        nominal: 0.0284267
+        min: 0.00793684
+        min_at: C-ADC-BULK+ C-ADC-VDD+ R-ADC-VDD+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: 0.293969
+        max_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+      lsb_pp:
+        nominal: 0.0311778
+        min: 0.00870497
+        min_at: C-ADC-BULK+ C-ADC-VDD+ R-ADC-VDD+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: 0.32242
+        max_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+      lsb_pp_fbuck:
+        nominal: 0.0206961
+        min: 0.00244647
+        min_at: C-ADC-BULK+ C-ADC-VDD+ R-ADC-VDD+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
+        max: 0.186651
+        max_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
+      rip_budget_mv:
+        nominal: 7697.79
+        min: 744.371
+        min_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+        max: 27570.4
+        max_at: C-ADC-BULK+ C-ADC-VDD+ R-ADC-VDD+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+    asserts:
+    - expr: max['lsb_pp'] <= 2.0
+      why: 'the converter''s ripple on VDD = VREF moves a full-scale reading (sensor-full-scale through the divider, 2.92
+        V) by at most 2 LSB p-p - E9''s budget (breath-adc.md) - at every corner, at the worst frequency in 200-500 kHz, with
+        the whole 120 mV p-p taken as the fundamental: R-ADC-VDD damps the ribbon''s LC and adds its own pole with the capacitance
+        at the pin (owner, 2026-10-03, D1)'
+      pass: true
+  vdd-load:
+    corners: 65
+    measures:
+      droop_mv:
+        nominal: 0.40739
+        min: 0.40734
+        min_at: C-ADC-BULK+ C-ADC-VDD+ R-ADC-VDD- c_ldo- l_rib_m- len_rib-
+        max: 0.67136
+        max_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD+ c_ldo- l_rib_m+ len_rib+
+      lsb_droop:
+        nominal: 0.446817
+        min: 0.446762
+        min_at: C-ADC-BULK+ C-ADC-VDD+ R-ADC-VDD- c_ldo- l_rib_m- len_rib-
+        max: 0.736334
+        max_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD+ c_ldo- l_rib_m+ len_rib+
+      dc_drop_mv:
+        nominal: 0.40809
+        min: 0.30598
+        min_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- l_rib_m+ len_rib-
+        max: 0.41641
+        max_at: C-ADC-BULK+ C-ADC-VDD+ R-ADC-VDD+ c_ldo- l_rib_m- len_rib+
+    asserts:
+    - expr: max['lsb_droop'] <= 1.0
+      why: 'U-ADC''s own conversion current - 550 uA, its 5 V maximum, for a whole 24-clock frame - through R-ADC-VDD sags
+        VDD = VREF by under 1 LSB of a full-scale reading inside a conversion at every corner: C-ADC-VDD, C-ADC-BULK and C-DEC-ADC
+        at the pin carry it, so the filter does not trade the ripple for a load error'
+      pass: true
+  vdd-ripple-without-filter:
     corners: 65
     measures:
       h_fbuck_db:
-        nominal: -18.9258
-        min: -59.9255
+        nominal: -19.7328
+        min: -53.2563
         min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
-        max: -1.1336
+        max: -2.51629
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       h_band_db:
-        nominal: -18.9237
-        min: -36.8179
-        min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
-        max: -1.09163
+        nominal: -19.1494
+        min: -33.5013
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: -1.19617
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       f_band_peak:
-        nominal: 327341.0
+        nominal: 391291.0
         min: 200678.0
-        min_at: C-ADC-BULK- c_ldo- c_vcc5- k_psrr- l_rib_m- len_rib+
+        min_at: C-ADC-BULK- c_ldo- c_vcc5- k_psrr- l_rib_m- len_rib-
         max: 498310.0
-        max_at: C-ADC-BULK- c_ldo- c_vcc5- k_psrr- l_rib_m- len_rib-
+        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr- l_rib_m- len_rib-
       vdd_pp_mv:
-        nominal: 13.583
-        min: 1.73095
-        min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
-        max: 105.828
+        nominal: 13.2347
+        min: 2.5358
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: 104.562
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       lsb_pp:
-        nominal: 14.8975
-        min: 1.89847
-        min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
-        max: 116.07
+        nominal: 14.5155
+        min: 2.78122
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: 114.681
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       lsb_pp_fbuck:
-        nominal: 14.8941
-        min: 0.132748
+        nominal: 13.5725
+        min: 0.286078
         min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
-        max: 115.51
+        max: 98.5114
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       rip_budget_mv:
-        nominal: 16.11
-        min: 2.06772
+        nominal: 16.534
+        min: 2.09276
         min_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
-        max: 126.418
-        max_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
+        max: 86.2931
+        max_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
     asserts:
-    - expr: max['lsb_pp'] <= 2.0
-      why: the converter's ripple on VDD = VREF moves a full-scale reading (sensor-full-scale through the divider, 2.92 V)
-        by at most 2 LSB p-p - E9's budget (breath-adc.md) - at every corner, at the worst frequency in 200-500 kHz, with
-        the whole 120 mV p-p taken as the fundamental
-      pass: false
+    - expr: max['lsb_pp'] > 2.0
+      why: 'WHAT-IF: without R-ADC-VDD and C-ADC-VDD the same conservative model misses the 2 LSB budget - why the filter
+        is fitted'
+      pass: true

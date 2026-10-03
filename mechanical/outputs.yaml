@@ -277,7 +277,7 @@ scripts:
                            hardware/lib/woody.3dshapes/Hanxia_HX_PZ2.54-1x8P_WZ.step, hardware/lib/woody.3dshapes/NXP_Case1351-01_MPXV4006DP.step,
                            hardware/lib/woody.3dshapes/Samtec_SHF-106-01-L-D-RA.step, hardware/lib/woody.3dshapes/XKB_X1270WR-2x12A-9TV01.step,
                            mechanical/module/blender/studio_small_08_1k.hdr,
-                           branding/export/scs-orbit-wave-mark.dxf, branding/export/spec.json, branding/build.py]
+                           branding/export/scs-orbit-wave-mark.dxf, branding/export/spec.json, branding/build.py, tools/lib-models.py]
     out: mechanical/renders/photo-hero.png
     stamp: Woody body
     note: "Sides rendered clear (config/render.yaml side_glass) to show the inside; the instrument's sides are frosted (ADR 0009)."

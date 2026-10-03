@@ -3,7 +3,8 @@
 **Status:** Accepted. Geometry and data-line wiring amended by
 [ADR 0016](0016-one-strip-on-the-centre-board.md): one strip, on the centre board.
 The strip itself replaced 2026-09-30 by [ADR 0028](0028-on-board-leds.md):
-thirteen WS2815B-V1 on the main board, 12 V, backup-chained.
+thirteen WS2815B-V1 on the main board, 12 V, backup-chained (fourteen since
+ADR 0028's amendment of 2026-10-02, one in the tail corner).
 
 > **Note, 2026-09-30 (ADR 0028).** The lights are no longer a strip. The 12 V
 > rail, the level shifter, the backup data line, the shared clamp and
@@ -224,6 +225,20 @@ field at around 60 % of one channel.
 
 **Validate it at M8's thermal soak**, which exists anyway, rather than trusting
 3 K/W. That figure is a bounding estimate, not a measurement.
+
+> *(Amended 2026-10-03, #18 E2 and E3: **accepted by the owner as is.**
+> The 3 K/W is a whole-body figure, and the shared budget can put all 3 W
+> on the Matrix: 3 W on its 25 × 25 mm board is about 70 K/W in free
+> convection on both faces alone `[calc, #18 E2: h ≈ 10–12 W/m²K over
+> 12.5 cm², an estimate]`, tens of kelvin per watt locally even with the
+> ribbon and the lid spreading it, against an ESP32-S3 rated to 85 °C
+> ambient that already sits beside the ME6217's own ~0.2 W. And the
+> WS2815B-V1 row's −40 to +65 °C operating range (ADR 0028) leaves about
+> 10 K on a 35 °C stage with a 20 K interior, before the row's own heat at
+> full white (#18 E3). Offered a Matrix sub-cap, a die-temperature throttle
+> and extra M8 thermocouples (on the Matrix, `U-BUCK` and the row), the
+> owner chose **"Neither"**: no sub-cap, no throttle, no extra M8 checks.
+> The shared budget and M8's soak as ROADMAP states it stand.)*
 
 Proportional scaling is what makes a full-field breath bar behave: it arrives
 dimmer than a single dot would, which is also what looks right.
@@ -470,6 +485,17 @@ hard limit rather than a setting.
 > cap still stands; its binding constraint in the instrument is the one this
 > note names, and E1/E6 measure it. The register's `matrix-led-current`
 > records both paths under `power_path`.)*
+>
+> *(Amended 2026-10-03, #18 E1: **rack and USB together.** The two paths
+> above are not exclusive: with the rack up and a USB host plugged in,
+> `VCC_5V` is fed through both `D-USBOR` and `D1`, and the share is set by
+> tens of millivolts, so at the corners `D1` carries all of it
+> (`hardware/carrier/power-entry-instrument/power-entry-instrument.md`,
+> *Rack and USB together*). The owner's choice: **"Firmware cap"** — while a
+> USB host is attached the firmware clamps the matrix to what `D1` can pass
+> beside the ESP32-S3's own draw, on top of the shared budget below
+> (`firmware/README.md`, *The lights*, which holds the number). No hardware
+> change.)*
 
 WS2812C-2020 draws **5 mA per channel**, so 15 mA per LED at full white and
 960 mA for all 64 — **this is the wrong part's figure and it is at least 2.4×

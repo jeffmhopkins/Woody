@@ -24,7 +24,7 @@ CBUCK cb cb1 {{C-BUCK-IN}}
 RCBUCK cb1 ig {{esr_buck}}
 IAC ig cb DC 0 AC 1
 .control
-ac dec 200 10 1meg
+ac dec 200 1 10meg
 let zmag = mag(v(cb) - v(ig))
 wrdata zmag.dat zmag
 quit

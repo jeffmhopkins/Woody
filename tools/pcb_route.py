@@ -520,7 +520,9 @@ class Router:
         fixed = 0
         for rnd in range(60):
             changed = False
-            tracks = [t for t in self.board.GetTracks() if type(t) is pcbnew.PCB_TRACK]
+            # the outer layers' (an inner routing layer's joins are left as routed; check_tracks
+            # still tests them)
+            tracks = [t for t in self.board.GetTracks() if type(t) is pcbnew.PCB_TRACK and t.GetLayer() in LAYERS]
             # 1. a branch ending in the middle of a track: split the track there
             for t in tracks:
                 for e in (t.GetStart(), t.GetEnd()):
@@ -565,6 +567,8 @@ class Router:
                         # failing that (no room), only its first part: tb split at Q, a fraction
                         # of the way along, and P..Q turned - a short square step, then tb's
                         # own line from Q at an obtuse join
+                        if layer not in LAYERS:
+                            continue            # an inner routing layer (the module's layer 3): left as routed
                         L = LAYERS.index(layer)
                         found = None
                         for frac in (1.0, 0.5, 0.3, 0.15):
@@ -843,16 +847,16 @@ class Obstacles:
             for pad in fp.Pads():
                 if pad.HasHole():
                     c = Point(TO(pad.GetPosition().x), TO(pad.GetPosition().y))
-                    self.items.append((c.buffer(TO(pad.GetDrillSize().x) / 2), "", {"F", "B"},
+                    self.items.append((c.buffer(TO(pad.GetDrillSize().x) / 2), "", {"F", "B", "I"},
                                        "npth" if pad.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH else "hole"))
                 if pad.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH:
                     continue
-                for L, lid in (("F", pcbnew.F_Cu), ("B", pcbnew.B_Cu)):
-                    if pad.IsOnLayer(lid):
+                for L, lid in (("F", pcbnew.F_Cu), ("B", pcbnew.B_Cu), ("I", pcbnew.In2_Cu)):
+                    if pad.IsOnLayer(lid) and (L != "I" or pad.HasHole()):
                         self.items.append((pad_geom_on(pad, lid), pad.GetNetname(), {L}, "pad" if pad.HasHole() else "smd"))
         for z in board.Zones():
             if z.GetIsRuleArea() and (z.GetDoNotAllowVias() or z.GetDoNotAllowTracks()):
-                ls = {k for k, lid in (("F", pcbnew.F_Cu), ("B", pcbnew.B_Cu)) if z.IsOnLayer(lid)}
+                ls = {k for k, lid in (("F", pcbnew.F_Cu), ("B", pcbnew.B_Cu), ("I", pcbnew.In2_Cu)) if z.IsOnLayer(lid)}
                 for i in range(z.Outline().OutlineCount()):
                     o = z.Outline().Outline(i)
                     self.items.append((Polygon([(TO(o.CPoint(k).x), TO(o.CPoint(k).y)) for k in range(o.PointCount())]),
@@ -892,13 +896,14 @@ class Obstacles:
         """A track or via already on the board, as an obstacle."""
         if isinstance(t, pcbnew.PCB_VIA):
             c = Point(TO(t.GetPosition().x), TO(t.GetPosition().y))
-            self.add(c.buffer(TO(t.GetWidth(pcbnew.F_Cu)) / 2, 16), t.GetNetname(), {"F", "B"}, "via")
-            self.add(c.buffer(TO(t.GetDrillValue()) / 2, 16), t.GetNetname(), {"F", "B"}, "vhole")
-        elif t.GetLayer() in (pcbnew.F_Cu, pcbnew.B_Cu):
+            self.add(c.buffer(TO(t.GetWidth(pcbnew.F_Cu)) / 2, 16), t.GetNetname(), {"F", "B", "I"}, "via")
+            self.add(c.buffer(TO(t.GetDrillValue()) / 2, 16), t.GetNetname(), {"F", "B", "I"}, "vhole")
+        else:
+            # an inner layer's track (a board that routes layer 3) is an obstacle to vias only
             a, b = t.GetStart(), t.GetEnd()
             g = LineString([(TO(a.x), TO(a.y)), (TO(b.x), TO(b.y))]).buffer(TO(t.GetWidth()) / 2, 8) \
                 if (a.x, a.y) != (b.x, b.y) else Point(TO(a.x), TO(a.y)).buffer(TO(t.GetWidth()) / 2)
-            self.add(g, t.GetNetname(), {"F" if t.GetLayer() == pcbnew.F_Cu else "B"}, "track")
+            self.add(g, t.GetNetname(), {{pcbnew.F_Cu: "F", pcbnew.B_Cu: "B"}.get(t.GetLayer(), "I")}, "track")
 
     def near(self, g, pad=1.0):
         from shapely.strtree import STRtree
@@ -999,7 +1004,12 @@ def plane_regions(board, lay):
                 reg = reg.difference(moat)
         out[pl["net"]] = unary_union([out[pl["net"]], reg]) if pl["net"] in out else reg
     for spec, p, moat in isl:
-        out[spec["net"]] = p
+        out[spec["net"]] = unary_union([out[spec["net"]], p]) if spec["net"] in out and any(
+            s_["net"] == spec["net"] and s_ is not spec for s_, _, _ in isl) else p
+    # an outer-layer pour (the module's isolated return on the rear face): a via into it
+    for po in lay.get("pours") or []:
+        p = outline if po["outline"] == "board" else Polygon([pcb.to_pcb(x, y) for x, y in po["outline"]]).intersection(outline)
+        out[po["net"]] = unary_union([out[po["net"]], p]) if po["net"] in out else p
     return out
 
 
@@ -1020,7 +1030,7 @@ def lay_track(board, obs, net, a, b, width, layer, locked=True):
     t.SetStart(pcbnew.VECTOR2I(MM(a[0]), MM(a[1])))
     t.SetEnd(pcbnew.VECTOR2I(MM(b[0]), MM(b[1])))
     t.SetWidth(MM(width))
-    t.SetLayer(pcbnew.F_Cu if layer == "F" else pcbnew.B_Cu)
+    t.SetLayer({"F": pcbnew.F_Cu, "B": pcbnew.B_Cu, "I": pcbnew.In2_Cu}[layer])
     t.SetNet(board.FindNet(net))
     t.SetLocked(locked)
     board.Add(t)
@@ -1442,6 +1452,7 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
     path crosses are taken up whole (never a plane net's, the pair's or locked copper,
     and each net at most n times), the connection laid, and theirs queued again, pad to
     pad. Returns the ones it could not route."""
+    import pcb
     obs = Obstacles(board, lay)
     classes = lay.get("net_classes") or {}
     width_of = lambda net: next((c["track"] for c in classes.values() if net in c["nets"]), lay["rules"]["track"])
@@ -1450,10 +1461,15 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
         {s_["net"] for s_ in lay.get("islands") or []} | {n for pr in lay.get("pairs") or [] for n in pr["nets"]}
     limit, rips = int(lay.get("rip_up", 0)), {}
     queue = list(unconnected)
+    # the layers it routes: the outer two, and layer 3 where layout.yaml directions: names it
+    # (a four-layer board whose layer 3 is a routing layer, the module's)
+    dirs_ = lay.get("directions") or {}
+    routed = ["F", "B"] + (["I"] if "In2.Cu" in (dirs_.get("layers") or {}) or "In2.Cu" in (dirs_.get("routed") or []) else [])
+    via_cost = float(dirs_.get("via_cost", VIA))
     while queue:
         net, pa, pb = queue.pop(0)
         w = width_of(net)
-        grids = {L: Grid(obs, L, w / 2, own={net}) for L in ("F", "B")}
+        grids = {L: Grid(obs, L, w / 2, own={net}) for L in routed}
         vcache = {}
 
         def via_ok(i, j):
@@ -1474,9 +1490,13 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
                     for i in range(c0[0], c1[0] + 1):
                         for j in range(c0[1], c1[1] + 1):
                             if g_.contains(Point(*grids["F"].xy((i, j)))):
-                                out |= {(L, i, j) for L in ls}
+                                out |= {(L, i, j) for L in ls if L in grids}    # a THT pad's inner layer only where it is routed
             return out
         src, dst = cells_of(pa), cells_of(pb)
+        if src & dst and {c[0] for c in src | dst} != {"F"} and any(c[0] == "F" for c in src | dst):
+            # the two items stand at one place on different faces (a front pad over a rear
+            # one): a path from the front copper to the rest, so a via joins them
+            src, dst = {c for c in src | dst if c[0] == "F"}, {c for c in src | dst if c[0] != "F"}
         # start and end only where a track may stand: a cell inside a pad can still be
         # within clearance of the next pin's copper (all of them, if none may)
         src = {c for c in src if grids[c[0]].free(c[1], c[2])} or src
@@ -1508,15 +1528,35 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
                 soft_of[(L, i, j)] = nets
             return soft_of[(L, i, j)]
         # layout.yaml directions: a step against its layer's preferred direction costs
-        # against_cost, a diagonal one half way between (a 45-degree corner stays cheap)
-        dirs = lay.get("directions") or {}
+        # against_cost, a diagonal one half way between (a 45-degree corner stays cheap).
+        # `layers:` holds over the whole board (the controller's boards); `regions:` only
+        # inside each region's rectangle (frame mm), free routing elsewhere - the owner's
+        # rule, 2026-10-03: one direction per layer only where a crossing needs it
+        # (docs/reference/tooling.md, the router).
+        dirs = dirs_
         ag = float(dirs.get("against_cost", 1.0))
-        way = {{"F.Cu": "F", "B.Cu": "B"}[k]: v for k, v in (dirs.get("layers") or {}).items() if k in ("F.Cu", "B.Cu")}
+        LK = {"F.Cu": "F", "B.Cu": "B", "In2.Cu": "I"}
+        way = {LK[k]: v for k, v in (dirs.get("layers") or {}).items() if k in LK}
+        regions = []
+        for rg in dirs.get("regions") or []:
+            x0, y0, x1, y1 = rg["rect"]
+            (ax, ay), (bx, by) = pcb.to_pcb(x0, y0), pcb.to_pcb(x1, y1)
+            regions.append((min(ax, bx), min(ay, by), max(ax, bx), max(ay, by),
+                            {LK[k]: v for k, v in (rg.get("layers") or {}).items() if k in LK}))
 
-        def step_cost(L, di, dj, c):
-            if L not in way:
+        def way_at(L, i, j):
+            if regions:
+                x, y = grids["F"].xy((i, j))
+                for rx0, ry0, rx1, ry1, w_ in regions:
+                    if rx0 <= x <= rx1 and ry0 <= y <= ry1 and L in w_:
+                        return w_[L]
+            return way.get(L)
+
+        def step_cost(L, di, dj, c, i=0, j=0):
+            wl = way_at(L, i, j)
+            if wl is None:
                 return c
-            along = di if way[L] == "horizontal" else dj
+            along = di if wl == "horizontal" else dj
             if di and dj:
                 return c * (1 + ag) / 2
             return c if along else c * ag
@@ -1552,18 +1592,20 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
                     if di and dj and not (gr.free(i + di, j) and gr.free(i, j + dj)):
                         if not soft or softc(L, i + di, j) is None or softc(L, i, j + dj) is None:
                             continue
-                    ng = g + extra + step_cost(L, di, dj, c) + (TURN.get(steps45(pd, (di, dj)), 0) if pd else 0)
+                    ng = g + extra + step_cost(L, di, dj, c, i, j) + (TURN.get(steps45(pd, (di, dj)), 0) if pd else 0)
                     if ng < cost.get(nxt, 1e18):
                         cost[nxt], came[nxt] = ng, cur
                         heapq.heappush(openq, (ng + h(i + di, j + dj), ng, nxt, (di, dj)))
-                O = "B" if L == "F" else "F"
-                nxt = (O, i, j)
-                if nxt not in seen and via_ok(i, j) and (grids[O].free(i, j) or nxt in dst
-                                                         or (soft and softc(O, i, j) is not None)):
-                    ng = g + VIA
-                    if ng < cost.get(nxt, 1e18):
-                        cost[nxt], came[nxt] = ng, cur
-                        heapq.heappush(openq, (ng + h(i, j), ng, nxt, None))
+                for O in routed:
+                    if O == L:
+                        continue
+                    nxt = (O, i, j)
+                    if nxt not in seen and via_ok(i, j) and (grids[O].free(i, j) or nxt in dst
+                                                             or (soft and softc(O, i, j) is not None)):
+                        ng = g + via_cost
+                        if ng < cost.get(nxt, 1e18):
+                            cost[nxt], came[nxt] = ng, cur
+                            heapq.heappush(openq, (ng + h(i, j), ng, nxt, None))
             return None, len(seen)
         # from the first item; if that search is boxed in early, from the second (a
         # pad walled in on one side can still be reached from outside)
@@ -1673,9 +1715,13 @@ def moat_keepout(board, lay):
     for spec in lay.get("islands") or []:
         p = Polygon(spec["outline"])
         ring = p.buffer(spec["moat"], join_style=2).difference(p.buffer(-0.05, join_style=2))
-        tie = board.FindFootprintByReference(spec["tie"])
-        tx, ty = pcb_main.to_body(TO(tie.GetPosition().x), TO(tie.GetPosition().y))
-        ring = ring.difference(Point(tx, ty).buffer(spec["tie_window"]))
+        for t_ in pcb_main.ties_of(spec):
+            tie = board.FindFootprintByReference(t_)
+            tx, ty = pcb_main.to_body(TO(tie.GetPosition().x), TO(tie.GetPosition().y))
+            ring = ring.difference(Point(tx, ty).buffer(spec["tie_window"]))
+        for x, y, r in spec.get("windows") or []:
+            # a part that straddles the moat by design (the module's DAC): its pins' escapes
+            ring = ring.difference(Point(x, y).buffer(r))
         for t in board.GetTracks():
             if type(t) is pcbnew.PCB_TRACK and t.GetNetname() in {n for pr in lay.get("pairs") or [] for n in pr["nets"]}:
                 a, b = (pcb_main.to_body(TO(v.x), TO(v.y)) for v in (t.GetStart(), t.GetEnd()))
@@ -1683,17 +1729,82 @@ def moat_keepout(board, lay):
         pcb_main.rule_area(board, ring, f"{spec['net']} moat", [above[spec["layer"]]])
 
 
+def escape(board, lay):
+    """layout.yaml escape: [refs] - a fine-pitch part's pads (0.5-0.65 mm: an MSOP, a
+    TSSOP) each get a short straight stub outward along the pad's long axis, past
+    its end, so the grid router starts from copper it can leave: on the 0.2 mm grid a
+    track in a 0.5 mm row has one legal line, the pad's own centre line, and the
+    grid seldom lands on it. Plane-net pads already fanned and pads on no net are
+    left; a stub that would come nearer another net than the clearance is left out.
+    Idempotent: a pad with a track already ending on it is skipped. Locked."""
+    obs = Obstacles(board, lay)
+    w = lay["rules"]["track_min"]
+    n = 0
+    for ref in lay.get("escape") or []:
+        fp = board.FindFootprintByReference(ref)
+        fc = (TO(fp.GetPosition().x), TO(fp.GetPosition().y))
+        for pad in fp.Pads():
+            net = pad.GetNetname()
+            if not net or net.startswith("unconnected") or pad.HasHole() or not pad.GetNumber():
+                continue
+            c = pad.GetPosition()
+            if any(type(t) is pcbnew.PCB_TRACK and t.GetNetname() == net and (pad.HitTest(t.GetStart()) or pad.HitTest(t.GetEnd()))
+                   for t in board.GetTracks()):
+                continue
+            L = "F" if pad.IsOnLayer(pcbnew.F_Cu) else "B"
+            g = pad_geom_on(pad, pcbnew.F_Cu if L == "F" else pcbnew.B_Cu)
+            x0, y0, x1, y1 = g.bounds
+            cx, cy = TO(c.x), TO(c.y)
+            if x1 - x0 >= y1 - y0:
+                d = (1.0 if cx > fc[0] else -1.0, 0.0)
+                reach = (x1 - x0) / 2
+            else:
+                d = (0.0, 1.0 if cy > fc[1] else -1.0)
+                reach = (y1 - y0) / 2
+            if abs(cx - fc[0]) < 0.05 and abs(cy - fc[1]) < 0.05:
+                continue                    # the exposed pad
+            end = (cx + d[0] * (reach + 0.6), cy + d[1] * (reach + 0.6))
+            if not obs.track_ok((cx, cy), end, w, net, L):
+                continue
+            lay_track(board, obs, net, (cx, cy), end, w, L)
+            n += 1
+    print(f"route: escape - {n} stub(s) out of fine-pitch pads")
+
+
 def prepare(board, lay):
     """A multi-layer board's own routing before the autorouter (tools/pcb.py
     `route: freerouting`): the pairs, then every plane net's fanout. Returns the report."""
     obs = Obstacles(board, lay)
     report = []
+    import pcb
+    for gd in lay.get("guards") or []:
+        # a guard pour's own via (pcb_module: the module's SET guard), joining its faces
+        for x, y in gd.get("vias") or []:
+            lay_via(board, obs, gd["net"], *pcb.to_pcb(x, y))
     for spec in lay.get("pairs") or []:
         report += route_pair(board, lay, obs, spec)
     # the moat's keep-out before the fanout, so no other plane net's via lands in it
     moat_keepout(board, lay)
     obs = Obstacles(board, lay)
     report += fanout(board, lay, obs)
+    # layout.yaml connect_first: on a multi-layer board too, each pad-to-pad connection
+    # by its own track before anything else (a Kelvin sense, a decoupling loop, a rail's
+    # own branch); pcb.py check holds each to its max_mm
+    for spec in lay.get("connect_first") or []:
+        pads = []
+        for p_ in spec["pads"]:
+            ref, num = p_.split(".")
+            pads.append(board.FindFootprintByReference(ref).FindPadByNumber(num))
+        if pads[0].GetNetname() != pads[1].GetNetname():
+            sys.exit(f"pcb: connect_first {spec['pads']} are not on one net")
+        at = [(TO(q.GetPosition().x), TO(q.GetPosition().y)) for q in pads]
+        if complete(board, lay, [(pads[0].GetNetname(), at[0], at[1])]):
+            report.append(f"connect_first {spec['pads'][0]} - {spec['pads'][1]} FAILED")
+        else:
+            for t in board.GetTracks():
+                if t.GetNetname() == pads[0].GetNetname():
+                    t.SetLocked(True)            # the autorouter and the rip-up keep it
+            print(f"route: connect_first {spec['pads'][0]} - {spec['pads'][1]} ok")
     for r in report:
         print("route: " + r)
     return report

@@ -290,15 +290,15 @@ components:
     - 2
     sheet: led-strip-drive
   C38:
-    of: C-INRUSH-GS
-    value: 1uF 50V X7R
+    of: C-LED
+    value: 100nF
     pins:
     - 1
     - 2
-    sheet: power-entry-instrument
+    sheet: led-strip-drive
   C39:
-    of: C-INRUSH-GD
-    value: 22nF 50V X7R
+    of: C-INRUSH-GS
+    value: 1uF 50V X7R
     pins:
     - 1
     - 2
@@ -310,6 +310,34 @@ components:
     - 1
     - 2
     sheet: breath-excitation-reference
+  C40:
+    of: C-INRUSH-GD
+    value: 22nF 50V X7R
+    pins:
+    - 1
+    - 2
+    sheet: power-entry-instrument
+  C41:
+    of: C-EN
+    value: 1uF
+    pins:
+    - 1
+    - 2
+    sheet: service-uart
+  C42:
+    of: C-ADC-VDD
+    value: 22uF
+    pins:
+    - 1
+    - 2
+    sheet: breath-adc
+  C43:
+    of: C-BUCK-OUT
+    value: 10uF
+    pins:
+    - 1
+    - 2
+    sheet: power-entry-instrument
   C5:
     of: C-REF-OUT
     value: 10uF
@@ -460,6 +488,16 @@ components:
     - K
     sheet: power-entry-instrument
   D20:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    sheet: led-strip-drive
+  D21:
     of: D-INRUSH-RST
     value: 1N4148W
     pins:
@@ -916,6 +954,27 @@ components:
     pins:
     - 1
     - 2
+  R45:
+    of: R-CS-PULL-ADC
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-adc
+  R46:
+    of: R-TXD-SER
+    value: 499R 1%
+    pins:
+    - 1
+    - 2
+    sheet: service-uart
+  R47:
+    of: R-ADC-VDD
+    value: 10R 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-adc
   R5:
     of: R-ADCDIV-L
     value: 15k 1%
@@ -1039,6 +1098,15 @@ components:
     - VOUT
     - GND
     sheet: breath-sense-link
+  U11:
+    of: U-TVS-CHAIN
+    value: SP0504BAHTG 4-channel 5V array
+    pins:
+    - CH1
+    - CH2
+    - CH3
+    - CH4
+    - GND
   U2:
     of: U-ADC
     value: MCP3202-CI/SN
@@ -1173,6 +1241,7 @@ nets:
   - J4.2
   - J5.2
   - R34.2
+  - U11.CH1
   - U7.CLK
   - U8.CLK
   - U9.CH1
@@ -1185,6 +1254,7 @@ nets:
   - J4.4
   - J5.4
   - R35.2
+  - U11.CH2
   - U7.SHLD
   - U8.SHLD
   - U9.CH2
@@ -1196,6 +1266,7 @@ nets:
   - NT1.1
   /EN:
   - A1.EN
+  - C41.1
   - J1.24
   - J2.4
   /HOP_LH_LT:
@@ -1207,8 +1278,10 @@ nets:
   /HOP_LT_RH:
   - J5.6
   - R44.2
+  - U11.CH3
   /HOP_RH_RT:
   - J5.8
+  - U11.CH4
   - U8.SER
   /IO0:
   - A1.IO0
@@ -1246,6 +1319,7 @@ nets:
   /IO39:
   - A1.IO39
   - J1.16
+  - R45.2
   - U2.CS
   /IO7:
   - A1.IO7
@@ -1353,7 +1427,7 @@ nets:
   /U0TXD:
   - A1.IO43
   - J1.22
-  - J2.1
+  - R46.1
   /V3V3_CHAIN_LH:
   - FB1.2
   - J4.10
@@ -1365,6 +1439,12 @@ nets:
   - R4.2
   - R5.1
   - U2.CH0
+  /breath-adc/ADC_VDD:
+  - C2.1
+  - C3.1
+  - C42.1
+  - R47.2
+  - U2.VDD
   /breath-excitation-reference/AC_FB_MID:
   - C9.2
   - R9.2
@@ -1411,6 +1491,10 @@ nets:
   /led-strip-drive/LED_D12:
   - D18.DO
   - D19.DIN1
+  - D20.DIN2
+  /led-strip-drive/LED_D13:
+  - D19.DO
+  - D20.DIN1
   /led-strip-drive/LED_D2:
   - D10.DIN2
   - D8.DO
@@ -1448,18 +1532,22 @@ nets:
   - D8.DIN2
   - R11.2
   /power-entry-instrument/BUCK_A_OUT:
+  - C43.1
   - D4.A
   - U5.OUT
   /power-entry-instrument/INRUSH_GATE:
-  - C38.2
-  - C39.1
-  - D20.K
+  - C39.2
+  - C40.1
+  - D21.K
   - Q1.G
   - R41.2
   - R42.1
   /power-entry-instrument/INRUSH_MILLER:
-  - C39.2
+  - C40.2
   - R43.1
+  /service-uart/TXD_HDR:
+  - J2.1
+  - R46.2
   /sw+/SWITCH_LEG:
   - R29.2
   - SW9.1
@@ -1475,6 +1563,7 @@ nets:
   - C204.2
   - C3.2
   - C4.2
+  - C42.2
   - C5.2
   - C6.2
   - C7.2
@@ -1484,6 +1573,7 @@ nets:
   - R39.1
   - R5.2
   - U10.GND
+  - U2.CH1
   - U2.VSS
   - U3.V-
   - U4.GND
@@ -1511,8 +1601,10 @@ nets:
   - D18.1
   D19.1:
   - D19.1
-  D19.DO:
-  - D19.DO
+  D20.1:
+  - D20.1
+  D20.DO:
+  - D20.DO
   D7.1:
   - D7.1
   D8.1:
@@ -1523,10 +1615,8 @@ nets:
   - A1.P3V3
   - C13.1
   - C14.1
-  - C2.1
   - C205.1
   - C206.1
-  - C3.1
   - FB1.1
   - FB2.1
   - J1.13
@@ -1544,7 +1634,8 @@ nets:
   - R33.1
   - R37.2
   - R40.1
-  - U2.VDD
+  - R45.1
+  - R47.1
   - U7.C
   - U7.VCC
   - U8.B
@@ -1574,6 +1665,7 @@ nets:
   - C35.1
   - C36.1
   - C37.1
+  - C38.1
   - D10.VDD
   - D11.VDD
   - D12.VDD
@@ -1584,6 +1676,7 @@ nets:
   - D17.VDD
   - D18.VDD
   - D19.VDD
+  - D20.VDD
   - D7.VDD
   - D8.VDD
   - D9.VDD
@@ -1633,6 +1726,9 @@ nets:
   - C35.2
   - C36.2
   - C37.2
+  - C38.2
+  - C41.2
+  - C43.2
   - D10.GND
   - D11.GND
   - D12.GND
@@ -1644,7 +1740,8 @@ nets:
   - D18.GND
   - D19.GND
   - D2.A
-  - D20.A
+  - D20.GND
+  - D21.A
   - D3.A
   - D5.A
   - D6.A
@@ -1683,6 +1780,7 @@ nets:
   - SW8.2
   - SW9.2
   - U1.GND
+  - U11.GND
   - U5.GND
   - U6.1OE
   - U6.3OE
@@ -1717,8 +1815,6 @@ nets:
   - U10.7
   U10.8:
   - U10.8
-  U2.CH1:
-  - U2.CH1
   U4.DNC1:
   - U4.DNC1
   U4.DNC8:
@@ -1742,7 +1838,7 @@ nets:
   U9.CH4:
   - U9.CH4
   UMBILICAL_POS12:
-  - C38.1
+  - C39.1
   - D2.K
   - D3.K
   - J6.3
@@ -1766,7 +1862,8 @@ external_endpoints:
 - D17.1
 - D18.1
 - D19.1
-- D19.DO
+- D20.1
+- D20.DO
 - D7.1
 - D8.1
 - D9.1
@@ -1780,7 +1877,6 @@ external_endpoints:
 - U10.6
 - U10.7
 - U10.8
-- U2.CH1
 - U4.DNC1
 - U4.DNC8
 - U4.NC7

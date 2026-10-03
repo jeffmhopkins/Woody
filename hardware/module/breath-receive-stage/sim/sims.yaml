@@ -28,15 +28,18 @@ vary:
   R3:  {tol: from-value}
   R4:  {tol: from-value}
   R5:  {tol: from-value}
-  C-CM-IN+: {tol: [-0.01, 0.01], source: "C-CM-BREATH's '+/-1%' (bom.csv row; the netlist value states none)"}
-  C-CM-IN-: {tol: [-0.01, 0.01], source: "as C-CM-IN+"}
+  C-CM-IN+: {tol: [-0.005, 0.005], source: "C-CM-BREATH, a MATCHED PAIR: each within 0.5 % of the pair's mean (owner, 2026-10-03: 'Tighten cap matching'; the bom.csv row and the sheet's Note say how it is matched). Only the pair's mismatch converts common mode, so the corners hold the two 1 % apart at most"}
+  C-CM-IN-: {tol: [-0.005, 0.005], source: "as C-CM-IN+"}
 
 sims:
   - name: cmrr-as-netlisted
     deck: cmrr.cir
-    measures: [cmrr_dc, cmrr_50, cmrr_60, cmrr_500, cmrr_1k, f_req]
+    vary: [R1, R1b, R2, R3, R4, R5, C-CM-IN+, C-CM-IN-]
+    measures: [cmrr_dc, cmrr_50, cmrr_60, cmrr_500, cmrr_1k, f_req, cmrr_band]
     post:
       f_req: "cross(w['cmrr'], 58.5, 1)"
+      # the least CMRR anywhere in the requirement's band, DC to 500 Hz (breath-sense-link.md)
+      cmrr_band: "trough(w['cmrr'], 1, 500)"
       cmrr_dc: "at(w['cmrr'], 1)"
       cmrr_50: "at(w['cmrr'], 50)"
       cmrr_60: "at(w['cmrr'], 60)"
@@ -47,8 +50,8 @@ sims:
         why: "the link clears the page's requirement (breath-sense-link.md, 58.5 dB) at the mains fundamental, worst corner"
       - expr: "abs(min['cmrr_dc'] - 73) < 3"
         why: "the worst-case floor is the page's 73 dB, set by the 1 Mohm bias pair's 1 % (breath-sense-link.md, 'One correction'), within 3 dB"
-      - expr: "min['f_req'] < 1000"
-        why: "RECORDED FINDING: at the worst corner the requirement is lost below 1 kHz - C_cm's +-1 % mismatch rises with frequency. The page states no band for its 58.5 dB; this is the frequency that band must stay under"
+      - expr: "min['cmrr_band'] > 58.5"
+        why: "THE REQUIREMENT OVER ITS BAND (#5 finding 5): 58.5 dB from DC to 500 Hz, the breath channel's band (breath-sense-link.md, 'From the instrument end'), at every corner. C_cm's mismatch converts common mode in proportion to frequency, so the band's top is the worst: with two independent 1 % parts it failed from ~480 Hz, and the owner chose a matched pair (2026-10-03, 'Tighten cap matching'), each within 0.5 % of the pair's mean"
   - name: cmrr-without-r1b
     # R1b shorted: the case the page says spends the whole budget (1 kohm unmatched)
     deck: cmrr.cir
@@ -66,6 +69,7 @@ sims:
     # C_cm at +-5 %: the default tolerance the BOM row forbids
     deck: cmrr.cir
     tol: {C-CM-IN+: [-0.05, 0.05], C-CM-IN-: [-0.05, 0.05]}
+    vary: [R1, R1b, R2, R3, R4, R5, C-CM-IN+, C-CM-IN-]
     measures: [cmrr_dc, cmrr_50, cmrr_500, cmrr_1k]
     asserts:
       - expr: "abs(min['cmrr_500'] - 46) < 3"
@@ -75,3 +79,34 @@ sims:
       cmrr_50: "at(w['cmrr'], 50)"
       cmrr_500: "at(w['cmrr'], 500)"
       cmrr_1k: "at(w['cmrr'], 1000)"
+  # --- #5 finding 6: the rails at their ends, 10.8 to 12.6 V each way, not +-12.000 V.
+  # Each sim below is one above with only the rails varied, so what moves is the supply's
+  # Both rails low, and both high, at the parts' nominal. NOT the mixed corners: at -10.8 V
+  # with +12.6 V the TI macromodels find no operating point (gmin, source stepping and
+  # gminsteps=100 all fail, 2026-10-03) - a model's limit, recorded, not a circuit's
+  - name: cmrr-supply-low
+    deck: cmrr.cir
+    vary: []
+    set: {v_pos: 10.8, v_neg: -10.8}
+    measures: [cmrr_dc, cmrr_50, cmrr_60, cmrr_500]
+    post:
+      cmrr_dc: "at(w['cmrr'], 1)"
+      cmrr_50: "at(w['cmrr'], 50)"
+      cmrr_60: "at(w['cmrr'], 60)"
+      cmrr_500: "at(w['cmrr'], 500)"
+    asserts:
+      - expr: "nom['cmrr_60'] > 58.5 and nom['cmrr_500'] > 58.5"
+        why: "with both rails at 10.8 V the link still clears 58.5 dB at mains and at the band's 500 Hz edge, at the parts' nominal: the INA828's supply is not what limits it (the tolerances are, cmrr-as-netlisted)"
+  - name: cmrr-supply-high
+    deck: cmrr.cir
+    vary: []
+    set: {v_pos: 12.6, v_neg: -12.6}
+    measures: [cmrr_dc, cmrr_50, cmrr_60, cmrr_500]
+    post:
+      cmrr_dc: "at(w['cmrr'], 1)"
+      cmrr_50: "at(w['cmrr'], 50)"
+      cmrr_60: "at(w['cmrr'], 60)"
+      cmrr_500: "at(w['cmrr'], 500)"
+    asserts:
+      - expr: "nom['cmrr_60'] > 58.5 and nom['cmrr_500'] > 58.5"
+        why: "and with both at 12.6 V"

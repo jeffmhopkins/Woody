@@ -25,7 +25,9 @@ CCABB jackb 0 {{c_cable_f}}
 CMULTB jackb 0 {{c_mult}}
 RVCOB jackb 0 {{r_vco}}
 RMULTB jackb 0 {{r_mult}}
-.options method=gear rshunt=1e10
+* gminsteps=100: since D-JACK-CLAMP joined pitch-stage.lib (2026-10-03) the default gmin
+* stepping found no operating point for this deck; finer steps reach it
+.options method=gear rshunt=1e10 gminsteps=100
 .control
 ac dec 100 1 100meg
 let t = -v(ma)/v(ia)

@@ -57,7 +57,7 @@ other.
 > **That holds for an ideal `V/2` source, and the netlist's is not one.** The
 > `R-RESP-DIV` pair is a 5 kΩ source and the pot loads it, so the wiper's zero
 > lands about 5 % of the rotation clockwise of `p = 0.5` for every input, and
-> at the detent itself the stage is linear within 0.3 % across real playing
+> at the detent itself the stage is linear within 0.4 % across real playing
 > rather than exactly `[sim]` (the note under *Scaling*, `sim/README.md`).
 
 ```
@@ -94,7 +94,7 @@ More expression at the top.
 compresses.
 
 **The knob changes the level as well as the shape.** The stage's gain is
-above 1 at every breath level at CW (×1.11 at *pp* to `shaper-exp-gain` at a
+above 1 at every breath level at CW (×1.12 at *pp* to `shaper-exp-gain` at a
 hard blow) and below 1 at every level at CCW (×0.83 at *pp* to ×0.49 at a hard
 blow) `[sim, sim/README.md, TRIM-RESP as commissioned]`. So **at a fixed GAIN setting, CW is louder at
 every breath level and CCW quieter**; "harder to get loud" (CW) and "easier to
@@ -108,7 +108,7 @@ This is the one place a centre detent is honestly warranted on this panel,
 and unlike `POT-OFFSET` (whose detent the review found lands ~20° off its
 true zero) this null is set by the topology, not by resistor tolerance — to
 within the divider's loading, which puts it about 14° off the click and costs
-0.3 % of linearity at a hard blow `[sim]`.
+0.4 % of linearity at a hard blow `[sim]`.
 
 ## Scaling — and the mistake this nearly shipped with
 
@@ -138,9 +138,9 @@ acts across the playing range rather than above it `[calc]`:
 > `POT-RESP`'s 50 kΩ track from it to `V_shaped` loads it to about 0.41 `V_in`
 > at the CW end `[calc]`. The fully-exponential gain at a hard blow is
 > `shaper-exp-gain`, not the 1.494 above, and the curve is not exactly linear
-> below the knee (1.11× at *pp*, with `TRIM-RESP` as commissioned). The same loading moves the centre detent's
+> below the knee (1.12× at *pp*, with `TRIM-RESP` as commissioned). The same loading moves the centre detent's
 > null about 5 % of the rotation clockwise: at the detent the stage is linear
-> within 0.3 % across real playing, not exactly — the diodes see a few
+> within 0.4 % across real playing, not exactly — the diodes see a few
 > hundred millivolts at full scale and barely conduct. The table is kept as the
 > arithmetic it is; `sim/README.md` has the curve as netlisted.
 

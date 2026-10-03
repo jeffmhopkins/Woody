@@ -50,6 +50,13 @@ params:
   r_ldo:    {value: 0.05, source: "the LDO's output resistance at the switching rate, where its loop has little gain left [assumption: 50 mohm, low, so the least of the ripple is lost in it]"}
   k_psrr:   {value: 0.1, source: "the ME6217's ripple rejection at ~330 kHz: NOT PUBLISHED - its sheet gives 65 dB at 1 kHz only [datasheets/discrete-and-power/ME6217C33M5G.pdf p.1]. BEHAVIOURAL AND CONSERVATIVE: VOUT = 3.3 V + k_psrr x (VIN ripple); -20 dB nominal, -30 to -10 dB at the ends [assumption: small CMOS LDOs typically keep 30-40 dB there with 1-10 uF out] (vary)"}
   esr_cer:  {value: 0.005, source: "each ceramic's ESR [assumption: 5 mohm, low, the least damping]"}
+  # --- the reference's filter as netlisted (owner, 2026-10-03, D1: '10 ohm + 22 uF + 10 uF'):
+  # R-ADC-VDD in series from the ribbon's DEV_3V3 to ADC_VDD, U-ADC's VDD, with C-ADC-VDD,
+  # C-ADC-BULK and C-DEC-ADC at the pin. Their values are the netlist's
+  filt:     {value: 1, source: "1: R-ADC-VDD and C-ADC-VDD as netlisted; 0: the WHAT-IF without them (DEV_3V3 straight to the pin, as before D1), which vdd-ripple-without-filter runs"}
+  i_conv:   {value: 550.0e-6, source: "U-ADC's operating current while it converts: 550 uA max, at VDD 5 V [datasheets/analog/MCP3202-CI-SN.pdf p.3] - at 3.3 V it draws less (Figure 2-31), so this is the pessimistic side; between conversions 5 uA max standby, taken as 0"}
+  t_conv:   {value: 26.7e-6, source: "one conversion's 24 clocks at f_clk 900 kHz [calc: 24 / 0.9 MHz]; the current is drawn from CS low to the last bit [assumption: the whole frame]"}
+  t_conv0:  {value: 50.0e-6, source: "the first conversion's start in adc-vddload.cir"}
 
 derived:
   t_step_e: "v['t_step'] + v['t_edge']"
@@ -70,6 +77,10 @@ derived:
   l_rib3: "v['l_rib_m'] * v['len_rib']"
   r_rib3: "v['r_rib_m'] * v['len_rib'] * (1.0 + 1.0 / 4.0)"
   k_lsb: "(v['v_fs'] * v['ratio'] / v['vdd']) / v['vdd'] * 4096"
+  r_filt_f: "max(v['R-ADC-VDD'] * v['filt'], 1e-4)"
+  c_filt_x_f: "max(v['C-ADC-VDD'] * v['filt'], 1e-15)"
+  t_load_end: "v['t_conv0'] + 10 * v['t_loop']"
+  t_last: "v['t_conv0'] + 9 * v['t_loop']"
 
 vary:
   R-ADCDIV-U: {tol: from-value}
@@ -87,6 +98,8 @@ vary:
   c_ldo:      {tol: [-0.4, 0.0], source: "DC-bias loss at 3.3 V [assumption: to 60 %]"}
   C-ADC-BULK: {tol: [-0.4, 0.0], source: "C-ADC-BULK's DC-bias loss at 3.3 V [assumption: to 60 %]"}
   k_psrr:     {tol: [-0.684, 2.162], source: "-30 dB (0.0316) to -10 dB (0.316) about -20 dB"}
+  R-ADC-VDD:  {tol: from-value}
+  C-ADC-VDD:  {tol: [-0.4, 0.0], source: "C-ADC-VDD's DC-bias loss at 3.3 V and its -10 %: Samsung's curve for CL31A226KAHNNNE reads -20.5 % at 3.3 V [web product.samsungsem.com, 2026-10-03; ds SAMSUNG-CL31A226KAHNNNE-SPECSHEET.pdf p.1 for the -10 %], so to 60 % covers both"}
 
 sims:
   - name: filter
@@ -191,10 +204,11 @@ sims:
   # Matrix's VCC_5V -> the ME6217 -> its one 3V3 conductor -> C-ADC-BULK and C-DEC-ADC at
   # U-ADC. A code error ratiometric to the input: (V_in / VREF) x (dVREF / VREF) x 4096.
   - name: vdd-ripple
+    # AS NETLISTED (owner, 2026-10-03, D1): R-ADC-VDD and C-ADC-VDD in the deck from the netlist
     deck: adc-vdd.cir
-    vary: [len_rib, l_rib_m, c_vcc5, c_ldo, C-ADC-BULK, k_psrr]
-    measures: [h_fbuck_db, h_band_db, f_band_peak, vdd_pp_mv, lsb_pp, lsb_pp_fbuck, rip_budget_mv]
-    post:
+    vary: [len_rib, l_rib_m, c_vcc5, c_ldo, C-ADC-BULK, k_psrr, R-ADC-VDD, C-ADC-VDD]
+    measures: &rip_meas [h_fbuck_db, h_band_db, f_band_peak, vdd_pp_mv, lsb_pp, lsb_pp_fbuck, rip_budget_mv]
+    post: &rip_post
       h_fbuck_db: "20 * math.log10(at(w['hmag'], p['f_buck']))"
       h_band_db: "20 * math.log10(peak(w['hmag'], p['f_lo'], p['f_hi']))"
       f_band_peak: "argpeak(w['hmag'], p['f_lo'], p['f_hi'])"
@@ -206,4 +220,26 @@ sims:
       rip_budget_mv: "1000 * 2.0 / (peak(w['hmag'], p['f_lo'], p['f_hi']) * p['k_lsb'])"
     asserts:
       - expr: "max['lsb_pp'] <= 2.0"
-        why: "the converter's ripple on VDD = VREF moves a full-scale reading (sensor-full-scale through the divider, 2.92 V) by at most 2 LSB p-p - E9's budget (breath-adc.md) - at every corner, at the worst frequency in 200-500 kHz, with the whole 120 mV p-p taken as the fundamental"
+        why: "the converter's ripple on VDD = VREF moves a full-scale reading (sensor-full-scale through the divider, 2.92 V) by at most 2 LSB p-p - E9's budget (breath-adc.md) - at every corner, at the worst frequency in 200-500 kHz, with the whole 120 mV p-p taken as the fundamental: R-ADC-VDD damps the ribbon's LC and adds its own pole with the capacitance at the pin (owner, 2026-10-03, D1)"
+  - name: vdd-load
+    # AS NETLISTED: U-ADC's own conversion current through R-ADC-VDD, held up by the pin's capacitors
+    deck: adc-vddload.cir
+    vary: [len_rib, l_rib_m, c_ldo, C-ADC-BULK, R-ADC-VDD, C-ADC-VDD]
+    measures: &load_meas [droop_mv, lsb_droop, dc_drop_mv]
+    post: &load_post
+      droop_mv: "1000 * (at(w['vdd'], p['t_last']) - trough(w['vdd'], p['t_last'], p['t_last'] + p['t_conv']))"
+      lsb_droop: "(at(w['vdd'], p['t_last']) - trough(w['vdd'], p['t_last'], p['t_last'] + p['t_conv'])) * p['k_lsb']"
+      dc_drop_mv: "1000 * (p['vdd'] - at(w['vdd'], p['t_last']))"
+    asserts:
+      - expr: "max['lsb_droop'] <= 1.0"
+        why: "U-ADC's own conversion current - 550 uA, its 5 V maximum, for a whole 24-clock frame - through R-ADC-VDD sags VDD = VREF by under 1 LSB of a full-scale reading inside a conversion at every corner: C-ADC-VDD, C-ADC-BULK and C-DEC-ADC at the pin carry it, so the filter does not trade the ripple for a load error"
+  - name: vdd-ripple-without-filter
+    # A WHAT-IF, recorded: DEV_3V3 straight to the pin, as the netlist had it before D1
+    deck: adc-vdd.cir
+    vary: [len_rib, l_rib_m, c_vcc5, c_ldo, C-ADC-BULK, k_psrr]
+    set: {filt: 0}
+    measures: *rip_meas
+    post: *rip_post
+    asserts:
+      - expr: "max['lsb_pp'] > 2.0"
+        why: "WHAT-IF: without R-ADC-VDD and C-ADC-VDD the same conservative model misses the 2 LSB budget - why the filter is fitted"

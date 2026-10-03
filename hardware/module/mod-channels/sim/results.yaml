@@ -4,12 +4,12 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/mod-channels/sim/sims.yaml: 7dccfa359b25af42
+  hardware/module/mod-channels/sim/sims.yaml: 1de68a89d4cc2f22
   hardware/module/mod-channels/netlist.yaml: 00739b63d111a848
   hardware/module/breath-output-stage/netlist.yaml: 63517b01fa4c02a2
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/mod-channels/sim/mod.cir: d1e903a7be7d8369
-  hardware/module/mod-channels/sim/mod-loop.cir: 0e5dc559dbb51807
+  hardware/module/mod-channels/sim/mod-loop.cir: 4c5a784f94f8d974
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
   figure:mod-reference: 3.3333 V
 ngspice: '42'
@@ -369,4 +369,74 @@ sims:
     asserts:
     - expr: abs(nom['iref'] - 1.333e-3) < 0.02e-3
       why: the page's 1.33 mA into four 10 kohm with every channel at code 0 (its (-) inputs at 0 V)
+      pass: true
+  range-supply:
+    corners: 5
+    measures:
+      out_lo:
+        nominal: -9.99986
+        min: -9.99986
+        min_at: v_neg- v_pos+
+        max: -9.99986
+        max_at: v_neg+ v_pos-
+      out_hi:
+        nominal: 9.99983
+        min: 9.99983
+        min_at: v_neg- v_pos+
+        max: 9.99983
+        max_at: v_neg+ v_pos-
+      law_err_lo:
+        nominal: 4.221e-05
+        min: 4.017e-05
+        min_at: v_neg- v_pos+
+        max: 4.398e-05
+        max_at: v_neg+ v_pos-
+      law_err_hi:
+        nominal: 5.204e-05
+        min: 5.0e-05
+        min_at: v_neg- v_pos+
+        max: 5.381e-05
+        max_at: v_neg+ v_pos-
+    asserts:
+    - expr: max['law_err_lo'] < 0.01 and min['law_err_lo'] > -0.01 and max['law_err_hi'] < 0.01 and min['law_err_hi'] > -0.01
+      why: 'the +-10 V range still follows the page''s law within 10 mV at both ends with the rails at 10.8 V: neither end
+        clips, and the rails'' level does not reach the output'
+      pass: true
+  step-supply:
+    corners: 5
+    measures:
+      overshoot_pct:
+        nominal: 1.98474e-12
+        min: 0.0
+        min_at: v_neg- v_pos+
+        max: 2.72482e-12
+        max_at: v_neg+ v_pos+
+      t_settle:
+        nominal: 0.000372979
+        min: 0.000372979
+        min_at: v_neg+ v_pos-
+        max: 0.000373044
+        max_at: v_neg- v_pos+
+    asserts:
+    - expr: max['overshoot_pct'] < 1
+      why: a step into a VCO is an RC charge with no overshoot at every rail corner
+      pass: true
+  loop-supply:
+    corners: 5
+    measures:
+      pm:
+        nominal: 91.6433
+        min: 91.6433
+        min_at: nominal
+        max: 91.6433
+        max_at: nominal
+      fc:
+        nominal: 2323050.0
+        min: 2323050.0
+        min_at: nominal
+        max: 2323050.0
+        max_at: nominal
+    asserts:
+    - expr: min['pm'] - 10 > 45
+      why: the phase margin clears 45 degrees after the screen at every rail corner
       pass: true

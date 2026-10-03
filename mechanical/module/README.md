@@ -1,9 +1,10 @@
 # Eurorack module — parametric CAD
 
-The module's panel, its two boards and every part that sets their positions
+The module's panel, its three boards and every part that sets their positions
 and depths, as an OpenSCAD model: [`../cad/module.scad`](../cad/module.scad).
 The decisions it realises are [ADR 0023](../../docs/decisions/0023-module-ethercon-and-two-boards.md)
-(the NE8FAV, two boards) and [ADR 0024](../../docs/decisions/0024-module-panel-layout-and-stack.md)
+(the NE8FAV; the boards - three since its amendment of 2026-10-03, the iso
+board behind the main board carrying `U-ISO` and its filter) and [ADR 0024](../../docs/decisions/0024-module-panel-layout-and-stack.md)
 (the panel layout and the stack). It goes as far as the line before board
 layout: outlines, positions, keep-outs and the cut file, not copper.
 
@@ -66,8 +67,8 @@ body never marks a module picture stale, nor the reverse.
 
 | Path | What it is |
 |---|---|
-| [`../cad/module.scad`](../cad/module.scad) | The model. `part=` selects the assembly, a 2D cut (`panel`, `jack_board`, `main_board`), the DRC or the PCB geometry |
-| `../cad/fig_module_*.scad` | The drawings: the panel, both boards, the side section |
+| [`../cad/module.scad`](../cad/module.scad) | The model. `part=` selects the assembly, a 2D cut (`panel`, `jack_board`, `main_board`, `iso_board`), the DRC or the PCB geometry |
+| `../cad/fig_module_*.scad` | The drawings: the panel, the three boards, the side section |
 | `../cad/generated/module-params.scad` | **Generated** from `config/module.yaml` |
 | [`drc.echo`](drc.echo) | **Generated.** Every design rule, `PASS`/`FAIL`/`NOTE`/`INFO` with its measured value. Pages cite rules by name |
 | [`clash.txt`](clash.txt) | **Generated.** Every named envelope against every other |
@@ -140,13 +141,13 @@ something it shows moved.
 
 ![The panel drawing: cuts, centres, legend zones, the washers' reach along their slots](renders/panel.png)
 
-![Both boards seen from the panel: the jack board a plain rectangle above the toggle and the NE8FAV, the standoffs (two between the boards, two to the panel), J-B2B-MOD, J-LED-PANEL with the LED's nut and its lead's run outlined above it, the parts on each face](renders/boards.png)
+![The three boards seen from the panel: the jack board a plain rectangle above the toggle and the NE8FAV, the main board with its standoffs (two between the boards, two to the panel, two to the iso board), J-B2B-MOD, J-B2B-ISO, J-LED-PANEL with the LED's nut and its lead's run outlined above it; the iso board's rear face with U-ISO and its filter, its notch round J-PWR-EURO](renders/boards.png)
 
 ![Side section through the panel's centre, with every depth and the Palette's limit read both ways](renders/section.png)
 
 | | |
 |---|---|
-| ![The stack pulled apart](renders/exploded.png) The stack pulled apart | ![From behind](renders/rear.png) From behind: the power header, its socket and the ribbon folded down, `U-ISO` (RPA20-2412SAW, ADR 0027) with its filter parts, the trimmers and bulk caps (envelopes) |
+| ![The stack pulled apart](renders/exploded.png) The stack pulled apart | ![From behind](renders/rear.png) From behind: the power header, its socket and the ribbon folded down, the iso board with `U-ISO` (RPA20-2412SAW, ADR 0027) and its filter parts, the trimmers and bulk caps (envelopes) |
 
 ## Build order — the stack
 
@@ -182,7 +183,15 @@ than one part, so neither is left to the builder to discover
    the slot between the jack bodies and cannot be reached once the panel is
    on. Then on the main board's rear face. The header, once soldered, freezes
    the gap.
-5. **Plug `CBL-LED-PANEL` into `J-LED-PANEL`** (pin 1, the red wire, the
+5. **The iso board** (`PCB-MODULE-ISO`, its parts already on its rear face):
+   offer it to the main board's rear on its two spacers
+   (`MECH-STANDOFF-ISO`, the stock length uncut: *iso board gap*) with
+   `J-B2B-ISO`'s insulator on the main board's rear face and its posts
+   through the iso board, screw it home, then solder `J-B2B-ISO` on the iso
+   board's rear and on the main board's front. Trim `U-ISO`'s tails and the
+   header's ends where a keep-out needs it (*J-B2B-ISO pin length
+   (derived)*).
+6. **Plug `CBL-LED-PANEL` into `J-LED-PANEL`** (pin 1, the red wire, the
    anode) while the main board is still clear of the panel, and **feed
    `SW-POWER`'s wires** below the jack board's bottom edge and solder
    them to the main board from its rear; fold the LED's lead into the gap

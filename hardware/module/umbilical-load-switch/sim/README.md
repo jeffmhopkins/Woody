@@ -1,5 +1,13 @@
 # Umbilical load switch — simulation
 
+> **Superseded for the ordinary start by
+> [`carrier/power-entry-instrument/sim`](../../../carrier/power-entry-instrument/sim/README.md)**
+> (#5 finding 3, 2026-10-03). That suite runs this LT1641 model through the
+> umbilical and `Q-INRUSH`, as built, and owns the `C-TIMER` sizing check
+> (`timer_peak`). This deck has neither: `C-STRIP-BULK` sits directly on `OUT`.
+> It stays as the switch's own stress case — a plug-in with `Q-INRUSH` failed
+> short, or a replug inside its window — and for the `FB`-unconnected history.
+
 `sims.yaml` says what is simulated and what every run must show;
 `loadswitch.cir` is the deck and `lt1641.inc` the part; `results.yaml` is what
 the last run found, **generated** by
@@ -25,7 +33,9 @@ it above the `ON` pin's worst-case turn-off, 9.90 V.
 
 **Values are the netlists'**: this circuit's, and the instrument's input that
 the umbilical charges (`carrier/power-entry-instrument`: `C-STRIP-BULK`,
-`L-BUCK-IN`, `C-BUCK-IN`), with `R-ILIM` at its row's 50 mΩ. `Q-LOADSW`
+`L-BUCK-IN`, `C-BUCK-IN`), with `R-ILIM` read from the netlist and varied by
+its 1 % (until #5 finding 3 a hard-coded 50 mΩ that a sheet change would not
+have reached). `Q-LOADSW`
 (PSMN2R0-30YLE) is a level-1 FET fitted to its datasheet: maximum threshold,
 maximum R_DS(on) at the LT1641's minimum 4.5 V gate drive, and C_iss. The instrument's load is `umbilical-current`,
 arriving at the buck's 8 V input minimum.
@@ -33,8 +43,8 @@ arriving at the buck's 8 V input minimum.
 ## What it shows
 
 Every sim but `fb-unconnected` runs at the nominal and at every end of the datasheet's min/max on
-the sense thresholds (both ends of the foldback), the gate pull-up and both
-`TIMER` currents: 33 runs.
+the sense thresholds (both ends of the foldback), the gate pull-up, both
+`TIMER` currents, `U-ISO`'s output and `R-ILIM`'s 1 %: 129 runs.
 
 | Sim | What | Holds |
 |---|---|---|
