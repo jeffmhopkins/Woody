@@ -1,0 +1,118 @@
+# GENERATED from the KiCad project hardware/boards/module-iso/module-iso.kicad_sch by tools/kicad.py - DO NOT EDIT.
+# The flattened netlist of this board, every sub-sheet instance expanded.
+
+board: module-iso
+title: Woody module iso board (hardware/boards/module-iso)
+components:
+  C2:
+    of: C-ISO-BULK
+    value: 100uF 50V
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  C44:
+    of: C-ISO-IN
+    value: 4.7uF 50V
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  C45:
+    of: C-ISO-OUT
+    value: 100uF 25V
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  C46:
+    of: C-ISO-Y
+    value: 22nF
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  J1:
+    of: J-B2B-ISO
+    value: 2x5 2.54mm pin header
+    pins:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+  L1:
+    of: L-ISO-IN
+    value: 22uH
+    pins:
+    - 1
+    - 2
+    sheet: power-entry
+  L2:
+    of: L-CM-ISO
+    value: 1mH
+    pins:
+    - IN_POS
+    - OUT_POS
+    - OUT_NEG
+    - IN_NEG
+    sheet: power-entry
+  U14:
+    of: U-ISO
+    value: RPA20-2412SAW
+    pins:
+    - VIN
+    - GND
+    - 0V
+    - TRIM
+    - VO
+    sheet: power-entry
+nets:
+  /ISO_FB2:
+  - J1.10
+  - J1.9
+  - L1.1
+  /ISO_FILT_NEG:
+  - J1.7
+  - J1.8
+  - L2.IN_NEG
+  /ISO_POS12:
+  - C45.1
+  - J1.3
+  - J1.4
+  - U14.VO
+  /PWR_GND:
+  - C45.2
+  - C46.2
+  - J1.1
+  - J1.2
+  - U14.0V
+  /power-entry/ISO_FILT_POS:
+  - L1.2
+  - L2.IN_POS
+  /power-entry/ISO_VIN_NEG:
+  - C2.2
+  - C44.2
+  - L2.OUT_NEG
+  - U14.GND
+  /power-entry/ISO_VIN_POS:
+  - C2.1
+  - C44.1
+  - C46.1
+  - L2.OUT_POS
+  - U14.VIN
+  J1.5:
+  - J1.5
+  J1.6:
+  - J1.6
+  U14.TRIM:
+  - U14.TRIM
+external_endpoints:
+- J1.5
+- J1.6
+- U14.TRIM

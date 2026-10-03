@@ -12,9 +12,37 @@ until 2026-10-01 it was a U whose legs reached down beside them.
 Everything it connects to is on [`module-main`](../module-main/README.md),
 through `J-B2B-MOD`.
 
-> **Status: schematic done, layout not started.** The sheets are the source
-> and pass KiCad's ERC. Every part has a footprint; the parts still missing a
-> bought part are under *Open*.
+> **Status: laid out and routed by `tools/pcb.py` (`kind: module`), 2026-10-02.**
+> `pcb.py check` passes: KiCad's DRC with schematic parity is clean, nothing is
+> unrouted, every courtyard is inside the board, every CAD-placed part is
+> where `mechanical/module/export/pcb-geometry.echo` puts it, and `J-B2B-MOD`
+> mates with the main board's pin for pin. Two layers, `AGND_MOD` poured on
+> both; layer 1 runs vertically and layer 2 across (`layout.yaml`
+> `directions:`). The mask colour is **not decided** — green until the owner
+> says (*Open*). The sheets are the source and pass KiCad's ERC. Every part
+> has a footprint; the parts still missing a bought part are under *Open*.
+
+## The layout
+
+`layout.yaml` beside this file records how the first layout was made; the
+`.kicad_pcb` is the source now. Everything but one part is placed by the
+module CAD: the six jacks by their pins along the CAD's pin line, the pots by
+their pins, `J-B2B-MOD` on the top face unmirrored, `H1`/`H2` on the CAD's
+standoffs. What the layout decided:
+
+- **`D-ESD-PITCH` (`D2`) on the rear, between `J-CV-PITCH`'s tip and its
+  switch pad** — pitch-stage.md's *at the jack's tip and sleeve pads, before
+  the trace leaves*.
+- **`J-B2B-MOD`'s courtyard is drawn on the rear** (`connectors:` `body:
+  rear`): its insulator is on the main board's side, so on the front only its
+  pins stand between the jacks. On the front it overlapped every jack's
+  courtyard.
+- **The R0904N's courtyard** (`hardware/lib/woody.pretty`) was its bounding
+  box, which reached the standoffs' heads between the pots; it now follows
+  the body and the snap-in slots' pads, each 0.25 round.
+- The CAD's jack positions put the bottom row's courtyards 0.055 mm inside
+  the board's bottom edge (`config/module.yaml` `boards.jack_y0`'s
+  derivation), and the outer pots' snap-in lugs 0.4 mm inside the sides.
 
 It places:
 - the `jack` pages of [`pitch-stage`](../../module/pitch-stage/pitch-stage.md)
@@ -36,10 +64,10 @@ It places:
   unmirrored pin map as the main board, pin 1 at the top left
   (`mechanical/module/export/pcb-geometry.echo` `J-B2B-MOD`). Put on B.Cu,
   the natural side for a part whose body is on the rear, it mirrors: odd and
-  even columns swap and every net lands one column over. Neither
-  `tools/kicad.py check` (it compares the sheets) nor anything else catches
-  that yet, so check pad 1's position against the main board's before
-  ordering.
+  even columns swap and every net lands one column over. `tools/pcb.py
+  check` catches that since 2026-10-02 (`pcb_module.check_b2b`): the header
+  must be on the top face, and each pin k at the same panel-frame place and
+  on the same net as the main board's.
 
 The parts carry the references KiCad gives them on this board (`J1`, `RV2`);
 `board-netlist.yaml` gives each one's BOM row (`of`) and circuit (`sheet`).
@@ -52,6 +80,9 @@ The same header is `J7` here and `J2` on the main board.
 | `module-jack.kicad_sch` (+ the pages it places) | **Source** (ADR 0019) |
 | `board-netlist.yaml` | Exported (`python3 tools/kicad.py export hardware/boards/module-jack`), with KiCad's ERC |
 | `*.sch.png` | Renders, recorded in `hardware/SHEETS.csv` |
+| `module-jack.kicad_pcb`, `module-jack.kicad_pro` | **Source** since the first layout (`python3 tools/pcb.py layout`, then `route`): edit in KiCad 9; `python3 tools/pcb.py check hardware/boards/module-jack` holds it |
+| `layout.yaml` | How the first layout was made: the parts' places, the rules, planes and checks' inputs |
+| `module-jack.pcb-*.png`, `fab/` | Written by `python3 tools/pcb.py render`, recorded in `hardware/SHEETS.csv` |
 | `fp-lib-table`, `sym-lib-table` | Register `hardware/lib/` (the R0904N pot footprint) |
 
 
@@ -71,5 +102,7 @@ The same header is `J7` here and `J2` on the main board.
 | Item | Decided by |
 |---|---|
 | The pots and jacks have no LCSC number (Thonk and Song Huei/Alpha, bought by hand) | Nothing to decide: hand-placed, bought from the maker's stockists. `POT-GAIN`/`POT-OFFSET` are Song Huei R0904N with the 18-tooth **KC** shaft the T18 knob needs, `POT-RESP` Alpha's centre-click RV09 (rows) |
+| The boards' mask colour (green in `layout.yaml` `fab:` until decided) | The owner, before the first order |
+| The pots' shaft against the panel hole: the footprint (from drawing R09N-003, `R0904N.pdf` p.2) puts the snap-in slots, and so the shaft, 7.0 mm from the pin row; the module CAD (`config/module.yaml` `pot.pins`, from the STEP) 6.7. The layout places the pins where the CAD does, so the shaft sits 0.3 mm above the CAD's hole centre, inside the hole's 0.5 mm radial play (`pot.hole_d`) | Reading both banked sources again; the first panel's test-fit (`pot.hole_d`'s own `decided_by`) |
 | The pots' rotation sense (which end is clockwise). Checked 2026-09-30 against both banked drawings — `R0904N.pdf` p.2 and `RV09AF-40.pdf` p.3 draw pins 1-2-3 with the shaft at full CCW and say nothing about which end the wiper approaches, so the sheets' "CW toward pin 3" stays `[from memory]` | Goods-in, E10: turn each pot fully CCW and read pin 1 to 2 with an ohmmeter — near 0 Ω confirms the sheets; near the full track means swap `CW`/`CCW` on all three symbols before the legends are drawn |
 | Whether the reasons for `J-B2B-MOD`'s allocation still hold once the board is laid out. The panel layout is settled (ADR 0024 points 11–13), and the reasons were re-read against it | The layout, against `mechanical/module/export/pcb-geometry.echo` |

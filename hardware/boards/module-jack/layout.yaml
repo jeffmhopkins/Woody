@@ -1,0 +1,114 @@
+# FIRST-LAYOUT INPUT for the module jack board's PCB - tools/pcb.py layout, `kind: module`
+# (tools/pcb_module.py). Two layers (README, Decided 2026-09-30). Once the .kicad_pcb
+# exists it is the source; this file records how the first layout was made.
+#
+# FROM THE MODULE CAD, NOT HERE (mechanical/module/export/pcb-geometry.echo,
+# `module-jack` lines; the outline from jack-board.dxf): the six jacks, the three
+# pots, J-B2B-MOD, the two standoffs and the keep-outs. Coordinates are the panel
+# frame (config/module.yaml): x across from the panel's left edge, y up, mm, seen
+# from the front - KiCad's top view. FRONT face (toward the panel) = F.Cu.
+
+kind: module
+cluster: module-jack
+outline: jack-board.dxf
+layers: 2
+
+# The controller boards' rules and board house, so one order makes every board;
+# the edge clearance is config/module.yaml boards.copper_edge (check holds it).
+rules:
+  track: 0.25
+  track_min: 0.2
+  clearance: 0.2
+  via: 0.7
+  via_drill: 0.3
+  via_min: 0.66
+  drill_min: 0.3
+  edge_clearance: 0.5
+  power_track: 0.4
+
+fab:
+  house: JLCPCB
+  hole_clearance: 0.28
+  hole_to_hole: 0.45
+  annular_min: 0.18
+  silk_text_min: 1.0
+  silk_line_min: 0.15
+  silk_to_pad: 0.15
+  finish: "HAL lead-free"
+  # The module boards' mask colour is NOT DECIDED (owner); green, the board house's
+  # default, until it is. Decided by: the owner, before the first order.
+  mask: Green
+  silk: White
+  copper_oz: 1
+
+# The standoffs' pads are the sheet's own H1/H2, on AGND_MOD (README, Decided
+# 2026-09-30), in the order pcb-geometry.echo lists the standoffs.
+mounts:
+  on_sheet: [H1, H2]
+  net: AGND_MOD
+
+# Each jack the module CAD names, by the net on its tip (the sheets' allocation).
+jacks:
+  J-CV-BREATH: BREATH_JACK
+  J-CV-PITCH: PITCH_JACK
+  J-CV-MOD1: MOD1_JACK
+  J-CV-MOD2: MOD2_JACK
+  J-CV-MOD3: MOD3_JACK
+  J-CV-MOD4: MOD4_JACK
+
+# J-B2B-MOD on the TOP face, unmirrored (README): pin k at the same panel-frame place
+# as the main board's pin k - check_b2b holds it against hardware/boards/module-main.
+# Its insulator is on this board's REAR (toward the main board), so its courtyard is
+# drawn there (pcb_module.body_to_rear): on the front only its pins stand, between
+# the jacks.
+connectors:
+  J-B2B-MOD: {row: J-B2B-MOD, body: rear}
+# 3D models only (pcb.py render). The PJ398SM's model is the banked community one
+# (datasheets MANIFEST row THONKICONN-PJ398SM-BADPIXEL-3D), installed under KiCad's
+# name by tools/setup-env.sh; its origin is the bushing axis, not the sleeve pad, so
+# it moves 6.6 mm along the pin row: its pin tails at Y -4.9 / 3.4 / 6.7 [calc, OCP
+# bounds of the STEP's faces below z -1] against the footprint's T / TN / S at
+# 11.4 / 3.1 / 0 (a 0.2 mm pitch difference split both ends). J7's insulator is on
+# this board's rear (hardware/module/bom.csv J-B2B-MOD): the stock model is turned
+# over the x axis and dropped through the board, pin 1 kept at pin 1.
+models:
+  Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles: {offset: [0, -6.6, 0]}
+  PinHeader_2x10_P2.54mm_Vertical: {offset: [0, -22.86, -1.6], rotate: [180, 0, 0]}
+b2b:
+  other: hardware/boards/module-main
+
+# The board's one ground, AGND_MOD, poured on both faces over the whole board; the
+# jacks' barrels and the standoffs' heads keep their own copper keep-outs (the CAD's).
+pours:
+  - {net: /AGND_MOD, layer: F.Cu, outline: board}
+  - {net: /AGND_MOD, layer: B.Cu, outline: board}
+
+# How tall each footprint stands, for the rooms (pcb_module.check_heights): the rear
+# face's room toward the main board is the CAD's keep-out; the front is the panel's
+# side, where the jacks and pots stand by their own drawings.
+rooms: {front: 9.0}
+heights:
+  Jack_3.5mm_QingPu_WQP-PJ398SM: 9.0      # [repo config/module.yaml jack: the body under the panel]
+  Potentiometer_SongHuei_R0904N: 7.8      # [repo config/module.yaml pot.body: bracket top 7.8]
+  PinHeader_2x10_P2.54mm: 0.0             # on this board: its pins only (the insulator is on the main board's front face)
+  D_SOD-323: 1.1                          # [from memory]
+  MountingHole: 0.0
+
+# D-ESD-PITCH (pitch-stage.md, Layout: "at the jack's tip and sleeve pads, before the
+# trace leaves"): on the rear face between J-CV-PITCH's tip and its switch pad,
+# its cathode on the tip.
+parts:
+  D2: [34.0, 86.0, 0, rear]
+
+silk:
+  at: [2.0, 97.2]
+  title: "WOODY module jack board"
+  rev: "A"
+  date: "2026-10-02"
+
+route: astar
+rip_up: 10
+directions:
+  layers: {F.Cu: vertical, B.Cu: horizontal}
+  against_cost: 6.0
+  chamfer: 0.6

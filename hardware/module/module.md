@@ -23,13 +23,17 @@ circuits. **The circuits own their own values** — nothing here restates one.
 | [`panel-led/`](panel-led/panel-led.md) | The panel indicator: lit while the load switch delivers, dark when it is off or latched |
 | [`panel/`](panel/panel.md) | Panel geometry: width, clear height, how many control rows fit, and the layout (ADR 0024) |
 
-**The module is two boards** (ADR 0023), and each circuit's KiCad sheet is
-its source (ADR 0019): [`module-main`](../boards/module-main/README.md)
-carries the etherCON, every IC, the trimmers and the power header;
-[`module-jack`](../boards/module-jack/README.md) the jacks and pots. The
-panel LED is in the panel on its own nut, its lead plugged into a header
-on the main board (ADR 0024 point 16).
-`J-B2B-MOD` joins them; its pin allocation is in the main board's README.
+**The module is three boards** (ADR 0023 point 2, amended 2026-10-03), and
+each circuit's KiCad sheet is its source (ADR 0019):
+[`module-main`](../boards/module-main/README.md) carries the etherCON, every
+IC but the isolated converter, the trimmers and the power header;
+[`module-jack`](../boards/module-jack/README.md) the jacks and pots;
+[`module-iso`](../boards/module-iso/README.md), behind the main board, `U-ISO`
+and its filter. The panel LED is in the panel on its own nut, its lead
+plugged into a header on the main board (ADR 0024 point 16).
+`J-B2B-MOD` joins the jack board to the main board, its pin allocation in the
+main board's README; `J-B2B-ISO` the iso board, its allocation in the iso
+board's.
 
 The other half of the breath chain and of the SPI path are **not here**. They
 cross a board boundary and live in

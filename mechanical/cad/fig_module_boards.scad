@@ -1,5 +1,5 @@
-// Both boards, each seen from the panel (the frame's x and y): the jack board
-// on the left, the main board to its right. Solid: what stands on the face
+// The three boards, each seen from the panel (the frame's x and y): the jack
+// board on the left, the main board in the middle, the iso board on the right. Solid: what stands on the face
 // toward the panel. Outlined: what stands on the rear face. Drawn from the
 // same lists the DRC and pcb-geometry.echo use.
 include <module.scad>
@@ -58,7 +58,38 @@ translate([DX, 0, 0]) {
         else outline("Blue") r2([t[0], t[1]] - [tall_trim[0], tall_trim[1]] / 2, [t[0], t[1]] + [tall_trim[0], tall_trim[1]] / 2);
     outline("DimGray") r2(tog - tog_body / 2, tog + tog_body / 2);
     tag(tog + [0, -tog_body[1] / 2 - 1.5], "SW-POWER lugs, in front");
+    // The iso board behind, its spacers and J-B2B-ISO's insulator on the rear face.
+    outline("Purple") polygon(ib_poly);
+    tag([b_x0 + 9, iso_board_y1 - 1.6], "the iso board, behind", 1.1);
+    outline("Red") r2(b2bi_rect[1], b2bi_rect[2]);
+    tag(b2b_iso_at + [0, b2bi_w / 2 + 2.6], "J-B2B-ISO (rear)", 1.1);
+    for (s = iso_board_standoff_at) outline("Purple") translate(s) circle(d = standoff_af / cos(30), $fn = 6);
     tag([cx, -6], str("MAIN BOARD - ", b_x1 - b_x0, " x ", b_y1 - b_y0, ", ", mb_d, " behind the panel"), 1.5);
     tag([cx, -9], "solid: front face - outlined: rear face; orange: ribbon");
 }
-label([DX / 2 + cx, H + 6, 1], "THE MODULE'S TWO BOARDS, seen from the panel - mm, panel frame", size = 2.0);
+
+// ---- iso board (ADR 0023 point 2, amended 2026-10-03): solid is its REAR face here, where its parts stand
+translate([2 * DX, 0, 0]) {
+    color(C_PCB2) linear_extrude(Z) iso_board_2d();
+    fill(C_METAL) r2(iso_rect[1], iso_rect[2]);
+    tag(iso_at, "U-ISO", 1.5);
+    fill("Gold") for (q = iso_pins) translate(iso_at + q) circle(d = 2 * iso_pin_d);
+    for (f = iso_filter) {
+        if (f[2] == "can") fill(C_CAP) translate([f[0], f[1]]) circle(d = f[3]);
+        else if (f[2] == "toroid") fill(C_BLACK) translate([f[0], f[1]]) circle(d = f[6]);
+        else fill(C_BLACK) r2([f[0], f[1]] - [f[3], f[3]] / 2, [f[0], f[1]] + [f[3], f[3]] / 2);
+        tag([f[0], f[1]], f[5], 1.0);
+    }
+    fill("Gold") r2(b2b_iso_at - [b2bi_l, b2bi_w] / 2 - [1.27, 1.27], b2b_iso_at + [b2bi_l, b2bi_w] / 2 + [1.27, 1.27]);
+    tag(b2b_iso_at + [0, -b2bi_w / 2 - 2.6], "J-B2B-ISO", 1.1);
+    for (s = iso_board_standoff_at) fill(C_METAL) translate(s) circle(d = m3_head_d);
+    outline("Red") r2(pw - [power_w, power_l] / 2, pw + [power_w, power_l] / 2);
+    tag(pw + [0, -power_l / 2 + 1.5], "J-PWR-EURO", 1.0);
+    outline("DarkOrange") r2([fold[0], fold[1]], [fold[2], fold[3]]);
+    for (i = [0 : len(tall_at) - 1]) let(t = tall_at[i])
+        if (t[2] == "cap") outline("Blue") translate([t[0], t[1]]) circle(d = tall_cap_d);
+        else outline("Blue") r2([t[0], t[1]] - [tall_trim[0], tall_trim[1]] / 2, [t[0], t[1]] + [tall_trim[0], tall_trim[1]] / 2);
+    tag([cx, -6], str("ISO BOARD - ", b_x1 - b_x0, " x ", iso_board_y1 - ib_y0, ", ", mb_d + boards_t + ib_gap, " behind the panel"), 1.5);
+    tag([cx, -9], "solid: rear face - outlined: the main board's rear-face parts beside it");
+}
+label([DX + cx, H + 6, 1], "THE MODULE'S THREE BOARDS, seen from the panel - mm, panel frame", size = 2.0);

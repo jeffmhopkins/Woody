@@ -196,9 +196,10 @@ OpenSCAD's depfile gets. Two tools use it, both for the module (ADR 0026):
   (its flattened netlist, what a PCB is laid out from), and the PNG renders,
   recorded in `hardware/SHEETS.csv`.
 - **Every circuit with a netlist is migrated** (the module's on
-  2026-09-30). A circuit whose parts sit on two boards (four of the module's)
-  is a parent sheet placing two pages, `<circuit>.main.kicad_sch` and
-  `<circuit>.jack.kicad_sch`, and each board places its own page.
+  2026-09-30). A circuit whose parts sit on two boards is a parent sheet
+  placing two pages, `<circuit>.main.kicad_sch` and `<circuit>.jack.kicad_sch`
+  (or `.iso.kicad_sch`, power-entry's iso-board page), and each board places
+  its own page.
 
 ### Commands
 
@@ -215,8 +216,9 @@ python3 tools/kicad.py check                                  # everything above
 - a render or a `fab/` file exists that no ledger row knows (a stray Gerber is uploaded with the rest);
 - a board has an ERC error;
 - a board with a layout fails `tools/pcb.py check` (§4);
-- `J-B2B-MOD`, soldered through both module boards, is netted differently on
-  `module-main` and `module-jack` (pin *k* is one conductor on both);
+- `J-B2B-MOD` or `J-B2B-ISO`, each soldered through two module boards, is
+  netted differently on the two (`module-main` and `module-jack`,
+  `module-main` and `module-iso`; pin *k* is one conductor on both);
 - a board's umbilical connector is wired differently from its part in
   `hardware/interfaces/spi-link/netlist.yaml`: the main board's and the
   adapter's `J-UMB` against `J-UMB`, the adapter's etherCON against
@@ -412,12 +414,39 @@ project in KiCad 9 and move or re-route by hand. `tools/kicad.py check` runs
 files are in `hardware/SHEETS.csv`, so an edited board with stale Gerbers is
 reported by name.
 
+### The routing policy — quality first, one direction per layer only where needed
+
+**The owner, 2026-10-03:** *"I think maybe the horizontal vertical should only
+be used when required, and maybe even just in portions or sections of the
+board that is necessary"*, after the module iso board's first, autorouted
+layout (*"the strict vertical/horizontal routing is completely unnecessary"*).
+So, on every board:
+
+1. **The default is quality routing**: short, direct paths; 45° bends; power
+   traces or zones sized for their current; ground and return pours; few vias.
+2. **A preferred direction per layer is optional and regional.**
+   `layout.yaml` `directions:` takes `regions:` — each a `rect: [x0, y0, x1,
+   y1]` in the board's frame (mm), a `name`, a `why`, and the `layers:` it
+   directs — and routes free everywhere else. Use one only where congestion
+   needs it (a dense bus crossing), and say why in the board's README.
+   `directions: layers:` (no region) still directs a layer over the whole
+   board, which the controller's boards were laid out with; their re-layout
+   follows the rule above. `routed:` lists the layers the router uses
+   (layer 3 of a four-layer board when it is a routing layer), `via_cost:` what
+   a via costs against a grid step (12 by default).
+3. **A power board may be drawn by hand**: the module's iso board is placed in
+   current-flow order and its copper - pours per region on both faces,
+   stitched, and straight supply runs with 45° bends - is drawn in its
+   `.kicad_pcb`, which is the source once it exists (`layout.yaml` `route:
+   false`). `pcb.py check` holds it like any other board.
+
 ### The router, and its limits
 
 `tools/pcb_route.py` is a small two-layer grid router: A* on a 0.2 mm grid per
 layer, vias where they fit, every other net's copper, every hole and the board
-edge inflated by the clearance. Each layer has a preferred direction (top
-along the board, bottom across it) and a turn costs by its angle. The order:
+edge inflated by the clearance. A layer may have a preferred direction -
+over the board, or only in `directions: regions:` (*The routing policy*,
+above) - and a turn costs by its angle. The order:
 1. **`connect_first:`** pad-to-pad connections, before anything else, the most
    direct path the board allows (a decoupler's return to its IC's ground pin,
    which ground, routed last and round everything, would not give).
@@ -563,6 +592,51 @@ layer 4) — a track must lie wholly within one filled area of its reference
 layer, antipads (holes under 4 mm²) closed; the tie's window and a pair's
 crossing of its moat are exempt.
 
+### The module's boards — `kind: module` (`tools/pcb_module.py`)
+
+`hardware/boards/module-main` (four layers), `hardware/boards/module-jack`
+and `hardware/boards/module-iso` (two each) are built by `tools/pcb_module.py` and checked by the same `pcb.py
+check`. Coordinates are the module CAD's panel frame (`config/module.yaml`),
+which the controller's `to_pcb` serves unchanged: a board's KiCad top view is
+the panel view, its front face (toward the panel) is F.Cu.
+
+| What | From |
+|---|---|
+| Outline | `mechanical/module/export/<main|jack|iso>-board.dxf`, less each standoff's hole |
+| Jacks, pots, `J-B2B-MOD`, `J-UMBILICAL`, `J-LED-PANEL`, `J-PWR-EURO`, `U-ISO`, standoffs, keep-outs, thickness | `mechanical/module/export/pcb-geometry.echo`, the board's own lines. Each part is placed **by its pads** (`place_by_pads`): the turn and face that put the named pads on the CAD's places is found, not assumed. `layout.yaml` `jacks:` says which jack is which by the net on its tip; `connectors:` which connectors the CAD places (`J-PWR-EURO`'s `odd_column` is the one its footprint's chirality allows with pin 1 at the bottom); `cad_tall:` `U-ISO`'s pins from `config/module.yaml` `iso.pins` |
+| A part whose body is on the other face from its pin map | `connectors:` `body: rear` — the jack board's `J-B2B-MOD`, placed on top for its unmirrored pin map, its courtyard, fab and silk drawn on the rear, where its insulator is |
+| Standoff pads | `mounts:` — board-only and on no net (the main board), or the sheet's own (`on_sheet:`, the jack board's `AGND_MOD` pair). The head's keep-out is a rule area on no net; on a net, the courtyard keeps parts off and `check_cad` keeps every other net's copper off |
+| Everything else | `parts:` `[x, y, rot]` or `[x, y, rot, rear]` |
+| Planes, islands, pours | as `kind: main`, plus `pours:` (an outer-layer zone over a polygon, or `outline: board`) and an island's `ties:` list and `foreign_ok:` pads |
+
+**`check` adds** for a module board (`pcb_module.check_cad`): the thickness
+and outline against the CAD; every CAD-placed part's pads where the CAD puts
+them, on its face; each standoff pad's place, hole and net, and no other
+copper under its head; `rules.edge_clearance` not under
+`boards.copper_edge`; every part inside its height room on its face
+(`heights:`, `rooms:`, the CAD's height keep-outs); **`J-B2B-MOD` and
+`J-B2B-ISO` mating** (`check_b2b`, `b2b:` a list of `{row, other}`): on the top
+face, and pin k at the same panel-frame place and on the same net on both
+boards (against the other board's `.kicad_pcb`); and
+**`U-ISO`'s isolation gap** (`check_isolation`): on every copper layer the
+nets `isolation: input` and `output` name keep `gap` apart, pads, tracks,
+vias and pours alike, the bridging part (`C-ISO-Y`) left out.
+
+**Every board** (all kinds) now also fails on **a courtyard outside the board
+outline** (`check_courtyards`, owner 2026-10-02): KiCad's DRC tests
+courtyards only against each other and copper only against the edge, so a part
+could hang off a board and pass. A part meant to overhang is named in
+`layout.yaml` `courtyard_overhang:` with its `reason:` and `source:`; an entry
+for a part that does not overhang fails too.
+
+**`pcb.py route <board>`** routes a placed board (`layout --no-route`) **in
+place, resumably**: the pairs, moat keep-outs, plane fanout and
+`connect_first:` once (on a multi-layer board `connect_first:` is routed and
+locked before anything else), then every missing connection by
+`pcb_route.complete` in chunks, the board saved and the zones filled after
+each, so a killed run picks up where it stopped; then the rip-up rescue, the
+silkscreen clear of every via, and the stackup.
+
 ### Learned the hard way
 
 - **A zone's fill is FRACTURED**: KiCad joins each hole to the outline by a
@@ -693,10 +767,8 @@ Each render is generated; what it is rendered from is the source.
 
 ### Not yet
 
-- **The module's layout.** Its ten circuits are sheets and its two boards are
-  projects (2026-09-30, `hardware/boards/module-main/README.md`); no
-  `.kicad_pcb` yet; they are placed from the panel layout in
-  `config/module.yaml` (ADRs 0024, 0026).
+- **The module's layout** is under way (2026-10-02, `kind: module`, above);
+  each board's README says where it stands.
   The interfaces migrated on 2026-09-29. The boards still draw their own
   halves of them rather than placing the interface sheets, which span boards
   (each interface page says which board draws which part). The main board is a project placing its circuit sheets

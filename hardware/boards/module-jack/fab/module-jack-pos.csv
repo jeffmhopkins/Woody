@@ -1,0 +1,12 @@
+Ref,Val,Package,PosX,PosY,Rot,Side
+"D2","PESD15VL1BA","D_SOD-323",94.000000,-64.000000,0.000000,bottom
+"J1","PJ398SM","Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles",101.230000,-61.500000,-90.000000,top
+"J2","PJ398SM","Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles",69.270000,-61.500000,90.000000,top
+"J3","PJ398SM","Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles",69.270000,-74.500000,90.000000,top
+"J4","PJ398SM","Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles",69.270000,-87.500000,90.000000,top
+"J5","PJ398SM","Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles",101.230000,-74.500000,-90.000000,top
+"J6","PJ398SM","Jack_3.5mm_QingPu_WQP-PJ398SM_Vertical_CircularHoles",101.230000,-87.500000,-90.000000,top
+"J7","2x10 2.54mm pin header","PinHeader_2x10_P2.54mm_Vertical",83.980000,-61.569999,0.000000,top
+"RV1","50k linear","Potentiometer_SongHuei_R0904N_Single_Vertical",65.750000,-50.700000,0.000000,top
+"RV2","10k linear","Potentiometer_SongHuei_R0904N_Single_Vertical",82.750000,-50.700000,0.000000,top
+"RV3","50k linear","Potentiometer_SongHuei_R0904N_Single_Vertical",99.750000,-50.700000,0.000000,top

@@ -81,13 +81,6 @@ components:
     - 1
     - 2
     sheet: breath-receive-stage
-  C2:
-    of: C-ISO-BULK
-    value: 100uF 50V
-    pins:
-    - 1
-    - 2
-    sheet: power-entry
   C20:
     of: C-DECOUPLE
     value: 100nF
@@ -263,27 +256,6 @@ components:
     - 1
     - 2
     sheet: dac8568
-  C44:
-    of: C-ISO-IN
-    value: 4.7uF 50V
-    pins:
-    - 1
-    - 2
-    sheet: power-entry
-  C45:
-    of: C-ISO-OUT
-    value: 100uF 25V
-    pins:
-    - 1
-    - 2
-    sheet: power-entry
-  C46:
-    of: C-ISO-Y
-    value: 22nF
-    pins:
-    - 1
-    - 2
-    sheet: power-entry
   C47:
     of: C-RX-MOD
     value: 47pF C0G
@@ -587,6 +559,20 @@ components:
     - 1
     - 2
     sheet: panel-led
+  J5:
+    of: J-B2B-ISO
+    value: 2x5 2.54mm pin header
+    pins:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
   JP1:
     of: LK-CLR
     value: 2-pad solder link
@@ -594,22 +580,6 @@ components:
     - 1
     - 2
     sheet: dac8568
-  L1:
-    of: L-ISO-IN
-    value: 22uH
-    pins:
-    - 1
-    - 2
-    sheet: power-entry
-  L2:
-    of: L-CM-ISO
-    value: 1mH
-    pins:
-    - IN_POS
-    - OUT_POS
-    - OUT_NEG
-    - IN_NEG
-    sheet: power-entry
   NT1:
     of: NT-AGND-MOD
     value: net tie
@@ -1242,16 +1212,6 @@ components:
     - SENSE
     - VOUT
     sheet: power-entry
-  U14:
-    of: U-ISO
-    value: RPA20-2412SAW
-    pins:
-    - VIN
-    - GND
-    - 0V
-    - TRIM
-    - VO
-    sheet: power-entry
   U15:
     of: U-RX-MOD
     value: 74AHCT14
@@ -1460,6 +1420,14 @@ nets:
   /GAIN_WIPER:
   - J2.3
   - U7.INA+
+  /ISO_FB2:
+  - FB2.2
+  - J5.10
+  - J5.9
+  /ISO_FILT_NEG:
+  - FB4.2
+  - J5.7
+  - J5.8
   /MOD1_JACK:
   - C36.1
   - J2.15
@@ -1750,26 +1718,6 @@ nets:
   - C5.1
   - R1.1
   - U1.SET
-  /power-entry/ISO_FB2:
-  - FB2.2
-  - L1.1
-  /power-entry/ISO_FILT_NEG:
-  - FB4.2
-  - L2.IN_NEG
-  /power-entry/ISO_FILT_POS:
-  - L1.2
-  - L2.IN_POS
-  /power-entry/ISO_VIN_NEG:
-  - C2.2
-  - C44.2
-  - L2.OUT_NEG
-  - U14.GND
-  /power-entry/ISO_VIN_POS:
-  - C2.1
-  - C44.1
-  - C46.1
-  - L2.OUT_POS
-  - U14.VIN
   /power-entry/NEG12_D4:
   - D15.A
   - FB4.1
@@ -1918,10 +1866,10 @@ nets:
   - U4.GND
   ISO_POS12:
   - C10.1
-  - C45.1
+  - J5.3
+  - J5.4
   - R3.1
   - R57.1
-  - U14.VO
   - U2.VCC
   J1.CV_13:
   - J1.CV_13
@@ -1937,6 +1885,10 @@ nets:
   - J1.POS5_12
   J2.19:
   - J2.19
+  J5.5:
+  - J5.5
+  J5.6:
+  - J5.6
   LOGIC_5V:
   - C42.1
   - C50.1
@@ -2011,20 +1963,17 @@ nets:
   PWR_GND:
   - C10.2
   - C40.2
-  - C45.2
-  - C46.2
   - C8.2
   - C9.2
   - J3.6
+  - J5.1
+  - J5.2
   - NT3.1
   - R58.2
   - R7.2
-  - U14.0V
   - U2.GND
   U1.PG:
   - U1.PG
-  U14.TRIM:
-  - U14.TRIM
   U2.PWRGD:
   - U2.PWRGD
   U3.VOUTF:
@@ -2041,8 +1990,9 @@ external_endpoints:
 - J1.POS5_11
 - J1.POS5_12
 - J2.19
+- J5.5
+- J5.6
 - U1.PG
-- U14.TRIM
 - U2.PWRGD
 - U3.VOUTF
 - U3.VOUTH

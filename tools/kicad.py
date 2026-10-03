@@ -701,12 +701,12 @@ def check_chain_main_parts(bnet, doc, loom, rel):
 
 # A header soldered through two boards is one conductor per pin: pin k on one board is pin k
 # on the other (ADR 0023). Each pair of boards it joins, by BOM row.
-THROUGH = {"J-B2B-MOD": ("module-main", "module-jack")}
+THROUGH = {"J-B2B-MOD": ("module-main", "module-jack"), "J-B2B-ISO": ("module-main", "module-iso")}
 SPI_LINK = os.path.join(ROOT, "hardware", "interfaces", "spi-link", "netlist.yaml")
 
 
 def check_through(board_docs):
-    """J-B2B-MOD: every pin on the same net, by name, on both boards it is soldered into, and
+    """J-B2B-MOD, J-B2B-ISO: every pin on the same net, by name, on both boards it is soldered into, and
     no pin left open on one board that the other uses. A pin moved on one sheet only is a
     wrong conductor on the other board, which no ERC sees - each board is clean alone."""
     docs = dict(board_docs)

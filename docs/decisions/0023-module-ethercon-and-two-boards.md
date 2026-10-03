@@ -5,6 +5,9 @@ research (fragment R26). It settles ADR 0004's open question *which etherCON
 variant at each end* **for the module's end**. The instrument's end was settled
 by ADR 0021. **Amended 2026-09-29 by [ADR 0024](0024-module-panel-layout-and-stack.md)**
 (point 3: the panel has no slot for the PUSH tab), at a dated note below.
+**Amended 2026-10-03 by the owner** (point 2: the module is three boards - the
+instrument's isolated supply on a board of its own, behind the main board;
+issue #22), at a dated note below.
 
 ## Context
 
@@ -38,6 +41,30 @@ A Eurorack module's board sits parallel to its panel. That is what a
    A 2 × 10 header soldered through both boards joins them. Standoffs hold
    them apart. The toggle is panel-mounted and wired: its body is deeper
    than the gap in front of the jack board.
+
+   *Amended 2026-10-03 by the owner (issue #22): "probably good to go to 3
+   pcbs if needed", then "3 boards for module is correct". **The module is
+   three boards**: the two above, and **the iso board** (`PCB-MODULE-ISO`),
+   parallel to the main board and behind it, carrying the instrument's
+   isolated supply - `U-ISO` and its filter (`L-ISO-IN`, `L-CM-ISO`, `C2`,
+   `C-ISO-IN`, `C-ISO-Y`, `C-ISO-OUT`), ADR 0027. Why: the main board could
+   not be routed cleanly inside its outline with a 25 mm converter's pins, its
+   isolation gap and its return pour in the middle of the DAC's corner - re-placing
+   that corner first left more connections unrouted, not fewer
+   (`hardware/boards/module-main/README.md`). It is held off the main board's
+   rear face by stock spacers used uncut (`MECH-STANDOFF-ISO`; the gap is
+   their length) and joined to it by `J-B2B-ISO`, a 2 × 5 header soldered
+   through both, its pins 5-6 left open as the isolation gap. Its outline,
+   the gap and the header's pin length are derived in the module CAD
+   (`config/module.yaml` `iso_board`, `b2b_iso`; `mechanical/module/drc.echo`):
+   below the rear trimmers, so each stays adjustable from behind, and clear of
+   `J-PWR-EURO` and its ribbon. The deepest thing behind the panel is now
+   `L-CM-ISO` on the iso board (`mechanical/module/drc.echo`, *depths of the
+   deep things*), still inside the Intellijel Palette's depth - reported, not
+   ruled, since the owner's "Don't worry about module depth" (ADR 0024 point
+   10). The main board still carries the etherCON, every other IC, the
+   trimmers and the power header. The paragraphs above are what this point
+   said before the amendment.*
 3. **The power header is 2 × 8, while the module takes the bus's +5 V**:
    only the 16-pin bus carries it [ds `DOEPFER-A100-TECHNICAL-DETAILS-a100t_e.html`].
    Deriving +5 V locally instead is still open

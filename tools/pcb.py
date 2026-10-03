@@ -6,6 +6,7 @@
     python3 tools/pcb.py render hardware/boards/key-board-lh   # 3D top/bottom and 2D copper PNGs, fab/ (refuses a board that fails check)
     python3 tools/pcb.py stackup hardware/boards/key-board-lh  # mask/silk colours and finish rewritten from layout.yaml fab:
     python3 tools/pcb.py finish hardware/boards/main-board     # a routed board's missing connections tried again, with rip-up
+    python3 tools/pcb.py route hardware/boards/module-main     # a placed board (layout --no-route) routed in place, resumably
     python3 tools/pcb.py update-footprints hardware/boards/main-board LED_WS2815B-V1_PLCC6_5.4x5.0mm_P1.6mm   # placed footprints from the library, same place and nets
 
 WHERE THINGS COME FROM - nothing on this board is typed in by hand twice:
@@ -599,6 +600,8 @@ def add_top_silk(board, lay, comps):
     and reference beside its switch (off its body), J-CHAIN's reference, pin 1 and the way its mouth faces, the MOUTH end,
     and the board's title and revision. Not mirrored: it reads from above."""
     _TWB[0] = board
+    for fp in board.GetFootprints():
+        fp.BuildCourtyardCaches()   # read below; LoadBoard leaves them empty on some 9.0.x (#9 G2, G9)
     edge = board.GetBoardEdgesBoundingBox()
     ex0, ey0, ex1, ey1 = (pcbnew.ToMM(edge.GetLeft()) + 0.5, pcbnew.ToMM(edge.GetTop()) + 0.5,
                           pcbnew.ToMM(edge.GetRight()) - 0.5, pcbnew.ToMM(edge.GetBottom()) - 0.5)
@@ -678,6 +681,8 @@ def add_silk_generic(board, lay, comps):
     off and named (not fatal: the fab layer still carries it), so a crowded corner is
     visible rather than silently unlabelled."""
     _TWB[0] = board
+    for fp in board.GetFootprints():
+        fp.BuildCourtyardCaches()   # read below; LoadBoard leaves them empty on some 9.0.x (#9 G2, G9)
     edge = board.GetBoardEdgesBoundingBox()
     ol = pcbnew.SHAPE_POLY_SET()
     board.GetBoardPolygonOutlines(ol)
@@ -722,6 +727,53 @@ def add_silk_generic(board, lay, comps):
     def put(top, text, x, y, angle=0, justify=0):
         silk_text(board, text, x, y, top=top, angle=angle, justify=justify)
 
+    # the title block first, where layout.yaml puts it; the references then keep off it
+    t = lay.get("silk", {})
+    if t:
+        tb = board.GetTitleBlock()
+        tb.SetTitle(t["title"])
+        tb.SetRevision(t["rev"])
+        tb.SetDate(t["date"])
+        board.SetTitleBlock(tb)
+        # silk.at: one place, or a list of places tried in turn (the first clear one)
+        ats = t["at"] if isinstance(t["at"][0], (list, tuple)) else [t["at"]]
+        lines = [t["title"], f"rev {t['rev']}  {t['date']}"]
+        for at in ats:
+            x, y = to_pcb(*at)
+            boxes = [_box(x, y + i * SILK_H * 1.8 - SILK_H / 2, x + text_w(line), y + i * SILK_H * 1.8 + SILK_H / 2) for i, line in enumerate(lines)]
+            if all(free(True, g) for g in boxes):
+                break
+        else:
+            if not t.get("search"):
+                sys.exit(f"pcb: the silkscreen title at layout.yaml silk.at is not clear: {lines[0]!r}")
+            # silk.search: the first clear place on a 0.5 mm scan of the board, top down
+            bb = board.GetBoardEdgesBoundingBox()
+            found = None
+            for face in (True, False):          # the top face first, then the rear
+                yy = pcbnew.ToMM(bb.GetTop()) + 1.0
+                while found is None and yy < pcbnew.ToMM(bb.GetBottom()) - 3:
+                    xx = pcbnew.ToMM(bb.GetLeft()) + 1.0
+                    while xx < pcbnew.ToMM(bb.GetRight()) - 5:
+                        # on the rear the text is mirrored: it runs leftward from its anchor
+                        boxes = [_box(xx, yy + i * SILK_H * 1.8 - SILK_H / 2, xx + text_w(line), yy + i * SILK_H * 1.8 + SILK_H / 2) for i, line in enumerate(lines)]
+                        if all(free(face, g) for g in boxes):
+                            found = (xx, yy, face)
+                            break
+                        xx += 0.5
+                    yy += 0.5
+                if found:
+                    break
+            if found is None:
+                sys.exit(f"pcb: no clear place on either silkscreen for the title {lines[0]!r}")
+            x, y, tface = found
+            print(f"pcb: silk - the title placed at the first clear place on the {'top' if tface else 'rear'}")
+            for i, (line, g) in enumerate(zip(lines, boxes)):
+                put(tface, line, x + (0 if tface else text_w(line)), y + i * SILK_H * 1.8, justify=-1)
+                placed[tface].append(g)
+            lines = []
+        for i, (line, g) in enumerate(zip(lines, boxes)):
+            put(True, line, x, y + i * SILK_H * 1.8, justify=-1)
+            placed[True].append(g)
     for fp in sorted(board.GetFootprints(), key=lambda f: f.GetReference()):
         ref = fp.GetReference()
         c = comps.get(ref)
@@ -744,20 +796,6 @@ def add_silk_generic(board, lay, comps):
                 break
         else:
             skipped.append(ref)
-    t = lay.get("silk", {})
-    if t:
-        tb = board.GetTitleBlock()
-        tb.SetTitle(t["title"])
-        tb.SetRevision(t["rev"])
-        tb.SetDate(t["date"])
-        board.SetTitleBlock(tb)
-        x, y = to_pcb(*t["at"])
-        for i, line in enumerate([t["title"], f"rev {t['rev']}  {t['date']}"]):
-            g = _box(x, y + i * SILK_H * 1.8 - SILK_H / 2, x + text_w(line), y + i * SILK_H * 1.8 + SILK_H / 2)
-            if not free(True, g):
-                sys.exit(f"pcb: the silkscreen title at layout.yaml silk.at is not clear: {line!r}")
-            put(True, line, x, y + i * SILK_H * 1.8, justify=-1)
-            placed[True].append(g)
     # every label placed, proved as check_silk will judge it - its real stroked shape,
     # not its box, off every courtyard on its face and the board house's silk clearance
     # off every footprint's own silk; one that fails comes off and is named with the rest
@@ -948,53 +986,123 @@ def rescue(path, bdir, radii=(1.5, 3.0, 5.0)):
     for f in (path[:-len(".kicad_pcb")] + ".kicad_pro", os.path.join(bdir, "fp-lib-table"), os.path.join(bdir, "sym-lib-table")):
         if os.path.exists(f):
             shutil.copy(f, tdir)
-    progress = True
-    while progress:
-        progress = False
-        for net, pa, pb in unconnected_of(path):
-            key = (net, round(pa[0], 1), round(pa[1], 1), round(pb[0], 1), round(pb[1], 1))
-            if key in tried:
-                continue
-            tried.add(key)
-            for r in radii:
-                board = pcbnew.LoadBoard(path)
-                # round its two ends - where a connection is walled in - and, for a short
-                # hop, the ground between them
-                region = Point(pa).buffer(r).union(Point(pb).buffer(r))
-                if math.dist(pa, pb) < 10:
-                    region = region.union(box(min(pa[0], pb[0]), min(pa[1], pb[1]), max(pa[0], pb[0]), max(pa[1], pb[1])).buffer(r))
-                victims = []
-                for t in board.GetTracks():
-                    if t.IsLocked() or t.GetNetname() in planes or t.GetNetname() == net:
+    try:
+        progress = True
+        while progress:
+            progress = False
+            for net, pa, pb in unconnected_of(path):
+                key = (net, round(pa[0], 1), round(pa[1], 1), round(pb[0], 1), round(pb[1], 1))
+                if key in tried:
+                    continue
+                tried.add(key)
+                for r in radii:
+                    board = pcbnew.LoadBoard(path)
+                    # round its two ends - where a connection is walled in - and, for a short
+                    # hop, the ground between them
+                    region = Point(pa).buffer(r).union(Point(pb).buffer(r))
+                    if math.dist(pa, pb) < 10:
+                        region = region.union(box(min(pa[0], pb[0]), min(pa[1], pb[1]), max(pa[0], pb[0]), max(pa[1], pb[1])).buffer(r))
+                    victims = []
+                    for t in board.GetTracks():
+                        if t.IsLocked() or t.GetNetname() in planes or t.GetNetname() == net:
+                            continue
+                        bb = t.GetBoundingBox()
+                        if region.intersects(box(bb.GetLeft() / 1e6, bb.GetTop() / 1e6, bb.GetRight() / 1e6, bb.GetBottom() / 1e6)):
+                            victims.append(t)
+                    if not victims:
                         continue
-                    bb = t.GetBoundingBox()
-                    if region.intersects(box(bb.GetLeft() / 1e6, bb.GetTop() / 1e6, bb.GetRight() / 1e6, bb.GetBottom() / 1e6)):
-                        victims.append(t)
-                if not victims:
-                    continue
-                hit, nv = {t.GetNetname() for t in victims}, len(victims)
-                for t in victims:
-                    board.Delete(t)
-                if pcb_route.complete(board, lay, [(net, pa, pb)]):
-                    continue
-                pcbnew.SaveBoard(tmp, board)
-                _fill(tmp)
-                b2 = pcbnew.LoadBoard(tmp)
-                pcb_route.complete(b2, lay, [m for m in unconnected_of(tmp) if m[0] in hit])
-                pcb_route.tidy(b2, lay)
-                pcbnew.SaveBoard(tmp, b2)
-                _fill(tmp)
-                s2 = score(tmp)
-                if s2 < base:
-                    print(f"route: rescue - {net} ({pa[0]:.1f}, {pa[1]:.1f}): {nv} item(s) taken up within {r} mm "
-                          f"and routed again; problems {base} -> {s2}", flush=True)
-                    os.replace(tmp, path)
-                    base, kept, progress = s2, kept + 1, True
-                    break
-            if progress:
-                break           # the list moved: read it again
-    shutil.rmtree(tdir, ignore_errors=True)
+                    hit, nv = {t.GetNetname() for t in victims}, len(victims)
+                    for t in victims:
+                        board.Delete(t)
+                    if pcb_route.complete(board, lay, [(net, pa, pb)]):
+                        continue
+                    try:
+                        pcbnew.SaveBoard(tmp, board)
+                        _fill(tmp)
+                        b2 = pcbnew.LoadBoard(tmp)
+                        pcb_route.complete(b2, lay, [m for m in unconnected_of(tmp) if m[0] in hit])
+                        pcb_route.tidy(b2, lay)
+                        pcbnew.SaveBoard(tmp, b2)
+                        _fill(tmp)
+                    except subprocess.CalledProcessError:
+                        continue        # a trial the filler crashed on (KiCad 9 can segfault) is dropped
+                    s2 = score(tmp)
+                    if s2 < base:
+                        print(f"route: rescue - {net} ({pa[0]:.1f}, {pa[1]:.1f}): {nv} item(s) taken up within {r} mm "
+                              f"and routed again; problems {base} -> {s2}", flush=True)
+                        os.replace(tmp, path)
+                        base, kept, progress = s2, kept + 1, True
+                        break
+                if progress:
+                    break           # the list moved: read it again
+    finally:
+        shutil.rmtree(tdir, ignore_errors=True)
     return kept
+
+
+def cmd_route(bdir, chunk=30):
+    """`route <board>`: route a placed board IN PLACE, in steps that each save the board,
+    so a run that is killed (a container restart) resumes where it stopped: run it again.
+    For a board laid out with `layout --no-route`. In order, each done once: the pairs,
+    moat keep-outs, plane fanout and connect_first (pcb_route.prepare); then every
+    connection KiCad still counts missing, shortest first, by pcb_route.complete in
+    chunks, the zones filled and the board saved after each; then tidy, rip-up rescue
+    of what is left, the silkscreen (clear of every via) and the stackup. Prints what is
+    still unconnected; check fails on each."""
+    import json
+    import pcb_route
+    name = os.path.basename(bdir)
+    path = os.path.join(bdir, name + ".kicad_pcb")
+    lay = layout_yaml(bdir)
+    comps, _ = sheet_netlist(os.path.join(bdir, name + ".kicad_sch"))
+    board = pcbnew.LoadBoard(path)
+    if not any(type(t) is pcbnew.PCB_TRACK for t in board.GetTracks()):     # a guard's locked via is not routing
+        pcb_route.prepare(board, lay)
+        pcbnew.SaveBoard(path, board)
+        print("route: prepared (pairs, fanout, connect_first) - saved", flush=True)
+    if lay.get("escape"):
+        board = pcbnew.LoadBoard(path)
+        pcb_route.escape(board, lay)        # idempotent: a pad already left is skipped
+        pcbnew.SaveBoard(path, board)
+    _fill(path)
+    tried = set()
+    while True:
+        # route_first: nets a crowded corner needs before its neighbours take the room
+        first = {n.lstrip("/") for n in lay.get("route_first") or []}
+        miss = sorted((m for m in unconnected_of(path) if (m[0], round(m[1][0], 1), round(m[1][1], 1), round(m[2][0], 1), round(m[2][1], 1)) not in tried),
+                      key=lambda m: (m[0].lstrip("/") not in first, math.dist(m[1], m[2])))
+        if not miss:
+            break
+        batch = miss[:chunk]
+        for m in batch:
+            tried.add((m[0], round(m[1][0], 1), round(m[1][1], 1), round(m[2][0], 1), round(m[2][1], 1)))
+        board = pcbnew.LoadBoard(path)
+        failed = pcb_route.complete(board, lay, batch)
+        pcbnew.SaveBoard(path, board)
+        board = pcbnew.LoadBoard(path)          # tidy on a fresh load (post_route says why)
+        pcb_route.tidy(board, lay)
+        pcbnew.SaveBoard(path, board)
+        _fill(path)
+        print(f"route: {len(batch) - len(failed)} of {len(batch)} routed this step; saved", flush=True)
+    left = unconnected_of(path)
+    if left and not lay.get("no_rescue"):
+        print(f"route: rescue - {rescue(path, bdir)} kept", flush=True)
+    board = pcbnew.LoadBoard(path)
+    pcb_route.tidy(board, lay)
+    for d in list(board.GetDrawings()):
+        if isinstance(d, pcbnew.PCB_TEXT) and d.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS):
+            board.Delete(d)                     # the labels again, clear of the vias as they now stand
+    add_silk_generic(board, lay, comps)
+    silk_off_vias(board)
+    pcbnew.SaveBoard(path, board)
+    _fill(path)
+    if lay.get("fab"):
+        set_stackup(path, lay["fab"], pcbnew.LoadBoard(path).GetDesignSettings().GetBoardThickness() / 1e6, lay.get("stackup"))
+    left = sorted({"; ".join(i["description"] for i in v.get("items", [])) for v in drc(path).get("unconnected_items", [])})
+    print(f"pcb: {len(left)} connection(s) left for hand routing" + (":" if left else ""))
+    for u in left:
+        print("  " + u)
+    print(f"pcb: wrote {os.path.relpath(path, ROOT)}")
 
 
 def cmd_finish(bdir):
@@ -1108,9 +1216,10 @@ def load_parts(board, comps, nets, skip=()):
 def build(bdir):
     name = os.path.basename(bdir)
     lay = yaml.safe_load(open(os.path.join(bdir, "layout.yaml")))
-    if lay.get("kind") == "main":
+    if lay.get("kind") in ("main", "module"):
         import pcb_main
-        board, fps, netinfo, lay, comps, _ = pcb_main.build(bdir, lay)
+        import pcb_module
+        board, fps, netinfo, lay, comps, _ = (pcb_main if lay["kind"] == "main" else pcb_module).build(bdir, lay)
         if lay.get("fab"):
             fit_footprint_silk(board, lay["fab"])
         if not lay.get("route"):
@@ -1472,6 +1581,48 @@ def cmd_stackup(bdir):
     print(f"pcb: stackup of {os.path.relpath(pcb, ROOT)} written from layout.yaml fab: (mask {lay['fab']['mask']}, silk {lay['fab']['silk']})")
 
 
+def check_courtyards(board, lay):
+    """EVERY FOOTPRINT'S COURTYARD INSIDE THE BOARD (owner, 2026-10-02: "everything needs
+    to fit within the footprint of the boards"): each part's courtyard, on whichever face,
+    within the Edge.Cuts outline, its cut-outs and holes counted as outside. KiCad's DRC
+    does not test this - its courtyard tests are part against part, and its edge test is
+    copper only - so a part could hang off the side of a board and pass. A part that is
+    MEANT to overhang (a connector whose body reaches through a panel) is named in
+    layout.yaml `courtyard_overhang:` with the reason and the source that says so; an
+    entry naming a part that does not overhang is an error too, so the list cannot go
+    stale. A footprint with no courtyard (a net tie, a board-only mount) is not tested."""
+    bad = []
+    allow = lay.get("courtyard_overhang") or {}
+    for ref, why in allow.items():
+        if not isinstance(why, dict) or not why.get("reason") or not why.get("source"):
+            bad.append(f"error: [courtyard] layout.yaml courtyard_overhang: {ref} needs a reason: and a source:")
+    ol = pcbnew.SHAPE_POLY_SET()
+    if not board.GetBoardPolygonOutlines(ol):
+        return bad + ["error: [courtyard] the Edge.Cuts outline is not one closed shape, so courtyards cannot be checked against it"]
+    outline = shapely_of(ol).buffer(1e-3)
+    over = set()
+    for fp in sorted(board.GetFootprints(), key=lambda f: f.GetReference()):
+        ref = fp.GetReference()
+        for cl in (pcbnew.F_CrtYd, pcbnew.B_CrtYd):
+            cy = fp.GetCourtyard(cl)
+            if not cy.OutlineCount():
+                continue
+            out = shapely_of(cy).difference(outline)
+            if out.is_empty or out.area < 1e-4:
+                continue
+            over.add(ref)
+            if ref in allow:
+                continue
+            x0, y0, x1, y1 = out.bounds
+            bad.append(f"error: [courtyard] {ref} ({fp.GetFPID().GetLibItemName().wx_str()}): {out.area:.2f} mm2 of its "
+                       f"{'front' if cl == pcbnew.F_CrtYd else 'rear'} courtyard lies outside the board outline, over "
+                       f"({x0:.2f}, {y0:.2f})-({x1:.2f}, {y1:.2f}) - move it inside, or name it in layout.yaml "
+                       f"courtyard_overhang: with the reason it is meant to overhang and the source")
+    for ref in sorted(set(allow) - over):
+        bad.append(f"error: [courtyard] layout.yaml courtyard_overhang: {ref} lies wholly inside the board - take it off the list")
+    return bad
+
+
 def check_silk(board, fab):
     """What KiCad 9's DRC does not check (K3-2): silk LINE width (min_text_thickness is
     text only), silk to a pad's mask opening (min_silk_clearance is silk to silk, and
@@ -1773,9 +1924,12 @@ def cad_export_problems(lay):
     committed; at a STALE export they compare the board with a body that may no longer
     exist, and pass. Asks tools/cad.py's own ledger test, for those files only."""
     import cad
-    want = {"mechanical/export/pcb-geometry.echo",
-            "mechanical/export/" + (lay["outline"] if lay.get("kind") == "main"
-                                    else f"key-board-{lay['suffix'].lower()}.dxf")}
+    if lay.get("kind") == "module":     # the module's own CAD and its exports
+        want = {"mechanical/module/export/pcb-geometry.echo", "mechanical/module/export/" + lay["outline"]}
+    else:
+        want = {"mechanical/export/pcb-geometry.echo",
+                "mechanical/export/" + (lay["outline"] if lay.get("kind") == "main"
+                                        else f"key-board-{lay['suffix'].lower()}.dxf")}
     outs = {o["out"]: o for o in cad.load_spec() if o["out"] in want}
     ledger = cad.load_ledger()
     behind = [p for p, _ in cad.params_problems()]
@@ -1849,6 +2003,7 @@ def cmd_check(bdir):
     bad += cad_export_problems(lay)
     bad += jlc_rotation_problems(bdir, name, board)
     bad += check_rules(board, bdir, name, lay)
+    bad += check_courtyards(board, lay)
     if lay.get("fab"):
         bad += check_silk(board, lay["fab"])
     bad += check_tracks(board)
@@ -1857,6 +2012,11 @@ def cmd_check(bdir):
     if lay.get("kind") == "main":
         import pcb_main
         bad += pcb_main.check_cad(board, lay, comps)
+    elif lay.get("kind") == "module":
+        import pcb_module
+        bad += pcb_module.check_cad(board, lay, comps)
+        for b in pcb_module.check_b2b(board, bdir, lay):
+            (notes if b.startswith("note:") else bad).append(b)
     else:
         bad += check_cad(board, lay, cad_geometry(lay["cluster"]), comps)
     if lay.get("planes") or lay.get("islands"):
@@ -2078,10 +2238,10 @@ if __name__ == "__main__":
     if len(sys.argv) >= 4 and sys.argv[1] == "update-footprints":
         sys.exit(cmd_update_footprints(os.path.join(ROOT, sys.argv[2].rstrip("/")),
                                        [a for a in sys.argv[3:] if not a.startswith("--")], "--pads-resized" in sys.argv) or 0)
-    if len(sys.argv) >= 3 and sys.argv[1] in ("layout", "check", "render", "finish", "stackup"):
+    if len(sys.argv) >= 3 and sys.argv[1] in ("layout", "check", "render", "finish", "route", "stackup"):
         d = os.path.join(ROOT, sys.argv[2].rstrip("/"))
         sys.exit({"layout": lambda: cmd_layout(d, "--force" in sys.argv, "--no-route" not in sys.argv), "check": lambda: cmd_check(d),
-                  "finish": lambda: cmd_finish(d), "stackup": lambda: cmd_stackup(d),
+                  "finish": lambda: cmd_finish(d), "route": lambda: cmd_route(d), "stackup": lambda: cmd_stackup(d),
                   "render": lambda: cmd_render(d, sys.argv[sys.argv.index("--preview") + 1] if "--preview" in sys.argv else None)}[sys.argv[1]]() or 0)
     print(__doc__)
     sys.exit(2)
