@@ -1,8 +1,9 @@
 # Instrument power entry — simulation
 
 `sims.yaml` says what is simulated and what every run must show; `pei-z.cir`
-(the impedance the buck sees) and `pei-start.cir` (the start: cold,
-hot-plugged, and pulled and put back) are the decks; `results.yaml` is **generated** by
+(the impedance the buck sees), `pei-start.cir` (the start: cold,
+hot-plugged, and pulled and put back) and `pei-pwm.cir` (the LED row's PWM on
+the input LC at the operating point, #12) are the decks; `results.yaml` is **generated** by
 `python3 tools/sim.py run hardware/carrier/power-entry-instrument/sim`.
 `docs/reference/tooling.md` §5 explains the tool.
 
@@ -40,6 +41,11 @@ put `V_GS` at 16.5 V with the output at 12 V.)
 | `hot-plug` | the instrument plugged into a running module, 65 corners | starts at every corner in 94–183 ms, no fault latch. **`U-ISO` peaks at 0.50–0.56 A at every corner, 3.3× under its 1.84 A over-current threshold** (`hotplug-iso-ocp`); `VCC` at the load switch does not move (11.996 V); the ring at `J-UMB` peaks at 14.2 V, under `D-TVS-PWR`'s standoff; `Q-INRUSH` dissipates 1.8 W at most |
 | `replug-late` | running, pulled, and put back 200 ms later | starts again from off: `U-ISO` 0.51–0.53 A |
 | `replug-early` | running, pulled, and put back 30 ms later | **A recorded hazard:** the bulk still holds a few volts and `Q-INRUSH` is still enhanced, so the replug reaches `U-ISO`'s threshold, as every hot-plug did before `Q-INRUSH`; see `results.yaml` for how long, and `VCC`'s dip, at every corner including the LT1641's highest gate drive |
+| `supply-cold-start` | `cold-start` with U-ISO's output at ±3.1 % (#12), 65 corners | **`INST_POS12` peaks at 12.20 V**, under the WS2815B-V1's 13.5 V absolute maximum; `J-UMB` at most 12.37 V (the supply itself); U-ISO 0.48–0.54 A; the buck's input never falls back |
+| `supply-hot-plug` | `hot-plug` with U-ISO at ±3.1 %, 129 corners | **the ring at `J-UMB` peaks at 14.68 V** at U-ISO's +3.1 % — under `D-TVS-PWR`'s 15 V standoff by **0.32 V**, the thinnest margin in this suite; `INST_POS12` at most 12.20 V; U-ISO 0.48–0.56 A, no fault latch |
+| `supply-replug-late` | `replug-late` with U-ISO at ±3.1 % | `J-UMB` 14.45 V, `INST_POS12` 12.21 V at most; U-ISO under 0.54 A |
+| `led-pwm` | the LED row's PWM (in phase, half duty, 2/3/3.39/4 kHz, 0.195 and 0.367 A swing) on the input LC, 136 runs | `BUCK_IN` ripple **28–153 mV p-p**, never below **11.23 V**; `INST_POS12` ripple 18–221 mV p-p, never above **12.37 V** |
+| `led-pwm-matrix` | the same with the buck's input power swinging 3.08 W in phase (the Matrix from typical play to the 5 V rail's clamp-legal worst), 68 runs | `BUCK_IN` ripple up to **0.94 V p-p** at `C-BUCK-IN`'s 120 Hz ESR maximum, never below **10.71 V** — 2.7 V over the R-78E5.0's 8 V minimum; `INST_POS12` at most 12.29 V |
 
 ## What it says that the page does not
 
@@ -67,6 +73,27 @@ put `V_GS` at 16.5 V with the output at 12 V.)
   hiccups on it depends on how long its over-current detection waits, which
   RECOM does not publish. **E6 decides**: pull and replug the instrument
   quickly with a current probe on `U-ISO`'s output.
+
+## Since #12
+
+- **`v_buck_dip` is replaced by `v_buck_fallback`.** The trough it took
+  started its window where the buck's input crossed 9 V, so it read 9.00 V at
+  every corner and a sag from 11.4 V to 8.6 V would have passed (#5). The new
+  measure is how far the buck's input ever falls back below its own running
+  maximum once the buck is drawing (past `v_on` + 0.25 V); it reads 0 at
+  every corner — the start is monotonic — and any sag at all after the start
+  would show. Asserted under 0.25 V, which keeps it above `v_on`.
+- **U-ISO's tolerance is swept** (`supply-*`, ±3.1 % as
+  `umbilical-load-switch/sim` varies it) and **`INST_POS12` is measured** —
+  the LED row's VDD, whose 13.5 V absolute maximum nothing guarded before.
+  It holds with 1.3 V to spare. The standoff margin at `J-UMB` is the one to
+  watch: 14.24 V at the nominal supply becomes **14.68 V** at +3.1 %.
+- **The LED row's PWM is run on the input LC** (`led-pwm`, `led-pwm-matrix`).
+  The LC's 3.39 kHz sits inside the row's 2–4 kHz, and `input-z` only checks its
+  small-signal peak. Driven, the buck's input keeps at least 2.7 V over its
+  minimum even with the Matrix swinging in phase, which it need not be;
+  `INST_POS12` never approaches 13.5 V. Neither PWM sim models U-ISO's loop:
+  it is a stiff source behind `r_bus`, leaving the damping to the network.
 
 ## In the register
 

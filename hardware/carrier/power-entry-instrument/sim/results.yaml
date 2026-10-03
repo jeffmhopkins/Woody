@@ -4,16 +4,17 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/carrier/power-entry-instrument/sim/sims.yaml: 4c809ffb5bd82027
+  hardware/carrier/power-entry-instrument/sim/sims.yaml: a16f7f2bedcc5fd0
   hardware/carrier/power-entry-instrument/netlist.yaml: 2ced35d8a0373a19
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
-  hardware/module/power-entry/netlist.yaml: 4f808996f437e7cd
+  hardware/module/power-entry/netlist.yaml: 56b479e28aae437c
   hardware/carrier/power-entry-instrument/sim/pei-z.cir: a1aee2ada3397cc1
-  hardware/carrier/power-entry-instrument/sim/pei-start.cir: e2387246ee8256e5
+  hardware/carrier/power-entry-instrument/sim/pei-start.cir: 514be1cedaf9a06a
+  hardware/carrier/power-entry-instrument/sim/pei-pwm.cir: c8faaade2a9390f2
   hardware/module/umbilical-load-switch/sim/lt1641.inc: 59be165ccd4451a6
   hardware/module/umbilical-load-switch/sim/sims.yaml: 85eec256fad8b2e5
-  figure:umbilical-current: 374 mA
-ngspice: '42'
+  figure:umbilical-current: 359 mA
+ngspice: '44.2'
 sims:
   input-z:
     corners: 9
@@ -52,17 +53,17 @@ sims:
         max: 0.0
         max_at: nominal
       t_up:
-        nominal: 0.163881
-        min: 0.108637
+        nominal: 0.16317
+        min: 0.107952
         min_at: igate+ itup- r_cable- t_iso- vto_q-
-        max: 0.238791
+        max: 0.237997
         max_at: igate- itup+ r_cable+ t_iso+ vto_q+
       i_iso_peak:
-        nominal: 0.527967
-        min: 0.509825
-        min_at: igate+ itup- r_cable+ t_iso- vto_q+
-        max: 0.537843
-        max_at: igate- itup+ r_cable- t_iso- vto_q-
+        nominal: 0.514881
+        min: 0.497198
+        min_at: igate+ itup- r_cable+ t_iso+ vto_q+
+        max: 0.525351
+        max_at: igate- itup- r_cable- t_iso- vto_q-
       t_at_ocp:
         nominal: 0.0
         min: 0.0
@@ -71,21 +72,21 @@ sims:
         max_at: nominal
       v_in_peak:
         nominal: 12.0
-        min: 11.6297
+        min: 11.6448
         min_at: igate- itup- r_cable+ t_iso+ vto_q-
         max: 12.0
         max_at: igate+ itup- r_cable- t_iso- vto_q+
-      v_buck_dip:
-        nominal: 9.00002
-        min: 9.00002
+      v_buck_fallback:
+        nominal: 0.0
+        min: 0.0
         min_at: nominal
-        max: 9.00406
-        max_at: igate- itup+ r_cable- t_iso- vto_q-
+        max: 0.0
+        max_at: nominal
       vcc_min:
-        nominal: 11.9963
-        min: 11.9962
+        nominal: 11.9964
+        min: 11.9963
         min_at: igate- itup- r_cable- t_iso- vto_q-
-        max: 11.9964
+        max: 11.9965
         max_at: igate- itup- r_cable+ t_iso- vto_q+
     asserts:
     - expr: max['latched'] < 0.5
@@ -95,9 +96,10 @@ sims:
       why: U-ISO's current never reaches its lowest over-current threshold (1.84 A, hiccup), so the converter's own limit
         never interrupts the start
       pass: true
-    - expr: min['v_buck_dip'] > p['v_on'] + 0.5
+    - expr: max['v_buck_fallback'] < 0.25
       why: 'once the buck is running its input never falls back towards its 8 V minimum: no start-stop chatter as the constant-power
-        load comes on through the cable and the LC'
+        load comes on through the cable and the LC. It passed v_on + 0.25 V with the load fully on, so a fall-back under 0.25
+        V from any later maximum keeps it above v_on - strict: any sag at all after the start reads here'
       pass: true
     - expr: max['v_in_peak'] < 15.0
       why: no overshoot at the instrument's input reaches D-TVS-PWR's 15 V standoff (SMAJ15A)
@@ -112,17 +114,17 @@ sims:
         max: 0.0
         max_at: nominal
       t_up:
-        nominal: 0.135421
-        min: 0.093976
-        min_at: C-INRUSH-GD+ c_tvs- igate+ r_cable- vhi- vto_q-
-        max: 0.182469
-        max_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ vhi- vto_q+
+        nominal: 0.134709
+        min: 0.0932808
+        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable- vhi- vto_q-
+        max: 0.181661
+        max_at: C-INRUSH-GD+ c_tvs+ igate+ r_cable+ vhi- vto_q+
       i_iso_peak:
-        nominal: 0.527965
-        min: 0.503573
-        min_at: C-INRUSH-GD+ c_tvs+ igate- r_cable+ vhi+ vto_q+
-        max: 0.556907
-        max_at: C-INRUSH-GD- c_tvs- igate+ r_cable- vhi- vto_q-
+        nominal: 0.514895
+        min: 0.490897
+        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ vhi- vto_q+
+        max: 0.544158
+        max_at: C-INRUSH-GD- c_tvs+ igate+ r_cable- vhi- vto_q-
       t_at_ocp:
         nominal: 0.0
         min: 0.0
@@ -130,28 +132,28 @@ sims:
         max: 0.0
         max_at: nominal
       v_in_peak:
-        nominal: 13.6682
-        min: 12.9636
-        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ vhi+ vto_q-
-        max: 14.2382
+        nominal: 13.6651
+        min: 12.9665
+        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ vhi- vto_q-
+        max: 14.2396
         max_at: C-INRUSH-GD- c_tvs+ igate- r_cable- vhi- vto_q-
-      v_buck_dip:
-        nominal: 9.00207
-        min: 9.00021
-        min_at: C-INRUSH-GD+ c_tvs+ igate- r_cable+ vhi+ vto_q+
-        max: 9.00241
-        max_at: C-INRUSH-GD- c_tvs- igate- r_cable- vhi- vto_q+
+      v_buck_fallback:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
       vcc_min:
-        nominal: 11.9963
-        min: 11.9961
+        nominal: 11.9964
+        min: 11.9962
         min_at: C-INRUSH-GD- c_tvs- igate- r_cable- vhi- vto_q-
-        max: 11.9965
+        max: 11.9966
         max_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ vhi- vto_q+
       p_q_peak:
-        nominal: 1.66752
-        min: 1.55047
+        nominal: 1.63654
+        min: 1.52024
         min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ vhi- vto_q+
-        max: 1.82206
+        max: 1.79256
         max_at: C-INRUSH-GD- c_tvs- igate+ r_cable- vhi- vto_q-
     asserts:
     - expr: max['latched'] < 0.5
@@ -166,7 +168,7 @@ sims:
       why: VCC at the load switch stays above the ON divider's worst-case turn-off, 9.90 V (umbilical-load-switch.md, 'The
         ON pin'), so the start is never interrupted by its own supply
       pass: true
-    - expr: min['v_buck_dip'] > p['v_on'] + 0.5 and max['v_in_peak'] < 15.0
+    - expr: max['v_buck_fallback'] < 0.25 and max['v_in_peak'] < 15.0
       why: the buck's input never falls back towards its minimum once running, and the ring at J-UMB when the plug makes contact
         stays under D-TVS-PWR's 15 V standoff (R-INRUSH-GD damps it)
       pass: true
@@ -184,10 +186,10 @@ sims:
         max: 0.0
         max_at: nominal
       i_iso_peak:
-        nominal: 0.527973
-        min: 0.509831
+        nominal: 0.514901
+        min: 0.49721
         min_at: r_cable+ vto_q+
-        max: 0.534298
+        max: 0.52129
         max_at: r_cable- vto_q-
       t_at_ocp:
         nominal: 0.0
@@ -196,10 +198,10 @@ sims:
         max: 0.0
         max_at: nominal
       vcc_min:
-        nominal: 11.9963
-        min: 11.9963
+        nominal: 11.9964
+        min: 11.9964
         min_at: r_cable- vto_q-
-        max: 11.9964
+        max: 11.9965
         max_at: r_cable+ vto_q+
     asserts:
     - expr: max['latched'] < 0.5 and max['i_iso_peak'] < 0.5 * p['i_ocp']
@@ -222,16 +224,16 @@ sims:
         max: 1.837
         max_at: nominal
       t_at_ocp:
-        nominal: 0.000161155
-        min: 9.95638e-05
-        min_at: dvg- igate- r_cable+ vhi- vto_q-
-        max: 0.000456957
+        nominal: 0.000157346
+        min: 9.70094e-05
+        min_at: dvg- igate+ r_cable+ vhi- vto_q-
+        max: 0.000452873
         max_at: dvg+ igate+ r_cable- vhi+ vto_q+
       vcc_min:
-        nominal: 11.6268
-        min: 10.2075
-        min_at: dvg+ igate+ r_cable- vhi+ vto_q+
-        max: 11.7297
+        nominal: 11.645
+        min: 10.2304
+        min_at: dvg+ igate+ r_cable- vhi+ vto_q-
+        max: 11.7355
         max_at: dvg- igate- r_cable+ vhi- vto_q+
     asserts:
     - expr: max['latched'] < 0.5 and min['vcc_min'] > 9.90
@@ -242,4 +244,561 @@ sims:
         Q-INRUSH is still enhanced (C-INRUSH-GS holds its V_GS) and the replug reaches U-ISO''s lowest over-current threshold
         for t_at_ocp, as every hot-plug did before Q-INRUSH. How long the window lasts depends on how fast the instrument
         drains, which the model''s loads set: the bench at E6 decides. If this starts failing the window is gone'
+      pass: true
+  supply-cold-start:
+    corners: 65
+    measures:
+      latched:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
+      i_iso_peak:
+        nominal: 0.514881
+        min: 0.484468
+        min_at: igate- itup- r_cable+ t_iso+ v_bus- vto_q+
+        max: 0.544001
+        max_at: igate- itup- r_cable- t_iso- v_bus+ vto_q-
+      v_in_peak:
+        nominal: 12.0
+        min: 11.2728
+        min_at: igate- itup- r_cable+ t_iso- v_bus- vto_q-
+        max: 12.372
+        max_at: igate+ itup- r_cable- t_iso- v_bus+ vto_q+
+      v_pos12_peak:
+        nominal: 11.8258
+        min: 11.2438
+        min_at: igate- itup- r_cable+ t_iso+ v_bus- vto_q+
+        max: 12.201
+        max_at: igate+ itup- r_cable- t_iso- v_bus+ vto_q-
+      v_buck_fallback:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
+    asserts:
+    - expr: max['v_pos12_peak'] < 13.5
+      why: 'INST_POS12 - the thirteen WS2815B-V1s'' VDD, on it directly - stays under their 13.5 V absolute maximum [datasheets/led/WS2815B-V1.pdf,
+        Absolute Maximum Ratings: VDD +9.5~+13.5 V] at U-ISO''s +3.1 % and every start corner'
+      pass: true
+    - expr: max['v_in_peak'] < 15.0
+      why: J-UMB's +12 V pin stays under D-TVS-PWR's 15 V standoff (SMAJ15A) at U-ISO's +3.1 % and every start corner
+      pass: true
+    - expr: max['latched'] < 0.5 and max['i_iso_peak'] < 0.999 * p['i_ocp'] and max['v_buck_fallback'] < 0.25
+      why: 'and the start still completes at either end of U-ISO''s tolerance: no fault latch, U-ISO under its over-current
+        threshold, the buck''s input never falling back'
+      pass: true
+  supply-hot-plug:
+    corners: 129
+    measures:
+      latched:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
+      i_iso_peak:
+        nominal: 0.514895
+        min: 0.478836
+        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ v_bus- vhi- vto_q+
+        max: 0.559803
+        max_at: C-INRUSH-GD- c_tvs- igate+ r_cable- v_bus+ vhi- vto_q-
+      v_in_peak:
+        nominal: 13.6651
+        min: 12.5636
+        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ v_bus- vhi- vto_q-
+        max: 14.6844
+        max_at: C-INRUSH-GD- c_tvs+ igate- r_cable- v_bus+ vhi- vto_q+
+      v_pos12_peak:
+        nominal: 11.8266
+        min: 11.2459
+        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ v_bus- vhi- vto_q+
+        max: 12.2015
+        max_at: C-INRUSH-GD- c_tvs- igate+ r_cable- v_bus+ vhi- vto_q-
+      v_buck_fallback:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
+    asserts:
+    - expr: max['v_pos12_peak'] < 13.5
+      why: 'INST_POS12 - the thirteen WS2815B-V1s'' VDD, on it directly - stays under their 13.5 V absolute maximum [datasheets/led/WS2815B-V1.pdf,
+        Absolute Maximum Ratings: VDD +9.5~+13.5 V] at U-ISO''s +3.1 % and every start corner'
+      pass: true
+    - expr: max['v_in_peak'] < 15.0
+      why: J-UMB's +12 V pin stays under D-TVS-PWR's 15 V standoff (SMAJ15A) at U-ISO's +3.1 % and every start corner
+      pass: true
+    - expr: max['latched'] < 0.5 and max['i_iso_peak'] < 0.999 * p['i_ocp'] and max['v_buck_fallback'] < 0.25
+      why: 'and the start still completes at either end of U-ISO''s tolerance: no fault latch, U-ISO under its over-current
+        threshold, the buck''s input never falling back'
+      pass: true
+  supply-replug-late:
+    corners: 9
+    measures:
+      latched:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
+      i_iso_peak:
+        nominal: 0.514901
+        min: 0.484475
+        min_at: r_cable+ v_bus- vto_q+
+        max: 0.534393
+        max_at: r_cable- v_bus+ vto_q-
+      v_in_peak:
+        nominal: 13.6651
+        min: 13.2445
+        min_at: r_cable- v_bus- vto_q-
+        max: 14.448
+        max_at: r_cable- v_bus+ vto_q-
+      v_pos12_peak:
+        nominal: 11.8305
+        min: 11.2507
+        min_at: r_cable+ v_bus- vto_q+
+        max: 12.205
+        max_at: r_cable- v_bus+ vto_q+
+    asserts:
+    - expr: max['v_pos12_peak'] < 13.5 and max['v_in_peak'] < 15.0
+      why: 'a replug once drained, at either end of U-ISO''s tolerance: INST_POS12 under the WS2815B-V1''s 13.5 V absolute
+        maximum and J-UMB under D-TVS-PWR''s 15 V standoff'
+      pass: true
+    - expr: max['latched'] < 0.5 and max['i_iso_peak'] < 0.5 * p['i_ocp']
+      why: and it still starts from off as a first plug-in does
+      pass: true
+  led-pwm[pw_f=2000.0,pw_i_swing=0.195]:
+    corners: 17
+    measures:
+      buck_pp_mv:
+        nominal: 38.691
+        min: 36.1543
+        min_at: esr_buck- esr_strip- r_cable- v_bus+
+        max: 68.1723
+        max_at: esr_buck- esr_strip+ r_cable+ v_bus+
+      buck_min:
+        nominal: 11.8511
+        min: 11.305
+        min_at: esr_buck- esr_strip+ r_cable+ v_bus-
+        max: 12.226
+        max_at: esr_buck- esr_strip- r_cable- v_bus+
+      pos12_pp_mv:
+        nominal: 39.5248
+        min: 37.8596
+        min_at: esr_buck- esr_strip- r_cable- v_bus+
+        max: 89.0495
+        max_at: esr_buck+ esr_strip+ r_cable- v_bus+
+      pos12_max:
+        nominal: 11.9149
+        min: 11.432
+        min_at: esr_buck- esr_strip- r_cable+ v_bus-
+        max: 12.3032
+        max_at: esr_buck+ esr_strip+ r_cable- v_bus+
+    asserts:
+    - expr: min['buck_min'] > p['v_on'] + 0.5
+      why: BUCK_IN stays at least 0.5 V above the R-78E5.0-1.0's 8 V input minimum through the PWM's start and its steady
+        ripple, at every frequency, swing and corner
+      pass: true
+    - expr: max['pos12_max'] < 13.5
+      why: INST_POS12 stays under the WS2815B-V1's 13.5 V absolute maximum as the row switches (the row going dark kicks it
+        up through the cable's inductance)
+      pass: true
+  led-pwm[pw_f=2000.0,pw_i_swing=0.367]:
+    corners: 17
+    measures:
+      buck_pp_mv:
+        nominal: 78.0693
+        min: 72.9508
+        min_at: esr_buck- esr_strip- r_cable- v_bus+
+        max: 137.558
+        max_at: esr_buck- esr_strip+ r_cable+ v_bus+
+      buck_min:
+        nominal: 11.8161
+        min: 11.2373
+        min_at: esr_buck- esr_strip+ r_cable+ v_bus-
+        max: 12.1923
+        max_at: esr_buck- esr_strip- r_cable- v_bus+
+      pos12_pp_mv:
+        nominal: 79.7514
+        min: 76.3916
+        min_at: esr_buck- esr_strip- r_cable- v_bus+
+        max: 179.679
+        max_at: esr_buck+ esr_strip+ r_cable- v_bus+
+      pos12_max:
+        nominal: 11.9394
+        min: 11.4875
+        min_at: esr_buck- esr_strip- r_cable+ v_bus-
+        max: 12.3428
+        max_at: esr_buck+ esr_strip+ r_cable- v_bus+
+    asserts:
+    - expr: min['buck_min'] > p['v_on'] + 0.5
+      why: BUCK_IN stays at least 0.5 V above the R-78E5.0-1.0's 8 V input minimum through the PWM's start and its steady
+        ripple, at every frequency, swing and corner
+      pass: true
+    - expr: max['pos12_max'] < 13.5
+      why: INST_POS12 stays under the WS2815B-V1's 13.5 V absolute maximum as the row switches (the row going dark kicks it
+        up through the cable's inductance)
+      pass: true
+  led-pwm[pw_f=3000.0,pw_i_swing=0.195]:
+    corners: 17
+    measures:
+      buck_pp_mv:
+        nominal: 40.1451
+        min: 29.9722
+        min_at: esr_buck+ esr_strip- r_cable- v_bus+
+        max: 77.5226
+        max_at: esr_buck- esr_strip+ r_cable+ v_bus+
+      buck_min:
+        nominal: 11.8504
+        min: 11.3003
+        min_at: esr_buck- esr_strip+ r_cable+ v_bus-
+        max: 12.2291
+        max_at: esr_buck+ esr_strip- r_cable- v_bus+
+      pos12_pp_mv:
+        nominal: 30.3365
+        min: 25.3912
+        min_at: esr_buck- esr_strip- r_cable- v_bus+
+        max: 92.7724
+        max_at: esr_buck+ esr_strip+ r_cable- v_bus+
+      pos12_max:
+        nominal: 11.9149
+        min: 11.432
+        min_at: esr_buck- esr_strip- r_cable+ v_bus-
+        max: 12.3082
+        max_at: esr_buck+ esr_strip+ r_cable- v_bus+
+    asserts:
+    - expr: min['buck_min'] > p['v_on'] + 0.5
+      why: BUCK_IN stays at least 0.5 V above the R-78E5.0-1.0's 8 V input minimum through the PWM's start and its steady
+        ripple, at every frequency, swing and corner
+      pass: true
+    - expr: max['pos12_max'] < 13.5
+      why: INST_POS12 stays under the WS2815B-V1's 13.5 V absolute maximum as the row switches (the row going dark kicks it
+        up through the cable's inductance)
+      pass: true
+  led-pwm[pw_f=3000.0,pw_i_swing=0.367]:
+    corners: 17
+    measures:
+      buck_pp_mv:
+        nominal: 81.0037
+        min: 60.4769
+        min_at: esr_buck+ esr_strip- r_cable- v_bus+
+        max: 156.426
+        max_at: esr_buck- esr_strip+ r_cable+ v_bus+
+      buck_min:
+        nominal: 11.8146
+        min: 11.2278
+        min_at: esr_buck- esr_strip+ r_cable+ v_bus-
+        max: 12.1985
+        max_at: esr_buck+ esr_strip- r_cable- v_bus+
+      pos12_pp_mv:
+        nominal: 61.2118
+        min: 51.2333
+        min_at: esr_buck- esr_strip- r_cable- v_bus+
+        max: 187.191
+        max_at: esr_buck+ esr_strip+ r_cable- v_bus+
+      pos12_max:
+        nominal: 11.9394
+        min: 11.4875
+        min_at: esr_buck- esr_strip- r_cable+ v_bus-
+        max: 12.3529
+        max_at: esr_buck+ esr_strip+ r_cable- v_bus+
+    asserts:
+    - expr: min['buck_min'] > p['v_on'] + 0.5
+      why: BUCK_IN stays at least 0.5 V above the R-78E5.0-1.0's 8 V input minimum through the PWM's start and its steady
+        ripple, at every frequency, swing and corner
+      pass: true
+    - expr: max['pos12_max'] < 13.5
+      why: INST_POS12 stays under the WS2815B-V1's 13.5 V absolute maximum as the row switches (the row going dark kicks it
+        up through the cable's inductance)
+      pass: true
+  led-pwm[pw_f=3390.0,pw_i_swing=0.195]:
+    corners: 17
+    measures:
+      buck_pp_mv:
+        nominal: 39.4721
+        min: 27.7387
+        min_at: esr_buck+ esr_strip- r_cable- v_bus+
+        max: 75.8191
+        max_at: esr_buck- esr_strip+ r_cable+ v_bus+
+      buck_min:
+        nominal: 11.8507
+        min: 11.3011
+        min_at: esr_buck- esr_strip+ r_cable+ v_bus-
+        max: 12.2302
+        max_at: esr_buck+ esr_strip- r_cable- v_bus+
+      pos12_pp_mv:
+        nominal: 27.3091
+        min: 20.1994
+        min_at: esr_buck- esr_strip- r_cable- v_bus-
+        max: 99.0321
+        max_at: esr_buck- esr_strip+ r_cable- v_bus+
+      pos12_max:
+        nominal: 11.9149
+        min: 11.432
+        min_at: esr_buck- esr_strip- r_cable+ v_bus-
+        max: 12.3107
+        max_at: esr_buck- esr_strip+ r_cable- v_bus+
+    asserts:
+    - expr: min['buck_min'] > p['v_on'] + 0.5
+      why: BUCK_IN stays at least 0.5 V above the R-78E5.0-1.0's 8 V input minimum through the PWM's start and its steady
+        ripple, at every frequency, swing and corner
+      pass: true
+    - expr: max['pos12_max'] < 13.5
+      why: INST_POS12 stays under the WS2815B-V1's 13.5 V absolute maximum as the row switches (the row going dark kicks it
+        up through the cable's inductance)
+      pass: true
+  led-pwm[pw_f=3390.0,pw_i_swing=0.367]:
+    corners: 17
+    measures:
+      buck_pp_mv:
+        nominal: 79.6457
+        min: 55.9702
+        min_at: esr_buck+ esr_strip- r_cable- v_bus+
+        max: 152.988
+        max_at: esr_buck- esr_strip+ r_cable+ v_bus+
+      buck_min:
+        nominal: 11.8153
+        min: 11.2294
+        min_at: esr_buck- esr_strip+ r_cable+ v_bus-
+        max: 12.2008
+        max_at: esr_buck+ esr_strip- r_cable- v_bus+
+      pos12_pp_mv:
+        nominal: 55.103
+        min: 40.7572
+        min_at: esr_buck- esr_strip- r_cable- v_bus-
+        max: 199.822
+        max_at: esr_buck- esr_strip+ r_cable- v_bus+
+      pos12_max:
+        nominal: 11.9394
+        min: 11.4875
+        min_at: esr_buck- esr_strip- r_cable+ v_bus-
+        max: 12.358
+        max_at: esr_buck- esr_strip+ r_cable- v_bus+
+    asserts:
+    - expr: min['buck_min'] > p['v_on'] + 0.5
+      why: BUCK_IN stays at least 0.5 V above the R-78E5.0-1.0's 8 V input minimum through the PWM's start and its steady
+        ripple, at every frequency, swing and corner
+      pass: true
+    - expr: max['pos12_max'] < 13.5
+      why: INST_POS12 stays under the WS2815B-V1's 13.5 V absolute maximum as the row switches (the row going dark kicks it
+        up through the cable's inductance)
+      pass: true
+  led-pwm[pw_f=4000.0,pw_i_swing=0.195]:
+    corners: 17
+    measures:
+      buck_pp_mv:
+        nominal: 33.9328
+        min: 25.0268
+        min_at: esr_buck+ esr_strip- r_cable- v_bus+
+        max: 62.7673
+        max_at: esr_buck- esr_strip+ r_cable+ v_bus+
+      buck_min:
+        nominal: 11.8535
+        min: 11.3076
+        min_at: esr_buck- esr_strip+ r_cable+ v_bus-
+        max: 12.2316
+        max_at: esr_buck+ esr_strip- r_cable- v_bus+
+      pos12_pp_mv:
+        nominal: 27.6935
+        min: 18.4067
+        min_at: esr_buck- esr_strip- r_cable- v_bus-
+        max: 109.516
+        max_at: esr_buck- esr_strip+ r_cable- v_bus-
+      pos12_max:
+        nominal: 11.9149
+        min: 11.432
+        min_at: esr_buck- esr_strip- r_cable+ v_bus-
+        max: 12.3151
+        max_at: esr_buck- esr_strip+ r_cable- v_bus+
+    asserts:
+    - expr: min['buck_min'] > p['v_on'] + 0.5
+      why: BUCK_IN stays at least 0.5 V above the R-78E5.0-1.0's 8 V input minimum through the PWM's start and its steady
+        ripple, at every frequency, swing and corner
+      pass: true
+    - expr: max['pos12_max'] < 13.5
+      why: INST_POS12 stays under the WS2815B-V1's 13.5 V absolute maximum as the row switches (the row going dark kicks it
+        up through the cable's inductance)
+      pass: true
+  led-pwm[pw_f=4000.0,pw_i_swing=0.367]:
+    corners: 17
+    measures:
+      buck_pp_mv:
+        nominal: 68.4688
+        min: 50.4982
+        min_at: esr_buck+ esr_strip- r_cable- v_bus+
+        max: 126.652
+        max_at: esr_buck- esr_strip+ r_cable+ v_bus+
+      buck_min:
+        nominal: 11.8209
+        min: 11.2426
+        min_at: esr_buck- esr_strip+ r_cable+ v_bus-
+        max: 12.2035
+        max_at: esr_buck+ esr_strip- r_cable- v_bus+
+      pos12_pp_mv:
+        nominal: 55.8784
+        min: 37.1399
+        min_at: esr_buck- esr_strip- r_cable- v_bus-
+        max: 220.965
+        max_at: esr_buck- esr_strip+ r_cable- v_bus+
+      pos12_max:
+        nominal: 11.9394
+        min: 11.4875
+        min_at: esr_buck- esr_strip- r_cable+ v_bus-
+        max: 12.3669
+        max_at: esr_buck- esr_strip+ r_cable- v_bus+
+    asserts:
+    - expr: min['buck_min'] > p['v_on'] + 0.5
+      why: BUCK_IN stays at least 0.5 V above the R-78E5.0-1.0's 8 V input minimum through the PWM's start and its steady
+        ripple, at every frequency, swing and corner
+      pass: true
+    - expr: max['pos12_max'] < 13.5
+      why: INST_POS12 stays under the WS2815B-V1's 13.5 V absolute maximum as the row switches (the row going dark kicks it
+        up through the cable's inductance)
+      pass: true
+  led-pwm-matrix[pw_f=2000.0]:
+    corners: 17
+    measures:
+      buck_pp_mv:
+        nominal: 125.625
+        min: 97.1208
+        min_at: esr_buck- esr_strip- r_cable+ v_bus+
+        max: 895.047
+        max_at: esr_buck+ esr_strip- r_cable+ v_bus-
+      buck_min:
+        nominal: 11.7402
+        min: 10.7318
+        min_at: esr_buck+ esr_strip- r_cable+ v_bus-
+        max: 12.1213
+        max_at: esr_buck- esr_strip- r_cable- v_bus+
+      pos12_pp_mv:
+        nominal: 99.4779
+        min: 91.5183
+        min_at: esr_buck- esr_strip- r_cable- v_bus+
+        max: 174.039
+        max_at: esr_buck- esr_strip+ r_cable+ v_bus-
+      pos12_max:
+        nominal: 11.9149
+        min: 11.432
+        min_at: esr_buck- esr_strip- r_cable+ v_bus-
+        max: 12.2884
+        max_at: esr_buck- esr_strip- r_cable- v_bus+
+    asserts:
+    - expr: min['buck_min'] > p['v_on'] + 0.5
+      why: BUCK_IN stays at least 0.5 V above the R-78E5.0-1.0's 8 V input minimum through the PWM's start and its steady
+        ripple, at every frequency, swing and corner
+      pass: true
+    - expr: max['pos12_max'] < 13.5
+      why: INST_POS12 stays under the WS2815B-V1's 13.5 V absolute maximum as the row switches (the row going dark kicks it
+        up through the cable's inductance)
+      pass: true
+  led-pwm-matrix[pw_f=3000.0]:
+    corners: 17
+    measures:
+      buck_pp_mv:
+        nominal: 165.308
+        min: 165.308
+        min_at: nominal
+        max: 926.36
+        max_at: esr_buck+ esr_strip- r_cable+ v_bus-
+      buck_min:
+        nominal: 11.7203
+        min: 10.7152
+        min_at: esr_buck+ esr_strip- r_cable+ v_bus-
+        max: 12.0724
+        max_at: esr_buck- esr_strip- r_cable- v_bus+
+      pos12_pp_mv:
+        nominal: 92.6448
+        min: 76.0816
+        min_at: esr_buck+ esr_strip- r_cable- v_bus+
+        max: 182.31
+        max_at: esr_buck- esr_strip+ r_cable+ v_bus-
+      pos12_max:
+        nominal: 11.9149
+        min: 11.432
+        min_at: esr_buck- esr_strip- r_cable+ v_bus-
+        max: 12.2884
+        max_at: esr_buck- esr_strip- r_cable- v_bus+
+    asserts:
+    - expr: min['buck_min'] > p['v_on'] + 0.5
+      why: BUCK_IN stays at least 0.5 V above the R-78E5.0-1.0's 8 V input minimum through the PWM's start and its steady
+        ripple, at every frequency, swing and corner
+      pass: true
+    - expr: max['pos12_max'] < 13.5
+      why: INST_POS12 stays under the WS2815B-V1's 13.5 V absolute maximum as the row switches (the row going dark kicks it
+        up through the cable's inductance)
+      pass: true
+  led-pwm-matrix[pw_f=3390.0]:
+    corners: 17
+    measures:
+      buck_pp_mv:
+        nominal: 172.336
+        min: 172.336
+        min_at: nominal
+        max: 933.929
+        max_at: esr_buck+ esr_strip- r_cable+ v_bus-
+      buck_min:
+        nominal: 11.7167
+        min: 10.7112
+        min_at: esr_buck+ esr_strip- r_cable+ v_bus-
+        max: 12.0563
+        max_at: esr_buck- esr_strip+ r_cable- v_bus+
+      pos12_pp_mv:
+        nominal: 88.6063
+        min: 70.6604
+        min_at: esr_buck+ esr_strip- r_cable- v_bus+
+        max: 168.927
+        max_at: esr_buck- esr_strip+ r_cable+ v_bus-
+      pos12_max:
+        nominal: 11.9149
+        min: 11.432
+        min_at: esr_buck- esr_strip- r_cable+ v_bus-
+        max: 12.2884
+        max_at: esr_buck- esr_strip- r_cable- v_bus+
+    asserts:
+    - expr: min['buck_min'] > p['v_on'] + 0.5
+      why: BUCK_IN stays at least 0.5 V above the R-78E5.0-1.0's 8 V input minimum through the PWM's start and its steady
+        ripple, at every frequency, swing and corner
+      pass: true
+    - expr: max['pos12_max'] < 13.5
+      why: INST_POS12 stays under the WS2815B-V1's 13.5 V absolute maximum as the row switches (the row going dark kicks it
+        up through the cable's inductance)
+      pass: true
+  led-pwm-matrix[pw_f=4000.0]:
+    corners: 17
+    measures:
+      buck_pp_mv:
+        nominal: 170.191
+        min: 170.191
+        min_at: nominal
+        max: 942.959
+        max_at: esr_buck+ esr_strip- r_cable+ v_bus-
+      buck_min:
+        nominal: 11.7178
+        min: 10.7064
+        min_at: esr_buck+ esr_strip- r_cable+ v_bus-
+        max: 12.0627
+        max_at: esr_buck- esr_strip+ r_cable- v_bus+
+      pos12_pp_mv:
+        nominal: 76.9041
+        min: 55.4891
+        min_at: esr_buck- esr_strip- r_cable- v_bus+
+        max: 144.968
+        max_at: esr_buck+ esr_strip+ r_cable+ v_bus-
+      pos12_max:
+        nominal: 11.9149
+        min: 11.432
+        min_at: esr_buck- esr_strip- r_cable+ v_bus-
+        max: 12.2884
+        max_at: esr_buck- esr_strip- r_cable- v_bus+
+    asserts:
+    - expr: min['buck_min'] > p['v_on'] + 0.5
+      why: BUCK_IN stays at least 0.5 V above the R-78E5.0-1.0's 8 V input minimum through the PWM's start and its steady
+        ripple, at every frequency, swing and corner
+      pass: true
+    - expr: max['pos12_max'] < 13.5
+      why: INST_POS12 stays under the WS2815B-V1's 13.5 V absolute maximum as the row switches (the row going dark kicks it
+        up through the cable's inductance)
       pass: true

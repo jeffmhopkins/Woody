@@ -60,12 +60,20 @@ V<sub>SS</sub> … −0.6 V to V<sub>DD</sub> + 0.6 V"* `[ds MCP3202-CI-SN.pdf
 p.2]`. So the 10 kΩ is a current limit judged against nothing printed, and it
 is only reached when the buffer is high while 3V3 is still down. At rest the
 divider sits at 0.16 V (above), inside the −0.6 V … +0.6 V window even with
-3V3 at zero. **Whether the buffer swings high during power-up is the
-power-on transient the sequencing simulation is answering**; that result
-closes this paragraph, and the upper leg stays ≥10 kΩ until it does.
+3V3 at zero. **Whether the buffer swings high during power-up no longer
+needs an answer**: the sequencing simulation (`sim/`, `powerup-*`, #12) holds
+the buffer at its positive rail through the whole power-up and the clamp
+carries at most 0.72 mA; with the sensor at full scale and 3V3 down, 0.40 mA
+`[sim]`. Both are under the 1 mA that run states as its limit — a limit of
+its own, since the datasheet prints none — so the upper leg stays ≥10 kΩ.
+The same run shows the pin 0.52–0.64 V over VDD while it conducts (the clamp's
+drop, unpublished, varied a decade either way): at the weak end just past the
+"V<sub>DD</sub> + 0.6 V" above, current-limited by this resistor.
 
 The same resistor covers a saturated buffer: if the sensor or the op-amp fails
-high at +12 V, `(12 − 0.7 − 3.3)/10 kΩ ≈ 800 µA`, still inside the clamp rating.
+high at +12 V, `(12 − 0.7 − 3.3)/10 kΩ ≈ 800 µA` — 0.48–0.59 mA simulated
+through the whole divider (`powerup-rail`) — under the 1 mA the power-up run
+judges against; the datasheet itself rates no clamp current.
 
 **Anti-alias** `[calc]`, matching `C-AA-ADC` `[repo] bom.csv`:
 
@@ -75,6 +83,15 @@ f_c  = 1/(2π × 6k × 47 nF) = 564 Hz
 τ    = 6 kΩ × 47 nF        = 282 µs
 attenuation at the R-78E5.0's ~330 kHz switching rate = 20·log10(330k/564) = 55 dB
 ```
+
+> **The 55 dB is ADC_IN's own path, not the converter's.** The breath signal
+> is made from `INST_POS12`, not the 5 V rail; the R-78E5.0's ripple reaches
+> the conversion through `VDD`, which is the reference, and this filter does
+> not touch it. `sim/`'s `vdd-ripple` (#12) runs that path and, on
+> pessimistic inputs (the converter's whole 120 mV p-p as its fundamental,
+> the LDO's unpublished rejection at 330 kHz as −20 dB), **does not meet the
+> 2 LSB E9 budget below**: 14.6 LSB at full scale nominal. The bench decides;
+> `sim/README.md` says what to measure.
 
 > **τ = 282 µs exceeds the 250 µs loop period, and the note-on threshold is read
 > through it.** About 5.6 % of the 5 ms budget. It is booked as its own row,
