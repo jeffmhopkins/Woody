@@ -267,7 +267,20 @@ derived requirement of 58.5 dB — and 60.2 dB is the nominal: at the worst
 tolerance corner the unmatched link is **below** the requirement
 (`breath-link-cmrr`, simulated). With `R1b` fitted the worst case clears it
 at mains; it does not hold to the 500 Hz edge of the breath channel, because
-the `C_cm` mismatch grows with frequency (same figure). Both parts are inside a
+the `C_cm` mismatch grows with frequency (same figure).
+
+**The requirement's band is DC to 500 Hz** — the breath channel's band
+(ADR 0004: `BREATH` is "band-limited ~500 Hz"), because a common-mode
+disturbance anywhere inside it reaches `BREATH_OUT` as breath, and nothing
+after the in-amp removes it. It was stated with no band until 2026-10-03
+(#5 finding 5). Its derivation is not in the corpus; the 2026-09-21
+pre-merge review reconstructs it to 0.1 dB as the `PWR_GND` drop at ADR
+0003's 350 mA (58.9 mV) held to 1 LSB of 10 V at 16 bits at the in-amp output,
+referred to its input `[calc, docs/review/2026-09-21-pre-merge-review/A1-breath-chain.md]`.
+**Against that band the worst corner fails**, from about 480 Hz to the band's
+edge, by under half a decibel (`module/breath-receive-stage/sim`,
+`cmrr-as-netlisted`). Deciding it is the owner's: a tighter `C_cm` match, or
+accepting the band's top 20 Hz. The band was not moved to make it pass. Both parts are inside a
 body that is expensive to reopen (ADR 0009).
 
 > One correction to the receive page's own case for `R1b`: it claims the

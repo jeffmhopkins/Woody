@@ -178,7 +178,7 @@ what each found is in the register, not here:
 
 | Sim | Where | Result |
 |---|---|---|
-| **Breath-link CMRR** with the INA828 | `module/breath-receive-stage/sim` | `breath-link-cmrr`. Clears 58.5 dB at mains on the worst corner, not to the 500 Hz edge of the breath channel; without `R1b` the worst corner is below it |
+| **Breath-link CMRR** with the INA828 | `module/breath-receive-stage/sim` | `breath-link-cmrr`. Clears 58.5 dB at mains on the worst corner, not to the 500 Hz edge of the breath channel, which is the requirement's band (DC–500 Hz, `breath-sense-link.md`): the assertion fails there, for the owner; without `R1b` the worst corner is below it |
 | **`R-ISO-REF` stability** | `carrier/breath-excitation-reference/sim` | `riso-ref-phase-margin`, TI's Figure 56 reproduced alongside. No longer blocked: `cref-out-node` settled the load. **10 µF added at `VS` rings** although the margin barely moves |
 | **Pitch transient into a passive mult** | `module/pitch-stage/sim` | `pitch-mult-overshoot`. **The AC sweep is structurally blind to it**: the phase margin is the same at every load |
 | **Power-on / reset transient** | `module/power-entry/sim` | **`D3` is netlisted backwards** and the −12 V rail never arrives; with it reversed, `DAC_AVDD` keeps `dac-rail`'s floor and the pitch jack stays at 0 V |
