@@ -52,6 +52,13 @@ components:
     pins:
     - 1
     - 2
+  C8:
+    of: C-DECOUPLE-165
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: REG
   J1:
     of: J-CHAIN
     value: 12-way
@@ -265,6 +272,7 @@ nets:
   - C5.2
   - C6.2
   - C7.2
+  - C8.2
   - J1.10
   - J1.12
   - J1.4
@@ -287,6 +295,7 @@ nets:
   V3V3_CHAIN_LH:
   - C6.1
   - C7.1
+  - C8.1
   - J1.3
   - R10.1
   - R11.1

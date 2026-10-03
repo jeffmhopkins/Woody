@@ -1,5 +1,9 @@
 Designator,Value,Manufacturer,MPN
 J1,12-way,Samtec,SHF-106-01-L-D-RA
+J2,2x12 1.27mm shrouded box header,XKB Connection,X1270WR-2x12A-9TV01
+J3,1x10 2.54mm header pins,,
+J4,1x10 2.54mm header pins,,
+J5,4 wire pads,,
 SW1,KS-33,Gateron,KS-33H10B050NN-Y24
 SW2,KS-33,Gateron,KS-33H10B050NN-Y24
 SW3,KS-33,Gateron,KS-33H10B050NN-Y24

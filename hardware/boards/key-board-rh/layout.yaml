@@ -87,10 +87,11 @@ parts:
   # plate's end, where nothing stands over them but the oak. J5's place is
   # nominal: the Matrix's TP2, TP3 and button pads, measured on the board in
   # hand, decide it.
+  C9:  [211.2, 46.47, 0]     # C-DECOUPLE-165-VCC, at U1's VCC (pin 16), review #6-5
   J2:  [242.3, 21.515, 0]    # J-MCU-KB
   J3:  [272.97, 17.07, 270]  # HDR-MATRIX, the 5V..IO1 row
   J4:  [272.97, 39.93, 270]  # HDR-MATRIX, the IO33..RX row
-  J5:  [276.0, 11.5, 0]      # W-MATRIX
+  J5:  [284.0, 8.7, 270]      # W-MATRIX, by the near rail's outer edge, below the lanes
 
 silk:
   at: [152.0, 12.5]
@@ -99,26 +100,22 @@ silk:
   rev: "A"
   date: "2026-09-28"
 
-# FREEROUTING SINCE THE MATRIX (2026-10-02). With J2 (J-MCU-KB, 24 pins at 1.27
-# mm) on the board, pcb_route's own router (`route: true`) fanned out at most
-# fifteen of J2's nets, in every route order tried and with the Matrix's 5 V
-# and 3V3 at power width or not. Freerouting routes all but about five, which
-# differ run to run; `pcb.py finish` does not close them. TWO THINGS ARE OPEN,
-# both needing either hand work in KiCad or tools/pcb.py: those last
-# connections out of J2, and the GND_CHAIN pours, which this path does not
-# add (pcb_route adds them only with `route: true`).
-route: freerouting
+# THE MATRIX'S NETS ARE ROUTED BY HAND (2026-10-03). pcb_route fans out at most
+# fifteen of J2's (J-MCU-KB's) 24 pins in any order, and Freerouting leaves a few
+# and adds no pours. So tools/ stays as it is and the layout is made in two
+# steps: pcb.py layout routes everything else with J2-J5's nets held out and
+# their routes kept clear, then a script draws the Matrix's routes - every pin
+# out of J2 in nested 45-degree fans, the odd row off its back on the bottom
+# face and the even row off its front, round the header's ends between it and
+# the tail columns, then along the rails, each net dropping to its pin on the
+# top face. hardware/boards/key-board-rh/README.md, *Revisions* B, names it.
+route: true
 # The two key lines from the register's far row first, as the left-hand board
 # routes KEY_LH5 first: U1.13 (RH6) is boxed in by the 12-15 strap, and routed
 # later it finds its via spots below the pin taken. Then J-CHAIN's far row (the
 # odd pins), reachable only from the header's back. KEY_RH1 last: routed early,
 # its via lands beside J-CHAIN's ground pin 4 and starves that pin's thermal.
-# Then J2's (J-MCU-KB's) far row, the odd pins, reachable only from the
-# header's back - outermost first, as they wrap round its ends to the rails -
-# and its near row.
-route_first: [/KEY_RH5, /KEY_RH6, /CHAIN_SCK, /CHAIN_SHLD, /HOP_LT_RH, /HOP_RH_RT, /KEY_RH1,
-              /EN, /U0TXD, /IO1, /IO40, /IO7, /IO37, /IO38, /IO39, /IO35, /IO34, /IO36,
-              /IO0, /U0RXD, /IO2, /IO33, /IO3, /INST_5V_A, /DEV_3V3]
+route_first: [/KEY_RH5, /KEY_RH6, /CHAIN_SCK, /CHAIN_SHLD, /HOP_LT_RH, /HOP_RH_RT, /KEY_RH1]
 connect_first:
   - {pads: [C7.2, U1.8], max_mm: 15, why: "the decoupling loop's ground half, in its own track"}
   # The register's two far-row ground pins are boxed in by the far-row key lines:
@@ -128,6 +125,7 @@ connect_first:
   # strap of its own, routed before the key lines: 12 to the ground pin 8, 15 to 12.
   - {pads: [U1.12, U1.8], max_mm: 20, why: "the low marker's strap to ground, boxed in between the high marker and RH6's line"}
   - {pads: [U1.15, U1.12], max_mm: 12, why: "CLK INH's strap to ground, boxed in between RH5's line and VCC"}
+  - {pads: [C9.1, U1.16], max_mm: 4, why: "the second decoupler's VCC side, straight onto pin 16 (review #6-5)"}
 ground_net: GND_CHAIN
 # The Matrix's grounds are on GND_CHAIN, the pour (the sheet says why). Its
 # 5 V and 3V3 route at signal width: routed first at the power width they

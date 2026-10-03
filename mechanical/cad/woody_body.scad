@@ -793,7 +793,7 @@ function kb_rect(cl) = let(x = xs(cluster_keys(cl)))
      max(x) + plate_cutout / 2 + tail_margin, W - u_y0 - boards_board_clear];
 // THE RIGHT-HAND KEY BOARD CARRIES THE MATRIX (boards.matrix_mount, owner
 // 2026-10-02; ADR 0021 amendment): past its tail end it runs on as two rails,
-// one under each of the Matrix's pad rows, out to the Matrix's tail edge.
+// one under each of the Matrix's pad rows, out just past the Matrix's tail edge.
 // Each rail runs from the board's side to boards.matrix_rail_in past its pad
 // row; the middle is open for the Matrix's back-side parts and the USB-C
 // plug. Its columns stay at kb_rect's corners, so the rails cantilever past
@@ -802,7 +802,11 @@ function kb_rect(cl) = let(x = xs(cluster_keys(cl)))
 assert(boards_matrix_mount == "key_board_rh", "the body CAD draws the Matrix on the right-hand key board's rails only (boards.matrix_mount)");
 assert(boards_matrix_support == "none", "boards.matrix_support 'standoff' is not drawn yet");
 matrix_row_dy = 22.86 / 2;   // [ds] WAVESHARE-ESP32-S3-MATRIX-pinout.png: two rows of ten at 2.54, 22.86 apart
-function matrix_rails() = let(r = kb_rect("right_hand"), x1 = matrix_xy[0] + boards_matrix_board / 2)
+// The rails end matrix_rail_past beyond the Matrix's tail edge: its last pins'
+// pads stand 1.07 in from that edge, and the board keeps its edge clearance
+// from them [drawing convention].
+matrix_rail_past = 0.5;
+function matrix_rails() = let(r = kb_rect("right_hand"), x1 = matrix_xy[0] + boards_matrix_board / 2 + matrix_rail_past)
     [[r[2] - kb_corner_r, r[1], x1, matrix_xy[1] - matrix_row_dy + boards_matrix_rail_in],
      [r[2] - kb_corner_r, matrix_xy[1] + matrix_row_dy - boards_matrix_rail_in, x1, r[3]]];
 // The pins' centres: row 0 is the 5V..IO1 row, row 1 the IO33..RX row, pin 1

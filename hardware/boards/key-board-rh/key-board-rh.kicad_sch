@@ -2971,7 +2971,7 @@
     (uuid f223ece3-2ce1-55bd-97dd-4237e9b97b19)
     (property "Reference" "J5" (at 330.20 185.42 0) (effects (font (size 1.27 1.27))))
     (property "Value" "4 wire pads" (at 330.20 220.98 0) (effects (font (size 1.27 1.27))))
-    (property "Footprint" "Connector_Wire:SolderWire-0.15sqmm_1x04_P4mm_D0.5mm_OD1.5mm" (at 330.20 203.20 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical" (at 330.20 203.20 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 330.20 203.20 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "W-MATRIX" (at 330.20 203.20 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "TP2=1 TP3=2 EN=3 IO0=4" (at 330.20 203.20 0) (effects (font (size 1.27 1.27)) hide))
