@@ -3,7 +3,7 @@
 # its inputs (hashed below), so a value changed on the sheet makes it stale.
 
 inputs:
-  tools/sim.py: 0312a1077b9afa80
+  tools/sim.py: 495aebffb8f9ad19
   hardware/carrier/led-strip-drive/sim/sims.yaml: 4c322fbf55b1004f
   hardware/carrier/led-strip-drive/netlist.yaml: a8adbcf1d88d727b
   hardware/carrier/led-strip-drive/sim/data.cir: 5eace363e6537ca4

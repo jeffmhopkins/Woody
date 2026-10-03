@@ -3,7 +3,7 @@
 # its inputs (hashed below), so a value changed on the sheet makes it stale.
 
 inputs:
-  tools/sim.py: 0312a1077b9afa80
+  tools/sim.py: 495aebffb8f9ad19
   hardware/module/dac8568/sim/sims.yaml: 181b10d260df2708
   hardware/module/dac8568/netlist.yaml: 2619a0f3926942d3
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
