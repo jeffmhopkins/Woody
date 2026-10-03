@@ -6,8 +6,8 @@ with the breath sensor at the mouth end. **The strip is replaced by
 [ADR 0028](0028-on-board-leds.md), 2026-09-30**: the option this page left
 open, "LEDs populated directly on the centre board", is taken — thirteen
 WS2815B-V1 in one row down the main board's centreline, on the same data
-line, fourteen since ADR 0028's amendment of 2026-10-02 (in the tail
-corner that day; in the row, at one pitch, since 2026-10-03). One data line, the indirect light path and the cavity as the diffuser
+line, at one pitch since ADR 0028's amendments of 2026-10-03 (fourteen
+for a day from its amendment of 2026-10-02, thirteen again since). One data line, the indirect light path and the cavity as the diffuser
 stand; `J-LED` and the `LED-STRIP` reel are gone.
 
 Amends [ADR 0014](0014-lighting.md): its geometry ("two runs, one chain") and

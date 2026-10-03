@@ -49,7 +49,7 @@ the two agree, and where they do not the netlist wins.*
       INST_POS12 ────┤                     │
                      ├─────────────────────┼──── the LED row, direct
                      │                     │     (every D-LED, lighting.led_count)
-                     │                     │     [C-STRIP-BULK 470 µF 25V]
+                     │                     │     [C-STRIP-BULK-1 220uF 25V] ∥ [C-STRIP-BULK-2 220uF 25V]
                      │                     │
                      ├──[REF5050]──┬────────┼──── §2 analog (its VIN through R-REF-IN and a
                      │   in  out   │        │     15 V clamp: breath-excitation-reference.md)
@@ -225,8 +225,8 @@ stay at the connector, ahead of it.
 **The numbers** `[calc]`, each checked by the run:
 
 ```
-Charge behind it: C-STRIP-BULK 470 µF + C-BUCK-IN 100 µF
-                  + 14 × C-LED 100 nF                          ≈ 571 µF
+Charge behind it: C-STRIP-BULK 2 × 220 µF + C-BUCK-IN 100 µF
+                  + 13 × C-LED 100 nF                          ≈ 541 µF
 The plug-in step: J-UMB jumps 0 → 12 V in microseconds. The gate follows
   through C-INRUSH-GS and is held back through C-INRUSH-GD:
   ΔV_GS = −12 V × (22 nF + 55 pF) / (1 µF + 645 pF + 22 nF + 55 pF)
@@ -236,7 +236,7 @@ The delay: the gate relaxes towards −V_in/2 through R-INRUSH-GS ∥ R-INRUSH-G
   0.51 × ln(5.9 / 4.4) = 0.15 s
 The ramp: at the plateau the gate is ~10.3 V above ground
   I = 10.3 V / 1 MΩ − 1.5 V / 1 MΩ = 8.8 µA
-  dV/dt = 8.8 µA / 22 nF = 400 V/s → 571 µF × 400 V/s = 0.23 A, ~30 ms
+  dV/dt = 8.8 µA / 22 nF = 400 V/s → 541 µF × 400 V/s = 0.22 A, ~30 ms
 On:  V_GS = −V_in / 2 = −5.9 V at 11.8 V; R_DS(on) ≤ 60 mΩ at −4.5 V [ds p.2]
   at `umbilical-current`, 0.36 A × 60 mΩ ≈ 22 mV; at the LT1641's 1.10 A
   worst-case trip, 66 mV and 73 mW
@@ -304,10 +304,10 @@ datasheets/led/WS2815B-V1.pdf p.2]`, the lowest rating on `INST_POS12`, and
 16.7 V minimum `[ds LITTELFUSE-SMAJ-SERIES-SMAJ15A.pdf]`, and `U-ISO`'s own
 over-voltage protection starts at 13.8 V `[ds RECOM-RPA20-AW.pdf PD-5]`. In
 operation the rail is `U-ISO`'s regulation, 12 V +3.1 % at worst
-(`power-entry.md`), and a surge through the on FET into ~571 µF moves it by
+(`power-entry.md`), and a surge through the on FET into ~541 µF moves it by
 tenths of a volt; the plug's ring lands on `J-UMB` while `Q-INRUSH` is off
 (§1a). **What is not covered is a converter that fails regulating high**,
-anywhere between 13.5 V and its OVP: fourteen LEDs that cannot be reworked
+anywhere between 13.5 V and its OVP: LEDs that cannot be reworked
 after reflow (ADR 0028) would see it unclamped. **Accepted by the owner,
 2026-10-01** (pre-layout review A4-4): a converter that fails regulating high
 is out of scope, and no clamp is added (ADR 0027, its 2026-10-01 amendment).
@@ -376,19 +376,32 @@ keys scanning, at both ends of the link.
 
 ## Bulk at the LED row's feed
 
-**`C-STRIP-BULK` (470 µF 25 V) sits at the LED row's feed end**, on
+**`C-STRIP-BULK`, two 220 µF 25 V polymer cans in parallel, sits at the LED
+row's feed end**, on
 this board — "bulk capacitance belongs where the current swings" `[repo] 0014`.
 The lights are LEDs on this board since ADR 0028 (`lighting.led_count`, in
 one row since its amendment of 2026-10-03), each with its own
 100 nF (`C-LED`), which take the edges; this one takes the row's PWM step.
 The row switches its whole current at the LEDs' PWM rate: at
 `led-row-current`'s upper end, a 250 µs half-period drawn from this
-capacitor alone would sag it by about 0.1 V `[calc: 0.210 A × 250 µs /
-470 µF = 0.11 V]` — the umbilical and the load switch supply most of it, so
-that is the worst case, and the value stays. The ~2 kHz rate is the WS2815's
-`[ds datasheets/led/WS2815B-V1.pdf p.1, 'scan frequency is of 2KHz']`. A 10 × 10 mm SMD can is a height
-item; it goes in the regulator block (`config/body.yaml` `boards.tall_h`) and
-`mechanical/drc.echo` says whether that fits.
+capacitor alone would sag it by about 0.1 V `[calc: 0.195 A × 250 µs /
+440 µF = 0.11 V]` — the umbilical and the load switch supply most of it, so
+that is the worst case. The ~2 kHz rate is the WS2815's
+`[ds datasheets/led/WS2815B-V1.pdf p.1, 'scan frequency is of 2KHz']`.
+
+**Two 6.3 × 7.7 mm polymer cans, not one 10 × 10 mm electrolytic** (#19,
+2026-10-03, the owner approving a lower part for the LEDs' emission cone):
+`MA25V220M6X8` (JIERR, LCSC C46550464), 220 µF ±20 %, 28 mΩ max at 100 kHz,
+tan δ 0.10 at 120 Hz, 2.9 A ripple at 100 kHz `[ds
+datasheets/discrete-and-power/JIERR-MA-SERIES-MA25V220M6X8.pdf p.3]`. The pair
+is 440 µF and 14 mΩ against the 470 µF and 0.16 Ω (100 kHz) of the
+`UCW1E471MNL1GS` it replaced; at the row's 1–10 kHz the datasheet derates the
+ripple to 0.3 × 2.9 A per can `[ds p.2]`, over 1.7 A for the pair against a
+row swinging at most 0.367 A (`sim/`'s `led-pwm`). They stand 7.7 mm, not
+10.2, and the layout places them against the far edge (`main-board`
+README). **Lower ESR is less damping**: the run (`sim/`) sweeps it from half
+the 100 kHz maximum to the 120 Hz figure and asserts the input LC and the
+start against it.
 
 ---
 
@@ -406,7 +419,7 @@ named as they stand; **proposed** rows have no BOM entry yet.*
 | `D-USBOR` | SS14 | **Between the buck and the dev board's 5V pin** — the OR node is that pin, and USB can back-feed it | `[repo]` |
 | `D-REVSHUNT` | SS34 | At the connector, ahead of `L-BUCK-IN` | `[repo]` |
 | `D-TVS-PWR` | SMAJ15A | Across the power pair | `[repo]` |
-| `C-STRIP-BULK` | 470 µF 25 V (UCW1E471MNL1GS) | At the LED row's feed end, on this board (ADR 0028) | `[repo]`, `[calc]` |
+| `C-STRIP-BULK` ×2 | 220 µF 25 V polymer (MA25V220M6X8), in parallel | At the LED row's feed end, on this board (ADR 0028) | `[ds]`, `[calc]`, `[sim]` |
 | `Q-INRUSH` | AO3401A P-FET, SOT-23 | Hot-plug inrush limiter: source at `J-UMB`, drain on `INST_POS12` (§1a) | `[ds]`, `[calc]`, `[sim]` |
 | `R-INRUSH-GS`, `R-INRUSH-G` | 1 MΩ 1 % each | Its gate divider: `V_GS` half the input when on; `R-INRUSH-G` sets the ramp | `[calc]` |
 | `C-INRUSH-GS` | 1 µF 50 V X7R | Gate to source: the gate follows the plug-in step. **At least 45× `C-INRUSH-GD`** | `[calc]`, `[sim]` |

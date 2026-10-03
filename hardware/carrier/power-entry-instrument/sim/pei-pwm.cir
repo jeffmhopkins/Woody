@@ -21,8 +21,8 @@ LCP cp1 inp {{l_cable}}
 RCN ig cn1 {{r_cable}}
 LCN cn1 0 {{l_cable}}
 RQ inp ins {{r_on_z}}
-CSTRIP ins cs1 {{C-STRIP-BULK}}
-RCSTRIP cs1 ig {{esr_strip}}
+CSTRIP ins cs1 {{c_strip}}
+RCSTRIP cs1 ig {{r_strip}}
 VPW pw 0 PULSE(0 1 {{pw_t_start}} {{pw_t_edge}} {{pw_t_edge}} {{pw_t_high}} {{pw_t_period}})
 BROW ins ig I = ({{pw_i_other}} + {{pw_i_row_q}} + {{pw_i_row_pk}} * V(pw)) * max(0, min(1, V(ins,ig) / {{v_nom}}))
 LBIN ins lb1 {{L-BUCK-IN}}

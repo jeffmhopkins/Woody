@@ -74,7 +74,7 @@ planes:
 # U-ADC (U2) between its VSS (pin 4, the island side) and its digital pins (5-8,
 # the plane side): the moat runs along U2's centreline. The outline (body mm)
 # keeps off the mouth-end mount H9 and the column mount at x 40 (both PWR_GND,
-# ADR 0025), and out of the band of LED14 (D20) and LED13's corner (the LEDs
+# ADR 0025), and out of the band of LED13 (D20) and LED12's corner (the LEDs
 # return to PWR_GND). pcb.py check holds: every AGND_INST pad on the island but
 # the pair's far end, no other plane net's pad on it, one tie.
 islands:
@@ -93,7 +93,7 @@ islands:
     # slot: C8 on VS, and the room kept for the datasheet's supply and output
     # decoupling (MPXV4006DP Fig. 3: 1 uF + 10 nF on VS, 470 pF on Vout; README, Open)
     # WAVE 3 (issue #8-3, owner's filter 2026-10-03, breath-adc.md "The reference's filter"):
-    # the island now takes ALL of U-ADC and the pocket above it between LED14 and LED13,
+    # the island now takes ALL of U-ADC and the pocket above it between LED13 and LED12,
     # where ADC_VDD's three capacitors stand (C3 at pin 8, C42 and C2 beside it), so each
     # returns into AGND_INST under the ADC, a few mm from pin 4's own via. The moat runs down
     # U2's tail side, where NT2 ties it, and the digital pins (5-7) cross it there, inside
@@ -121,7 +121,7 @@ pairs:
     # off both legs as the router lays them - the clock lines (CHAIN_SCK, IO36) ran 0.5 mm
     # beside one leg and not the other, a differential pick-up (pcb_route.Obstacles)
     guard: 0.55
-    # out from between the sensor's pins and the buffer, over LED14's cap and along
+    # out from between the sensor's pins and the buffer, over LED13's cap and along
     # the board above the LED row's caps (body mm); the rest is the router's
     through: [[23.0, 35.6]]
 
@@ -189,8 +189,10 @@ fanout_count:
   Q1.3: 3        # Q-INRUSH drain -> INST_POS12: the whole instrument
   D2.2: 2        # D-REVSHUNT's anode to PWR_GND: a reversed supply's fault current
   D3.2: 2        # D-TVS-PWR to PWR_GND: the clamp's surge
-  C10.1: 2       # C-STRIP-BULK + on INST_POS12: the LED row's pulse current
+  C10.1: 2       # C-STRIP-BULK (two cans) + on INST_POS12: the LED row's pulse current
   C10.2: 2
+  C44.1: 2
+  C44.2: 2
   L1.1: 2        # L-BUCK-IN from INST_POS12: the buck's input current
   C11.2: 2       # C-BUCK-IN's return
   C43.2: 2       # C-BUCK-OUT's return
@@ -282,7 +284,7 @@ keepouts:
 # (pcb_main.check_heights): under the key boards, elsewhere, and under the Matrix
 # ribbon. Each with where it comes from.
 heights:
-  CP_Elec_10x10: 10.2          # [ds UCW1E471MNL1GS, 10.2 max]
+  CP_Elec_6.3x7.7: 7.7         # [ds JIERR-MA-SERIES-MA25V220M6X8.pdf p.3, case 6.3 x 7.7]
   CP_Elec_6.3x5.8: 5.8         # [ds UCM1E101MCL1GS]
   SWPA6028: 2.8                # [ds SWPA6028S220MT]
   D_SMC: 2.62                  # [from memory: DO-214AB max]
@@ -399,10 +401,11 @@ parts:
   # #8-7: the module's own caps at the module - C11 beside pin 1 (VIN) between L1 and U5,
   # C43 (owner, 2026-10-03, RECOM's application) at pin 3 (OUT), returned to pin 2 (GND)
   C11: [220.8, 45.7, 180]   # C-BUCK-IN 100 uF (5.8 mm) against the far edge at pin 1 (VIN), its + pad toward it
-  L1:  [219.5, 38.0, 0]   # L-BUCK-IN 22 uH, INST_POS12 into C11 and pin 1
+  L1:  [221.3, 38.0, 0]   # (moved 1.8 toward U5 for C44) L-BUCK-IN 22 uH, INST_POS12 into C11 and pin 1
   C43: [236.9, 39.3, 0]   # C-BUCK-OUT 10 uF at pin 3 (OUT), returned to its own via beside pin 2 (GND)
   D4:  [243.0, 39.0, 180]   # D-USBOR at C43, its cathode toward J-MCU's 5 V pins
-  C10: [209.0, 44.1, 0]   # C-STRIP-BULK 470 uF (10.2 mm) against the far edge, off the LED row as far as the board allows, on the INST_POS12 plane beside the buck's input
+  C10: [206.3, 44.6, 90]   # C-STRIP-BULK-1 220 uF polymer (7.7 mm) against the far edge, off the LED row as far as the board allows, on the INST_POS12 plane beside the buck's input
+  C44: [213.7, 37.6, 90]   # C-STRIP-BULK-2, its pair: between C10 and L1, as high as C11 (above it) allows; the cone note reports it
   U6:  [233.0, 11.7, 90]   # U-LVLSHIFT 74AHCT125
   C12: [239.9, 12.4, 90]   # its 100 nF, at VCC (pin 14) and GND (pin 13)
   R10: [240.3, 17.6, 90]   # R-LED-PD

@@ -16,14 +16,14 @@ ports:
     dir: out
     to: carrier/led-strip-drive
     figure: umbilical-current
-  INST_5V_A:
-    dir: out
-    to: carrier/led-strip-drive
-    figure: matrix-led-current
   PWR_GND:
     dir: ref
     from: module/power-entry
     figure: umbilical-pinmap
+  INST_5V_A:
+    dir: out
+    to: carrier/led-strip-drive
+    figure: matrix-led-current
   AGND_INST:
     dir: ref
     from: carrier/power-entry-instrument
@@ -59,13 +59,26 @@ components:
     note: 'Gate to source, AT LEAST 45x C-INRUSH-GD: when the plug makes contact the source jumps 12 V in microseconds,
       and the gate must follow it or the Miller capacitor turns the FET on hard. 1 uF against 22 nF holds the jump
       in V_GS to -0.26 V, under the 0.5 V minimum threshold'
-  C-STRIP-BULK:
-    value: 470uF 25V
+  C-STRIP-BULK-1:
+    of: C-STRIP-BULK
+    value: 220uF 25V
     pins:
     - 1
     - 2
-    note: 'At the LED row''s 12 V feed end. Bulk belongs where the current swings: the row''s PWM steps its whole
-      current at once, and each LED''s own 100 nF (C-LED) takes only the edges (ADR 0028)'
+    note: 'At the LED row''s 12 V feed end, ONE OF TWO IN PARALLEL: bulk belongs where the current swings: the row''s
+      PWM steps its whole current at once, and each LED''s own 100 nF (C-LED) takes only the edges (ADR 0028). Two
+      6.3 x 7.7 polymer cans, not one 10 x 10 electrolytic, so the bulk stands 7.7 mm, not 10.2, in the LEDs'' cone
+      (#19): 440 uF and 14 mohm together [ds JIERR-MA-SERIES-MA25V220M6X8.pdf p.3]'
+  C-STRIP-BULK-2:
+    of: C-STRIP-BULK
+    value: 220uF 25V
+    pins:
+    - 1
+    - 2
+    note: 'At the LED row''s 12 V feed end, ONE OF TWO IN PARALLEL: bulk belongs where the current swings: the row''s
+      PWM steps its whole current at once, and each LED''s own 100 nF (C-LED) takes only the edges (ADR 0028). Two
+      6.3 x 7.7 polymer cans, not one 10 x 10 electrolytic, so the bulk stands 7.7 mm, not 10.2, in the LEDs'' cone
+      (#19): 440 uF and 14 mohm together [ds JIERR-MA-SERIES-MA25V220M6X8.pdf p.3]'
   D-INRUSH-RST:
     value: 1N4148W
     pins:
@@ -172,7 +185,8 @@ nets:
   - D-USBOR-A.K
   INST_POS12:
   - port: INST_POS12
-  - C-STRIP-BULK.1
+  - C-STRIP-BULK-1.1
+  - C-STRIP-BULK-2.1
   - L-BUCK-IN.1
   - Q-INRUSH.D
   - R-INRUSH-GD.2
@@ -180,7 +194,8 @@ nets:
   - port: PWR_GND
   - C-BUCK-IN.2
   - C-BUCK-OUT.2
-  - C-STRIP-BULK.2
+  - C-STRIP-BULK-1.2
+  - C-STRIP-BULK-2.2
   - D-INRUSH-RST.A
   - D-REVSHUNT.A
   - D-TVS-PWR.A

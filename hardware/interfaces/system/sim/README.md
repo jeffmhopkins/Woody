@@ -159,12 +159,12 @@ them, and each is `[sim]`. "Worst" is the worst corner.
 
 | Scenario | Pitch jack | Breath jack | Other |
 |---|---|---|---|
-| `led-pwm` | 0.0041 cents p-p nominal, 0.014 at the worst corner (`led-pwm-pitch`) | 0.08 mV p-p, 0.26 worst | header ±12 V 1.2 mV p-p, 4.5 worst; the instrument's ground against the module's 6.3 mV, 19 worst |
-| `led-pattern`, 200 Hz | 0.033 cents p-p, 0.067 worst | 6.3 mV p-p, 13.4 worst | header ±12 V 15 mV p-p, 33 worst |
+| `led-pwm` | 0.0034 cents p-p nominal, 0.011 at the worst corner (`led-pwm-pitch`) | 0.06 mV p-p, 0.20 worst | header ±12 V 1.0 mV p-p, 3.4 worst; the instrument's ground against the module's 3.7 mV, 13 worst |
+| `led-pattern`, 200 Hz | 0.033 cents p-p, 0.067 worst | 5.8 mV p-p, 12.5 worst | header ±12 V 15 mV p-p, 32 worst |
 | `led-off` | 1 × 10⁻⁸ cents | 0.6 µV | the deck's floor |
 | `burst` | 0.025 cents | 0.22 mV | the in-amp's output 0.22 mV; mod 1 swings 3.5 V |
 | `burst-spi` | 0.011 cents | 0.18 mV | the SPI edges alone |
-| `hot-plug` | 0.007 cents | −1.32 V absent, −0.10 V at rest, a 76 mV transient | `U-ISO` 0.34 A peak; no latch; the instrument up in 0.125 s; SCLK/MOSI at the receiver 1.2–1.3 V at contact |
+| `hot-plug` | 0.008 cents | −1.32 V absent, −0.10 V at rest, a 76 mV transient | `U-ISO` 0.33 A peak; no latch; the instrument up in 0.125 s; SCLK/MOSI at the receiver 1.2–1.3 V at contact |
 
 ## Findings
 
@@ -220,9 +220,9 @@ does.
 - **A light pattern inside the audio band is a different load from the
   PWM.** At 200 Hz, with the whole row switching blank to lit, nothing
   filters it:
-  - the case's ±12 V move 15 mV p-p at the header, and 33 mV with a 200 mΩ
+  - the case's ±12 V move 15 mV p-p at the header, and 32 mV with a 200 mΩ
     rack supply and 24 AWG;
-  - the breath jack moves 6.3 mV, and 13.4 mV at the worst corner: three to
+  - the breath jack moves 5.8 mV, and 12.5 mV at the worst corner: three to
     seven times its own noise, peak to peak (`breath-jack-noise`);
   - the pitch jack moves 0.03–0.07 cents.
 

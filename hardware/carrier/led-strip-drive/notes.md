@@ -57,3 +57,11 @@ block). It stood about six times nearer its acrylic than the row, so firmware
 was to scale it to about a sixth, and the data feed ran ~100 mm out to it and
 back to the row. On 2026-10-03 the owner moved it into the row (ADR 0028's
 amendment of that date): one row, one pitch, equal margins to the board's ends.
+
+## Fourteen in the row, then thirteen (2026-10-03)
+
+The same day the row was laid out for fourteen at one pitch with equal margins
+to the board's ends, and then its tail-end LED was removed with the other
+thirteen left where they stood (ADR 0028's two amendments of 2026-10-03). The
+removed LED was `D-LED-1` / `C-LED-1` (`D7` / `C25` on the main board); every
+other LED and cap took the number one lower and kept its part.

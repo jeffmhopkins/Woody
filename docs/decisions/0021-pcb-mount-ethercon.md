@@ -233,7 +233,7 @@ first in the data chain, because the data arrives at the tail:
 point 5: the corner LED's `DIN2` to GND, and `LED1`'s `DIN2` from the
 feed. The refdes are renumbered in chain order. Firmware: one more pixel
 (~30 µs more per frame at 800 kbit/s) and a per-LED gain for it. **Added
-2026-10-02** by the owner ("Add it"; ADR 0028's amendment of that date).
+2026-10-02** by the owner ("Add it"; ADR 0028's amendment of that date). **Removed 2026-10-03**: put in the row that morning, then the row's tail-end LED taken out with the rest left where they stood, thirteen again (ADR 0028's two amendments of that date).
 
 **`HDR-SERVICE` where it is, or elsewhere.** ADR 0018 point 4 puts it on the
 main board, reached with the lid off. Since ADR 0025 that means cutting the
@@ -244,7 +244,7 @@ keeping. Its place on the tongue is the first layout's (`layout.yaml`
 `J2`), recorded as `boards.service_hdr_at` (nominal). It is a vertical 1 × 5.
 Nothing stands over it, so a right-angle or lower part gains nothing in
 height. It can move into the new corner if the owner wants the tongue's far
-side clear, as long as it stays out of the 14th LED's light. Its tails then
+side clear, as long as it stayed out of the corner LED's light (gone since 2026-10-03). Its tails then
 stand past the bottom plate's end, over oak, and its plate window goes.
 
 **A board-mount USB-C at the tail face** (owner's follow-up, 2026-10-02).

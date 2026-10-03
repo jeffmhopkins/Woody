@@ -13,7 +13,7 @@ params:
   tr_out:  {value: 3.0e-9, source: "the gate's own edge into a light load [assumption: tPLH is 3.8-5.5 ns into 15 pF, p.4] (vary)"}
   c_in:    {value: 15.0e-12, source: "the WS2815B-V1's input capacity C_I, 15 pF max [datasheets/led/WS2815B-V1.pdf p.3]"}
   n_in:    {value: 2, source: "LED_DI feeds two inputs, D-LED-1 DIN1 and D-LED-2 DIN2 (netlist)"}
-  c_trace: {value: 8.0e-12, source: "LED_DI's trace from R-LED-SER beside U-LVLSHIFT (under J-MCU) out along the board to D-LED-1's DIN1 at the row's tail end, ~45 mm, and back to D-LED-2's DIN2, ~20 mm (ADR 0028 amendment 2026-10-03, the main board's wave-3 placement), at ~1.2 pF/cm for a signal trace over a plane [from memory] (vary)"}
+  c_trace: {value: 8.0e-12, source: "LED_DI's trace from R-LED-SER beside U-LVLSHIFT (under J-MCU) out along the board to D-LED-1's DIN1 at the row's tail end, ~21 mm, and back to D-LED-2's DIN2, ~20 mm (ADR 0028's second amendment of 2026-10-03, the main board's wave-3 placement: R-LED-SER at 242.5, D-LED-1 at 263.0, D-LED-2 at 243.1 along the body), ~5 pF at ~1.2 pF/cm for a signal trace over a plane [from memory]; carried at 8 pF, the bound it was set at, until the board is routed (vary)"}
   t_hi:    {value: 220.0e-9, source: "T0H's minimum, 220 ns [WS2815B-V1.pdf p.3, Data Transfer Time]: the shortest high the row must read"}
   t_lo:    {value: 900.0e-9, source: "T0L's minimum, 900 ns [same]"}
   vih:     {value: 2.7, source: "the WS2815B-V1's V_IH min at VDD 12 V [same, p.3]"}

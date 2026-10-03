@@ -34,7 +34,7 @@ The `Dir` and `Peer` columns are defined once in
 |---|---|---|---|---|
 | IO1 | in | `J-MCU` | — | High-impedance through the bootloader window; `R-LED-PD` is what holds it down in it. IO2 is spare (ADR 0016) |
 | 5 V | in | `carrier/power-entry-instrument` | `matrix-led-current` | The buck. The 74AHCT125's rail; TTL thresholds on this rail are why 3.3 V in reads high |
-| `INST_POS12` | in | `carrier/power-entry-instrument` (`C-STRIP-BULK` at the row's feed) | `umbilical-current`, `led-row-current` | Every LED's `VDD` and its 100 nF. Since ADR 0027 it is the module's isolated 12 V, through the load switch; on this board it is the node behind `Q-INRUSH`, the hot-plug inrush limiter, so the LEDs' 1.4 µF of `C-LED` `[calc: 14 × 100 nF]` charges on its ramp and not off the plug |
+| `INST_POS12` | in | `carrier/power-entry-instrument` (`C-STRIP-BULK` at the row's feed) | `umbilical-current`, `led-row-current` | Every LED's `VDD` and its 100 nF. Since ADR 0027 it is the module's isolated 12 V, through the load switch; on this board it is the node behind `Q-INRUSH`, the hot-plug inrush limiter, so the LEDs' 1.3 µF of `C-LED` `[calc: 13 × 100 nF]` charges on its ramp and not off the plug |
 | `PWR_GND` | ref | `carrier/power-entry-instrument` | `dig-gnd-topology` | The LEDs' ground, LED 1's `DIN2`, the spare gates and enables |
 | `OE_INST` ×4 | ref | — | — | `U-LVLSHIFT`'s four enables, tied LOW on this board, which is why the pull-down is needed rather than optional. **Not `OE_MOD`**, the module buffer's |
 
@@ -57,12 +57,12 @@ the two agree, and where they do not the netlist wins.*
 
     LED k:  DIN1 = LED_D(k-1)   (the DO of the LED before)
             DIN2 = LED_D(k-2)   (the DIN1 of the LED before: the backup line)
-    D-LED-14's DO drives nothing.
-    D-LED-1 is the row's tail-end LED, D-LED-14 its mouth-end one
+    D-LED-13's DO drives nothing.
+    D-LED-1 is the row's tail-end LED, D-LED-13 its mouth-end one
     (pcb-geometry.echo 'led', in this order).
 
   each LED: VDD (pin 2) = +12V, GND (pin 5), pin 1 NC
-            [C-LED-1 100nF] ... [C-LED-14 100nF], one at each LED's VDD pin
+            [C-LED-1 100nF] ... [C-LED-13 100nF], one at each LED's VDD pin
 
   gates B, C, D SPARE, inputs tied to GND
   74AHCT125 rail = 5 V (TTL thresholds, so 3.3 V in reads high)
@@ -177,15 +177,15 @@ white. Its derivation:
 
 - **The datasheet bounds it.** The B-V1's power consumption is 0.1–0.18 W
   per LED `[ds p.2, Absolute Maximum Ratings]`, so at 12 V a lit LED draws at
-  most 15 mA `[calc: 0.18 / 12 = 0.015 A]`, and the fourteen at most 210 mA
-  `[calc: 14 × 15]`.
+  most 15 mA `[calc: 0.18 / 12 = 0.015 A]`, and the thirteen at most 195 mA
+  `[calc: 13 × 15]`.
 - **Measurements of WS2815 tape agree**: 13.1–13.7 mA per LED at full white
   (`[web https://www.ledlab.io/chips/ws2815]`,
   `[web https://auschristmaslighting.com/threads/power-requirements-for-ws2815-led-strips.14653/]`,
-  both via the trade study of 2026-09-29), so ~183 mA for the fourteen
-  `[calc: 14 × 13.1]`.
-- **Blanked, it is not zero:** under 2 mA quiescent each `[ds p.3]`, ~28 mA
-  for the fourteen `[calc: 14 × 2]`, always on.
+  both via the trade study of 2026-09-29), so ~170 mA for the row
+  `[calc: 13 × 13.1]`.
+- **Blanked, it is not zero:** under 2 mA quiescent each `[ds p.3]`, ~26 mA
+  for the thirteen `[calc: 13 × 2]`, always on.
 - **ADR 0014 read "15 mA" as per channel**, 45 mA per LED. On the B-V1 that
   reading would be 0.54 W per LED, three times the datasheet's own maximum
   `[calc: 0.045 × 12]`, so this page does not use it — but it is a reading of
@@ -209,8 +209,8 @@ rail, so it cannot fold the buck back and stop blank-at-boot from running.
 | `U-LVLSHIFT` | 74AHCT125 SOIC-14 | LED data, 5 V rail. One gate used | `[repo]`, `[ds]` |
 | **`R-LED-PD`** | **10 kΩ** | **Holds the row's data low through reset** | `[ds]`, `[calc]` |
 | **`R-LED-SER`** | **330 Ω** | **Damps the data line at its source** | `[ds]`, `[calc]` |
-| `D-LED-1` … `D-LED-14` | WS2815B-V1 (LCSC C5446699) | One row, `D-LED-1` at its tail end: 12 V, backup-chained. **The body's chamfer marks pin 1 (NC)**, as the sheet's numbered pin drawing places it (footprint `woody:LED_WS2815B-V1_PLCC6_5.4x5.0mm_P1.6mm`, `hardware/lib/README.md`) | `[ds]` |
-| `C-LED-1` … `C-LED-14` | 100 nF X7R 50 V 0805 | One at each LED's `VDD` | `[ds]` |
+| `D-LED-1` … `D-LED-13` | WS2815B-V1 (LCSC C5446699) | One row, `D-LED-1` at its tail end: 12 V, backup-chained. **The body's chamfer marks pin 1 (NC)**, as the sheet's numbered pin drawing places it (footprint `woody:LED_WS2815B-V1_PLCC6_5.4x5.0mm_P1.6mm`, `hardware/lib/README.md`) | `[ds]` |
+| `C-LED-1` … `C-LED-13` | 100 nF X7R 50 V 0805 | One at each LED's `VDD` | `[ds]` |
 
 Where the LEDs sit is the body CAD's: `config/body.yaml` `lighting.*` and the
 `led` records in `mechanical/export/pcb-geometry.echo` (numbered along the data
@@ -221,14 +221,18 @@ main board"* and *"LED row clear of its neighbours"*.
 
 The owner moved the fourteenth LED from the tail corner into the row: *"it
 needs to be distance equalized and centered just like the other leds"*, then
-*"all the 14 LEDs equidistant from board extents"* (ADR 0028's amendment of
-2026-10-03). The data still arrives at the tail: `R-LED-SER` → `D-LED-1` (the
-row's tail end) → … → `D-LED-14` (its mouth end). The backup line is ADR 0028
-point 5: `D-LED-1`'s `DIN2` to GND, `D-LED-2`'s `DIN2` from the feed,
-`LED_DI`, so `R-LED-SER` still drives two inputs. The feed runs from
-`R-LED-SER` beside `U-LVLSHIFT`, under `J-MCU`, out to the tail-end LED, about
-45 mm, and back to the next, about 20 mm: ~8 pF of trace `[from memory, ~1.2
-pF/cm over a plane]` beside the inputs' 30 pF, which `sim/` carries. Every
-LED stands the same distance from the acrylic, so firmware gives none of them
-its own gain (`firmware/README.md`, *The lights*). What the corner LED was is
-in [`notes.md`](notes.md).
+*"all the 14 LEDs equidistant from board extents"* (ADR 0028's first amendment
+of 2026-10-03). The same day he removed its tail-end LED and kept the rest
+where they stood: *"Keep current layout, remove bottom one"* (ADR 0028's
+second amendment of 2026-10-03), so thirteen LEDs fill the row's fourteen
+places from the mouth end (`lighting.led_slots`). The data still arrives at
+the tail: `R-LED-SER` → `D-LED-1` (the row's tail end) → … → `D-LED-13` (its
+mouth end), the chain renumbered from the tail with each part kept. The
+backup line is ADR 0028 point 5: `D-LED-1`'s `DIN2` to GND, `D-LED-2`'s `DIN2`
+from the feed, `LED_DI`, so `R-LED-SER` still drives two inputs. The feed runs
+from `R-LED-SER` beside `U-LVLSHIFT` out to the tail-end LED, about 21 mm, and
+back to the next, about 20 mm: ~5 pF of trace `[from memory, ~1.2 pF/cm over a
+plane]` beside the inputs' 30 pF; `sim/` carries 8 pF, the bound it was set
+at, until the board is routed. Every LED stands the same distance from the
+acrylic, so firmware gives none of them its own gain (`firmware/README.md`,
+*The lights*). What the corner LED was is in [`notes.md`](notes.md).

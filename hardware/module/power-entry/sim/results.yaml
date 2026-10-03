@@ -4,27 +4,27 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/power-entry/sim/sims.yaml: ac7fce77bd35dc1e
-  hardware/module/power-entry/netlist.yaml: 4f808996f437e7cd
+  hardware/module/power-entry/sim/sims.yaml: 582583c807777927
+  hardware/module/power-entry/netlist.yaml: 14fd898035959809
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/mod-channels/netlist.yaml: 00739b63d111a848
   hardware/module/breath-output-stage/netlist.yaml: 63517b01fa4c02a2
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
-  hardware/carrier/power-entry-instrument/netlist.yaml: 89f351c1b8aba0f0
-  hardware/carrier/led-strip-drive/netlist.yaml: 466ccae220ba1302
+  hardware/carrier/power-entry-instrument/netlist.yaml: d20421ddf0209f51
+  hardware/carrier/led-strip-drive/netlist.yaml: ec7ec56762e982ee
   hardware/module/power-entry/sim/poweron.cir: 0c1ee473967b4108
   hardware/module/power-entry/sim/groundshift.cir: 4aae040d6b7e03a1
   hardware/module/power-entry/sim/poweroff.cir: aa8a3991ce4d5a85
   hardware/module/power-entry/sim/cm.cir: bf15e91728c95a53
   hardware/module/power-entry/sim/isoin.cir: d95d1859fd117b2b
   hardware/module/power-entry/sim/dacrail.cir: 00875ad3e9b9af2c
-  hardware/module/power-entry/sim/ledpwm.cir: 56e45702f84baa5b
+  hardware/module/power-entry/sim/ledpwm.cir: cd05b59c0bc84a23
   hardware/module/pitch-stage/sim/pitch-stage.lib: b3934228b80633ec
   hardware/module/power-entry/sim/lt3042.lib: 2664843cbe66f3e8
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
-  hardware/module/umbilical-load-switch/sim/sims.yaml: c338c3bd07b25968
-  hardware/carrier/power-entry-instrument/sim/sims.yaml: 8074febf49dd842e
-  figure:umbilical-current: 374 mA
+  hardware/module/umbilical-load-switch/sim/sims.yaml: cadec99739eed8eb
+  hardware/carrier/power-entry-instrument/sim/sims.yaml: c0e62a80d6155dee
+  figure:umbilical-current: 359 mA
   figure:dac-rail: 5.23 V
   figure:mod-reference: 3.3333 V
 ngspice: '42'
@@ -259,26 +259,26 @@ sims:
       why: 'pitch-stage.md ''Power-on is 0.000 V'': with the DAC at its reset zero scale and V_ref at 0 V the jack stays within
         100 mV of 0 V through the whole power-up, whichever rail arrives first'
       pass: true
-  gnd-before[r_bus_seg=0.001,i_swing=0.21]:
+  gnd-before[r_bus_seg=0.001,i_swing=0.195]:
     corners: 1
     measures:
       err_cents:
-        nominal: 4.53599
-        min: 4.53599
+        nominal: 4.21199
+        min: 4.21199
         min_at: nominal
-        max: 4.53599
+        max: 4.21199
         max_at: nominal
       err_mv:
-        nominal: 3.77999
-        min: 3.77999
+        nominal: 3.50999
+        min: 3.50999
         min_at: nominal
-        max: 3.77999
+        max: 3.50999
         max_at: nominal
       rail_mv:
-        nominal: 17.0099
-        min: 17.0099
+        nominal: 15.795
+        min: 15.795
         min_at: nominal
-        max: 17.0099
+        max: 15.795
         max_at: nominal
     asserts:
     - expr: min['err_cents'] > 3.0
@@ -311,26 +311,26 @@ sims:
       why: 'the problem ADR 0027 exists for: several cents of breath-correlated pitch error even with the receiver in the
         next slot'
       pass: true
-  gnd-before[r_bus_seg=0.031,i_swing=0.21]:
+  gnd-before[r_bus_seg=0.031,i_swing=0.195]:
     corners: 1
     measures:
       err_cents:
-        nominal: 12.096
-        min: 12.096
+        nominal: 11.232
+        min: 11.232
         min_at: nominal
-        max: 12.096
+        max: 11.232
         max_at: nominal
       err_mv:
-        nominal: 10.08
-        min: 10.08
+        nominal: 9.35997
+        min: 9.35997
         min_at: nominal
-        max: 10.08
+        max: 9.35997
         max_at: nominal
       rail_mv:
-        nominal: 17.0099
-        min: 17.0099
+        nominal: 15.795
+        min: 15.795
         min_at: nominal
-        max: 17.0099
+        max: 15.795
         max_at: nominal
     asserts:
     - expr: min['err_cents'] > 3.0
@@ -363,7 +363,7 @@ sims:
       why: 'the problem ADR 0027 exists for: several cents of breath-correlated pitch error even with the receiver in the
         next slot'
       pass: true
-  gnd-isolated[r_bus_seg=0.001,i_swing=0.21]:
+  gnd-isolated[r_bus_seg=0.001,i_swing=0.195]:
     corners: 1
     measures:
       err_cents:
@@ -379,16 +379,16 @@ sims:
         max: 2.0e-09
         max_at: nominal
       tie_ua:
-        nominal: 7.18898e-05
-        min: 7.18898e-05
+        nominal: 6.67507e-05
+        min: 6.67507e-05
         min_at: nominal
-        max: 7.18898e-05
+        max: 6.67507e-05
         max_at: nominal
       rail_mv:
-        nominal: 10.401
-        min: 10.401
+        nominal: 9.6574
+        min: 9.6574
         min_at: nominal
-        max: 10.401
+        max: 9.6574
         max_at: nominal
     asserts:
     - expr: max['err_cents'] < 0.01 and max['tie_ua'] < 1.0
@@ -427,7 +427,7 @@ sims:
       why: 'ADR 0027: with the converter no breath-correlated current reaches the rack''s ground - under a hundredth of a
         cent, and under a microamp in the tie to the star (what is left is the isolation capacitance)'
       pass: true
-  gnd-isolated[r_bus_seg=0.031,i_swing=0.21]:
+  gnd-isolated[r_bus_seg=0.031,i_swing=0.195]:
     corners: 1
     measures:
       err_cents:
@@ -443,16 +443,16 @@ sims:
         max: 6.0e-09
         max_at: nominal
       tie_ua:
-        nominal: 7.18898e-05
-        min: 7.18898e-05
+        nominal: 6.67506e-05
+        min: 6.67506e-05
         min_at: nominal
-        max: 7.18898e-05
+        max: 6.67506e-05
         max_at: nominal
       rail_mv:
-        nominal: 10.401
-        min: 10.401
+        nominal: 9.6574
+        min: 9.6574
         min_at: nominal
-        max: 10.401
+        max: 9.6574
         max_at: nominal
     asserts:
     - expr: max['err_cents'] < 0.01 and max['tie_ua'] < 1.0
@@ -491,26 +491,26 @@ sims:
       why: 'ADR 0027: with the converter no breath-correlated current reaches the rack''s ground - under a hundredth of a
         cent, and under a microamp in the tie to the star (what is left is the isolation capacitance)'
       pass: true
-  gnd-sense[r_bus_seg=0.001,i_swing=0.21]:
+  gnd-sense[r_bus_seg=0.001,i_swing=0.195]:
     corners: 1
     measures:
       err_cents:
-        nominal: 0.251999
-        min: 0.251999
+        nominal: 0.233999
+        min: 0.233999
         min_at: nominal
-        max: 0.251999
+        max: 0.233999
         max_at: nominal
       err_mv:
-        nominal: 0.209999
-        min: 0.209999
+        nominal: 0.194999
+        min: 0.194999
         min_at: nominal
-        max: 0.209999
+        max: 0.194999
         max_at: nominal
       rail_mv:
-        nominal: 17.0099
-        min: 17.0099
+        nominal: 15.795
+        min: 15.795
         min_at: nominal
-        max: 17.0099
+        max: 15.795
         max_at: nominal
     asserts:
     - expr: nom['err_cents'] < 0.5 or nom['err_cents'] > 3.0
@@ -545,26 +545,26 @@ sims:
         rails'' drop is common-mode), the whole bus-board share with it at the PSU end - the reason ADR 0027 does not choose
         it'
       pass: true
-  gnd-sense[r_bus_seg=0.031,i_swing=0.21]:
+  gnd-sense[r_bus_seg=0.031,i_swing=0.195]:
     corners: 1
     measures:
       err_cents:
-        nominal: 7.81198
-        min: 7.81198
+        nominal: 7.25398
+        min: 7.25398
         min_at: nominal
-        max: 7.81198
+        max: 7.25398
         max_at: nominal
       err_mv:
-        nominal: 6.50998
-        min: 6.50998
+        nominal: 6.04498
+        min: 6.04498
         min_at: nominal
-        max: 6.50998
+        max: 6.04498
         max_at: nominal
       rail_mv:
-        nominal: 17.0099
-        min: 17.0099
+        nominal: 15.795
+        min: 15.795
         min_at: nominal
-        max: 17.0099
+        max: 15.795
         max_at: nominal
     asserts:
     - expr: nom['err_cents'] < 0.5 or nom['err_cents'] > 3.0
@@ -599,26 +599,26 @@ sims:
         rails'' drop is common-mode), the whole bus-board share with it at the PSU end - the reason ADR 0027 does not choose
         it'
       pass: true
-  gnd-balanced[r_bus_seg=0.001,i_swing=0.21]:
+  gnd-balanced[r_bus_seg=0.001,i_swing=0.195]:
     corners: 1
     measures:
       err_cents:
-        nominal: 0.0453599
-        min: 0.0453599
+        nominal: 0.0421199
+        min: 0.0421199
         min_at: nominal
-        max: 0.0453599
+        max: 0.0421199
         max_at: nominal
       err_mv:
-        nominal: 0.0377999
-        min: 0.0377999
+        nominal: 0.0350999
+        min: 0.0350999
         min_at: nominal
-        max: 0.0377999
+        max: 0.0350999
         max_at: nominal
       rail_mv:
-        nominal: 0.1701
-        min: 0.1701
+        nominal: 0.1579
+        min: 0.1579
         min_at: nominal
-        max: 0.1701
+        max: 0.1579
         max_at: nominal
     asserts:
     - expr: max['err_cents'] < 0.5
@@ -651,26 +651,26 @@ sims:
       why: option (c) at 1 % balance leaves a fraction of a cent - at the cost of burning the whole swing as heat all the
         time (ADR 0027)
       pass: true
-  gnd-balanced[r_bus_seg=0.031,i_swing=0.21]:
+  gnd-balanced[r_bus_seg=0.031,i_swing=0.195]:
     corners: 1
     measures:
       err_cents:
-        nominal: 0.12096
-        min: 0.12096
+        nominal: 0.11232
+        min: 0.11232
         min_at: nominal
-        max: 0.12096
+        max: 0.11232
         max_at: nominal
       err_mv:
-        nominal: 0.1008
-        min: 0.1008
+        nominal: 0.0935997
+        min: 0.0935997
         min_at: nominal
-        max: 0.1008
+        max: 0.0935997
         max_at: nominal
       rail_mv:
-        nominal: 0.1701
-        min: 0.1701
+        nominal: 0.1579
+        min: 0.1579
         min_at: nominal
-        max: 0.1701
+        max: 0.1579
         max_at: nominal
     asserts:
     - expr: max['err_cents'] < 0.5
@@ -806,22 +806,22 @@ sims:
     corners: 17
     measures:
       star_550k:
-        nominal: 1.39152
-        min: 0.630599
+        nominal: 1.39148
+        min: 0.630581
         min_at: C-ISO-Y+ L-CM-ISO+ l_rib+ r_cm_core+
-        max: 5.42202
+        max: 5.42166
         max_at: C-ISO-Y- L-CM-ISO- l_rib- r_cm_core-
       star_1650k:
-        nominal: 0.427635
-        min: 0.189443
+        nominal: 0.427627
+        min: 0.189441
         min_at: C-ISO-Y+ L-CM-ISO- l_rib+ r_cm_core+
-        max: 1.69387
+        max: 1.69376
         max_at: C-ISO-Y- L-CM-ISO+ l_rib- r_cm_core-
       star_5500k:
-        nominal: 0.055599
-        min: 0.0375478
+        nominal: 0.0555981
+        min: 0.0375476
         min_at: C-ISO-Y+ L-CM-ISO- l_rib+ r_cm_core+
-        max: 0.188699
+        max: 0.188687
         max_at: C-ISO-Y- L-CM-ISO+ l_rib- r_cm_core-
       y_550k:
         nominal: 100.291
@@ -830,16 +830,16 @@ sims:
         max: 100.506
         max_at: C-ISO-Y- L-CM-ISO- l_rib+ r_cm_core-
       agnd_550k:
-        nominal: 0.276171
-        min: 0.0761941
+        nominal: 0.276151
+        min: 0.0761889
         min_at: C-ISO-Y+ L-CM-ISO+ l_rib- r_cm_core+
-        max: 2.16286
+        max: 2.16263
         max_at: C-ISO-Y- L-CM-ISO- l_rib+ r_cm_core-
       star_peak:
-        nominal: 1.5367
-        min: 0.702108
+        nominal: 1.53666
+        min: 0.702085
         min_at: C-ISO-Y+ L-CM-ISO+ l_rib+ r_cm_core+
-        max: 5.9496
+        max: 5.94919
         max_at: C-ISO-Y- L-CM-ISO- l_rib- r_cm_core-
     asserts:
     - expr: max['star_550k'] < p['cm_bound'] and max['star_1650k'] < p['cm_bound'] and max['star_5500k'] < p['cm_bound']
@@ -855,14 +855,14 @@ sims:
     corners: 9
     measures:
       star_550k:
-        nominal: 30.6997
-        min: 14.6457
+        nominal: 30.6988
+        min: 14.6452
         min_at: L-CM-ISO+ l_rib+ r_cm_core+
-        max: 77.8633
+        max: 77.8607
         max_at: L-CM-ISO- l_rib- r_cm_core-
       y_550k:
         nominal: 101.282
-        min: 67.5944
+        min: 67.5968
         min_at: L-CM-ISO+ l_rib- r_cm_core-
         max: 109.418
         max_at: L-CM-ISO- l_rib+ r_cm_core+
@@ -875,10 +875,10 @@ sims:
     corners: 17
     measures:
       z_peak:
-        nominal: 1.46
-        min: 1.38
+        nominal: 1.5
+        min: 1.42
         min_at: L-CM-ISO- esr_c2+ l_rib- r_psu-
-        max: 1.76
+        max: 1.8
         max_at: L-CM-ISO- esr_c2- l_rib+ r_psu+
       f_peak:
         nominal: 1.0
@@ -893,22 +893,22 @@ sims:
         max: 1.0
         max_at: nominal
       margin:
-        nominal: 68.5633
-        min: 56.8764
+        nominal: 69.3993
+        min: 57.8327
         min_at: L-CM-ISO- esr_c2- l_rib+ r_psu+
-        max: 72.538
+        max: 73.3091
         max_at: L-CM-ISO- esr_c2+ l_rib- r_psu-
       rack_550k:
-        nominal: 0.0597412
-        min: 0.0568454
+        nominal: 0.0597408
+        min: 0.056845
         min_at: L-CM-ISO- esr_c2+ l_rib+ r_psu-
-        max: 0.0611918
+        max: 0.0611913
         max_at: L-CM-ISO+ esr_c2- l_rib- r_psu+
       rack_band:
-        nominal: 69.8064
-        min: 60.0662
+        nominal: 68.8175
+        min: 59.4155
         min_at: L-CM-ISO+ esr_c2+ l_rib- r_psu+
-        max: 76.3365
+        max: 75.2075
         max_at: L-CM-ISO- esr_c2- l_rib+ r_psu-
       f_rack_band:
         nominal: 1001.13
@@ -1105,76 +1105,76 @@ sims:
     corners: 5
     measures:
       hdr_pos_mv:
-        nominal: 3.0114
-        min: 2.089
+        nominal: 2.2717
+        min: 1.7183
         min_at: esr_c2- r_psu-
-        max: 6.8831
+        max: 5.3421
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 3.087
-        min: 2.1264
+        nominal: 2.3295
+        min: 1.7493
         min_at: esr_c2- r_psu-
-        max: 7.2044
+        max: 5.5948
         max_at: esr_c2+ r_psu+
       tap_pos_mv:
-        nominal: 1.8344
-        min: 0.937
+        nominal: 1.3999
+        min: 0.7732
         min_at: esr_c2- r_psu-
-        max: 5.5632
+        max: 4.3408
         max_at: esr_c2+ r_psu+
       tap_neg_mv:
-        nominal: 1.8803
-        min: 0.9538
+        nominal: 1.4356
+        min: 0.7872
         min_at: esr_c2- r_psu-
-        max: 5.8233
+        max: 4.5467
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
-        nominal: 0.8676
-        min: 0.6858
+        nominal: 0.7971
+        min: 0.6234
         min_at: esr_c2- r_psu-
-        max: 2.1971
+        max: 1.7315
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
-        nominal: 1.3267
-        min: 1.032
+        nominal: 1.2028
+        min: 0.9312
         min_at: esr_c2- r_psu-
-        max: 3.4797
+        max: 2.7202
         max_at: esr_c2+ r_psu+
       avdd_uv:
         nominal: 0.08
         min: 0.06
         min_at: esr_c2- r_psu-
-        max: 0.22
+        max: 0.18
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000508102
-        min: 0.000372148
+        nominal: 0.000407284
+        min: 0.000295964
         min_at: esr_c2- r_psu-
-        max: 0.00103602
+        max: 0.000878243
         max_at: esr_c2+ r_psu+
       mod_uv:
-        nominal: 0.25
-        min: 0.19
+        nominal: 0.21
+        min: 0.15
         min_at: esr_c2- r_psu-
-        max: 0.59
+        max: 0.47
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.13371
-        min: 0.10337
+        nominal: 0.12086
+        min: 0.09325
         min_at: esr_c2- r_psu-
-        max: 0.28395
+        max: 0.25901
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 56.9223
-        min: 56.8625
+        nominal: 48.0208
+        min: 47.9661
         min_at: esr_c2- r_psu-
-        max: 57.1639
+        max: 48.2351
         max_at: esr_c2+ r_psu+
       iuout_ma:
-        nominal: 90.8321
-        min: 90.8299
-        min_at: esr_c2- r_psu-
-        max: 90.8321
+        nominal: 76.7293
+        min: 76.7292
+        min_at: esr_c2+ r_psu-
+        max: 76.7293
         max_at: nominal
     asserts:
     - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
@@ -1198,77 +1198,77 @@ sims:
     corners: 5
     measures:
       hdr_pos_mv:
-        nominal: 2.2246
-        min: 1.4605
+        nominal: 1.5421
+        min: 1.1263
         min_at: esr_c2- r_psu-
-        max: 5.4933
+        max: 3.9845
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 2.2784
-        min: 1.4857
+        nominal: 1.5796
+        min: 1.1458
         min_at: esr_c2- r_psu-
-        max: 5.736
+        max: 4.1612
         max_at: esr_c2+ r_psu+
       tap_pos_mv:
-        nominal: 1.3483
-        min: 0.6538
+        nominal: 0.9488
+        min: 0.5066
         min_at: esr_c2- r_psu-
-        max: 4.418
+        max: 3.2272
         max_at: esr_c2+ r_psu+
       tap_neg_mv:
-        nominal: 1.3807
-        min: 0.6651
+        nominal: 0.9719
+        min: 0.5153
         min_at: esr_c2- r_psu-
-        max: 4.6134
+        max: 3.3707
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
-        nominal: 0.5368
-        min: 0.4095
+        nominal: 0.4673
+        min: 0.3562
         min_at: esr_c2- r_psu-
-        max: 1.5971
+        max: 1.147
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
-        nominal: 0.8431
-        min: 0.6246
+        nominal: 0.7144
+        min: 0.5388
         min_at: esr_c2- r_psu-
-        max: 2.5115
+        max: 1.8071
         max_at: esr_c2+ r_psu+
       avdd_uv:
-        nominal: 0.06
+        nominal: 0.04
         min: 0.04
-        min_at: esr_c2- r_psu-
-        max: 0.16
+        min_at: nominal
+        max: 0.12
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000419086
-        min: 0.000297474
+        nominal: 0.000308821
+        min: 0.000218119
         min_at: esr_c2- r_psu-
-        max: 0.000911201
+        max: 0.000707053
         max_at: esr_c2+ r_psu+
       mod_uv:
-        nominal: 0.18
-        min: 0.13
+        nominal: 0.13
+        min: 0.1
         min_at: esr_c2- r_psu-
-        max: 0.45
+        max: 0.34
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.06777
-        min: 0.05129
+        nominal: 0.05853
+        min: 0.04406
         min_at: esr_c2- r_psu-
-        max: 0.15821
+        max: 0.13855
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 49.6585
-        min: 49.5985
+        nominal: 38.3622
+        min: 38.3093
         min_at: esr_c2- r_psu-
-        max: 49.8851
+        max: 38.5406
         max_at: esr_c2+ r_psu+
       iuout_ma:
-        nominal: 79.2865
-        min: 79.283
-        min_at: esr_c2+ r_psu-
-        max: 79.2866
-        max_at: esr_c2+ r_psu+
+        nominal: 61.3258
+        min: 61.3209
+        min_at: esr_c2- r_psu+
+        max: 61.3258
+        max_at: nominal
     asserts:
     - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
         and max['tap_neg_mv'] < p['rail_bound_mv']
@@ -1291,77 +1291,77 @@ sims:
     corners: 5
     measures:
       hdr_pos_mv:
-        nominal: 1.683
-        min: 1.0583
+        nominal: 1.1337
+        min: 0.785
         min_at: esr_c2- r_psu-
-        max: 4.3356
+        max: 3.16
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 1.7225
-        min: 1.0763
+        nominal: 1.1601
+        min: 0.7981
         min_at: esr_c2- r_psu-
-        max: 4.5198
+        max: 3.2925
         max_at: esr_c2+ r_psu+
       tap_pos_mv:
-        nominal: 1.0152
-        min: 0.4707
+        nominal: 0.6959
+        min: 0.3527
         min_at: esr_c2- r_psu-
-        max: 3.4729
+        max: 2.5525
         max_at: esr_c2+ r_psu+
       tap_neg_mv:
-        nominal: 1.0389
-        min: 0.4787
+        nominal: 0.7121
+        min: 0.3586
         min_at: esr_c2- r_psu-
-        max: 3.6206
+        max: 2.6597
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
-        nominal: 0.3885
-        min: 0.2574
+        nominal: 0.3021
+        min: 0.2191
         min_at: esr_c2- r_psu-
-        max: 1.2096
+        max: 0.8398
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
-        nominal: 0.6043
-        min: 0.3936
+        nominal: 0.463
+        min: 0.3325
         min_at: esr_c2- r_psu-
-        max: 1.8815
+        max: 1.3116
         max_at: esr_c2+ r_psu+
       avdd_uv:
         nominal: 0.04
         min: 0.02
         min_at: esr_c2- r_psu-
-        max: 0.12
+        max: 0.08
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000339232
-        min: 0.000235007
+        nominal: 0.000246709
+        min: 0.000170994
         min_at: esr_c2- r_psu-
-        max: 0.000766343
+        max: 0.000581604
         max_at: esr_c2+ r_psu+
       mod_uv:
-        nominal: 0.13
-        min: 0.09
+        nominal: 0.09
+        min: 0.07
         min_at: esr_c2- r_psu-
-        max: 0.35
+        max: 0.25
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.03566
-        min: 0.02601
+        nominal: 0.03066
+        min: 0.02213
         min_at: esr_c2- r_psu-
-        max: 0.09224
+        max: 0.0805
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 41.6912
-        min: 41.6394
+        nominal: 31.5481
+        min: 31.5039
         min_at: esr_c2- r_psu-
-        max: 41.8853
+        max: 31.7016
         max_at: esr_c2+ r_psu+
       iuout_ma:
-        nominal: 66.586
-        min: 66.5816
-        min_at: esr_c2+ r_psu+
-        max: 66.5887
-        max_at: esr_c2- r_psu-
+        nominal: 50.4438
+        min: 50.4438
+        min_at: nominal
+        max: 50.444
+        max_at: esr_c2- r_psu+
     asserts:
     - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
         and max['tap_neg_mv'] < p['rail_bound_mv']
@@ -1384,77 +1384,77 @@ sims:
     corners: 5
     measures:
       hdr_pos_mv:
-        nominal: 1.4941
-        min: 0.9297
+        nominal: 1.0126
+        min: 0.6776
         min_at: esr_c2- r_psu-
-        max: 3.8765
+        max: 2.9449
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 1.5288
-        min: 0.9455
+        nominal: 1.0357
+        min: 0.6887
         min_at: esr_c2- r_psu-
-        max: 4.0401
+        max: 3.0648
         max_at: esr_c2+ r_psu+
       tap_pos_mv:
-        nominal: 0.8998
-        min: 0.4117
+        nominal: 0.6207
+        min: 0.3043
         min_at: esr_c2- r_psu-
-        max: 3.1047
+        max: 2.375
         max_at: esr_c2+ r_psu+
       tap_neg_mv:
-        nominal: 0.9206
-        min: 0.4185
+        nominal: 0.6349
+        min: 0.3093
         min_at: esr_c2- r_psu-
-        max: 3.2355
+        max: 2.4709
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
-        nominal: 0.3472
-        min: 0.2136
+        nominal: 0.2549
+        min: 0.1782
         min_at: esr_c2- r_psu-
-        max: 1.0791
+        max: 0.7506
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
-        nominal: 0.536
-        min: 0.3252
+        nominal: 0.3893
+        min: 0.2697
         min_at: esr_c2- r_psu-
-        max: 1.67
+        max: 1.1648
         max_at: esr_c2+ r_psu+
       avdd_uv:
-        nominal: 0.04
+        nominal: 0.02
         min: 0.02
-        min_at: esr_c2- r_psu-
-        max: 0.1
+        min_at: nominal
+        max: 0.08
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000302146
-        min: 0.00021003
+        nominal: 0.00023031
+        min: 0.00015782
         min_at: esr_c2- r_psu-
-        max: 0.000778633
+        max: 0.000553271
         max_at: esr_c2+ r_psu+
       mod_uv:
-        nominal: 0.11
-        min: 0.07
+        nominal: 0.08
+        min: 0.05
         min_at: esr_c2- r_psu-
-        max: 0.31
+        max: 0.23
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.02648
-        min: 0.01873
+        nominal: 0.02284
+        min: 0.01596
         min_at: esr_c2- r_psu-
-        max: 0.07387
+        max: 0.06359
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 37.4602
-        min: 37.4103
+        nominal: 29.8432
+        min: 29.8014
         min_at: esr_c2- r_psu-
-        max: 37.6381
+        max: 29.9909
         max_at: esr_c2+ r_psu+
       iuout_ma:
-        nominal: 59.8308
-        min: 59.8286
-        min_at: esr_c2- r_psu-
-        max: 59.8316
-        max_at: esr_c2+ r_psu+
+        nominal: 47.7232
+        min: 47.7232
+        min_at: nominal
+        max: 47.7259
+        max_at: esr_c2- r_psu-
     asserts:
     - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
         and max['tap_neg_mv'] < p['rail_bound_mv']
@@ -1477,77 +1477,77 @@ sims:
     corners: 5
     measures:
       hdr_pos_mv:
-        nominal: 1.372
-        min: 0.8414
+        nominal: 0.8982
+        min: 0.5762
         min_at: esr_c2- r_psu-
-        max: 3.609
+        max: 2.773
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 1.4036
-        min: 0.8556
+        nominal: 0.9184
+        min: 0.5855
         min_at: esr_c2- r_psu-
-        max: 3.7601
+        max: 2.8805
         max_at: esr_c2+ r_psu+
       tap_pos_mv:
-        nominal: 0.8256
-        min: 0.3713
+        nominal: 0.5499
+        min: 0.2586
         min_at: esr_c2- r_psu-
-        max: 2.8968
+        max: 2.2285
         max_at: esr_c2+ r_psu+
       tap_neg_mv:
-        nominal: 0.8446
-        min: 0.3774
+        nominal: 0.5622
+        min: 0.2627
         min_at: esr_c2- r_psu-
-        max: 3.0177
+        max: 2.3151
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
-        nominal: 0.3173
-        min: 0.1847
+        nominal: 0.2144
+        min: 0.1432
         min_at: esr_c2- r_psu-
-        max: 0.9909
+        max: 0.6662
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
-        nominal: 0.4872
-        min: 0.279
+        nominal: 0.3255
+        min: 0.2157
         min_at: esr_c2- r_psu-
-        max: 1.528
+        max: 1.0265
         max_at: esr_c2+ r_psu+
       avdd_uv:
-        nominal: 0.04
+        nominal: 0.02
         min: 0.02
-        min_at: esr_c2- r_psu-
-        max: 0.1
+        min_at: nominal
+        max: 0.06
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000275161
-        min: 0.000194732
+        nominal: 0.00022156
+        min: 0.000146984
         min_at: esr_c2- r_psu-
-        max: 0.000854356
+        max: 0.000560462
         max_at: esr_c2+ r_psu+
       mod_uv:
-        nominal: 0.11
-        min: 0.07
+        nominal: 0.07
+        min: 0.05
         min_at: esr_c2- r_psu-
-        max: 0.29
+        max: 0.21
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.02061
-        min: 0.01394
+        nominal: 0.01684
+        min: 0.01122
         min_at: esr_c2- r_psu-
-        max: 0.06201
+        max: 0.04982
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 34.2914
-        min: 34.2448
+        nominal: 29.3211
+        min: 29.2757
         min_at: esr_c2- r_psu-
-        max: 34.4508
+        max: 29.471
         max_at: esr_c2+ r_psu+
       iuout_ma:
-        nominal: 54.7698
-        min: 54.766
-        min_at: esr_c2+ r_psu+
-        max: 54.7698
-        max_at: nominal
+        nominal: 46.8995
+        min: 46.8995
+        min_at: nominal
+        max: 46.9006
+        max_at: esr_c2+ r_psu-
     asserts:
     - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
         and max['tap_neg_mv'] < p['rail_bound_mv']
@@ -1570,40 +1570,40 @@ sims:
     corners: 5
     measures:
       hdr_pos_mv:
-        nominal: 0.0536
-        min: 0.0262
+        nominal: 0.0304
+        min: 0.0223
         min_at: esr_c2- r_psu-
-        max: 0.1729
+        max: 0.0804
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 0.0549
-        min: 0.0266
+        nominal: 0.0312
+        min: 0.0227
         min_at: esr_c2- r_psu-
-        max: 0.1787
+        max: 0.0836
         max_at: esr_c2+ r_psu+
       tap_pos_mv:
-        nominal: 0.0313
-        min: 0.0117
+        nominal: 0.0186
+        min: 0.01
         min_at: esr_c2- r_psu-
-        max: 0.1327
+        max: 0.0646
         max_at: esr_c2+ r_psu+
       tap_neg_mv:
-        nominal: 0.0319
-        min: 0.0119
+        nominal: 0.0191
+        min: 0.0101
         min_at: esr_c2- r_psu-
-        max: 0.1371
+        max: 0.0672
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
-        nominal: 0.0142
-        min: 0.0102
+        nominal: 0.0113
+        min: 0.0081
         min_at: esr_c2- r_psu-
-        max: 0.0378
+        max: 0.025
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
-        nominal: 0.0206
-        min: 0.0149
+        nominal: 0.0168
+        min: 0.0121
         min_at: esr_c2- r_psu-
-        max: 0.057
+        max: 0.038
         max_at: esr_c2+ r_psu+
       avdd_uv:
         nominal: 0.0
@@ -1612,10 +1612,10 @@ sims:
         max: 0.0
         max_at: nominal
       pitch_cents:
-        nominal: 3.54732e-05
-        min: 2.19108e-05
+        nominal: 1.971e-05
+        min: 1.68228e-05
         min_at: esr_c2- r_psu-
-        max: 8.8458e-05
+        max: 3.50172e-05
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.01
@@ -1624,23 +1624,23 @@ sims:
         max: 0.01
         max_at: nominal
       breath_mv:
-        nominal: 0.00175
-        min: 0.00126
+        nominal: 0.00146
+        min: 0.00112
         min_at: esr_c2- r_psu-
-        max: 0.0042
+        max: 0.00338
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 11.874
-        min: 11.874
-        min_at: nominal
-        max: 11.9278
-        max_at: esr_c2- r_psu+
+        nominal: 1.27417
+        min: 1.27024
+        min_at: esr_c2+ r_psu-
+        max: 1.27417
+        max_at: nominal
       iuout_ma:
-        nominal: 19.1026
-        min: 19.1026
-        min_at: nominal
-        max: 19.1591
-        max_at: esr_c2+ r_psu-
+        nominal: 2.04995
+        min: 2.04307
+        min_at: esr_c2+ r_psu+
+        max: 2.04995
+        max_at: nominal
     asserts:
     - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
         and max['tap_neg_mv'] < p['rail_bound_mv']
@@ -1663,76 +1663,76 @@ sims:
     corners: 5
     measures:
       hdr_pos_mv:
-        nominal: 1.0913
-        min: 0.6402
+        nominal: 0.7376
+        min: 0.5425
         min_at: esr_c2- r_psu-
-        max: 3.2685
+        max: 1.9439
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 1.1165
-        min: 0.651
+        nominal: 0.7557
+        min: 0.552
         min_at: esr_c2- r_psu-
-        max: 3.392
+        max: 2.0244
         max_at: esr_c2+ r_psu+
       tap_pos_mv:
-        nominal: 0.6558
-        min: 0.2862
+        nominal: 0.4533
+        min: 0.2438
         min_at: esr_c2- r_psu-
-        max: 2.587
+        max: 1.5691
         max_at: esr_c2+ r_psu+
       tap_neg_mv:
-        nominal: 0.6708
-        min: 0.2911
+        nominal: 0.4645
+        min: 0.248
         min_at: esr_c2- r_psu-
-        max: 2.685
+        max: 1.6344
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
-        nominal: 0.3314
-        min: 0.2396
+        nominal: 0.2699
+        min: 0.1997
         min_at: esr_c2- r_psu-
-        max: 0.8036
+        max: 0.5986
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
-        nominal: 0.485
-        min: 0.3515
+        nominal: 0.3996
+        min: 0.2951
         min_at: esr_c2- r_psu-
-        max: 1.2341
+        max: 0.9133
         max_at: esr_c2+ r_psu+
       avdd_uv:
         nominal: 0.03
-        min: 0.03
-        min_at: nominal
-        max: 0.08
+        min: 0.02
+        min_at: esr_c2- r_psu-
+        max: 0.06
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.00027195
-        min: 0.000170404
+        nominal: 0.000163159
+        min: 0.000106507
         min_at: esr_c2- r_psu-
-        max: 0.000892002
+        max: 0.000461335
         max_at: esr_c2+ r_psu+
       mod_uv:
-        nominal: 0.08
-        min: 0.06
+        nominal: 0.06
+        min: 0.05
         min_at: esr_c2- r_psu-
-        max: 0.24
+        max: 0.16
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.04179
-        min: 0.03081
+        nominal: 0.03587
+        min: 0.0271
         min_at: esr_c2- r_psu-
-        max: 0.0992
+        max: 0.08338
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 34.6696
-        min: 34.6247
+        nominal: 21.5978
+        min: 21.5691
         min_at: esr_c2- r_psu-
-        max: 34.819
+        max: 21.6868
         max_at: esr_c2+ r_psu+
       iuout_ma:
-        nominal: 55.5959
-        min: 55.5946
-        min_at: esr_c2- r_psu-
-        max: 55.5959
+        nominal: 34.6723
+        min: 34.6666
+        min_at: esr_c2+ r_psu+
+        max: 34.6723
         max_at: nominal
     asserts:
     - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
@@ -1756,77 +1756,77 @@ sims:
     corners: 5
     measures:
       hdr_pos_mv:
-        nominal: 2.1165
-        min: 1.4299
+        nominal: 1.6167
+        min: 1.2062
         min_at: esr_c2- r_psu-
-        max: 5.1387
+        max: 4.0253
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 2.1681
-        min: 1.4551
+        nominal: 1.6573
+        min: 1.2277
         min_at: esr_c2- r_psu-
-        max: 5.3697
+        max: 4.2071
         max_at: esr_c2+ r_psu+
       tap_pos_mv:
-        nominal: 1.2861
-        min: 0.6398
+        nominal: 0.9955
+        min: 0.5426
         min_at: esr_c2- r_psu-
-        max: 4.1459
+        max: 3.2645
         max_at: esr_c2+ r_psu+
       tap_neg_mv:
-        nominal: 1.3174
-        min: 0.6512
+        nominal: 1.0205
+        min: 0.5523
         min_at: esr_c2- r_psu-
-        max: 4.3326
+        max: 3.4124
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
-        nominal: 0.6782
-        min: 0.5013
+        nominal: 0.5765
+        min: 0.4412
         min_at: esr_c2- r_psu-
-        max: 1.5584
+        max: 1.2716
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
-        nominal: 1.0152
-        min: 0.7446
+        nominal: 0.8622
+        min: 0.6553
         min_at: esr_c2- r_psu-
-        max: 2.4506
+        max: 1.9698
         max_at: esr_c2+ r_psu+
       avdd_uv:
-        nominal: 0.07
+        nominal: 0.05
         min: 0.05
-        min_at: esr_c2- r_psu-
-        max: 0.16
+        min_at: nominal
+        max: 0.13
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000379228
-        min: 0.000272641
+        nominal: 0.000304844
+        min: 0.000216626
         min_at: esr_c2- r_psu-
-        max: 0.00079972
+        max: 0.00070288
         max_at: esr_c2+ r_psu+
       mod_uv:
-        nominal: 0.17
-        min: 0.13
+        nominal: 0.15
+        min: 0.12
         min_at: esr_c2- r_psu-
-        max: 0.43
+        max: 0.34
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.09367
-        min: 0.07143
+        nominal: 0.08361
+        min: 0.06369
         min_at: esr_c2- r_psu-
-        max: 0.20814
+        max: 0.18575
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 45.4987
-        min: 45.4519
+        nominal: 38.5933
+        min: 38.5476
         min_at: esr_c2- r_psu-
-        max: 45.6801
+        max: 38.7591
         max_at: esr_c2+ r_psu+
       iuout_ma:
-        nominal: 72.799
-        min: 72.7988
-        min_at: esr_c2+ r_psu+
-        max: 72.8015
-        max_at: esr_c2+ r_psu-
+        nominal: 61.829
+        min: 61.829
+        min_at: nominal
+        max: 61.8339
+        max_at: esr_c2+ r_psu+
     asserts:
     - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
         and max['tap_neg_mv'] < p['rail_bound_mv']
@@ -1849,77 +1849,77 @@ sims:
     corners: 5
     measures:
       hdr_pos_mv:
-        nominal: 2.2591
-        min: 1.5514
+        nominal: 1.7356
+        min: 1.3083
         min_at: esr_c2- r_psu-
-        max: 5.351
+        max: 4.2088
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 2.3142
-        min: 1.5788
+        nominal: 1.7791
+        min: 1.3316
         min_at: esr_c2- r_psu-
-        max: 5.5931
+        max: 4.3983
         max_at: esr_c2+ r_psu+
       tap_pos_mv:
-        nominal: 1.3737
-        min: 0.6944
+        nominal: 1.0686
+        min: 0.5885
         min_at: esr_c2- r_psu-
-        max: 4.3189
+        max: 3.4133
         max_at: esr_c2+ r_psu+
       tap_neg_mv:
-        nominal: 1.4072
-        min: 0.7066
+        nominal: 1.0955
+        min: 0.599
         min_at: esr_c2- r_psu-
-        max: 4.5143
+        max: 3.5679
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
-        nominal: 0.7248
-        min: 0.5428
+        nominal: 0.6167
+        min: 0.477
         min_at: esr_c2- r_psu-
-        max: 1.6411
+        max: 1.3307
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
-        nominal: 1.0849
-        min: 0.8062
+        nominal: 0.923
+        min: 0.7088
         min_at: esr_c2- r_psu-
-        max: 2.5826
+        max: 2.0648
         max_at: esr_c2+ r_psu+
       avdd_uv:
         nominal: 0.07
         min: 0.05
         min_at: esr_c2- r_psu-
-        max: 0.17
+        max: 0.13
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000402095
-        min: 0.000292295
+        nominal: 0.000325265
+        min: 0.000233693
         min_at: esr_c2- r_psu-
-        max: 0.000835162
+        max: 0.000736409
         max_at: esr_c2+ r_psu+
       mod_uv:
-        nominal: 0.19
-        min: 0.13
+        nominal: 0.15
+        min: 0.12
         min_at: esr_c2- r_psu-
-        max: 0.46
+        max: 0.36
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.10034
-        min: 0.07732
+        nominal: 0.08943
+        min: 0.06883
         min_at: esr_c2- r_psu-
-        max: 0.21825
+        max: 0.19436
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 45.7109
-        min: 45.6537
+        nominal: 38.7651
+        min: 38.7105
         min_at: esr_c2- r_psu-
-        max: 45.9331
+        max: 38.9653
         max_at: esr_c2+ r_psu+
       iuout_ma:
-        nominal: 72.8006
-        min: 72.7979
-        min_at: esr_c2- r_psu+
-        max: 72.8006
-        max_at: nominal
+        nominal: 61.8292
+        min: 61.827
+        min_at: esr_c2+ r_psu+
+        max: 61.8294
+        max_at: esr_c2+ r_psu-
     asserts:
     - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
         and max['tap_neg_mv'] < p['rail_bound_mv']
@@ -1942,77 +1942,77 @@ sims:
     corners: 5
     measures:
       hdr_pos_mv:
-        nominal: 1.1951
-        min: 0.7263
+        nominal: 0.8245
+        min: 0.6165
         min_at: esr_c2- r_psu-
-        max: 3.5006
+        max: 2.0986
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 1.2225
-        min: 0.7385
+        nominal: 0.8448
+        min: 0.6273
         min_at: esr_c2- r_psu-
-        max: 3.6336
+        max: 2.1853
         max_at: esr_c2+ r_psu+
       tap_pos_mv:
-        nominal: 0.7195
-        min: 0.325
+        nominal: 0.507
+        min: 0.277
         min_at: esr_c2- r_psu-
-        max: 2.7722
+        max: 1.6936
         max_at: esr_c2+ r_psu+
       tap_neg_mv:
-        nominal: 0.736
-        min: 0.3305
+        nominal: 0.5193
+        min: 0.2818
         min_at: esr_c2- r_psu-
-        max: 2.8779
+        max: 1.7641
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
-        nominal: 0.3664
-        min: 0.2699
+        nominal: 0.2996
+        min: 0.2257
         min_at: esr_c2- r_psu-
-        max: 0.8733
+        max: 0.6427
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
-        nominal: 0.5359
-        min: 0.3956
+        nominal: 0.4438
+        min: 0.3338
         min_at: esr_c2- r_psu-
-        max: 1.343
+        max: 0.9836
         max_at: esr_c2+ r_psu+
       avdd_uv:
         nominal: 0.03
-        min: 0.03
-        min_at: nominal
-        max: 0.09
+        min: 0.02
+        min_at: esr_c2- r_psu-
+        max: 0.06
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000299726
-        min: 0.000187873
+        nominal: 0.000178895
+        min: 0.00011898
         min_at: esr_c2- r_psu-
-        max: 0.000978078
+        max: 0.000498576
         max_at: esr_c2+ r_psu+
       mod_uv:
-        nominal: 0.09
+        nominal: 0.08
         min: 0.06
         min_at: esr_c2- r_psu-
-        max: 0.26
+        max: 0.17
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.0468
-        min: 0.03516
+        nominal: 0.04007
+        min: 0.03078
         min_at: esr_c2- r_psu-
-        max: 0.10712
+        max: 0.08984
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 34.9084
-        min: 34.8476
+        nominal: 21.7382
+        min: 21.6985
         min_at: esr_c2- r_psu-
-        max: 35.1204
+        max: 21.881
         max_at: esr_c2+ r_psu+
       iuout_ma:
-        nominal: 55.5948
-        min: 55.5948
+        nominal: 34.6666
+        min: 34.6666
         min_at: nominal
-        max: 55.5964
-        max_at: esr_c2- r_psu+
+        max: 34.6724
+        max_at: esr_c2+ r_psu+
     asserts:
     - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
         and max['tap_neg_mv'] < p['rail_bound_mv']
@@ -2035,40 +2035,40 @@ sims:
     corners: 5
     measures:
       hdr_pos_mv:
-        nominal: 0.0573
-        min: 0.0304
+        nominal: 0.0348
+        min: 0.026
         min_at: esr_c2- r_psu-
-        max: 0.1881
+        max: 0.089
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 0.0585
-        min: 0.0309
+        nominal: 0.0356
+        min: 0.0264
         min_at: esr_c2- r_psu-
-        max: 0.1944
+        max: 0.0925
         max_at: esr_c2+ r_psu+
       tap_pos_mv:
-        nominal: 0.0337
-        min: 0.0136
+        nominal: 0.0213
+        min: 0.0116
         min_at: esr_c2- r_psu-
-        max: 0.1446
+        max: 0.0715
         max_at: esr_c2+ r_psu+
       tap_neg_mv:
-        nominal: 0.0345
-        min: 0.0138
-        min_at: esr_c2- r_psu-
-        max: 0.1494
-        max_at: esr_c2+ r_psu+
-      rail_pos_mv:
-        nominal: 0.016
+        nominal: 0.0219
         min: 0.0118
         min_at: esr_c2- r_psu-
-        max: 0.0415
+        max: 0.0744
+        max_at: esr_c2+ r_psu+
+      rail_pos_mv:
+        nominal: 0.0128
+        min: 0.0094
+        min_at: esr_c2- r_psu-
+        max: 0.0273
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
-        nominal: 0.0232
-        min: 0.0172
+        nominal: 0.0192
+        min: 0.014
         min_at: esr_c2- r_psu-
-        max: 0.0626
+        max: 0.0417
         max_at: esr_c2+ r_psu+
       avdd_uv:
         nominal: 0.0
@@ -2077,10 +2077,10 @@ sims:
         max: 0.0
         max_at: nominal
       pitch_cents:
-        nominal: 3.72336e-05
-        min: 2.3046e-05
+        nominal: 2.076e-05
+        min: 1.78236e-05
         min_at: esr_c2- r_psu-
-        max: 9.44784e-05
+        max: 3.738e-05
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.01
@@ -2089,23 +2089,23 @@ sims:
         max: 0.01
         max_at: nominal
       breath_mv:
-        nominal: 0.002
-        min: 0.00148
+        nominal: 0.00168
+        min: 0.0013
         min_at: esr_c2- r_psu-
-        max: 0.00461
+        max: 0.0037
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 11.9622
-        min: 11.942
-        min_at: esr_c2+ r_psu-
-        max: 12.031
-        max_at: esr_c2- r_psu+
+        nominal: 1.28192
+        min: 1.27928
+        min_at: esr_c2- r_psu-
+        max: 1.28592
+        max_at: esr_c2+ r_psu+
       iuout_ma:
-        nominal: 19.1044
-        min: 19.0863
-        min_at: esr_c2+ r_psu-
-        max: 19.1545
-        max_at: esr_c2- r_psu+
+        nominal: 2.04806
+        min: 2.04638
+        min_at: esr_c2- r_psu-
+        max: 2.04949
+        max_at: esr_c2+ r_psu-
     asserts:
     - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
         and max['tap_neg_mv'] < p['rail_bound_mv']
@@ -2128,40 +2128,40 @@ sims:
     corners: 5
     measures:
       hdr_pos_mv:
-        nominal: 1.4519
-        min: 0.9994
+        nominal: 1.1803
+        min: 0.8883
         min_at: esr_c2- r_psu-
-        max: 3.3596
+        max: 2.8112
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 1.4883
-        min: 1.0174
+        nominal: 1.2105
+        min: 0.9044
         min_at: esr_c2- r_psu-
-        max: 3.5164
+        max: 2.9442
         max_at: esr_c2+ r_psu+
       tap_pos_mv:
-        nominal: 0.8841
-        min: 0.4482
+        nominal: 0.7274
+        min: 0.3997
         min_at: esr_c2- r_psu-
-        max: 2.7148
+        max: 2.2842
         max_at: esr_c2+ r_psu+
       tap_neg_mv:
-        nominal: 0.9063
-        min: 0.4562
+        nominal: 0.7459
+        min: 0.4069
         min_at: esr_c2- r_psu-
-        max: 2.8418
+        max: 2.3926
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
-        nominal: 0.4167
-        min: 0.3275
+        nominal: 0.4146
+        min: 0.3225
         min_at: esr_c2- r_psu-
-        max: 1.0691
+        max: 0.9107
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
-        nominal: 0.6362
-        min: 0.4925
+        nominal: 0.6254
+        min: 0.4817
         min_at: esr_c2- r_psu-
-        max: 1.6942
+        max: 1.4305
         max_at: esr_c2+ r_psu+
       avdd_uv:
         nominal: 0.04
@@ -2170,34 +2170,34 @@ sims:
         max: 0.1
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000253003
-        min: 0.000186182
+        nominal: 0.000218932
+        min: 0.000159941
         min_at: esr_c2- r_psu-
-        max: 0.00051382
+        max: 0.000469597
         max_at: esr_c2+ r_psu+
       mod_uv:
-        nominal: 0.13
+        nominal: 0.11
         min: 0.09
         min_at: esr_c2- r_psu-
-        max: 0.29
+        max: 0.25
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.06442
-        min: 0.04952
+        nominal: 0.06297
+        min: 0.04834
         min_at: esr_c2- r_psu-
-        max: 0.13853
+        max: 0.13645
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 28.3874
-        min: 28.3617
+        nominal: 25.8025
+        min: 25.7765
         min_at: esr_c2- r_psu-
-        max: 28.4911
+        max: 25.9033
         max_at: esr_c2+ r_psu+
       iuout_ma:
-        nominal: 45.4154
-        min: 45.4143
+        nominal: 41.3157
+        min: 41.3156
         min_at: esr_c2+ r_psu-
-        max: 45.4154
+        max: 41.3157
         max_at: nominal
     asserts:
     - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
@@ -2221,40 +2221,40 @@ sims:
     corners: 5
     measures:
       hdr_pos_mv:
-        nominal: 0.7186
-        min: 0.5581
+        nominal: 0.6524
+        min: 0.5048
         min_at: esr_c2- r_psu-
-        max: 1.5002
+        max: 1.3755
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 0.7372
-        min: 0.5682
+        nominal: 0.6691
+        min: 0.5139
         min_at: esr_c2- r_psu-
-        max: 1.5758
+        max: 1.445
         max_at: esr_c2+ r_psu+
       tap_pos_mv:
-        nominal: 0.4425
-        min: 0.2512
+        nominal: 0.4026
+        min: 0.2272
         min_at: esr_c2- r_psu-
-        max: 1.2254
+        max: 1.126
         max_at: esr_c2+ r_psu+
       tap_neg_mv:
-        nominal: 0.4538
-        min: 0.2557
+        nominal: 0.4129
+        min: 0.2314
         min_at: esr_c2- r_psu-
-        max: 1.2873
+        max: 1.1829
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
-        nominal: 0.2887
-        min: 0.2214
+        nominal: 0.2571
+        min: 0.1979
         min_at: esr_c2- r_psu-
-        max: 0.6076
+        max: 0.5474
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
-        nominal: 0.4274
-        min: 0.3273
+        nominal: 0.3828
+        min: 0.293
         min_at: esr_c2- r_psu-
-        max: 0.9227
+        max: 0.8309
         max_at: esr_c2+ r_psu+
       avdd_uv:
         nominal: 0.02
@@ -2263,35 +2263,35 @@ sims:
         max: 0.06
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.00011875
-        min: 9.46752e-05
+        nominal: 0.000107647
+        min: 8.66664e-05
         min_at: esr_c2- r_psu-
-        max: 0.000302644
+        max: 0.000223004
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.07
         min: 0.05
         min_at: esr_c2- r_psu-
-        max: 0.15
+        max: 0.13
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.04189
-        min: 0.03208
+        nominal: 0.03746
+        min: 0.0287
         min_at: esr_c2- r_psu-
-        max: 0.09343
+        max: 0.08288
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 14.9469
-        min: 14.922
+        nominal: 12.1086
+        min: 12.0951
         min_at: esr_c2- r_psu-
-        max: 15.0177
+        max: 12.1589
         max_at: esr_c2+ r_psu+
       iuout_ma:
-        nominal: 23.9756
-        min: 23.97
-        min_at: esr_c2- r_psu+
-        max: 23.9756
-        max_at: nominal
+        nominal: 19.4031
+        min: 19.4031
+        min_at: nominal
+        max: 19.4031
+        max_at: esr_c2+ r_psu+
     asserts:
     - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
         and max['tap_neg_mv'] < p['rail_bound_mv']
@@ -2310,80 +2310,80 @@ sims:
       why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
         DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
       pass: true
-  led-pwm-pattern[n_lit=14,spread=0.0]:
+  led-pwm-pattern[n_lit=13,spread=0.0]:
     corners: 5
     measures:
       hdr_pos_mv:
-        nominal: 3.0114
-        min: 2.089
+        nominal: 2.2717
+        min: 1.7183
         min_at: esr_c2- r_psu-
-        max: 6.8831
+        max: 5.3421
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 3.087
-        min: 2.1264
+        nominal: 2.3295
+        min: 1.7493
         min_at: esr_c2- r_psu-
-        max: 7.2044
+        max: 5.5948
         max_at: esr_c2+ r_psu+
       tap_pos_mv:
-        nominal: 1.8344
-        min: 0.937
+        nominal: 1.3999
+        min: 0.7732
         min_at: esr_c2- r_psu-
-        max: 5.5632
+        max: 4.3408
         max_at: esr_c2+ r_psu+
       tap_neg_mv:
-        nominal: 1.8803
-        min: 0.9538
+        nominal: 1.4356
+        min: 0.7872
         min_at: esr_c2- r_psu-
-        max: 5.8233
+        max: 4.5467
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
-        nominal: 0.8676
-        min: 0.6858
+        nominal: 0.7971
+        min: 0.6234
         min_at: esr_c2- r_psu-
-        max: 2.1971
+        max: 1.7315
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
-        nominal: 1.3267
-        min: 1.032
+        nominal: 1.2028
+        min: 0.9312
         min_at: esr_c2- r_psu-
-        max: 3.4797
+        max: 2.7202
         max_at: esr_c2+ r_psu+
       avdd_uv:
         nominal: 0.08
         min: 0.06
         min_at: esr_c2- r_psu-
-        max: 0.22
+        max: 0.18
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000508102
-        min: 0.000372148
+        nominal: 0.000407284
+        min: 0.000295964
         min_at: esr_c2- r_psu-
-        max: 0.00103602
+        max: 0.000878243
         max_at: esr_c2+ r_psu+
       mod_uv:
-        nominal: 0.25
-        min: 0.19
+        nominal: 0.21
+        min: 0.15
         min_at: esr_c2- r_psu-
-        max: 0.59
+        max: 0.47
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.13371
-        min: 0.10337
+        nominal: 0.12086
+        min: 0.09325
         min_at: esr_c2- r_psu-
-        max: 0.28395
+        max: 0.25901
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 56.9223
-        min: 56.8625
+        nominal: 48.0208
+        min: 47.9661
         min_at: esr_c2- r_psu-
-        max: 57.1639
+        max: 48.2351
         max_at: esr_c2+ r_psu+
       iuout_ma:
-        nominal: 90.8321
-        min: 90.8299
-        min_at: esr_c2- r_psu-
-        max: 90.8321
+        nominal: 76.7293
+        min: 76.7292
+        min_at: esr_c2+ r_psu-
+        max: 76.7293
         max_at: nominal
     asserts:
     - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
@@ -2403,45 +2403,45 @@ sims:
       why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
         DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
       pass: true
-  led-pwm-pattern[n_lit=14,spread=1.0]:
+  led-pwm-pattern[n_lit=13,spread=1.0]:
     corners: 5
     measures:
       hdr_pos_mv:
-        nominal: 0.0
-        min: 0.0
-        min_at: nominal
-        max: 0.0
-        max_at: nominal
+        nominal: 0.0024
+        min: 0.0008
+        min_at: esr_c2- r_psu-
+        max: 0.0063
+        max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 0.0
-        min: 0.0
-        min_at: nominal
-        max: 0.0
-        max_at: nominal
+        nominal: 0.0024
+        min: 0.0008
+        min_at: esr_c2- r_psu-
+        max: 0.0065
+        max_at: esr_c2+ r_psu+
       tap_pos_mv:
-        nominal: 0.0
-        min: 0.0
-        min_at: nominal
-        max: 0.0
-        max_at: nominal
+        nominal: 0.0013
+        min: 0.0004
+        min_at: esr_c2- r_psu-
+        max: 0.0044
+        max_at: esr_c2+ r_psu+
       tap_neg_mv:
-        nominal: 0.0
-        min: 0.0
-        min_at: nominal
-        max: 0.0
-        max_at: nominal
+        nominal: 0.0013
+        min: 0.0004
+        min_at: esr_c2- r_psu-
+        max: 0.0044
+        max_at: esr_c2+ r_psu+
       rail_pos_mv:
-        nominal: 0.0
-        min: 0.0
-        min_at: nominal
-        max: 0.0
-        max_at: nominal
+        nominal: 0.0004
+        min: 0.0001
+        min_at: esr_c2- r_psu-
+        max: 0.0009
+        max_at: esr_c2+ r_psu+
       rail_neg_mv:
-        nominal: 0.0
-        min: 0.0
-        min_at: nominal
-        max: 0.0
-        max_at: nominal
+        nominal: 0.0006
+        min: 0.0002
+        min_at: esr_c2- r_psu-
+        max: 0.0016
+        max_at: esr_c2+ r_psu+
       avdd_uv:
         nominal: 0.0
         min: 0.0
@@ -2449,11 +2449,11 @@ sims:
         max: 0.0
         max_at: nominal
       pitch_cents:
-        nominal: 1.35612e-05
-        min: 1.35612e-05
-        min_at: nominal
-        max: 1.35624e-05
-        max_at: esr_c2+ r_psu-
+        nominal: 1.50108e-05
+        min: 1.41456e-05
+        min_at: esr_c2- r_psu-
+        max: 1.68936e-05
+        max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.01
         min: 0.01
@@ -2461,23 +2461,23 @@ sims:
         max: 0.01
         max_at: nominal
       breath_mv:
-        nominal: 7.0e-05
-        min: 7.0e-05
+        nominal: 8.0e-05
+        min: 8.0e-05
         min_at: nominal
-        max: 7.0e-05
-        max_at: nominal
+        max: 9.0e-05
+        max_at: esr_c2+ r_psu-
       iuin_ma:
-        nominal: 0.0
-        min: 0.0
-        min_at: nominal
-        max: 0.0
-        max_at: nominal
+        nominal: 0.425631
+        min: 0.424942
+        min_at: esr_c2- r_psu-
+        max: 0.42705
+        max_at: esr_c2+ r_psu+
       iuout_ma:
-        nominal: 0.0
-        min: 0.0
+        nominal: 0.681766
+        min: 0.681766
         min_at: nominal
-        max: 0.0
-        max_at: nominal
+        max: 0.681841
+        max_at: esr_c2+ r_psu-
     asserts:
     - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
         and max['tap_neg_mv'] < p['rail_bound_mv']
@@ -2500,81 +2500,81 @@ sims:
     corners: 5
     measures:
       hdr_pos_mv:
-        nominal: 9.3856
-        min: 7.0356
+        nominal: 8.6585
+        min: 6.4844
         min_at: esr_c2- r_psu-
-        max: 18.1142
+        max: 16.741
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 9.6128
-        min: 7.1582
+        nominal: 8.8682
+        min: 6.5977
         min_at: esr_c2- r_psu-
-        max: 18.9802
+        max: 17.5416
         max_at: esr_c2+ r_psu+
       tap_pos_mv:
-        nominal: 5.7482
-        min: 3.14
+        nominal: 5.3025
+        min: 2.8937
         min_at: esr_c2- r_psu-
-        max: 14.7665
+        max: 13.6463
         max_at: esr_c2+ r_psu+
       tap_neg_mv:
-        nominal: 5.8879
-        min: 3.1948
+        nominal: 5.4314
+        min: 2.9442
         min_at: esr_c2- r_psu-
-        max: 15.4755
+        max: 14.3017
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
-        nominal: 3.5263
-        min: 2.547
+        nominal: 3.2481
+        min: 2.3432
         min_at: esr_c2- r_psu-
-        max: 8.08
+        max: 7.4612
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
-        nominal: 5.3864
-        min: 3.832
+        nominal: 4.963
+        min: 3.5263
         min_at: esr_c2- r_psu-
-        max: 12.112
+        max: 11.1866
         max_at: esr_c2+ r_psu+
       avdd_uv:
-        nominal: 0.36
-        min: 0.26
+        nominal: 0.32
+        min: 0.24
         min_at: esr_c2- r_psu-
-        max: 0.8
+        max: 0.74
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.001165
-        min: 0.000891487
+        nominal: 0.00107744
+        min: 0.000824275
         min_at: esr_c2- r_psu-
-        max: 0.00372482
+        max: 0.00343107
         max_at: esr_c2+ r_psu+
       mod_uv:
-        nominal: 0.83
-        min: 0.62
+        nominal: 0.76
+        min: 0.58
         min_at: esr_c2- r_psu-
-        max: 1.62
+        max: 1.5
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.44813
-        min: 0.34679
+        nominal: 0.4128
+        min: 0.31915
         min_at: esr_c2- r_psu-
-        max: 0.99096
+        max: 0.91476
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 113.413
-        min: 113.32
+        nominal: 105.178
+        min: 105.095
         min_at: esr_c2+ r_psu-
-        max: 113.801
+        max: 105.528
         max_at: esr_c2+ r_psu+
       iuout_ma:
-        nominal: 180.595
-        min: 180.595
-        min_at: nominal
-        max: 180.595
-        max_at: esr_c2- r_psu-
+        nominal: 167.571
+        min: 167.571
+        min_at: esr_c2- r_psu-
+        max: 167.571
+        max_at: nominal
     asserts:
     - expr: max['hdr_neg_mv'] > p['rail_bound_mv']
       why: 'RECORDED WHAT-IF: on the review''s own premise - no instrument bulk - its 13 mV is not a bound: with a 200 mohm
-        rack PSU the header reaches 15-19 mV p-p across the band, though the input LC has no gain there (iso-input-z rack_band).
+        rack PSU the header reaches 14-18 mV p-p across the band, though the input LC has no gain there (iso-input-z rack_band).
         What holds the design well under it is C-STRIP-BULK keeping half or more of the row''s current in the instrument (led-pwm''s
         iuout_ma against this run''s)'
       pass: true
@@ -2586,81 +2586,81 @@ sims:
     corners: 5
     measures:
       hdr_pos_mv:
-        nominal: 6.9604
-        min: 4.9012
+        nominal: 6.4173
+        min: 4.5131
         min_at: esr_c2- r_psu-
-        max: 15.5331
+        max: 14.3528
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 7.1242
-        min: 4.9843
+        nominal: 6.5683
+        min: 4.5896
         min_at: esr_c2- r_psu-
-        max: 16.2479
+        max: 15.0133
         max_at: esr_c2+ r_psu+
       tap_pos_mv:
-        nominal: 4.2257
-        min: 2.1611
+        nominal: 3.8958
+        min: 1.9897
         min_at: esr_c2- r_psu-
-        max: 12.6186
+        max: 11.6594
         max_at: esr_c2+ r_psu+
       tap_neg_mv:
-        nominal: 4.3254
-        min: 2.1978
+        nominal: 3.9876
+        min: 2.0235
         min_at: esr_c2- r_psu-
-        max: 13.1987
+        max: 12.1953
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
-        nominal: 1.949
-        min: 1.2612
+        nominal: 1.7955
+        min: 1.1601
         min_at: esr_c2- r_psu-
-        max: 5.3337
+        max: 4.9253
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
-        nominal: 3.0285
-        min: 1.922
+        nominal: 2.7908
+        min: 1.7682
         min_at: esr_c2- r_psu-
-        max: 8.2172
+        max: 7.589
         max_at: esr_c2+ r_psu+
       avdd_uv:
-        nominal: 0.2
+        nominal: 0.18
         min: 0.12
         min_at: esr_c2- r_psu-
-        max: 0.52
+        max: 0.48
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.00104363
-        min: 0.000797386
+        nominal: 0.000964134
+        min: 0.000736018
         min_at: esr_c2- r_psu-
-        max: 0.00379869
+        max: 0.00350086
         max_at: esr_c2+ r_psu+
       mod_uv:
-        nominal: 0.57
-        min: 0.39
+        nominal: 0.53
+        min: 0.35
         min_at: esr_c2- r_psu-
-        max: 1.35
+        max: 1.25
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.16254
-        min: 0.11791
+        nominal: 0.14971
+        min: 0.10849
         min_at: esr_c2- r_psu-
-        max: 0.44057
+        max: 0.40666
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 113.003
-        min: 112.903
+        nominal: 104.774
+        min: 104.683
         min_at: esr_c2- r_psu-
-        max: 113.457
+        max: 105.184
         max_at: esr_c2+ r_psu+
       iuout_ma:
-        nominal: 180.215
-        min: 180.215
-        min_at: esr_c2+ r_psu-
-        max: 180.215
+        nominal: 167.174
+        min: 167.174
+        min_at: nominal
+        max: 167.174
         max_at: nominal
     asserts:
     - expr: max['hdr_neg_mv'] > p['rail_bound_mv']
       why: 'RECORDED WHAT-IF: on the review''s own premise - no instrument bulk - its 13 mV is not a bound: with a 200 mohm
-        rack PSU the header reaches 15-19 mV p-p across the band, though the input LC has no gain there (iso-input-z rack_band).
+        rack PSU the header reaches 14-18 mV p-p across the band, though the input LC has no gain there (iso-input-z rack_band).
         What holds the design well under it is C-STRIP-BULK keeping half or more of the row''s current in the instrument (led-pwm''s
         iuout_ma against this run''s)'
       pass: true
@@ -2672,81 +2672,81 @@ sims:
     corners: 5
     measures:
       hdr_pos_mv:
-        nominal: 5.7898
-        min: 3.7805
+        nominal: 5.3368
+        min: 3.4806
         min_at: esr_c2- r_psu-
-        max: 14.3558
+        max: 13.2642
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 5.9229
-        min: 3.8436
+        nominal: 5.4594
+        min: 3.5388
         min_at: esr_c2- r_psu-
-        max: 14.982
+        max: 13.8426
         max_at: esr_c2+ r_psu+
       tap_pos_mv:
-        nominal: 3.4908
-        min: 1.6482
+        nominal: 3.2174
+        min: 1.5173
         min_at: esr_c2- r_psu-
-        max: 11.6254
+        max: 10.7402
         max_at: esr_c2+ r_psu+
       tap_neg_mv:
-        nominal: 3.5711
-        min: 1.6756
+        nominal: 3.2913
+        min: 1.5426
         min_at: esr_c2- r_psu-
-        max: 12.1294
+        max: 11.2057
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
-        nominal: 1.421
-        min: 0.8345
+        nominal: 1.309
+        min: 0.7675
         min_at: esr_c2- r_psu-
-        max: 4.2466
+        max: 3.9202
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
-        nominal: 2.2028
-        min: 1.2589
+        nominal: 2.0296
+        min: 1.1579
         min_at: esr_c2- r_psu-
-        max: 6.5549
+        max: 6.0517
         max_at: esr_c2+ r_psu+
       avdd_uv:
         nominal: 0.14
         min: 0.08
         min_at: esr_c2- r_psu-
-        max: 0.42
+        max: 0.38
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000963874
-        min: 0.000725872
+        nominal: 0.000890576
+        min: 0.000669857
         min_at: esr_c2- r_psu-
-        max: 0.00382882
+        max: 0.00352634
         max_at: esr_c2+ r_psu+
       mod_uv:
-        nominal: 0.43
-        min: 0.27
+        nominal: 0.41
+        min: 0.25
         min_at: esr_c2- r_psu-
-        max: 1.17
+        max: 1.09
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.09118
-        min: 0.06131
+        nominal: 0.08396
+        min: 0.05641
         min_at: esr_c2- r_psu-
-        max: 0.27859
+        max: 0.25696
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 112.81
-        min: 112.688
+        nominal: 104.666
+        min: 104.555
         min_at: esr_c2- r_psu-
-        max: 113.302
+        max: 105.11
         max_at: esr_c2+ r_psu+
       iuout_ma:
-        nominal: 180.042
-        min: 180.042
-        min_at: esr_c2+ r_psu-
-        max: 180.042
-        max_at: nominal
+        nominal: 167.123
+        min: 167.123
+        min_at: nominal
+        max: 167.123
+        max_at: esr_c2+ r_psu-
     asserts:
     - expr: max['hdr_neg_mv'] > p['rail_bound_mv']
       why: 'RECORDED WHAT-IF: on the review''s own premise - no instrument bulk - its 13 mV is not a bound: with a 200 mohm
-        rack PSU the header reaches 15-19 mV p-p across the band, though the input LC has no gain there (iso-input-z rack_band).
+        rack PSU the header reaches 14-18 mV p-p across the band, though the input LC has no gain there (iso-input-z rack_band).
         What holds the design well under it is C-STRIP-BULK keeping half or more of the row''s current in the instrument (led-pwm''s
         iuout_ma against this run''s)'
       pass: true

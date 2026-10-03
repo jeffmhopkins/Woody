@@ -548,7 +548,7 @@ boards:
     status: settled
     source: "J-MCU's tails past its seating plane, 2.10 [ds XKB-X1270WR-2x12A-9TV01.pdf rev A1 side view; repo hardware/lib/README.md]"
   mcu_conn_at:
-    value: [261.27, 12.29, 90]
+    value: [262.27, 12.29, 90]
     status: tbd
     source: "J-MCU's place, ONE figure: its insulator's centre along and across the body, and the way its mouth faces (0 the tail, 90 the far side, 270 the near side). Off the LED row (the owner, 2026-10-03: 'This connector needs moved to the side so that it doesn't cause coverage of the led'): turned along the body at the near edge, its tails at the edge and its mouth toward the row, in the tail strip between column mount H8 and the tail's end mount; drc.echo 'J-MCU, its plug and the Matrix ribbon off the LED row' holds it"
     decided_by: "the RH key board's J-MCU-KB and the ribbon between them, set jointly with the Matrix move (#23): the owner's solid key-board extension"
@@ -1161,16 +1161,23 @@ lighting:
   # face, LEDs up, lighting both acrylic sides through the cavity. ONE ROW down the
   # centreline at one pitch, with EQUAL MARGINS to the main board's two ends (the owner,
   # 2026-10-03: "all the 14 LEDs equidistant from board extents, and rework all components
-  # around them"). The pitch is DERIVED, not set here: woody_body.scad spreads led_count
-  # LEDs over the board with half a pitch at each end where it can, and the breath sensor
-  # holds the mouth-end LED further in, so both margins take that (drc.echo 'LED row on the
-  # main board' prints the pitch and the margins). Numbered along the data line: LED 1 at
-  # the tail end, where the data arrives; LED led_count at the mouth end.
+  # around them"). The pitch is DERIVED, not set here: woody_body.scad spreads led_slots
+  # places over the board with half a pitch at each end where it can, and the breath sensor
+  # holds the mouth-end place further in, so both margins take that (drc.echo 'LED row on
+  # the main board' prints the pitch and the margins). led_count LEDs fill the places from
+  # the mouth end; the tail-end place is empty (the owner, the same day: "Keep current
+  # layout, remove bottom one"). Numbered along the data line: LED 1 at the tail end, where
+  # the data arrives; LED led_count at the mouth end.
   led_count:
+    value: 13
+    status: settled
+    source: "owner: thirteen, 2026-09-30 (ADR 0028), the count the 60/m strip gave over the same run; a fourteenth, 2026-10-02 ('Add it', ADR 0028 amendment), in the row 2026-10-03; thirteen again later that day, the tail-end one removed: 'remove that bottom led again' / 'Keep current layout, remove bottom one' (ADR 0028 amendment, second of 2026-10-03)"
+    decided_by: "the side-light diffusion test (ROADMAP): the count, and through the board's length the pitch it gives"
+  led_slots:
     value: 14
     status: settled
-    source: "owner: thirteen, 2026-09-30 (ADR 0028), the count the 60/m strip gave over the same run; a fourteenth, 2026-10-02 ('Add it', ADR 0028 amendment), first in the tail corner and since 2026-10-03 in the row: 'it needs to be distance equalized and centered just like the other leds'"
-    decided_by: "the side-light diffusion test (ROADMAP): the count, and through the board's length the pitch it gives"
+    source: "the places the row's pitch and margins are set by (woody_body.scad led_pitch): fourteen, the row as laid out with equal margins on 2026-10-03, when the owner then removed its tail-end LED and kept the rest where they stood ('Keep current layout, remove bottom one', ADR 0028 amendment, second of 2026-10-03). led_count LEDs fill them from the mouth end"
+    decided_by: "the side-light diffusion test (ADR 0028): with led_count, the pitch and where the row ends at the tail"
   led_view_angle:
     value: 120
     status: tbd

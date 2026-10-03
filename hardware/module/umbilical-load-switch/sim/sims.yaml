@@ -42,6 +42,8 @@ params:
   t_end:    {value: 0.4}
 
 derived:
+  # C-STRIP-BULK is two cans of one row in parallel (#19): the deck takes the pair
+  c_strip: "v['C-STRIP-BULK'] * v['n:C-STRIP-BULK']"
   kp: "1.0/(v['r_dson']*(v['dvg'] - v['v_th']))"
   v_bus0: "0.0 if v['cold'] else v['v_bus']"
   v_gate0: "0.0 if v['cold'] else v['v_bus'] + v['dvg']"

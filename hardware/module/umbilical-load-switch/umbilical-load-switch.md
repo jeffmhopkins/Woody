@@ -258,9 +258,9 @@ phase 2  3.99 → 12 V at 940 mA less 360 mA load  = 2.2mF x 8.01 V / 580 mA
 requirement; 62 ms was an artefact of the unconnected `FB`.
 
 **The 2.2 mF this section sizes against is a bound, not the instrument.** The
-instrument's input as netlisted is `C-STRIP-BULK` 470 µF plus `C-BUCK-IN`
-100 µF, **570 µF** `[repo, carrier/power-entry-instrument/netlist.yaml]`;
-2.2 mF is 3.9× that, so every charging time and current on this page is an
+instrument's input as netlisted is `C-STRIP-BULK` 2 × 220 µF plus `C-BUCK-IN`
+100 µF, **540 µF** `[repo, carrier/power-entry-instrument/netlist.yaml]`;
+2.2 mF is 4.1× that, so every charging time and current on this page is an
 upper bound, and the sims run both.
 
 > **Simulated 2026-09-30, behaviourally — [`sim/`](sim/README.md).** Every
@@ -279,9 +279,9 @@ upper bound, and the sims run both.
 > failed short. The sizing check runs where the real topology is,
 > [`carrier/power-entry-instrument/sim`](../../carrier/power-entry-instrument/sim/README.md)
 > (`timer_peak`, `R-ILIM` varied by its 1 %): the `TIMER` stays at 0 V on a cold
-> start, a hot-plug and a late replug at every corner, and reaches 4.2 mV on a
+> start, a hot-plug and a late replug at every corner, and reaches 4.1 mV on a
 > replug 30 ms after a pull; the assertion is under half of 1.233 V, the 2×
-> below. With `Q-INRUSH` shorted and the page's 2.2 mF, 66 mV at the worst
+> below. With `Q-INRUSH` shorted and the page's 2.2 mF, 63 mV at the worst
 > corner (`sim/`, `hot-plug-page-2m2`). The 47.5 ms below is that failed case's
 > bound, and 10 µF still covers it 2.01×.
 

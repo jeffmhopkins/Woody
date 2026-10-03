@@ -3,9 +3,9 @@
 **Status:** Accepted. Geometry and data-line wiring amended by
 [ADR 0016](0016-one-strip-on-the-centre-board.md): one strip, on the centre board.
 The strip itself replaced 2026-09-30 by [ADR 0028](0028-on-board-leds.md):
-thirteen WS2815B-V1 on the main board, 12 V, backup-chained (fourteen since
-ADR 0028's amendment of 2026-10-02; in one row at one pitch since its
-amendment of 2026-10-03).
+thirteen WS2815B-V1 on the main board, 12 V, backup-chained (fourteen for a
+day from ADR 0028's amendment of 2026-10-02; thirteen again, in one row at one
+pitch, since its amendments of 2026-10-03).
 
 > **Note, 2026-09-30 (ADR 0028).** The lights are no longer a strip. The 12 V
 > rail, the level shifter, the backup data line, the shared clamp and
