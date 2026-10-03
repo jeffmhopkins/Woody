@@ -31,10 +31,10 @@ Not tracked, and gitignored: `.staleness/`, `.staleness-report.txt`, `*.tmp`.
 
 ## §2. `tools/check-staleness.py` — the mechanical half of the one failure mode
 
-Surfaced by a `PreToolUse` hook, so forgetting it is visible rather than
-silent — but the hook fires before every `Bash` call, not only `git commit`,
-and it never blocks: a FAIL is reported and you are the one who stops
-(CLAUDE.md rule 2 says how that was found). It greps the corpus for values
+Run by the commit gate (`tools/commit-gate.py`, a `PreToolUse` hook that acts
+on `git commit` and `git merge` only): a FAIL refuses the commit unless its
+message carries a `Gate-Red:` trailer saying why it goes in red
+(`docs/reference/tooling.md`, *The commit gate*; CLAUDE.md rule 2). It greps the corpus for values
 `config/figures.yaml` lists as `forbidden`, skipping prose whose wording
 refutes them (`.md` only — rule 2b). **It also reads the placed parts'
 identity fields on every KiCad sheet** — `Value`, `Manufacturer`, `MPN`,
@@ -215,8 +215,9 @@ ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
 >
 > Unlike the manifest's, this one is caught: `merge-bom.py --check`
 > regenerates into memory, byte-compares, and names the first differing line.
-> `check-staleness.py` runs it and reports a hand edit as a FAIL; the hook
-> only reports, so nothing blocks the commit (`CLAUDE.md`, rule 2).
+> `check-staleness.py` runs it, so the commit gate refuses a hand edit
+> (`tools/commit-gate.py`; until 2026-10-03 the hook only reported it, and
+> this line said it failed the commit — issue #9, G1).
 >
 > **Edit the fragment, then re-run the tool.** A row lives with the circuit
 > **whose page derives its value** — not where it is mentioned, not where it
@@ -318,9 +319,10 @@ python3 tools/cad.py explain <name>   # which input moved since an output was bu
 ```
 
 The first four are expected to pass before a commit that touches the corpus.
-The staleness hook surfaces `check-staleness.py` automatically — though note
-`CLAUDE.md` §2: it runs before *every* `Bash` call rather than before `git
-commit`, and it never blocks, it only tells you.
+The commit gate runs `check-staleness.py` (and `kicad.py check`, when the
+commit can touch a KiCad input) before every `git commit` and `git merge`, and
+refuses a FAIL unless the message carries a `Gate-Red:` trailer — `CLAUDE.md`
+§2.
 
 `audit-notes.py` is the odd one out: it is an ADVISORY, it changes nothing,
 and it exists because the defect it looks for is one no other check can see.
