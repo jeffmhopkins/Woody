@@ -1,0 +1,28 @@
+* The R-78E5.0's switching ripple to the MCP3202's VDD, which is its reference (#12 item 3),
+* small-signal: a 1 V AC source on INST_5V_A (ideal: the converter's output impedance, D4 and
+* C12 are given no credit); CBL-MCU-RIBBON's three 5 V conductors in parallel with its four
+* grounds as their return (R and L, per metre times len_rib); the Matrix's VCC_5V
+* capacitance; its ME6217C33 as a behavioural transfer of k_psrr behind r_ldo into its 10 uF
+* output capacitor; the ribbon's one 3V3 conductor (and the grounds) back to this board;
+* C-ADC-BULK and C-DEC-ADC at U-ADC, as netlisted. hmag is |VDD| per volt on INST_5V_A.
+VRIP n5 0 DC 0 AC 1
+RR5 n5 r5a {{r_rib5}}
+LR5 r5a vcc5 {{l_rib5}}
+CMX vcc5 cmx1 {{c_vcc5}}
+RCMX cmx1 0 {{esr_cer}}
+ELDO ldoi 0 vcc5 0 {{k_psrr}}
+RLDO ldoi ldoo {{r_ldo}}
+CLDO ldoo cl1 {{c_ldo}}
+RCLDO cl1 0 {{esr_cer}}
+RR3 ldoo r3a {{r_rib3}}
+LR3 r3a vdd {{l_rib3}}
+CBULK vdd cb1 {{C-ADC-BULK}}
+RCB cb1 0 {{esr_cer}}
+CDEC vdd 0 {{C-DEC-ADC}}
+.control
+ac dec 400 1k 10meg
+let hmag = mag(v(vdd))
+wrdata hmag.dat hmag
+quit
+.endc
+.end
