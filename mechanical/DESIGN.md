@@ -123,19 +123,17 @@ Several things can claim each end, and the largest wins:
   connectors"). The Matrix **sits just under the oak top** below its window:
   the key plate stops short of it, so the board's top face comes up to the
   oak and its LEDs stand up into the window opening, under the acrylic
-  (owner, same day: "led matrix tighter to the acrylic"). **Since 2026-10-02
-  it is mounted on the right-hand key board** (ADR 0021 amendment;
-  `boards.matrix_mount`): that board runs on past its tail columns as two
-  rails under the Matrix's pad rows, header pins through a shim join them
-  (`boards.matrix_shim_t`, *"Matrix shim on the extension's rails"*), and
-  the rails' open middle takes the Matrix's back-side parts and the USB-C
-  plug (*"Matrix on the right-hand key board's rails"*). The rails cantilever
-  past the tail columns with no support (`boards.matrix_support` says why
-  and what would change it). Under the Matrix: the extension's
-  **right-angle USB-C plug** off its mouth edge, centred on the Matrix's
-  receptacle (`boards.matrix_usb`) and turned so its lead leaves downward and
-  passes under the far rail (`openings.usb_plug_turn`, *"USB-C plug and lead
-  clear of the right-hand key board's rails"*). Its overmould rises past the
+  (owner, same day: "led matrix tighter to the acrylic"). **Since 2026-10-03
+  it is mounted on a carrier board of its own, hung from the oak top**
+  (ADR 0021 amendment 2026-10-03; `boards.matrix_mount`): two headers through
+  its pad rows stand it on the carrier (`boards.matrix_hdr_h`, *"Matrix's
+  back-side parts clear the carrier"*), and the carrier hangs on three
+  spacers from inserts in the oak (*"Matrix carrier hangs from the oak"*).
+  It lifts off with the lid. Off the Matrix's mouth edge: the extension's
+  **right-angle USB-C plug**, centred on the Matrix's receptacle
+  (`boards.matrix_usb`) and turned so its lead leaves downward, beside the
+  carrier, and runs to the tail under it (`openings.usb_plug_turn`,
+  *"USB-C plug and lead clear of the Matrix carrier"*). Its overmould rises past the
   key plate's underside, so the plate stops in front of it, and past the
   oak's, which has a pocket over it (*"USB-C plug clear of the key plate and
   the oak top"*; review #19 F1). Under it, the main board's tail end with
@@ -180,7 +178,7 @@ Several things can claim each end, and the largest wins:
   registers and the carrier's circuits are on one board at the thumb level,
   from the mouth cap to the end of the right hand, the full width inside the
   sides. Its parts face up; the two key boards connect to it by ribbons (below);
-  the Matrix's ribbon comes down to it from the right-hand key board, and it runs on past the right-hand key
+  the Matrix's ribbon comes down to it from the Matrix carrier, and it runs on past the right-hand key
   board to the etherCON's adapter, carrying J-UMB (ADR 0021). **That tail
   end is full width** (owner, 2026-10-02; `boards.main_tail`). It was a
   tongue as wide as the adapter, narrowed for lid screws that ADR 0025

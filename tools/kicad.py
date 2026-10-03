@@ -846,6 +846,52 @@ def check_matrix(board_docs):
                     problems.append(f"matrix: {MATRIX_BOARD} leaves {ref}.{pin} ({row}) open; {rel} puts {key} on {want}")
                 elif net != want:
                     problems.append(f"matrix: {MATRIX_BOARD} wires {ref}.{pin} ({row}) to {net}; {rel} puts {key} on {want}")
+    problems += check_matrix_pad_rows(doc)
+    return problems
+
+
+MATRIX_PINS_C = os.path.join(ROOT, "datasheets", "mechanical", "WAVESHARE-ESP32-S3-MATRIX-circuitpython-pins.c")
+
+
+def matrix_pad_rows():
+    """The Matrix's two pad rows, pin 1 first, read from the banked CircuitPython board file:
+    its 'left column' (5V, GND, 3V3, then the IOs it lists) and its 'right column', each IO
+    once in the order listed. WHICH END IS PIN 1 is the vendor pinout's
+    (datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-pinout.png, read 2026-10-03): with the
+    USB-C at the top both columns run top to bottom, 5V..GP1 and GP33..RX, so each list
+    starts at the USB-C edge. The file's own comment says the right column is listed
+    'bottom to top'; the image contradicts it and the list order agrees with the image."""
+    import re
+    text = open(MATRIX_PINS_C).read()
+    left = text.split("left column", 1)[1].split("right column", 1)[0]
+    right = text.split("right column", 1)[1].split("Neopixel", 1)[0]
+
+    def ios(s):
+        seen = []
+        for m in re.findall(r"MP_QSTR_IO(\d+)\b", s):
+            if f"IO{m}" not in seen:
+                seen.append(f"IO{m}")
+        return seen
+    return [["P5V", "GND", "P3V3"] + ios(left), ios(right)]
+
+
+def check_matrix_pad_rows(doc):
+    """Each HDR-MATRIX on the Matrix's board names its pins, pin 1 first, in one of the
+    Matrix's two pad rows' orders (matrix_pad_rows), and the two headers take both rows."""
+    rows = matrix_pad_rows()
+    problems, used = [], []
+    for ref, c in sorted(doc["components"].items()):
+        if c.get("of") != "HDR-MATRIX":
+            continue
+        pins = [str(p) for p in c["pins"]]
+        if pins in rows:
+            used.append(rows.index(pins))
+        else:
+            problems.append(f"matrix: {MATRIX_BOARD} {ref} (HDR-MATRIX) names its pins {' '.join(pins)}; the Matrix's pad rows are "
+                            f"{' '.join(rows[0])} and {' '.join(rows[1])} from the USB-C edge "
+                            f"({os.path.relpath(MATRIX_PINS_C, ROOT)}, the pinout image for the end)")
+    if sorted(used) != [0, 1] and not problems:
+        problems.append(f"matrix: {MATRIX_BOARD}'s HDR-MATRIX parts do not take both of the Matrix's pad rows")
     return problems
 
 

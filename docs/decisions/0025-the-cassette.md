@@ -209,6 +209,14 @@ And, answering the follow-up questions:
   > board's `J-MCU-KB` to `J-MCU`, plugged with the key plate raised like the
   > key chain's ribbons (step 4 above). The bench test therefore has the
   > Matrix in place, and cutting the oak top free no longer unplugs anything.
+  >
+  > **Amended again 2026-10-03 (ADR 0021, *Amendment, 2026-10-03*): the
+  > Matrix is on the lid, not in the cassette.** It sits on a carrier board
+  > of its own, hung from inserts in the oak top, and `CBL-MCU-RIBBON` runs
+  > from that board's `J-MCU-C` to `J-MCU`. Lifting the lid lifts the
+  > Matrix with it, so the Matrix ribbon is unplugged at `J-MCU` with the lid
+  > raised, as the key chain's are; the bench test without the lid has no
+  > Matrix on it.
 - **The shell is the structure; the cassette only has to survive the bench.**
   A key press goes from the switch into the key board and the plate, down the
   columns in compression to the bottom plate, and into the oak bottom. Before,

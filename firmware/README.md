@@ -177,8 +177,6 @@ Pins: `SCK` IO38, `SH/LD` IO7, chain-end `SER` IO33, `QH` IO40.
 
 - **`IO2` and `IO3` driven low after boot** — shields on the ribbon
   (`carrier.md`, *The pin map*; recovery ladder, below).
-- **`EN` and `IO0` only ever pulled to ground** (*The instrument must stay
-  recoverable*, below).
 
 ### The lights
 
@@ -240,16 +238,15 @@ fresh silicone. Everything here exists so that it never has to be the answer.
   through the tail USB-C slot — which is why MIDI is opt-in. (3) The console
   header on the main board, with the body opened (ADR 0025 — there is no
   service cover since 2026-09-26), for watching a board that boots
-  but misbehaves. (4) **Hardware boot-force on the same header**: `EN` and
-  `IO0` are not on the ESP32-S3-Matrix's pad rows, so two short wires join
-  its RESET and BOOT button pads to the right-hand key board, which carries
-  the Matrix, and two ribbon conductors bring them to `HDR-SERVICE` (ADR 0018;
-  ADR 0021 amendment 2026-10-02; `hardware/carrier/service-uart/`). Hold `IO0` low,
-  pulse `EN`, and the ROM download mode takes a UART flash over the console
-  pair — so a corrupted *bootloader* is recovered with the body opened and the
-  Matrix still in place. **Only pull `EN` and `IO0` to ground** (open-drain or
-  a switch to GND), never drive them high: the Matrix's own buttons short them
-  to GND. The two spare GPIO on the ribbon (`IO2`, `IO3`) sit beside fast
+  but misbehaves. (4) **The Matrix's own BOOT and RESET buttons.** Since 2026-10-03 the
+  Matrix is **programmed and recovered over USB-C only** (owner: "Program
+  over USB only"; ADR 0021, *Amendment, 2026-10-03*): `EN` and `IO0` are not
+  wired out, and `HDR-SERVICE` carries the console's TXD, RXD and GND only
+  (`hardware/carrier/service-uart/`). Hold BOOT, press RESET, and the ROM's
+  download mode takes a flash over USB-Serial-JTAG through the tail USB-C -
+  so a corrupted *bootloader* is recovered without a UART. The buttons are
+  on the Matrix's underside, over its carrier; how they are reached with the
+  lid lifted is open (ADR 0021, *Amendment, 2026-10-03*, *Open*). The two spare GPIO on the ribbon (`IO2`, `IO3`) sit beside fast
   lines as shields; drive them low after boot (`IO3` is a strapping pin
   [from memory], harmless once booted) — pin map in `hardware/carrier/carrier.md`.
 - **Exercise the ladder at M8**, before the body closes, so it is known good

@@ -550,3 +550,4 @@ pins between the carrier and service-uart sheets.
 | The pad rows' side (the 5V..IO1 row on the near side with the USB-C toward the mouth) | the Matrix in hand, before the carrier is ordered |
 | The inserts in oak: they are sold for heat-setting in plastic | one set and pulled in a scrap of the chosen oak, before the lid is drilled |
 | `EN`'s start-up with no C (#14 A2) | the power-cycle E-test above |
+| Reaching the Matrix's BOOT and RESET buttons, on its underside over the carrier, for recovery (item 5) | the carrier's final outline (2026-10-03: the owner asked for no cut-out, which the plug and the ribbon's fold constrain); with the Matrix in hand, a probe through the gap or an access hole |
