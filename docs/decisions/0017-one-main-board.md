@@ -1,6 +1,8 @@
 # 0017 — One main board
 
 **Status:** Accepted; amended 2026-09-27 (the key-board chain: 1.27 mm IDC, *Amendment* below)
+and 2026-09-29 (four layers, and parts on both faces, *Amendment* below); the
+wiring details are [ADR 0018](0018-main-board-wiring-decisions.md)
 
 Replaces the **centre board** and the two **thumb boards** with one board.
 The centre board is named in ADRs 0009, 0013, 0014, 0015 and 0016 and in

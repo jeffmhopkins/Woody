@@ -5,7 +5,9 @@ design chosen here: *"There needs to be another way to avoid the breath
 affecting pitch. This is unacceptable. We are powering the controller through
 the rack, there has to be a valid way to do this."* Numbering: 0025 and 0026
 are taken on other branches (the instrument's drop-in module, the panel
-graphics), so this is 0027.
+graphics), so this is 0027. **Amended 2026-10-01**, three times (the
+converter's common-mode current; the choke is fitted; the `INST_POS12` range
+is accepted), the *Amendment* sections below.
 
 **Amended 2026-09-30 — `U-ISO` is RECOM's RPA20-2412SAW.** The owner: *"I
 thought the point was to do a RECOM that was in stock."* It replaces the

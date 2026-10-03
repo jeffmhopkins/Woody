@@ -5,7 +5,7 @@
 prototype's timing) and [ADR 0016](0016-one-strip-on-the-centre-board.md)
 (one strip on the centre board, whose "LEDs populated directly on the centre
 board ... not decided here" this decides). Each carries a dated note pointing
-here. Numbering: 0025–0027 are taken.
+here. Numbering: 0025–0027 are taken. **Amended 2026-09-30** (the layout goes ahead of the diffusion test, *Amendment* below).
 
 ## Context
 

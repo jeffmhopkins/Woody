@@ -1,6 +1,10 @@
 # 0004 — CV interface module and umbilical
 
-**Status:** Accepted
+**Status:** Accepted. **Amended in place**, each at a dated note:
+2026-09-30 (the instrument's supply, ADR 0027, twice; the bus +5 V unused,
+ADR 0023 point 3; the panel's rows, ADR 0024 point 11) and 2026-10-01 (the DAC
+rail's regulator, three times, ending at the LT3042; the level shifter on
+`DAC_AVDD`; the power diagram, pre-layout review A3-12; the jacks' labels).
 
 ## Context
 

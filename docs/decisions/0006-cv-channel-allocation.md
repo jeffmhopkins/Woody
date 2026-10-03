@@ -1,6 +1,8 @@
 # 0006 — CV channel allocation and calibration
 
-**Status:** Accepted
+**Status:** Accepted. **Amended 2026-10-01** by the pre-layout review (A2-x
+in place near the top, A1-10 at the range derivation) and the jacks' labels,
+each at a dated note.
 
 ## Decision
 

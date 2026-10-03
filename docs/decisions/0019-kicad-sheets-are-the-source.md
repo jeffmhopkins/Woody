@@ -1,8 +1,12 @@
 # 0019 — The KiCad sheets are the source of truth
 
 **Status:** Accepted. Decided by the owner, 2026-09-27; amended the same day
-(the sheet names the bought part). Migration in progress:
-the key-board circuits and both key boards are done (see *Consequences*).
+(the sheet names the bought part). **Migration done for every board:** the
+key boards (2026-09-27), the main board, the interfaces and the umbilical
+adapter (2026-09-29), the module's two boards (2026-09-30) — *Consequences*.
+**Open: the second phase** — BOM fragments counted from the sheets, and
+`allocation.yaml` — whose stated trigger (every board in KiCad) is now met;
+the owner decides when it starts.
 
 ## Context
 
@@ -97,12 +101,15 @@ these KiCad schematics actually be the source of truth of all the things.")
   (`hardware/boards/module-main`, `module-jack`, ADR 0023). A circuit on both
   boards is two pages, one per board. `link-supervision` (no parts) and
   `panel` (no electrical parts) have nothing to draw.
+- **Drawn as a sheet from the start, 2026-09-29:** the umbilical adapter
+  (`hardware/boards/umb-adapter`, ADR 0021; commit `f29e0bc`).
 - **The BOM fragments are a second phase.** A fragment's quantity is a total
   over every board, so it can only be counted from the sheets once every
   board is in KiCad. Until then the fragments stay hand-written, and
   `check-netlist.py` keeps proving the sheets' parts against them.
 - **`allocation.yaml` stays data until the main board is drawn**, because two
-  of its four rows are registers on the main board. `kicad.py check` proves
+  of its four rows are registers on the main board. (The main board is drawn
+  since 2026-09-29 and the file is still data: open, with the second phase.) `kicad.py check` proves
   the key boards' wiring against it, and it against the page's table.
 - **The layouts follow the same rule** (2026-09-27, the left-hand key board
   as proof of concept): `tools/pcb.py` writes a board's first layout from the
@@ -111,7 +118,7 @@ these KiCad schematics actually be the source of truth of all the things.")
   CAD's switch positions. `docs/reference/tooling.md` §4.
 - **`kicad.py check` needs KiCad 9**, so it is not in the commit hook, which
   runs before every shell command. It is run by hand, and
-  `docs/reference/tooling.md` says when.
+  `docs/reference/tooling.md` says when; nothing reports that it was skipped.
 
 ## Amendment, 2026-09-27 — the sheet names the bought part
 
