@@ -101,6 +101,7 @@ for m in Capacitor_SMD.3dshapes/C_0805_2012Metric.step \
          Capacitor_SMD.3dshapes/C_1206_3216Metric.step \
          Capacitor_SMD.3dshapes/CP_Elec_10x10.step \
          Capacitor_SMD.3dshapes/CP_Elec_6.3x5.8.step \
+         Capacitor_SMD.3dshapes/CP_Elec_6.3x7.7.step \
          Resistor_SMD.3dshapes/R_1206_3216Metric.step \
          Inductor_SMD.3dshapes/L_0805_2012Metric.step \
          Inductor_SMD.3dshapes/L_Sunlord_SWPA6028S.step \

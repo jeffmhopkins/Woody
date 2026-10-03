@@ -5,17 +5,17 @@
       "Application": "Pcbnew",
       "Version": "9.0.9-9.0.9~ubuntu24.04.1"
     },
-    "CreationDate": "2026-10-03T14:25:10+00:00"
+    "CreationDate": "2026-10-03T14:28:51+00:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
-      "Name": "module-jack",
-      "GUID": "6d6f6475-6c65-42d6-9a61-636b2e6b6963",
+      "Name": "module-iso",
+      "GUID": "6d6f6475-6c65-42d6-9973-6f2e6b696361",
       "Revision": "A"
     },
     "Size": {
       "X": 48.6,
-      "Y": 61.1
+      "Y": 46.25
     },
     "LayerNumber": 2,
     "BoardThickness": 1.6,
@@ -27,54 +27,54 @@
       "PadToPad": 0.2,
       "PadToTrack": 0.2,
       "TrackToTrack": 0.2,
-      "MinLineWidth": 0.25,
-      "TrackToRegion": 0.5,
-      "RegionToRegion": 0.5
+      "MinLineWidth": 0.6,
+      "TrackToRegion": 0.3,
+      "RegionToRegion": 0.3
     }
   ],
   "FilesAttributes": [
     {
-      "Path": "module-jack-F_Cu.gbr",
+      "Path": "module-iso-F_Cu.gbr",
       "FileFunction": "Copper,L1,Top",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "module-jack-B_Cu.gbr",
+      "Path": "module-iso-B_Cu.gbr",
       "FileFunction": "Copper,L2,Bot",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "module-jack-F_Paste.gbr",
+      "Path": "module-iso-F_Paste.gbr",
       "FileFunction": "SolderPaste,Top",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "module-jack-B_Paste.gbr",
+      "Path": "module-iso-B_Paste.gbr",
       "FileFunction": "SolderPaste,Bot",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "module-jack-F_Silkscreen.gbr",
+      "Path": "module-iso-F_Silkscreen.gbr",
       "FileFunction": "Legend,Top",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "module-jack-B_Silkscreen.gbr",
+      "Path": "module-iso-B_Silkscreen.gbr",
       "FileFunction": "Legend,Bot",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "module-jack-F_Mask.gbr",
+      "Path": "module-iso-F_Mask.gbr",
       "FileFunction": "SolderMask,Top",
       "FilePolarity": "Negative"
     },
     {
-      "Path": "module-jack-B_Mask.gbr",
+      "Path": "module-iso-B_Mask.gbr",
       "FileFunction": "SolderMask,Bot",
       "FilePolarity": "Negative"
     },
     {
-      "Path": "module-jack-Edge_Cuts.gbr",
+      "Path": "module-iso-Edge_Cuts.gbr",
       "FileFunction": "Profile",
       "FilePolarity": "Positive"
     }
