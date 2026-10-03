@@ -1,5 +1,5 @@
 # The LED row's data line: U-LVLSHIFT through R-LED-SER into the two inputs LED_DI feeds
-# (D-LED-1's DIN1, D-LED-2's DIN2), against the WS2815B-V1's thresholds and its shortest
+# (D-LED-1's DIN1, D-LED-2's DIN2: the row's two tail-end LEDs), against the WS2815B-V1's thresholds and its shortest
 # pulse, T0H. The rest of the row is re-timed by each LED and is not this circuit's
 # edge. Values from this circuit's netlist. Run:
 #   python3 tools/sim.py run hardware/carrier/led-strip-drive/sim
@@ -13,7 +13,7 @@ params:
   tr_out:  {value: 3.0e-9, source: "the gate's own edge into a light load [assumption: tPLH is 3.8-5.5 ns into 15 pF, p.4] (vary)"}
   c_in:    {value: 15.0e-12, source: "the WS2815B-V1's input capacity C_I, 15 pF max [datasheets/led/WS2815B-V1.pdf p.3]"}
   n_in:    {value: 2, source: "LED_DI feeds two inputs, D-LED-1 DIN1 and D-LED-2 DIN2 (netlist)"}
-  c_trace: {value: 12.0e-12, source: "LED_DI's trace from R-LED-SER to D-LED-1 in the tail corner, ~50 mm, and on to D-LED-2's DIN2 at the row's tail end, ~55 mm [ADR 0021 amendment 2026-10-02, the study of a fourteenth LED], at ~1.2 pF/cm for a signal trace over a plane [from memory; the layout is not drawn] (vary)"}
+  c_trace: {value: 8.0e-12, source: "LED_DI's trace from R-LED-SER beside U-LVLSHIFT (under J-MCU) out along the board to D-LED-1's DIN1 at the row's tail end, ~45 mm, and back to D-LED-2's DIN2, ~20 mm (ADR 0028 amendment 2026-10-03, the main board's wave-3 placement), at ~1.2 pF/cm for a signal trace over a plane [from memory] (vary)"}
   t_hi:    {value: 220.0e-9, source: "T0H's minimum, 220 ns [WS2815B-V1.pdf p.3, Data Transfer Time]: the shortest high the row must read"}
   t_lo:    {value: 900.0e-9, source: "T0L's minimum, 900 ns [same]"}
   vih:     {value: 2.7, source: "the WS2815B-V1's V_IH min at VDD 12 V [same, p.3]"}
@@ -44,8 +44,8 @@ sims:
       v_max: "peak(w['di'], 0, 1.5e-6)"
       v_min: "trough(w['di'], 0, 1.5e-6)"
     asserts:
-      - expr: "max['t_rise'] < 55e-9 and max['t_fall'] < 55e-9"
-        why: "the edge stays under a quarter of T0H's 220 ns minimum at every corner: 330 ohm into the two inputs' 30 pF alone is ~22 ns (x 2.2), and the feed's ~100 mm to the tail corner's LED and back to the row (c_trace) makes it ~37 ns nominal and ~50 ns at the worst corner. What T0H needs is the next assertion; this one bounds the edge the layout may not lengthen"
+      - expr: "max['t_rise'] < 45e-9 and max['t_fall'] < 45e-9"
+        why: "the edge stays under a fifth of T0H's 220 ns minimum at every corner: 330 ohm into the two inputs' 30 pF alone is ~22 ns (x 2.2), and the feed's ~65 mm out to the row's tail-end LED and back to the next (c_trace) makes it ~33 ns nominal and ~42 ns at the worst corner. The bar is the worst corner with a few ns to spare (it was 55 ns for the corner LED's ~100 mm feed, until 2026-10-03): what T0H needs is the next assertion; this one bounds the edge the layout may not lengthen"
       - expr: "min['hi_short'] > 0.9 * p['t_hi'] and max['hi_long'] < 1.2 * p['t_hi']"
         why: "a 220 ns high arrives as 198-264 ns or better wherever in 1.5-2.7 V the LED's threshold sits: the edge moves the pulse by a few nanoseconds, a small fraction of T0H's 220-380 ns window"
       - expr: "max['v_max'] < 5.7 and min['v_min'] > -0.3"

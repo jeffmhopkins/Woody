@@ -211,7 +211,7 @@ solids (`[calc]`, ray cast; a wall point counts if nothing stands between;
 | LED | far side, x 250–270 / 270–290 / 290–320 | near side, same bands |
 |---|---|---|
 | `LED1` today (centreline, x 224.7) | 18 / 35 / 13 % | 0 / 2 / 4 % |
-| **at x 274.7 (LED1 + 3 × `lighting.led_pitch`), 13.5 mm off the centreline toward the near side** | 17 / 59 / 36 % | 85 / 85 / 85 % |
+| **at x 274.7 (LED1 + 3 × the pitch then set in config), 13.5 mm off the centreline toward the near side** (superseded 2026-10-03: ADR 0028's amendment of that date puts the fourteenth in the row) | 17 / 59 / 36 % | 85 / 85 / 85 % |
 | at x 258.0 (LED1 + 2 pitches), same offset | 48 / 29 / 7 % | 85 / 85 / 85 % |
 
 The tail's near side is almost unlit today. The regulator block, 12.5 mm
@@ -228,7 +228,7 @@ U-ISO's rating. The register's `umbilical-current` upper bound would move
 by the same 15 mA. `led-pwm-rail-ripple` and `led-pwm-pitch` scale with the
 row's swing and should be re-simulated, not scaled. The new LED has to be
 first in the data chain, because the data arrives at the tail:
-`R-LED-SER` → the corner LED → `LED1`. That adds about 50 mm of feed and
+`R-LED-SER` → the corner LED → `LED1` (superseded 2026-10-03, ADR 0028: the row's tail end is first). That adds about 50 mm of feed and
 55 mm of return across the `J-MCU` area. The backup line follows ADR 0028
 point 5: the corner LED's `DIN2` to GND, and `LED1`'s `DIN2` from the
 feed. The refdes are renumbered in chain order. Firmware: one more pixel

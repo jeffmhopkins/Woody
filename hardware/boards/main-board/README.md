@@ -14,24 +14,22 @@ is part of the cassette (ADR 0025): every one of its mounts stands on the one
 bottom plate, and eight of them are columns up to the key boards (ADR 0022 as
 amended).
 
-> **Status: laid out and routed by `tools/pcb.py` (`kind: main`) to the 2026-10-01
-> outline, finished by hand (rev D below). The ADR 0021 amendment of 2026-10-02
-> (`boards.main_tail` `full`, the full-width tail) is not yet taken, so
-> `pcb.py check` FAILS on one error — `[cad]` the Edge.Cuts outline against
-> `mechanical/export/main-board.dxf` — until the new outline is laid in (*Open*
-> below); `kicad.py check` fails with it.** Everything else `check` tests passed at
-> rev D: KiCad's DRC with schematic parity, nothing unrouted, the planes, the
-> island and its one tie, the mounts and every CAD-placed part. Layer 1 runs along the board and layer 4 across it
-> (`layout.yaml` `directions:`; owner, 2026-10-01). The last connection, `IO34`
-> into `J-MCU` pin 14, was routed by a scripted hand edit of the board (*What
-> the first layout settled*). The renders (`*.pcb-*.png`) and `fab/` are written
-> by `pcb.py render` and ledgered in `hardware/SHEETS.csv`. The sheets are the source and pass KiCad's ERC. Every part
-> has its footprint and bought part on its symbol (`Footprint`, `Manufacturer`,
-> `MPN`, `LCSC`, `Assembly`), from selections whose datasheets are banked. The
-> board's outline and every placement the body fixes are exported
-> (`mechanical/export/main-board.dxf`, the `main` entries in
-> `mechanical/export/pcb-geometry.echo`). The thumb switch positions are
-> provisional until M2/M3, as the key boards' are.
+> **Status (wave 3, 2026-10-03): re-placed to its current design and NOT YET ROUTED.**
+> The full-width tail's outline (ADR 0021 amendment), the fourteen LEDs in one even row
+> (ADR 0028 amendment of 2026-10-03), `J-MCU` turned off the row to the near edge
+> (`boards.mcu_conn_at`), the wave-2 and wave-3 parts (`R45`–`R47`, `C41`–`C43`, `U11`)
+> and the review fixes (*Wave 3*, below) are placed (`layout.yaml`, `pcb.py layout
+> --no-route`). **Routing waits for the Matrix branch's `J-MCU` / `J-MCU-KB` pair (#23)**,
+> which may move `J-MCU` again; until it is routed `pcb.py check` fails on every
+> unrouted connection and `kicad.py check` with it, and `fab/` and the renders are the
+> last routed board's (rev D) - stale, and not to be ordered from. The sheets are the
+> source and pass KiCad's ERC. Every part has its footprint and bought part on its
+> symbol (`Footprint`, `Manufacturer`, `MPN`, `LCSC`, `Assembly`), from selections whose
+> datasheets are banked, and every machine-placed part with a polarity or more than two
+> pads has its JLC rotation (`hardware/lib/jlc-rotation.csv`). The board's outline and
+> every placement the body fixes are exported (`mechanical/export/main-board.dxf`, the
+> `main` entries in `mechanical/export/pcb-geometry.echo`). The thumb switch positions
+> are provisional until M2/M3, as the key boards' are.
 
 What each circuit does, and why, is on its page:
 - [`carrier.md`](../../carrier/carrier.md), the board's own page, and its
@@ -167,13 +165,16 @@ finish, and every other open item:
 
 | Item | Decided by |
 |---|---|
-| **The LED row's places** are the body CAD's (`pcb-geometry.echo` `main` `led`, *"LED row on the main board"* in `mechanical/drc.echo`): LED 1 in the tail corner beside the etherCON adapter, where the data arrives (*"LED in the tail corner clear of its neighbours"*; ADR 0028 amendment, 2026-10-02), then one row on the centreline from its tail end, the U-bolt station midway between two LEDs. The references run in the same order: `D7` is LED 1, `C25` its 100 nF. Laid out as it stands, and reshuffled if the diffusion test moves count or pitch (owner's choice (b), ADR 0028 amendment). **The WS2815B-V1's chamfer marks pin 1 (NC)**; the footprint's silk triangle marks the chamfer, and JLCPCB's own footprint agrees (`hardware/lib/README.md`), so the placement preview should need no rotation offset: pass it only when the chamfer lands on the triangle | Layout; the first order's placement preview |
+| **The LED row's places** are the body CAD's (`pcb-geometry.echo` `main` `led`, *"LED row on the main board"* in `mechanical/drc.echo`): fourteen on the centreline at one pitch with equal margins to the board's ends (ADR 0028 amendment, 2026-10-03), `D7` (LED 1, first on the data line) at the tail end, `D20` at the mouth end; each `C-LED` 4.5 mm across (`layout.yaml` `led_caps:`). Reshuffled if the diffusion test moves the count. **The WS2815B-V1's chamfer marks pin 1 (NC)**; the footprint's silk triangle marks the chamfer, and JLCPCB's own footprint agrees (`hardware/lib/README.md`) | Layout; the side-light diffusion test; the first order's placement preview |
 | **Passives may go on the underside** (owner, 2026-09-29). The underside faces the grounded bottom plate, `hardware.kb_spacer_l` below it, over the board's whole length since the cassette (ADR 0025). At `boards.board_clear` that leaves no room for a part (`mechanical/drc.echo` *"main board underside room over the bottom plate"*), so an underside part needs a **window cut through the bottom plate** under it, down to the oak (the second figure on that line), and must be clear of the thumb switches' housings, pins and the mounts' spacers. Through-hole tails face the plate too: the next row. The thumb switches are already underside parts | The layout; each window goes into the bottom plate's outline in the body CAD |
 | **Through-hole tails under the board** (2026-10-01): every part with plated through-hole pins pokes its tails out of the underside toward the grounded bottom plate — `J-CHAIN` ×2, `J-MCU`, `J-UMB`, `HDR-SERVICE` and `U-BUCK` (`config/body.yaml`, *THE THROUGH-HOLE TAILS UNDER THE MAIN BOARD*, says which and why these). `mechanical/drc.echo` *"through-hole tails under the main board clear of the bottom plate"* tests each against what is under it, and the body model draws them for `clash.txt`. `J-CHAIN`'s and `J-MCU`'s clear the plate as supplied. The plate ends short of `J-UMB`'s tail row, and has a window to the oak under `HDR-SERVICE` and under the regulator block (`pcb-geometry.echo` `main` `plate`). **`U-BUCK`'s pins are cut to `boards.tht_trim` below the board after soldering** — as supplied they reach the oak even through the window. `HDR-SERVICE` stands where `boards.service_hdr_at` puts it and `U-BUCK` inside the regulator block, or the window moves with them | A part moved off its window: move `boards.service_hdr_at` (or the block) and rebuild the body CAD; a new through-hole part: add it to `tht_tails` in `mechanical/cad/woody_body.scad` |
 | **The references with no clear place on the silkscreen** stay on the fabrication layer; the layout names them when it writes the board | Hand-placed in KiCad, or room made round them |
-| **The full-width tail** (ADR 0021 amendment 2026-10-02, `boards.main_tail` `full`): the body CAD's outline gained the corner beside the etherCON adapter (*"main board's tail end runs full width beside the etherCON adapter"* in `mechanical/drc.echo`) and this board has not. Take the new `main-board.dxf` outline and the USB-C keep-out, extend the pours and planes into the corner, re-check edge clearance along the old tongue's edge (ADR 0021, *What the layout has to do*). Until then `pcb.py check` fails on Edge.Cuts | A hand edit of `main-board.kicad_pcb` in KiCad, then `pcb.py check` and `render` |
 | **The revision letter on the silkscreen** reads `rev A  2026-09-30` (`layout.yaml` `silk:`, the `.kicad_pcb`), while the table below runs to D | **Decided (owner, 2026-10-03): this table's letters are design iterations only; the silkscreen reads `rev A` on the first board fabricated**, so it stays A until a board is made and the next order is B | First order |
-| **Wave 3: parts on the sheets and not yet on the board.** `main-board.kicad_pcb` predates them, so `pcb.py check` fails on schematic parity until they are placed and routed (and `fab/` re-rendered). **From the owner's decisions of 2026-10-03:** `R47` (`R-ADC-VDD`, 0805) and `C42` (`C-ADC-VDD`, 1206) — `R47` between `DEV_3V3` and the new net `ADC_VDD`, `C42` at `U2` pin 8 beside `C2` and `C3`, all three returned to `AGND_INST` at `U2` pin 4, `ADC_VDD` a short local trace (`breath-adc.md`, *The reference's filter*); `C43` (`C-BUCK-OUT`, 1206) at `U5`'s OUT pin, returned to its GND pin, inside the regulator block; `U11` (`U-TVS-CHAIN`, SOT-23-5) at `J5`, on `CHAIN_SCK`, `CHAIN_SHLD`, `HOP_LT_RH`, `HOP_RH_RT`, its pin 2 to `PWR_GND` through its own via (`key-chain-loom.md`); `U2`'s `CH1` (pin 3) now on `AGND_INST`. Part-number changes on placed footprints, same 1206 pads, `fab/` BOM only: `R1`–`R3` and `R38`, `R39` to Panasonic ERJ-P08 anti-surge. **Still unplaced from wave 2:** `R45` (`R-CS-PULL-ADC`, at `U2` pin 1), `R46` (`R-TXD-SER`, at `J2`), `C41` (`C-EN`, at `J1` pin 24) | Wave 3's placement and routing, then `pcb.py check` and `render` |
+| **Routing (wave 3)**: placed, not routed (*Status*). `J-MCU` is at `config/body.yaml` `boards.mcu_conn_at`, the one figure the Matrix branch's `J-MCU` / `J-MCU-KB` pair sets (#23); at the value both branches carry, `mechanical/drc.echo` *"columns vertical"* asks column mount 7 (x 247.7, y 11.1) to move 0.8 mm - the pair's study settles it. Then `pcb.py route`, `check`, `render` | The Matrix branch's merge (#23), then routing |
+| **`INST_POS12`–`PWR_GND` stitching capacitors** near `J-MCU`, `J-UMB` and the analog end (#8-8): signals change layers between the two planes' references more than 20 mm from the nearest `C-LED`. New parts on the sheets, so the owner's | Owner (a sheet change) |
+| **`C203` at `U10` pin 4** (MPXV4006DP Fig. 3): pin 4 is the corner of `U10`'s own courtyard, at the mouth and far edges, so no 0805 can stand within 3 mm of it on the top face; `C203` stands at `U3`'s input, the net's other end, as before. Nearer needs an underside part and a bottom-plate window under it | Owner |
+| **Through-hole tails' margin over the grounded plate** (#8-11: `J-CHAIN` 0.75 mm, `J-MCU` 0.8 mm): an insulating sheet on the plate under the tail fields, or a trim length on the hand-assembly sheet | Owner, before assembly |
+| **Standard or Economic PCBA, white mask** (#17 D1): *Ordering it*, below | Owner, before the order |
 | **The umbilical adapter** (`PCB-UMB-ADAPTER`) is a separate small board: its schematic is [`../umb-adapter/`](../umb-adapter/README.md), not laid out | With this board's layout |
 
 What the first layout settled, and where it is held:
@@ -181,10 +182,11 @@ What the first layout settled, and where it is held:
   `JLC04161H-7628` [ds `datasheets/fab/JLCPCB-IMPEDANCE-STACKUPS.pdf`]. Layer 2 `PWR_GND`, layer 3
   the +12 V behind `Q-INRUSH` (`INST_POS12`, `power-entry-instrument.md` §1a); the +12 V
   ahead of it and the other rails are tracks (`layout.yaml` `net_classes:`). **`AGND_INST` is an island on layer 2** round the analog block,
-  its moat bridged once by `NT-AGND` (NT2) beside `U-ADC`, between its VSS and its
-  digital pins (`power-entry-instrument.md` §2); `check` fails a second tie, an
-  island pad off the island, and any layer-1 track crossing the moat but at the
-  tie or as the breath pair.
+  its moat bridged once by `NT-AGND` (NT2) on `U-ADC`'s tail side, where its digital pins
+  (5-7) cross the moat inside the tie's window (`power-entry-instrument.md` §2); since wave 3
+  the island takes all of `U-ADC` and the pocket above it where `ADC_VDD`'s capacitors
+  stand (#8-3). `check` fails a second tie, an island pad off the island, and any layer-1
+  track crossing the moat but at the tie or as the breath pair.
 - **White solder mask** both faces, black legend (`layout.yaml` `fab:`; ADR 0028).
 - **Every mount plated on `PWR_GND`**, pads both faces, no other net's copper under
   its hardware (`check`); the U-bolt legs' holes unplated, the outer layers kept
@@ -202,21 +204,74 @@ What the first layout settled, and where it is held:
   `breath-sense-link.md` (*Mounting*) put them, which turns its pins 1–4 (`VS`,
   `GND`, `Vout`) to the board's far edge, away from the rest of the analog block;
   the island reaches round them (`layout.yaml` `cad_parts:`, `islands:`).
-- **`U-BREATH`'s decoupling** (fix round F1): `C202`, `C8` and `C201` on `VS` beside its
-  pins at the far edge, the smallest nearest pin 2, inside the island; `C203` on
-  `SENSOR_RAW` at `U-BUF`'s input, since pin 4 is walled in by the sensor's own
-  courtyard; `C204` at `U-BUF`'s `V+` (`layout.yaml` `parts:`).
+- **`U-BREATH`'s decoupling** (fix round F1; wave 3): `C202` (10 nF), `C201` (1 µF) and `C8`
+  (100 nF) on `VS` in that order from pin 2 - `C202` at the nearest place `U10`'s own
+  courtyard leaves, 6.3 mm - inside the island; `C203` on `SENSOR_RAW` at `U-BUF`'s input,
+  since pin 4 is walled in by the sensor's own courtyard (*Open*); `C204` at `U-BUF`'s `V+`.
+- **`U-ADC`'s reference filter** (owner, 2026-10-03; #8-3): `R47` feeds `ADC_VDD` from
+  `DEV_3V3`; `C3` (100 nF) with its `ADC_VDD` pad straight over pin 8, `C42` (22 µF) and `C2`
+  (10 µF) on a short `ADC_VDD` run beside it, every return into the island under `U-ADC`,
+  a few mm from pin 4's own via; `R45` (`CS_ADC`'s pull-up) on a stub from pin 1.
+- **`U-REF-BREATH`'s input** (#8-7): `C6` (100 nF) across pins 2 and 4, `C4` (10 µF) above
+  pin 2 between `U4` and `U3`.
 - **`R44`** (`R-HOP-SER`, fix round F6) at `REG-LT`'s `QH`, pin 9 (`layout.yaml` `parts:`).
-- **`IO34` into `J-MCU` pin 14, by hand** (2026-10-01, a `pcbnew` script, then the
-  zones refilled): `IO36` leaves pin 12 at 45° to one via on its own layer-4 line
-  north to the ADC, and runs on layer 1 under `R-SPI-SER`'s `IO35` resistor into its
-  own; the router's detour of five vias that only joined pin 12 to that line is gone.
-  `IO34` leaves pin 14 at 45° under that via, runs along the board on layer 1 below
-  `IO36`, and rises to its via at `R-SPI-SER`'s `IO34` resistor. No part moved. A
-  re-run of `pcb.py layout` would lose it: the board is the source now.
-- **`Q-INRUSH` and its gate network** on the tongue between `HDR-SERVICE` and the
-  end mount, behind the clamps at `J-UMB`; its drain meets the layer-3 plane by
-  vias (`layout.yaml` `parts:`).
+- **`Q-INRUSH` and its gate network** in the tail strip above the LED row, between LED2 and
+  LED1, where the corner LED stood for a day; its drain meets the layer-3 plane by three
+  vias (`fanout_count:`).
+- **The power paths carry no via** (#8-6): `UMBILICAL_POS12`, `BUCK_IN`, `BUCK_A_OUT` and
+  `INST_5V_A` route on layer 1 only (a net class's `layers:`), 0.5 mm; where a power part
+  meets a plane it does so by two or three vias (`Q-INRUSH`'s drain, the clamps' and bulk
+  capacitors' returns, `L-BUCK-IN`).
+- **The clamps at their connector** (#8-9): `D-TVS-PWR` (D3) beside `J-UMB`'s pins 3 and 6,
+  `D-REVSHUNT` (D2) beside it; the buck's caps at the module (#8-7): `C11` at `U5`'s input,
+  `C43` (owner, 2026-10-03) at its output, returned to its GND pin.
+- **`U11`** (`U-TVS-CHAIN`) at `J5`, as `U9` at `J4`, its pin 2 to `PWR_GND` by its own via.
+- **The routing policy** (owner, 2026-10-03; `docs/reference/tooling.md`): free 45° routing
+  on both outer layers, no layer direction anywhere - no region of this board is a bus
+  crossing that needs one. The analog block's nets prefer layer 1, over the island
+  (`layer_cost:`; #8-5: layer 4's reference is the LEDs' +12 V plane), and take layer 4
+  only where the block's density leaves no other way (VS across the feedback ring,
+  REF_5V round U4). The breath pair is guarded: every other net the router lays keeps
+  0.75 mm (3W) off its legs (`pairs:` `guard:`; #8-4).
+
+## Ordering it — JLCPCB
+
+**Not to be ordered until it is routed and `pcb.py check` and `kicad.py check` pass**: then
+`fab/` is this board. JLC's limits are from the banked pages in `datasheets/fab/`; the
+pattern is the key boards' order sheet (`hardware/boards/key-board-lh/README.md`,
+*Ordering it*), and only what differs is here.
+
+| Option | Pick | Why |
+|---|---|---|
+| Layers | **4** | ADR 0017 amendment 2026-09-29 |
+| Stack-up | **JLC04161H-7628** (`layout.yaml` `stackup:`) | JLC's standard 4-layer 1.6 mm stack; the `.gbrjob` carries it [ds `JLCPCB-IMPEDANCE-STACKUPS.pdf`] |
+| Thickness | 1.6 mm (`switch.pcb_t`) | `pcb.py check` holds it |
+| Mask / silk | **White / black** (`fab:`) | ADR 0028: the top face is the LED row's first reflector |
+| Surface finish | LeadFree HASL (`fab: finish`) | 4-layer FR-4 takes HASL; only 6 layers and up do not [ds `JLCPCB-PCB-CAPABILITIES.pdf`, *Surface Finish*] |
+| Copper | 1 oz outer, 0.5 oz inner (the stack's) | |
+| Delivery format | **Owner's choice** with the PCBA type (below) | |
+| PCBA side | Top | Every machine part is on the top face; the thumb switches (underneath) are fitted by hand |
+| Assembly | `fab/main-board-bom-jlc.csv`, `-cpl-jlc.csv`; `-hand-assembly.csv` for the rest | One BOM row per LCSC number, its MPN as the Comment (#17 D5) |
+
+**The PCBA type is the owner's (#17 D1)** [ds `datasheets/fab/JLCPCB-PCBA-CAPABILITIES.pdf`]:
+- **Economic PCBA** offers 4-layer boards in **green only** (its *PCB Specs for Economic PCB
+  Assembly* table: the 4-layer rows - 1.0, 1.2, 1.6 mm - are green; white appears only in the
+  1.6 mm *Red/White, Leaded HASL* row of the 2-layer group; the table's layer column does not
+  render in the banked copy, so the grouping is read from the rows' thicknesses). So this
+  board as specified - white, lead-free HASL, 4 layers - is **not an Economic board**, and
+  white with leaded HASL is not offered at 4 layers either.
+- **Standard PCBA** has no colour or finish limit ("No limit"), so it **does** take white
+  with lead-free HASL. It asks **edge rails and fiducials** ("Necessary"; JLC adds 5 mm
+  rails with 1 mm fiducials and 2 mm tooling holes [ds `JLCPCB-PCB-CAPABILITIES.pdf`,
+  *Mouse bites Panel*]) and a **single board of at least 70 × 70 mm**: this one is 292.4 ×
+  42.0, so it goes as a panel or with rails that widen it - and at 292 mm long it is past the
+  250 × 250 mm panel JLC recommends, which the PCBA FAQ allows at the customer's risk of
+  bending. The board carries no fiducials of its own; on rails it needs none.
+- **Or green mask** under Economic, which gives up ADR 0028's white reflector on this board.
+
+**Revision.** The silkscreen reads `rev A` with the layout's date (`layout.yaml` `silk:`): the
+owner decided (2026-10-03) that the first board fabricated is A, whatever the design
+iterations below are lettered.
 
 ## Revisions
 
@@ -227,3 +282,4 @@ What the first layout settled, and where it is held:
 | B | 2026-10-01 | Re-laid out on the merged sheets (`Q-INRUSH`, `INST_POS12` the layer-3 plane) and footprints (`J-MCU`, `J-UMB`, the LED's chamfer at pin 1); `U-BREATH` turned so its ports face the tail; decouplers to their ICs' power pins; the reference's feedback network stacked as its ring; routed by the tool's own router with layer directions and rip-up, Freerouting dropped (owner: "routing is super sloppy... similar horizontal and vertical layers"); `pcb.py check` passed then | `layout.yaml`, `main-board.kicad_pcb`, `docs/reference/tooling.md` §4 |
 | C | 2026-10-01 | Re-laid out with fix rounds F1 (`U-BREATH` and `U-BUF` decoupling, `C201`-`C204`), F6 (`R44` at `REG-LT`'s `QH`) and F4 (`KS-33` 2.8 mm pads, by `pcb.py update-footprints --pads-resized`); `VS`'s caps turned so their `VS` pads share a row; all but one connection routed | `layout.yaml`, `main-board.kicad_pcb` |
 | D | 2026-10-01 | `IO34` routed into `J-MCU` pin 14 by hand, `IO36`'s escape from pin 12 re-routed (*What the first layout settled*); `pcb.py check` passed then, to the 2026-10-01 outline; renders and `fab/` written | `main-board.kicad_pcb`, `fab/` |
+| E | 2026-10-03 | Wave 3 (#8, #17, #19, #6): the full-width tail's outline; fourteen LEDs in one even row (ADR 0028 amendment); `J-MCU` off the row at the near edge, `HDR-SERVICE` to the tail corner (`config/body.yaml`); `R45`-`R47`, `C41`-`C43`, `U11` placed; the ADC's filter on an island grown to take it, `C6` at `U4`, the TVS at its connector, the buck's caps at the module; KS-33 holes 3.0 mm (ADR 0020 Amendment 8); the routing policy's free routing. Placed; routing waits for #23 | `layout.yaml`, `main-board.kicad_pcb` |

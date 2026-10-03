@@ -787,7 +787,7 @@ figures:
     status: blocked
     blocked_on: "An E6 current-probe measurement of the row at full white. The upper end is the datasheet's own bound, the lower end measurements of WS2815 tape; ADR 0014's reading of '15 mA' as per channel (45 mA per LED) would be three times the B-V1's stated maximum power and is not used."
     owner: hardware/carrier/led-strip-drive/led-strip-drive.md
-    derivation: "Fourteen LEDs (lighting.led_count; the corner LED added by the ADR 0028 amendment, 2026-10-02). Upper: 14 x 0.18 W / 12 V = 210 mA [ds datasheets/led/WS2815B-V1.pdf p.2, power consumption 0.1-0.18 W]. Lower: 14 x 13.1 mA = 183.4 mA, carried as 183 mA [web https://www.ledlab.io/chips/ws2815, measured on WS2815 tape]. Blanked: under 2 mA each [ds p.3], ~28 mA for all fourteen."
+    derivation: "Fourteen LEDs (lighting.led_count; the fourteenth added by the ADR 0028 amendment of 2026-10-02, in the row since 2026-10-03). Upper: 14 x 0.18 W / 12 V = 210 mA [ds datasheets/led/WS2815B-V1.pdf p.2, power consumption 0.1-0.18 W]. Lower: 14 x 13.1 mA = 183.4 mA, carried as 183 mA [web https://www.ledlab.io/chips/ws2815, measured on WS2815 tape]. Blanked: under 2 mA each [ds p.3], ~28 mA for all fourteen."
     candidates: ["183-210 mA (the datasheet's bound and tape measurements)", "630 mA (14 x 45 mA, ADR 0014's per-channel reading of 15 mA)"]
     decided_by: "E6, a current probe on the LEDs' 12 V feed with every one at full white"
     forbidden: ["170-195 mA", "170–195 mA", "thirteen at most 195 mA", "~170 mA for the row", "13 x WS2815B-V1", "13 × WS2815B-V1", "13 × C-LED", "i_row_full: {value: 0.195", "i_swing:    {value: 0.195", "i_swing: [0.195, 0.367]", "row's 1.3 µF of `C-LED`", "the thirteen WS2815B-V1 on the main board at full white"]

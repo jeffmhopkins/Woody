@@ -882,6 +882,22 @@ class Obstacles:
                                {"F" if it.GetLayer() == pcbnew.F_SilkS else "B"}, "silk"))
         for t in board.GetTracks():
             self.add_item(t)
+        # layout.yaml pairs: `guard:` - every other net's copper kept that much further off
+        # the pair's legs than the clearance (a sensitive pair beside clock lines: 3W edge
+        # to edge is guard + clearance). The guard is the leg's own net, so its own copper
+        # passes; it holds only what this router lays, not a hand edit (KiCad's DRC keeps
+        # the plain clearance)
+        # (the pair's own tracks: locked and of the pair's width - a plane net's fanout stub is
+        # locked too, but wider)
+        guards = {n: (float(pr["guard"]), float(pr["width"])) for pr in lay.get("pairs") or [] if pr.get("guard") for n in pr["nets"]}
+        for t in board.GetTracks():
+            if type(t) is pcbnew.PCB_TRACK and t.IsLocked() and t.GetNetname() in guards and t.GetLayer() in (pcbnew.F_Cu, pcbnew.B_Cu) \
+                    and abs(TO(t.GetWidth()) - guards[t.GetNetname()][1]) < 1e-3:
+                a, b = t.GetStart(), t.GetEnd()
+                if (a.x, a.y) == (b.x, b.y):
+                    continue
+                g = LineString([(TO(a.x), TO(a.y)), (TO(b.x), TO(b.y))]).buffer(TO(t.GetWidth()) / 2 + guards[t.GetNetname()][0], 8)
+                self.items.append((g, t.GetNetname(), {"F" if t.GetLayer() == pcbnew.F_Cu else "B"}, "guard"))
         self.outline = board_outline_with_holes(board)
         from shapely.prepared import prep
         self.inner = prep(self.outline.buffer(-self.edge))
@@ -1075,29 +1091,33 @@ def fanout(board, lay, obs, only=None):
                         region = region.intersection(body.buffer(-(obs.via / 2 + 0.3)))
             fc = Point(TO(fp.GetPosition().x), TO(fp.GetPosition().y))
             away = math.atan2(c.y - fc.y, c.x - fc.x) if fc.distance(c) > 0.05 else 0.0
-            found = None
-            for k in range(3, 41):
-                r = k * 0.1
-                for da in range(0, 181, 15):
-                    for sgn in ((1,) if da in (0, 180) else (1, -1)):
-                        a = away + sgn * math.radians(da)
-                        x, y = c.x + r * math.cos(a), c.y + r * math.sin(a)
-                        p = Point(x, y)
-                        if pg.buffer(obs.via / 2 + OWN_PAD_GAP).contains(p) or not region.contains(p):
-                            continue
-                        if obs.via_ok(x, y, net) and obs.track_ok((c.x, c.y), (x, y), width, net, L):
-                            found = (x, y)
+            # layout.yaml fanout_count: a power pad's plane transition by more than one via
+            # (each its own stub, the next nearest legal spot): current and inductance shared
+            want = int((lay.get("fanout_count") or {}).get(name, 1))
+            for _ in range(want):
+                found = None
+                for k in range(3, 41):
+                    r = k * 0.1
+                    for da in range(0, 181, 15):
+                        for sgn in ((1,) if da in (0, 180) else (1, -1)):
+                            a = away + sgn * math.radians(da)
+                            x, y = c.x + r * math.cos(a), c.y + r * math.sin(a)
+                            p = Point(x, y)
+                            if pg.buffer(obs.via / 2 + OWN_PAD_GAP).contains(p) or not region.contains(p):
+                                continue
+                            if obs.via_ok(x, y, net) and obs.track_ok((c.x, c.y), (x, y), width, net, L):
+                                found = (x, y)
+                                break
+                        if found:
                             break
                     if found:
                         break
-                if found:
+                if not found:
+                    missed.append(f"{name} ({net}): no legal via within 4 mm")
                     break
-            if not found:
-                missed.append(f"{name} ({net}): no legal via within 4 mm")
-                continue
-            lay_via(board, obs, net, *found)
-            lay_track(board, obs, net, (c.x, c.y), found, width, L)
-            n += 1
+                lay_via(board, obs, net, *found)
+                lay_track(board, obs, net, (c.x, c.y), found, width, L)
+                n += 1
     print(f"route: fanout - {n} plane via(s); {len(missed)} pad(s) without one")
     for m in missed:
         print("  fanout: " + m)
@@ -1464,10 +1484,19 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
     # the layers it routes: the outer two, and layer 3 where layout.yaml directions: names it
     # (a four-layer board whose layer 3 is a routing layer, the module's)
     dirs_ = lay.get("directions") or {}
-    routed = ["F", "B"] + (["I"] if "In2.Cu" in (dirs_.get("layers") or {}) or "In2.Cu" in (dirs_.get("routed") or []) else [])
+    routed_all = ["F", "B"] + (["I"] if "In2.Cu" in (dirs_.get("layers") or {}) or "In2.Cu" in (dirs_.get("routed") or []) else [])
     via_cost = float(dirs_.get("via_cost", VIA))
+    # a net class's `layers:` - the only layers its nets route on (an analog net kept on
+    # layer 1, over its island, not on layer 4 over another rail's plane)
+    LK_ = {"F.Cu": "F", "B.Cu": "B", "In2.Cu": "I"}
+    only = {n: [LK_[L] for L in c["layers"]] for c in classes.values() if c.get("layers") for n in c["nets"]}
+    # ...or a class's `layer_cost:` - each step on that layer costs this many times more, so
+    # its nets take it only for the hops they cannot make on the others
+    lcost = {n: {LK_[L]: float(v) for L, v in c["layer_cost"].items()} for c in classes.values() if c.get("layer_cost") for n in c["nets"]}
     while queue:
         net, pa, pb = queue.pop(0)
+        routed = [L for L in routed_all if L in only.get(net, routed_all)]
+        lc_ = lcost.get(net, {})
         w = width_of(net)
         grids = {L: Grid(obs, L, w / 2, own={net}) for L in routed}
         vcache = {}
@@ -1553,6 +1582,7 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
             return way.get(L)
 
         def step_cost(L, di, dj, c, i=0, j=0):
+            c = c * lc_.get(L, 1.0)
             wl = way_at(L, i, j)
             if wl is None:
                 return c

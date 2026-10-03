@@ -4,12 +4,13 @@
 [ADR 0016](0016-one-strip-on-the-centre-board.md): one strip, on the centre board.
 The strip itself replaced 2026-09-30 by [ADR 0028](0028-on-board-leds.md):
 thirteen WS2815B-V1 on the main board, 12 V, backup-chained (fourteen since
-ADR 0028's amendment of 2026-10-02, one in the tail corner).
+ADR 0028's amendment of 2026-10-02; in one row at one pitch since its
+amendment of 2026-10-03).
 
 > **Note, 2026-09-30 (ADR 0028).** The lights are no longer a strip. The 12 V
 > rail, the level shifter, the backup data line, the shared clamp and
 > blank-at-boot all stand. Three things here do not: the density (the row's
-> count and pitch are `lighting.led_count` / `lighting.led_pitch`, fixed at
+> count is `lighting.led_count` and the pitch the body CAD derives from it, fixed at
 > board fabrication); the diffusion prototype's timing (it moves ahead of the
 > main board's layout, ROADMAP); and the per-LED current. This page's reading
 > of the WS2815's "15 mA" as per channel, 45 mA per LED, would be three

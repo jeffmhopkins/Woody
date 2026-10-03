@@ -378,8 +378,8 @@ keys scanning, at both ends of the link.
 
 **`C-STRIP-BULK` (470 µF 25 V) sits at the LED row's feed end**, on
 this board — "bulk capacitance belongs where the current swings" `[repo] 0014`.
-The lights are LEDs on this board since ADR 0028 (`lighting.led_count`, the
-last added in the tail corner on 2026-10-02), each with its own
+The lights are LEDs on this board since ADR 0028 (`lighting.led_count`, in
+one row since its amendment of 2026-10-03), each with its own
 100 nF (`C-LED`), which take the edges; this one takes the row's PWM step.
 The row switches its whole current at the LEDs' PWM rate: at
 `led-row-current`'s upper end, a 250 µs half-period drawn from this
