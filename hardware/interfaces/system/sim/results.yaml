@@ -10,8 +10,8 @@ inputs:
   hardware/carrier/netlist.yaml: 544daa1002d5ae2c
   hardware/carrier/power-entry-instrument/netlist.yaml: 89f351c1b8aba0f0
   hardware/carrier/breath-excitation-reference/netlist.yaml: 2d5ee10b223dc95d
-  hardware/carrier/led-strip-drive/netlist.yaml: 466ccae220ba1302
-  hardware/module/power-entry/netlist.yaml: 4f808996f437e7cd
+  hardware/carrier/led-strip-drive/netlist.yaml: 9042cc93a19e6824
+  hardware/module/power-entry/netlist.yaml: 014e885f01a4104b
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
   hardware/module/panel-led/netlist.yaml: 90d3bf8e99aa8da8
   hardware/module/digital-and-supervision/netlist.yaml: b4a891171540924f
