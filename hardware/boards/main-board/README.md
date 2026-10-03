@@ -96,17 +96,17 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | C13, C14 | `C-DECOUPLE-165` | REG-LT, REG-RT |
 | C3, C6–C8, C12, C204 | `C-DECOUPLE-CARRIER` | breath-adc, breath-excitation-reference, led-strip-drive |
 | C9 | `C-FB-REF` | breath-excitation-reference |
-| C39 | `C-INRUSH-GD` | power-entry-instrument |
-| C38 | `C-INRUSH-GS` | power-entry-instrument |
+| C40 | `C-INRUSH-GD` | power-entry-instrument |
+| C39 | `C-INRUSH-GS` | power-entry-instrument |
 | C15–C24 | `C-KEY` | LT1, LT2, LT3, LT4, RT1, RT2, RT3, RT4, sw+, sw- |
-| C25–C37 | `C-LED` | led-strip-drive |
+| C25–C38 | `C-LED` | led-strip-drive |
 | C4, C5 | `C-REF-OUT` | breath-excitation-reference |
 | C203 | `C-SENSOR-OUT` | breath-sense-link |
 | C201 | `C-SENSOR-VS-BULK` | breath-sense-link |
 | C202 | `C-SENSOR-VS-HF` | breath-sense-link |
 | C10 | `C-STRIP-BULK` | power-entry-instrument |
-| D20 | `D-INRUSH-RST` | power-entry-instrument |
-| D7–D19 | `D-LED` | led-strip-drive |
+| D21 | `D-INRUSH-RST` | power-entry-instrument |
+| D7–D20 | `D-LED` | led-strip-drive |
 | D1 | `D-REF-CLAMP` | breath-excitation-reference |
 | D2 | `D-REVSHUNT` | power-entry-instrument |
 | D5, D6 | `D-TVS-BREATH` | breath-sense-link |
@@ -160,7 +160,7 @@ finish, and every other open item:
 
 | Item | Decided by |
 |---|---|
-| **The LED row's places** are the body CAD's (`pcb-geometry.echo` `main` `led`, *"LED row on the main board"* in `mechanical/drc.echo`): one row on the centreline, LED 1 at the tail end where the data arrives, the U-bolt station midway between two LEDs. Laid out as it stands, and reshuffled if the diffusion test moves count or pitch (owner's choice (b), ADR 0028 amendment). **The WS2815B-V1's chamfer marks pin 1 (NC)**; the footprint's silk triangle marks the chamfer, and JLCPCB's own footprint agrees (`hardware/lib/README.md`), so the placement preview should need no rotation offset: pass it only when the chamfer lands on the triangle | Layout; the first order's placement preview |
+| **The LED row's places** are the body CAD's (`pcb-geometry.echo` `main` `led`, *"LED row on the main board"* in `mechanical/drc.echo`): LED 1 in the tail corner beside the etherCON adapter, where the data arrives (*"LED in the tail corner clear of its neighbours"*; ADR 0028 amendment, 2026-10-02), then one row on the centreline from its tail end, the U-bolt station midway between two LEDs. The references run in the same order: `D7` is LED 1, `C25` its 100 nF. Laid out as it stands, and reshuffled if the diffusion test moves count or pitch (owner's choice (b), ADR 0028 amendment). **The WS2815B-V1's chamfer marks pin 1 (NC)**; the footprint's silk triangle marks the chamfer, and JLCPCB's own footprint agrees (`hardware/lib/README.md`), so the placement preview should need no rotation offset: pass it only when the chamfer lands on the triangle | Layout; the first order's placement preview |
 | **Passives may go on the underside** (owner, 2026-09-29). The underside faces the grounded bottom plate, `hardware.kb_spacer_l` below it, over the board's whole length since the cassette (ADR 0025). At `boards.board_clear` that leaves no room for a part (`mechanical/drc.echo` *"main board underside room over the bottom plate"*), so an underside part needs a **window cut through the bottom plate** under it, down to the oak (the second figure on that line), and must be clear of the thumb switches' housings, pins and the mounts' spacers. Through-hole tails face the plate too: the next row. The thumb switches are already underside parts | The layout; each window goes into the bottom plate's outline in the body CAD |
 | **Through-hole tails under the board** (2026-10-01): every part with plated through-hole pins pokes its tails out of the underside toward the grounded bottom plate — `J-CHAIN` ×2, `J-MCU`, `J-UMB`, `HDR-SERVICE` and `U-BUCK` (`config/body.yaml`, *THE THROUGH-HOLE TAILS UNDER THE MAIN BOARD*, says which and why these). `mechanical/drc.echo` *"through-hole tails under the main board clear of the bottom plate"* tests each against what is under it, and the body model draws them for `clash.txt`. `J-CHAIN`'s and `J-MCU`'s clear the plate as supplied. The plate ends short of `J-UMB`'s tail row, and has a window to the oak under `HDR-SERVICE` and under the regulator block (`pcb-geometry.echo` `main` `plate`). **`U-BUCK`'s pins are cut to `boards.tht_trim` below the board after soldering** — as supplied they reach the oak even through the window. `HDR-SERVICE` stands where `boards.service_hdr_at` puts it and `U-BUCK` inside the regulator block, or the window moves with them | A part moved off its window: move `boards.service_hdr_at` (or the block) and rebuild the body CAD; a new through-hole part: add it to `tht_tails` in `mechanical/cad/woody_body.scad` |
 | **The references with no clear place on the silkscreen** stay on the fabrication layer; the layout names them when it writes the board | Hand-placed in KiCad, or room made round them |

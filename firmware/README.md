@@ -2,8 +2,8 @@
 
 **One image** ([ADR 0015](../docs/decisions/0015-one-mcu-no-display.md)):
 
-- `realtime/` — the ESP32-S3-Matrix. Keys, breath, IMU, DAC loop, the LED
-  row (thirteen WS2815B-V1 on the main board, ADR 0028) and the 8×8 matrix
+- `realtime/` — the ESP32-S3-Matrix. Keys, breath, IMU, DAC loop, the LEDs
+  (WS2815B-V1 on the main board, `lighting.led_count`, ADR 0028) and the 8×8 matrix
   (the only display), USB MIDI and USB configuration. Owns all state and
   persistence. This is the instrument.
 
@@ -195,6 +195,22 @@ Pins: `SCK` IO38, `SH/LD` IO7, chain-end `SER` IO33, `QH` IO40.
   sensor's zero-pressure offset (`breath-adc.md`, the *rest* line), with it
   down it reads near zero. Gate the row on the reading sitting above about
   half the rest count, and blank it when it falls below.
+- **Fourteen pixels, the tail corner's first.** The data line reaches the LED
+  in the main board's tail corner before the row (ADR 0028's amendment of
+  2026-10-02; `led-strip-drive.md`, *The LED in the tail corner*), so a
+  frame is pixel 0 for the corner LED, then pixels 1–13 for the row from its
+  tail end to the mouth end. One more pixel is ~30 µs more per frame
+  `[calc: 24 bits / 800 kbit/s]`. Anything drawn *along* the body (the breath
+  bar, a sweep) addresses pixels 1–13; the corner LED is not a step of it,
+  and takes the colour of the row's tail end unless a pattern sets it.
+- **A per-LED gain, and the corner LED's is about a sixth.** It stands ~9 mm
+  from the near side's acrylic where the row stands ~22.5 mm from either
+  side, so at the same drive it lights its patch about six times as brightly
+  `[calc: (22.5 / 9)² = 6.25, ADR 0021's study]`. Scale each pixel by a
+  gain table — all 1.0 but pixel 0, which starts at 0.16 — applied before
+  the shared lighting budget's clamp, so the clamp sees what is actually drawn. A
+  setting, not a constant: the side-light diffusion test (ROADMAP) sets it,
+  by eye on the real acrylic.
 
 ## The instrument must stay recoverable
 

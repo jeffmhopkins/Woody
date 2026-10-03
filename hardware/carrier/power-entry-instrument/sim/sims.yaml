@@ -17,6 +17,8 @@ values:
     - hardware/carrier/power-entry-instrument/netlist.yaml
     - hardware/module/umbilical-load-switch/netlist.yaml
     - hardware/module/power-entry/netlist.yaml
+    # the LEDs' count (n:D-LED), for pei-pwm.cir
+    - hardware/carrier/led-strip-drive/netlist.yaml
 params_from: [hardware/module/umbilical-load-switch/sim/sims.yaml]
 include: [hardware/module/umbilical-load-switch/sim/lt1641.inc]
 
@@ -37,7 +39,7 @@ params:
   esr_buck: {value: 0.26, source: "C-BUCK-IN (UCM1E101MCL1GS): 0.26 ohm max at 100 kHz, 1.86 ohm (tan d 0.14) at 120 Hz [datasheets/discrete-and-power/NICHICON-UCM-SERIES-UCM1E101MCL1GS.pdf p.2, as the page reads it]. MAXIMA ONLY: a real part sits below them, so the low end is swept to a third of the 100 kHz figure [assumption] (vary)"}
   r_lbin:  {value: 0.05, source: "L-BUCK-IN's DCR [assumption, as umbilical-load-switch/sim]"}
   p_buck:  {value: 1.256, source: "the buck's input power at typical play: 226 mA x 5 V / 0.90 [calc from umbilical-current's derivation, ADR 0005]"}
-  i_12:    {value: 0.248, source: "the 12 V loads at typical play, 248 mA (umbilical-current's derivation, ADR 0005): the LEDs' lit share and the analog block"}
+  i_12:    {value: 0.263, source: "the 12 V loads at typical play, 263 mA (umbilical-current's derivation, ADR 0005, with the fourteenth LED's 15 mA): the LEDs' lit share and the analog block"}
   v_on:    {value: 8.0, source: "the R-78E5.0-1.0's input minimum, 8 V [datasheets/discrete-and-power/R-78E5.0-1.0.pdf p.1]: the buck modelled as drawing its power from there up (no UVLO hysteresis is published)"}
   v_nom:   {value: 11.4, source: "the buck's input at typical play, the page's 11.4 V"}
   t_end:   {value: 0.6}
@@ -58,7 +60,7 @@ params:
   t_un:    {value: 10.0, source: "the plug pulled: after the run unless a sim sets it"}
   t_re:    {value: 11.0, source: "the plug put back: after the run unless a sim sets it"}
   # --- pei-pwm.cir: the LED row's PWM on the input LC, at the operating point (#12 item 4)
-  pw_i_swing: {value: 0.195, source: "the row's swing, blanked to full white: 0.195 A, the thirteen WS2815B-V1 at full white, the top of led-row-current (blocked on E6); 0.367 A, ADR 0005's quiescent-to-clamp-legal-worst swing - the two module/power-entry/sim's led-pwm sweeps (sweep)"}
+  pw_i_swing: {value: 0.210, source: "the LEDs' swing, blanked to full white: 0.210 A, every WS2815B-V1 (n:D-LED, fourteen) at full white, the top of led-row-current (blocked on E6; a register range, so the top is written here and moves with it by hand); 0.367 A, ADR 0005's quiescent-to-clamp-legal-worst swing - the two module/power-entry/sim's led-pwm sweeps (sweep)"}
   pw_i_q_led: {value: 2.0e-3, source: "one WS2815B-V1 blanked, 'Quiescent Current < 2mA' [datasheets/led/WS2815B-V1.pdf p.3]: its maximum, as module/power-entry/sim takes it"}
   pw_f:   {value: 2000.0, source: "the WS2815B-V1's PWM: 'scan frequency is of 2KHz' and 'Refresh Frequency updates to 4KHz' [datasheets/led/WS2815B-V1.pdf p.1]; no tolerance is published, so the sims sweep 2-4 kHz and the input LC's 3.39 kHz inside it (sweep)"}
   pw_duty:   {value: 0.5, source: "the pulse's duty; 0.5 puts the most current in the fundamental, as module/power-entry/sim's led-pwm takes it"}
@@ -81,8 +83,8 @@ derived:
   pw_r_sw: "v.get('R-ILIM', 0.0) + v['r_dson']"
   pw_t_period: "1.0 / v['pw_f']"
   pw_t_high: "min(v['pw_duty'] / v['pw_f'] - v['pw_t_edge'], 1.0 / v['pw_f'] - 2.0 * v['pw_t_edge'])"
-  pw_i_row_q: "13.0 * v['pw_i_q_led']"
-  pw_i_row_pk: "v['pw_i_swing'] - 13.0 * v['pw_i_q_led']"
+  pw_i_row_q: "v.get('n:D-LED', 0.0) * v['pw_i_q_led']"
+  pw_i_row_pk: "v['pw_i_swing'] - v.get('n:D-LED', 0.0) * v['pw_i_q_led']"
   pw_i_other: "max(v.get('i_12', 0.0) - v['pw_i_swing'], 0.0)"
   pw_t_win0: "v['pw_t_end'] - v['pw_t_win']"
 
@@ -200,7 +202,7 @@ sims:
     post: *start_post
     asserts: &supply_asserts
       - expr: "max['v_pos12_peak'] < 13.5"
-        why: "INST_POS12 - the thirteen WS2815B-V1s' VDD, on it directly - stays under their 13.5 V absolute maximum [datasheets/led/WS2815B-V1.pdf, Absolute Maximum Ratings: VDD +9.5~+13.5 V] at U-ISO's +3.1 % and every start corner"
+        why: "INST_POS12 - every WS2815B-V1's VDD, on it directly - stays under their 13.5 V absolute maximum [datasheets/led/WS2815B-V1.pdf, Absolute Maximum Ratings: VDD +9.5~+13.5 V] at U-ISO's +3.1 % and every start corner"
       - expr: "max['v_in_peak'] < 15.0"
         why: "J-UMB's +12 V pin stays under D-TVS-PWR's 15 V standoff (SMAJ15A) at U-ISO's +3.1 % and every start corner"
       - expr: "max['latched'] < 0.5 and max['i_iso_peak'] < 0.999 * p['i_ocp'] and max['v_buck_fallback'] < 0.25"
@@ -229,7 +231,7 @@ sims:
   # duty, and read BUCK_IN (the buck's input) and INST_POS12 (the row's VDD).
   - name: led-pwm
     deck: pei-pwm.cir
-    sweep: {pw_f: [2000.0, 3000.0, 3390.0, 4000.0], pw_i_swing: [0.195, 0.367]}
+    sweep: {pw_f: [2000.0, 3000.0, 3390.0, 4000.0], pw_i_swing: [0.210, 0.367]}
     vary: [v_bus, esr_buck, esr_strip, r_cable]
     measures: &pwm_measures [buck_pp_mv, buck_min, pos12_pp_mv, pos12_max]
     post: &pwm_post

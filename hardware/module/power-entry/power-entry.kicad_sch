@@ -2797,7 +2797,7 @@
     (property "Row" "FB-IN" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Drawn_as" "FB2" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "U-ISO's +12 V input leg; FB4 is its -12 V leg. They carry the converter's input, ~0.22 A in typical play, which puts them between the bias curve's 0 and 250 mA traces (ferrite-bias-impedance): the two of the four where DC bias matters - see the FB-IN row. ORDERED AS MI1206K601R-10: JLC sources it through Global Sourcing / consignment (owner, 2026-10-01), so it stays machine-placed though LCSC lists 0 - see the FB-IN row" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "U-ISO's +12 V input leg; FB4 is its -12 V leg. They carry the converter's input, ~0.23 A in typical play, which puts them between the bias curve's 0 and 250 mA traces (ferrite-bias-impedance): the two of the four where DC bias matters - see the FB-IN row. ORDERED AS MI1206K601R-10: JLC sources it through Global Sourcing / consignment (owner, 2026-10-01), so it stays machine-placed though LCSC lists 0 - see the FB-IN row" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Laird" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "MI1206K601R-10" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "C2441375" (at 243.84 142.24 0) (effects (font (size 1.27 1.27)) hide))

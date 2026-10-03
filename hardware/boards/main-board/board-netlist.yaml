@@ -276,15 +276,15 @@ components:
     - 2
     sheet: led-strip-drive
   C38:
-    of: C-INRUSH-GS
-    value: 1uF 50V X7R
+    of: C-LED
+    value: 100nF
     pins:
     - 1
     - 2
-    sheet: power-entry-instrument
+    sheet: led-strip-drive
   C39:
-    of: C-INRUSH-GD
-    value: 22nF 50V X7R
+    of: C-INRUSH-GS
+    value: 1uF 50V X7R
     pins:
     - 1
     - 2
@@ -296,6 +296,13 @@ components:
     - 1
     - 2
     sheet: breath-excitation-reference
+  C40:
+    of: C-INRUSH-GD
+    value: 22nF 50V X7R
+    pins:
+    - 1
+    - 2
+    sheet: power-entry-instrument
   C5:
     of: C-REF-OUT
     value: 10uF
@@ -446,6 +453,16 @@ components:
     - K
     sheet: power-entry-instrument
   D20:
+    of: D-LED
+    value: WS2815B-V1
+    pins:
+    - DIN1
+    - DIN2
+    - DO
+    - VDD
+    - GND
+    sheet: led-strip-drive
+  D21:
     of: D-INRUSH-RST
     value: 1N4148W
     pins:
@@ -1397,6 +1414,10 @@ nets:
   /led-strip-drive/LED_D12:
   - D18.DO
   - D19.DIN1
+  - D20.DIN2
+  /led-strip-drive/LED_D13:
+  - D19.DO
+  - D20.DIN1
   /led-strip-drive/LED_D2:
   - D10.DIN2
   - D8.DO
@@ -1437,14 +1458,14 @@ nets:
   - D4.A
   - U5.OUT
   /power-entry-instrument/INRUSH_GATE:
-  - C38.2
-  - C39.1
-  - D20.K
+  - C39.2
+  - C40.1
+  - D21.K
   - Q1.G
   - R41.2
   - R42.1
   /power-entry-instrument/INRUSH_MILLER:
-  - C39.2
+  - C40.2
   - R43.1
   /sw+/SWITCH_LEG:
   - R29.2
@@ -1497,8 +1518,10 @@ nets:
   - D18.1
   D19.1:
   - D19.1
-  D19.DO:
-  - D19.DO
+  D20.1:
+  - D20.1
+  D20.DO:
+  - D20.DO
   D7.1:
   - D7.1
   D8.1:
@@ -1558,6 +1581,7 @@ nets:
   - C35.1
   - C36.1
   - C37.1
+  - C38.1
   - D10.VDD
   - D11.VDD
   - D12.VDD
@@ -1568,6 +1592,7 @@ nets:
   - D17.VDD
   - D18.VDD
   - D19.VDD
+  - D20.VDD
   - D7.VDD
   - D8.VDD
   - D9.VDD
@@ -1615,6 +1640,7 @@ nets:
   - C35.2
   - C36.2
   - C37.2
+  - C38.2
   - D10.GND
   - D11.GND
   - D12.GND
@@ -1626,7 +1652,8 @@ nets:
   - D18.GND
   - D19.GND
   - D2.A
-  - D20.A
+  - D20.GND
+  - D21.A
   - D3.A
   - D5.A
   - D6.A
@@ -1724,7 +1751,7 @@ nets:
   U9.CH4:
   - U9.CH4
   UMBILICAL_POS12:
-  - C38.1
+  - C39.1
   - D2.K
   - D3.K
   - J6.3
@@ -1748,7 +1775,8 @@ external_endpoints:
 - D17.1
 - D18.1
 - D19.1
-- D19.DO
+- D20.1
+- D20.DO
 - D7.1
 - D8.1
 - D9.1

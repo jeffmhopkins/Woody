@@ -32,7 +32,7 @@ module fig() {
         offset(-0.4) cb_2d();
     }
     if (fig_view == "plan") {
-        callout([gap_x[0] + 10, W / 2, z], [gap_x[0] + 12, bot - 10, z], "LED row (13) - lights both sides", size = s2);
+        callout([gap_x[0] + 10, W / 2, z], [gap_x[0] + 12, bot - 10, z], str("LEDs (", lighting_led_count, ", one in the tail corner) - light both sides"), size = s2);
         callout([tall_c[0][0], tall_c[0][1], z], [tall_c[0][0] - 2, top, z], "regulator + bulk caps", size = s2, halign = "right");
         callout([sensor_c[0], sensor_c[1], z], [sensor_c[0] - 2, top, z], "breath sensor (mouth end)", size = s2, halign = "left");
         callout([mb_chain("left_hand")[0], chain_y, z], [mb_chain("left_hand")[0] + 2, bot, z], "ribbon to the LH key board", size = s2);

@@ -7,10 +7,10 @@ inputs:
   hardware/module/umbilical-load-switch/sim/sims.yaml: 85eec256fad8b2e5
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
   hardware/carrier/power-entry-instrument/netlist.yaml: 2ced35d8a0373a19
-  hardware/module/power-entry/netlist.yaml: 56b479e28aae437c
+  hardware/module/power-entry/netlist.yaml: 4f808996f437e7cd
   hardware/module/umbilical-load-switch/sim/loadswitch.cir: a52911857b091c78
   hardware/module/umbilical-load-switch/sim/lt1641.inc: 59be165ccd4451a6
-  figure:umbilical-current: 359 mA
+  figure:umbilical-current: 374 mA
 ngspice: '42'
 sims:
   cold-start:
@@ -29,16 +29,16 @@ sims:
         max: 0.0
         max_at: nominal
       t_up:
-        nominal: 0.112905
-        min: 0.0549851
+        nominal: 0.112918
+        min: 0.054991
         min_at: igate+ itdn- itup- v_bus- vhi- vlo-
-        max: 0.231678
+        max: 0.231704
         max_at: igate- itdn- itup- v_bus+ vhi- vlo-
       i_peak:
-        nominal: 0.428774
-        min: 0.39401
+        nominal: 0.443774
+        min: 0.40901
         min_at: igate- itdn- itup- v_bus- vhi- vlo-
-        max: 0.498294
+        max: 0.513294
         max_at: igate+ itdn- itup- v_bus+ vhi- vlo-
     asserts:
     - expr: max['latched'] < 0.5
@@ -60,10 +60,10 @@ sims:
         max: 0.0066075
         max_at: igate- itdn- itup+ v_bus+ vhi- vlo-
       t_up:
-        nominal: 0.0870789
-        min: 0.0420149
+        nominal: 0.0870916
+        min: 0.0420208
         min_at: igate+ itdn- itup- v_bus- vhi+ vlo+
-        max: 0.180207
+        max: 0.180234
         max_at: igate- itdn- itup- v_bus+ vhi- vlo-
       i_peak:
         nominal: 147.964
@@ -108,16 +108,16 @@ sims:
         max: 0.0637804
         max_at: igate+ itdn- itup+ v_bus- vhi- vlo-
       t_up:
-        nominal: 0.0925147
-        min: 0.0455277
+        nominal: 0.0925252
+        min: 0.0455321
         min_at: igate+ itdn- itup- v_bus- vhi+ vlo+
-        max: 0.190452
+        max: 0.190475
         max_at: igate- itdn- itup- v_bus+ vhi- vlo-
       i_after:
         nominal: 0.278163
         min: 0.156952
         min_at: igate- itdn- itup- v_bus- vhi- vlo-
-        max: 0.53667
+        max: 0.536671
         max_at: igate+ itdn- itup- v_bus+ vhi- vlo+
     asserts:
     - expr: max['latched'] < 0.5 and max['timer_peak'] < 1.233
@@ -127,16 +127,16 @@ sims:
     corners: 3
     measures:
       latched:
-        nominal: 1.0073
-        min: 1.00715
+        nominal: 1.00872
+        min: 1.00829
         min_at: itup+
-        max: 1.00877
-        max_at: itup-
+        max: 1.00872
+        max_at: nominal
       v_out_max:
-        nominal: 8.04828
-        min: 8.04828
+        nominal: 8.04226
+        min: 8.04226
         min_at: nominal
-        max: 8.04828
+        max: 8.04226
         max_at: nominal
     asserts:
     - expr: min['latched'] > 0.5 and max['v_out_max'] < 0.95*p['v_bus']

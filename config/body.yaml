@@ -1136,15 +1136,22 @@ routing:
 
 # ------------------------------------------------------------ lighting ----
 lighting:
-  # THE LED ROW (ADR 0028): thirteen WS2815B-V1 reflowed on the main board's
-  # top face, one row down the centreline, LEDs up, lighting both acrylic
-  # sides through the cavity. LED 1 is at the tail end, where the data
-  # arrives; the row is shifted along the body so the U-bolt station falls
-  # midway between two LEDs (drc.echo 'LED row off the U-bolt station').
+  # THE LEDS (ADR 0028): WS2815B-V1 reflowed on the main board's top face,
+  # LEDs up, lighting both acrylic sides through the cavity. One row down the
+  # centreline, and one LED in the tail corner beside the etherCON adapter
+  # (ADR 0028 amendment, 2026-10-02). Numbered along the data line: LED 1 is
+  # the corner LED, where the data arrives; LED 2 is the row's tail end. The
+  # row is shifted along the body so the U-bolt station falls midway between
+  # two LEDs (drc.echo 'LED row off the U-bolt station').
   led_count:
-    value: 13
+    value: 14
     status: settled
-    source: "owner, 2026-09-30 (ADR 0028): thirteen LEDs, the count the 60/m strip gave over the same run"
+    source: "owner: thirteen in the row, 2026-09-30 (ADR 0028), the count the 60/m strip gave over the same run; and one in the main board's tail corner, 2026-10-02 ('Add it', ADR 0028 amendment). The row is this less the corner LED"
+  tail_led:
+    value: [3, 13.5]
+    status: nominal
+    source: "the corner LED's centre: along the body, this many lighting.led_pitch past the row's tail-end LED; across, mm off the centreline toward the near side (+y). The owner's study's place (ADR 0021 amendment 2026-10-02, 'A fourteenth LED' [calc, ray cast through the CAD's solids]: 17 / 59 / 36 % of the far side's inside face seen past the key board, 85 / 85 / 85 % of the near side's, where the row's tail-end LED sees 18 / 35 / 13 and 0 / 2 / 4). drc.echo 'LED in the tail corner clear of its neighbours' checks it"
+    decided_by: "the side-light diffusion test (ROADMAP), with the row's count and pitch"
   led_pitch:
     value: 16.67
     status: tbd

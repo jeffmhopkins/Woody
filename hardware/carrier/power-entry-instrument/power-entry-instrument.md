@@ -48,7 +48,7 @@ the two agree, and where they do not the netlist wins.*
                      │                     │    network is drawn in §1a
       INST_POS12 ────┤                     │
                      ├─────────────────────┼──── the LED row, direct
-                     │                     │     (13 × WS2815B-V1)
+                     │                     │     (every D-LED, lighting.led_count)
                      │                     │     [C-STRIP-BULK 470 µF 25V]
                      │                     │
                      ├──[REF5050]──┬────────┼──── §2 analog (its VIN through R-REF-IN and a
@@ -185,7 +185,7 @@ stay at the connector, ahead of it.
 
 ```
 Charge behind it: C-STRIP-BULK 470 µF + C-BUCK-IN 100 µF
-                  + 13 × C-LED 100 nF                          ≈ 571 µF
+                  + 14 × C-LED 100 nF                          ≈ 571 µF
 The plug-in step: J-UMB jumps 0 → 12 V in microseconds. The gate follows
   through C-INRUSH-GS and is held back through C-INRUSH-GD:
   ΔV_GS = −12 V × (22 nF + 55 pF) / (1 µF + 645 pF + 22 nF + 55 pF)
@@ -204,10 +204,10 @@ Its ratings: V_DS −30 V against D-TVS-PWR's 24.4 V clamp [ds SMAJ15A p.2];
   C-INRUSH-GS carries the source's jump to it
 ```
 
-The run agrees with all of it and says more: `U-ISO` peaks at 0.49–0.54 A on
-a hot-plug at 65 corners (`hotplug-iso-ocp`) — the peak is the ramp's end,
+The run agrees with all of it and says more: `U-ISO` peaks at `hotplug-iso-ocp`
+on a hot-plug at 65 corners — the peak is the ramp's end,
 not the plug — `VCC` at the load switch does not move, the instrument is up in
-93–182 ms, and the ramp takes about 50 ms 10–90 %, slower than the arithmetic
+94–183 ms, and the ramp takes about 50 ms 10–90 %, slower than the arithmetic
 above because the loads come on during it. **`Q-INRUSH` dissipates 1.8 W at
 most, ~85 mJ a start**: the AO3401A's single-pulse rating at 50 ms is about
 12 W and its transient impedance there about 12 K/W `[ds p.4 Figures 10–11,
@@ -266,7 +266,7 @@ operation the rail is `U-ISO`'s regulation, 12 V +3.1 % at worst
 (`power-entry.md`), and a surge through the on FET into ~571 µF moves it by
 tenths of a volt; the plug's ring lands on `J-UMB` while `Q-INRUSH` is off
 (§1a). **What is not covered is a converter that fails regulating high**,
-anywhere between 13.5 V and its OVP: thirteen parts that cannot be reworked
+anywhere between 13.5 V and its OVP: fourteen LEDs that cannot be reworked
 after reflow (ADR 0028) would see it unclamped. **Accepted by the owner,
 2026-10-01** (pre-layout review A4-4): a converter that fails regulating high
 is out of scope, and no clamp is added (ADR 0027, its 2026-10-01 amendment).
@@ -337,12 +337,13 @@ keys scanning, at both ends of the link.
 
 **`C-STRIP-BULK` (470 µF 25 V) sits at the LED row's feed end**, on
 this board — "bulk capacitance belongs where the current swings" `[repo] 0014`.
-The lights are thirteen LEDs on this board since ADR 0028, each with its own
+The lights are LEDs on this board since ADR 0028 (`lighting.led_count`, the
+last added in the tail corner on 2026-10-02), each with its own
 100 nF (`C-LED`), which take the edges; this one takes the row's PWM step.
 The row switches its whole current at the LEDs' PWM rate: at
 `led-row-current`'s upper end, a 250 µs half-period drawn from this
-capacitor alone would sag it by about 0.1 V `[calc: 0.195 A × 250 µs /
-470 µF = 0.10 V]` — the umbilical and the load switch supply most of it, so
+capacitor alone would sag it by about 0.1 V `[calc: 0.210 A × 250 µs /
+470 µF = 0.11 V]` — the umbilical and the load switch supply most of it, so
 that is the worst case, and the value stays. The ~2 kHz rate is the WS2815's
 `[ds datasheets/led/WS2815B-V1.pdf p.1, 'scan frequency is of 2KHz']`. A 10 × 10 mm SMD can is a height
 item; it goes in the regulator block (`config/body.yaml` `boards.tall_h`) and
