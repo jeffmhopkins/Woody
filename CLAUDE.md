@@ -260,7 +260,8 @@ repeating, and record the verification.
 
 ## Work is tracked in GitHub issues
 
-New work and every owner decision get an issue before work starts; commits
+New work gets an issue before work starts; **owner decisions are asked and
+answered in the working chat, never as issues**, and recorded in an ADR; commits
 reference it (`#9 G2: …`); the issue is commented with the outcome **by
 finding id** and its `status:` label moved, or closed. Issues cite figures by
 name and never quote them — the corpus stays the only place a value lives.
