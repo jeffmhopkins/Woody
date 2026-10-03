@@ -126,7 +126,7 @@ hardware/boards/module-main/module-main.sch.png,bc9924938da1127b8cacb8ba51ae50f2
 hardware/boards/umb-adapter/umb-adapter.sch.png,c08503ed592fe96f2df9907b68b9447b1b857dbd,hardware/boards/umb-adapter/umb-adapter.kicad_sch@75e3626cf94636d3ef5ec5058d71181b5b75e628
 hardware/carrier/breath-adc/breath-adc.sch.png,ac5b009340d0aabbaa12ecc62fc7251c77a085e1,hardware/carrier/breath-adc/breath-adc.kicad_sch@0380e545f4d6bfd043a0d76f5b092e242ace8e8e
 hardware/carrier/breath-excitation-reference/breath-excitation-reference.sch.png,b184de98da510ebb5870350bf7b8056224ea3ef5,hardware/carrier/breath-excitation-reference/breath-excitation-reference.kicad_sch@0034a8025c5a02b62f00c5b1215dbc688f4791df
-hardware/carrier/carrier.sch.png,35f92c70ecaff44af0edd54b9173a407822fca3f,hardware/carrier/carrier.kicad_sch@ae03bb4cbf8d0e170fb0222e27bdf06049c4e51b
+hardware/carrier/carrier.sch.png,35f92c70ecaff44af0edd54b9173a407822fca3f,hardware/carrier/carrier.kicad_sch@e92698b2d6a8009edcb5a668cbb2f12fd0543ad3
 hardware/carrier/led-strip-drive/led-strip-drive.sch.png,4b4d614092706c9446f287333dbe4b64621a3f4f,hardware/carrier/led-strip-drive/led-strip-drive.kicad_sch@82461e807f0e8d45e1961497a683903865748c4f
 hardware/carrier/power-entry-instrument/power-entry-instrument.sch.png,0e807168672645c4d7f497c87a7905fa9e3620ee,hardware/carrier/power-entry-instrument/power-entry-instrument.kicad_sch@a164c910d4c50f2fa5cee5d2c35c1d5bf37d4bff
 hardware/carrier/service-uart/service-uart.sch.png,40cc858ed2f6b34c72fb0ba61801aba338f3a7b6,hardware/carrier/service-uart/service-uart.kicad_sch@38095f8e3205f38c1edaa532472b26d9e33e6bed

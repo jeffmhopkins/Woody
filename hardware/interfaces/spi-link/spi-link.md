@@ -234,13 +234,12 @@ the part survived every pin shorted to ground for 24 hours `[ds p.64,
 Table 5-1]`. The 68 Ω row's rejection was argued against it; 82 Ω does not
 need it, standing on `cs-fall-reentry`. With the clamp now behind
 it, `R-SPI-SER` is also the first thing an ESD strike on a conductor meets,
-so it is **an anti-surge 1206** on the same footprint (owner, 2026-10-03,
-#15 C3: Panasonic ERJ-P08, "ESD surge characteristics superior to standard
-metal film resistors" `[ds PANASONIC-ERJ-P08-ANTI-SURGE-THICK-FILM.pdf p.1,
-ESD p.4]`), and E11's result cannot force a respin. The 82 Ω value read 0
-at JLC and LCSC on 2026-10-03; the BOM row names the in-stock pulse-proof
-equivalent, Vishay's CRCW-HP. `R-SER-BREATH-INST` at the same connector is
-the same series (`breath-sense-link.md`).
+so it is **a pulse-rated 1206** on the same footprint (owner, 2026-10-03,
+#15 C3), and E11's result cannot force a respin: Vishay CRCW120682R0FKEAHP,
+pulse-proof thick film, 0.75 W `[ds VISHAY-CRCW-HP-E3-PULSE-PROOF.pdf]` —
+the owner's pick over Panasonic's ERJ-P08 at this value, which neither JLC
+nor LCSC stocks. `R-SER-BREATH-INST` at the same connector is the ERJ-P08 in
+1 kΩ (`breath-sense-link.md`).
 (ADR 0004's old "7.9 MHz corner" was the figure for 100 Ω all along, quoted
 against 220 Ω — the schematic review caught that separately.)
 
