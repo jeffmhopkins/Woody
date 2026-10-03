@@ -138,6 +138,33 @@ Seventy-odd percent, inside a body running 10–20 K above ambient, is near
 enough to want the derating curve. **The display board's share was only ever
 estimated**, so the figure is a range until E6 measures the rail.
 
+**Counted from the bottom up it is higher** (#18 E4) `[calc]`: the whole
+lighting budget on the matrix (3 W at 5 V, 600 mA; ADR 0014), the 64 matrix
+LEDs' idle draw (~32–64 mA `[from memory]`), the ESP32-S3 and its PSRAM
+through the ME6217 (~100–160 mA, radio off, ADR 0015) and the level shifter
+give **≈ 0.82 A, 82 %**. The R-78E5.0-1.0 carries full load to 60 °C ambient
+and derates linearly to 60 % at 85 °C `[ds R-78E5.0-1.0.pdf p.3, Derating
+Graph]`, so 82 % holds to about 71 °C at the part `[calc: 60 + (100 − 82) /
+40 × 25]`. That is the number to carry until E6 measures the rail, and the
+reason the M8 soak should put a thermocouple on `U-BUCK` (#18 E2/E4; open,
+the owner's).
+
+**Rack and USB together: the share is not controlled** (#18 E1; open, the
+owner's decision). With the rack up and a USB host plugged in — the
+configuration and telemetry case, `firmware/README.md` — `VCC_5V` is fed from
+both sides: the buck through `D-USBOR` (SS14, `V_F` 0.50 V max at 1 A
+`[ds SS14.pdf]`) and `VBUS` through the Matrix's own `D1` (B5819WS, 0.60 V
+max at 1 A `[ds B5819WS.pdf]`). The sources are 5.0 V ± 5 % (`[ds
+R-78E5.0-1.0.pdf p.2]`) and USB's 4.75–5.25 V `[from memory: USB 2.0]`, so
+which one carries the load is set by tens of millivolts, and at the corners
+`VBUS` carries all of it. All of it is up to the ~0.82 A above, and `D1` is
+rated `P_D` 200 mW at `RθJA` 500 °C/W `[ds B5819WS.pdf]` — about 0.45 W
+would be twice that, and more than a USB 2.0 port's 500 mA. The analyses
+above and ADR 0005/0014 cover rack alone and USB alone, never both. What
+decides it: a firmware cap on the matrix while a USB host is attached, an
+ideal-diode OR in place of `D-USBOR`, or `D1` lifted in the instrument build
+(which gives up bench running on USB, ADR 0005).
+
 ---
 
 ## §1a Hot-plug inrush — `Q-INRUSH`
