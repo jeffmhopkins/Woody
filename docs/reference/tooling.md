@@ -184,9 +184,10 @@ OpenSCAD's depfile gets. Two tools use it, both for the module (ADR 0026):
   (its flattened netlist, what a PCB is laid out from), and the PNG renders,
   recorded in `hardware/SHEETS.csv`.
 - **Every circuit with a netlist is migrated** (the module's on
-  2026-09-30). A circuit whose parts sit on two boards (four of the module's)
-  is a parent sheet placing two pages, `<circuit>.main.kicad_sch` and
-  `<circuit>.jack.kicad_sch`, and each board places its own page.
+  2026-09-30). A circuit whose parts sit on two boards is a parent sheet
+  placing two pages, `<circuit>.main.kicad_sch` and `<circuit>.jack.kicad_sch`
+  (or `.iso.kicad_sch`, power-entry's iso-board page), and each board places
+  its own page.
 
 ### Commands
 
@@ -203,8 +204,9 @@ python3 tools/kicad.py check                                  # everything above
 - a render or a `fab/` file exists that no ledger row knows (a stray Gerber is uploaded with the rest);
 - a board has an ERC error;
 - a board with a layout fails `tools/pcb.py check` (§4);
-- `J-B2B-MOD`, soldered through both module boards, is netted differently on
-  `module-main` and `module-jack` (pin *k* is one conductor on both);
+- `J-B2B-MOD` or `J-B2B-ISO`, each soldered through two module boards, is
+  netted differently on the two (`module-main` and `module-jack`,
+  `module-main` and `module-iso`; pin *k* is one conductor on both);
 - a board's umbilical connector is wired differently from its part in
   `hardware/interfaces/spi-link/netlist.yaml`: the main board's and the
   adapter's `J-UMB` against `J-UMB`, the adapter's etherCON against

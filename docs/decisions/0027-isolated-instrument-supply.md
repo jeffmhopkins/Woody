@@ -7,7 +7,9 @@ the rack, there has to be a valid way to do this."* Numbering: 0025 and 0026
 are taken on other branches (the instrument's drop-in module, the panel
 graphics), so this is 0027. **Amended 2026-10-01**, three times (the
 converter's common-mode current; the choke is fitted; the `INST_POS12` range
-is accepted), the *Amendment* sections below.
+is accepted), the *Amendment* sections below. **Amended 2026-10-03** (issue
+#22): `U-ISO` and its filter are on a board of their own, the iso board (ADR
+0023 point 2), at a dated note in *Consequences*.
 
 **Amended 2026-09-30 — `U-ISO` is RECOM's RPA20-2412SAW.** The owner: *"I
 thought the point was to do a RECOM that was in stock."* It replaces the
@@ -203,7 +205,11 @@ constant; it is part of what the owner tunes out, as in every Eurorack module.
   with `L-ISO-IN`, `C2`, `C-ISO-IN`, `C-ISO-OUT` beside it; the envelopes are
   `config/module.yaml`'s. *(Amended 2026-10-01: and `L-CM-ISO`, 21.6 mm over
   its terminals and 11.43 mm tall, between `L-ISO-IN` and the converter's
-  input pins — its envelope is not in `config/module.yaml` yet.)*
+  input pins — its envelope is not in `config/module.yaml` yet.)* *(Amended
+  2026-10-03, issue #22: `U-ISO` and its whole filter moved to a board of
+  their own, the iso board behind module-main (ADR 0023 point 2, amended),
+  still on a rear face; the envelopes are `config/module.yaml` `iso.*` and
+  `iso_board`, and the module CAD checks them on that board.)*
 - **Supply**: the RPA20-2412SAW is end-of-life, 20 at DigiKey on
   2026-09-30 — **buy spares with the first order**. The RP20-2412SAW is the
   path after that, on the same footprint, with its lead time (11 weeks on

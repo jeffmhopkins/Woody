@@ -613,6 +613,18 @@ one ground, `AGND_MOD`, which reaches it only on `J-B2B-MOD`'s five ground
 pins; nothing on it needs a second reference, so there is nothing for a
 second plane to separate (`PCB-MODULE-JACK`).
 
+**`U-ISO` and its filter are on the iso board**, two layers, behind the main
+board (ADR 0023 point 2, amended 2026-10-03; `PCB-MODULE-ISO`). This
+circuit's sheet is a parent placing two pages: `main`, on the main board, and
+`iso` - `U-ISO`, `L-ISO-IN`, `L-CM-ISO`, `C2`, `C-ISO-IN`, `C-ISO-Y` and
+`C-ISO-OUT` - on the iso board. `J-B2B-ISO` carries the four nets between them,
+each on two pins: `ISO_FB2` and `ISO_FILT_NEG` out from the beads, `ISO_POS12`
+and `PWR_GND` back to the load switch, with its pins 5-6 left open between the
+input and the output pairs. The iso board has no ground of its own: its input
+side returns on `ISO_FILT_NEG` to the −12 V leg, and its output on `PWR_GND`,
+which meets the module's grounds only at `NT-UMB-MOD` on the main board, as
+before. Its spacers' pads are on no net on both boards, for the reason below.
+
 **The standoffs are metal** (owner, 2026-09-30), so they could tie the boards'
 copper at more points. **Their pads are on `AGND_MOD` on the jack board
 and on no net on the main board** — the main board's two low ones, which go to
@@ -639,14 +651,6 @@ are in [`umbilical-load-switch.md`](../umbilical-load-switch/umbilical-load-swit
 - **The case's −12 V rating** against ~0.24 A typical and ~0.39 A clamp-legal
   from this module (`U-ISO` plus `module-own-draw`) `[calc: 0.225 + 0.020;
   0.37 + 0.020]`. **Decided by: the owner's supply**, measured at E6.
-- **Where `U-ISO` sits on module-main**: on its rear face, 10.2 mm tall on
-  5.6 mm pins, with its filter parts beside it — `config/module.yaml` holds
-  the envelopes and the module CAD checks them. **`L-CM-ISO` has no envelope
-  there yet**: 21.6 mm over its terminals, 17.78 mm body, 11.43 mm tall, SMD,
-  between `L-ISO-IN` and the converter's input pins; and no footprint in
-  `hardware/lib` yet (`woody:L_CommonModeChoke_Bourns_PM3700`, four 3.18 mm
-  pads on a 21.59 mm cross, from the datasheet). **Decided by: the module
-  CAD's placement**, before the module layout.
 - **How much common-mode current `U-ISO` makes.** RECOM does not publish it,
   and every copper parasitic in `cm-loop` is an estimate. **Decided by: E6**,
   a current probe on the star tie with the converter loaded.
