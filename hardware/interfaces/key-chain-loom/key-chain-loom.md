@@ -537,6 +537,22 @@ the bead's model for 1 MHz to 3 GHz, so at the LC's frequency it is
 extrapolated: **bring-up step 6 still scopes the key board's VCC while
 shifting**, against the simulation.
 
+**Power off before seating or unseating a `J-CHAIN` ribbon** (#15 C4). Seated
+live, an empty `C-BULK-CHAIN` is switched onto `DEV_3V3` through the bead.
+`DEV_3V3` holds about 32 µF (the Matrix's LDO output capacitor and its other
+3V3 capacitors, `C-ADC-BULK` and the decouplers here), so with nothing else
+acting, charge sharing would take it to 3.3 V × 32 / 42 ≈ 2.5 V `[calc]`. A
+scratch run of this page's own rail model with Murata's bead model and the
+LDO as its output resistance (not committed; `sim/`'s `rail` deck plus a
+switch) put the dip at 3.13 V with the typical `r_ldo` and 2.65 V at its
+0.17 Ω end, a few microseconds after contact, and the key board's own rail
+ringing up to 4.8–5.5 V, inside the SN74HCS165's 2–6 V supply range
+`[sim, scratch; ds SN74HCS165-ti-scls828a.pdf p.4]`. Below the ESP32-S3's
+3.0 V minimum `[ds ESP32-S3-datasheet-v2.2.pdf Table 5-2 p.64]` the Matrix
+may brown out and reset. Nothing is damaged, but the reading is not a
+fault to chase: unplug the instrument, or the USB, before touching a key
+ribbon. The same rule covers `CBL-MCU-RIBBON` at `J-MCU`.
+
 ---
 
 ## What the main board still owes the chain
