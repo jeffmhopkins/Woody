@@ -45,7 +45,7 @@ XB 0 sum pos neg out OPAx197
 ROUT out jack {{R-OUT-PROT}}
 COUT jack 0 {{C-OUT-BREATH}}
 RLOAD jack 0 {{r_load}}
-.model DRESP D(IS={{is_d}} N={{n_d}} RS={{rs_d}} CJO=1.5p)
+.model DRESP D(IS={{is_d}} N={{n_d}} RS={{rs_d}} CJO=1.5p EG={{eg_d}})
 .options method=gear rshunt=1e10
 .control
 if {{trimmed}} > 0
