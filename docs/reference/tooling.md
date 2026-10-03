@@ -742,6 +742,12 @@ sims.yaml files, the decks, the netlist and the cited figures' values.
 or a failed assertion, fails the check until the sims are re-run. Proven by
 changing `C-KEY` in the netlist, 2026-09-28.
 
+**One ngspice version.** `sim.py` pins it (`NGSPICE`, which `tools/setup-env.sh`
+installs), every `results.yaml` records the one it ran on, and `check` fails a
+result from any other. Results moved between 42 and 44.2 without crossing an
+assertion — an unquieted op-amp's noise by 3×, `SYNC`'s overshoot by 8× — so a
+mixed corpus is not one measurement (#5, 2026-10-02). `run` warns on another version.
+
 **What a result is worth.** It proves the arithmetic and the wiring against the
 models it was given. Where a model is behavioural, as a Schmitt input modelled
 as its datasheet thresholds or a switch as two resistances, `sims.yaml` says
