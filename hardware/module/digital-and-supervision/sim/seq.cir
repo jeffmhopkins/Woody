@@ -31,7 +31,8 @@ XREG p12 avdd set 0 LT3042B
 RSET set 0 {{R-SET-DAC}}
 CSET set 0 {{C-SET-DAC}}
 CREG avdd 0 {{C-REG-OUT}}
-RDAC avdd 0 {{r_dac}}
+* DAC_AVDD's whole load (power-entry/sim's r_dac_load)
+RDAC avdd 0 {{r_dac_load}}
 * LOGIC_5V: ADP7118, behavioural. ss charges while VIN is over UVLO (to 5 V in t_ss), and is
 * discharged below it; the pass element sources current only, up to i_lim, towards
 * min(ss, VIN - v_do)

@@ -30,7 +30,6 @@ params:
   r_fb:       {value: 0.1, source: "FB-IN's DC resistance [assumption: the netlist value '600R @ 100MHz' is not a DC figure]"}
   r_load_pos: {value: 200.0, source: "the module's +12 V analog load, 60 mA [assumption: no figure registers it]"}
   r_load_neg: {value: 200.0, source: "the -12 V analog load, 60 mA [assumption]"}
-  r_dac:      {value: 4000.0, source: "DAC8568 supply, 1.25 mA at 5 V [datasheets/analog/DAC8568CIPW.pdf p.1] as a resistance"}
   r_vco:      {value: 100.0e3, source: "one VCO input [assumption, as pitch-stage/sim]"}
   # 1N5817, BEHAVIOURAL: n = 1.1 chosen, Rs and Is fitted to the two points the D-REVPOL
   # row digitised off the banked curve (0.24 V at 245 mA, 0.36 V at 612 mA) [calc:
@@ -86,7 +85,7 @@ params:
   gm_dac:     {value: 10.0, source: "the pass element's error gain, A/V [assumption: stiff; the loop's dynamics are not the question]"}
   rset_fault: {value: 0, source: "0 none; 1 R-SET-DAC open; 2 C-SET-DAC shorted (SET to ground)"}
   v_dac_absmax: {value: 6.0, source: "the DAC8568's absolute maximum, AVDD to GND -0.3 to +6 V [datasheets/analog/DAC8568CIPW.pdf p.2]"}
-  r_dac_load: {value: 1300.0, source: "DAC_AVDD's load, ~4 mA (power-entry.md, The DAC rail's load) as a resistance [calc: 5.2 / 4.0e-3] (vary: 585 ohm, ~9 mA, the ceiling with U-LVL-MOD's inputs at their Delta-I_CC bound, to 2.6 kohm, ~2 mA)"}
+  r_dac_load: {value: 1300.0, source: "DAC_AVDD's load, ~4 mA (power-entry.md, The DAC rail's load) as a resistance [calc: 5.2 / 4.0e-3] (vary: 585 ohm, ~9 mA, the ceiling with U-LVL-MOD's inputs at their Delta-I_CC bound, to 2.6 kohm, ~2 mA). The one load every deck puts on DAC_AVDD since #5: poweron.cir and digital-and-supervision's seq.cir used the DAC8568's 1.25 mA alone (4 kohm)"}
   # --- cm.cir / isoin.cir: U-ISO's input, common mode and differential (A4-1) -------------
   l_leak:     {value: 3.9e-6, source: "L-CM-ISO's leakage inductance, 3.9 uH typ [datasheets/discrete-and-power/BOURNS-PM3700-CM-CHOKE.pdf p.1]: the pair's differential inductance"}
   r_cm_dcr:   {value: 0.020, source: "its DCR per winding, 0.020 ohm max [same]"}
@@ -359,20 +358,28 @@ sims:
     # resistance; and how much of its reflected current reaches the rack.
     deck: isoin.cir
     vary: [esr_c2, l_rib, L-CM-ISO, r_psu]
-    measures: [z_peak, f_peak, margin, rack_550k, rack_band, f_rack_band]
+    measures: [z_peak, f_peak, z_edge, margin, rack_550k, rack_band, f_rack_band, rack_edge, rack_low]
+    # WINDOW EDGES (#5 minor): a maximum read on an AC sweep's first or last point is that
+    # end of the curve, not a resonance - *_edge says which (1 = the maximum IS an end
+    # point). The sweep reaches toward DC so that a peak below the old 100 Hz edge shows.
     post:
-      z_peak: "peak(w['zmag'], 100, 2e6)"
-      f_peak: "argpeak(w['zmag'], 100, 2e6)"
-      margin: "p['r_neg_iso'] / peak(w['zmag'], 100, 2e6)"
+      z_peak: "peak(w['zmag'], 1, 2e6)"
+      f_peak: "argpeak(w['zmag'], 1, 2e6)"
+      z_edge: "1.0 if argpeak(w['zmag'], 1, 2e6) in (w['zmag'][0][0], w['zmag'][0][-1]) else 0.0"
+      margin: "p['r_neg_iso'] / peak(w['zmag'], 1, 2e6)"
       rack_550k: "at(w['rack'], 550e3)"
       rack_band: "peak(w['rack'], 1e3, 1e4)"
       f_rack_band: "argpeak(w['rack'], 1e3, 1e4)"
+      # the band's maximum at its own 1 kHz edge is the curve still rising towards DC, where
+      # all of the current comes from the rack (100 %); rack_low is the most below the band
+      rack_edge: "1.0 if argpeak(w['rack'], 1, 2e6) in (w['rack'][0][0], w['rack'][0][-1]) else 0.0"
+      rack_low: "peak(w['rack'], 1, 1e3)"
     asserts:
       - expr: "min['margin'] > 20"
         why: "the input filter stays damped with the choke's leakage added: its impedance peak is over 20x (26 dB) below the converter's -V^2/P at every ESR, ribbon and choke corner, the bar power-entry-instrument/sim holds the instrument's own input LC to"
       - expr: "max['rack_550k'] < 1.0"
         why: "under 1 % of the converter's reflected current at its 550 kHz fundamental reaches the rack's +12 V conductor"
-      - expr: "max['rack_band'] <= 100.0"
+      - expr: "max['rack_low'] <= 100.0 and max['rack_band'] <= 100.0"
         why: "NO GAIN IN THE LED ROW'S BAND: from 1 to 10 kHz the share of U-ISO's input current that reaches the rack's +12 V conductor never exceeds 100 % at any corner. L-ISO-IN and L-CM-ISO's leakage with C2 have their corner at ~3.1 kHz (power-entry.md), but D2, D4, PTC-ISO, the beads and the ribbon are in series in the same loop and hold it under critical damping - the premise of the review's '~13 mV' bound (A4-13: Q up to 1.35 on C2's ESR alone) does not hold. led-pwm runs the row's current through it"
 
   # ---- DAC_AVDD: U-REG-DAC, the LT3042, precision-set (owner, 2026-10-01) ------------------
