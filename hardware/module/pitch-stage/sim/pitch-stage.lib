@@ -11,7 +11,15 @@
 * VREF_BUFFERED through R-GAIN-CTR, R2 of RN-PITCH plus TRIM-GAIN's CCW-W section
 * (t_gain of its track; its CW end is strapped to the wiper) from the JACK, C-FB-PITCH
 * from the op-amp output, R-OUT-PROT inside the DC loop, C-FILT-PITCH at the jack.
-* D-JACK-CLAMP is left out: reverse-biased inside +-12 V.
+* D-JACK-CLAMP (BAV99: A to the -12 V rail, K to the +12 V rail, C on AMP_OUT, the
+* op-amp side of R-OUT-PROT) as two diodes, DJC: reverse-biased while the op-amp's output
+* is inside the rails. The patch and short sims measure its current rather than assume it.
+* DJC is a SPICE diode through the banked datasheet's MAXIMUM VF - 715 mV at 1 mA, 855 mV
+* at 10 mA, 1.25 V at 150 mA, Cd 1.5 pF max [ds NEXPERIA-BAV99-SOT23.pdf p.3, Tamb 25 C]:
+* [calc: the three equations V = N Vt ln(I/IS) + I RS at Vt 25.9 mV give IS 1.77 nA,
+* N 2.08, RS 1.78 ohm]. A model, not a part value, so it is written here once, where every
+* deck that places PSTAGE (this directory's, module/power-entry's, interfaces/system's)
+* reads it.
 .subckt PSTAGE vrefout dac jack pos neg vrefb minus inm
 RTOCW vrefout wip {{r_toff_cw}}
 RTOCCW wip 0 {{r_toff_ccw}}
@@ -30,4 +38,7 @@ XAMP plus inm pos neg ampout OPAx197
 CFB ampout minus {{C-FB-PITCH}}
 ROUT ampout jack {{R-OUT-PROT}}
 CFILT jack 0 {{C-FILT-PITCH}}
+DJCN neg ampout DJC
+DJCP ampout pos DJC
 .ends
+.model DJC D(IS=1.77e-9 N=2.08 RS=1.78 CJO=1.5e-12)

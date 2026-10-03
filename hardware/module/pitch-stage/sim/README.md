@@ -23,7 +23,10 @@ for the loads a passive mult joins to `PITCH`, the other outputs' jack parts:
 (`t_gain`; its CW end is strapped to the wiper), `R-OPAMP-IN`/`C-AA-PITCH`,
 `C-FB-PITCH`, `R-OUT-PROT` and `C-FILT-PITCH`. Both trims sit at mid-travel
 unless a sim says otherwise. `VREFOUT` is an ideal 2.5 V source.
-`D-JACK-CLAMP` is left out: reverse-biased inside ±12 V.
+`D-JACK-CLAMP` is in since 2026-10-03 (#5 finding 6): two diodes fitted to
+the BAV99's maximum V_F, on the op-amp side of `R-OUT-PROT`. It is
+reverse-biased everywhere but under abuse, and `patch` and `short` measure it.
+`pitch-loop.cir` needed `gminsteps=100` to find its operating point with it.
 
 **Every deck places the stage twice**, `XA` with `D-ESD-PITCH` on its jack and
 `XB` without, on the same sources and the same load, so the clamp's effect is
@@ -38,7 +41,11 @@ its leakage at the 15 V standoff as 300 MΩ `[ds NEXPERIA-PESD15VL1BA.pdf p.4]`.
 | `dc-transfer` | the transfer over the DAC's 0.25–4.75 V window into a VCO | gain 2.000 and intercept −2.500 V within 1 mV at mid-travel; **`D-ESD-PITCH` moves the jack by under 1 µV** |
 | `trim-gain-ccw`, `-cw` | `TRIM-GAIN` at 0 Ω and 200 Ω | the gain is `1 + R2/(R1 + R-GAIN-CTR)` and `1 + (R2 + 200 Ω)/(R1 + R-GAIN-CTR)`: 1.990 and 2.010, ±1 % |
 | `trim-offset-ccw`, `-cw` | `TRIM-OFFSET`'s wiper at either end | `V_ref` is the page's formula at w = 0 and w = 1: −60 / +50 mV about 2.500 V |
-| `step-vco[c_cable=…]` | an octave step into a VCO and 0, 200 pF or 800 pF of cable | under 5 % overshoot at every corner; **`D-ESD-PITCH` changes it by under 0.1 point** |
+| `step-vco[c_cable=…]` | an octave step into a VCO and 0, 200 pF, 800 pF or 2.2 nF on the jack beyond `C-FILT-PITCH` | under 5 % overshoot at every corner (4.8 % worst, at 2.2 nF); **`D-ESD-PITCH` changes it by under 0.1 point** |
+| `step-vco-heavy[c_cable=…]` | the same at 4.7, 10 and 22 nF (#5 finding 1) | **a recorded limit**: over 5 % at the nominal and worst corner — 6.2 % at 4.7 nF (5.0 % at its best corner); 11 % and 20 % at 10 and 22 nF, nominal |
+| `dc-transfer-supply`, `step-vco-supply`, `loop-supply` | the transfer, the step into 800 pF and the loop with the rails at 10.8–12.6 V each way | gain 2.000 and intercept −2.500 V within 1 mV, under 5 % overshoot, 69.4° — the rails' level does not reach the jack |
+| `patch[v_ext=…,r_ext=…]` | another module's output at either rail, stiff or through 220 Ω, patched onto the jack | **FAILS**: against a stiff output `R-OUT-PROT` carries 0.53 W (0.59 W at the worst corner), over its ≥500 mW; 0.36–0.40 W through 220 Ω. The op-amp holds the opposite rail at 24 mA; `D-JACK-CLAMP` never conducts. For the owner (`pitch-stage.md`) |
+| `short[v_dac=…]` | the jack shorted for 5 ms and released, the DAC at either end of its window | back within a cent in under 0.2 ms; a swing of several volts past the note on release; 0.15 W in `R-OUT-PROT` while shorted |
 | `step-mult[mult=1]`, `[mult=2]` | a passive mult to a MOD jack (its 82 nF) or the BREATH jack (its 330 nF) — the page's own model, the capacitor alone | **a recorded hazard**: over 25 % |
 | `step-real-mult[…]` | the same, with that output's own `R-OUT-PROT` to its driver as well | recorded only |
 | `loop[mult=…]`, `loop-cable[c_cable=…]` | the loop gain at all three loads and into the cable, broken at the stage's (−) input | phase margin over 45° after the ±10° screen; **`D-ESD-PITCH` moves it by under 0.1°** |
