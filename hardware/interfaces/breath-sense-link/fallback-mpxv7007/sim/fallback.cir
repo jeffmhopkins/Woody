@@ -1,0 +1,80 @@
+* U-BREATH's documented fallback, NOT FITTED (issue #30): an MPXV7007DP in the
+* MPXV4006DP's footprint, with U-BUF B turned from a follower into a ratiometric
+* gain-and-offset stage, and TRIM-BREATH-ZERO's range resistor reduced so the module can
+* null the wider pedestal band. breath-sense-link.md, "Fallback: MPXV7007DP".
+* Instrument end: VS (the REF5050 loop is its own sim, so an ideal source here, ramped up
+* with the rails); the sensor a behavioural source on its banked transfer function,
+* VS x (s_slope x P + s_off), with the datasheet's 470 pF on its output (C-SENSOR-OUT,
+* fitted either way); U-BUF B (TI's OPA2197 model) on INST_POS12 and AGND_INST,
+* R-BUFB-FB from its output to its (-) input, R-BUFB-VS from VS and R-BUFB-GND to
+* AGND_INST at that input; the ADC divider and C-AA-ADC as netlisted; R1 and R1b. Module
+* end, as netlisted: R2/R3, R4/R5, C_cm, C_diff, the INA828 (TI's model), REF driven by
+* U-REF-BUF A (TI's OPA2197 model) from an ideal wiper. The instrument's and the module's
+* grounds are one node here: the link's CMRR is breath-receive-stage/sim's and does not
+* depend on the sensor.
+* WHY TRANSIENTS AND NOT OPERATING POINTS: TI's INA828 model finds no operating point
+* with this chain at rest (gmin and source stepping both fail, and ngspice's transient op
+* then reports a false one - tooling.md 5). Every reading is taken from a transient
+* started from zero (uic) with the supplies ramped over 1 ms, after the chain has settled.
+* The pressure is a voltage, 1 V = 1 kPa: 0 until t_p1, a step to p_step (10 us), then a
+* step to p_full at t_p2. Readings: rest at t_rest, p_step at t_r1, p_full at t_r2.
+* Sequence: (1) REF at 0, the pedestal through the in-amp; (2) REF set to null it
+* (commissioning, TRIM-BREATH-ZERO) and the profile run again; (3) VS raised by vs_k_hi to
+* show the stage is ratiometric.
+VRAMP ramp 0 PWL(0 0 1m 1)
+BPOSI posi 0 V = {{v_pos_inst}} * v(ramp)
+BPOS pos 0 V = {{v_pos}} * v(ramp)
+BNEG neg 0 V = {{v_neg}} * v(ramp)
+VSK vsk 0 DC 1
+BVS vs 0 V = {{v_s}} * v(ramp) * v(vsk)
+VPK pk 0 PWL(0 0 {{t_p1}} 0 {{t_p1e}} {{p_step}} {{t_p2}} {{p_step}} {{t_p2e}} {{p_full}})
+BSENS sraw 0 V = v(vs) * ({{s_slope}} * v(pk) + {{s_off}})
+CSOUT sraw 0 {{C-SENSOR-OUT}}
+XBUFB sraw invm posi 0 bufout OPAx197
+RBFB bufout invm {{r_fb_eff}}
+RBVS vs invm {{r_vs_eff}}
+RBGND invm 0 {{r_gnd_eff}}
+RADCU bufout adcin {{R-ADCDIV-U}}
+RADCL adcin 0 {{R-ADCDIV-L}}
+CAA adcin 0 {{C-AA-ADC}}
+R1 bufout breath {{R1}}
+R1b 0 agndsense {{R1b}}
+R3 breath inneg {{R3}}
+R2 agndsense inpos {{R2}}
+R4 inpos 0 {{R4}}
+R5 inneg 0 {{R5}}
+CCMP inpos 0 {{C-CM-IN+}}
+CCMN inneg 0 {{C-CM-IN-}}
+CDIFF inpos inneg {{C-DIFF-BREATH}}
+XAMP inpos inneg pos neg out refdrv rg1 rg2 INA828
+RG rg1 rg2 {{R-GAIN-INAMP}}
+VWIP wiper 0 DC 0
+XREFB wiper refdrv pos neg refdrv OPAx197
+.options method=gear rshunt=1e10
+.control
+tran {{t_max}} {{t_end}} uic
+meas tran ped find v(bufout) at={{t_rest}}
+meas tran adc0 find v(adcin) at={{t_rest}}
+meas tran ina0 find v(out) at={{t_rest}}
+let vref_null = -ina0
+print vref_null
+alter vwip dc = $&vref_null
+tran {{t_max}} {{t_end}} uic
+meas tran ina_rest find v(out) at={{t_rest}}
+meas tran ina_28 find v(out) at={{t_r1}}
+meas tran fs find v(bufout) at={{t_r2}}
+meas tran adc6 find v(adcin) at={{t_r2}}
+meas tran ina_6 find v(out) at={{t_r2}}
+let slope = (fs - tran1.ped) / {{p_full}}
+let p_clip = {{p_full}} * ({{v_dd}} - tran1.adc0) / (adc6 - tran1.adc0)
+print slope p_clip
+wrdata vb.dat v(bufout)
+alter vsk dc = {{vs_k_hi}}
+tran {{t_max}} {{t_end}} uic
+meas tran ped_hi find v(bufout) at={{t_rest}}
+meas tran fs_hi find v(bufout) at={{t_r2}}
+let ratio_dev = abs(((fs_hi - ped_hi) / {{vs_k_hi}}) / (tran2.fs - tran1.ped) - 1) + abs((ped_hi / {{vs_k_hi}}) / tran1.ped - 1)
+print ratio_dev
+quit
+.endc
+.end

@@ -1,0 +1,102 @@
+# U-BREATH's FALLBACK, NOT THE LIVE DESIGN (issue #30): the MPXV7007DP in the
+# MPXV4006DP's footprint, U-BUF B turned into a ratiometric gain-and-offset stage, and
+# R-ZERO-TOP reduced. Written up, with its derivation, in
+# hardware/interfaces/breath-sense-link/breath-sense-link.md, "Fallback: MPXV7007DP".
+# Run:
+#   python3 tools/sim.py run hardware/interfaces/breath-sense-link/fallback-mpxv7007/sim
+#
+# WHY THE FALLBACK'S PARTS ARE PARAMS. A sim never writes a part value that a netlist
+# owns, and every part the live design fits is read from its netlist here (R1, R1b,
+# C-SENSOR-OUT, the ADC divider, the receive stage). The three stage resistors and the
+# reduced R-ZERO-TOP are on no sheet, because the fallback is not fitted; they are params,
+# each sourced to the page. Applying the fallback puts them on the sheets, and this
+# directory then reads them from the netlists like every other sim.
+title: MPXV7007DP fallback - the instrument's gain-and-offset stage into the in-amp
+values:
+  netlist:
+    - hardware/interfaces/breath-sense-link/netlist.yaml
+    - hardware/carrier/breath-adc/netlist.yaml
+    - hardware/module/breath-receive-stage/netlist.yaml
+models:
+  - datasheets/analog/INA828-ti-pspice-sbomag5c.lib
+  - datasheets/analog/OPAx197-ti-pspice-sboma34d.lib
+spiceinit: [set ngbehavior=psa]
+
+params:
+  v_pos_inst: {value: 12.0,  source: "INST_POS12, U-BUF's V+ (breath-excitation-reference netlist); its V- is AGND_INST"}
+  v_pos:      {value: 12.0,  source: "MODULE_ANALOG_POS12, the INA828's and U-REF-BUF's V+ (breath-receive-stage netlist)"}
+  v_neg:      {value: -12.0, source: "MODULE_ANALOG_NEG12"}
+  v_s:        {value: 5.0,   source: "VS, the REF5050's 5.000 V through U-BUF A (breath-excitation-reference); an ideal source here"}
+  vs_k_hi:    {value: 1.05,  source: "VS raised 5 %, to 5.25 V, the top of the MPXV7007's ratiometric supply range 4.75-5.25 V [ds datasheets/analog/MPXV7007DP.pdf p.2, note 2]: the ratiometric check only"}
+  s_slope:    {value: 0.057, source: "MPXV7007 transfer function Vout = VS x (0.057 x P + 0.5), P in kPa [ds datasheets/analog/MPXV7007DP.pdf p.5]"}
+  s_off:      {value: 0.5,   source: "the same transfer function's offset term (2.5 V at 0 kPa, VS 5 V). Varied by +-6.8 %: +-0.17 V at VS 5 V, the Voff band 0.33/0.5/0.67 V [p.2] taken at zero pressure - the wider of that and the p.5 error band's +-0.5 kPa x 0.285 V/kPa = +-0.1425 V [calc], so conservative"}
+  stage:      {value: 1,     source: "1: the fallback's gain-and-offset stage; 0: U-BUF B left a follower (the MPXV7007DP dropped in with nothing else changed)"}
+  r_fb:       {value: 10.0e3, source: "R-BUFB-FB, 10.0k 0.1 %, U-BUF B's output to its (-) input (fallback, breath-sense-link.md)"}
+  r_vs:       {value: 8.25e3, source: "R-BUFB-VS, 8.25k 0.1 %, VS to U-BUF B's (-) input (fallback, breath-sense-link.md)"}
+  r_gnd:      {value: 21.0e3, source: "R-BUFB-GND, 21.0k 0.1 %, U-BUF B's (-) input to AGND_INST (fallback, breath-sense-link.md)"}
+  r_zero_top_fb: {value: 8.25e3, source: "R-ZERO-TOP as the fallback replaces it, 8.25k 1 %, above TRIM-BREATH-ZERO's track (fallback, breath-sense-link.md); live it is 42.2k (netlist)"}
+  rail_lo:    {value: {fig: dac-rail, scale: 0.97667}, source: "DAC_AVDD at its lowest corner: dac-rail's derivation gives 5.108 V of its 5.230 V nominal (5.108 / 5.230 = 0.97667)"}
+  rail_hi:    {value: {fig: dac-rail, scale: 1.02352}, source: "DAC_AVDD at its highest corner, 5.353 / 5.230 = 1.02352 (dac-rail's derivation)"}
+  v_dd:       {value: 3.3,   source: "the MCP3202's VDD, which is its reference: the Matrix's 3V3 (breath-adc.md, Interfaces)"}
+  p_step:     {value: 2.8,   source: "2.8 kPa: breath-working-point's candidate hard blow (disputed, E2)"}
+  p_full:     {value: 6.0,   source: "the MPXV4006DP's full rated pressure, the range sensor-full-scale is taken at and the in-amp is sized for (ADR 0003, 0-6 kPa)"}
+  t_rest:     {value: 14.0e-3, source: "rest reading: the supplies are up by 1 ms and the slowest pole in the chain, C-AA-ADC's 282 us, has had ~45 time constants"}
+  t_p1:       {value: 15.0e-3, source: "the step to p_step starts"}
+  t_p1e:      {value: 15.01e-3, source: "a 10 us ramp: faster than the sensor's own 1.0 ms response [ds p.2], so it is the stage's step, not the sensor's"}
+  t_r1:       {value: 24.0e-3, source: "p_step reading"}
+  t_p2:       {value: 25.0e-3, source: "the step to p_full starts"}
+  t_p2e:      {value: 25.01e-3, source: "10 us ramp"}
+  t_r2:       {value: 34.0e-3, source: "p_full reading"}
+  t_end:      {value: 35.0e-3, source: "end of the run"}
+  t_max:      {value: 2.0e-6,  source: "transient step"}
+
+derived:
+  r_fb_eff: "v['r_fb'] if v['stage'] else 1.0e-3"
+  r_vs_eff: "v['r_vs'] if v['stage'] else 1.0e12"
+  r_gnd_eff: "v['r_gnd'] if v['stage'] else 1.0e12"
+  # the top of TRIM-BREATH-ZERO's range at its worst: the rail low, the track 10 % low, the
+  # range resistor 1 % high (fallback) - and the live range at its best, for the drop-in
+  ref_top_fb_min: "v['rail_lo'] * 0.9 * v['TRIM-BREATH-ZERO'] / (1.01 * v['r_zero_top_fb'] + 0.9 * v['TRIM-BREATH-ZERO'])"
+  ref_top_live_max: "v['rail_hi'] * 1.1 * v['TRIM-BREATH-ZERO'] / (0.99 * v['R-ZERO-TOP'] + 1.1 * v['TRIM-BREATH-ZERO'])"
+
+vary:
+  s_off: {tol: [-0.068, 0.068]}
+  r_fb:  {tol: [-0.001, 0.001]}
+  r_vs:  {tol: [-0.001, 0.001]}
+  r_gnd: {tol: [-0.001, 0.001]}
+
+sims:
+  - name: fallback
+    deck: fallback.cir
+    measures: [ped, adc0, vref_null, ina_rest, ina_28, fs, adc6, ina_6, slope, p_clip, ratio_dev, step_overshoot, step_settle]
+    post:
+      step_overshoot: "overshoot(w['vb'], p['t_p1'], p['t_p2'])"
+      step_settle: "settling(w['vb'], p['t_p1'], p['t_p2'], 0.001)"
+    asserts:
+      - expr: "abs(min['slope'] / fig['breath-sensor-slope'] - 1) < 0.005 and abs(max['slope'] / fig['breath-sensor-slope'] - 1) < 0.005"
+        why: "the stage's output slope is the MPXV4006DP's (breath-sensor-slope) within 0.5 % at every corner: the jack's span per kPa, the ADC's counts per kPa and the in-amp's full scale are kept"
+      - expr: "abs(min['ina_6'] / fig['inamp-full-scale'] - 1) < 0.01 and abs(max['ina_6'] / fig['inamp-full-scale'] - 1) < 0.01"
+        why: "after the zero is nulled, 6 kPa reaches inamp-full-scale within 1 % at every corner, the highest pedestal included - the INA828 is not clipped and nothing downstream of it moves"
+      - expr: "min['ped'] > 0.125"
+        why: "the lowest-offset sensor's pedestal stays above the OPA2197's 125 mV maximum swing to its negative rail at 10 kohm [ds datasheets/analog/OPA2197.pdf p.8]: no dead band at the bottom of the breath range at any corner"
+      - expr: "max['vref_null'] < p['ref_top_fb_min'] and min['vref_null'] > 0"
+        why: "TRIM-BREATH-ZERO with the fallback's R-ZERO-TOP reaches the null of the highest-offset sensor with the rail, the track and the range resistor all at their worst"
+      - expr: "abs(max['ina_rest']) < 1e-3 and abs(min['ina_rest']) < 1e-3"
+        why: "the null is reached (the deck's commissioning step works)"
+      - expr: "nom['p_clip'] > 6 and min['p_clip'] > 5.5"
+        why: "the ADC copy clips above the sensor's 6 kPa range for a nominal part. RECORDED: the highest-offset part clips it a little below 6 kPa (min p_clip); breath-working-point (E2) decides whether that matters"
+      - expr: "max['ratio_dev'] < 1e-3"
+        why: "the stage is ratiometric: its pedestal and slope per volt of VS do not move when VS does, because its offset is taken from VS itself"
+      - expr: "max['step_overshoot'] < 5 and max['step_settle'] < 1e-4"
+        why: "a 2.8 kPa step through the stage, into the ADC divider and the link, overshoots under 5 % and settles to 1 mV in under 100 us - a tenth of the sensor's own 1 ms response"
+  - name: drop-in
+    # the MPXV7007DP with nothing else changed: U-BUF B a follower, R-ZERO-TOP as netlisted
+    deck: fallback.cir
+    set: {stage: 0}
+    vary: [s_off]
+    measures: [ped, vref_null, ina_rest, ina_6, slope, p_clip]
+    asserts:
+      - expr: "min['vref_null'] > p['ref_top_live_max']"
+        why: "RECORDED: a drop-in cannot be commissioned - the live TRIM-BREATH-ZERO cannot reach the null of the 2.5 V pedestal at any corner, so the jack rests far from 0 V"
+      - expr: "abs(nom['slope'] / fig['breath-sensor-slope']) < 0.4"
+        why: "RECORDED: and the slope is 0.285 V/kPa, about 37 % of breath-sensor-slope - the jack span and the ADC's counts per kPa fall by the same factor"
