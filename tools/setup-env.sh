@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Install everything the body CAD and the schematic pipeline need, on Ubuntu 24.04.
+# Install everything the body CAD, the schematics, the layout and the sims need.
+# Written for Ubuntu 24.04; on another distribution it installs what it can and
+# says what it could not. Versions: tools/toolchain.yaml, tools/requirements.txt.
 #
 #   sudo bash tools/setup-env.sh          # or as root, e.g. from a cloud environment's setup script
 #
@@ -7,6 +9,15 @@
 # a fresh machine, most of it KiCad. docs/reference/tooling.md says what each
 # piece is for and how to use it.
 set -euo pipefail
+
+# The versions the committed outputs were made with: tools/toolchain.yaml (issue #9, G7).
+here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+pin() { awk -v k="$1:" '$1 == k {print $2}' "$here/toolchain.yaml"; }
+KICAD_MIN=$(pin kicad_min); NGSPICE_MAJOR=$(pin ngspice_major); OPENSCAD_WANT=$(pin openscad)
+# ver_ge A B: version A >= B
+ver_ge() { [ "$(printf '%s\n%s\n' "$2" "$1" | sort -V | head -1)" = "$2" ]; }
+. /etc/os-release
+warn=()
 
 need_apt=()
 have() { dpkg -s "$1" >/dev/null 2>&1; }
@@ -28,20 +39,29 @@ for p in openscad xvfb libxft2 poppler-utils librsvg2-bin python3-yaml python3-p
   have "$p" || need_apt+=("$p")
 done
 
-# --- circuit simulation (tools/sim.py): ngspice 42 from the Ubuntu archive. Raw
+# --- circuit simulation (tools/sim.py): ngspice from the distribution's archive
+# (Ubuntu 24.04's is the 42 every results.yaml records; tools/toolchain.yaml). Raw
 # decks through subprocess; not PySpice (hardware/module/pitch-stage/sim/README.md says why).
 have ngspice || need_apt+=(ngspice)
 
 # --- schematics (tools/sch.py): KiCad 9 from the KiCad project's own archive.
 # Ubuntu's own kicad is 7.0, whose command line has no ERC and whose file
 # format is older than the sheets this repository writes.
-if ! kicad-cli version 2>/dev/null | grep -q '^9\.'; then
+# The archive is a Launchpad PPA built for UBUNTU: on Debian (trixie ships 9.0.2) or
+# any other distribution it is the wrong source, so it is never added there.
+kicad_now=$(kicad-cli version 2>/dev/null || true)
+if [ "$ID" != ubuntu ] && ! printf '%s' "$kicad_now" | grep -q '^9\.'; then
+  echo "setup-env: $PRETTY_NAME - no KiCad 9 found, and the KiCad PPA is Ubuntu's. Install KiCad >= $KICAD_MIN" \
+       "from your distribution (Debian: trixie's 9.0.x, or backports) or the Flatpak (org.kicad.KiCad), then re-run." >&2
+elif [ "$ID" = ubuntu ] && printf '%s' "$kicad_now" | grep -q '^9\.' && ! ver_ge "$kicad_now" "$KICAD_MIN"; then
+  need_apt+=(kicad kicad-symbols kicad-footprints)        # an older 9.x: upgrade from the archive
+elif ! printf '%s' "$kicad_now" | grep -q '^9\.'; then
   if [ ! -f /etc/apt/sources.list.d/kicad-9.list ]; then
     key=$(curl -fsS https://api.launchpad.net/1.0/~kicad/+archive/ubuntu/kicad-9.0-releases \
           | python3 -c "import sys,json;print(json.load(sys.stdin)['signing_key_fingerprint'])")
     curl -fsS "https://keyserver.ubuntu.com/pks/lookup?op=get&options=mr&search=0x$key" \
       | gpg --dearmor > /etc/apt/trusted.gpg.d/kicad-9.gpg
-    echo "deb https://ppa.launchpadcontent.net/kicad/kicad-9.0-releases/ubuntu noble main" \
+    echo "deb https://ppa.launchpadcontent.net/kicad/kicad-9.0-releases/ubuntu ${VERSION_CODENAME:-noble} main" \
       > /etc/apt/sources.list.d/kicad-9.list
   fi
   need_apt+=(kicad kicad-symbols kicad-footprints)
@@ -114,11 +134,21 @@ fi
 # trimesh and numpy run the clash check; fontTools, shapely and ezdxf set the
 # module's panel artwork (tools/panel-art.py, with librsvg2-bin's rsvg-convert);
 # bpy - Blender as a Python module - renders its photographs (tools/render-module.py).
-python3 - <<'EOF' || pip install --break-system-packages -q pillow gmsh manifold3d trimesh numpy shapely fonttools ezdxf
-import PIL, gmsh, manifold3d, trimesh, numpy, shapely, fontTools, ezdxf
-EOF
-# OpenCASCADE's Python binding: tools/lib-models.py draws the woody footprints' 3D models.
-python3 -c "import OCP" 2>/dev/null || pip install --break-system-packages -q cadquery-ocp
-python3 -c "import bpy" 2>/dev/null || pip install --break-system-packages -q bpy
+# cadquery-ocp (OpenCASCADE's binding) for tools/lib-models.py. Versions pinned in
+# tools/requirements.txt (issue #9, G7); bpy apart, because Blender 5's wheels exist for
+# Python 3.11 only, so its failure is a warning rather than the end of the script.
+grep -v '^bpy' "$here/requirements.txt" > /tmp/woody-requirements.txt
+pip install --break-system-packages -q -r /tmp/woody-requirements.txt
+pip install --break-system-packages -q "$(awk '/^bpy/ {print $1}' "$here/requirements.txt")" \
+  || warn+=("bpy did not install for $(python3 --version) - tools/render-module.py (the module's photographs) will not run")
 
-echo "setup-env: OpenSCAD $(openscad --version 2>&1 | awk '{print $3}'), KiCad $(kicad-cli version)"
+# --- what is installed, against what the outputs were made with (tools/toolchain.yaml)
+kicad_now=$(kicad-cli version 2>/dev/null || echo none)
+ng_now=$(ngspice -v 2>&1 | sed -n 's/.*ngspice-\([0-9.]*\).*/\1/p' | head -1)
+scad_now=$(openscad --version 2>&1 | awk '{print $3}')
+{ [ "$kicad_now" != none ] && ver_ge "$kicad_now" "$KICAD_MIN"; } || warn+=("KiCad $kicad_now is below $KICAD_MIN, which made the fab outputs")
+[ "${ng_now%%.*}" = "$NGSPICE_MAJOR" ] || warn+=("ngspice $ng_now; every results.yaml was made with $NGSPICE_MAJOR - a re-run may move numbers")
+[ "$scad_now" = "$OPENSCAD_WANT" ] || warn+=("OpenSCAD $scad_now; the renders were made with $OPENSCAD_WANT")
+command -v java >/dev/null || warn+=("no Java, so no Freerouting: only 'route: freerouting' needs it, and no board uses it now (the main board routes astar)")
+echo "setup-env: $PRETTY_NAME | OpenSCAD $scad_now | KiCad $kicad_now | ngspice $ng_now"
+for w in "${warn[@]}"; do echo "setup-env: WARNING: $w" >&2; done
