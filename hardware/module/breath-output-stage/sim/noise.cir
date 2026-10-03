@@ -103,7 +103,7 @@ XB 0 sum pos neg out OPAx197
 ROUT out jack {{R-OUT-PROT}}
 COUT jack 0 {{C-OUT-BREATH}}
 RLOAD jack 0 {{r_load}}
-.model DRESP D(IS={{is_d}} N={{n_d}} RS={{rs_d}} CJO=1.5p)
+.model DRESP D(IS={{is_d}} N={{n_d}} RS={{rs_d}} CJO=1.5p EG={{eg_d}})
 .options method=gear rshunt=1e10 itl1=1000 itl2=1000 gminsteps=0
 .control
 * TI's models mark their bookkeeping resistors noiseless with PSpice's T_ABS=-273.15 on

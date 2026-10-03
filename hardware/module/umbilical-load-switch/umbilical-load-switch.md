@@ -272,6 +272,18 @@ upper bound, and the sims run both.
 > no netlist**: the instrument's input holds `C-STRIP-BULK` and `C-BUCK-IN`
 > (`carrier/power-entry-instrument`). The deck runs both. The amplifier's own
 > dynamics are the one thing the model assumed, so E6 decides.
+>
+> **On the circuit as built the `TIMER` does not move** (re-verified
+> 2026-10-03, #5 finding 3). `sim/` above has no cable and no `Q-INRUSH`
+> (`C-STRIP-BULK` straight on `OUT`), so it is now the case of `Q-INRUSH`
+> failed short. The sizing check runs where the real topology is,
+> [`carrier/power-entry-instrument/sim`](../../carrier/power-entry-instrument/sim/README.md)
+> (`timer_peak`, `R-ILIM` varied by its 1 %): the `TIMER` stays at 0 V on a cold
+> start, a hot-plug and a late replug at every corner, and reaches 4.2 mV on a
+> replug 30 ms after a pull; the assertion is under half of 1.233 V, the 2×
+> below. With `Q-INRUSH` shorted and the page's 2.2 mF, 66 mV at the worst
+> corner (`sim/`, `hot-plug-page-2m2`). The 47.5 ms below is that failed case's
+> bound, and 10 µF still covers it 2.01×.
 
 ### The two capacitors — **values set 2026-09-21, no longer blocked**
 

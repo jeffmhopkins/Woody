@@ -101,6 +101,7 @@ vary:
   vto_q:  {tol: [-0.4444, 0.4444], source: "Q-INRUSH's V_GS(th), -0.5 and -1.3 V about -0.9"}
   C-INRUSH-GD: {tol: [-0.3, 0.1], source: "X7R 10 %, and down to 30 % under at 6-12 V of bias [assumption: an 0805 X7R's DC-bias loss]; less capacitance is a faster ramp"}
   c_tvs:  {tol: [-0.7, 0.0], source: "300 pF at the standoff to 1000 pF at 0 V"}
+  R-ILIM: {tol: from-value, source: "its value field's 1 % (umbilical-load-switch netlist): the limit, V_SENSETRIP / R-ILIM, moves with it"}
   dvg:    {tol: [0.0, 2.3333], source: "dV_GATE from its 4.5 V minimum [LT1641.pdf p.2] to 15 V, where D-GATE-CLAMP holds V_GS (the pump's 18 V maximum is above it): the load switch's V_GS before a plug, which its limit has to pull back from"}
 
 sims:
@@ -108,11 +109,15 @@ sims:
     # the impedance at C-BUCK-IN: its peak against the buck's negative input resistance
     deck: pei-z.cir
     vary: [esr_buck, esr_strip, r_cable]
-    measures: [z_peak, f_peak, margin]
+    measures: [z_peak, f_peak, z_edge, margin]
+    # WINDOW EDGES (#5 minor): a maximum read on an AC sweep's first or last point is that
+    # end of the curve, not a resonance - *_edge says which (1 = the maximum IS an end
+    # point). The sweep reaches toward DC so that a peak below the old 100 Hz edge, or above the old 1 MHz one, shows.
     post:
-      z_peak: "peak(w['zmag'], 100, 1e6)"
-      f_peak: "argpeak(w['zmag'], 100, 1e6)"
-      margin: "p['r_neg'] / peak(w['zmag'], 100, 1e6)"
+      z_peak: "peak(w['zmag'], 1, 1e7)"
+      f_peak: "argpeak(w['zmag'], 1, 1e7)"
+      z_edge: "1.0 if argpeak(w['zmag'], 1, 1e7) in (w['zmag'][0][0], w['zmag'][0][-1]) else 0.0"
+      margin: "p['r_neg'] / peak(w['zmag'], 1, 1e7)"
     asserts:
       - expr: "min['margin'] > 20"
         why: "the input's impedance peak stays over 20x (26 dB) below the buck's -V^2/P = 103 ohm at every ESR and cable corner - the page's '120x, worst case' is on the page's own model; this one adds C-STRIP-BULK ahead of the LC and the cable behind it, and lets C-BUCK-IN's ESR fall below its datasheet maximum"
@@ -120,8 +125,8 @@ sims:
     # the rack powers up with the instrument plugged in
     deck: pei-start.cir
     set: {cold: 1}
-    vary: [igate, itup, t_iso, r_cable, vto_q]
-    measures: [latched, t_up, i_iso_peak, t_at_ocp, v_in_peak, v_buck_fallback, vcc_min]
+    vary: [igate, itup, t_iso, r_cable, vto_q, R-ILIM]
+    measures: [latched, t_up, i_iso_peak, t_at_ocp, v_in_peak, v_buck_fallback, vcc_min, timer_peak]
     post: &start_post
       latched: "peak(w['latch'], 0, p['t_end'])"
       t_up: "cross(w['vinst'], 0.9 * p['v_bus'], 0)"
@@ -136,6 +141,9 @@ sims:
       # 9.00 V at every corner - a sag from 11.4 V to 8.6 V would have passed)
       v_buck_fallback: "backswing(w['vinst'], p['v_on'] + 0.25, True, 0, p['t_end'])"
       v_pos12_peak: "peak(w['vpos12'], 0, p['t_end'])"
+      # the LT1641's fault timer: it ramps only while the current limit is active, and
+      # latches at 1.233 V [LT1641.pdf p.5] - the page's C-TIMER sizing, on this topology
+      timer_peak: "peak(w['timer'], 0, p['t_end'])"
     asserts: &start_asserts
       - expr: "max['latched'] < 0.5"
         why: "the start completes without the LT1641's fault latch at every corner"
@@ -145,14 +153,16 @@ sims:
         why: "once the buck is running its input never falls back towards its 8 V minimum: no start-stop chatter as the constant-power load comes on through the cable and the LC. It passed v_on + 0.25 V with the load fully on, so a fall-back under 0.25 V from any later maximum keeps it above v_on - strict: any sag at all after the start reads here"
       - expr: "max['v_in_peak'] < 15.0"
         why: "no overshoot at the instrument's input reaches D-TVS-PWR's 15 V standoff (SMAJ15A)"
+      - expr: "max['timer_peak'] < 0.5 * 1.233"
+        why: "C-TIMER-LOADSW's sizing (umbilical-load-switch.md, 'The two capacitors'): the fault TIMER rises under half its 1.233 V threshold at every corner, R-ILIM's 1 % and the fastest TIMER pull-up among them - the 2x the page asks of worst-case silicon, on the circuit as built (Q-INRUSH and the cable in)"
   - name: hot-plug
     # the module running, its FET enhanced with nothing on its output; the +12 V conductor
     # makes contact at t_plug. Q-INRUSH's corners (threshold, Miller capacitor, the TVS's
     # capacitance at J-UMB) on top of the LT1641's
     deck: pei-start.cir
     set: {cold: 0}
-    vary: [igate, vhi, r_cable, vto_q, C-INRUSH-GD, c_tvs]
-    measures: [latched, t_up, i_iso_peak, t_at_ocp, v_in_peak, v_buck_fallback, vcc_min, p_q_peak]
+    vary: [igate, vhi, r_cable, vto_q, C-INRUSH-GD, c_tvs, R-ILIM]
+    measures: [latched, t_up, i_iso_peak, t_at_ocp, v_in_peak, v_buck_fallback, vcc_min, p_q_peak, timer_peak]
     post:
       <<: *start_post
       p_q_peak: "peak(w['pq'], 0, p['t_end'])"
@@ -165,6 +175,8 @@ sims:
         why: "VCC at the load switch stays above the ON divider's worst-case turn-off, 9.90 V (umbilical-load-switch.md, 'The ON pin'), so the start is never interrupted by its own supply"
       - expr: "max['v_buck_fallback'] < 0.25 and max['v_in_peak'] < 15.0"
         why: "the buck's input never falls back towards its minimum once running, and the ring at J-UMB when the plug makes contact stays under D-TVS-PWR's 15 V standoff (R-INRUSH-GD damps it)"
+      - expr: "max['timer_peak'] < 0.5 * 1.233"
+        why: "the hot-plug sizing case: the fault TIMER rises under half its 1.233 V threshold at every corner, R-ILIM's 1 % among them"
       - expr: "max['p_q_peak'] < 3.0"
         why: "Q-INRUSH's dissipation during the ramp peaks under 3 W at every corner, a quarter of the AO3401A's single-pulse rating at 50 ms (~12 W, AOS-AO3401A.pdf p.4 Figure 10, read off the curve)"
   - name: replug-late
@@ -172,8 +184,8 @@ sims:
     # capacitors have drained and D-INRUSH-RST has reset the gate
     deck: pei-start.cir
     set: {cold: 0, t_un: 0.8, t_re: 1.0, t_end: 1.5}
-    vary: [r_cable, vto_q]
-    measures: [latched, i_iso_peak, t_at_ocp, vcc_min]
+    vary: [r_cable, vto_q, R-ILIM]
+    measures: [latched, i_iso_peak, t_at_ocp, vcc_min, timer_peak]
     post: *start_post
     asserts:
       - expr: "max['latched'] < 0.5 and max['i_iso_peak'] < 0.5 * p['i_ocp']"
@@ -182,8 +194,8 @@ sims:
     # the plug pulled at 0.8 s and put back 30 ms later, with the bulk half drained
     deck: pei-start.cir
     set: {cold: 0, t_un: 0.8, t_re: 0.83, t_end: 1.3}
-    vary: [r_cable, vto_q, igate, vhi, dvg]
-    measures: [latched, i_iso_peak, t_at_ocp, vcc_min]
+    vary: [r_cable, vto_q, igate, vhi, dvg, R-ILIM]
+    measures: [latched, i_iso_peak, t_at_ocp, vcc_min, timer_peak]
     post: *start_post
     asserts:
       - expr: "max['latched'] < 0.5 and min['vcc_min'] > 9.90"

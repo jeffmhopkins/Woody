@@ -456,7 +456,7 @@ CIC j7 ig {{c_inst}}
 .model D5817 D(Is={{d_is}} N={{d_n}} Rs={{d_rs}} Cjo=110p BV=20)
 .model DLTL D(Is={{led_is}} N={{led_n}} Rs={{led_rs}})
 .model DCLAMP D(Is={{is_d}} N={{n_d}} Rs={{rs_d}} Cjo=1.5p)
-.model DRESP D(IS={{is_d}} N={{n_d}} RS={{rs_d}} CJO=1.5p)
+.model DRESP D(IS={{is_d}} N={{n_d}} RS={{rs_d}} CJO=1.5p EG={{eg_d}})
 .model DTVSB D(Is=1e-14 Cjo={{cj_sig}} Vj={{tvs_vj}} M={{tvs_m}} BV={{tvs_bv}})
 .model DPAD D(Is=1e-14 N=1 Rs=1 Cjo=1p)
 .model QPASS NMOS(level=1 vto={{v_th}} kp={{kp}})

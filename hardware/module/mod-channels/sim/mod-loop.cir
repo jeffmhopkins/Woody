@@ -24,7 +24,9 @@ RMULT j1 0 {{r_mult}}
 LBRK m1 inm 1G
 CINJ inm inj 1G
 VINJ inj 0 DC 0 AC 1
-.options method=gear rshunt=1e10
+* gminsteps=100: at the rails 10.8 V / -12.6 V (loop-supply) the default gmin stepping found
+* no operating point; finer steps reach it (2026-10-03)
+.options method=gear rshunt=1e10 gminsteps=100
 .control
 ac dec 100 1 100meg
 let t = -v(m1)/v(inm)

@@ -4,7 +4,7 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/breath-receive-stage/sim/sims.yaml: 5be525e753cc5d3d
+  hardware/module/breath-receive-stage/sim/sims.yaml: 2acb3e622f585a56
   hardware/interfaces/breath-sense-link/netlist.yaml: 430f1e37ec9c97fa
   hardware/module/breath-receive-stage/netlist.yaml: 3db924b303628921
   hardware/module/breath-receive-stage/sim/cmrr.cir: 0c582bd5096fd228
@@ -51,6 +51,12 @@ sims:
         min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5-
         max: 14595.5
         max_at: C-CM-IN++ C-CM-IN-+ R1- R1b- R2- R3- R4+ R5-
+      cmrr_band:
+        nominal: 107.154
+        min: 58.4729
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5-
+        max: 107.165
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5-
     asserts:
     - expr: min['cmrr_50'] > 58.5 and min['cmrr_60'] > 58.5
       why: the link clears the page's requirement (breath-sense-link.md, 58.5 dB) at the mains fundamental, worst corner
@@ -59,10 +65,12 @@ sims:
       why: the worst-case floor is the page's 73 dB, set by the 1 Mohm bias pair's 1 % (breath-sense-link.md, 'One correction'),
         within 3 dB
       pass: true
-    - expr: min['f_req'] < 1000
-      why: 'RECORDED FINDING: at the worst corner the requirement is lost below 1 kHz - C_cm''s +-1 % mismatch rises with
-        frequency. The page states no band for its 58.5 dB; this is the frequency that band must stay under'
-      pass: true
+    - expr: min['cmrr_band'] > 58.5
+      why: 'THE REQUIREMENT OVER ITS BAND (#5 finding 5): 58.5 dB from DC to 500 Hz, the breath channel''s band (breath-sense-link.md,
+        ''From the instrument end''), at every corner. FAILS at the worst corner from ~480 Hz (f_req) to the band''s edge:
+        C_cm''s +-1 % mismatch converts common mode in proportion to frequency. Not moved to make it pass - the owner decides
+        between a tighter C_cm match and accepting the band''s top ~20 Hz'
+      pass: false
   cmrr-without-r1b:
     corners: 129
     measures:
@@ -119,4 +127,67 @@ sims:
     asserts:
     - expr: abs(min['cmrr_500'] - 46) < 3
       why: the page's '~46 dB' for C_cm at +-5 % reproduces at 500 Hz, the breath channel's edge (the page names no frequency)
+      pass: true
+  cmrr-supply-low:
+    corners: 1
+    measures:
+      cmrr_dc:
+        nominal: 114.952
+        min: 114.952
+        min_at: nominal
+        max: 114.952
+        max_at: nominal
+      cmrr_50:
+        nominal: 114.809
+        min: 114.809
+        min_at: nominal
+        max: 114.809
+        max_at: nominal
+      cmrr_60:
+        nominal: 114.747
+        min: 114.747
+        min_at: nominal
+        max: 114.747
+        max_at: nominal
+      cmrr_500:
+        nominal: 106.702
+        min: 106.702
+        min_at: nominal
+        max: 106.702
+        max_at: nominal
+    asserts:
+    - expr: nom['cmrr_60'] > 58.5 and nom['cmrr_500'] > 58.5
+      why: 'with both rails at 10.8 V the link still clears 58.5 dB at mains and at the band''s 500 Hz edge, at the parts''
+        nominal: the INA828''s supply is not what limits it (the tolerances are, cmrr-as-netlisted)'
+      pass: true
+  cmrr-supply-high:
+    corners: 1
+    measures:
+      cmrr_dc:
+        nominal: 114.952
+        min: 114.952
+        min_at: nominal
+        max: 114.952
+        max_at: nominal
+      cmrr_50:
+        nominal: 114.809
+        min: 114.809
+        min_at: nominal
+        max: 114.809
+        max_at: nominal
+      cmrr_60:
+        nominal: 114.747
+        min: 114.747
+        min_at: nominal
+        max: 114.747
+        max_at: nominal
+      cmrr_500:
+        nominal: 106.702
+        min: 106.702
+        min_at: nominal
+        max: 106.702
+        max_at: nominal
+    asserts:
+    - expr: nom['cmrr_60'] > 58.5 and nom['cmrr_500'] > 58.5
+      why: and with both at 12.6 V
       pass: true

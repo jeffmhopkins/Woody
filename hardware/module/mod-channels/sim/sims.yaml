@@ -46,6 +46,8 @@ vary:
   R1-1:  {tol: from-value}
   R2-1:  {tol: from-value}
   C-FILT-MOD-1: {tol: [-0.05, 0.05], source: "C0G +/-5 % [assumption: the netlist value states none]"}
+  v_pos: {tol: [-0.1, 0.05], source: "the analog +12 V from 10.8 V (a tripped PTC-POS12 and D1) to 12.6 V (the bus maximum), as module/power-entry/sim's v_in_dac and pitch-stage/sim; only the *-supply sims name it (#5 finding 6)"}
+  v_neg: {tol: [-0.1, 0.05], source: "the analog -12 V, -10.8 to -12.6 V"}
 
 sims:
   - name: range
@@ -155,3 +157,40 @@ sims:
     asserts:
       - expr: "abs(nom['iref'] - 1.333e-3) < 0.02e-3"
         why: "the page's 1.33 mA into four 10 kohm with every channel at code 0 (its (-) inputs at 0 V)"
+  # --- #5 finding 6: the rails at their ends, 10.8 to 12.6 V each way, not +-12.000 V.
+  # Each sim below is one above with only the rails varied, so what moves is the supply's
+  - name: range-supply
+    deck: mod.cir
+    set: {v_a0: 0.0, v_a1: 4.99992, t_step: 1.0e-3, t_end: 2.0e-3, t_stepsize: 1.0e-6}
+    vary: [v_pos, v_neg]
+    measures: [out_lo, out_hi, law_err_lo, law_err_hi]
+    post:
+      out_lo: "at(w['o1'], 0.95e-3)"
+      out_hi: "at(w['o1'], 1.95e-3)"
+      law_err_lo: "at(w['o1'], 0.95e-3) - (-p['k1'] * p['v_ref7'])"
+      law_err_hi: "at(w['o1'], 1.95e-3) - ((1 + p['k1']) * p['v_full'] - p['k1'] * p['v_ref7'])"
+    asserts:
+      - expr: "max['law_err_lo'] < 0.01 and min['law_err_lo'] > -0.01 and max['law_err_hi'] < 0.01 and min['law_err_hi'] > -0.01"
+        why: "the +-10 V range still follows the page's law within 10 mV at both ends with the rails at 10.8 V: neither end clips, and the rails' level does not reach the output"
+  - name: step-supply
+    deck: mod.cir
+    set: {v_a0: 2.5, v_a1: 2.75, t_end: 3.0e-3}
+    vary: [v_pos, v_neg]
+    measures: [overshoot_pct, t_settle]
+    post:
+      overshoot_pct: "overshoot(w['j1'], p['t_step'], p['t_end'])"
+      t_settle: "settling(w['j1'], p['t_step'], p['t_end'], 0.01)"
+    asserts:
+      - expr: "max['overshoot_pct'] < 1"
+        why: "a step into a VCO is an RC charge with no overshoot at every rail corner"
+  - name: loop-supply
+    deck: mod-loop.cir
+    set: {v_a0: 2.5}
+    vary: [v_pos, v_neg]
+    measures: [pm, fc]
+    post:
+      pm: "phase_margin(w['tdb'], w['tph'])"
+      fc: "crossover(w['tdb'])"
+    asserts:
+      - expr: "min['pm'] - 10 > 45"
+        why: "the phase margin clears 45 degrees after the screen at every rail corner"

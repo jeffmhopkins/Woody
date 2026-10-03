@@ -4,9 +4,9 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/breath-response-shaper/sim/sims.yaml: fc02a3ddd36b774a
+  hardware/module/breath-response-shaper/sim/sims.yaml: befba7f85cb5cd25
   hardware/module/breath-response-shaper/netlist.yaml: 3f6549b620f9e912
-  hardware/module/breath-response-shaper/sim/shaper.cir: 943e2328af022d74
+  hardware/module/breath-response-shaper/sim/shaper.cir: b9ddbd40af4ca648
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
   figure:inamp-full-scale: -9.94 V
 ngspice: '42'
@@ -15,120 +15,120 @@ sims:
     corners: 3
     measures:
       g_pp:
-        nominal: 0.834706
-        min: 0.789619
+        nominal: 0.820693
+        min: 0.775787
         min_at: is_d+
-        max: 0.878313
+        max: 0.864356
         max_at: is_d-
       g_mp:
-        nominal: 0.588785
-        min: 0.574322
+        nominal: 0.585159
+        min: 0.570881
         min_at: is_d+
-        max: 0.604007
+        max: 0.600117
         max_at: is_d-
       g_mf:
-        nominal: 0.529056
-        min: 0.522707
+        nominal: 0.527599
+        min: 0.521327
         min_at: is_d+
-        max: 0.535781
+        max: 0.534193
         max_at: is_d-
       g_hard:
-        nominal: 0.490068
-        min: 0.488924
+        nominal: 0.48989
+        min: 0.48876
         min_at: is_d+
-        max: 0.491319
+        max: 0.491089
         max_at: is_d-
       g_full:
-        nominal: 0.421434
-        min: 0.413357
+        nominal: 0.423193
+        min: 0.415184
         min_at: is_d-
-        max: 0.429141
+        max: 0.43082
         max_at: is_d+
       i_hard:
-        nominal: 0.000118303
-        min: 0.000118013
+        nominal: 0.000118344
+        min: 0.000118066
         min_at: is_d-
-        max: 0.000118568
+        max: 0.000118606
         max_at: is_d+
       i_full:
-        nominal: 0.000287517
-        min: 0.000283687
+        nominal: 0.000286643
+        min: 0.000282852
         min_at: is_d+
-        max: 0.000291531
+        max: 0.000290623
         max_at: is_d-
     asserts: []
   curve[p_resp=0.5]:
     corners: 3
     measures:
       g_pp:
-        nominal: 0.999799
-        min: 0.999561
+        nominal: 0.999689
+        min: 0.99928
         min_at: is_d+
-        max: 0.999882
+        max: 0.99984
         max_at: is_d-
       g_mp:
-        nominal: 0.999722
-        min: 0.999266
+        nominal: 0.999533
+        min: 0.998811
         min_at: is_d+
-        max: 0.999884
+        max: 0.99981
         max_at: is_d-
       g_mf:
-        nominal: 0.999518
-        min: 0.998727
+        nominal: 0.999212
+        min: 0.998059
         min_at: is_d+
-        max: 0.999817
+        max: 0.999691
         max_at: is_d-
       g_hard:
-        nominal: 0.999004
-        min: 0.997583
+        nominal: 0.998485
+        min: 0.996641
         min_at: is_d+
-        max: 0.999624
+        max: 0.999385
         max_at: is_d-
       g_full:
-        nominal: 0.991101
-        min: 0.988243
+        nominal: 0.990152
+        min: 0.98728
         min_at: is_d+
-        max: 0.993766
+        max: 0.992854
         max_at: is_d-
       i_hard:
-        nominal: 2.2731e-07
-        min: 8.35474e-08
+        nominal: 3.47831e-07
+        min: 1.38976e-07
         min_at: is_d-
-        max: 5.57007e-07
+        max: 7.75576e-07
         max_at: is_d+
       i_full:
-        nominal: 4.41819e-06
-        min: 3.09417e-06
+        nominal: 4.89028e-06
+        min: 3.54716e-06
         min_at: is_d-
-        max: 5.83878e-06
+        max: 6.31738e-06
         max_at: is_d+
     asserts: []
   curve[p_resp=1.0]:
     corners: 3
     measures:
       g_pp:
-        nominal: 1.10541
-        min: 1.06142
+        nominal: 1.12187
+        min: 1.07562
         min_at: is_d-
-        max: 1.15751
+        max: 1.17489
         max_at: is_d+
       g_mp:
-        nominal: 1.41548
-        min: 1.39433
+        nominal: 1.42045
+        min: 1.39977
         min_at: is_d-
-        max: 1.43524
+        max: 1.43987
         max_at: is_d+
       g_mf:
-        nominal: 1.49914
-        min: 1.49061
+        nominal: 1.50093
+        min: 1.49262
         min_at: is_d-
-        max: 1.50703
+        max: 1.50869
         max_at: is_d+
       g_hard:
-        nominal: 1.55433
-        min: 1.55413
+        nominal: 1.55422
+        min: 1.55408
         min_at: is_d-
-        max: 1.55444
+        max: 1.55433
         max_at: is_d+
       g_full:
         nominal: 1.20215
@@ -137,50 +137,50 @@ sims:
         max: 1.20216
         max_at: is_d+
       i_hard:
-        nominal: 0.000128611
-        min: 0.000128566
+        nominal: 0.000128586
+        min: 0.000128553
         min_at: is_d-
-        max: 0.000128638
+        max: 0.000128612
         max_at: is_d+
       i_full:
-        nominal: 0.000324117
-        min: 0.000317512
+        nominal: 0.000322619
+        min: 0.000316109
         min_at: is_d+
-        max: 0.000331187
+        max: 0.000329596
         max_at: is_d-
     asserts: []
   centre:
     corners: 33
     measures:
       g_hard:
-        nominal: 0.999004
-        min: 0.977869
+        nominal: 0.998485
+        min: 0.976945
         min_at: R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- is_d+
-        max: 1.01981
+        max: 1.01956
         max_at: R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ is_d-
       g_full:
-        nominal: 0.991101
-        min: 0.968586
+        nominal: 0.990152
+        min: 0.967612
         min_at: R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- is_d+
-        max: 1.01377
+        max: 1.01286
         max_at: R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ is_d-
       lin_hard_pct:
-        nominal: -0.0514591
-        min: -0.274493
+        nominal: -0.0936561
+        min: -0.362127
         min_at: R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN- R-RESTORE-FB- is_d+
-        max: 0.0164926
+        max: 0.00371118
         max_at: R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN+ R-RESTORE-FB+ is_d-
       lin_full_pct:
-        nominal: -0.84209
-        min: -1.41852
+        nominal: -0.92744
+        min: -1.48829
         min_at: R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN- R-RESTORE-FB- is_d+
-        max: -0.352655
+        max: -0.429795
         max_at: R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN+ R-RESTORE-FB+ is_d-
       wiper_full:
-        nominal: 0.367437
-        min: 0.317758
+        nominal: 0.358424
+        min: 0.308749
         min_at: R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN+ R-RESTORE-FB- is_d+
-        max: 0.417399
+        max: 0.408318
         max_at: R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN- R-RESTORE-FB+ is_d-
     asserts:
     - expr: min['g_hard'] > 0.97 and max['g_hard'] < 1.03
@@ -195,34 +195,34 @@ sims:
     corners: 257
     measures:
       g_set:
-        nominal: 1.54996
+        nominal: 1.54997
         min: 1.54985
-        min_at: POT-RESP- R-RESP- R-RESP-DIV-HI+ R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB- TRIM-RESP+ is_d-
-        max: 1.55016
+        min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO+ R-RESP-IN+ R-RESTORE-FB- TRIM-RESP+ is_d-
+        max: 1.55015
         max_at: POT-RESP- R-RESP- R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP+ is_d-
       r_set:
-        nominal: 2587.09
-        min: 766.516
-        min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP- is_d-
-        max: 4313.39
-        max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP+ is_d+
+        nominal: 2664.43
+        min: 841.14
+        min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP+ is_d-
+        max: 4394.9
+        max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP- is_d+
       g_cold:
-        nominal: 1.53669
-        min: 1.53447
-        min_at: POT-RESP- R-RESP- R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP- is_d+
-        max: 1.53844
-        max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP- is_d-
+        nominal: 1.53721
+        min: 1.53506
+        min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP+ is_d+
+        max: 1.539
+        max_at: POT-RESP+ R-RESP+ R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP+ is_d-
       g_hard:
-        nominal: 1.57217
-        min: 1.5693
-        min_at: POT-RESP+ R-RESP+ R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP- is_d-
-        max: 1.57586
-        max_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP- is_d+
+        nominal: 1.57132
+        min: 1.56849
+        min_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP+ is_d-
+        max: 1.57496
+        max_at: POT-RESP- R-RESP- R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP- is_d+
       clip_in:
-        nominal: -7.28244
-        min: -7.34923
-        min_at: POT-RESP+ R-RESP+ R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP+ is_d+
-        max: -7.19426
+        nominal: -7.29404
+        min: -7.3593
+        min_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP- is_d+
+        max: -7.20785
         max_at: POT-RESP- R-RESP- R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP+ is_d-
     asserts:
     - expr: min['g_set'] > p['g_trim'] - 0.003 and max['g_set'] < p['g_trim'] + 0.003
@@ -242,35 +242,35 @@ sims:
     corners: 257
     measures:
       g_set:
-        nominal: 1.5501
+        nominal: 1.54995
         min: 1.54986
-        min_at: POT-RESP+ R-RESP- R-RESP-DIV-HI+ R-RESP-DIV-LO+ R-RESP-IN+ R-RESTORE-FB- TRIM-RESP+ is_d-
-        max: 1.55013
-        max_at: POT-RESP- R-RESP+ R-RESP-DIV-HI- R-RESP-DIV-LO- R-RESP-IN- R-RESTORE-FB- TRIM-RESP+ is_d+
+        min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI- R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP+ is_d+
+        max: 1.55015
+        max_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP+ is_d-
       r_set:
-        nominal: 2852.95
-        min: 1005.8
-        min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP- is_d-
-        max: 4616.78
-        max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP- is_d+
+        nominal: 2925.46
+        min: 1069.79
+        min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP+ is_d-
+        max: 4690.93
+        max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP+ is_d+
       g_cold:
-        nominal: 1.52412
-        min: 1.51978
-        min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP+ is_d+
-        max: 1.52735
+        nominal: 1.52496
+        min: 1.52093
+        min_at: POT-RESP- R-RESP- R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP- is_d+
+        max: 1.52829
         max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP- is_d-
       g_hard:
-        nominal: 1.5588
-        min: 1.55758
-        min_at: POT-RESP+ R-RESP+ R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP- is_d-
-        max: 1.56016
+        nominal: 1.55832
+        min: 1.55728
+        min_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO- R-RESP-IN- R-RESTORE-FB+ TRIM-RESP+ is_d-
+        max: 1.5598
         max_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP- is_d+
       clip_in:
-        nominal: -7.34571
-        min: -7.41046
-        min_at: POT-RESP+ R-RESP+ R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP+ is_d+
-        max: -7.26248
-        max_at: POT-RESP- R-RESP- R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP- is_d-
+        nominal: -7.35574
+        min: -7.41872
+        min_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-IN- R-RESTORE-FB+ TRIM-RESP+ is_d+
+        max: -7.27312
+        max_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-IN+ R-RESTORE-FB- TRIM-RESP+ is_d-
     asserts:
     - expr: min['g_set'] > p['g_trim'] - 0.003 and max['g_set'] < p['g_trim'] + 0.003
       why: 'every corner CAN be trimmed to the target, from both sides: the bisection reached g_trim within 0.003 everywhere,
@@ -289,34 +289,34 @@ sims:
     corners: 513
     measures:
       g_pp:
-        nominal: 1.08337
-        min: 0.987792
+        nominal: 1.10245
+        min: 0.998416
         min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ is_d-
-        max: 1.21452
+        max: 1.23911
         max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- is_d+
       g_cold:
-        nominal: 1.69274
-        min: 1.54909
+        nominal: 1.69802
+        min: 1.55432
         min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ is_d-
-        max: 1.82992
+        max: 1.83532
         max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- is_d+
       g_hard:
-        nominal: 1.7097
-        min: 1.5642
+        nominal: 1.71441
+        min: 1.56889
         min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ is_d-
-        max: 1.84884
+        max: 1.85363
         max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- is_d+
       out_min:
         nominal: -11.9499
         min: -11.95
-        min_at: POT-RESP- R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN+ is_d+
+        min_at: POT-RESP- R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO- R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN+ is_d+
         max: -11.9497
-        max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO- R-RESP-FB+ R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ is_d-
+        max_at: POT-RESP- R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO- R-RESP-FB+ R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN- is_d-
       clip_in:
-        nominal: -6.65757
-        min: -7.17529
+        nominal: -6.64759
+        min: -7.16483
         min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ is_d-
-        max: -6.22759
+        max: -6.21785
         max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- is_d+
     asserts:
     - expr: min['g_hard'] >= p['g_trim']
@@ -334,34 +334,34 @@ sims:
     corners: 513
     measures:
       g_pp:
-        nominal: 1.17028
-        min: 1.03611
+        nominal: 1.19147
+        min: 1.05218
         min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ is_d-
-        max: 1.33263
+        max: 1.35651
         max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- is_d+
       g_cold:
-        nominal: 1.69274
-        min: 1.54909
+        nominal: 1.69802
+        min: 1.55432
         min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ is_d-
-        max: 1.82992
+        max: 1.83532
         max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- is_d+
       g_hard:
-        nominal: 1.7381
-        min: 1.58949
+        nominal: 1.74184
+        min: 1.59329
         min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ is_d-
-        max: 1.8805
+        max: 1.88428
         max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- is_d+
       out_min:
         nominal: -11.9499
         min: -11.95
-        min_at: POT-RESP- R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB+ R-RESTORE-IN+ is_d-
+        min_at: POT-RESP- R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN+ is_d-
         max: -11.9497
-        max_at: POT-RESP- R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN- R-RESTORE-FB- R-RESTORE-IN- is_d-
+        max_at: POT-RESP- R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN- is_d+
       clip_in:
-        nominal: -6.592
-        min: -7.11305
+        nominal: -6.58433
+        min: -7.10494
         min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ is_d-
-        max: -6.15848
+        max: -6.151
         max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- is_d+
     asserts:
     - expr: min['g_hard'] >= p['g_trim']
@@ -379,27 +379,27 @@ sims:
     corners: 1025
     measures:
       g_pp:
-        nominal: 1.08402
-        min: 0.998849
+        nominal: 1.09559
+        min: 1.00756
         min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ TRIM-RESP+
           is_d-
-        max: 1.18611
+        max: 1.19968
         max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- TRIM-RESP-
           is_d+
       g_hard:
-        nominal: 1.33895
-        min: 1.23769
+        nominal: 1.34124
+        min: 1.23989
         min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ TRIM-RESP+
           is_d-
-        max: 1.44526
+        max: 1.44769
         max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- TRIM-RESP-
           is_d+
       clip_in:
-        nominal: -8.587
-        min: -9.23375
+        nominal: -8.58081
+        min: -9.22748
         min_at: POT-RESP- R-RESP+ R-RESP-DIV-HI+ R-RESP-DIV-LO- R-RESP-FB- R-RESP-IN+ R-RESTORE-FB- R-RESTORE-IN+ TRIM-RESP+
           is_d-
-        max: -8.00079
+        max: -7.99456
         max_at: POT-RESP+ R-RESP- R-RESP-DIV-HI- R-RESP-DIV-LO+ R-RESP-FB+ R-RESP-IN- R-RESTORE-FB+ R-RESTORE-IN- TRIM-RESP-
           is_d+
     asserts:
@@ -409,4 +409,64 @@ sims:
     - expr: min['g_hard'] > 1.0
       why: 'FAIL-SAFE: an open wiper is this end - the whole track in series - and still an expansive curve, gentler than
         trimmed, never a runaway'
+      pass: true
+  curve-supply[p_resp=0.0]:
+    corners: 5
+    measures:
+      g_hard:
+        nominal: 0.48989
+        min: 0.48989
+        min_at: v_neg+ v_pos-
+        max: 0.489891
+        max_at: v_neg- v_pos+
+      g_full:
+        nominal: 0.423193
+        min: 0.423193
+        min_at: v_neg+ v_pos-
+        max: 0.423193
+        max_at: v_neg- v_pos+
+    asserts:
+    - expr: max['g_hard'] - min['g_hard'] < 0.01 * nom['g_hard']
+      why: 'the rails move the curve at a hard blow by under 1 % at POT-RESP''s ends and centre: the shaper''s diode and its
+        divider do not see the supply'
+      pass: true
+  curve-supply[p_resp=0.5]:
+    corners: 5
+    measures:
+      g_hard:
+        nominal: 0.998485
+        min: 0.998485
+        min_at: v_neg- v_pos+
+        max: 0.998485
+        max_at: v_neg+ v_pos-
+      g_full:
+        nominal: 0.990152
+        min: 0.990152
+        min_at: v_neg- v_pos+
+        max: 0.990152
+        max_at: v_neg+ v_pos-
+    asserts:
+    - expr: max['g_hard'] - min['g_hard'] < 0.01 * nom['g_hard']
+      why: 'the rails move the curve at a hard blow by under 1 % at POT-RESP''s ends and centre: the shaper''s diode and its
+        divider do not see the supply'
+      pass: true
+  curve-supply[p_resp=1.0]:
+    corners: 5
+    measures:
+      g_hard:
+        nominal: 1.55422
+        min: 1.55422
+        min_at: v_neg- v_pos+
+        max: 1.55422
+        max_at: v_neg+ v_pos-
+      g_full:
+        nominal: 1.20215
+        min: 1.0816
+        min_at: v_neg- v_pos+
+        max: 1.26243
+        max_at: v_neg+ v_pos-
+    asserts:
+    - expr: max['g_hard'] - min['g_hard'] < 0.01 * nom['g_hard']
+      why: 'the rails move the curve at a hard blow by under 1 % at POT-RESP''s ends and centre: the shaper''s diode and its
+        divider do not see the supply'
       pass: true

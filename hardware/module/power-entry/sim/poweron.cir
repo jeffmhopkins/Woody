@@ -14,7 +14,8 @@
 * at 0 V (uic): that is what a power-on is.
 VP12 bp12 0 PWL(0 0 {{t_pos0}} 0 {{t_pos_end}} {{v_bus}})
 VN12 bn12 0 PWL(0 0 {{t_neg0}} 0 {{t_neg_end}} {{v_bus_neg}})
-* PTC-POS12 / PTC-NEG12 at their largest resistance (r_ptc), ahead of D1 / D3 (ADR 0027)
+* PTC-POS12 / PTC-NEG12 at a fitted part's MINIMUM resistance, 0.40 ohm (r_ptc), ahead of
+* D1 / D3 (ADR 0027); ptc-tripped sets r_ptc to R1max, the most a part reads after a trip
 RPTC1 bp12 bp12f {{r_ptc}}
 RPTC3 bn12 bn12f {{r_ptc}}
 * D1: bus +12 -> module +12 (A at the bus, as netlisted)
@@ -36,7 +37,8 @@ XREG p12 avdd set 0 LT3042B
 RSET set 0 {{R-SET-DAC}}
 CSET set 0 {{C-SET-DAC}}
 CREG avdd 0 {{C-REG-OUT}}
-RDAC avdd 0 {{r_dac}}
+* DAC_AVDD's whole load (r_dac_load, as dac-rail-spread): the DAC and what else the rail feeds
+RDAC avdd 0 {{r_dac_load}}
 * the pitch stage on those rails
 VREFO vrefout 0 0
 XRB vrefout vrefb p12 n12 vrefb OPAx197

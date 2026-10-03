@@ -310,14 +310,38 @@ against the real patch because the 1 kΩ divided against it. That error is gone.
 
 **Two new bounds to check at E9**, both created by the tap:
 
-- **It does not oscillate; it rings.** `Q = √(R_eff·C_load / R2·C_fb)`. Safe to
-  about 10 nF, but joining PITCH to the MOD (82 nF) or BREATH (330 nF) jacks
+- **It does not oscillate; it rings.** `Q = √(R_eff·C_load / R2·C_fb)`. An
+  octave step into a VCO stays **under 5 % overshoot with up to 2.2 nF on the
+  jack beyond `C-FILT-PITCH`**, at every corner (4.8 % at the worst;
+  `sim/`, `step-vco`). Past that it rings: 6.2 % at 4.7 nF (5.0–7.5 % across
+  the corners), 11 % at 10 nF and 20 % at 22 nF at the nominal (`step-vco-heavy`) —
+  a destination with its own input capacitor, or a long run, is where this
+  bites. The phase margin stays at 69° throughout, so the loop analysis
+  cannot see it; this bound is the step's. (It said "safe to about 10 nF"
+  until #5 finding 1 ran it.) Joining PITCH to the MOD (82 nF) or BREATH (330 nF) jacks
   through a passive mult gives the overshoot in `pitch-mult-overshoot`
   (simulated, `sim/`) — several semitones of transient on every note. That failure mode did not exist with op-amp-side
   feedback.
 - **With the jack shorted, DC feedback is exactly zero** and the amp rails. A
   3.5 mm plug shorts tip to sleeve on every insertion, so every patch-in is a
-  brief rail excursion recovering through the loop.
+  brief rail excursion recovering through the loop. Simulated (`sim/`,
+  `short`, `D-JACK-CLAMP` in): released, the jack is back within a cent in
+  under 0.2 ms at every corner and rail; on the way it swings past its note
+  by several volts (to about −8 V from a −2 V note, +10.4 V from +7 V) — a
+  click, not a held wrong note. `R-OUT-PROT` carries 0.15 W at most while
+  shorted.
+- **Patched to another output, the loop fights it** (#5 finding 6). Tapped at
+  the jack, the DC loop drives the op-amp to the rail opposite whatever is
+  forcing the jack, and `R-OUT-PROT` carries the difference. Simulated
+  (`sim/`, `patch`, the other output at either rail): **against a stiff
+  output, 0.53 W at ±12 V and 0.59 W at the worst corner** (12.6 V rails,
+  `R-OUT-PROT` at −1 %) — **over the ≥500 mW the part is specified at**;
+  through 220 Ω, 0.36 W and 0.40 W. The op-amp sinks or sources 24 mA, under
+  its 65 mA limit, and `D-JACK-CLAMP` never conducts (its output stays inside
+  the rails). **The part change is the owner's**: the assertion fails until
+  then. The mod channels share the part and the arithmetic, from the other
+  side: their output at −10 V against a stiff +12.6 V is
+  `(12.6 + 10)² / 1 kΩ` = 0.51 W `[calc]`.
 
 ## What limits accuracy, in order
 

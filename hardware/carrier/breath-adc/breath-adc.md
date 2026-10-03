@@ -95,6 +95,20 @@ attenuation at the R-78E5.0's ~330 kHz switching rate = 20·log10(330k/564) = 55
 > the LDO's unpublished rejection at 330 kHz as −20 dB), **does not meet the
 > 2 LSB E9 budget below**: 14.6 LSB at full scale nominal. The bench decides;
 > `sim/README.md` says what to measure.
+>
+> **Proposed, for the owner (2026-10-03, #12 item 3), not on the sheet:**
+> 10 Ω in series from the ribbon's `DEV_3V3` to `U-ADC`'s `VDD`, ahead of
+> `C-ADC-BULK` and `C-DEC-ADC`, with 22 µF added at the pin. Simulated on the
+> same pessimistic model (`sim/`, `vdd-ripple-proposed`): **0.03 LSB nominal,
+> 0.22 LSB at the worst corner**, against the 2 LSB budget. The resistor's
+> cost is the MCP3202's own current, which on `VDD` = `VREF` is a reference
+> error inside each conversion: 550 µA (its 5 V maximum) through 10 Ω alone
+> sags the pin 1.4–2.1 LSB within a conversion, which is why the 22 µF is part
+> of it — with it, under 0.51 LSB at every corner (`vdd-load-proposed`; as
+> netlisted, 0.11). Its DC drop is 0.4 mV, a gain term inside `DEV_3V3`'s own
+> tolerance. The ME6217's rejection above 1 kHz is still unpublished (three
+> copies of its sheet checked, 2026-10-03; none has a curve), so the
+> −20 dB model, not a datasheet, is what this beats.
 
 > **τ = 282 µs exceeds the 250 µs loop period, and the note-on threshold is read
 > through it.** About 5.6 % of the 5 ms budget. It is booked as its own row,

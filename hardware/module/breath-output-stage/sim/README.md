@@ -20,9 +20,10 @@ OPA2197 model. `DAC_AVDD` is `dac-rail`, cited, varied over the C grade's
 | `clip` | offset +5 V, gain 4×, a hard blow | stops at **+11.89 V** on the deck's ideal +12.0 V rail: a hard wall, as the page says. Its "about ±11.5 V" is the same clip on the module's rails less their Schottky drops |
 | `step-mult`, `loop` | a hard-blow step and the summer's loop, into a module input and passive mults to the PITCH and a MOD jack | no overshoot (under 0.03 %) at any load; phase margin 95.6° at every load |
 | `rail` | the −12 V rail's movement, through `R-BREATH-OFFNEG` | 0.418 V/V: **4.05 mV at the jack** for ADR 0027's 9.7 mV, the page's 4.1 mV |
-| `chain-centre` | the response shaper and this stage together, `POT-RESP` at its click, GAIN at noon, OFFSET at its zero | a hard blow reaches **9.99 V**; `BREATH_OUT` clips from an in-amp output of −5.54 V, 1.19× a hard blow |
+| `chain-centre` | the response shaper and this stage together, `POT-RESP` at its click, GAIN at noon, OFFSET at its zero | a hard blow reaches **9.96 V**; `BREATH_OUT` clips from an in-amp output of −5.56 V, 1.20× a hard blow |
 | `chain[p_resp=…]`, `chain-trim` | the same with GAIN left at noon and the curve knob at CCW, ¼, centre, ¾ and CW; and at CW with `TRIM-RESP` at its ends | see below: `breath-chain-curve-clip` |
 | `noise[p_resp=…,level=…]`, `noise-amps`, `noise-ref` | the whole breath chain's noise, sensor to jack and to the instrument's `ADC_IN`, per stage, at the curve knob's ends and click, at rest and at a hard blow; and the three TI models against their datasheets | see below: `breath-jack-noise` |
+| `offset-supply`, `chain-centre-supply` | the rest level and the commissioned chain with the rails at 10.8–12.6 V each way (#5 finding 6) | the page's offset arithmetic holds within 0.08 mV at every rail corner; **the rest level moves −0.54 to +0.22 V** with the −12 V rail (`R-BREATH-FB`/`R-BREATH-OFFNEG` × its error) — inside `POT-OFFSET`'s reach, so the player's zero trim recovers it; rest-to-hard-blow is 9.95 V at every corner, and at 10.8 V / −12.6 V `BREATH_OUT` clips from an in-amp output of −4.88 V, 1.05× a hard blow (−5.56 V, 1.20×, at ±12 V) |
 
 ## The curve knob after commissioning — `chain`, `chain-trim`
 
@@ -34,11 +35,11 @@ nominal parts, `BREATH_OUT` (the op-amp output; the jack is 1 % lower into
 
 | `POT-RESP` | Shaper at a hard blow | `BREATH_OUT` at a hard blow | Clips from an in-amp output of |
 |---|---|---|---|
-| CCW (log) | 0.490× | 4.90 V | does not clip (about 9.0 V at full scale `[calc: 0.421 × 9.94 × 2.156]`) |
-| ¼ | 0.844× | 8.44 V | −6.73 V, 1.45× a hard blow |
-| centre click | 0.999× | 9.99 V | −5.54 V, 1.19× |
-| ¾ | 1.090× | 10.90 V | −5.05 V, 1.09× |
-| CW (exp) | 1.554× | 11.97 V (on the rail) | **−3.66 V, 0.79× — inside real playing** |
+| CCW (log) | 0.490× | 4.87 V | does not clip (about 9.0 V at full scale `[calc: 0.421 × 9.94 × 2.156]`) |
+| ¼ | 0.843× | 8.40 V | −6.76 V, 1.46× a hard blow |
+| centre click | 0.998× | 9.96 V | −5.56 V, 1.20× |
+| ¾ | 1.092× | 10.89 V | −5.05 V, 1.09× |
+| CW (exp) | 1.554× | 11.97 V (on the rail) | **−3.67 V, 0.79× — inside real playing** |
 
 `chain-trim`, the same at CW with `TRIM-RESP` left at an end instead of set:
 its clockwise end (1.72× at a hard blow) clips from −3.38 V, 0.73×; its

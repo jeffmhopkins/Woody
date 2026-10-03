@@ -19,14 +19,14 @@ include: [pitch-stage.lib]
 spiceinit: [set ngbehavior=psa]
 
 params:
-  v_pos:    {value: 12.0,  source: "MODULE_ANALOG_POS12 (netlist rails)"}
-  v_neg:    {value: -12.0, source: "MODULE_ANALOG_NEG12"}
+  v_pos:    {value: 12.0,  source: "MODULE_ANALOG_POS12 (netlist rails); the *-supply, patch and short sims vary it 10.8-12.6 V, a tripped PTC-POS12 and D1 to the bus maximum (module/power-entry/sim's v_in_dac, power-entry.md Fuses)"}
+  v_neg:    {value: -12.0, source: "MODULE_ANALOG_NEG12; varied as v_pos, -10.8 to -12.6 V"}
   v_refout: {value: 2.5,   source: "DAC8568 internal reference, VREFOUT 2.5 V [ds DAC8568CIPW.pdf p.4], an ideal source: the trim network that follows it is in pitch-stage.lib"}
   t_gain:   {value: 0.5,   source: "TRIM-GAIN's CCW-W section as a fraction of its track: 0.5 is mid-travel, where its 100 ohm matches R-GAIN-CTR and the ratio is 1 (pitch-stage.md, Component values)"}
   w_offset: {value: 0.5,   source: "TRIM-OFFSET's wiper from its AGND_MOD (CCW) end: 0.5 is mid-travel, V_ref 2.500 V (pitch-stage.md, The offset trim)"}
   c_esd:    {value: 16.0e-12, source: "D-ESD-PITCH, Cd 16 pF typ at 0 V, 1 MHz [ds NEXPERIA-PESD15VL1BA.pdf p.4 Table 6]; no maximum is published, so `vary` takes it to twice that"}
   r_esd:    {value: 3.0e+8, source: "D-ESD-PITCH's leakage as a resistance: IRM 50 nA max at VRWM 15 V [ds NEXPERIA-PESD15VL1BA.pdf p.4] = 300 Mohm, an upper bound on the current anywhere inside +-15 V"}
-  c_cable:  {value: 0.0,   source: "the patch cable's capacitance on the jack; swept 200 pF and 800 pF, the passive loads pitch-stage.md's loop analyses tried (about 2 m and 8 m of cable at 100 pF/m [from memory: typical patch-cable figure])"}
+  c_cable:  {value: 0.0,   source: "the capacitance on the jack beyond C-FILT-PITCH: 200 pF and 800 pF are the passive loads pitch-stage.md's loop analyses tried (about 2 m and 8 m of cable at 100 pF/m [from memory: typical patch-cable figure]); 2.2-22 nF is a destination's own input filter, or a long run, where the step's overshoot passes 5 % (#5 finding 1)"}
   r_vco:    {value: 100.0e3, source: "one VCO's 1V/oct input, 100 kohm (pitch-stage.md, '100 kohm VCO') [assumption: typical Eurorack]"}
   v_dac0:   {value: 1.25,  source: "a DAC code at jack 0 V (2 x 1.25 - 2.5): the operating point TI's OPA2197 model converges from with the trim network in (pitch-dc.cir says why)"}
   v_dac1:   {value: 1.75,  source: "one octave up: jack +1 V"}
@@ -40,6 +40,10 @@ params:
   mult:     {value: 0}
   r_open:   {value: 1.0e12}
   real_mult: {value: 0, source: "1: the other output's R-OUT-PROT to its driver at 0 V is on the jack too"}
+  v_ext:    {value: 1, source: "patch: which rail the other module's output sits at, +1 or -1; AT the rail, the furthest a module on the same bus can drive (v_ext_f)"}
+  r_ext:    {value: 0.0, source: "patch: the other output's own series resistance; 0 is a stiff output (an op-amp with no resistor, a buffered multiple), 220 ohm the lowest common protection resistor [assumption: typical Eurorack, as bom.csv's R-OUT-PROT note]"}
+  v_dac:    {value: 2.5, source: "patch and short: the DAC's code, held; the short sim sweeps the window's ends"}
+  t_short:  {value: 5.0e-3, source: "how long a plug insertion holds tip to sleeve [assumption: a hand pushes a plug home in milliseconds; once the op-amp has railed, in microseconds, the length stops mattering]"}
 
 derived:
   t_step_e: "v['t_step'] + v['t_edge']"
@@ -55,12 +59,22 @@ derived:
   r_trim_gain: "max(v['TRIM-GAIN'] * v['t_gain'], 1e-3)"
   r_toff_cw: "max(v['TRIM-OFFSET'] * (1 - v['w_offset']), 1e-3)"
   r_toff_ccw: "max(v['TRIM-OFFSET'] * v['w_offset'], 1e-3)"
+  v_ext_f: "v['v_pos'] if v['v_ext'] > 0 else v['v_neg']"
+  r_ext_f: "max(v['r_ext'], 1e-3)"
+  t_patch: "v['t_dc']"
+  t_patch_e: "v['t_dc'] + 1e-6"
+  t_sh0: "v['t_dc']"
+  t_sh0_e: "v['t_dc'] + 1e-6"
+  t_sh1: "v['t_dc'] + v['t_short']"
+  t_sh1_e: "v['t_dc'] + v['t_short'] + 1e-6"
 
 vary:
   C-FB-PITCH:  {tol: [-0.05, 0.05], source: "C0G +/-5 % [assumption: the netlist value states none]"}
   C-FILT-PITCH: {tol: [-0.05, 0.05], source: "as C-FB-PITCH"}
   R-OUT-PROT:  {tol: from-value}
   c_esd:       {tol: [0.0, 1.0], source: "16 pF typ to twice that: the datasheet gives no maximum"}
+  v_pos:       {tol: [-0.1, 0.05], source: "10.8 to 12.6 V about 12 (params: v_pos); only the sims that name it"}
+  v_neg:       {tol: [-0.1, 0.05], source: "-10.8 to -12.6 V about -12"}
 
 sims:
   - name: dc-transfer
@@ -125,9 +139,11 @@ sims:
       - expr: "abs(nom['vref'] - p['v_refout'] * (1 + p['R-VREF-FB'] / p['R-VREF-GND'])) < 2e-4"
         why: "the page's V_ref at w = 1, VREFOUT (1 + g)"
   - name: step-vco
-    # one VCO on the jack, and the patch cable: the page's "safe to about 10 nF" case
+    # one VCO on the jack, and the patch cable, to 2.2 nF beyond C-FILT-PITCH: the page's
+    # "under 5 %" bound (pitch-stage.md, 'It does not oscillate; it rings')
     deck: pitch-step.cir
-    sweep: {c_cable: [0, 200pF, 800pF]}
+    vary: [C-FB-PITCH, C-FILT-PITCH, R-OUT-PROT, c_esd]
+    sweep: {c_cable: [0, 200pF, 800pF, 2.2nF]}
     measures: [overshoot_pct, t_settle, d_overshoot]
     post:
       overshoot_pct: "overshoot(w['jack'], p['t_step'], p['t_end'])"
@@ -138,10 +154,25 @@ sims:
         why: "into a VCO and the cable an octave step does not ring (under 5 %) at any corner"
       - expr: "max['d_overshoot'] < 0.1 and min['d_overshoot'] > -0.1"
         why: "D-ESD-PITCH changes the step's overshoot by under 0.1 point at every corner and cable"
+  - name: step-vco-heavy
+    # more capacitance on the jack: 4.7, 10 and 22 nF (#5 finding 1, which measured 6.2,
+    # 11.4 and 20.4 % at the nominal). Where the page's bound stops
+    deck: pitch-step.cir
+    vary: [C-FB-PITCH, C-FILT-PITCH, R-OUT-PROT, c_esd]
+    sweep: {c_cable: [4.7nF, 10nF, 22nF]}
+    measures: [overshoot_pct, t_settle, d_overshoot]
+    post:
+      overshoot_pct: "overshoot(w['jack'], p['t_step'], p['t_end'])"
+      t_settle: "settling(w['jack'], p['t_step'], p['t_end'], 1.0/12/100)"
+      d_overshoot: "overshoot(w['jack'], p['t_step'], p['t_end']) - overshoot(w['jackb'], p['t_step'], p['t_end'])"
+    asserts:
+      - expr: "nom['overshoot_pct'] > 5 and max['overshoot_pct'] > 5"
+        why: "RECORDED LIMIT, not a requirement: from 4.7 nF beyond C-FILT-PITCH an octave step overshoots by more than 5 % at the nominal and the worst corner (4.7 nF's best corner sits at 5.0 %) - the page's bound is 2.2 nF (step-vco). If this starts failing the bound has moved: restate pitch-stage.md"
   - name: step-mult
     # a passive mult to a MOD jack (mult=1) or the BREATH jack (mult=2): that jack's own
     # C-FILT on PITCH, its driver not counted (the page's own model: a capacitor)
     deck: pitch-step.cir
+    vary: [C-FB-PITCH, C-FILT-PITCH, R-OUT-PROT, c_esd]
     set: {t_end: 8.0e-3}
     sweep: {mult: [1, 2]}
     measures: [overshoot_pct, t_settle, d_overshoot]
@@ -156,6 +187,7 @@ sims:
     # the same mults with the other output's R-OUT-PROT to its driver (held at 0 V) on
     # the jack as well: what a patch actually connects
     deck: pitch-step.cir
+    vary: [C-FB-PITCH, C-FILT-PITCH, R-OUT-PROT, c_esd]
     set: {real_mult: 1, t_end: 8.0e-3}
     sweep: {mult: [1, 2]}
     measures: [overshoot_pct, t_settle]
@@ -164,6 +196,7 @@ sims:
       t_settle: "settling(w['jack'], p['t_step'], p['t_end'], 1.0/12/100)"
   - name: loop
     deck: pitch-loop.cir
+    vary: [C-FB-PITCH, C-FILT-PITCH, R-OUT-PROT, c_esd]
     sweep: {mult: [0, 1, 2]}
     measures: [pm, fc, d_pm]
     post:
@@ -178,6 +211,7 @@ sims:
   - name: loop-cable
     # the loop into a VCO and the patch cable
     deck: pitch-loop.cir
+    vary: [C-FB-PITCH, C-FILT-PITCH, R-OUT-PROT, c_esd]
     sweep: {c_cable: [200pF, 800pF]}
     measures: [pm, fc, d_pm]
     post:
@@ -189,3 +223,83 @@ sims:
         why: "the phase margin clears 45 degrees after the screen into the cable"
       - expr: "max['d_pm'] < 0.1 and min['d_pm'] > -0.1"
         why: "D-ESD-PITCH moves the phase margin by under 0.1 degree into the cable"
+  - name: dc-transfer-supply
+    # the transfer at the rails' ends, 10.8 to 12.6 V each way (#5 finding 6): the
+    # stage's DC accuracy rests on the op-amp's supply rejection, not on +-12.000 V
+    deck: pitch-dc.cir
+    vary: [v_pos, v_neg]
+    measures: [gain, intercept]
+    post:
+      gain: "(at(w['jack'], 2.999 * p['t_dc']) - at(w['jack'], 0.999 * p['t_dc'])) / (p['v_hi'] - p['v_lo'])"
+      intercept: "at(w['jack'], 0.999 * p['t_dc']) - p['v_lo'] * (at(w['jack'], 2.999 * p['t_dc']) - at(w['jack'], 0.999 * p['t_dc'])) / (p['v_hi'] - p['v_lo'])"
+    asserts:
+      - expr: "abs(min['gain'] - 2) < 1e-4 and abs(max['gain'] - 2) < 1e-4"
+        why: "the gain is 2.000 within 1e-4 at every rail corner"
+      - expr: "abs(min['intercept'] + 2.5) < 1e-3 and abs(max['intercept'] + 2.5) < 1e-3"
+        why: "the intercept is -2.500 V within 1 mV (1.2 cents) at every rail corner"
+  - name: step-vco-supply
+    # the octave step into a VCO and 800 pF of cable at the rails' ends
+    deck: pitch-step.cir
+    vary: [v_pos, v_neg]
+    set: {c_cable: 800pF}
+    measures: [overshoot_pct, t_settle]
+    post:
+      overshoot_pct: "overshoot(w['jack'], p['t_step'], p['t_end'])"
+      t_settle: "settling(w['jack'], p['t_step'], p['t_end'], 1.0/12/100)"
+    asserts:
+      - expr: "max['overshoot_pct'] < 5"
+        why: "under 5 % overshoot at every rail corner"
+  - name: loop-supply
+    # the loop into a VCO at the rails' ends
+    deck: pitch-loop.cir
+    vary: [v_pos, v_neg]
+    measures: [pm, fc]
+    post:
+      pm: "phase_margin(w['tdb'], w['tph'])"
+      fc: "crossover(w['tdb'])"
+    asserts:
+      - expr: "min['pm'] - 10 > 45"
+        why: "the phase margin clears 45 degrees after the screen at every rail corner"
+  - name: patch
+    # OUTPUT-TO-OUTPUT PATCHING (#5 finding 6): another module's output, at either rail,
+    # stiff or through 220 ohm, joined to the pitch jack. The loop fights it; the op-amp
+    # rails the other way and R-OUT-PROT takes the difference. D-JACK-CLAMP in
+    deck: pitch-patch.cir
+    vary: [v_pos, v_neg, R-OUT-PROT]
+    set: {t_end: 4.0e-3}
+    sweep: {v_ext: [1, -1], r_ext: [0, 220]}
+    measures: [p_rout, i_out, v_amp, v_jack, i_jc]
+    post:
+      p_rout: "at(w['prout'], 0.999 * p['t_end'])"
+      i_out: "abs(at(w['iout'], 0.999 * p['t_end']))"
+      v_amp: "at(w['amp'], 0.999 * p['t_end'])"
+      v_jack: "at(w['jack'], 0.999 * p['t_end'])"
+      i_jc: "max(peak(w['ijcn'], 0, p['t_end']), -trough(w['ijcn'], 0, p['t_end']), peak(w['ijcp'], 0, p['t_end']), -trough(w['ijcp'], 0, p['t_end']))"
+    asserts:
+      - expr: "max['p_rout'] < 0.5"
+        why: "R-OUT-PROT's rating, its netlist value '1k 1%, >=500mW': the power it carries while the loop fights another output stays inside it at every rail corner. FAILS against a stiff output at the rail (r_ext 0) - the part change is the owner's (pitch-stage.md, 'Patched to another output')"
+      - expr: "max['i_out'] < 0.065"
+        why: "the op-amp's output current stays under the OPA2197's 65 mA short-circuit current (typ, at +-18 V) [ds OPA2197.pdf p.8]: it holds the rail rather than limiting"
+      - expr: "max['i_jc'] < 1.0e-3"
+        why: "D-JACK-CLAMP never conducts: the op-amp's output stays inside the rails, so the other module's current goes through R-OUT-PROT into the op-amp, not into a rail (what the clamp carries is its 1.5 pF charging at the patch's edge)"
+  - name: short
+    # A SHORTED JACK and the recovery (#5 finding 6; pitch-stage.md, 'With the jack
+    # shorted'): t_short of tip to sleeve with the DAC at either end of its window, then
+    # released. D-JACK-CLAMP in
+    deck: pitch-short.cir
+    vary: [v_pos, v_neg, R-OUT-PROT, C-FB-PITCH, C-FILT-PITCH]
+    set: {t_end: 12.0e-3}
+    sweep: {v_dac: [0.25, 4.75]}
+    measures: [p_short, overshoot_pct, t_rec, i_jc]
+    post:
+      p_short: "at(w['prout'], p['t_sh1'] - 1e-5)"
+      overshoot_pct: "overshoot(w['jack'], p['t_sh1'], p['t_end'])"
+      t_rec: "settling(w['jack'], p['t_sh1'], p['t_end'], 1.0/12/100)"
+      i_jc: "peak(w['ijc'], 0, p['t_end'])"
+    asserts:
+      - expr: "max['t_rec'] < 1.0e-3"
+        why: "released, the jack is back within a cent of its note in under a millisecond at every corner: a patch-in is a click, not a held wrong note"
+      - expr: "max['p_short'] < 0.5"
+        why: "a dead short is inside R-OUT-PROT's rating ('1k 1%, >=500mW'): the op-amp rails across 1 kohm alone"
+      - expr: "max['i_jc'] < 1.0e-3"
+        why: "D-JACK-CLAMP never conducts through the short or its recovery"

@@ -26,6 +26,13 @@ window edges. A measure whose recorded min or max sits on one (to 1e-4) is a
 PROBLEM when an assert reads it, and a NOTE otherwise (a frequency peak at its
 window's edge says the window missed the peak; nobody may be relying on it).
 
+And one thing nothing asked (#5, minor): which ngspice made the numbers. Every
+results.yaml records its version, and results move between versions without
+crossing an assertion (on 44.2 an unquieted OPA2197 follower's noise read 260
+nV/rtHz, 42's 868; SYNC's overshoot 1.5 mV, not 0.18). A results.yaml whose major
+version is not tools/toolchain.yaml's `ngspice_major` is a PROBLEM: re-run it on
+the pinned version, or move the pin with every result regenerated.
+
 It is a separate tool, not part of `sim.py check`, ON PURPOSE: sim.py hashes
 itself into every results.yaml, so any edit to it marks all of them stale until
 every sim is re-run. This file is not a sim input, and changing it changes no
@@ -149,15 +156,37 @@ def recheck(simdir, got):
     return problems, notes
 
 
+def pinned_ngspice():
+    """tools/toolchain.yaml's ngspice_major, as text ('42'), or None if it pins none."""
+    t = yaml.safe_load(open(os.path.join(ROOT, "tools", "toolchain.yaml"))) or {}
+    v = t.get("ngspice_major")
+    return None if v is None else str(v)
+
+
+def version_problem(simdir, got, pin):
+    """A results.yaml made on another ngspice than the pinned one."""
+    if pin is None:
+        return []
+    made = str(got.get("ngspice", "?"))
+    if made.split(".")[0] != pin:
+        rel = os.path.relpath(simdir, ROOT)
+        return [f"{rel}: results.yaml was made on ngspice {made}, not the pinned {pin} "
+                f"(tools/toolchain.yaml) - re-run it on {pin}: python3 tools/sim.py run {rel}"]
+    return []
+
+
 def main():
     problems, notes = [], []
     dirs = sim.sim_dirs()
+    pin = pinned_ngspice()
     for d in dirs:
         path = os.path.join(d, "results.yaml")
         if not os.path.exists(path):
             continue                    # sim.py check reports a sim never run
+        got = yaml.safe_load(open(path)) or {}
+        problems += version_problem(d, got, pin)
         try:
-            pr, nt = recheck(d, yaml.safe_load(open(path)) or {})
+            pr, nt = recheck(d, got)
         except SystemExit as e:
             pr, nt = [str(e)], []
         problems += pr

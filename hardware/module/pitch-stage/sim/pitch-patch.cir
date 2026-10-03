@@ -1,0 +1,38 @@
+* OUTPUT-TO-OUTPUT PATCHING onto the pitch jack: another module's output at the rail v_ext
+* names (v_ext_f: a module on the same bus can drive no further), through its own output
+* resistance r_ext, joined to JACK_TIP by a patch cable (SPATCH, closed at
+* t_patch - the deck starts from jack 0 V, the only operating point TI's model finds, as
+* pitch-dc.cir says). The DC loop is tapped at the jack, so it FIGHTS the other output:
+* the op-amp runs to the rail opposite v_ext and R-OUT-PROT carries the difference. The
+* stage as netlisted (pitch-stage.lib), D-JACK-CLAMP and D-ESD-PITCH included, a VCO on
+* the jack as well. The DAC sits at v_dac; where does not matter, since the op-amp rails
+* either way.
+* Read at the end of the run: R-OUT-PROT's power, the op-amp's output current, both
+* halves of D-JACK-CLAMP and the jack.
+VPOS pos 0 {{v_pos}}
+VNEG neg 0 {{v_neg}}
+VREFO vrefout 0 {{v_refout}}
+VDAC dacpin 0 PWL(0 {{v_dac0}} {{t_dc_a}} {{v_dac0}} {{t_dc_b}} {{v_dac}})
+RBD dacpin 0 {{R-BIAS-DAC}}
+XA vrefout dacpin jack pos neg vrefba ma ma PSTAGE
+CESD jack 0 {{c_esd}}
+RESD jack 0 {{r_esd}}
+RVCOA jack 0 {{r_vco}}
+VEXT ext 0 {{v_ext_f}}
+REXT ext extr {{r_ext_f}}
+SPATCH extr jack sw 0 SWP
+VSW sw 0 PWL(0 0 {{t_patch}} 0 {{t_patch_e}} 1)
+.model SWP SW(Vt=0.5 Vh=0 Ron=1m Roff=1e12)
+.options method=gear rshunt=1e10
+.control
+save all @d.xa.djcn[id] @d.xa.djcp[id]
+tran 1u {{t_end}} 0 1u
+wrdata jack.dat v(jack)
+wrdata amp.dat v(xa.ampout)
+wrdata prout.dat (v(xa.ampout)-v(jack))*(v(xa.ampout)-v(jack))/{{R-OUT-PROT}}
+wrdata iout.dat (v(xa.ampout)-v(jack))/{{R-OUT-PROT}}
+wrdata ijcn.dat @d.xa.djcn[id]
+wrdata ijcp.dat @d.xa.djcp[id]
+quit
+.endc
+.end

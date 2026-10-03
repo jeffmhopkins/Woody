@@ -86,8 +86,12 @@ Two consequences to keep in mind at layout:
   point.** Against TI's own OPA2197 macromodel the phase margin is
   `riso-ref-phase-margin` across a 200× range of `C_L` (47 nF to 10.1 µF) and
   every tolerance corner `[sim, sim/]`, so X7R DC-bias derating cannot
-  destabilise it. **But do not add bulk capacitance at `VS` on the phase margin
-  alone.** 10 µF there barely moves the margin and still rings: `|Z_out|` peaks
+  destabilise it. **That is all the margin says.** It is read at the ~1.2 MHz
+  crossover, where `C_F` has handed the loop to the op-amp's own output, so the
+  load barely moves it; the `R_ISO`–`C_L` resonance sits below crossover, where
+  no margin is read, and the as-built load rings with over 122° of margin
+  (below).
+  **So do not add bulk capacitance at `VS` on the phase margin alone.** 10 µF there barely moves the margin and still rings: `|Z_out|` peaks
   near `R_ISO` at 2.5 kHz and a load step swings back through most of its own
   dip for about 3 ms (`sim/`, `step-with-10u-added`). If E13 finds the rail
   wants stiffening against strip PWM, re-run that sim with the part first.

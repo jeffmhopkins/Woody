@@ -6,10 +6,11 @@
 # Nexperia, onsemi and Diotec URLs tried 2026-09-30, fragment R38). A SPICE diode fitted to
 # the banked datasheets: the 1N4448W's guaranteed window, 0.62-0.72 V at 5 mA
 # [datasheets/discrete-and-power/1N4448W.pdf p.2, Vishay; 1N4148W-DIOTEC.pdf p.2 agrees], sets IS;
-# N is an assumption. The bought part is the 1N4448W since 2026-10-01 (pre-layout review A1-3),
+# N and EG are fitted to the same datasheet's Fig. 1, the typical I_F-V_F curves at 25, 100
+# and 150 C (p.3; #5 minor, 2026-10-03 - N was 1.8 from memory, EG the SPICE default). The bought part is the 1N4448W since 2026-10-01 (pre-layout review A1-3),
 # so the window fitted is the part's own specification. TEMPERATURE is a corner since
-# 2026-10-01 (A1-3): ngspice's `temp`, which moves the diode by the SPICE defaults (XTI 3,
-# EG 1.11 - an assumption, the sheet gives no tempco) and TI's model as it was built.
+# 2026-10-01 (A1-3): ngspice's `temp`, which moves the diode by XTI 3 (the SPICE default)
+# and EG fitted to Fig. 1's 100 and 150 C curves, and TI's model as it was built.
 # TRIM-RESP (since 2026-10-01, A1-3) is set at commissioning: `trimmed: 1` makes the deck
 # do the builder's step - POT-RESP fully clockwise, bisect the trimmer until a hard blow
 # gives g_trim at t_comm - before it measures (shaper.cir says how).
@@ -27,8 +28,9 @@ params:
   v_hard: {value: 4.64, source: "a hard blow at the in-amp, as a magnitude: breath-working-point's 2.8 kPa candidate, disputed until E2 [calc: 2.80 x 0.7665 x 2.16106 = 4.64] (breath-output-stage.md, 'What it has to do')"}
   r_load: {value: 50.0e3, source: "BREATH_SHAPED's load: the top of POT-GAIN, 50 kohm to R-GAIN-FLOOR at most (breath-output-stage)"}
   p_resp: {value: 0.5, source: "POT-RESP's rotation from CCW (0, log) to CW (1, exp); 0.5 is the centre detent"}
-  n_d:    {value: 1.8, source: "the diode's emission coefficient [assumption: 1N4148 SPICE models run 1.75-1.9, from memory]"}
-  is_d:   {value: 2.76e-9, source: "fitted: 0.67 V at 5 mA with N = 1.8 [calc: 5e-3 / exp(0.67 / (1.8 x 0.02585))], the middle of the bought 1N4448W's 0.62-0.72 V window [datasheets/discrete-and-power/1N4448W.pdf p.2] (vary: 8.1 nA at 0.62 V, 0.94 nA at 0.72 V)"}
+  n_d:    {value: 1.89, source: "the diode's emission coefficient, FITTED to the 1N4448W's typical I_F-V_F curve at 25 C [datasheets/discrete-and-power/1N4448W.pdf p.3, Fig. 1, digitised]: least squares of V_F on ln I_F from 10 uA to 5 mA, the shaper's range, gives 1.89 (1.88 over 10 uA-1 mA, 1.91 over 20 uA-10 mA), 5.5 mV worst residual [calc]. Was 1.8, from memory"}
+  is_d:   {value: 5.54e-9, source: "fitted: 0.67 V at 5 mA with N = 1.89 [calc: 5e-3 / exp(0.67 / (1.89 x 0.02585))], the middle of the bought 1N4448W's 0.62-0.72 V window [datasheets/discrete-and-power/1N4448W.pdf p.2] (vary: 15.4 nA at 0.62 V, 1.99 nA at 0.72 V). Fig. 1's typical part reads 0.69 V there, inside the window"}
+  eg_d:   {value: 1.08, source: "the band gap the diode's temperature law uses, FITTED with XTI 3 (the SPICE default) and the 25 C N and IS to Fig. 1's 100 C and 150 C curves, 10 uA-1 mA [datasheets/discrete-and-power/1N4448W.pdf p.3; calc]: 1.08 at both, where the SPICE default 1.11 put V_F 8-9 mV low at 100 uA. Fig. 1 reads -2.24 mV/C at 100 uA from 25 to 100 C"}
   t_ramp: {value: 10.0e-3, source: "the input ramp, 0 V to full scale: quasi-static (a breath is slower; the op-amps settle in microseconds)"}
   rs_d:   {value: 0.6, source: "series resistance [assumption: immaterial at the shaper's under 1 mA]"}
   temp_c: {value: 27.0, source: "the circuit's temperature for the measured run, C (ngspice's temp; the models' nominal is 27)"}
@@ -48,7 +50,7 @@ derived:
   t_hard_run: "v['v_hard'] * v['t_ramp'] / v['v_mag'] + 20e-6"
 
 vary:
-  is_d:  {tol: [-0.66, 1.93]}
+  is_d:  {tol: [-0.641, 1.783], source: "the 0.72 V and 0.62 V ends of the window at 5 mA, with N 1.89 (params: is_d)"}
   R-RESP-DIV-HI: {tol: from-value}
   R-RESP-DIV-LO: {tol: from-value}
   R-RESP-IN: {tol: from-value}
@@ -61,6 +63,8 @@ vary:
   POT-RESP: {tol: [-0.2, 0.2]}
   # TRIM-RESP's track: +/-10 % [ds BOURNS-3224-TRIMPOT.pdf p.1]
   TRIM-RESP: {tol: from-value}
+  v_pos: {tol: [-0.1, 0.05], source: "the analog +12 V from 10.8 V (a tripped PTC-POS12 and D1) to 12.6 V (the bus maximum), as module/power-entry/sim's v_in_dac and pitch-stage/sim; only the *-supply sims name it (#5 finding 6)"}
+  v_neg: {tol: [-0.1, 0.05], source: "the analog -12 V, -10.8 to -12.6 V"}
 
 sims:
   - name: curve
@@ -156,3 +160,16 @@ sims:
         why: "every corner can be trimmed down to the target at 30 C: the counter-clockwise end gives no more than g_trim there"
       - expr: "min['g_hard'] > 1.0"
         why: "FAIL-SAFE: an open wiper is this end - the whole track in series - and still an expansive curve, gentler than trimmed, never a runaway"
+  # --- #5 finding 6: the rails at their ends, 10.8 to 12.6 V each way, not +-12.000 V.
+  # Each sim below is one above with only the rails varied, so what moves is the supply's
+  - name: curve-supply
+    deck: shaper.cir
+    sweep: {p_resp: [0.0, 0.5, 1.0]}
+    vary: [v_pos, v_neg]
+    measures: [g_hard, g_full]
+    post:
+      g_hard: "-at(w['out'], (p['v_hard']) * p['t_ramp'] / p['v_mag']) / p['v_hard']"
+      g_full: "-at(w['out'], (p['v_mag'] - 0.001) * p['t_ramp'] / p['v_mag']) / (p['v_mag'] - 0.001)"
+    asserts:
+      - expr: "max['g_hard'] - min['g_hard'] < 0.01 * nom['g_hard']"
+        why: "the rails move the curve at a hard blow by under 1 % at POT-RESP's ends and centre: the shaper's diode and its divider do not see the supply"

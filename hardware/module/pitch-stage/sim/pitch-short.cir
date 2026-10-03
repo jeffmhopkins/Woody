@@ -1,0 +1,29 @@
+* A SHORTED JACK, AND ITS RECOVERY: a 3.5 mm plug shorts tip to sleeve on every insertion
+* (pitch-stage.md, 'With the jack shorted, DC feedback is exactly zero'). SSHORT joins
+* JACK_TIP to AGND from t_sh0 to t_sh1; the op-amp rails while it is closed, and the loop
+* must pull the jack back when it opens. The stage as netlisted (pitch-stage.lib),
+* D-JACK-CLAMP and D-ESD-PITCH included, a VCO on the jack. The DAC walks from v_dac0
+* (jack 0 V, where TI's model finds its operating point) to v_dac and holds there.
+VPOS pos 0 {{v_pos}}
+VNEG neg 0 {{v_neg}}
+VREFO vrefout 0 {{v_refout}}
+VDAC dacpin 0 PWL(0 {{v_dac0}} {{t_dc_a}} {{v_dac0}} {{t_dc_b}} {{v_dac}})
+RBD dacpin 0 {{R-BIAS-DAC}}
+XA vrefout dacpin jack pos neg vrefba ma ma PSTAGE
+CESD jack 0 {{c_esd}}
+RESD jack 0 {{r_esd}}
+RVCOA jack 0 {{r_vco}}
+SSHORT jack 0 sw 0 SWP
+VSW sw 0 PWL(0 0 {{t_sh0}} 0 {{t_sh0_e}} 1 {{t_sh1}} 1 {{t_sh1_e}} 0)
+.model SWP SW(Vt=0.5 Vh=0 Ron=1m Roff=1e12)
+.options method=gear rshunt=1e10
+.control
+save all @d.xa.djcn[id] @d.xa.djcp[id]
+tran 1u {{t_end}} 0 1u
+wrdata jack.dat v(jack)
+wrdata amp.dat v(xa.ampout)
+wrdata prout.dat (v(xa.ampout)-v(jack))*(v(xa.ampout)-v(jack))/{{R-OUT-PROT}}
+wrdata ijc.dat abs(@d.xa.djcn[id])+abs(@d.xa.djcp[id])
+quit
+.endc
+.end
