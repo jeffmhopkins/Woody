@@ -117,20 +117,22 @@ islands:
     tie_window: 0.0
     # and under the pair's two legs at the mouth, on layer 4 from the sensor's GND pin
     # (U10.3) and the buffer's output (U3.7) down to where the coupled run starts
-    outline: [[45.9, 11.0], [114.71, 11.0], [116.21, 18.0], [127.29, 18.0], [128.79, 11.0], [141.61, 11.0],
-              [142.61, 18.0], [153.9, 18.0], [153.9, 11.0], [241.11, 11.0], [242.11, 18.1], [245.6, 18.1],
-              [245.6, 25.0], [252.0, 25.0], [252.0, 15.0], [249.5, 15.0], [249.5, 14.9], [244.89, 14.9],
-              [243.89, 7.8], [150.7, 7.8], [150.7, 14.8], [145.39, 14.8], [144.39, 7.8], [126.21, 7.8],
-              [124.71, 14.8], [118.79, 14.8], [117.29, 7.8], [42.7, 7.8], [42.7, 14.8], [37.63, 14.8],
-              [35.13, 7.8], [17.5, 7.8], [17.5, 9.0], [13.7, 9.0], [13.7, 46.9], [16.2, 46.9],
-              [16.2, 26.9], [18.5, 26.9], [18.5, 11.0], [32.87, 11.0], [35.37, 18.0], [45.9, 18.0]]
+    outline: [[252.0, 15.0], [249.5, 15.0], [249.5, 14.9], [244.89, 14.9], [243.89, 7.8], [150.7, 7.8],
+              [150.7, 14.8], [145.39, 14.8], [144.39, 7.8], [126.21, 7.8], [124.71, 14.8], [118.79, 14.8],
+              [117.29, 7.8], [42.7, 7.8], [42.7, 14.8], [37.63, 14.8], [35.13, 7.8], [17.5, 7.8],
+              [17.5, 9.0], [13.7, 9.0], [13.7, 46.9], [16.2, 46.9], [16.2, 26.9], [18.5, 26.9],
+              [18.5, 11.0], [32.87, 11.0], [35.37, 18.0], [45.9, 18.0], [45.9, 11.0], [114.71, 11.0],
+              [116.21, 18.0], [127.29, 18.0], [128.79, 11.0], [141.61, 11.0], [142.61, 18.0], [153.9, 18.0],
+              [153.9, 11.0], [241.11, 11.0], [242.11, 18.1], [245.6, 18.1], [245.6, 25.0], [247.0, 25.0],
+              [247.0, 30.5], [252.0, 30.5]]
   - net: AGND_INST
     layer: In1.Cu
     strip: true
     moat: 0.5
     tie_window: 0.0
-    outline: [[291.1, 47.1], [291.1, 33.4], [287.9, 33.4], [287.9, 43.9], [257.19, 43.9], [254.77, 41.31],
-              [252.43, 43.49], [255.81, 47.1]]
+    outline: [[252.6, 37.0], [250.0, 37.0], [250.0, 42.0], [251.52, 42.0], [251.09, 42.62], [252.55, 43.62],
+              [255.81, 47.1], [291.1, 47.1], [291.1, 33.4], [287.9, 33.4], [287.9, 43.9], [257.19, 43.9],
+              [254.65, 41.18], [252.91, 39.98], [252.6, 40.43]]
 
 # THE BREATH PAIR (same page: "crosses the moat as a pair"): BREATH_SENSE's
 # source SENSOR_BUFFERED_OUT and the AGND leg, taken at the sensor's own GND pin
@@ -153,6 +155,10 @@ pairs:
     # #8-4: every other net's tracks and vias kept 0.55 + the 0.2 clearance = 0.75 mm (3W)
     # off both legs as the router lays them (pcb_route.Obstacles)
     guard: 0.55
+    # ...and a ground track each side of the coupled run, one clearance off its legs,
+    # stitched into the AGND strip under it at least every 5 mm (pcb_route.guard_traces);
+    # left out only where another net's copper leaves no room - README lists the spans
+    guard_traces: {net: AGND_INST, every: 5.0}
     through: [[17.5, 9.4], [34.0, 9.4], [36.5, 16.4], [44.3, 16.4], [44.3, 9.4], [116.0, 9.4], [117.5, 16.4], [126.0, 16.4], [127.5, 9.4], [143.0, 9.4], [144.0, 16.4], [152.3, 16.4], [152.3, 9.4], [242.5, 9.4], [243.5, 16.5], [249.5, 16.5]]
   # B - after the series resistors: ONE crossing of the LED row at 90 deg on layer 1, in
   #     the gap between LED2 and J-MCU (x 249.5), over solid PWR_GND (no strip there,
@@ -165,6 +171,7 @@ pairs:
     width: 0.25
     gap: 0.25
     guard: 0.55
+    guard_traces: {net: AGND_INST, every: 5.0}
     through: [[249.5, 28.2], [249.5, 41.3], [252.5, 41.3], [256.5, 45.5], [289.5, 45.5], [289.5, 33.0]]
 
 # Net classes (the rest are the Default class, rules: track): the rails as
@@ -502,3 +509,13 @@ route_first: [INST_5V_A, /power-entry-instrument/BUCK_A_OUT, BUCK_IN, UMBILICAL_
 directions:
   # each right-angle corner cut to two 45-degree bends, up to this far back (pcb_route.chamfer)
   chamfer: 0.6
+  # ONE region, where a crossing needs it (the owner's rule, 2026-10-03): the breath pair's
+  # crossing of the LED row runs up layer 1 at x 249.5, and everything that crosses it -
+  # the LED chain's data, J-MCU's lines, the 5 V - does so on layer 4; there layer 4 runs
+  # across the board, so it meets the pair at 90 degrees (README, The breath corridor)
+  against_cost: 6.0
+  regions:
+    - name: breath crossing
+      rect: [244.0, 17.5, 255.0, 43.5]
+      layers: {B.Cu: horizontal}
+      why: "layer 4 square across the breath pair's layer-1 crossing of the LED row"

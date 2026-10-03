@@ -1262,6 +1262,13 @@ def route_pair(board, lay, obs, spec):
         pts = list(leg.coords)
         for end, pname in ((pts[0], pf), (pts[-1], pt)):
             g = Grid(obs, L, w / 2, own={net})
+            pad_obj = board.FindFootprintByReference(pname.split(".")[0]).FindPadByNumber(pname.split(".")[1])
+            if not pad_obj.IsOnLayer(lid):
+                # a pad on the other face (an SMD part on layer 1 for a layer-4 pair): the
+                # autorouter joins the leg's end to it, by a via (a track under the pad would
+                # only dangle)
+                report.append(f"pair {net}: {pname} is on the other face - its via left to the autorouter")
+                continue
             pg = pads[pname].buffer(-0.05)
             bx0, by0, bx1, by1 = pads[pname].bounds
             goals = {(i, j) for i in range(g.cell(bx0, by0)[0], g.cell(bx1, by1)[0] + 1)
@@ -1276,7 +1283,84 @@ def route_pair(board, lay, obs, spec):
                 if math.dist(a, b) > 1e-3:
                     lay_track(board, obs, net, a, b, w, L)
     print(f"route: pair {' / '.join(nets)} - {centre.length:.1f} mm side by side on {spec['layer']}")
+    if spec.get("guard_traces"):
+        report += guard_traces(board, lay, obs, spec, centre, L, lid)
     return report
+
+
+def guard_traces(board, lay, obs, spec, centre, L, lid):
+    """layout.yaml pairs: `guard_traces: {net, every}` - a ground track each side of the
+    coupled run, one clearance off its legs, stitched by a via into its net's island or
+    strip at least every `every` mm. Laid where it fits: a piece that would come within the
+    clearance of another net's copper (a pad, a keep-out, the board's edge) is left out,
+    and a run with no room for a single stitching via is dropped, never left floating.
+    Locked, so the autorouter keeps them. Returns the spans left without a guard."""
+    gnet, every = spec["guard_traces"]["net"], float(spec["guard_traces"].get("every", 5.0))
+    w, gap = spec["width"], spec["gap"]
+    gw = w
+    off = (w + gap) / 2 + w / 2 + obs.clear + gw / 2
+    voff = (w + gap) / 2 + w / 2 + obs.clear + obs.via / 2 + 0.02
+    region = plane_regions(board, lay).get(gnet)
+    mine = {gnet}
+    step = 0.4
+    out, laid, vias = [], 0.0, 0
+
+    def clear_of_others(g):
+        for geom, n, ls, kind in obs.near(g, 0.5):
+            if L not in ls or kind in ("silk", "guard") or n in mine:
+                continue
+            if geom.distance(g) < obs.clear - 1e-3:
+                return False
+        return obs.inner.contains(g)
+    for side in (1, -1):
+        line = centre.offset_curve(side * off, join_style=2, mitre_limit=2.0)
+        vline = centre.offset_curve(side * voff, join_style=2, mitre_limit=2.0)
+        n = max(1, int(line.length / step))
+        keep = []
+        for i in range(n):
+            a, b = line.interpolate(i * line.length / n), line.interpolate((i + 1) * line.length / n)
+            keep.append(clear_of_others(LineString([a, b]).buffer(gw / 2, cap_style=1)))
+        runs, cur = [], None
+        for i, k in enumerate(keep):
+            if k and cur is None:
+                cur = i
+            if not k and cur is not None:
+                runs.append((cur, i))
+                cur = None
+        if cur is not None:
+            runs.append((cur, n))
+        for i0, i1 in runs:
+            d0, d1 = i0 * line.length / n, i1 * line.length / n
+            if d1 - d0 < 1.0:
+                continue
+            got, d = [], d0 + 0.5
+            while d <= d1 - 0.5:
+                q = vline.interpolate(d / line.length * vline.length)
+                if (region is None or region.contains(q)) and obs.via_ok(q.x, q.y, gnet):
+                    got.append((d, q))
+                    d += every
+                else:
+                    d += 0.4
+            if len(got) < 2:
+                a_, b_ = line.interpolate(d0), line.interpolate(d1)
+                out.append(f"guard {gnet}: {d1 - d0:.1f} mm beside the pair, ({a_.x:.1f}, {a_.y:.1f}) to ({b_.x:.1f}, {b_.y:.1f}), "
+                           f"with no room for two stitching vias - left out")
+                continue
+            # the run from its first via to its last: no end of it left hanging
+            d0, d1 = got[0][0], got[-1][0]
+            ds = [d0] + [x for x in (line.project(Point(c)) for c in line.coords) if d0 < x < d1] + [d1]
+            pts = [line.interpolate(x) for x in sorted(ds)]
+            for a, b in zip(pts, pts[1:]):
+                if a.distance(b) > 1e-3:
+                    lay_track(board, obs, gnet, (a.x, a.y), (b.x, b.y), gw, L)
+            for d_, q in got:
+                lay_via(board, obs, gnet, q.x, q.y)
+                g_ = line.interpolate(d_)
+                lay_track(board, obs, gnet, (g_.x, g_.y), (q.x, q.y), gw, L)
+                vias += 1
+            laid += d1 - d0
+    print(f"route: pair {' / '.join(spec['nets'])} - guard {gnet} {laid:.1f} mm, {vias} stitching via(s)")
+    return out
 
 
 def one_sided(board, v, lay):
