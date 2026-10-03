@@ -25,7 +25,7 @@ left-hand page holds, with `key-board-rh` for `key-board-lh` in every path.
 | Its rail | `V3V3_CHAIN_LH` | `V3V3_CHAIN_RH` |
 | **The Matrix** | none | **carried on two rails past the tail columns** (owner, 2026-10-02; ADR 0021, *Amendment, 2026-10-02 (2)*): J3 and J4 are bare header pins through the Matrix's pad rows on a shim, J5 four wire pads for its `TP2`, `TP3`, `EN` and `IO0`, and J2 (`J-MCU-KB`) hangs under the board straight above the main board's `J-MCU`, the Matrix ribbon's key-board end. J2's pin k is `J-MCU` pin 25 − k; `tools/kicad.py check` holds all four parts to `hardware/carrier/netlist.yaml`. The Matrix's grounds join `GND_CHAIN`, and its 5 V and 3V3 are power tracks (`layout.yaml`) |
 | The outline | a rectangle | the rectangle and the two rails, from the body CAD; the rails' inside edges clear the Matrix's back-side parts and the USB-C plug (`mechanical/drc.echo` *"Matrix on the right-hand key board's rails"*) |
-| The key networks | the pattern, every key | **RH6's T is an exception**, under the switch's tail-side edge, because J2 stands where the pattern puts it (`layout.yaml`) |
+| The key networks | the pattern, every key | **RH6's T is an exception**, across the body beyond RH6, because J2 stands where the pattern puts it (`layout.yaml`) |
 
 Everything else is the same part, placed the same way: every key's network
 the same T round its own switch but RH6's (`layout.yaml` `networks:`, the same

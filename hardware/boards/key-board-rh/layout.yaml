@@ -43,10 +43,12 @@ standoff_footprint: "MountingHole:MountingHole_2.7mm_M2.5"
 networks:
   pattern: {offset: [9.4, 0.0], axis: y, leg: -1, c: -1}
   # RH6's T would stand where J2 (J-MCU-KB) now hangs, straight above J-MCU
-  # (2026-10-02): it goes under the switch's tail-side edge instead, along x,
-  # S toward the switch's pin 1, C up toward the switch between its two pins.
+  # (2026-10-02): it moves across the body into the free square beyond RH6
+  # (no key at x 234 on the far side), the pattern's own orientation. Under
+  # the switch's near edge was tried: the strip to the board's edge is too
+  # narrow for the T beside the switch's two pins.
   except:
-    RH6: {at: [234.0, 10.0], axis: x, leg: -1, c: 1}
+    RH6: {at: [234.0, 31.0]}
 
 # Placed as the left-hand board's, 108.0 further along the body - the key row's own
 # offset (pcb-geometry.echo) - so the register stands level with RH3, as it
