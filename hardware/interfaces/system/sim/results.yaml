@@ -26,21 +26,21 @@ inputs:
   hardware/interfaces/system/sim/burst.cir: 9897869d796f400a
   hardware/interfaces/system/sim/plug.cir: ef052b6fbe8e9440
   hardware/interfaces/system/sim/bopa.lib: 000a5a750e2d755c
-  hardware/interfaces/system/sim/system.lib: 38841de70f803bac
+  hardware/interfaces/system/sim/system.lib: b43006ff8c8ffb1d
   hardware/interfaces/system/sim/cable.lib: 6584a714f787dccc
   hardware/module/power-entry/sim/lt3042.lib: 2664843cbe66f3e8
   hardware/module/umbilical-load-switch/sim/lt1641.inc: 59be165ccd4451a6
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
   datasheets/analog/INA828-ti-pspice-sbomag5c.lib: 6ae6e0285c98dc1e
-  hardware/module/power-entry/sim/sims.yaml: 7479149434b90933
-  hardware/module/umbilical-load-switch/sim/sims.yaml: 85eec256fad8b2e5
-  hardware/carrier/power-entry-instrument/sim/sims.yaml: a16f7f2bedcc5fd0
+  hardware/module/power-entry/sim/sims.yaml: 646b3304bdaf8c3c
+  hardware/module/umbilical-load-switch/sim/sims.yaml: c338c3bd07b25968
+  hardware/carrier/power-entry-instrument/sim/sims.yaml: 25fc92c191c1f407
   hardware/interfaces/spi-link/sim/sims.yaml: 87161a5d295990b6
-  hardware/module/breath-response-shaper/sim/sims.yaml: fc02a3ddd36b774a
-  hardware/module/breath-output-stage/sim/sims.yaml: 19ba75e6fa4ef072
-  hardware/module/pitch-stage/sim/sims.yaml: c1f4929d96c9b3af
+  hardware/module/breath-response-shaper/sim/sims.yaml: befba7f85cb5cd25
+  hardware/module/breath-output-stage/sim/sims.yaml: ea524974e4623456
+  hardware/module/pitch-stage/sim/sims.yaml: 5a7a138f0f32f75d
   hardware/module/panel-led/sim/sims.yaml: 652a64f857dfee0b
-  hardware/carrier/breath-excitation-reference/sim/sims.yaml: 0835c432b67a9747
+  hardware/carrier/breath-excitation-reference/sim/sims.yaml: b1ed85b6f09facb0
   hardware/interfaces/breath-sense-link/sim/sims.yaml: 24ea39bcf90faccc
   figure:pitch-cents-budget: 0.76 cents worst-case linear sum (0.45 cents RSS)
   figure:dac-rail: 5.23 V
@@ -54,7 +54,7 @@ inputs:
   figure:breath-jack-noise: 0.29 mV rms over 1-459 Hz (-91 dB of 10 V, about 1.9 mV peak-to-peak) and 0.32 mV rms over 20
     Hz-20 kHz, at rest and at a hard blow alike; all but 11 uV rms of it the sensor's, on an assumed sensor noise; ADC_IN
     0.082 LSB rms
-ngspice: '44.2'
+ngspice: '42'
 sims:
   cable-check[z_cm=70]:
     corners: 1
@@ -415,89 +415,89 @@ sims:
     corners: 17
     measures:
       pitch_cents:
-        nominal: 0.00376308
-        min: 0.00199677
+        nominal: 0.00376138
+        min: 0.00199627
         min_at: esr_c2- esr_strip- k_gauge+ r_psu-
-        max: 0.0130023
+        max: 0.0130009
         max_at: esr_c2+ esr_strip+ k_gauge- r_psu+
       breath_mv:
-        nominal: 0.07069
-        min: 0.03677
+        nominal: 0.07053
+        min: 0.0367
         min_at: esr_c2- esr_strip- k_gauge+ r_psu-
-        max: 0.24008
+        max: 0.23993
         max_at: esr_c2+ esr_strip+ k_gauge- r_psu+
       mod_mv:
-        nominal: 0.0033981
-        min: 0.0017953
+        nominal: 0.00339917
+        min: 0.00179483
         min_at: esr_c2- esr_strip- k_gauge+ r_psu-
-        max: 0.0110068
+        max: 0.0110149
         max_at: esr_c2+ esr_strip+ k_gauge- r_psu+
       hdr_pos_mv:
-        nominal: 1.0411
-        min: 0.5515
+        nominal: 1.0415
+        min: 0.5514
         min_at: esr_c2- esr_strip- k_gauge+ r_psu-
-        max: 3.9203
+        max: 3.9215
         max_at: esr_c2+ esr_strip+ k_gauge- r_psu+
       hdr_neg_mv:
-        nominal: 1.0793
-        min: 0.5664
+        nominal: 1.0797
+        min: 0.5662
         min_at: esr_c2- esr_strip- k_gauge+ r_psu-
-        max: 4.1408
+        max: 4.1417
         max_at: esr_c2+ esr_strip+ k_gauge- r_psu+
       rail_pos_mv:
-        nominal: 0.4914
-        min: 0.2611
+        nominal: 0.4913
+        min: 0.261
         min_at: esr_c2- esr_strip- k_gauge+ r_psu-
-        max: 1.526
+        max: 1.5256
         max_at: esr_c2+ esr_strip+ k_gauge- r_psu+
       rail_neg_mv:
-        nominal: 0.7209
+        nominal: 0.721
         min: 0.3788
         min_at: esr_c2- esr_strip- k_gauge+ r_psu-
-        max: 2.3404
+        max: 2.3397
         max_at: esr_c2+ esr_strip+ k_gauge- r_psu+
       ins_mv:
-        nominal: 48.9898
-        min: 43.4406
+        nominal: 49.0254
+        min: 43.4511
         min_at: esr_c2- esr_strip- k_gauge- r_psu-
-        max: 72.9251
+        max: 72.9415
         max_at: esr_c2- esr_strip+ k_gauge+ r_psu-
       vs_uv:
-        nominal: 53.45
-        min: 35.08
+        nominal: 53.18
+        min: 34.94
         min_at: esr_c2- esr_strip- k_gauge- r_psu-
-        max: 115.16
+        max: 115.15
         max_at: esr_c2- esr_strip+ k_gauge+ r_psu-
       ina_uv:
-        nominal: 11.77
-        min: 10.82
+        nominal: 11.78
+        min: 10.81
         min_at: esr_c2+ esr_strip- k_gauge- r_psu-
-        max: 17.68
+        max: 17.67
         max_at: esr_c2- esr_strip+ k_gauge+ r_psu+
       gnd_cm_mv:
-        nominal: 6.94047
-        min: 4.10729
-        min_at: esr_c2- esr_strip- k_gauge- r_psu+
-        max: 18.5634
-        max_at: esr_c2+ esr_strip+ k_gauge- r_psu-
+        nominal: 6.41096
+        min: 4.10879
+        min_at: esr_c2+ esr_strip- k_gauge- r_psu+
+        max: 18.4249
+        max_at: esr_c2- esr_strip+ k_gauge- r_psu+
       iso_ma:
-        nominal: 43.1602
-        min: 24.9081
+        nominal: 43.223
+        min: 24.9669
         min_at: esr_c2- esr_strip- k_gauge+ r_psu-
-        max: 67.6258
+        max: 67.6257
         max_at: esr_c2- esr_strip+ k_gauge- r_psu-
       pre_pitch_cents:
-        nominal: 1.68e-09
+        nominal: 2.16e-09
         min: 1.2e-09
         min_at: esr_c2- esr_strip+ k_gauge+ r_psu-
-        max: 3.36e-09
-        max_at: esr_c2- esr_strip+ k_gauge+ r_psu+
+        max: 3.48e-09
+        max_at: esr_c2- esr_strip- k_gauge- r_psu+
       pre_breath_mv:
         nominal: 0.00014
         min: 0.00011
         min_at: esr_c2- esr_strip- k_gauge- r_psu-
         max: 0.0003
-        max_at: esr_c2- esr_strip+ k_gauge+ r_psu+
+        max_at: esr_c2- esr_strip- k_gauge+ r_psu+
     asserts:
     - expr: nom['pitch_cents'] < p['pitch_bound'] and max['pitch_cents'] < fig['pitch-cents-budget'] / 50
       why: 'ROADMAP M8''s ''pitch scoped while the LEDs sweep'', simulated: the pitch jack moves under 0.01 cents p-p at the
@@ -540,22 +540,22 @@ sims:
         nominal: 14.2174
         min: 9.4567
         min_at: esr_c2+ k_gauge+ r_psu-
-        max: 30.3768
+        max: 30.3767
         max_at: esr_c2- k_gauge- r_psu+
       hdr_neg_mv:
         nominal: 14.2577
-        min: 9.4639
+        min: 9.464
         min_at: esr_c2+ k_gauge+ r_psu-
-        max: 30.5319
+        max: 30.5318
         max_at: esr_c2- k_gauge- r_psu+
       rail_pos_mv:
         nominal: 14.0573
-        min: 9.325
+        min: 9.3251
         min_at: esr_c2+ k_gauge+ r_psu-
         max: 30.119
         max_at: esr_c2- k_gauge- r_psu+
       rail_neg_mv:
-        nominal: 14.1859
+        nominal: 14.186
         min: 9.3986
         min_at: esr_c2+ k_gauge+ r_psu-
         max: 30.3962
@@ -574,14 +574,14 @@ sims:
         max_at: esr_c2- k_gauge+ r_psu-
       ina_uv:
         nominal: 21.16
-        min: 21.1
+        min: 21.09
         min_at: esr_c2+ k_gauge- r_psu-
         max: 24.33
         max_at: esr_c2- k_gauge+ r_psu+
       gnd_cm_mv:
         nominal: 16.7543
         min: 16.7543
-        min_at: esr_c2- k_gauge- r_psu-
+        min_at: nominal
         max: 40.1298
         max_at: esr_c2- k_gauge+ r_psu-
       iso_ma:
@@ -591,17 +591,17 @@ sims:
         max: 176.156
         max_at: esr_c2- k_gauge- r_psu+
       pre_pitch_cents:
-        nominal: 1.68e-09
+        nominal: 2.16e-09
         min: 1.2e-09
         min_at: esr_c2- k_gauge+ r_psu-
-        max: 3.36e-09
-        max_at: esr_c2+ k_gauge+ r_psu+
+        max: 3.6e-09
+        max_at: esr_c2- k_gauge- r_psu+
       pre_breath_mv:
         nominal: 0.00014
         min: 0.00011
         min_at: esr_c2- k_gauge- r_psu-
-        max: 0.00031
-        max_at: esr_c2- k_gauge+ r_psu+
+        max: 0.0003
+        max_at: esr_c2- k_gauge- r_psu+
     asserts:
     - expr: max['pitch_cents'] < 0.1 * fig['pitch-cents-budget']
       why: a light pattern at 200 Hz, inside the pitch band where nothing filters it, moves the pitch jack under a tenth of
@@ -619,22 +619,22 @@ sims:
     corners: 1
     measures:
       pitch_cents:
-        nominal: 6.48e-09
-        min: 6.48e-09
+        nominal: 1.068e-08
+        min: 1.068e-08
         min_at: nominal
-        max: 6.48e-09
+        max: 1.068e-08
         max_at: nominal
       breath_mv:
-        nominal: 0.00051
-        min: 0.00051
+        nominal: 0.00055
+        min: 0.00055
         min_at: nominal
-        max: 0.00051
+        max: 0.00055
         max_at: nominal
       mod_mv:
-        nominal: 3.0e-09
-        min: 3.0e-09
+        nominal: 6.0e-09
+        min: 6.0e-09
         min_at: nominal
-        max: 3.0e-09
+        max: 6.0e-09
         max_at: nominal
       rail_pos_mv:
         nominal: 0.0011
@@ -656,28 +656,28 @@ sims:
     corners: 3
     measures:
       breath_dev_mv:
-        nominal: 0.21588
-        min: 0.21588
+        nominal: 0.21608
+        min: 0.21608
         min_at: nominal
         max: 0.22068
         max_at: k_gauge+
       pitch_dev_cents:
-        nominal: 0.025112
-        min: 0.025112
+        nominal: 0.0251126
+        min: 0.0251126
         min_at: nominal
-        max: 0.0251589
+        max: 0.0251318
         max_at: k_gauge+
       ina_dev_uv:
-        nominal: 220.29
-        min: 215.31
+        nominal: 220.33
+        min: 215.17
         min_at: k_gauge+
-        max: 220.29
+        max: 220.33
         max_at: nominal
       agnd_mv:
-        nominal: 0.0294883
-        min: 0.0294883
+        nominal: 0.0294673
+        min: 0.0294673
         min_at: nominal
-        max: 0.0295676
+        max: 0.0295272
         max_at: k_gauge+
       mod_swing:
         nominal: 3.47349
@@ -686,10 +686,10 @@ sims:
         max: 3.47349
         max_at: k_gauge+
       sclk_rx_max:
-        nominal: 3.23379
-        min: 3.23379
+        nominal: 3.2338
+        min: 3.2338
         min_at: nominal
-        max: 3.25431
+        max: 3.25432
         max_at: k_gauge+
       pre_breath_mv:
         nominal: 0.00023
@@ -713,34 +713,34 @@ sims:
     corners: 1
     measures:
       breath_dev_mv:
-        nominal: 0.17543
-        min: 0.17543
+        nominal: 0.17542
+        min: 0.17542
         min_at: nominal
-        max: 0.17543
+        max: 0.17542
         max_at: nominal
       pitch_dev_cents:
-        nominal: 0.0111648
-        min: 0.0111648
+        nominal: 0.0111908
+        min: 0.0111908
         min_at: nominal
-        max: 0.0111648
+        max: 0.0111908
         max_at: nominal
       ina_dev_uv:
-        nominal: 212.12
-        min: 212.12
+        nominal: 212.32
+        min: 212.32
         min_at: nominal
-        max: 212.12
+        max: 212.32
         max_at: nominal
       agnd_mv:
-        nominal: 0.00977688
-        min: 0.00977688
+        nominal: 0.00980649
+        min: 0.00980649
         min_at: nominal
-        max: 0.00977688
+        max: 0.00980649
         max_at: nominal
       mod_swing:
-        nominal: 8.93687e-06
-        min: 8.93687e-06
+        nominal: 8.95909e-06
+        min: 8.95909e-06
         min_at: nominal
-        max: 8.93687e-06
+        max: 8.95909e-06
         max_at: nominal
       sclk_rx_max:
         nominal: 3.23378
@@ -762,52 +762,52 @@ sims:
     corners: 3
     measures:
       pitch_dev_cents:
-        nominal: 0.00738905
-        min: 0.00578165
+        nominal: 0.00738823
+        min: 0.0057815
         min_at: k_gauge+
-        max: 0.00738905
+        max: 0.00738823
         max_at: nominal
       pre_pitch_cents:
-        nominal: 1.2e-09
-        min: 1.08e-09
+        nominal: 1.56e-09
+        min: 8.4e-10
         min_at: k_gauge+
-        max: 1.2e-09
+        max: 1.56e-09
         max_at: nominal
       mod_dev_mv:
-        nominal: 0.00723623
-        min: 0.00568735
+        nominal: 0.00723629
+        min: 0.00568762
         min_at: k_gauge+
-        max: 0.00723623
+        max: 0.00723629
         max_at: nominal
       breath_absent:
-        nominal: -1.31541
-        min: -1.31541
+        nominal: -1.31528
+        min: -1.31528
         min_at: k_gauge+
-        max: -1.31541
+        max: -1.31528
         max_at: nominal
       breath_rest:
-        nominal: -0.0979888
-        min: -0.0980119
+        nominal: -0.0979893
+        min: -0.0980124
         min_at: k_gauge+
-        max: -0.0979888
+        max: -0.0979893
         max_at: nominal
       breath_over_mv:
-        nominal: 75.8358
-        min: 74.926
+        nominal: 75.8567
+        min: 75.0505
         min_at: k_gauge+
-        max: 75.8358
+        max: 75.8567
         max_at: nominal
       iso_peak:
-        nominal: 0.337958
-        min: 0.333608
+        nominal: 0.337957
+        min: 0.333612
         min_at: k_gauge+
-        max: 0.337958
+        max: 0.337957
         max_at: nominal
       hdr_dip_mv:
-        nominal: 27.2381
-        min: 26.8781
+        nominal: 27.2384
+        min: 26.8787
         min_at: k_gauge+
-        max: 27.2381
+        max: 27.2384
         max_at: nominal
       sclk_rx_max:
         nominal: 1.21198
@@ -822,22 +822,22 @@ sims:
         max: 1.22668
         max_at: k_gauge+
       sclk_sel_max:
-        nominal: 0.676355
+        nominal: 0.676354
         min: 0.669033
         min_at: k_gauge+
-        max: 0.676355
+        max: 0.676354
         max_at: nominal
       mosi_sel_max:
-        nominal: 0.68328
+        nominal: 0.683279
         min: 0.675875
         min_at: k_gauge+
-        max: 0.68328
+        max: 0.683279
         max_at: nominal
       cs_rx_min:
-        nominal: 0.445625
-        min: 0.445625
+        nominal: 0.445621
+        min: 0.445621
         min_at: nominal
-        max: 0.450161
+        max: 0.450144
         max_at: k_gauge+
       cs_rx_end:
         nominal: 3.46815
@@ -855,7 +855,7 @@ sims:
         nominal: 0.124524
         min: 0.124524
         min_at: nominal
-        max: 0.125075
+        max: 0.125076
         max_at: k_gauge+
     asserts:
     - expr: max['latched'] < 0.5 and max['iso_peak'] < 0.5 * p['i_ocp']
@@ -879,50 +879,50 @@ sims:
     corners: 3
     measures:
       pitch_dev_cents:
-        nominal: 0.00738902
-        min: 0.00578179
+        nominal: 0.00738909
+        min: 0.00578151
         min_at: k_gauge+
-        max: 0.00738902
+        max: 0.00738909
         max_at: nominal
       pre_pitch_cents:
-        nominal: 1.2e-09
-        min: 1.08e-09
+        nominal: 1.56e-09
+        min: 8.4e-10
         min_at: k_gauge+
-        max: 1.2e-09
+        max: 1.56e-09
         max_at: nominal
       mod_dev_mv:
-        nominal: 0.00723558
-        min: 0.00568749
+        nominal: 0.00723639
+        min: 0.00568762
         min_at: k_gauge+
-        max: 0.00723558
+        max: 0.00723639
         max_at: nominal
       breath_absent:
-        nominal: -1.31541
-        min: -1.31541
+        nominal: -1.31528
+        min: -1.31528
         min_at: k_gauge+
-        max: -1.31541
+        max: -1.31528
         max_at: nominal
       breath_rest:
-        nominal: -0.0979889
-        min: -0.0980119
+        nominal: -0.0979894
+        min: -0.0980124
         min_at: k_gauge+
-        max: -0.0979889
+        max: -0.0979894
         max_at: nominal
       breath_over_mv:
-        nominal: 75.9292
-        min: 75.0441
+        nominal: 75.9171
+        min: 75.0504
         min_at: k_gauge+
-        max: 75.9292
+        max: 75.9171
         max_at: nominal
       iso_peak:
-        nominal: 0.337954
-        min: 0.333611
+        nominal: 0.33796
+        min: 0.333612
         min_at: k_gauge+
-        max: 0.337954
+        max: 0.33796
         max_at: nominal
       hdr_dip_mv:
         nominal: 27.2383
-        min: 26.8783
+        min: 26.8787
         min_at: k_gauge+
         max: 27.2383
         max_at: nominal
