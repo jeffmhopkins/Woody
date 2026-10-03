@@ -654,6 +654,14 @@ boards:
     status: nominal
     source: "the deepest of the Matrix's back-side parts OVER the carrier, its two buttons beside the USB-C receptacle (the receptacle, boards.matrix_under_h, is over the carrier's notch); everything else is 1.12 or less (the ESP32-S3 module 0.92) [3D, datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-3D.stp, per-solid bounding boxes, 2026-10-03]. drc.echo 'Matrix's back-side parts clear the carrier'"
     decided_by: "calipers on the Matrix in hand"
+  matrix_notch_clear:
+    value: 0.5
+    status: nominal
+    source: "how far the carrier's USB-C notch stands off the plug's overmould on each side (openings.usb_overmold, which already carries its own clearance) and the receptacle: the least drc.echo 'Matrix's back-side parts clear the carrier' accepts. Not board_clear: at 1.5 the notch's edges came inside HDR-MATRIX's surface-mount pads (boards.matrix_hdr_reach) [drawing convention]"
+  matrix_hdr_reach:
+    value: 3.0
+    status: settled
+    source: "how far HDR-MATRIX's pads reach from its pin row, across the row: its staggered surface-mount feet 5.00 +/- 0.25 across [ds connectors/HANXIA-HX-PZ2.54-1x10P-TP-YQ.pdf], and the pads of hardware/lib/woody.pretty/PinHeader_1x10_P2.54mm_Vertical_SMD_Hanxia_PZ2.54-TP-YQ.kicad_mod, 1.6 + 2.8 / 2. drc.echo 'Matrix's back-side parts clear the carrier' holds them inside the notch's edges"
   matrix_carrier_past:
     value: 0.5
     status: nominal

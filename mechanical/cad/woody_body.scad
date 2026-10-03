@@ -1444,7 +1444,7 @@ mcu_fold = mcu_rect(mcu_fold_u[0], mcu_fold_u[1], min(mcu_c) - mcu_cw / 2, max(m
 // J-MCU, which J-MCU-C hangs from.
 mx_x0 = matrix_xy[0] - boards_matrix_board / 2 - boards_matrix_carrier_past;
 mx_x1 = matrix_xy[0] + boards_matrix_board / 2 + boards_matrix_carrier_past;
-mx_notch_w = max(usb_plug_w, boards_matrix_usb[2]) + 2 * boards_board_clear;
+mx_notch_w = max(usb_plug_w, boards_matrix_usb[2]) + 2 * boards_matrix_notch_clear;
 mx_notch = [mx_x0 - 1, matrix_xy[1] - mx_notch_w / 2,
             matrix_xy[0] - boards_matrix_board / 2 + boards_matrix_usb[1] + boards_board_clear, matrix_xy[1] + mx_notch_w / 2];
 mx_arm = [jk_x0 - boards_matrix_carrier_past, cb_y[0], mx_x0 + 1, jk_y + jm_sz[1] / 2 + boards_matrix_carrier_past];
@@ -2046,10 +2046,10 @@ module drc_report() {
         r_side = min(matrix_xy[1] - boards_matrix_usb[2] / 2 - mx_notch[1], mx_notch[3] - (matrix_xy[1] + boards_matrix_usb[2] / 2)),
         r_reach = mx_notch[2] - (matrix_xy[0] - boards_matrix_board / 2 + boards_matrix_usb[1]),
         p_side = min(matrix_xy[1] - usb_plug_w / 2 - mx_notch[1], mx_notch[3] - (matrix_xy[1] + usb_plug_w / 2)),
-        rows = min(mx_notch[1] - (matrix_xy[1] - matrix_row_dy + 1.27), (matrix_xy[1] + matrix_row_dy - 1.27) - mx_notch[3]))
-        drc(over >= 0.5 && r_side >= 0.5 && r_reach >= 0.5 && p_side >= 0.5 && rows >= 1.0, "Matrix's back-side parts clear the carrier",
+        rows = min(mx_notch[1] - (matrix_xy[1] - matrix_row_dy + boards_matrix_hdr_reach), (matrix_xy[1] + matrix_row_dy - boards_matrix_hdr_reach) - mx_notch[3]))
+        drc(over >= 0.5 && r_side >= 0.5 && r_reach >= 0.5 && p_side >= boards_matrix_notch_clear - 0.01 && rows >= 0.3, "Matrix's back-side parts clear the carrier",
             [over, r_side, r_reach, p_side, rows],
-            "mm: the deepest part over the carrier (boards.matrix_under_rest_h) above its top face (against 0.5); the notch's sides and end past the USB-C receptacle (against 0.5); its sides past the plug's overmould (against 0.5); HDR-MATRIX's plastic inside the notch's edges (against 1.0)");
+            "mm: the deepest part over the carrier (boards.matrix_under_rest_h) above its top face (against 0.5); the notch's sides and end past the USB-C receptacle (against 0.5); its sides past the plug's overmould (against boards.matrix_notch_clear); HDR-MATRIX's pads (boards.matrix_hdr_reach) inside the notch's edges (against the boards' edge clearance, 0.3)");
     // The mounts: the spacer beside the Matrix, inside the carrier, clear of
     // J-MCU-C under the arm (the screw's head), and the insert in the oak clear of
     // the window's rebate and the plug's pocket.
