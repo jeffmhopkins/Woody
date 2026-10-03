@@ -65,6 +65,16 @@ components:
     - 2
     note: 'UPPER LEG, AND >=10k IS A SPEC RATHER THAN A VALUE: below that, 5V-before-3V3 sequencing pushes about
       2.5 mA into the ADC''s ESD clamp on every power-up. DIVIDE AFTER THE BUFFER, never before'
+  R-CS-PULL-ADC:
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    note: 'CS_ADC''s idle pull-up (#11 F5): IO39 to DEV_3V3, beside U-ADC pin 1. IO39 is MTCK, whose weak pull-up
+      at reset depends on an eFuse - ''IE 7'', note 7: EFUSE_DIS_PAD_JTAG 0, WPU enabled; 1, pin floating [ds ESP32-S3-datasheet-v2.2.pdf
+      p.17-18] - and ESP-IDF burns that fuse when secure boot is built for release [from memory]. This holds U-ADC
+      deselected from reset until the firmware drives the pin whatever the fuses say, as R-CS-PULL-INST holds CS_MOD
+      on the same shared host. IO39 is not a strapping pin (GPIO0/3/45/46, p.26)'
   U-ADC:
     value: MCP3202-CI/SN
     drawn_as: MCP3202
@@ -96,6 +106,7 @@ nets:
   - port: DEV_3V3
   - C-ADC-BULK.1
   - C-DEC-ADC.1
+  - R-CS-PULL-ADC.1
   - U-ADC.VDD
   IO35:
   - port: IO35
@@ -108,6 +119,7 @@ nets:
   - U-ADC.DOUT
   IO39:
   - port: IO39
+  - R-CS-PULL-ADC.2
   - U-ADC.CS
   SENSOR_BUFFERED_OUT:
   - port: SENSOR_BUFFERED_OUT

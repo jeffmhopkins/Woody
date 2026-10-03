@@ -5,14 +5,14 @@
 inputs:
   tools/sim.py: 0312a1077b9afa80
   hardware/carrier/breath-adc/sim/sims.yaml: 8f5594f84cc8566b
-  hardware/carrier/breath-adc/netlist.yaml: 936c53388d7b1686
+  hardware/carrier/breath-adc/netlist.yaml: 5a7f08e03ef8ee17
   hardware/carrier/breath-adc/sim/adc-ac.cir: 92db36d52ceba839
   hardware/carrier/breath-adc/sim/adc.cir: 3d5f71307efa775a
   hardware/carrier/breath-adc/sim/adc-powerup.cir: 66ddee5fef5a915c
   hardware/carrier/breath-adc/sim/adc-vdd.cir: 71506d20867c2676
   drc:Matrix ribbon length: '37.6231'
   figure:sensor-full-scale: 4.86 V
-ngspice: '44.2'
+ngspice: '42'
 sims:
   filter:
     corners: 9

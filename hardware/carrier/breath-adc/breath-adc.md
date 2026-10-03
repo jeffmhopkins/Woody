@@ -28,7 +28,7 @@ The `Dir` and `Peer` columns are defined once in
 | buffered sensor output | in | `interfaces/breath-sense-link` | `sensor-full-scale`, `breath-working-point` | The breath buffer, drawn in `carrier.md` §2. Arrives at `R-ADCDIV-U`; the same node feeds `R1` and the umbilical |
 | `VDD`/`VREF` 3V3 | in | `J-MCU`, `interfaces/key-chain-loom` | — | The dev board's LDO. The MCP3202 has no `VREF` pin. **The key pull-ups load this same node** — that argument stays in `carrier.md` §2. It arrives down `CBL-MCU-RIBBON`, regulated against the Matrix's ground, so the Matrix's LED return current can move it: `carrier.md`, *The Matrix and the umbilical at the tail end* |
 | SPI2 `SCLK`, `MOSI`, `DOUT` | in/out | `J-MCU`, `interfaces/spi-link` | `loop-budget` | One host shared with the DAC8568, clocked slower than the DAC, per `carrier.md` §4 |
-| `CS_ADC` (IO39) | in | `J-MCU` | — | This device's own chip select on the shared host, and a carrier-local net. **Not `CS_MOD`**, the DAC's, which leaves on `J-UMB` |
+| `CS_ADC` (IO39) | in | `J-MCU` | — | This device's own chip select on the shared host, and a carrier-local net, pulled up to 3V3 by `R-CS-PULL-ADC` (below). **Not `CS_MOD`**, the DAC's, which leaves on `J-UMB` |
 | `AGND_INST` | ref | `carrier/power-entry-instrument` | — | The instrument analog star, drawn `AGND-local` in `carrier.md` §2 and tied to `PWR_GND` at one point. `R-ADCDIV-L` and `C-AA-ADC` return here. **Not `AGND_SENSE`** (the umbilical conductor) and **not `AGND_MOD`** |
 | CH1 | — | — | — | Spare input, unconnected |
 
@@ -114,8 +114,9 @@ I_avg = 20 pF × 4 kHz = 80 nA per volt
 `adc-sample-kickback`, larger than the average-current line above because each
 sample also takes 20 pF/47 nF of `C-AA-ADC`'s charge at once `[calc]`, which
 the 282 µs time constant has not fully restored by the next. Still a pure gain
-term. The same run confirms the 564 Hz corner, the 55 dB at the buck's rate
-and τ = 282 µs.
+term. The same run confirms the 564 Hz corner, the 55 dB at 330 kHz on
+`ADC_IN`'s own path (not the converter's ripple, which arrives on `VDD`) and
+τ = 282 µs.
 
 **Noise at `ADC_IN`** is in `breath-jack-noise`, from the breath chain's noise
 sim (`hardware/module/breath-output-stage/sim/`, `noise`): this input shares
@@ -144,6 +145,26 @@ passes if the reading's peak-to-peak moves by less than 2 LSB between LEDs off
 and LEDs sweeping. A fail is closed in firmware (averaging a pair of samples
 nulls a 2 kHz component at a 4 kHz rate) before it is closed in copper.
 
+**E9 has a second half, because the first cannot see the converter.** The
+R-78E5.0's ~330 kHz ripple is on `VDD` whether the LEDs are lit or not, so an
+LEDs-off-against-sweeping comparison cancels it (#11 Finding 2). So, also:
+scope `VDD` at `U-ADC` pin 8 against pin 4 with the scope's 20 MHz bandwidth
+limit, LEDs **off**, and record the peak-to-peak at the converter's frequency;
+then log the breath reading at a **steady full-scale blow**, LEDs off, where a
+reference error is largest (ratiometric, so it scales with the reading). It
+passes if that reading's peak-to-peak beyond the same blow's sensor noise is
+under the same 2 LSB. This is the measurement that replaces `sim/`'s assumed
+LDO rejection (`vdd-ripple`) with a real one.
+
+**`CS_ADC` is pulled up** (`R-CS-PULL-ADC`, #11 F5). `IO39` is the
+ESP32-S3's `MTCK`, and its weak pull-up at reset is conditional: the pin table
+marks it `IE` with a note, *"Depends on the value of EFUSE_DIS_PAD_JTAG: 0 -
+WPU is enabled; 1 - pin floating"* `[ds ESP32-S3-datasheet-v2.2.pdf p.17–18]`.
+A build that burns that fuse would leave the ADC's select floating from reset
+until firmware drives it, on a host whose clock and data the DAC shares. The
+10 kΩ makes the idle state the board's, not the fuses', as `R-CS-PULL-INST`
+does for `CS_MOD`. Its static current is zero while deselected.
+
 ---
 
 ## Component table
@@ -156,3 +177,4 @@ nulls a 2 kHz component at a 4 kHz rate) before it is closed in copper.
 | `R-ADCDIV-U`, `R-ADCDIV-L` | 10 kΩ / 15 kΩ 1 % | 0.6× after the buffer | `[repo]` + `[calc]` |
 | `C-AA-ADC` | 47 nF C0G | 564 Hz, and the ADC's charge reservoir | `[repo]` + `[calc]` |
 | `C-ADC-BULK` | 10 µF X7R | Reservoir at MCP3202 `VDD`/`VREF`, beside the 100 nF | `[ds]` + `[calc]`; the PWM question is E9's |
+| `R-CS-PULL-ADC` | 10 kΩ 1 % | `CS_ADC`'s idle pull-up to 3V3, beside pin 1: holds the ADC deselected from reset until firmware drives `IO39` | `[ds]` ESP32-S3 datasheet p.17–18 |

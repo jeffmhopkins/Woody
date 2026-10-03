@@ -919,6 +919,13 @@ components:
     pins:
     - 1
     - 2
+  R45:
+    of: R-CS-PULL-ADC
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-adc
   R5:
     of: R-ADCDIV-L
     value: 15k 1%
@@ -1249,6 +1256,7 @@ nets:
   /IO39:
   - A1.IO39
   - J1.16
+  - R45.2
   - U2.CS
   /IO7:
   - A1.IO7
@@ -1551,6 +1559,7 @@ nets:
   - R33.1
   - R37.2
   - R40.1
+  - R45.1
   - U2.VDD
   - U7.C
   - U7.VCC
