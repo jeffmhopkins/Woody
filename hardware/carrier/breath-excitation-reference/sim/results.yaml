@@ -3,7 +3,7 @@
 # its inputs (hashed below), so a value changed on the sheet makes it stale.
 
 inputs:
-  tools/sim.py: 495aebffb8f9ad19
+  tools/sim.py: 0312a1077b9afa80
   hardware/carrier/breath-excitation-reference/sim/sims.yaml: b1ed85b6f09facb0
   hardware/carrier/breath-excitation-reference/netlist.yaml: 2d5ee10b223dc95d
   hardware/interfaces/breath-sense-link/netlist.yaml: 430f1e37ec9c97fa
