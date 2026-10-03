@@ -42,7 +42,7 @@ params:
   a_rip_pp: {value: 0.12, source: "the R-78E5.0-1.0's output ripple and noise, 120 mV p-p max, 20 MHz bandwidth, with 100 nF across its output [datasheets/discrete-and-power/R-78E5.0-1.0.pdf p.1]: taken WHOLE as a sine at the switching rate on INST_5V_A, an ideal source - no credit for the converter's output impedance, D4 or C12 (pessimistic: much of the 120 mV is edge spikes that the network attenuates far more than the fundamental)"}
   f_lo:     {value: 200.0e3, source: "the band the switching rate is searched in: RECOM publishes ~330 kHz and no tolerance [assumption: 200-500 kHz]"}
   f_hi:     {value: 500.0e3}
-  len_rib:  {value: {drc: "Matrix ribbon length", scale: 0.001}, source: "CBL-MCU-RIBBON, the Matrix's edge to J-MCU as drawn (mechanical/drc.echo, 37.6 mm); to 150 mm for slack and build (vary)"}
+  len_rib:  {value: {drc: "Matrix ribbon length", scale: 0.001}, source: "CBL-MCU-RIBBON between its two sockets, J-MCU-KB to J-MCU (mechanical/drc.echo); the right-hand key board's tracks on to the Matrix are not in it - carrier.md; to 150 mm for slack and build (vary)"}
   r_rib_m:  {value: 0.34, source: "a 0.635 mm-pitch ribbon conductor, ~30 AWG, ~0.34 ohm/m (carrier.md, 'The ground count is also the ADC's', [from memory])"}
   l_rib_m:  {value: 0.7e-6, source: "a ribbon conductor's loop inductance with an adjacent return, per metre [assumption: 0.35-1.05 uH/m] (vary)"}
   c_vcc5:   {value: 11.1e-6, source: "the Matrix's VCC_5V, 11.1 uF in all (ADR 0014's amended note, from datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf: C4 10 uF and C3 0.1 uF at the LDO's input among them); down to half under 5 V of DC bias (vary)"}

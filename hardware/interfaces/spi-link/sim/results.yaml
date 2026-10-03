@@ -5,7 +5,7 @@
 inputs:
   tools/sim.py: 0312a1077b9afa80
   hardware/interfaces/spi-link/sim/sims.yaml: 87161a5d295990b6
-  hardware/carrier/netlist.yaml: 544daa1002d5ae2c
+  hardware/carrier/netlist.yaml: b61c3d6a92fa45ec
   hardware/module/digital-and-supervision/netlist.yaml: b4a891171540924f
   hardware/interfaces/spi-link/sim/cs.cir: 6d80adf0e68d79c2
   hardware/interfaces/spi-link/sim/pair.cir: cfc09aa8410da84a

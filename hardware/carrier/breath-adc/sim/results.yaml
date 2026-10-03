@@ -4,15 +4,15 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/carrier/breath-adc/sim/sims.yaml: 8f5594f84cc8566b
+  hardware/carrier/breath-adc/sim/sims.yaml: 44395020c466c80f
   hardware/carrier/breath-adc/netlist.yaml: 936c53388d7b1686
   hardware/carrier/breath-adc/sim/adc-ac.cir: 92db36d52ceba839
   hardware/carrier/breath-adc/sim/adc.cir: 3d5f71307efa775a
   hardware/carrier/breath-adc/sim/adc-powerup.cir: 66ddee5fef5a915c
   hardware/carrier/breath-adc/sim/adc-vdd.cir: 71506d20867c2676
-  drc:Matrix ribbon length: '37.6231'
+  drc:Matrix ribbon length: '50.65'
   figure:sensor-full-scale: 4.86 V
-ngspice: '44.2'
+ngspice: '42'
 sims:
   filter:
     corners: 9
@@ -214,47 +214,47 @@ sims:
     corners: 65
     measures:
       h_fbuck_db:
-        nominal: -19.7157
-        min: -53.2552
+        nominal: -18.9258
+        min: -59.9255
         min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
-        max: -2.50236
+        max: -1.1336
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       h_band_db:
-        nominal: -19.1285
-        min: -33.4965
-        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
-        max: -1.17999
+        nominal: -18.9237
+        min: -36.8179
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
+        max: -1.09163
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       f_band_peak:
-        nominal: 391291.0
+        nominal: 327341.0
         min: 200678.0
-        min_at: C-ADC-BULK- c_ldo- c_vcc5- k_psrr- l_rib_m- len_rib-
+        min_at: C-ADC-BULK- c_ldo- c_vcc5- k_psrr- l_rib_m- len_rib+
         max: 498310.0
-        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr- l_rib_m- len_rib-
+        max_at: C-ADC-BULK- c_ldo- c_vcc5- k_psrr- l_rib_m- len_rib-
       vdd_pp_mv:
-        nominal: 13.2664
-        min: 2.53722
-        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
-        max: 104.757
+        nominal: 13.583
+        min: 1.73095
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
+        max: 105.828
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       lsb_pp:
-        nominal: 14.5504
-        min: 2.78277
-        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
-        max: 114.895
+        nominal: 14.8975
+        min: 1.89847
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
+        max: 116.07
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       lsb_pp_fbuck:
-        nominal: 13.5993
-        min: 0.286114
+        nominal: 14.8941
+        min: 0.132748
         min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
-        max: 98.6695
+        max: 115.51
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       rip_budget_mv:
-        nominal: 16.4944
-        min: 2.08886
+        nominal: 16.11
+        min: 2.06772
         min_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
-        max: 86.245
-        max_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: 126.418
+        max_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
     asserts:
     - expr: max['lsb_pp'] <= 2.0
       why: the converter's ripple on VDD = VREF moves a full-scale reading (sensor-full-scale through the divider, 2.92 V)
