@@ -118,7 +118,10 @@ order of preference:
 Wave R8 established the convention, and it is in `datasheets/README.md`:
 
 - **DECLARED** — your `OK` row quotes the blocked row's **exact `part` string**
-  *and* contains the word `SUPERSEDES`. Opt-in, zero false positives.
+  *and* contains the word `SUPERSEDES` — or writes `RETIRES THE BLOCKED ROW
+  '<exact part>'`, the quote straight after it (a bare "retires" elsewhere in
+  the notes does not count). Opt-in, zero false positives. The summary's
+  `LIVE:` line is the count of gaps still open; the headline counts rows.
 - **LIKELY** — shared distinctive tokens, printed under `CHECK:`, never
   asserted as fact. Deliberately tuned to **refuse** `WS2812B-0807` →
   `WS2812B-2020` and the WS2815 strip → the WS2815 IC, because those are
@@ -255,6 +258,12 @@ ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
   A8-6.)
 - **`TBD`/`open` must say what decides them.** Two rows are deliberately
   blocked on a datasheet and say so; that is correct, not a defect.
+- **`status` is held to the sheets.** `merge-bom.py --check` fails a row still
+  `candidate` or `open` when a placed symbol whose `Row` it is carries an
+  `MPN`: the sheet owns the bought part (ADR 0019), so a part a sheet names is
+  at least `selected`. Promote the row, or clear the MPN if the part is not
+  chosen. A plain run only warns, so the master still regenerates. (Since
+  2026-10-03, issue #7: 58 rows read `candidate` with their parts chosen.)
 
 ---
 

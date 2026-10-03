@@ -30,9 +30,10 @@ read off vendor documents banked in this directory**. Two of the three had been
   from these rather than from a datasheet.
 - **Closing someone else's BLOCKED row: quote it.** When you bank a document
   that fills an earlier gap, put the blocked row's **exact `part` string** in
-  your own row's notes together with the word **`SUPERSEDES`**.
+  your own row's notes together with the word **`SUPERSEDES`** (or write
+  `RETIRES THE BLOCKED ROW '<exact part>'`, the quote straight after it).
   `tools/merge-manifests.py` then reports that row as closed every time it
-  runs. This matters because you must not edit their fragment, so the blocked
+  runs, and leaves it out of its `LIVE:` count of open gaps. This matters because you must not edit their fragment, so the blocked
   row goes on existing — and a reader greps `BLOCKED` to find the gaps. In
   September 2026 three banked documents read as live gaps for exactly this
   reason, and a session nearly spent a wave of agents re-fetching them. The
