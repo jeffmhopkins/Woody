@@ -1,11 +1,16 @@
 # 0005 — Power architecture
 
-**Status:** Accepted
+**Status:** Accepted. **Amended 2026-09-30** (the load switch's ramp
+specification widened to the part's guaranteed envelope, in place; the
+instrument's supply is isolated, ADR 0027, and the lights are LEDs on the main
+board, ADR 0028 — the two *Amendment* sections) **and 2026-10-01** (the 12 V
+row, the DAC rail, and the pre-layout review A3-1 and A3-11, each at a dated
+note).
 
 ## Context
 
-Output requirements are 0–10V on breath and modulation channels and −2 to +7V on
-pitch. Both need rails beyond what USB or a single cell provides directly.
+Output requirements are 0–10V on breath, bipolar on the four modulation
+channels (`mod-jack-range`, `config/figures.yaml`), and −2 to +7V on pitch. Both need rails beyond what USB or a single cell provides directly.
 
 ## Superseded approach: onboard battery
 

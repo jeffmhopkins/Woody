@@ -212,7 +212,8 @@ ref,category,part,manufacturer,description,package,qty,status,source,adr,notes
 >
 > Unlike the manifest's, this one is caught: `merge-bom.py --check`
 > regenerates into memory, byte-compares, and names the first differing line.
-> `check-staleness.py` runs it, so the commit hook fails on a hand edit.
+> `check-staleness.py` runs it and reports a hand edit as a FAIL; the hook
+> only reports, so nothing blocks the commit (`CLAUDE.md`, rule 2).
 >
 > **Edit the fragment, then re-run the tool.** A row lives with the circuit
 > **whose page derives its value** — not where it is mentioned, not where it
@@ -300,6 +301,8 @@ python3 tools/audit-notes.py          # BOM notes: live content vs accumulated h
 python3 tools/audit-notes.py --regrown  # ...rows that have turned back into logs
 python3 tools/audit-notes.py <REF>    # ...one row, classified segment by segment
 python3 tools/rewrite-paths.py        # restructure only; --apply/--verify/--invert
+python3 tools/extract-findings.py <wave-dir>  # a review wave's FINDINGS.csv, from its reports
+python3 tools/adr-index.py            # REGENERATES the ADR index in docs/decisions/README.md
 python3 tools/cad.py build            # body CAD: params, then every STALE render/DXF
 python3 tools/cad.py check            # ...or prove every output still matches its sources
 python3 tools/cad.py explain <name>   # which input moved since an output was built

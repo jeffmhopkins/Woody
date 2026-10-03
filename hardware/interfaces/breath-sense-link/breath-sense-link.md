@@ -358,7 +358,8 @@ I = (12 − 0.2) / 1 kΩ = 11.8 mA      P = 139 mW
 ```
 
 against an 0805's ~125 mW. **The part fails in the fault the design calls
-survivable**, and it is instrument-side, behind a gasket and a lid.
+survivable**, and it is instrument-side, inside a body glued shut (ADR 0025)
+and reached only by cutting it open.
 `bom.csv` makes exactly this
 argument, in full, for the module-side `R-OUT-PROT` — and it was never carried
 across to the instrument-side twin.
