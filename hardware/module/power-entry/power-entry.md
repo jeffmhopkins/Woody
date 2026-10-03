@@ -245,9 +245,9 @@ filter's characteristic impedance, the same shape and margin as the
 instrument's own input LC `[calc]`. **`C2` must stay an electrolytic.**
 `power-entry/sim`'s `iso-input-z` runs the filter as netlisted, with the
 diodes, the beads, `PTC-ISO`, the ribbon and the rack's supply behind it: the
-impedance the converter sees never exceeds 1.8 Ω anywhere from 100 Hz to
+impedance the converter sees never exceeds 1.8 Ω anywhere from 1 Hz to
 2 MHz — it is highest at DC, set by the series resistance, so there is no
-resonant peak left — which is **58× or more** inside the −104 Ω at every
+resonant peak left — which is **56× or more** inside the −104 Ω at every
 corner of `C2`'s ESR, the ribbon, the choke and the supply; and 0.06 % of the
 converter's 550 kHz input current reaches the rack's +12 V conductor.
 
@@ -261,7 +261,7 @@ all fourteen spread over the period) through `C-STRIP-BULK`, the umbilical, the
 load switch, `U-ISO` as output power over efficiency, this filter and the
 rack. Two things keep it small. **The filter has no gain in the band**: `D2`,
 `D4`, `PTC-ISO` and the beads sit in series with `L-ISO-IN` and `C2`, so the
-loop is overdamped and from 1 to 10 kHz at most 75 % of the converter's input
+loop is overdamped and from 1 to 10 kHz at most 76 % of the converter's input
 current reaches the rack (`iso-input-z`, `rack_band`); the corner is not a
 resonance. **And the instrument keeps half or more of the row's current** in
 `C-STRIP-BULK` (91 mA p-p of 182 reaches `U-ISO` at 2 kHz, less above).
