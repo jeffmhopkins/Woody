@@ -486,7 +486,7 @@ page and have no BOM entry yet.
 | `J-MCU` | 2 × 12, 1.27 mm shrouded box header, right-angle | The Matrix's connector, at the tail end. Pin map decided (ADR 0018) — *The Matrix and the umbilical at the tail end* | pin map decided; `[from memory]` part; part **open**, M4 |
 | `CBL-MCU-RIBBON` | 24-way flat ribbon, 0.635 mm, IDC socket each end | From `J-MCU-C` on the Matrix carrier into `J-MCU`; the carrier's socket crimped turned over | `[ds]` sockets and ribbon; part **open**, M4 |
 | `J-MCU-C` | as `J-MCU` | The ribbon's carrier end, hung under the Matrix carrier above `J-MCU`; pin k is `J-MCU` pin 25 − k | `[repo]` |
-| `HDR-MATRIX` ×2 | 1 × 10 2.54 mm pin header, surface mount | The Matrix on its carrier, its pad rows on the posts | `[ds]`; the carrier's outline **open** (ADR 0021, *Amendment, 2026-10-03*) |
+| `HDR-MATRIX` ×2 | 1 × 10 2.54 mm pin header, surface mount | The Matrix on its carrier (`hardware/boards/matrix-carrier/`), its pad rows on the posts | `[ds]` |
 | `J-UMB` | 1 × 8, 2.54 mm right-angle pin header | Where the umbilical reaches this board, on its tongue: soldered into it and into `PCB-UMB-ADAPTER` (ADR 0021); `interfaces/spi-link`'s row | `[from memory]` envelope; part **open**, M4 |
 | `J-UMBILICAL-INST`, `PCB-UMB-ADAPTER` | NE8FAV on its adapter board | The instrument's etherCON behind the tail cap, and the board that carries it to `J-UMB`; `interfaces/spi-link`'s rows | `[ds]` NE8FAV; adapter **open**, M4 |
 | `U-KEYS`, `R-KEY-PU`, `R-KEY-SER`, `C-KEY`, `C-DECOUPLE-165` | — | **Half of them are on this board since ADR 0017**: the `right_thumb` and `left_thumb` clusters. The other two clusters are on the key boards. Counts per cluster are `cluster-boards.md`'s component table | `[repo] 0017, bom.csv` |

@@ -5,7 +5,7 @@
 inputs:
   tools/sim.py: 0312a1077b9afa80
   hardware/interfaces/key-chain-loom/sim/sims.yaml: da6edd9f25f8fa10
-  hardware/boards/key-board-lh/board-netlist.yaml: 83dd5aa2b99e144f
+  hardware/boards/key-board-lh/board-netlist.yaml: 8181c6b2d4cc36b6
   hardware/interfaces/key-chain-loom/sim/rail.cir: 537b273e07928b72
   hardware/interfaces/key-chain-loom/sim/edge.cir: af73f23cc4332e65
   hardware/interfaces/key-chain-loom/sim/rail-ac.cir: 3bc2f2ac7bb9405b
