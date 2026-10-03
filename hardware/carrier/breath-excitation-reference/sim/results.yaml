@@ -3,8 +3,8 @@
 # its inputs (hashed below), so a value changed on the sheet makes it stale.
 
 inputs:
-  tools/sim.py: 0312a1077b9afa80
-  hardware/carrier/breath-excitation-reference/sim/sims.yaml: 0835c432b67a9747
+  tools/sim.py: 495aebffb8f9ad19
+  hardware/carrier/breath-excitation-reference/sim/sims.yaml: b1ed85b6f09facb0
   hardware/carrier/breath-excitation-reference/netlist.yaml: 2d5ee10b223dc95d
   hardware/interfaces/breath-sense-link/netlist.yaml: 430f1e37ec9c97fa
   hardware/carrier/breath-excitation-reference/sim/ref-loop.cir: 3b87404585d82f14
@@ -46,11 +46,19 @@ sims:
     asserts:
     - expr: min['pm'] - 10 > 76
       why: 'the page''s robustness claim (breath-excitation-reference.md: above 76 degrees across a 200x range of C_L) holds
-        at every corner and load, after the +-10 degree screen a macromodel earns'
+        at every corner and load, after the +-10 degree screen a macromodel earns. TRUE AND NARROW (#5 finding 4): it is the
+        margin at the 1.2 MHz crossover, which C_F hands to the op-amp''s own output, so the load barely moves it (118-123
+        degrees from 47 nF to 10.1 uF). The R_ISO-C_L resonance sits BELOW crossover, where no margin is read: the as-built
+        1.1 uF rings back ~45 % on a load step and 10.1 uF over 50 % (step-as-built, step-with-10u-added). This sim says the
+        loop does not oscillate; the step and Z_out sims judge a load'
       pass: true
-    - expr: abs(max['vs_dc'] - 5.0) < 2.5e-3 and abs(min['vs_dc'] - 5.0) < 2.5e-3
-      why: VS sits within 2.5 mV of 5.000 V at every corner - the bought High grade's 0.05 % initial accuracy (ref5050-grade)
-        - with nothing added by R-ISO-REF (the drop across it is outside the DC loop)
+    - expr: abs(max['vs_dc'] - 5.0) < 0.15e-3 and abs(min['vs_dc'] - 5.0) < 0.15e-3
+      why: 'THE BUFFER''S OWN ERROR, not the reference''s: the reference here is an ideal 5.000 V source, so this reads only
+        what U-BUF and R-ISO-REF add - under 150 uV at every corner, the room-temperature terms of riso-ref-topology''s dc_error
+        budget (I_B.R_F 50 uV + V_OS 100 uV max [ds OPA2197.pdf p.7]; its 125 uV of drift is not in the model). R-ISO-REF
+        adds nothing (its drop is outside the DC loop). The REF5050''s own 0.05 % (ref5050-grade) is reference-alone''s, and
+        the two add: VS is 5.000 V within 2.5 mV plus this, not within 2.5 mV in all (until #5 finding 4 this spent the reference''s
+        whole budget on the buffer)'
       pass: true
   loop-as-netlisted[c_vs=100n]:
     corners: 33
@@ -82,11 +90,19 @@ sims:
     asserts:
     - expr: min['pm'] - 10 > 76
       why: 'the page''s robustness claim (breath-excitation-reference.md: above 76 degrees across a 200x range of C_L) holds
-        at every corner and load, after the +-10 degree screen a macromodel earns'
+        at every corner and load, after the +-10 degree screen a macromodel earns. TRUE AND NARROW (#5 finding 4): it is the
+        margin at the 1.2 MHz crossover, which C_F hands to the op-amp''s own output, so the load barely moves it (118-123
+        degrees from 47 nF to 10.1 uF). The R_ISO-C_L resonance sits BELOW crossover, where no margin is read: the as-built
+        1.1 uF rings back ~45 % on a load step and 10.1 uF over 50 % (step-as-built, step-with-10u-added). This sim says the
+        loop does not oscillate; the step and Z_out sims judge a load'
       pass: true
-    - expr: abs(max['vs_dc'] - 5.0) < 2.5e-3 and abs(min['vs_dc'] - 5.0) < 2.5e-3
-      why: VS sits within 2.5 mV of 5.000 V at every corner - the bought High grade's 0.05 % initial accuracy (ref5050-grade)
-        - with nothing added by R-ISO-REF (the drop across it is outside the DC loop)
+    - expr: abs(max['vs_dc'] - 5.0) < 0.15e-3 and abs(min['vs_dc'] - 5.0) < 0.15e-3
+      why: 'THE BUFFER''S OWN ERROR, not the reference''s: the reference here is an ideal 5.000 V source, so this reads only
+        what U-BUF and R-ISO-REF add - under 150 uV at every corner, the room-temperature terms of riso-ref-topology''s dc_error
+        budget (I_B.R_F 50 uV + V_OS 100 uV max [ds OPA2197.pdf p.7]; its 125 uV of drift is not in the model). R-ISO-REF
+        adds nothing (its drop is outside the DC loop). The REF5050''s own 0.05 % (ref5050-grade) is reference-alone''s, and
+        the two add: VS is 5.000 V within 2.5 mV plus this, not within 2.5 mV in all (until #5 finding 4 this spent the reference''s
+        whole budget on the buffer)'
       pass: true
   loop-as-netlisted[c_vs=1u]:
     corners: 33
@@ -118,11 +134,19 @@ sims:
     asserts:
     - expr: min['pm'] - 10 > 76
       why: 'the page''s robustness claim (breath-excitation-reference.md: above 76 degrees across a 200x range of C_L) holds
-        at every corner and load, after the +-10 degree screen a macromodel earns'
+        at every corner and load, after the +-10 degree screen a macromodel earns. TRUE AND NARROW (#5 finding 4): it is the
+        margin at the 1.2 MHz crossover, which C_F hands to the op-amp''s own output, so the load barely moves it (118-123
+        degrees from 47 nF to 10.1 uF). The R_ISO-C_L resonance sits BELOW crossover, where no margin is read: the as-built
+        1.1 uF rings back ~45 % on a load step and 10.1 uF over 50 % (step-as-built, step-with-10u-added). This sim says the
+        loop does not oscillate; the step and Z_out sims judge a load'
       pass: true
-    - expr: abs(max['vs_dc'] - 5.0) < 2.5e-3 and abs(min['vs_dc'] - 5.0) < 2.5e-3
-      why: VS sits within 2.5 mV of 5.000 V at every corner - the bought High grade's 0.05 % initial accuracy (ref5050-grade)
-        - with nothing added by R-ISO-REF (the drop across it is outside the DC loop)
+    - expr: abs(max['vs_dc'] - 5.0) < 0.15e-3 and abs(min['vs_dc'] - 5.0) < 0.15e-3
+      why: 'THE BUFFER''S OWN ERROR, not the reference''s: the reference here is an ideal 5.000 V source, so this reads only
+        what U-BUF and R-ISO-REF add - under 150 uV at every corner, the room-temperature terms of riso-ref-topology''s dc_error
+        budget (I_B.R_F 50 uV + V_OS 100 uV max [ds OPA2197.pdf p.7]; its 125 uV of drift is not in the model). R-ISO-REF
+        adds nothing (its drop is outside the DC loop). The REF5050''s own 0.05 % (ref5050-grade) is reference-alone''s, and
+        the two add: VS is 5.000 V within 2.5 mV plus this, not within 2.5 mV in all (until #5 finding 4 this spent the reference''s
+        whole budget on the buffer)'
       pass: true
   loop-as-netlisted[c_vs=10u]:
     corners: 33
@@ -154,11 +178,19 @@ sims:
     asserts:
     - expr: min['pm'] - 10 > 76
       why: 'the page''s robustness claim (breath-excitation-reference.md: above 76 degrees across a 200x range of C_L) holds
-        at every corner and load, after the +-10 degree screen a macromodel earns'
+        at every corner and load, after the +-10 degree screen a macromodel earns. TRUE AND NARROW (#5 finding 4): it is the
+        margin at the 1.2 MHz crossover, which C_F hands to the op-amp''s own output, so the load barely moves it (118-123
+        degrees from 47 nF to 10.1 uF). The R_ISO-C_L resonance sits BELOW crossover, where no margin is read: the as-built
+        1.1 uF rings back ~45 % on a load step and 10.1 uF over 50 % (step-as-built, step-with-10u-added). This sim says the
+        loop does not oscillate; the step and Z_out sims judge a load'
       pass: true
-    - expr: abs(max['vs_dc'] - 5.0) < 2.5e-3 and abs(min['vs_dc'] - 5.0) < 2.5e-3
-      why: VS sits within 2.5 mV of 5.000 V at every corner - the bought High grade's 0.05 % initial accuracy (ref5050-grade)
-        - with nothing added by R-ISO-REF (the drop across it is outside the DC loop)
+    - expr: abs(max['vs_dc'] - 5.0) < 0.15e-3 and abs(min['vs_dc'] - 5.0) < 0.15e-3
+      why: 'THE BUFFER''S OWN ERROR, not the reference''s: the reference here is an ideal 5.000 V source, so this reads only
+        what U-BUF and R-ISO-REF add - under 150 uV at every corner, the room-temperature terms of riso-ref-topology''s dc_error
+        budget (I_B.R_F 50 uV + V_OS 100 uV max [ds OPA2197.pdf p.7]; its 125 uV of drift is not in the model). R-ISO-REF
+        adds nothing (its drop is outside the DC loop). The REF5050''s own 0.05 % (ref5050-grade) is reference-alone''s, and
+        the two add: VS is 5.000 V within 2.5 mV plus this, not within 2.5 mV in all (until #5 finding 4 this spent the reference''s
+        whole budget on the buffer)'
       pass: true
   loop-as-netlisted[c_vs=10.1u]:
     corners: 33
@@ -190,11 +222,19 @@ sims:
     asserts:
     - expr: min['pm'] - 10 > 76
       why: 'the page''s robustness claim (breath-excitation-reference.md: above 76 degrees across a 200x range of C_L) holds
-        at every corner and load, after the +-10 degree screen a macromodel earns'
+        at every corner and load, after the +-10 degree screen a macromodel earns. TRUE AND NARROW (#5 finding 4): it is the
+        margin at the 1.2 MHz crossover, which C_F hands to the op-amp''s own output, so the load barely moves it (118-123
+        degrees from 47 nF to 10.1 uF). The R_ISO-C_L resonance sits BELOW crossover, where no margin is read: the as-built
+        1.1 uF rings back ~45 % on a load step and 10.1 uF over 50 % (step-as-built, step-with-10u-added). This sim says the
+        loop does not oscillate; the step and Z_out sims judge a load'
       pass: true
-    - expr: abs(max['vs_dc'] - 5.0) < 2.5e-3 and abs(min['vs_dc'] - 5.0) < 2.5e-3
-      why: VS sits within 2.5 mV of 5.000 V at every corner - the bought High grade's 0.05 % initial accuracy (ref5050-grade)
-        - with nothing added by R-ISO-REF (the drop across it is outside the DC loop)
+    - expr: abs(max['vs_dc'] - 5.0) < 0.15e-3 and abs(min['vs_dc'] - 5.0) < 0.15e-3
+      why: 'THE BUFFER''S OWN ERROR, not the reference''s: the reference here is an ideal 5.000 V source, so this reads only
+        what U-BUF and R-ISO-REF add - under 150 uV at every corner, the room-temperature terms of riso-ref-topology''s dc_error
+        budget (I_B.R_F 50 uV + V_OS 100 uV max [ds OPA2197.pdf p.7]; its 125 uV of drift is not in the model). R-ISO-REF
+        adds nothing (its drop is outside the DC loop). The REF5050''s own 0.05 % (ref5050-grade) is reference-alone''s, and
+        the two add: VS is 5.000 V within 2.5 mV plus this, not within 2.5 mV in all (until #5 finding 4 this spent the reference''s
+        whole budget on the buffer)'
       pass: true
   zout-as-netlisted[c_vs=100n]:
     corners: 9

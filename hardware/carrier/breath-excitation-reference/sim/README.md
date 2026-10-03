@@ -18,7 +18,7 @@ feedback of `riso-ref-topology`, at the nominal and every tolerance corner.
 
 | Sim | What | Holds |
 |---|---|---|
-| `loop-as-netlisted[c_vs=…]` | loop gain, broken at `U-BUF`'s (−) input; loads 47 nF, 100 nF, 1 µF, 10 µF, 10.1 µF at `VS` | the page's robustness claim (above 76°) less the ±10° screen, at every corner; `VS` within 5 mV of 5.000 V |
+| `loop-as-netlisted[c_vs=…]` | loop gain, broken at `U-BUF`'s (−) input; loads 47 nF, 100 nF, 1 µF, 10 µF, 10.1 µF at `VS` | the page's robustness claim (above 76°) less the ±10° screen, at every corner — **the crossover's margin only**, which the load barely moves and which cannot see the ring below it (the step sims can); the buffer adds under 150 µV to an ideal 5.000 V reference, the room-temperature part of `riso-ref-topology`'s `dc_error` — the REF5050's own 0.05 % is `reference-alone`'s, and the two add |
 | `zout-as-netlisted[c_vs=…]` | the output impedance at `VS`, closed loop | 1.20 Ω at 500 Hz within 10 % |
 | `step-as-netlisted[c_vs=…]` | a 0.5 mA load step at `VS` | recovers without ringing through |
 | `step-with-10u-added` | the same with 10 µF added at `VS` | **a recorded finding**: it rings |
