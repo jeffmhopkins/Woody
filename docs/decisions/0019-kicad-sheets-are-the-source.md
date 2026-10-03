@@ -4,9 +4,10 @@
 (the sheet names the bought part). **Migration done for every board:** the
 key boards (2026-09-27), the main board, the interfaces and the umbilical
 adapter (2026-09-29), the module's two boards (2026-09-30) — *Consequences*.
-**Open: the second phase** — BOM fragments counted from the sheets, and
-`allocation.yaml` — whose stated trigger (every board in KiCad) is now met;
-the owner decides when it starts.
+**The second phase** — BOM fragments counted from the sheets, and
+`allocation.yaml` — starts **after design freeze** (owner, 2026-10-03,
+choosing that over now or after the Rev A order, so the BOM does not churn
+while the review fixes are editing it).
 
 ## Context
 
