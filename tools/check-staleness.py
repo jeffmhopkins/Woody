@@ -222,18 +222,54 @@ def check_corpus_shape(files):
     return problems
 
 
+def _joined(lines):
+    """(structural, text, lineof) for one file: the table-row and fenced line numbers,
+    the line-JOINED stream (lines stripped, joined with one space) and, for every
+    character of it, the 1-based line it came from. check_figures says why each."""
+    structural = set()
+    fenced = False
+    for i, line in enumerate(lines, 1):
+        st = line.strip()
+        if st.startswith("```"):
+            fenced = not fenced
+            structural.add(i)
+            continue
+        if fenced or (st.startswith("|") and st.endswith("|")):
+            structural.add(i)
+    buf, lineof = [], []
+    for i, line in enumerate(lines, 1):
+        s = line.strip()
+        if buf:
+            buf.append(" ")
+            lineof.append(i)
+        for ch in s:
+            buf.append(ch)
+            lineof.append(i)
+    return structural, "".join(buf), lineof
+
+
 def check_figures(files):
     spec = yaml.safe_load(open(os.path.join(ROOT, "config/figures.yaml")))
     live, refuted = [], []
+    # Each file is read and joined ONCE, not once per pattern. The per-pattern
+    # version re-read and re-joined every file, a character at a time, for each
+    # of 448 patterns: 2.8 billion list appends, ~95 of the run's ~100 s, and
+    # the reason the PreToolUse hook (60 s) timed out (issue #9, G1). Same text,
+    # same line map, same verdicts - fig-before/after compared on 2026-10-03.
+    prepared = []
+    for path in files:
+        rel = os.path.relpath(path, ROOT)
+        if rel == "config/figures.yaml":
+            continue
+        try:
+            lines = open(path, encoding="utf-8").read().splitlines()
+        except Exception:
+            continue
+        prepared.append((rel, lines) + _joined(lines))
     for fig in spec["figures"]:
         for bad in fig.get("forbidden") or []:
-            for path in files:
-                rel = os.path.relpath(path, ROOT)
-                if rel == "config/figures.yaml":
-                    continue
-                try:
-                    lines = open(path, encoding="utf-8").read().splitlines()
-                except Exception:
+            for rel, lines, structural, text, lineof in prepared:
+                if bad not in text:
                     continue
                 # Match against a line-JOINED stream, not line by line. The
                 # corpus is hard-wrapped at ~78 columns, so a forbidden phrase
@@ -269,29 +305,8 @@ def check_figures(files):
                 #   fenced    -> the refutation must be on the SAME LINE
                 #
                 # Both keep every real correction and both close the reach the
-                # injections exploited.
-                structural = set()
-                fenced = False
-                for i, line in enumerate(lines, 1):
-                    st = line.strip()
-                    if st.startswith("```"):
-                        fenced = not fenced
-                        structural.add(i)
-                        continue
-                    if fenced or (st.startswith("|") and st.endswith("|")):
-                        structural.add(i)
-
-                buf, lineof = [], []
-                for i, line in enumerate(lines, 1):
-                    s = line.strip()
-                    if buf:
-                        buf.append(" ")
-                        lineof.append(i)
-                    for ch in s:
-                        buf.append(ch)
-                        lineof.append(i)
-                text = "".join(buf)
-
+                # injections exploited. (`structural`, `text` and `lineof` are
+                # built by _joined(), once per file.)
                 start = 0
                 while True:
                     at = text.find(bad, start)
@@ -1376,6 +1391,18 @@ def check_sim():
         cm = [l.strip() for l in (c.stdout + "\n" + c.stderr).splitlines()
               if l.strip() and not l.strip().startswith("sim coverage:")]
         msgs += cm or [f"tools/sim_coverage.py exited {c.returncode} and said nothing parseable - run it directly"]
+    # and each results.yaml against its OWN numbers: sim.py check trusts the recorded
+    # pass: flags and hashes only the inputs, so a hand-edited result passed (issue #9, G5);
+    # a measure pinned to its own definition's constant is G6. Notes are not failures.
+    try:
+        v = subprocess.run([sys.executable, os.path.join(ROOT, "tools/sim_recheck.py")],
+                           capture_output=True, text=True, cwd=ROOT, timeout=120)
+    except Exception as e:
+        return msgs + [f"could not run tools/sim_recheck.py: {e}"]
+    if v.returncode != 0:
+        vm = [l.strip() for l in (v.stdout + "\n" + v.stderr).splitlines()
+              if l.strip() and not l.strip().startswith(("sim recheck:", "note:"))]
+        msgs += vm or [f"tools/sim_recheck.py exited {v.returncode} and said nothing parseable - run it directly"]
     return msgs
 
 

@@ -13,7 +13,6 @@ One template each in `.github/ISSUE_TEMPLATE/`.
 |---|---|---|
 | `kind: feature` | New capability | Its "done when" check passes on the integration branch |
 | `kind: task` | Defined work, usually under a feature or review | Its "done when" holds |
-| `kind: decision` | A choice that is the owner's | The owner answered **and** an ADR or ADR amendment records it; the closing comment quotes the owner and links the ADR |
 | `kind: review` | A review's findings, one id each | Every id is fixed, refuted with evidence, or split out into its own issue |
 | `kind: defect` | Something in the corpus is wrong | Fixed, with the check that now catches it |
 
@@ -28,9 +27,9 @@ Every open issue carries exactly one `kind:`, one `status:` and at least one
 
 - `status: queued` — accepted, not started.
 - `status: in progress` — someone is working on it; the latest comment says what.
-- `status: needs owner decision` — work is done up to a choice; the comment
-  sets out the options. Spin the choice out as a `kind: decision` issue when it
-  is more than one line.
+- `status: needs owner decision` — work is done up to a choice that has been
+  put to the owner **in the working chat**; the issue comment names the choice
+  and says it was asked there, and is updated with the answer.
 - `status: gated` — waits on a milestone, which the issue names.
 - `area:` module, controller, key-boards, mechanical, sims, tooling, docs, bom.
 
@@ -44,6 +43,9 @@ Every open issue carries exactly one `kind:`, one `status:` and at least one
 | Bring-up | Assembled, rails checked, E-series bench tests passed |
 | Finish | Assembly guide, carry case |
 
+Gates may be added when the work needs one (for example a Rev B); add it on
+GitHub and to this table in the same change.
+
 "What is left before we order" is the open list of the first three milestones.
 
 ## Commits, not pull requests
@@ -55,13 +57,14 @@ otherwise the issue is closed by hand with its outcome comment.
 
 ## The loop
 
-1. **New work asked for in chat becomes an issue before it starts.** A choice
-   the owner makes in chat becomes a `kind: decision` issue, closed at once
-   with their words quoted and the ADR linked, so it can be found later.
+1. **New work asked for in chat becomes an issue before it starts.**
+   **Decisions are not issues.** They are asked and answered in the working
+   chat, recorded in an ADR or ADR amendment with the owner's words quoted,
+   and the issue that needed them is commented with the answer and the ADR.
 2. **Starting:** set `status: in progress` and comment with the plan.
 3. **Finishing:** comment with the outcome **per finding id or checklist
    item**, with commit links; then close, or move to
-   `status: needs owner decision` with the options.
+   `status: needs owner decision` after asking the choice in chat.
 4. Comments end with the Claude Code attribution footer.
 
 Closed issues are history, like `docs/review/`: not edited afterwards. A

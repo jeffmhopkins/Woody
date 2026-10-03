@@ -2037,7 +2037,7 @@
     (property "Pins_source" "datasheets/discrete-and-power/R-78E5.0-1.0.pdf p.1: pin-out compatible with LM78xx - 1 +Vin, 2 GND, 3 +Vout" (at 91.44 96.52 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Recom" (at 91.44 96.52 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "R-78E5.0-1.0" (at 91.44 96.52 0) (effects (font (size 1.27 1.27)) hide))
-    (property "LCSC" "C3033024" (at 91.44 96.52 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "" (at 91.44 96.52 0) (effects (font (size 1.27 1.27)) hide))
     (property "Assembly" "hand" (at 91.44 96.52 0) (effects (font (size 1.27 1.27)) hide))
     (pin "1" (uuid 624d1981-fb4d-5193-a107-f5bdfe28b96d))
     (pin "2" (uuid 9eb10083-0978-5eb3-b354-0655ef717649))

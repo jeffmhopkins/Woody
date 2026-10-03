@@ -39,8 +39,20 @@ It installs:
 | `poppler-utils` | `pdftoppm` renders sheets to PNG; `pdftotext` reads banked datasheets |
 | `librsvg2-bin` | `rsvg-convert`: `pcb.py render` turns its SVG copper plots into PNGs |
 | `shapely` (pip) | `pcb.py check`'s silkscreen and outline geometry, and the router's clearances |
-| `ngspice` (Ubuntu's; 42 on this setup, and 44.2 reported to give identical results — GitHub issue #10) | `sim.py`: every circuit's SPICE simulation (§5) |
-| the KiCad 3D models the boards' footprints use (the list is the loop in `setup-env.sh`) | `pcb.py render`. The full `kicad-packages3D` library is 3 GB, so the script fetches only these, from the KiCad project's GitLab at tag `9.0.0`, into `/usr/share/kicad/3dmodels/`. The KS-33's model is banked in `datasheets/`, and the chain header has none |
+| `ngspice` (the distribution's; the version every `results.yaml` was made with is in `tools/toolchain.yaml`) | `sim.py`: every circuit's SPICE simulation (§5) |
+| the KiCad 3D models the boards' footprints name (the script's `models` list) | `pcb.py render`. The full `kicad-packages3D` library is 3 GB, so the script fetches only these, from the KiCad project's GitLab at tag `9.0.0`, into `/usr/share/kicad/3dmodels/`. The KS-33's model is banked in `datasheets/`, and the chain header has none |
+
+**Versions are pinned, and checked.** `tools/toolchain.yaml` names the KiCad,
+ngspice and OpenSCAD the committed outputs were made with, and
+`tools/requirements.txt` the Python packages. The script installs those,
+never adds the Ubuntu KiCad archive on another distribution (it says what to
+install instead), and ends with a `WARNING` line for every tool that differs;
+`tools/commit-gate.py` repeats the warning on every commit made with one. A
+different version is a reason to look, not a failure: on KiCad 9.0.2 the
+netlists and DRC agreed with 9.0.9 but a loaded board carried no courtyards,
+which silently emptied the main board's height check (issue #9, G2; the checks
+now build them). Java is not installed: only `route: freerouting` needs it, and
+no board uses it now.
 
 **KiCad must be 9, not Ubuntu's 7.0.** KiCad 7's command line has no ERC, and
 the sheets are written in KiCad 9's format. The script adds the KiCad 9 archive
@@ -217,9 +229,10 @@ python3 tools/kicad.py check                                  # everything above
   with the table in `key-marker-and-bits.md` §4, or it names a key that is not
   on that cluster in `config/key-layout.yaml`.
 
-It needs KiCad 9, so it is **not** in the commit hook; run it before
-committing anything under `hardware/` that touches a sheet, a netlist or the
-allocation.
+It needs KiCad 9 and takes about a minute, so the commit gate
+(`tools/commit-gate.py`, *The commit gate* below) runs it only when the commit
+can touch a KiCad input, and says `kicad: SKIPPED` with the reason otherwise.
+Run it by hand whenever that reason is wrong.
 
 ### Editing a circuit or a board
 
@@ -366,7 +379,18 @@ prints which, exits 1, and leaves any existing board as it was.
   track, via, pour or another part's pad — on either layer within its keep-out
   radius: the larger of the echo's two bearing diameters, halved, plus
   `rules.clearance` (`check_cad`; ADR 0020: what bears on the board there is
-  the grounded plate's hardware).
+  the grounded plate's hardware);
+- a body CAD export the board is checked against (its outline DXF,
+  `pcb-geometry.echo`) that `tools/cad.py`'s ledger calls stale, edited or
+  unbuilt (`cad_export_problems`): against a stale export, the checks above
+  compare the board with a body that may no longer exist;
+- a machine-placed part with polarity (a `D`, `Q`, `U` or `LED` reference, an
+  electrolytic) or more than two pads whose LCSC number has no row in
+  `hardware/lib/jlc-rotation.csv` (`jlc_rotation_problems`): at offset 0 JLC
+  fits a SOIC turned 90° and a SOT-23 180° from KiCad's. A row is proved from
+  JLC's own EasyEDA footprint, banked in `datasheets/`, **by pin function, not
+  pad number**: JLC's SS34 footprint numbers its anode 1 where KiCad's diode
+  numbers its cathode 1. A two-pad passive with no row only warns, at `render`.
 
 **`render`** refuses a board that fails `check`, and a board naming a 3D
 model that is not installed (kicad-cli would render the part as nothing and
@@ -528,7 +552,11 @@ from library"), and refuses one whose pads moved.
 mirrored switch has them; each chain header, connector, the sensor and each LED
 where the echo puts it; each mount plated on its net with no other net's
 copper under its hardware on either face; no copper of any net inside a U-bolt
-leg's outer-layer keep-out; every top part inside its height room; each plane
+leg's outer-layer keep-out; every top part inside its height room (measured
+by its courtyard, which `check` builds itself: a board loaded on KiCad 9.0.2
+has none, and the check once skipped every part in silence - a part over
+0.1 mm tall with no courtyard is now an error, and so is a board where none was
+checked); each plane
 and island zone present; every island-net pad on the island (but `off_island`)
 and every island via inside it, no other plane net's via on it or its moat;
 **exactly one tie**, the named net tie; and **no signal track on layer 1 or 4
@@ -721,10 +749,38 @@ Each render is generated; what it is rendered from is the source.
   `hardware/boards/main-board/README.md`, *Open*.
 - **The BOM fragments** become exports once every board is in KiCad, because
   a row's quantity is a count over all of them (ADR 0019).
-- **The commit gate.** `check-staleness.py` runs `cad.py check` but not
-  `kicad.py check`, because that needs KiCad installed; run it by hand.
-  **Nothing prints that it was skipped**: a `check-staleness.py` PASS says
-  nothing about the sheets' exports, renders, ERC or `pcb.py check`.
+- **A gate outside Claude Code.** The commit gate below is a Claude Code hook.
+  A human's `git commit` and any other client pass no gate; there is no CI and
+  no committed git hook (issue #9, G1, left to the owner).
+
+### The commit gate — `tools/commit-gate.py`
+
+A `PreToolUse` hook on `Bash` (`.claude/settings.json`). For any command that
+is not a `git commit` or `git merge` it exits at once and says nothing. For
+one that is, it runs, in the work tree the command commits in:
+
+- `check-staleness.py` (everything that needs no KiCad: figures, BOM,
+  datasheets, the CAD and sim ledgers), about 30 s;
+- `kicad.py check`, at the same time, when `kicad-cli` is installed **and** the
+  commit can touch a KiCad input: something staged under `hardware/` or
+  `mechanical/export/`, a KiCad tool, or a `git add`, `-a` or merge in the same
+  command (whose staging the gate cannot see yet). About 70 s alone, and the
+  two together about two minutes on a loaded four-core box (2026-10-03).
+  Otherwise the summary says `kicad: SKIPPED` and why.
+
+A FAIL **denies the command** (`permissionDecision: deny`). A commit that has to
+go in red — the tree is known-red and this commit does not make it so — says so
+in its message, with a trailer line
+
+```
+Gate-Red: <which failures, and why this commit goes in with them>
+```
+
+and goes ahead with the failures shown. The trailer stays in the log, and
+`git log --grep Gate-Red` lists every commit made red. A checker that crashes
+or times out (each has 200 s) is a FAIL. Detail is in `.staleness/report.txt`
+and `.staleness/gate.txt`. `python3 tools/commit-gate.py --self-test` checks
+which commands it treats as commits.
 
 ### Ordering: JLC's stock, not LCSC's
 
@@ -785,6 +841,20 @@ sims.yaml files, the decks, the netlist and the cited figures' values.
 `check-staleness.py` runs `sim.py check`, so a changed value, deck or figure,
 or a failed assertion, fails the check until the sims are re-run. Proven by
 changing `C-KEY` in the netlist, 2026-09-28.
+
+**The hashes cover the inputs, not the results**, so `check-staleness.py` also
+runs `tools/sim_recheck.py`: every assert in `sims.yaml` evaluated again on the
+recorded min, nominal and max, the recorded sims, measures and asserts held to
+`sims.yaml`'s, and a recorded `pass:` its own numbers contradict reported as an
+edit. Before it, a hand-set number or an assert's `expr` replaced with `True`
+passed every check (issue #9, G5, by mutation). It also reports a `post:`
+measure **pinned to a constant of its own definition** — a trough whose window
+starts where the signal crosses `v_on + 1` can never read above it, so an
+assert that it stays over `v_on + 0.5` passed by construction (G6): a failure
+when an assert reads the measure, a note otherwise. It is a separate tool
+because `sim.py` hashes itself into every `results.yaml`: an edit to `sim.py`
+makes every result stale until every sim is re-run. What it still cannot see:
+an edited number that no assert reads.
 
 **What a result is worth.** It proves the arithmetic and the wiring against the
 models it was given. Where a model is behavioural, as a Schmitt input modelled

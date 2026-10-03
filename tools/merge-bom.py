@@ -148,6 +148,47 @@ def load():
     return rows, problems
 
 
+# STATUS IS HELD TO THE SHEETS. ADR 0019 makes a circuit's KiCad sheet the
+# owner of the bought part: when a placed symbol whose `Row` is a BOM row
+# carries an `MPN`, that row's part has been chosen. Its status still read
+# `candidate` on 58 rows (issue #7, finding 6, 2026-10-03), so a reader
+# triaging the BOM for what is ready to order saw ~100 undecided rows and lost
+# the four real blockers among them. A status nobody is made to update is a
+# restated fact - the repository's named failure - so it is checked here
+# rather than trusted.
+UNCHOSEN = ("candidate", "open")
+
+
+def sheet_mpns():
+    """{row: {(sheet, ref, mpn)}} for every placed symbol with a `Row` field."""
+    import re
+    out = {}
+    for path in glob.glob(os.path.join(ROOT, "hardware", "**", "*.kicad_sch"),
+                          recursive=True):
+        text = open(path, encoding="utf-8").read()
+        for block in text.split("\n  (symbol (lib_id")[1:]:
+            props = dict(re.findall(r'\(property "([^"]+)" "((?:[^"\\]|\\.)*)"', block))
+            if props.get("Row"):
+                out.setdefault(props["Row"], set()).add(
+                    (os.path.relpath(path, ROOT), props.get("Reference", "?"),
+                     props.get("MPN", "")))
+    return out
+
+
+def status_lag(rows):
+    """Rows still `candidate`/`open` although a sheet names the part bought."""
+    placed, lag = sheet_mpns(), []
+    for r in rows:
+        chosen = sorted(p for p in placed.get(r[0], ()) if p[2])
+        if r[7] in UNCHOSEN and chosen:
+            sheet, ref, mpn = chosen[0]
+            lag.append(f"{r[0]} is '{r[7]}' but {sheet} {ref} buys {mpn} - "
+                       f"a part a sheet names is at least 'selected' (ADR 0019); "
+                       f"promote the row in its fragment, or clear the sheet's MPN "
+                       f"if it is not chosen")
+    return lag
+
+
 def render(rows):
     """CRLF, always. repo-maintenance.md 4: setting lineterminator to \\n
     rewrites every line in the file and buries a three-row change in a
@@ -163,6 +204,15 @@ def main():
     rows, problems = load()
     text = render(rows)
     check = "--check" in sys.argv
+    # A lagging status fails --check, the gate, but does not stop a write:
+    # the master is a faithful merge either way, and refusing to regenerate
+    # it would hold every other fragment edit hostage to a status column.
+    lag = status_lag(rows)
+    if check:
+        problems += lag
+    else:
+        for p in lag:
+            print("  WARNING: " + p)
 
     if check:
         try:

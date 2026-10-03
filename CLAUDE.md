@@ -38,18 +38,20 @@ pipes, a version with no ` V`. Each missed by a character or two against a
 case-sensitive literal match. Eleven derived statements stayed live while the
 checker reported **zero hits**.
 
-A `PreToolUse` hook runs the checker and surfaces the result, so forgetting
-step 3 is visible rather than silent. **It does not do what this paragraph
-used to say it does, in two ways, and both are worth knowing before you rely
-on it.** It runs before *every* `Bash` call, not before `git commit`: the
-entry carries `"matcher": "Bash"` and an `"if": "Bash(git commit *)"` that
-gates nothing, so `ls` pays a full corpus scan too — which is why a loop of
-twenty tool calls can blow the 60 s timeout. And it emits only
-`additionalContext`, never a `permissionDecision`, so **a FAIL never blocks
-a commit**; it tells you, and you are the one who has to stop. Found by the
-2026-09-22 coverage slice (E2-8), behaviourally — three earlier slices named
-the hook, one retyped its shell pipeline, and none of them tested *when* it
-fires.
+**The commit gate enforces step 3.** A `PreToolUse` hook on `Bash` runs
+`tools/commit-gate.py`, which returns at once for anything but `git commit` or
+`git merge`. For those it runs the checker — and `tools/kicad.py check` too
+when the commit can touch a KiCad input, or says `kicad: SKIPPED` and why —
+and **a FAIL denies the command.** If the tree is already red and this commit
+must go in anyway, put a trailer line in the message,
+`Gate-Red: <which failures, and why>`; the commit then goes ahead with the
+failures shown, and `git log --grep Gate-Red` lists every such commit. Do not
+use it to get past a failure your own change caused. A crash or a timeout is
+a FAIL. It is a Claude Code hook only: a human's `git commit` passes no gate,
+and there is no CI (`docs/reference/tooling.md`, *The commit gate*). The hook
+this replaced ran the full scan before *every* `Bash` call, behind an `"if"`
+that gated nothing, and never blocked — found behaviourally by the 2026-09-22
+coverage slice (E2-8) and fixed by issue #9 (G1).
 
 **Three traps in step 2, all paid for.**
 
@@ -260,7 +262,8 @@ repeating, and record the verification.
 
 ## Work is tracked in GitHub issues
 
-New work and every owner decision get an issue before work starts; commits
+New work gets an issue before work starts; **owner decisions are asked and
+answered in the working chat, never as issues**, and recorded in an ADR; commits
 reference it (`#9 G2: …`); the issue is commented with the outcome **by
 finding id** and its `status:` label moved, or closed. Issues cite figures by
 name and never quote them — the corpus stays the only place a value lives.
@@ -291,8 +294,9 @@ Kinds, labels, milestones and the loop: `docs/reference/workflow.md`.
   are KiCad projects under `hardware/boards/`, placing circuit sheets once per
   instance. `python3 tools/kicad.py check` fails on a sheet edited without
   re-exporting, a stale render, a board ERC error, or a board wired against
-  `allocation.yaml`. It needs KiCad 9 (`tools/setup-env.sh`) and is **not** in
-  the commit hook, so run it by hand. **Every circuit with parts has a
+  `allocation.yaml`. It needs KiCad 9 (`tools/setup-env.sh`); the commit gate
+  runs it only when the commit can touch a KiCad input, and says `SKIPPED`
+  otherwise, so run it by hand when that is wrong. **Every circuit with parts has a
   sheet**, so every `netlist.yaml` is exported: edit the sheet, never the
   netlist. A circuit with no parts has no sheet and says so on its page.
   A new circuit starts as a hand-written `netlist.yaml` and becomes a sheet

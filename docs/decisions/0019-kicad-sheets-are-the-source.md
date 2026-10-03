@@ -4,9 +4,10 @@
 (the sheet names the bought part). **Migration done for every board:** the
 key boards (2026-09-27), the main board, the interfaces and the umbilical
 adapter (2026-09-29), the module's two boards (2026-09-30) — *Consequences*.
-**Open: the second phase** — BOM fragments counted from the sheets, and
-`allocation.yaml` — whose stated trigger (every board in KiCad) is now met;
-the owner decides when it starts.
+**The second phase** — BOM fragments counted from the sheets, and
+`allocation.yaml` — starts **after design freeze** (owner, 2026-10-03,
+choosing that over now or after the Rev A order, so the BOM does not churn
+while the review fixes are editing it).
 
 ## Context
 
@@ -118,7 +119,11 @@ these KiCad schematics actually be the source of truth of all the things.")
   CAD's switch positions. `docs/reference/tooling.md` §4.
 - **`kicad.py check` needs KiCad 9**, so it is not in the commit hook, which
   runs before every shell command. It is run by hand, and
-  `docs/reference/tooling.md` says when; nothing reports that it was skipped.
+  `docs/reference/tooling.md` says when. *(Superseded 2026-10-03, issue #9:
+  the hook is now a commit gate that acts on `git commit` and `git merge`
+  only, and runs `kicad.py check` whenever the commit can touch a KiCad
+  input and KiCad is installed - `docs/reference/tooling.md`, *The commit
+  gate*.)*
 
 ## Amendment, 2026-09-27 — the sheet names the bought part
 

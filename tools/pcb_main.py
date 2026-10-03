@@ -238,6 +238,17 @@ def copper_zone(board, net, layer, poly_body, priority=0, name=""):
         board.Add(z)
 
 
+def pad_copper(pad):
+    """A pad's copper outline on its own face, in PCB mm (shapely)."""
+    from shapely.ops import unary_union
+    poly = pad.GetEffectivePolygon(pcbnew.F_Cu if pad.IsOnLayer(pcbnew.F_Cu) else pcbnew.B_Cu, pcbnew.ERROR_INSIDE)
+    out = []
+    for i in range(poly.OutlineCount()):
+        ol = poly.Outline(i)
+        out.append(Polygon([(pcbnew.ToMM(ol.CPoint(j).x), pcbnew.ToMM(ol.CPoint(j).y)) for j in range(ol.PointCount())]))
+    return unary_union(out)
+
+
 def ties_of(spec):
     """An island's net ties: `tie:` (one, the controller's) or `ties:` (a list - an island
     that meets two other grounds, each at its own tie: the module's DIG_GND, at the star
@@ -404,6 +415,12 @@ def build(bdir, lay):
 def courtyard_body(fp):
     layer = pcbnew.B_CrtYd if fp.IsFlipped() else pcbnew.F_CrtYd
     c = fp.GetCourtyard(layer)
+    if not c.OutlineCount():
+        # a board from pcbnew.LoadBoard() carries no courtyard cache on some 9.0.x builds
+        # (empty on 9.0.2 for every part; built on 9.0.9): build it, never trust an empty one
+        # (issue #9, G2)
+        fp.BuildCourtyardCaches()
+        c = fp.GetCourtyard(layer)
     return unary_union([Polygon([to_body(*xy_mm(c.Outline(i).CPoint(j))) for j in range(c.Outline(i).PointCount())])
                         for i in range(c.OutlineCount())])
 
@@ -566,6 +583,7 @@ def check_heights(board, lay, geo):
     rooms = [(box(*v[:4]), v[4], name) for name, v in k.items() if name.startswith("under key board") or name == "Matrix ribbon"]
     else_room = k["elsewhere"][4]
     heights = lay.get("heights") or {}
+    checked = 0
     for fp in board.GetFootprints():
         if fp.IsFlipped() or fp.GetReference().startswith("H"):
             continue
@@ -576,7 +594,15 @@ def check_heights(board, lay, geo):
             continue
         cy = courtyard_body(fp)
         if cy.is_empty:
+            # a part with no courtyard used to be skipped in silence - and on KiCad 9.0.2,
+            # where LoadBoard builds none, that was every part: a 40 mm part passed (issue #9,
+            # G2). Copper only (a net tie) cannot stand in any room; anything else must
+            # have a courtyard to be checked.
+            if h > 0.1:
+                bad.append(f"error: [height] {fp.GetReference()} ({name}) stands {h:g} mm and has no "
+                           f"courtyard, so its room cannot be checked - give its footprint one")
             continue
+        checked += 1
         room, where = else_room, "where no key board is overhead"
         for rect, r, nm in rooms:
             if cy.intersects(rect) and cy.intersection(rect).area > 1e-3 and r < room:
@@ -585,6 +611,9 @@ def check_heights(board, lay, geo):
                 room, where = r, nm
         if h > room + 1e-6:
             bad.append(f"error: [height] {fp.GetReference()} stands {h:g} mm; its room ({where}) is {room:g}")
+    if not checked:
+        bad.append("error: [height] no top-side part had a courtyard, so no height was checked - "
+                   "the courtyard caches were not built (KiCad version?)")
     return bad
 
 
@@ -614,10 +643,12 @@ def check_planes(board, lay):
         for f in board.GetFootprints():
             for pad in f.Pads():
                 name = f"{f.GetReference()}.{pad.GetNumber()}"
-                c = Point(*xy_mm(pad.GetPosition()))
-                if pad.GetNetname() == spec["net"] and name not in spec.get("off_island", []) and not P.contains(c):
+                # by the pad's copper, not its centre (#9 G9): an island pad wholly on the island,
+                # another plane net's pad standing on it when the larger part of its copper does
+                g = pad_copper(pad)
+                if pad.GetNetname() == spec["net"] and name not in spec.get("off_island", []) and not P.buffer(0.05).contains(g):
                     bad.append(f"error: [island] {name} is {spec['net']} but off its island - it would return through the plane")
-                if pad.GetNetname() in plane_nets - {spec["net"]} - other and P.contains(c) \
+                if pad.GetNetname() in plane_nets - {spec["net"]} - other and g.intersection(P).area > g.area / 2 \
                         and f.GetReference() not in ties_of(spec) and name not in spec.get("foreign_ok", {}):
                     bad.append(f"error: [island] {name} ({pad.GetNetname()}) stands on the {spec['net']} island")
         for v in board.GetTracks():
