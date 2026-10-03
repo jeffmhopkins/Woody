@@ -55,6 +55,18 @@ mounts:
 connectors:
   J-MCU-C: {row: J-MCU-C, rot: 0, back_row_from: x1, back_row_at: -8.00, bottom: true}
 
+# Parts whose courtyard is MEANT to lie off the board (pcb.py check_courtyards).
+courtyard_overhang:
+  J2:
+    reason: "HDR-MATRIX's insulator is ten pitches long, 25.4, under a Matrix 25.0 square whose pad rows it follows, so its mouth end stands 0.2 past the Matrix's edge - and the carrier's mouth edge is flush with the Matrix's, behind the extension's USB-C plug (owner, 2026-10-03, option A). The overhang is plastic over air, beside the plug, with no pad off the board"
+    source: "config/body.yaml boards.matrix_carrier_past (the mouth edge flush), openings.usb_ext_overmold_w; pcb-geometry.echo matrix pins (pin 1 1.07 in from the Matrix's edge); datasheets/connectors/HANXIA-HX-PZ2.54-1x10P-TP-YQ.pdf (B - 0.2 = 25.20 for 10 pins)"
+  J3:
+    reason: "as J2: the other pad row's header, its mouth end 0.2 past the carrier's mouth edge"
+    source: "as J2"
+  J1:
+    reason: "J-MCU-C's courtyard (its insulator plus 0.25) reaches the corner where the arm's mouth end meets its top edge, which the outline rounds; the insulator itself is inside by boards.matrix_carrier_past"
+    source: "config/body.yaml boards.matrix_carrier_past; mechanical/cad/woody_body.scad mx_arm and the outline's corner radius kb_corner_r"
+
 # Top-face parts' heights (pcb.py check_heights), against the one room the echo gives: under
 # the Matrix, HDR-MATRIX's plastic (config/body.yaml boards.matrix_hdr_h). Its posts go on
 # through the Matrix and are cut flush; the plastic is what stands on this board.
@@ -83,13 +95,9 @@ silk:
   rev: "A"
   date: "2026-10-03"
 
-# Every connection by pcb_route.complete, shortest first, 45-degree paths on both faces,
-# a via only where a crossing needs one (the owner's routing policy, docs/reference/
-# tooling.md); no layer direction.
+# EVERY TRACK IS DRAWN BY carrier_routes.py (run it instead of pcb.py layout): an orderly
+# two-layer bus with one ladder, because J-MCU-C's back row reaches J3 in the wrong order on
+# any one layer - the script says why. The autorouter after it finds nothing left to do.
 route: astar
-# TX and RX run farthest (J-MCU-C's pins 3 and 4 to the far row's last pins); with them left
-# to the end their way round the far header's end was closed (pcb.py layout, 2026-10-03)
-route_first: [/U0TXD, /U0RXD]
-rip_up: 10
 directions:
   chamfer: 0.6

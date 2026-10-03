@@ -79,7 +79,7 @@ ECHO: "PCB", "matrix", "board", "thickness", 1.6, "smt_height_max", 2.5, "side",
 ECHO: "PCB", "matrix", "connector", "J-MCU-C", 251.5, 273.04, 14.9, 8.97, 1, 90
 ECHO: "PCB", "matrix", "pins", "HDR-MATRIX row 0", 272.97, 17.07, 295.83, 17.07, 2.54
 ECHO: "PCB", "matrix", "pins", "HDR-MATRIX row 1", 272.97, 39.93, 295.83, 39.93, 2.54
-ECHO: "PCB", "matrix", "standoff", "M2.5", 291.7, 11.5, 2.7, 4.5, 5, "hang"
-ECHO: "PCB", "matrix", "standoff", "M2.5", 277.1, 45.5, 2.7, 4.5, 5, "hang"
-ECHO: "PCB", "matrix", "standoff", "M2.5", 291.7, 45.5, 2.7, 4.5, 5, "hang"
+ECHO: "PCB", "matrix", "standoff", "M2.5", 291.7, 11, 2.7, 4.5, 5, "hang"
+ECHO: "PCB", "matrix", "standoff", "M2.5", 277.1, 46, 2.7, 4.5, 5, "hang"
+ECHO: "PCB", "matrix", "standoff", "M2.5", 291.7, 46, 2.7, 4.5, 5, "hang"
 ECHO: "PCB", "matrix", "keepout", "elsewhere", 271.9, 7.5, 297.4, 49.5, 2.5
