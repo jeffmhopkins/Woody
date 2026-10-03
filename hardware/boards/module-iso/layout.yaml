@@ -91,7 +91,7 @@ parts:
   C44:  [23.0, 78.5, 0, rear]
   C45:  [19.0, 44.0, 0, rear]
   C46:  [9.2, 77.0, 180, rear]
-  L1:   [33.9, 47.9, 0, rear]
+  L1:   [33.4, 47.9, 0, rear]
   L2:   [38.75, 63.0, 45, rear]
 
 # How tall each footprint stands (pcb_module.check_heights), with its source. Rooms: the

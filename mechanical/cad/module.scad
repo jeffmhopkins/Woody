@@ -182,7 +182,8 @@ ib_gap = standoff_stock_l;                 // main board rear face to iso board 
 ib_z1 = mb_z0 - ib_gap;                    // iso board front face (toward the main board)
 ib_z0 = ib_z1 - boards_t;                  // its rear face, where U-ISO and its filter stand
 ib_y0 = ec[1] + 12.35 + boards_part_clear;
-ib_notch = [pw[0] - power_w / 2 - boards_part_clear, pw[1] + power_l / 2 + boards_part_clear];
+// the notch: J-PWR-EURO's body, its footprint's courtyard round it (0.5, as the layout draws it) and boards.part_clear
+ib_notch = [pw[0] - power_w / 2 - 0.5 - boards_part_clear, pw[1] + power_l / 2 + 0.5 + boards_part_clear];
 ib_poly = [[b_x0, ib_y0], [ib_notch[0], ib_y0], ib_notch, [b_x1, ib_notch[1]], [b_x1, iso_board_y1], [b_x0, iso_board_y1]];
 ib_rects = [["r", [b_x0, ib_y0], [ib_notch[0], iso_board_y1]], ["r", [b_x0, ib_notch[1]], [b_x1, iso_board_y1]]];   // the L as two rectangles
 function in_rect(A, R) = A[0] == "c" ? min(A[1][0] - A[2] - R[1][0], R[2][0] - A[1][0] - A[2], A[1][1] - A[2] - R[1][1], R[2][1] - A[1][1] - A[2])

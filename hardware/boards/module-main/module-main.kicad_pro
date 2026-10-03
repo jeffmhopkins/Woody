@@ -262,11 +262,11 @@
         "line_style": 0,
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
-        "name": "plane_nets",
+        "name": "supply",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 3,
+        "priority": 0,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.4,
+        "track_width": 0.5,
         "via_diameter": 0.7,
         "via_drill": 0.3,
         "wire_width": 6
@@ -316,11 +316,11 @@
         "line_style": 0,
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
-        "name": "supply",
+        "name": "plane_nets",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 0,
+        "priority": 3,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.5,
+        "track_width": 0.4,
         "via_diameter": 0.7,
         "via_drill": 0.3,
         "wire_width": 6
@@ -386,23 +386,11 @@
       },
       {
         "netclass": "supply",
-        "pattern": "/power-entry/ISO_FB2"
+        "pattern": "/ISO_FB2"
       },
       {
         "netclass": "supply",
-        "pattern": "/power-entry/ISO_FILT_POS"
-      },
-      {
-        "netclass": "supply",
-        "pattern": "/power-entry/ISO_FILT_NEG"
-      },
-      {
-        "netclass": "supply",
-        "pattern": "/power-entry/ISO_VIN_POS"
-      },
-      {
-        "netclass": "supply",
-        "pattern": "/power-entry/ISO_VIN_NEG"
+        "pattern": "/ISO_FILT_NEG"
       },
       {
         "netclass": "rail12",

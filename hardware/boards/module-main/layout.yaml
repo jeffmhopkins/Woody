@@ -45,19 +45,32 @@ mounts:
   footprint: "MountingHole:MountingHole_3.2mm_M3_Pad"
   net: null
 
+# J-B2B-ISO (ADR 0023 point 2, amended 2026-10-03) on the TOP face, unmirrored, as
+# J-B2B-MOD on the jack board: its insulator is on this board's REAR, toward the iso
+# board (pcb_module.body_to_rear), its tails out of the front.
 connectors:
   J-UMBILICAL: {row: J-UMBILICAL}
   J-B2B-MOD: {row: J-B2B-MOD}
+  J-B2B-ISO: {row: J-B2B-ISO, body: rear}
   J-LED-PANEL: {row: J-LED-PANEL}
   J-PWR-EURO: {row: J-PWR-EURO, side: rear, odd_column: -1}
 
-cad_tall:
-  U-ISO: {row: U-ISO, pins: ["1", "2", "4", "5", "6"]}
-
 b2b:
-  other: hardware/boards/module-jack
+  - {row: J-B2B-MOD, other: hardware/boards/module-jack}
+  - {row: J-B2B-ISO, other: hardware/boards/module-iso}
 
 parts:
+  D1:   [37.25, 62, 0, rear]
+  D15:  [24.9, 50.4, 0, rear]
+  C25:  [30.25, 82.75, 0]
+  D9:   [36.75, 90, 0, rear]
+  C28:  [38, 73, 270, rear]
+  C27:  [44.75, 74.75, 0]
+  U9:   [43, 73.75, 180, rear]
+  JP1:  [6.2, 67.75, 90, rear]
+  R43:  [4.7, 74.5, 180]
+  D11:  [3.2, 71.25, 90, rear]
+  D2:   [24.9, 46.9, 0, rear]
   C11:  [14.85, 58, 0]
   C43:  [11.6, 62.5, 90]
   C5:   [31.25, 102, 270]
@@ -65,12 +78,10 @@ parts:
   C6:   [30.25, 106.75, 0]
   C51:  [20.25, 104.25, 180]
   C7:   [23, 107.25, 90]
-  JP1:  [6.35, 78.25, 90, rear]
   C12:  [22.2, 53.5, 0]
   R14:  [8.45, 53, 270]
   R9:   [21.25, 56.35, 90]
   C1:   [29.85, 88.5, 0, rear]
-  C2:   [40.5, 50, 0]
   C3:   [40.6, 89.25, 0, rear]
   C8:   [3.8, 27.6, 0]
   C9:   [13.3, 28.35, 0, rear]
@@ -87,10 +98,7 @@ parts:
   C22:  [16.05, 80.25, 180, rear]
   C23:  [40.5, 99.25, 270, rear]
   C24:  [35.5, 108.75, 90, rear]
-  C25:  [43.3, 82, 180, rear]
   C26:  [41.05, 78, 0, rear]
-  C27:  [44.3, 75.25, 270]
-  C28:  [47.05, 80, 270]
   C29:  [29.55, 75, 90]
   C30:  [17.05, 71.5, 270, rear]
   C31:  [13.8, 68.5, 0, rear]
@@ -105,28 +113,20 @@ parts:
   C40:  [3.55, 25.1, 180]
   C41:  [22, 14.6, 90, rear]
   C42:  [30.25, 11.85, 0, rear]
-  C44:  [14.2, 43.2, 0]
-  C45:  [8.25, 68.5, 90, rear]
-  C46:  [8.9, 40.44, 180]
   C47:  [26.5, 19.1, 270, rear]
   C48:  [23.5, 19.35, 180, rear]
   C49:  [34.75, 27.6, 0, rear]
   C50:  [35.75, 12.35, 0, rear]
-  D1:   [46.85, 86.5, 270, rear]
-  D2:   [29, 38.9, 90, rear]
   D3:   [37.35, 76.25, 90, rear]
   D4:   [12.55, 98.75, 180]
   D5:   [8.05, 105.25, 270, rear]
   D6:   [14.8, 91.25, 270]
   D7:   [36.75, 99.75, 180, rear]
   D8:   [32.75, 101.5, 270, rear]
-  D9:   [43.8, 85, 270]
   D10:  [19.05, 74.25, 270]
-  D11:  [3.05, 75.5, 270]
   D12:  [11.05, 75.25, 270]
   D13:  [32.8, 71.75, 270]
   D14:  [17.8, 30.6, 270, rear]
-  D15:  [33, 38.9, 90, rear]
   F1:   [46.85, 33.5, 270]
   F2:   [46.85, 39.75, 90]
   F3:   [46.85, 24, 270]
@@ -134,8 +134,6 @@ parts:
   FB2:  [37.5, 58, 90]
   FB3:  [34.1, 82.75, 270, rear]
   FB4:  [40.5, 58, 90]
-  L1:   [31.5, 56, 0]
-  L2:   [38.2, 62.5, 45, rear]
   NT1:  [39.6, 29.92, 180]
   NT2:  [38.5, 33.2, 0]
   NT3:  [28.5, 30.35, 0, rear]
@@ -178,7 +176,6 @@ parts:
   R40:  [15.3, 74.5, 0]
   R41:  [20.55, 74.5, 0, rear]
   R42:  [5.55, 74, 90, rear]
-  R43:  [6.55, 78.25, 0]
   R44:  [11.3, 73.25, 180, rear]
   R45:  [8.55, 75.5, 180, rear]
   R46:  [11.05, 66.25, 0]
@@ -220,7 +217,6 @@ parts:
   U6:   [7.5, 102.5, 0]
   U7:   [14.5, 84, 0]
   U8:   [38, 104, 0, rear]
-  U9:   [42, 80, 0]
   U10:  [14.5, 70.5, 0]
   U11:  [5.5, 70.5, 0]
   U12:  [36, 67, 0]
@@ -232,7 +228,8 @@ parts:
 # Layer 2 is the one plane: AGND_MOD under the analog block, with DIG_GND as an island.
 # Layer 3 is a routing layer - signals, and the analog +12 V and -12 V as tracks
 # (net_classes:). Layer 4 carries the rear parts, signals, and PWR_GND, the isolated
-# return, as its own copper (pours: below). (Laid out first with +12 V as a layer-3
+# return, as its own copper (pours: below). U-ISO and its filter are on the iso board
+# behind (hardware/boards/module-iso), since 2026-10-03. (Laid out first with +12 V as a layer-3
 # plane, two routing layers did not complete the board: 2026-10-02, 50-60 connections
 # left by both routers.)
 planes:
@@ -262,24 +259,23 @@ islands:
     # its own clearance, joined to AGND_MOD by a track
     foreign_ok: {J4.2: "the panel LED's return: AGND_MOD by design (panel-led.md); J-LED-PANEL's place is the module CAD's"}
 
-# PWR_GND on layer 4 (power-entry.md, Grounding): under U-ISO's body and round the
-# load switch on the rear, joined by a strip at the board's left edge that keeps the
-# isolation gap (isolation:, below) from U-ISO's input pins.
+# PWR_GND on layer 4 (power-entry.md, Grounding): round the load switch on the rear,
+# to J-B2B-ISO's PWR_GND pair (U-ISO's return, from the iso board) and NT-UMB-MOD (NT3).
 pours:
-  - {net: PWR_GND, layer: B.Cu, outline: [[1.0, 17.0], [16.0, 17.0], [16.0, 37.6], [8.5, 37.6], [8.5, 43.6], [27.0, 43.6], [27.0, 63.6], [1.0, 63.6]]}
+  - {net: PWR_GND, layer: B.Cu, outline: [[1.0, 17.0], [16.0, 17.0], [16.0, 36.5], [27.6, 36.5], [27.6, 45.5], [1.0, 45.5]]}
 
-# U-ISO's barrier (ADR 0027): its input side - the filter after L-ISO-IN and the
-# converter's input pins - and its output side - the isolated +12 V, its return and
-# the load switch - keep this far apart on every layer. 2.0 mm is a FUNCTIONAL gap,
-# not a safety rating [from memory]: both sides are SELV (+-12 V), and they are
-# DC-tied at the etherCON and the star (NT3, NT2); what it keeps small is the stray
-# capacitance across the converter that L-CM-ISO and C-ISO-Y exist to manage.
-# C-ISO-Y (C46) bridges it by design.
+# U-ISO's barrier (ADR 0027), on this board: its input side is the converter's -12 V
+# leg after FB4 on its way to J-B2B-ISO; its output side the isolated +12 V, its return
+# and the load switch. 2.0 mm is a FUNCTIONAL gap, not a safety rating [from memory]:
+# both sides are SELV (+-12 V), and they are DC-tied at the etherCON and the star (NT3,
+# NT2); what it keeps small is the stray capacitance across the converter that L-CM-ISO
+# and C-ISO-Y (on the iso board) exist to manage. J-B2B-ISO leaves its pair 5-6 open
+# between the two sides.
 isolation:
   gap: 2.0
-  input: [ISO_VIN_POS, ISO_VIN_NEG, ISO_FILT_POS, ISO_FILT_NEG]
+  input: [ISO_FILT_NEG]
   output: [ISO_POS12, PWR_GND, UMBILICAL_POS12, ON, ON_SW, FB, GATE_DRIVE, GATE_NODE, SENSE_NODE, TIMER, GATE_COMP_MID]
-  bridge: [C46]
+  bridge: []
 
 # THE BREATH PAIR (breath-receive-stage.md: the in-amp's input pair symmetric):
 # BREATH_SENSE and AGND_SENSE from the etherCON's pins 1 and 2 side by side on the
@@ -304,8 +300,7 @@ net_classes:
            /power-entry/BUS_POS12_RAW, /power-entry/BUS_NEG12_RAW,
            /power-entry/POS12_PTC1, /power-entry/POS12_PTC2, /power-entry/NEG12_PTC3,
            /power-entry/POS12_D1, /power-entry/POS12_D2, /power-entry/NEG12_D4, /power-entry/NEG12_FB,
-           /power-entry/ISO_FB2, /power-entry/ISO_FILT_POS, /power-entry/ISO_FILT_NEG,
-           /power-entry/ISO_VIN_POS, /power-entry/ISO_VIN_NEG]
+           /ISO_FB2, /ISO_FILT_NEG]
     track: 0.5
   rail12:
     nets: [MODULE_ANALOG_POS12, MODULE_ANALOG_NEG12]
@@ -357,15 +352,11 @@ rooms: {front: 18.3, rear: 25.6}
 heights:
   Neutrik_NE8FAV: 18.3                    # [repo drc.echo: the NE8FAV's setback is the main board's]
   PinHeader_2x10: 2.54                    # [repo config/module.yaml b2b.insulator_h]
+  PinHeader_2x05: 2.54                    # [repo config/module.yaml b2b.insulator_h: J-B2B-ISO's, on the rear]
   JST_XH_B2B: 9.8                         # [repo pcb-geometry.echo J-LED-PANEL mated height]
   IDC-Header_2x08: 9.05                   # [repo config/module.yaml power.h]
-  Converter_DCDC_RECOM_RPA20: 10.2        # [repo config/module.yaml iso.body]
-  L_CommonModeChoke_Bourns_PM3700: 11.43  # [repo config/module.yaml iso.filter]
   CP_Radial_D6.3mm: 11.0                  # [repo config/module.yaml tall.cap_h, tbd]
   CP_Radial_D5.0mm: 11.0                  # [from memory: 5 x 11 can]
-  CP_Elec_6.3x7.7: 7.7                    # [repo config/module.yaml iso.filter]
-  CP_Elec_6.3x5.8: 5.8                    # [repo config/module.yaml iso.filter]
-  L_Sunlord_SWPA6028S: 2.8                # [repo config/module.yaml iso.filter]
   Potentiometer_Bourns_3296W: 10.03       # [repo config/module.yaml tall.trim]
   Potentiometer_Bourns_3224W: 5.3         # [repo config/module.yaml tall.trim_smd]
   D_DO-41: 2.7                            # [from memory: DO-41 body diameter, lying flat]
