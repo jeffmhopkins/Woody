@@ -1246,7 +1246,10 @@ module tail_wiring_3d() {
 // stands.
 tall_sz = [boards_tall_w, boards_tall_l];   // along x, across y
 far_y = cb_y[tube_side < 0 ? 1 : 0] + tube_side * (boards_tall_l / 2 + 0.5);
-tall_c = [[boards_tall_at_x, far_y]];   // boards.tall_at_x (J-MCU no longer places it: it moved off the LED row, 2026-10-03)
+near_y = cb_y[tube_side < 0 ? 0 : 1] - tube_side * (boards_tall_l / 2 + 0.5);
+// boards.tall_side: which edge it stands against. The near edge since 2026-10-03 (the
+// owner: the breath pair runs along the far edge only, and the buck keeps off it)
+tall_c = [[boards_tall_at_x, boards_tall_side == "near" ? near_y : far_y]];   // boards.tall_at_x (J-MCU no longer places it: it moved off the LED row, 2026-10-03)
 // Is any key board overhead? Tested against each key board's outline,
 // kb_rect - a full rectangle across the cavity since ADR 0025. (It used to
 // test per-key cluster_pcb_w squares, which predate those boards, and so

@@ -105,47 +105,41 @@ islands:
     # its one pad off the island: the breath pair's AGND leg ends at R-SER-BREATH-INST
     # beside J-UMB (breath-sense-link.md)
     off_island: [R39.1]
-  # THE BREATH CORRIDOR'S REFERENCE (pairs: below): AGND_INST strips under the pair, each
-  # its own zone with a moat, joined to the island through the pair's own AGND leg and
-  # its vias - no tie of their own (strip: true). S1 in layer 3 under the near-edge run
-  # on layer 4 (carved out of INST_POS12, the LEDs' supply, which keeps its copper
-  # inboard of it); S2 in layer 2 under the far run on layer 1. None under the crossing.
+  # THE BREATH CORRIDOR'S REFERENCE (pairs: below): an AGND_INST strip in layer 3 under the
+  # whole far-edge run, its two legs at the mouth and its hop into R38 / R39 - carved out
+  # of INST_POS12, the LEDs' supply, which keeps its copper inboard of it; its own zone
+  # with a moat, joined to the island through the pair's AGND leg and the guard traces'
+  # stitching (strip: true, no tie of its own)
   - net: AGND_INST
     layer: In2.Cu
     strip: true
     moat: 0.5
     tie_window: 0.0
-    # and under the pair's two legs at the mouth, on layer 4 from the sensor's GND pin
-    # (U10.3) and the buffer's output (U3.7) down to where the coupled run starts
-    outline: [[252.0, 15.0], [249.5, 15.0], [249.5, 14.9], [244.89, 14.9], [243.89, 7.8], [150.7, 7.8],
-              [150.7, 14.8], [145.39, 14.8], [144.39, 7.8], [126.21, 7.8], [124.71, 14.8], [118.79, 14.8],
-              [117.29, 7.8], [42.7, 7.8], [42.7, 14.8], [37.63, 14.8], [35.13, 7.8], [17.5, 7.8],
-              [17.5, 9.0], [13.7, 9.0], [13.7, 46.9], [16.2, 46.9], [16.2, 26.9], [18.5, 26.9],
-              [18.5, 11.0], [32.87, 11.0], [35.37, 18.0], [45.9, 18.0], [45.9, 11.0], [114.71, 11.0],
-              [116.21, 18.0], [127.29, 18.0], [128.79, 11.0], [141.61, 11.0], [142.61, 18.0], [153.9, 18.0],
-              [153.9, 11.0], [241.11, 11.0], [242.11, 18.1], [245.6, 18.1], [245.6, 25.0], [247.0, 25.0],
-              [247.0, 30.5], [252.0, 30.5]]
-  - net: AGND_INST
-    layer: In1.Cu
-    strip: true
-    moat: 0.5
-    tie_window: 0.0
-    outline: [[252.6, 37.0], [250.0, 37.0], [250.0, 42.0], [251.52, 42.0], [251.09, 42.62], [252.55, 43.62],
-              [255.81, 47.1], [291.1, 47.1], [291.1, 33.4], [287.9, 33.4], [287.9, 43.9], [257.19, 43.9],
-              [254.65, 41.18], [252.91, 39.98], [252.6, 40.43]]
+    outline: [[287.9, 34.0], [287.9, 46.0], [253.89, 46.0], [252.89, 39.0], [242.11, 39.0], [241.11, 46.0],
+              [153.9, 46.0], [153.9, 39.0], [142.61, 39.0], [141.61, 46.0], [128.79, 46.0], [127.29, 39.0],
+              [116.21, 39.0], [114.71, 46.0], [45.9, 46.0], [45.9, 39.0], [35.37, 39.0], [32.87, 46.0],
+              [20.5, 46.0], [20.5, 45.5], [19.8, 45.5], [19.8, 27.6], [17.8, 27.6], [17.8, 45.5],
+              [11.5, 45.5], [11.5, 49.5], [20.5, 49.5], [20.5, 49.2], [35.13, 49.2], [37.63, 42.2],
+              [42.7, 42.2], [42.7, 49.2], [117.29, 49.2], [118.79, 42.2], [124.71, 42.2], [126.21, 49.2],
+              [144.39, 49.2], [145.39, 42.2], [150.7, 42.2], [150.7, 49.2], [243.89, 49.2], [244.89, 42.2],
+              [250.11, 42.2], [251.11, 49.2], [291.1, 49.2], [291.1, 34.0], [291.5, 34.0], [291.5, 26.0],
+              [286.0, 26.0], [286.0, 34.0]]
 
 # THE BREATH PAIR (same page: "crosses the moat as a pair"): BREATH_SENSE's
 # source SENSOR_BUFFERED_OUT and the AGND leg, taken at the sensor's own GND pin
 # (U-BREATH pin 3), side by side on layer 1 over the plane to their series
 # resistors at J-UMB. Routed before everything else (pcb_route.route_pair).
 pairs:
-  # THE BREATH CORRIDOR (owner, 2026-10-03: "analog breath should not run under LEDs down
-  # the length"; README, The breath corridor). Two legs, a layer change at R38/R39:
-  # A - the sensor's output and its AGND leg along the NEAR EDGE on layer 4, over an AGND
-  #     strip in layer 3 (islands: below), stepping inboard round the near column mounts.
-  #     Layer 4, not 1: the near-row keys' T networks (LT1/LT3/RT1/RT3) stand on layer 1
-  #     between the edge and their switch pins. Its legs reach U3.7 / U10.3 by the
-  #     autorouter (a via each): the analog block on the island has no room for the pair.
+  # THE BREATH CORRIDOR (owner, 2026-10-03: "the analog path should just be routed along
+  # the top" - the far edge, the top of the board's plots - "Not the bottom is crossing the
+  # board twice. Unneedingly"; README, The breath corridor). ONE pair, the sensor's output
+  # and its AGND leg, along the FAR EDGE on layer 4 from the mouth to J-UMB: a short hop up
+  # from the buffer (U3, mid-board) to the edge where the sensor stands, the run along the
+  # edge stepping inboard round the far column mounts H2, H4, H6 and H8, and one hop down
+  # into R38 / R39 at J-UMB. No crossing of the LED row. Layer 4, not 1: the far-row keys'
+  # T networks stand on layer 1 between the edge and their switch pins. Its reference is an
+  # AGND_INST strip cut out of layer 3 under it (islands: above). Its legs reach the
+  # layer-1 pads at each end through a via each (the autorouter's).
   - nets: [/SENSOR_BUFFERED_OUT, AGND_INST]
     from: [U3.7, U10.3]
     to: [R38.1, R39.1]
@@ -159,20 +153,7 @@ pairs:
     # stitched into the AGND strip under it at least every 5 mm (pcb_route.guard_traces);
     # left out only where another net's copper leaves no room - README lists the spans
     guard_traces: {net: AGND_INST, every: 5.0}
-    through: [[17.5, 9.4], [34.0, 9.4], [36.5, 16.4], [44.3, 16.4], [44.3, 9.4], [116.0, 9.4], [117.5, 16.4], [126.0, 16.4], [127.5, 9.4], [143.0, 9.4], [144.0, 16.4], [152.3, 16.4], [152.3, 9.4], [242.5, 9.4], [243.5, 16.5], [249.5, 16.5]]
-  # B - after the series resistors: ONE crossing of the LED row at 90 deg on layer 1, in
-  #     the gap between LED2 and J-MCU (x 249.5), over solid PWR_GND (no strip there,
-  #     the coordinator's option B: layer 2 stays one piece); then the far side at y 45.5,
-  #     over an AGND strip in layer 2, to J-UMB's breath pins.
-  - nets: [/BREATH_SENSE, /AGND_SENSE]
-    from: [R38.2, R39.2]
-    to: [J6.1, J6.2]
-    layer: F.Cu
-    width: 0.25
-    gap: 0.25
-    guard: 0.55
-    guard_traces: {net: AGND_INST, every: 5.0}
-    through: [[249.5, 28.2], [249.5, 41.3], [252.5, 41.3], [256.5, 45.5], [289.5, 45.5], [289.5, 33.0]]
+    through: [[19.5, 47.6], [34.0, 47.6], [36.5, 40.6], [44.3, 40.6], [44.3, 47.6], [116.0, 47.6], [117.5, 40.6], [126.0, 40.6], [127.5, 47.6], [143.0, 47.6], [144.0, 40.6], [152.3, 40.6], [152.3, 47.6], [242.5, 47.6], [243.5, 40.6], [251.5, 40.6], [252.5, 47.6], [289.5, 47.6], [289.5, 33.0]]
 
 # Net classes (the rest are the Default class, rules: track): the rails as
 # tracks. [calc] IPC-2221 outer layer, 1 oz, 10 C rise: I = 0.048 dT^0.44 A^0.725
@@ -417,8 +398,8 @@ parts:
   # (config/body.yaml boards.umb_parts_d), D-TVS-PWR between them
   D5:  [292.6, 31.3, 90]   # D-TVS-BREATH on BREATH_SENSE (pin 1)
   D6:  [292.6, 27.55, 90]   # D-TVS-BREATH on AGND_SENSE (pin 2)
-  R38: [248.2, 24.0, 90]   # R-SER-BREATH-INST in BREATH, at the layer change: pair A in from below, pair B out above
-  R39: [250.8, 24.0, 90]   # R-SER-BREATH-INST in AGND_SENSE, beside it
+  R38: [288.95, 30.39, 0]   # R-SER-BREATH-INST in BREATH, at J-UMB pin 1, where the pair comes down from the far edge
+  R39: [288.95, 27.85, 0]   # R-SER-BREATH-INST in AGND_SENSE, at pin 2
   NT1: [293.0, 13.4, 90]    # NT-DIG at J-UMB pin 8 (ADR 0018)
   D2:  [286.4, 18.7, 90]    # D-REVSHUNT, across pins 3 / 6, ahead of L-BUCK-IN
   D3:  [291.6, 21.8, 270]   # D-TVS-PWR at J-UMB's pins 3 (+12 V, its cathode) and 6 (PWR_GND), #8-9
@@ -445,21 +426,21 @@ parts:
   # U-TVS-SPI clamps the pad side of R-SPI-SER (IO35, IO36, IO34 - spi-link), so it
   # stands on the J-MCU side of the resistors, below the chain's, clear of the column mount
   U1:  [278.5, 24.3, 0]
-  R34: [232.5, 15.5, 90]   # R-CHAIN-SER SCK, mouth side of the breath crossing
-  R35: [235.1, 15.5, 90]   # R-CHAIN-SER SH/LD
-  R36: [237.7, 15.5, 90]   # R-CHAIN-SER SER (the chain's end)
+  R34: [232.5, 36.5, 90]   # R-CHAIN-SER SCK, on the far side of the LED row where the block used to stand
+  R35: [235.1, 36.5, 90]   # R-CHAIN-SER SH/LD
+  R36: [237.7, 36.5, 90]   # R-CHAIN-SER SER (the chain's end)
   J2:  [284.0, 9.3, 90]   # HDR-SERVICE at config/body.yaml boards.service_hdr_at (pin 1), in the tail corner by J-UMB, off the LEDs' cone; reached with the lid off
   # --- the regulator block (the echo's REGULATOR-BLOCK) holds U-BUCK alone; the
   # buck's input LC and C-STRIP-BULK where their height fits (README, Open)
-  U5:  [230.71, 42.75, 0]   # U-BUCK in the block against the far edge, its pins ALONG the body on the row's side, its body toward the edge (the owner, 2026-10-03: tall parts 'away from leds')
+  U5:  [226.1, 14.75, 180]   # U-BUCK in the block against the near edge (boards.tall_side), its pins ALONG the body
   # #8-7: the module's own caps at the module - C11 beside pin 1 (VIN) between L1 and U5,
   # C43 (owner, 2026-10-03, RECOM's application) at pin 3 (OUT), returned to pin 2 (GND)
-  C11: [220.8, 45.7, 180]   # C-BUCK-IN 100 uF (5.8 mm) against the far edge at pin 1 (VIN), its + pad toward it
-  L1:  [221.3, 38.0, 0]   # (moved 1.8 toward U5 for C44) L-BUCK-IN 22 uH, INST_POS12 into C11 and pin 1
-  C43: [236.9, 39.3, 0]   # C-BUCK-OUT 10 uF at pin 3 (OUT), returned to its own via beside pin 2 (GND)
-  D4:  [242.5, 38.0, 90]   # D-USBOR at C43, off the breath crossing
-  C10: [206.3, 44.6, 90]   # C-STRIP-BULK-1 220 uF polymer (7.7 mm) against the far edge, off the LED row as far as the board allows, on the INST_POS12 plane beside the buck's input
-  C44: [213.7, 37.6, 90]   # C-STRIP-BULK-2, its pair: between C10 and L1, as high as C11 (above it) allows; the cone note reports it
+  C11: [237.0, 12.5, 90]   # C-BUCK-IN 100 uF (5.8 mm) at pin 1 (VIN), on the block's tail side
+  L1:  [247.8, 18.5, 0]   # L-BUCK-IN 22 uH, above H7, INST_POS12 into C11
+  C43: [220.0, 18.3, 0]   # C-BUCK-OUT 10 uF at pin 3 (OUT), returned to its own via
+  D4:  [237.0, 20.0, 0]   # D-USBOR, between C-BUCK-IN and the LED row, toward J-MCU's 5 V pins
+  C10: [212.2, 11.5, 0]   # C-STRIP-BULK-1 220 uF polymer (7.7 mm), against the near edge on the mouth side of the regulator block
+  C44: [212.2, 18.7, 0]   # C-STRIP-BULK-2, its pair, inboard of it
   U6:  [270.9, 30.0, 0]   # U-LVLSHIFT 74AHCT125, on the LED row's tail side of the breath crossing, by LED 1
   C12: [270.9, 36.6, 90]   # its 100 nF, at VCC (pin 14)
   R10: [268.3, 37.0, 90]   # R-LED-PD
@@ -509,13 +490,3 @@ route_first: [INST_5V_A, /power-entry-instrument/BUCK_A_OUT, BUCK_IN, UMBILICAL_
 directions:
   # each right-angle corner cut to two 45-degree bends, up to this far back (pcb_route.chamfer)
   chamfer: 0.6
-  # ONE region, where a crossing needs it (the owner's rule, 2026-10-03): the breath pair's
-  # crossing of the LED row runs up layer 1 at x 249.5, and everything that crosses it -
-  # the LED chain's data, J-MCU's lines, the 5 V - does so on layer 4; there layer 4 runs
-  # across the board, so it meets the pair at 90 degrees (README, The breath corridor)
-  against_cost: 6.0
-  regions:
-    - name: breath crossing
-      rect: [244.0, 17.5, 255.0, 43.5]
-      layers: {B.Cu: horizontal}
-      why: "layer 4 square across the breath pair's layer-1 crossing of the LED row"
