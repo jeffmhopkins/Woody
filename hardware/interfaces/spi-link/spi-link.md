@@ -227,15 +227,20 @@ is 40 mA, the pad's typical drive at its strongest setting; the pad's own
 output resistance, 17 Ω at its strongest drive setting and 35 Ω at the
 default, brings a shorted conductor's current to 33 mA or 28 mA `[calc; ds
 ESP32-S3-datasheet-v2.2.pdf p.65]`, and 33 mA through 82 Ω is 90 mW in the
-1206's 1/4 W. **The 40 mA is not a limit** (2026-10-01, A5-12): Table 5-4
+1206's 0.66 W (14 %). **The 40 mA is not a limit** (2026-10-01, A5-12): Table 5-4
 gives it as `I_OH` typical at `PAD_DRIVER` = 3, and the absolute maximum
 ratings give only a cumulative 1500 mA across all IO, with a footnote that
 the part survived every pin shorted to ground for 24 hours `[ds p.64,
 Table 5-1]`. The 68 Ω row's rejection was argued against it; 82 Ω does not
 need it, standing on `cs-fall-reentry`. With the clamp now behind
-it, `R-SPI-SER` is also the first thing an ESD strike on a conductor meets;
-the banked resistor sheet gives no pulse rating, so the ESD test at E11
-decides whether a pulse-rated part is needed there.
+it, `R-SPI-SER` is also the first thing an ESD strike on a conductor meets,
+so it is **an anti-surge 1206** on the same footprint (owner, 2026-10-03,
+#15 C3: Panasonic ERJ-P08, "ESD surge characteristics superior to standard
+metal film resistors" `[ds PANASONIC-ERJ-P08-ANTI-SURGE-THICK-FILM.pdf p.1,
+ESD p.4]`), and E11's result cannot force a respin. The 82 Ω value read 0
+at JLC and LCSC on 2026-10-03; the BOM row names the in-stock pulse-proof
+equivalent, Vishay's CRCW-HP. `R-SER-BREATH-INST` at the same connector is
+the same series (`breath-sense-link.md`).
 (ADR 0004's old "7.9 MHz corner" was the figure for 100 Ω all along, quoted
 against 220 Ω — the schematic review caught that separately.)
 

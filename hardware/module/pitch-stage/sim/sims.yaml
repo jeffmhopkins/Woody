@@ -276,8 +276,11 @@ sims:
       v_jack: "at(w['jack'], 0.999 * p['t_end'])"
       i_jc: "max(peak(w['ijcn'], 0, p['t_end']), -trough(w['ijcn'], 0, p['t_end']), peak(w['ijcp'], 0, p['t_end']), -trough(w['ijcp'], 0, p['t_end']))"
     asserts:
-      - expr: "max['p_rout'] < 0.5"
-        why: "R-OUT-PROT's rating, its netlist value '1k 1%, >=500mW': the power it carries while the loop fights another output stays inside it at every rail corner. FAILS against a stiff output at the rail (r_ext 0) - the part change is the owner's (pitch-stage.md, 'Patched to another output')"
+      # p_rout is RECORDED against the netlist value's '>=500mW', which a stiff output at the rail
+      # (r_ext 0) exceeds: ACCEPTED BY THE OWNER, 2026-10-03, 'Accept as is' (#5-6; pitch-stage.md,
+      # 'Patched to another output'). No part change, so no assertion at 0.5 W
+      - expr: "max['p_rout'] < 0.66"
+        why: "RECORDED, NOT HELD TO 500 mW - the owner accepted R-OUT-PROT's dissipation while patched to another output as is (2026-10-03, 'Accept as is', #5-6). What is still held: it stays under the fitted part's own rating, ERJ-P08F1001V 0.66 W [ds PANASONIC-ERJ-P08-ANTI-SURGE-THICK-FILM.pdf p.1], so a further rise is caught"
       - expr: "max['i_out'] < 0.065"
         why: "the op-amp's output current stays under the OPA2197's 65 mA short-circuit current (typ, at +-18 V) [ds OPA2197.pdf p.8]: it holds the rail rather than limiting"
       - expr: "max['i_jc'] < 1.0e-3"

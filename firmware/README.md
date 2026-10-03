@@ -195,6 +195,22 @@ Pins: `SCK` IO38, `SH/LD` IO7, chain-end `SER` IO33, `QH` IO40.
   sensor's zero-pressure offset (`breath-adc.md`, the *rest* line), with it
   down it reads near zero. Gate the row on the reading sitting above about
   half the rest count, and blank it when it falls below.
+- **Cap the matrix while a USB host is attached** (owner, 2026-10-03, #18
+  E1: "Firmware cap"). With the rack up and USB plugged in, the Matrix's
+  `VCC_5V` is fed from both the buck (through `D-USBOR`) and `VBUS` (through
+  the Matrix's own `D1`, a B5819WS), and tens of millivolts decide which
+  carries it: at the corners all of it comes through `D1`
+  (`power-entry-instrument.md`, *Rack and USB together*). So whenever the
+  USB-Serial-JTAG (or, with MIDI on, the USB-OTG) peripheral reports a host
+  connected, clamp the **matrix's** LEDs to **about 120 mA** of estimated
+  current `[calc: the ~283 mA ADR 0014 derives for D1 at a 60 °C interior,
+  *Current: sparse is free, full field is not*, less ~160 mA for the
+  ESP32-S3 through the ME6217, #18 E1's table]`, scaling down as the shared
+  budget does. It applies on top of the shared lighting budget, not instead
+  of it; the LED row is fed from `INST_POS12`, not `VCC_5V`, and is not
+  touched. Lift it when the host goes away. The per-LED current behind the
+  estimate is `matrix-led-current`, still blocked on E1's measurement, so the
+  clamp is a setting E1 confirms, not a constant.
 - **Fourteen pixels, the tail corner's first.** The data line reaches the LED
   in the main board's tail corner before the row (ADR 0028's amendment of
   2026-10-02; `led-strip-drive.md`, *The LED in the tail corner*), so a

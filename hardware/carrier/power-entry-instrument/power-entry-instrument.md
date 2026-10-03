@@ -59,9 +59,9 @@ the two agree, and where they do not the netlist wins.*
                      ├── OPA2197 V+ ────────┤
                      │                      │
                      ├──[L-BUCK-IN]──┬──────┼──[R-78E5.0 A]──▷|──┬── dev board 5V
-                     │   22 µH       │      │                 D-USBOR  ├── 74AHCT125
-                     │   [C-BUCK-IN 100µF]  │                         └── (8×8 matrix,
-                     │      25V, real ESR   │                              via the board)
+                     │   22 µH       │      │      │          D-USBOR  ├── 74AHCT125
+                     │   [C-BUCK-IN 100µF]  │ [C-BUCK-OUT 10µF]        └── (8×8 matrix,
+                     │      25V, real ESR   │   at its OUT pin              via the board)
                      │                      │
  J-UMB pin 6 PWR_GND ┴──────────────────────┴──── PWR_GND pour
 ```
@@ -146,11 +146,12 @@ give **≈ 0.82 A, 82 %**. The R-78E5.0-1.0 carries full load to 60 °C ambient
 and derates linearly to 60 % at 85 °C `[ds R-78E5.0-1.0.pdf p.3, Derating
 Graph]`, so 82 % holds to about 71 °C at the part `[calc: 60 + (100 − 82) /
 40 × 25]`. That is the number to carry until E6 measures the rail, and the
-reason the M8 soak should put a thermocouple on `U-BUCK` (#18 E2/E4; open,
-the owner's).
+figure a bench reading replaces. #18 E2 also asked for a thermocouple on
+`U-BUCK` in the M8 soak; the owner declined it (2026-10-03, "Neither": ADR
+0014, *The clamp, restated on thermal grounds*), so the soak stays as
+ROADMAP M8 has it.
 
-**Rack and USB together: the share is not controlled** (#18 E1; open, the
-owner's decision). With the rack up and a USB host plugged in — the
+**Rack and USB together: the share is not controlled in hardware** (#18 E1). With the rack up and a USB host plugged in — the
 configuration and telemetry case, `firmware/README.md` — `VCC_5V` is fed from
 both sides: the buck through `D-USBOR` (SS14, `V_F` 0.50 V max at 1 A
 `[ds SS14.pdf]`) and `VBUS` through the Matrix's own `D1` (B5819WS, 0.60 V
@@ -160,10 +161,23 @@ which one carries the load is set by tens of millivolts, and at the corners
 `VBUS` carries all of it. All of it is up to the ~0.82 A above, and `D1` is
 rated `P_D` 200 mW at `RθJA` 500 °C/W `[ds B5819WS.pdf]` — about 0.45 W
 would be twice that, and more than a USB 2.0 port's 500 mA. The analyses
-above and ADR 0005/0014 cover rack alone and USB alone, never both. What
-decides it: a firmware cap on the matrix while a USB host is attached, an
-ideal-diode OR in place of `D-USBOR`, or `D1` lifted in the instrument build
-(which gives up bench running on USB, ADR 0005).
+above and ADR 0005/0014 cover rack alone and USB alone, never both. **Decided by the owner, 2026-10-03: "Firmware cap".** While a USB host is
+attached, the firmware caps the Matrix's own LED-matrix brightness so that
+the whole of `VCC_5V` could come through `D1` and stay inside what ADR 0014
+derives for it on USB (*Current: sparse is free, full field is not*):
+`firmware/README.md`, *The lights*, states the rule and its number. No
+hardware changes — no ideal diode, `D1` stays fitted — and the LED row is
+not touched by the cap, being fed from `INST_POS12`, not `VCC_5V`.
+
+**The buck's output capacitor** (`C-BUCK-OUT`, owner, 2026-10-03, D1: "10 Ω
++ 22 µF + 10 µF"). RECOM's standard application puts a 10 µF MLCC on +Vout
+`[ds R-78E5.0-1.0.pdf p.I-4]`, and its 120 mV p-p ripple-and-noise figure is
+stated with only 100 nF across the output `[p.I-1]`; until now the board had
+neither. `C-BUCK-OUT` is that 10 µF, at `U-BUCK-A`'s OUT pin and returned to
+its GND pin, ahead of `D-USBOR`; it is part of the breath ADC's reference
+filter decision (`breath-adc.md`, *The reference's filter*), where the
+simulation gives it no credit. With the Matrix's ~11 µF it is far inside the
+part's 220 µF capacitive-load limit `[ds p.I-1]`.
 
 ---
 
@@ -388,6 +402,7 @@ named as they stand; **proposed** rows have no BOM entry yet.*
 | `U-BUCK` | R-78E5.0-1.0 SIP-3 | The one dev board, the matrix, the level shifter. **10.4 mm tall upright**, which fits anywhere on the main board, under the key boards included (`mechanical/drc.echo` "main board parts room under the key boards", and "regulator block fits where it stands") | `[repo]` |
 | `L-BUCK-IN` | 22 µH ≥1 A (SWPA6028S220MT) | The L of the input LC, one per buck (one buck) | `[repo]` + `[calc]` |
 | `C-BUCK-IN` | 100 µF 25 V electrolytic (UCM1E101MCL1GS) | **Must have real ESR; a ceramic breaks the damping** | `[ds]` + `[calc]` |
+| `C-BUCK-OUT` | 10 µF X5R 50 V 1206 (CL31A106KBHNNNE) | At the buck's OUT pin, ahead of `D-USBOR`: RECOM's standard application (owner, 2026-10-03, D1; below) | `[ds]` |
 | `D-USBOR` | SS14 | **Between the buck and the dev board's 5V pin** — the OR node is that pin, and USB can back-feed it | `[repo]` |
 | `D-REVSHUNT` | SS34 | At the connector, ahead of `L-BUCK-IN` | `[repo]` |
 | `D-TVS-PWR` | SMAJ15A | Across the power pair | `[repo]` |

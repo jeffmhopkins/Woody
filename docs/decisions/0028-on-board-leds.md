@@ -134,7 +134,9 @@ the cavity as the diffuser (ADR 0014, ADR 0016). Two things move:
   with a diode test on the first parts in hand.
 - **Operating range −40 to +65 °C** `[ds p.2]`, against an interior 10–20 K
   above ambient (ADR 0014). Fine in a room; worth remembering under stage
-  lights.
+  lights. The margin on a hot stage (#18 E3) was put to the owner on
+  2026-10-03 and accepted as is: ADR 0014, *The clamp, restated on thermal
+  grounds*.
 - **The LEDs are on the board from the first E-stage build**, so the
   LED-induced breath step (ADR 0014) is measured on the real layout, and E11
   runs with the lights in place.

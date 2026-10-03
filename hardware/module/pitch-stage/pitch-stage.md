@@ -338,8 +338,12 @@ against the real patch because the 1 kΩ divided against it. That error is gone.
   `R-OUT-PROT` at −1 %) — **over the ≥500 mW the part is specified at**;
   through 220 Ω, 0.36 W and 0.40 W. The op-amp sinks or sources 24 mA, under
   its 65 mA limit, and `D-JACK-CLAMP` never conducts (its output stays inside
-  the rails). **The part change is the owner's**: the assertion fails until
-  then. The mod channels share the part and the arithmetic, from the other
+  the rails). **Accepted by the owner as is** (2026-10-03, #5-6: **"Accept
+  as is"**): the part is not changed, and the run records the dissipation
+  rather than failing on the 500 mW; it still holds it under the fitted
+  ERJ-P08F1001V's own 0.66 W `[ds PANASONIC-ERJ-P08-ANTI-SURGE-THICK-FILM.pdf
+  p.1]`, so a further rise is caught. The same acceptance covers all six
+  `R-OUT-PROT` (qty 6). The mod channels share the part and the arithmetic, from the other
   side: their output at −10 V against a stiff +12.6 V is
   `(12.6 + 10)² / 1 kΩ` = 0.51 W `[calc]`.
 
