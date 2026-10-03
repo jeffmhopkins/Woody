@@ -66,7 +66,7 @@ nets.yaml                          at hardware/ root: THE MASTER NET LIST,
 | [`module/`](module/module.md) | The 10HP Eurorack module — 12 circuits |
 | [`interfaces/`](interfaces/README.md) | The 3 circuits that cross a board boundary |
 
-## The `## Interfaces` table
+## The `Interfaces` table
 
 Every circuit page carries one: every net that crosses that circuit's
 boundary, one row each. A PCB netlist is transcribed from these, so a row is

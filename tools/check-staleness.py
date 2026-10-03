@@ -13,7 +13,7 @@ staleness-sweep agents at gates for those.
 Usage:  python3 tools/check-staleness.py [--verbose]
 Exit:   0 clean, 1 defects found
 """
-import csv, os, re, sys, yaml
+import csv, os, re, sys, unicodedata, yaml
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 VERBOSE = "--verbose" in sys.argv
@@ -1181,16 +1181,77 @@ def check_links(files):
         except Exception:
             continue
         for m in list(pat.finditer(text)) + list(refpat.finditer(text)):
-            tgt = m.group(1).split("#")[0]
-            if not tgt or tgt.startswith(("http://", "https://", "mailto:",
-                                          "#")):
+            full = m.group(1)
+            if full.startswith(("http://", "https://", "mailto:")):
                 continue
-            dest = os.path.normpath(os.path.join(os.path.dirname(path), tgt))
+            tgt, _, anchor = full.partition("#")
+            line = text[:m.start()].count("\n") + 1
+            dest = (os.path.normpath(os.path.join(os.path.dirname(path), tgt))
+                    if tgt else path)
             if not os.path.exists(dest):
-                line = text[:m.start()].count("\n") + 1
                 problems.append(f"{rel}:{line} links to {tgt!r}, which does "
                                 f"not resolve")
+                continue
+            # THE ANCHOR WAS NEVER CHECKED. Until 2026-10-03 everything after
+            # `#` was dropped, so all 23 circuit pages' `#the-interfaces-table`
+            # passed while GitHub slugged the heading to
+            # `#the--interfaces-table` and every one of them landed at the top
+            # of the page (issue #10, H3). A link is a path AND a position.
+            if anchor and dest.endswith(".md") and os.path.isfile(dest):
+                if anchor not in md_anchors(dest):
+                    problems.append(
+                        f"{rel}:{line} links to {full!r}, but "
+                        f"{os.path.relpath(dest, ROOT)} has no heading or "
+                        f"<a id> whose GitHub anchor is {anchor!r}")
     return problems
+
+
+_ANCHORS = {}
+
+
+def github_slug(heading):
+    """GitHub's heading anchor: the RENDERED text, lower-cased, with every
+    character that is not a letter, mark, number, connector, space or hyphen
+    removed, then each space turned into a hyphen (not collapsed - so
+    "The `## Interfaces` table" is `the--interfaces-table`)."""
+    t = re.sub(r"!?\[([^\]]*)\]\([^)]*\)", r"\1", heading)  # [text](url)
+    t = re.sub(r"<[^>]+>", "", t)                               # inline HTML
+    t = t.strip().lower()
+    t = "".join(ch for ch in t if ch in " -_" or ch.isalnum()
+                or unicodedata.category(ch).startswith("M"))
+    return t.replace(" ", "-")
+
+
+def md_anchors(path):
+    """Every anchor a Markdown file offers: ATX headings outside fenced
+    blocks, slugged with GitHub's de-duplication (-1, -2 ...), plus explicit
+    `<a id=..>` / `<a name=..>`."""
+    if path in _ANCHORS:
+        return _ANCHORS[path]
+    try:
+        text = open(path, encoding="utf-8").read()
+    except Exception:
+        text = ""
+    seen, out, fence = {}, set(), None
+    for ln in text.splitlines():
+        f = re.match(r"^\s{0,3}(`{3,}|~{3,})", ln)
+        if f:
+            if fence is None:
+                fence = f.group(1)[0] * len(f.group(1))
+            elif f.group(1).startswith(fence):
+                fence = None
+            continue
+        if fence is not None:
+            continue
+        h = re.match(r"^\s{0,3}#{1,6}\s+(.*?)(?:\s+#+)?\s*$", ln)
+        if h:
+            base = github_slug(h.group(1))
+            n = seen.get(base, 0)
+            out.add(base if n == 0 else f"{base}-{n}")
+            seen[base] = n + 1
+    out.update(re.findall(r"<a\s+(?:id|name)=[\"']([^\"']+)[\"']", text))
+    _ANCHORS[path] = out
+    return out
 
 
 RAN = set()
