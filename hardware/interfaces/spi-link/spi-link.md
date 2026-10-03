@@ -218,7 +218,7 @@ costs `[calc]`:
 | **220 Ω** | **1.83–1.86 V** | **below threshold, dwelling ~20 ns per edge in the forbidden band** |
 | 100 Ω | **2.75 V** | clean single step |
 | **82 Ω** (2026-09-30) | **3.04–3.32 V** with the pad's 17–35 Ω `[calc]` | clean single step; the falling edge's first step 0.00–0.26 V |
-| 68 Ω | 3.25 V | clean, but **48 mA fault current**, above the pad's 40 mA typical drive — a characteristic, not a rating (below) |
+| 68 Ω | 3.25 V | clean; a shorted conductor draws **32–39 mA** with the pad's 17–35 Ω, on the 82 Ω row's convention (3.3 / (68 + 35) to 3.3 / (68 + 17)) `[calc]`, against 28–33 mA at 82 Ω. Not chosen because 82 Ω already passes `cs-fall-reentry` with less current, not on a rating (below) |
 
 The answer was 100 Ω until 2026-09-30, and is now **82 Ω**: the simulation
 found the falling edge was the tight one, and 82 Ω with `U-TVS-SPI` moved to

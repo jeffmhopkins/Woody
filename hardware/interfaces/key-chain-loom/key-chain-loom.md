@@ -18,7 +18,8 @@ and the firmware do not change. What changed is where the registers sit:
   lid under the top plate (`PCB-CLUSTER`). Each key board connects to the main
   board by **one 12-conductor 1.27 mm IDC ribbon** (`CBL-CHAIN`) with a 2×6
   IDC socket at each end, plugged into a **through-hole, right-angle, shrouded
-  2×6 header** (`J-CHAIN`) on each board — `chain-connectors` in all.
+  2×6 header** (`J-CHAIN`) on each board — **four** in all (`chain-connectors`):
+  two on the main board, one on each key board.
   Through-hole because the board, not SMT pads, then takes the cable's pull
   (owner, 2026-09-27).
 
