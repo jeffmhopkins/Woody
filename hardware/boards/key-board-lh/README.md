@@ -196,10 +196,10 @@ Where the form has an option that is not listed here, leave it at its default.
 | Different design | 1 | |
 | Delivery format | Single PCB | Not a panel: Economic PCBA takes single boards from 10 × 10 mm `[datasheets/fab/JLCPCB-PCBA-CAPABILITIES.pdf]` |
 | PCB thickness | `boards.key_board_t` (`config/body.yaml`) | ADR 0020 Amendment 6. `pcb.py check` holds the stackup to it, and the `.gbrjob` carries it |
-| PCB colour | Green (`layout.yaml` `fab: mask`) | At this thickness Economic PCBA offers green with HASL or ENIG, 2–50 boards `[JLCPCB-PCBA-CAPABILITIES.pdf, "PCB Specs for Economic PCB Assembly"]` |
-| Silkscreen | White (`fab: silk`) | |
+| PCB colour | **White** (`layout.yaml` `fab: mask`; ADR 0028, *Amendment, 2026-10-02*) | The undersides face the LED row: white is the cavity's reflector. **Check on the quote form:** at this thickness Economic PCBA lists white only with *leaded* HASL, 5–30 boards `[JLCPCB-PCBA-CAPABILITIES.pdf, "PCB Specs for Economic PCB Assembly"]`; if it refuses white with lead-free HASL, the owner chooses Standard PCBA or a leaded finish (*Open*) |
+| Silkscreen | Black (`fab: silk`) | A white legend does not read on white mask |
 | Material type | FR-4 TG135–140, the default | |
-| Surface finish | **LeadFree HASL** (`fab: finish`) | The stackup and the `.gbrjob` say it; Economic PCBA offers it at this thickness (above) |
+| Surface finish | **LeadFree HASL** (`fab: finish`) | The stackup and the `.gbrjob` say it; Economic PCBA offers it at this thickness in green, not listed with white (*PCB colour*, above) |
 | Outer copper weight | 1 oz (`fab: copper_oz`) | Every limit in the DFM table (below) is JLC's 1 oz figure |
 | Via covering | Tented, the default | No via is a test point (the board has none, *Bring-up*) |
 | Min via hole size / diameter | the default (0.3 mm hole) | Both boards' vias are `layout.yaml` `rules: via_drill` / `via`, which JLC does not charge extra for (DFM table) |
@@ -317,7 +317,7 @@ board's are the same.
 | Rule | JLC (2-layer, 1 oz) | Held by (rule) | Smallest on the board | Margin |
 |---|---|---|---|---|
 | Layers / board size | 2; Economic PCBA ≥ 10 × 10 mm | — | 2 layers; outline from the body CAD | ok |
-| Thickness | a standard FR-4 thickness; at this one Economic PCBA takes green HASL/ENIG | `boards.key_board_t` | the stackup, held by `pcb.py check` | ok |
+| Thickness | a standard FR-4 thickness; at this one Economic PCBA takes green HASL/ENIG, and white only with leaded HASL | `boards.key_board_t` | the stackup, held by `pcb.py check` | ok |
 | Track width | ≥ 0.10 | `rules: track_min` | `rules: track` (every signal track) | 2.5× |
 | Track/pad spacing | ≥ 0.10 (pad to track 0.10; SMD pad to pad 0.15) | `rules: clearance` | the rule (the pour is filled at it) | 2× |
 | Copper to routed edge | ≥ 0.20 | `rules: edge_clearance` | ≥ the rule (DRC) | +0.1 |
@@ -327,7 +327,7 @@ board's are the same.
 | Via hole / diameter | ≥ 0.15 / 0.25; diameter ≥ hole + 0.10 (0.15 preferred); a 0.2–0.25 hole under 0.45 costs more | `rules: via_drill`, `via`, `via_min` | the rule on every via (30 on this board, 33 on the right-hand one); ring 0.20 | ok, and no via surcharge |
 | Via hole to hole / pad hole to hole | ≥ 0.20 / 0.45 | `fab: hole_to_hole` | ≥ the rule (DRC) | ok |
 | PTH to track | ≥ 0.28 (0.35 recommended) | `fab: hole_clearance` | ≥ the rule (DRC) | at JLC's minimum by rule |
-| Mask expansion / bridge | 1:1 opening; bridge ≥ 0.10 between pads (green, 1 oz) | board setup: expansion 0 | the narrowest pad gap: 0.20 between J1's pads (1.27 pitch − 1.07 pad) | 2× |
+| Mask expansion / bridge | 1:1 opening; bridge between pads ≥ 0.13 in white or black, 1 oz (0.10 in green) | board setup: expansion 0 | the narrowest pad gap: 0.20 between J1's pads (1.27 pitch − 1.07 pad) | 1.5× `[calc: 0.20 / 0.13]` |
 | Silkscreen line width | ≥ 0.15 | `fab: silk_line_min` | 0.15 (footprint strokes widened to it, `hardware/lib/README.md`) | at minimum |
 | Silkscreen text height | ≥ 1.0 (stroke ≥ 0.15, ratio 1:6 preferred) | `fab: silk_text_min` | 1.0 high, 0.18 stroke | at minimum height; stroke ok |
 | Pad to silkscreen | ≥ 0.15 | `fab: silk_to_pad` | ≥ the rule (DRC, and `pcb.py check`) | ok |
@@ -462,3 +462,4 @@ a drill that did not fit) in the row.
 | Part orientation in JLC's placement preview. The CPL carries JLC's convention and each part's offset from JLC's own footprint (*Ordering*, 4), but no order has yet confirmed it | the first order's preview (*Ordering*, 5); record any correction in *Revisions* |
 | No 3D model of J-CHAIN in the renders (Samtec's is behind a login; `datasheets/.manifest-R12.csv` records the attempt) | nothing blocks on it |
 | The main board's end of the ribbon | the main board's layout |
+| Whether Economic PCBA takes **white** mask with **lead-free** HASL at 1.6 mm: the banked table lists white there only with leaded HASL, 5–30 boards (*Ordering*, PCB colour; ADR 0028, *Amendment, 2026-10-02*) | the quote form at the first order; if it refuses, the owner: Standard PCBA, or a leaded finish |

@@ -33,6 +33,11 @@ WHERE THE GEOMETRY COMES FROM - nothing is modelled twice:
                                      must agree in plan (checked, below: a board in the
                                      wrong place fails the render rather than shows it)
   mask, silk and finish colours      each board's layout.yaml `fab:` (mask, silk, finish)
+  the parts' colours                 each part's own 3D model, rewritten for the export by
+                                     tools/lib-models.py --assembly (kicad-cli drops the
+                                     colours otherwise: coloured_models); a part that still
+                                     arrives uncoloured fails the render. How each colour is
+                                     surfaced - metal, epoxy, ceramic - is PART_FINISH
   explode distances                  config/render.yaml (picture conventions)
 
 The CAD solids a board export REPLACES - its own envelope, the parts envelopes,
@@ -206,21 +211,91 @@ def board_inputs(name):
     return ins
 
 
+LIB_MODELS = "tools/lib-models.py"
+
+
+def coloured_models(name, pcb_text, env):
+    """Every 3D model the board names, as an ASSEMBLY of coloured parts, cached by the
+    model's own bytes: {the board's model string: the file to export with}.
+
+    WHY. kicad-cli's GLB export (KiCad 9) carries a model's colours only through an
+    assembly's components. KiCad's own library models (CadQuery-made: one solid, its
+    colours on its faces) arrive in the GLB with no material at all, and Blender draws
+    a primitive with no material white: every SOIC, chip resistor, MLCC, electrolytic
+    and pin header on the boards was white in these photographs until 2026-10-02.
+    tools/lib-models.py --assembly rewrites a model into the shape the export keeps
+    (a model that is already one is copied unchanged)."""
+    out = {}
+    bdir = os.path.join(ROOT, "hardware", "boards", name)
+    for m in sorted(set(re.findall(r'\(model "([^"]+)"', pcb_text))):
+        p = re.sub(r"\$\{(\w+)\}", lambda g: bdir if g.group(1) == "KIPRJMOD" else env.get(g.group(1), g.group(0)), m)
+        p = os.path.normpath(p if os.path.isabs(p) else os.path.join(bdir, p))
+        if not os.path.exists(p):
+            raise SystemExit(f"render-instrument: {name} names model {m}, which does not exist ({p}) - "
+                             f"it would be left out of the photograph")
+        h = hashlib.sha256(open(p, "rb").read() + f"\0{cad.blob_id(LIB_MODELS)}".encode()).hexdigest()[:16]
+        dst = os.path.join(CACHE, "instrument-models", h, os.path.basename(p))
+        if not os.path.exists(dst):
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            r = subprocess.run([sys.executable, os.path.join(ROOT, LIB_MODELS), "--assembly", p, dst + ".part"],
+                               capture_output=True, text=True)
+            if r.returncode or not os.path.exists(dst + ".part"):
+                raise SystemExit(f"render-instrument: could not recolour {p}:\n{(r.stdout + r.stderr)[-1500:]}")
+            os.replace(dst + ".part", dst)
+        out[m] = dst
+    return out
+
+
+def uncoloured_parts(glb, pcb_text):
+    """The references whose parts came out of the export with a mesh and no material -
+    the ones Blender would draw white - or with no mesh at all (a nested assembly the
+    export drops). Read from the GLB's own JSON chunk."""
+    import struct
+    raw = open(glb, "rb").read()
+    j = json.loads(raw[20:20 + struct.unpack("<I", raw[12:16])[0]])
+    nodes, meshes = j["nodes"], j.get("meshes", [])
+
+    def bare(i):
+        n = nodes[i]
+        if "mesh" in n and any(p.get("material") is None for p in meshes[n["mesh"]]["primitives"]):
+            return True
+        return any(bare(c) for c in n.get("children", []))
+    def empty(i):
+        n = nodes[i]
+        return "mesh" not in n and all(empty(c) for c in n.get("children", []))
+    refs = set(re.findall(r'\(property "Reference" "([^"]+)"', pcb_text))
+    return sorted({n["name"] + (" (no mesh at all)" if empty(i) else "")
+                   for i, n in enumerate(nodes) if n.get("name") in refs and (bare(i) or empty(i))})
+
+
 def export_board(name, ins):
     r = subprocess.run(["kicad-cli", "version"], capture_output=True, text=True)
     h = hashlib.sha256(f"{EXPORT_RECIPE}\n{r.stdout.strip()}\n".encode())
-    for p in ins:
+    for p in ins + [LIB_MODELS]:
         h.update(f"{p}\0{cad.blob_id(p)}\n".encode())
+    rd(LIB_MODELS)
     d = os.path.join(CACHE, "instrument-boards", h.hexdigest()[:16])
     out = os.path.join(d, name + ".glb")
     if not os.path.exists(out):
         os.makedirs(d, exist_ok=True)
+        env = kicad_env()
+        txt = open(os.path.join(ROOT, ins[0]), encoding="utf-8").read()
+        models = coloured_models(name, txt, env)
+        # the board as it is, but every model the recoloured copy: a copy beside the
+        # GLB, its model paths absolute (nothing else in it changes)
+        tmp_pcb = os.path.join(d, name + ".kicad_pcb")
+        open(tmp_pcb, "w", encoding="utf-8").write(
+            re.sub(r'\(model "([^"]+)"', lambda g: f'(model "{models[g.group(1)]}"', txt))
         r = subprocess.run(["kicad-cli", "pcb", "export", "glb", "--include-tracks", "--include-pads", "--include-zones",
                             "--include-silkscreen", "--include-soldermask", "--user-origin", f"{OX}x{OY}mm",
-                            "-f", "-o", out + ".part.glb", os.path.join(ROOT, ins[0])],
-                           capture_output=True, text=True, env=kicad_env())
+                            "-f", "-o", out + ".part.glb", tmp_pcb],
+                           capture_output=True, text=True, env=env)
         if r.returncode or not os.path.exists(out + ".part.glb"):
             raise SystemExit(f"render-instrument: kicad-cli could not export {name}:\n{(r.stdout + r.stderr)[-1500:]}")
+        bare = uncoloured_parts(out + ".part.glb", txt)
+        if bare:
+            raise SystemExit(f"render-instrument: {name}: these parts came out of the export with no colour, and "
+                             f"would render white: {', '.join(bare)}")
         os.replace(out + ".part.glb", out)
     return out
 
@@ -580,6 +655,43 @@ def board_materials(name):
                 pcb=principled(f"{name} FR-4", "#B9A773", 0.55, 0.0))
 
 
+# PICTURE CONVENTION - PART_FINISH: how a part's own model colour is SURFACED. The
+# colour is the model's (KiCad's library models use its generator's few named
+# colours; tools/lib-models.py's and the makers' models their own); what a colour
+# alone cannot say - that it is metal, epoxy, ceramic - is said here, by the colour
+# class the models use for it. First match wins; a colour matching none is a
+# plastic at the model's own colour. Nothing here is a design value.
+#   (test on linear RGB + alpha,                     what it is,                       colour (None: the model's), roughness, metallic)
+PART_FINISH = [
+    (lambda r, g, b, a: a < 0.99,                    "translucent plastic (a lens, a housing)", None, 0.25, 0.0),
+    (lambda r, g, b, a: abs(r - 0.12) < 0.01 and abs(g - 0.06) < 0.01 and b < 0.05,
+                                                     "MLCC ceramic (KiCad's 'brown body')", "#8E6A44", 0.6, 0.0),
+    (lambda r, g, b, a: max(r, g, b) < 0.13,         "black epoxy / PBT (IC, header, connector bodies; a resistor's top)", None, 0.55, 0.0),
+    (lambda r, g, b, a: r > g > b and max(r, g, b) > 0.6 and (r - b) / r > 0.4, "gold plating (header pins)", None, 0.22, 1.0),
+    (lambda r, g, b, a: 0.5 <= max(r, g, b) <= 0.86 and (max(r, g, b) - min(r, g, b)) / max(r, g, b) < 0.15,
+                                                     "tin / aluminium (leads, terminations, an electrolytic's can)", None, 0.3, 1.0),
+]
+
+
+def part_finish(m):
+    if not (m and m.node_tree and "Principled BSDF" in m.node_tree.nodes) or m.get("woody_finish"):
+        return
+    bs = m.node_tree.nodes["Principled BSDF"]
+    r, g, b, _ = bs.inputs["Base Color"].default_value
+    a = bs.inputs["Alpha"].default_value
+    for test, what, colour, rough, metal in PART_FINISH:
+        if test(r, g, b, a):
+            if colour:
+                bs.inputs["Base Color"].default_value = srgb(colour)
+            bs.inputs["Roughness"].default_value = rough
+            bs.inputs["Metallic"].default_value = metal
+            m["woody_finish"] = what
+            return
+    bs.inputs["Roughness"].default_value = max(bs.inputs["Roughness"].default_value, 0.4)
+    bs.inputs["Metallic"].default_value = 0.0
+    m["woody_finish"] = "plastic"
+
+
 def led_refs(name):
     txt = open(os.path.join(ROOT, f"hardware/boards/{name}/{name}.kicad_pcb"), encoding="utf-8").read()
     refs = []
@@ -612,11 +724,8 @@ def import_board(name, glb):
             o.data.materials.append(bm[{"soldermask": "mask", "silkscreen": "silk", "PCB": "pcb"}.get(key, key)])
             body.append(o)          # the laminate with its copper, mask and silk: the board as the CAD draws it
         else:
-            for m in o.data.materials:      # the parts' own STEP colours, made less plastic-flat
-                if m and m.node_tree and "Principled BSDF" in m.node_tree.nodes:
-                    bs = m.node_tree.nodes["Principled BSDF"]
-                    if bs.inputs["Metallic"].default_value < 0.5:
-                        bs.inputs["Roughness"].default_value = max(bs.inputs["Roughness"].default_value, 0.35)
+            for m in o.data.materials:      # the parts' own STEP colours, as surfaces (PART_FINISH)
+                part_finish(m)
     if not any(o.data.name.startswith(name + "_PCB") for o in body):
         raise SystemExit(f"render-instrument: {name}'s export has no board body ({name}_PCB)")
     return root, body

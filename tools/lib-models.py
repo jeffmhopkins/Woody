@@ -5,7 +5,8 @@ bought. Written to hardware/lib/woody.3dshapes/<name>.step, which the matching
 footprint in hardware/lib/woody.pretty names.
 
     python3 tools/lib-models.py            # (re)write every model
-    python3 tools/lib-models.py --check    # exit 1 if a model file's solids differ from what this builds
+    python3 tools/lib-models.py --check    # exit 1 if a model file's solids or part colours differ from what this builds
+    python3 tools/lib-models.py --assembly in.step out.step   # any model as an assembly of coloured parts (render-instrument.py)
 
 `--check` compares the solids (volume and bounding box of each), not the bytes:
 OpenCASCADE's STEP writer orders its colour records differently from one run to
@@ -39,6 +40,7 @@ from OCP.TDocStd import TDocStd_Document
 from OCP.XCAFDoc import XCAFDoc_DocumentTool, XCAFDoc_ColorSurf
 from OCP.Interface import Interface_Static
 from OCP.TDataStd import TDataStd_Name
+from OCP.TopLoc import TopLoc_Location
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "hardware", "lib", "woody.3dshapes")
@@ -190,13 +192,25 @@ MODELS = {
 
 
 def write(name, parts, path):
+    """One ASSEMBLY of coloured parts. kicad-cli's GLB export (KiCad 9) carries a model's
+    colours only through an assembly's components: colours on free top-level shapes, as
+    this wrote them until 2026-10-02, reach the GLB as no material at all, and the
+    instrument's photographs drew every one of these parts white."""
     doc = TDocStd_Document(TCollection_ExtendedString("XmlOcaf"))
     st = XCAFDoc_DocumentTool.ShapeTool_s(doc.Main())
     ct = XCAFDoc_DocumentTool.ColorTool_s(doc.Main())
+    asm = st.NewShape()
+    TDataStd_Name.Set_s(asm, TCollection_ExtendedString(name))
     for label_name, shape, rgb in parts:
         lab = st.AddShape(shape, False)
         TDataStd_Name.Set_s(lab, TCollection_ExtendedString(f"{name}_{label_name}"))
         ct.SetColor(lab, Quantity_Color(*rgb, Quantity_TOC_RGB), XCAFDoc_ColorSurf)
+        st.AddComponent(asm, lab, TopLoc_Location())
+    st.UpdateAssemblies()
+    save(doc, name, path)
+
+
+def save(doc, name, path):
     Interface_Static.SetCVal_s("write.step.schema", "AP214IS")
     Interface_Static.SetCVal_s("write.step.product.name", name)
     w = STEPCAFControl_Writer()
@@ -250,7 +264,130 @@ def solids(path):
     return sorted(out)
 
 
+def read_xcaf(path):
+    from OCP.STEPCAFControl import STEPCAFControl_Reader
+    doc = TDocStd_Document(TCollection_ExtendedString("XmlOcaf"))
+    r = STEPCAFControl_Reader()
+    r.SetColorMode(True); r.SetNameMode(True)
+    with quiet():
+        if r.ReadFile(path) != IFSelect_RetDone or not r.Transfer(doc):
+            raise SystemExit(f"could not read {path}")
+    return doc
+
+
+def label_colour(lab):
+    from OCP.XCAFDoc import XCAFDoc_ColorTool, XCAFDoc_ColorGen
+    c = Quantity_Color()
+    for t in (XCAFDoc_ColorSurf, XCAFDoc_ColorGen):
+        if XCAFDoc_ColorTool.GetColor_s(lab, t, c):
+            return (c.Red(), c.Green(), c.Blue())
+    return None
+
+
+def children(lab):
+    from OCP.TDF import TDF_ChildIterator
+    it, out = TDF_ChildIterator(lab, False), []
+    while it.More():
+        out.append(it.Value()); it.Next()
+    return out
+
+
+def part_colours(path):
+    """(is an assembly, the colours of its parts, rounded): what --check holds a drawn model to."""
+    doc = read_xcaf(path)
+    st = XCAFDoc_DocumentTool.ShapeTool_s(doc.Main())
+    free = children(st.BaseLabel())
+    asm = any(st.IsAssembly_s(L) for L in free)
+    return asm, sorted({tuple(round(v, 3) for v in label_colour(L)) for L in free
+                        if not st.IsAssembly_s(L) and label_colour(L)})
+
+
+def as_assembly(src, dst):
+    """Any STEP model rewritten as one flat ASSEMBLY with one part per colour, each part
+    the faces that colour covers, placed where the model's own tree puts them - what
+    kicad-cli's GLB export needs to carry a model's colours (write(), above). Two
+    shapes it drops: KiCad's own library models (colours on the faces of one solid)
+    reach the GLB with no material, and a nested assembly (Sunlord SWPA6028S) with no
+    mesh at all. Colours keep their alpha. The solids are not kept as solids: this
+    is for pictures, never for a clearance check."""
+    from OCP.TopExp import TopExp_Explorer
+    from OCP.TopAbs import TopAbs_FACE
+    from OCP.TopoDS import TopoDS_Compound
+    from OCP.BRep import BRep_Builder
+    from OCP.Quantity import Quantity_ColorRGBA
+    from OCP.XCAFPrs import XCAFPrs_DocumentExplorer, XCAFPrs_DocumentExplorerFlags_OnlyLeafNodes
+    import shutil
+    from OCP.TDF import TDF_Label
+    doc = read_xcaf(src)
+    st = XCAFDoc_DocumentTool.ShapeTool_s(doc.Main())
+    # one level of assembly over coloured parts already exports as it is: copy it, so
+    # that what this rewrite cannot write survives (the STEP writer here drops a
+    # colour's alpha - the KS33 housing's translucency)
+    free = children(st.BaseLabel())
+    asms = [L for L in free if st.IsAssembly_s(L)]
+
+    def ref(c):
+        r = TDF_Label()
+        return r if st.GetReferredShape_s(c, r) else None
+    if asms and not any(st.IsAssembly_s(ref(c)) for A in asms for c in children(A) if ref(c) is not None):
+        shutil.copyfile(src, dst)
+        return "copied: already one assembly of parts"
+    groups = {}
+
+    def faces(shape):
+        e = TopExp_Explorer(shape, TopAbs_FACE)
+        while e.More():
+            yield e.Current(); e.Next()
+
+    def rgba(lab, style=None):
+        if style is not None and style.IsSetColorSurf():
+            c = style.GetColorSurfRGBA()
+            q = c.GetRGB()
+            return (q.Red(), q.Green(), q.Blue(), c.Alpha())
+        c = label_colour(lab)
+        return (*c, 1.0) if c else None
+
+    ex = XCAFPrs_DocumentExplorer(doc, XCAFPrs_DocumentExplorerFlags_OnlyLeafNodes)
+    while ex.More():
+        node = ex.Current()
+        ref, loc = node.RefLabel, node.Location
+        base = rgba(ref) or rgba(ref, node.Style)
+        own = {}                      # face -> colour, from the part's coloured sub-shapes
+        for k in children(ref):
+            if st.IsSubShape_s(k) and rgba(k):
+                for f in faces(st.GetShape_s(k)):
+                    own.setdefault(hash(f), []).append((f, rgba(k)))
+        for f in faces(st.GetShape_s(ref)):
+            hit = next((c for g, c in own.get(hash(f), []) if g.IsSame(f)), None)
+            groups.setdefault(hit or base or rgba(ref, node.Style), []).append(f.Moved(loc))
+        ex.Next()
+    if not groups:
+        raise SystemExit(f"{src}: no faces")
+    out = TDocStd_Document(TCollection_ExtendedString("XmlOcaf"))
+    ost = XCAFDoc_DocumentTool.ShapeTool_s(out.Main())
+    oct_ = XCAFDoc_DocumentTool.ColorTool_s(out.Main())
+    asm = ost.NewShape()
+    name = os.path.splitext(os.path.basename(dst))[0]
+    TDataStd_Name.Set_s(asm, TCollection_ExtendedString(name))
+    for i, (c, fs) in enumerate(sorted(groups.items(), key=lambda kv: (kv[0] is None, kv[0] or ()))):
+        b, comp = BRep_Builder(), TopoDS_Compound()
+        b.MakeCompound(comp)
+        for f in fs:
+            b.Add(comp, f)
+        lab = ost.AddShape(comp, False)
+        TDataStd_Name.Set_s(lab, TCollection_ExtendedString(f"{name}_{i}"))
+        if c:
+            oct_.SetColor(lab, Quantity_ColorRGBA(Quantity_Color(*c[:3], Quantity_TOC_RGB), c[3]), XCAFDoc_ColorSurf)
+        ost.AddComponent(asm, lab, TopLoc_Location())
+    ost.UpdateAssemblies()
+    save(out, name, dst)
+    return f"{len(groups)} colour(s)" + (", some faces uncoloured" if None in groups else "")
+
+
 def main():
+    if len(sys.argv) == 4 and sys.argv[1] == "--assembly":
+        print(as_assembly(sys.argv[2], sys.argv[3]))
+        return
     check = "--check" in sys.argv
     os.makedirs(OUT, exist_ok=True)
     bad = 0
@@ -260,7 +397,7 @@ def main():
             with tempfile.TemporaryDirectory() as d:
                 p2 = os.path.join(d, name + ".step")
                 write(name, fn(), p2)
-                same = os.path.exists(path) and solids(p2) == solids(path)
+                same = os.path.exists(path) and solids(p2) == solids(path) and part_colours(p2) == part_colours(path)
             print(("ok     " if same else "DIFFERS ") + os.path.relpath(path, ROOT))
             bad += not same
         else:

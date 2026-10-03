@@ -42,14 +42,14 @@
 		(stackup
 			(layer "F.SilkS"
 				(type "Top Silk Screen")
-				(color "White")
+				(color "Black")
 			)
 			(layer "F.Paste"
 				(type "Top Solder Paste")
 			)
 			(layer "F.Mask"
 				(type "Top Solder Mask")
-				(color "Green")
+				(color "White")
 				(thickness 0.01)
 			)
 			(layer "F.Cu"
@@ -58,7 +58,7 @@
 			)
 			(layer "dielectric 1"
 				(type "core")
-				(thickness 1.51)
+				(thickness 1.510)
 				(material "FR4")
 				(epsilon_r 4.5)
 				(loss_tangent 0.02)
@@ -69,7 +69,7 @@
 			)
 			(layer "B.Mask"
 				(type "Bottom Solder Mask")
-				(color "Green")
+				(color "White")
 				(thickness 0.01)
 			)
 			(layer "B.Paste"
@@ -77,7 +77,7 @@
 			)
 			(layer "B.SilkS"
 				(type "Bottom Silk Screen")
-				(color "White")
+				(color "Black")
 			)
 			(copper_finish "HAL lead-free")
 			(dielectric_constraints no)
