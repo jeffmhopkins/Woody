@@ -248,9 +248,10 @@ courtyard_overhang:
 cad_parts:
   U-BREATH: {row: U-BREATH, rot: 270}
 
-# Each LED's 100 nF (C-LED), 4.6 mm across the body from its LED's centre, over
+# Each LED's 100 nF (C-LED), 4.5 mm across the body from its LED's centre (4.6 until the
+# row moved under the regulator block's edge, 2026-10-03), over
 # its VDD and GND pads (ADR 0028). LED n is the nth along the data chain.
-led_caps: {row: C-LED, offset: [0.0, 4.6], rot: 0}
+led_caps: {row: C-LED, offset: [0.0, 4.5], rot: 0}
 
 # The key networks: the key boards' T, relative to each thumb switch. The far row
 # (at 0 deg): the junction 8.5 mm outboard of the switch centre, past its pins,
@@ -274,6 +275,8 @@ keepouts:
   "ribbon left_hand": {except_rows: [J-CHAIN]}
   "ribbon right_hand": {except_rows: [J-CHAIN]}
   "regulator block": {part: REGULATOR-BLOCK, except_rows: [U-BUCK, C-BUCK-OUT]}
+  # J-MCU's mated plug and the Matrix ribbon's rise over it (pcb-geometry.echo): no part there
+  "Matrix ribbon": {except_rows: []}
 
 # How tall each footprint family stands on the top face, for the height rooms
 # (pcb_main.check_heights): under the key boards, elsewhere, and under the Matrix
@@ -355,53 +358,55 @@ parts:
   # --- at J-UMB (pin row x 295.9): the clamps and the breath pair's resistors in
   # two columns in front of it; the tongue's end mounts (x 278.3, y 13 / 30) behind
   # (config/body.yaml boards.umb_parts_d), D-TVS-PWR between them
-  D5:  [292.3, 30.39, 180]  # D-TVS-BREATH on BREATH_SENSE (pin 1)
-  D6:  [292.3, 27.85, 180]  # D-TVS-BREATH on AGND_SENSE (pin 2)
-  R38: [287.6, 30.39, 0]    # R-SER-BREATH-INST in BREATH
-  R39: [287.6, 27.85, 0]    # R-SER-BREATH-INST in AGND_SENSE
+  D5:  [292.6, 31.3, 90]   # D-TVS-BREATH on BREATH_SENSE (pin 1)
+  D6:  [292.6, 27.55, 90]   # D-TVS-BREATH on AGND_SENSE (pin 2)
+  R38: [288.95, 30.39, 0]   # R-SER-BREATH-INST in BREATH
+  R39: [288.95, 27.85, 0]   # R-SER-BREATH-INST in AGND_SENSE
   NT1: [293.0, 13.4, 90]    # NT-DIG at J-UMB pin 8 (ADR 0018)
   D2:  [286.4, 20.0, 90]    # D-REVSHUNT, across pins 3 / 6, ahead of L-BUCK-IN
   D3:  [291.6, 22.4, 270]   # D-TVS-PWR at J-UMB's pins 3 (+12 V, its cathode) and 6 (PWR_GND), #8-9
-  # --- Q-INRUSH and its gate network (power-entry-instrument.md §1a) behind the
-  # clamps, on the tongue between HDR-SERVICE and the end mount: its source from
-  # J-UMB pin 3 past D-REVSHUNT and D-TVS-PWR, its drain into the INST_POS12 plane
-  Q1:  [270.5, 21.8, 0]     # Q-INRUSH AO3401A
-  C39: [266.0, 26.3, 90]    # C-INRUSH-GS, source to gate
-  R41: [268.3, 26.3, 90]    # R-INRUSH-GS, source to gate
-  R42: [270.6, 26.3, 90]    # R-INRUSH-G, gate to ground
-  C40: [272.9, 26.3, 90]    # C-INRUSH-GD, the Miller leg's capacitor
-  R43: [272.9, 30.8, 90]    # R-INRUSH-GD, the Miller leg's damping, to the drain
-  D21: [268.8, 30.8, 90]    # D-INRUSH-RST, gate reset after an unplug
-  # --- the SPI and chain series resistors at their driving end, beside J-MCU, under
-  # the Matrix ribbon (each under its 2.15 mm room)
-  R1:  [254.2, 29.6, 90]    # R-SPI-SER SCLK
-  R2:  [257.2, 29.6, 90]    # R-SPI-SER MOSI
-  R3:  [260.2, 29.6, 90]    # R-SPI-SER CS_MOD
-  R40: [263.2, 29.6, 90]    # R-CS-PULL-INST, IO34 to 3V3 beside R-SPI-SER CS
+  # --- Q-INRUSH and its gate network (power-entry-instrument.md §1a) in the tail strip
+  # above the LED row, between LED2 and LED1 (the full-width tail's corner, which the
+  # corner LED held until 2026-10-03): its source from J-UMB pin 3 past D-REVSHUNT and
+  # D-TVS-PWR, its drain into the INST_POS12 plane
+  Q1:  [271.0, 36.5, 0]   # Q-INRUSH AO3401A
+  C39: [266.5, 41.0, 90]   # C-INRUSH-GS, source to gate
+  R41: [268.8, 41.0, 90]   # R-INRUSH-GS, source to gate
+  R42: [271.1, 41.0, 90]   # R-INRUSH-G, gate to ground
+  C40: [273.4, 41.0, 90]   # C-INRUSH-GD, the Miller leg's capacitor
+  R43: [273.4, 45.5, 90]   # R-INRUSH-GD, the Miller leg's damping, to the drain
+  D21: [269.3, 45.5, 90]   # D-INRUSH-RST, gate reset after an unplug
+  # --- the SPI and chain series resistors at their driving end, past J-MCU's mouth in
+  # the LED row's gap between LED3 and LED2, under the Matrix ribbon (each under its
+  # 2.15 mm room)
+  R1:  [249.0, 29.6, 90]   # R-SPI-SER SCLK
+  R2:  [251.6, 29.6, 90]   # R-SPI-SER MOSI
+  R3:  [254.2, 29.6, 90]   # R-SPI-SER CS_MOD
+  R40: [256.8, 29.6, 90]   # R-CS-PULL-INST, IO34 to 3V3 beside R-SPI-SER CS
   # the service UART at J-MCU (service-uart.md): R46 in TXD at J-MCU pin 22, C41 on EN at pin 24
-  R46: [241.6, 15.7, 270]   # R-TXD-SER beside it, U0TXD pad up toward pin 22, TXD_HDR on to J2
-  C41: [243.6, 15.7, 270]   # C-EN, below J-MCU's pin 24 end, its EN pad up, its ground a short stub to its own via
+  R46: [229.2, 16.45, 180]   # R-TXD-SER beside it, U0TXD pad up toward pin 22, TXD_HDR on to J2
+  C41: [232.9, 16.45, 0]   # C-EN, below J-MCU's pin 24 end, its EN pad up, its ground a short stub to its own via
   # U-TVS-SPI clamps the pad side of R-SPI-SER (IO35, IO36, IO34 - spi-link), so it
   # stands on the J-MCU side of the resistors, below the chain's, clear of the column mount
-  U1:  [256.5, 17.5, 0]
-  R34: [254.2, 23.8, 90]    # R-CHAIN-SER SCK
-  R35: [257.2, 23.8, 90]    # R-CHAIN-SER SH/LD
-  R36: [260.2, 23.8, 90]    # R-CHAIN-SER SER (the chain's end)
-  J2:  [262.6, 16.6, 90]    # HDR-SERVICE, on the tongue, reached with the lid off
+  U1:  [258.0, 21.5, 0]
+  R34: [249.0, 23.8, 90]   # R-CHAIN-SER SCK
+  R35: [251.6, 23.8, 90]   # R-CHAIN-SER SH/LD
+  R36: [254.2, 23.8, 90]   # R-CHAIN-SER SER (the chain's end)
+  J2:  [284.0, 9.3, 90]   # HDR-SERVICE at config/body.yaml boards.service_hdr_at (pin 1), in the tail corner by J-UMB, off the LEDs' cone; reached with the lid off
   # --- the regulator block (the echo's REGULATOR-BLOCK) holds U-BUCK alone; the
   # buck's input LC and C-STRIP-BULK where their height fits (README, Open)
-  U5:  [232.58, 43.985, 270] # U-BUCK, its courtyard centred in the block
+  U5:  [219.94, 43.985, 270]   # U-BUCK, its courtyard centred in the block
   # #8-7: the module's own caps at the module - C11 beside pin 1 (VIN) between L1 and U5,
   # C43 (owner, 2026-10-03, RECOM's application) at pin 3 (OUT), returned to pin 2 (GND)
-  C11: [225.5, 45.4, 180]   # C-BUCK-IN 100 uF (5.8 mm tall), its + pad toward pin 1
-  L1: [217.0, 45.0, 0]   # L-BUCK-IN 22 uH, ahead of C11
-  C43: [228.0, 38.9, 180]   # C-BUCK-OUT 10 uF at pin 3, in the block's edge (keepouts: except_rows)
-  D4:  [235.5, 32.3, 180]   # D-USBOR, buck -> INST_5V_A, its cathode toward J-MCU's 5 V pins
-  C10: [221.2, 16.4, 0]     # C-STRIP-BULK 470 uF, at the LED row's feed (its tail end, LED 2; LED 1 is the tail corner's)
-  U6:  [232.3, 16.4, 0]     # U-LVLSHIFT 74AHCT125
-  C12: [237.7, 20.2, 270]   # its 100 nF, at VCC (pin 14) and GND (pin 13)
-  R10: [238.6, 16.4, 90]    # R-LED-PD
-  R11: [238.6, 12.4, 90]    # R-LED-SER, into LED 1's DI
+  C11: [212.86, 45.4, 180]   # C-BUCK-IN 100 uF (5.8 mm tall), its + pad toward pin 1
+  L1:  [204.6, 40.2, 0]   # L-BUCK-IN 22 uH, ahead of C11
+  C43: [215.36, 38.9, 180]   # C-BUCK-OUT 10 uF at pin 3, in the block's edge (keepouts: except_rows)
+  D4:  [214.0, 35.6, 0]   # D-USBOR, buck -> INST_5V_A, beside C43 at U5's OUT; its cathode toward J-MCU's 5 V pins
+  C10: [221.2, 16.4, 0]     # C-STRIP-BULK 470 uF, the LED row's bulk, under LED 4 and J-MCU's 5 V end
+  U6:  [233.0, 11.7, 90]   # U-LVLSHIFT 74AHCT125
+  C12: [239.9, 12.4, 90]   # its 100 nF, at VCC (pin 14) and GND (pin 13)
+  R10: [240.3, 17.6, 90]   # R-LED-PD
+  R11: [242.5, 13.0, 90]   # R-LED-SER, into LED 1's DI at the row's tail end
   # --- the thumb registers, each in the near band between its hand's switches
   U7:  [70.0, 19.2, 90]     # REG-LT
   R44: [76.9, 21.7, 0]      # R-HOP-SER, at U7's QH (pin 9): its pad 1 to the pin, pad 2 on toward J5 pin 6

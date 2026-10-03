@@ -211,22 +211,13 @@ Pins: `SCK` IO38, `SH/LD` IO7, chain-end `SER` IO33, `QH` IO40.
   touched. Lift it when the host goes away. The per-LED current behind the
   estimate is `matrix-led-current`, still blocked on E1's measurement, so the
   clamp is a setting E1 confirms, not a constant.
-- **Fourteen pixels, the tail corner's first.** The data line reaches the LED
-  in the main board's tail corner before the row (ADR 0028's amendment of
-  2026-10-02; `led-strip-drive.md`, *The LED in the tail corner*), so a
-  frame is pixel 0 for the corner LED, then pixels 1–13 for the row from its
-  tail end to the mouth end. One more pixel is ~30 µs more per frame
-  `[calc: 24 bits / 800 kbit/s]`. Anything drawn *along* the body (the breath
-  bar, a sweep) addresses pixels 1–13; the corner LED is not a step of it,
-  and takes the colour of the row's tail end unless a pattern sets it.
-- **A per-LED gain, and the corner LED's is about a sixth.** It stands ~9 mm
-  from the near side's acrylic where the row stands ~22.5 mm from either
-  side, so at the same drive it lights its patch about six times as brightly
-  `[calc: (22.5 / 9)² = 6.25, ADR 0021's study]`. Scale each pixel by a
-  gain table — all 1.0 but pixel 0, which starts at 0.16 — applied before
-  the shared lighting budget's clamp, so the clamp sees what is actually drawn. A
-  setting, not a constant: the side-light diffusion test (ROADMAP) sets it,
-  by eye on the real acrylic.
+- **Fourteen pixels, one row, tail end first.** The data line reaches the
+  row's tail end first (ADR 0028, amendment of 2026-10-03: fourteen in one row
+  at one pitch, equal margins to the main board's ends), so a frame is pixel 0
+  for the tail-end LED, then pixels 1–13 toward the mouth end. Anything drawn
+  *along* the body (the breath bar, a sweep) addresses pixels 0–13 in order;
+  every pixel is a step of it. Every pixel takes the same gain: no LED stands
+  nearer its acrylic than the rest.
 
 ## The instrument must stay recoverable
 

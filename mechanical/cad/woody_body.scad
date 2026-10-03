@@ -861,7 +861,7 @@ module pcb_geometry() {
     // The Matrix's header: its insulator's extent along x, centre y, length
     // across, and the mouth's direction (+1 the tail) - the ribbon comes in
     // over the tongue.
-    echo("PCB", "main", "connector", "J-MCU", jm_x0, jm_x1, jm_y, jm_sz[1], 1);
+    echo("PCB", "main", "connector", "J-MCU", jm_x0, jm_x1, jm_y, jm_sz[1], 1, jm_dir);
     // J-UMB: the right-angle header whose tails go down through the
     // tongue and whose posts go through the adapter; its insulator's extent along x (it stands against the
     // adapter's rear face), centre y, pin count, pitch, and its row's
@@ -887,7 +887,7 @@ module pcb_geometry() {
     // The regulator block's envelope: centre, along x, across y, height.
     echo("PCB", "main", "part", "REGULATOR-BLOCK", tall_c[0][0], tall_c[0][1], 0, tall_sz[0], tall_sz[1], boards_tall_h);
     // THE LEDS (ADR 0028), one record per LED, numbered along the data line:
-    // LED1 in the tail corner, then the row from its tail end. Centre,
+    // LED1 at the row's tail end, LED led_count at its mouth end. Centre,
     // rotation (180 = its data inputs toward the tail, where the data comes
     // from), courtyard along and across, height.
     for (n = [1 : lighting_led_count]) let(c = led_xy(n))
@@ -921,8 +921,13 @@ module pcb_geometry() {
     if (boards_main_tail == "full")
         echo("PCB", "main", "keepout", "USB-C receptacle and lead", cb_x[1], usb_c[0] - usb_sz[0] / 2 - boards_board_clear, ua_x0, cb_y[1],
              usb_c[1] - usb_sz[1] / 2 - boards_board_clear - cb_top);
-    echo("PCB", "main", "keepout", "Matrix ribbon", jm_x1, jm_y - routing_mcu_ribbon_w / 2, mcu_x, jm_y + routing_mcu_ribbon_w / 2,
-         jm_z + e_mb - routing_mcu_ribbon_t / 2 - cb_top);
+    // the ribbon's level run to the Matrix when J-MCU's mouth faces the tail; turned to the
+    // side, the plug and the ribbon's rise over it, where no part may stand (height 0)
+    if (jm_dir == 0)
+        echo("PCB", "main", "keepout", "Matrix ribbon", jm_x1, jm_y - routing_mcu_ribbon_w / 2, mcu_x, jm_y + routing_mcu_ribbon_w / 2,
+             jm_z + e_mb - routing_mcu_ribbon_t / 2 - cb_top);
+    else
+        echo("PCB", "main", "keepout", "Matrix ribbon", jm_plug[0], jm_plug[1], jm_plug[2], jm_plug[3], 0);
     echo("PCB", "main", "board", "thickness", switch_pcb_t, "smt_height_max", boards_smt_h,
          "side", "parts on top; the thumb switches from below, their footprints on the underside");
 }
@@ -966,10 +971,10 @@ module tail_equipment() {
         [x_in1 - openings_usb_ext_depth - 4, usb_c[0], usb_c[1]], [x_in1 - openings_usb_ext_depth, usb_c[0], usb_c[1]]], 4);
 }
 
-// THE LEDS (ADR 0028): WS2815B-V1 on the main board's top face, a row down
-// the centreline between the thumb switches' two rows of pins and one in the
-// tail corner, LEDs up, lighting both acrylic sides through the cavity (ADR
-// 0016's light path). Placed with the main board below.
+// THE LEDS (ADR 0028): WS2815B-V1 on the main board's top face, one row down
+// the centreline between the thumb switches' two rows of pins, at one pitch with
+// equal margins to the board's ends (amendment 2026-10-03), LEDs up, lighting both
+// acrylic sides through the cavity (ADR 0016's light path). Placed with the main board below.
 module led_row() {
     P(C_LED, false, "LED row") for (n = [1 : lighting_led_count]) let(c = led_xy(n))
         translate([c[0] - lighting_led_body[0] / 2, c[1] - lighting_led_body[1] / 2, cb_top]) cube([lighting_led_body[0], lighting_led_body[1], lighting_led_h]);
@@ -1056,36 +1061,43 @@ module sensor_3d() {
     }
 }
 sensor_room = under_keys(sensor_c, [boards_sensor_body, boards_sensor_leads]) ? cb_room : gap_room;
-jm_x1 = cb_x[1] - 1;                               // J-MCU's mouth, at the main board's tail edge
-jm_x0 = jm_x1 - boards_mcu_conn_w;
-// THE LED ROW (ADR 0028): on the centreline, between the thumb switches' two
-// rows of pins, from past the sensor to short of J-MCU: lighting.led_count less
-// the one in the tail corner (below). led_span is where the row's
-// LEDs' centres may go. The row at lighting.led_pitch is centred in it, then
-// shifted to the nearest place where the U-bolt station falls midway between
-// two LEDs, so no LED stands between the legs; if no such place fits the
-// span, it stays centred and drc.echo 'LED row off the U-bolt station' fails.
+// THE LED ROW (ADR 0028, amendment of 2026-10-03): lighting.led_count LEDs on the
+// centreline, between the thumb switches' two rows of pins, at ONE pitch, with EQUAL
+// margins to the main board's two ends - the owner: "all the 14 LEDs equidistant from
+// board extents, and rework all components around them". The even tiling - half a pitch
+// at each end - is the aim (led_p_even); the breath sensor at the mouth end is the one
+// thing that holds an LED off it (its courtyard, which an LED's must clear by
+// boards.board_clear), so the mouth-end margin is the larger of the two and the tail end
+// takes the same. Nothing else bounds it: the tail end mounts step clear of the LEDs
+// (cb_ends, so_clear), J-MCU stands in a gap of the row (jm_c), and the row must end
+// short of J-UMB's pads (drc.echo 'LED row on the main board'). Numbered along the data
+// line: LED 1 at the tail end, where the data arrives from U-LVLSHIFT; LED led_count at
+// the mouth end.
 led_y = W / 2;
-led_row_n = lighting_led_count - 1;                 // the row: every LED but the tail corner's
-led_span = [sensor_c[0] + boards_sensor_lead_row / 2 + boards_board_clear + lighting_led_court[0] / 2,
-            min(cb_x[1], jm_x0 - boards_board_clear) - lighting_led_court[0] / 2];
-led_run = (led_row_n - 1) * lighting_led_pitch;
-led_centred = (led_span[0] + led_span[1] - led_run) / 2;
-led_fits = [for (j = [0 : led_row_n - 2]) let(x0 = ubolt_c[0] - (j + 0.5) * lighting_led_pitch)
-            if (x0 >= led_span[0] - 1e-6 && x0 + led_run <= led_span[1] + 1e-6) x0];
-led_x0 = len(led_fits) == 0 ? led_centred
-       : [for (x = led_fits) if (abs(x - led_centred) == min([for (y = led_fits) abs(y - led_centred)])) x][0];
-// THE LED IN THE TAIL CORNER (owner, 2026-10-02: "Add it"; ADR 0028
-// amendment): in the corner the full-width tail gained beside the etherCON
-// adapter (boards.main_tail "full"), lighting.tail_led pitches past the row's
-// tail-end LED and off the centreline toward the near side, which the row
-// cannot light past the regulator block. FIRST on the data line, because the
-// data arrives at the tail: R-LED-SER, this LED, then the row.
-function led_row_xy(i) = [led_x0 + (led_row_n - i) * lighting_led_pitch, led_y];   // the row's ith from its tail end
-led_tail_xy = led_row_xy(1) + [lighting_tail_led[0] * lighting_led_pitch, lighting_tail_led[1]];
-// LED n, numbered along the data line: LED 1 the tail corner's, where the data
-// arrives from U-LVLSHIFT; LED 2 the row's tail end; LED led_count nearest the mouth.
-function led_xy(n) = n == 1 ? led_tail_xy : led_row_xy(n - 1);
+led_n = lighting_led_count;
+mb_ends = [cb_x[0], ua_x0];                                   // the main board's mouth and tail edges
+led_p_even = (mb_ends[1] - mb_ends[0]) / led_n;               // half a pitch at each end
+led_lo = sensor_c[0] + boards_sensor_lead_row / 2 + boards_board_clear + lighting_led_court[0] / 2;   // past the breath sensor
+led_hi = ju_tail_x - 2.54 / 2 - boards_board_clear - lighting_led_court[0] / 2;                        // short of J-UMB's pads
+led_margin = max(led_p_even / 2, led_lo - mb_ends[0]);        // the same at both ends
+led_pitch = (mb_ends[1] - mb_ends[0] - 2 * led_margin) / (led_n - 1);
+function led_xy(n) = [mb_ends[1] - led_margin - (n - 1) * led_pitch, led_y];
+// J-MCU's place is ONE config figure, boards.mcu_conn_at [x, y, facing]: its insulator's
+// centre and the way its mouth faces (0 toward the tail, 90 toward the far side, 270 the
+// near side). Off the LED row since 2026-10-03 (the owner: "This connector needs moved to the
+// side so that it doesn't cause coverage of the led"); drc.echo 'J-MCU, its plug and the
+// Matrix ribbon off the LED row' holds it. jm_x0..jm_x1 and jm_y, jm_sz are its box along
+// and across the body whichever way it faces.
+jm_dir = boards_mcu_conn_at[2];
+jm_along = jm_dir == 0 || jm_dir == 180;          // mouth along the body
+jm_bb = jm_along ? [boards_mcu_conn_w, boards_mcu_conn_l] : [boards_mcu_conn_l, boards_mcu_conn_w];
+jm_x0 = boards_mcu_conn_at[0] - jm_bb[0] / 2;
+jm_x1 = jm_x0 + jm_bb[0];
+// the mated plug in front of its mouth (the Matrix ribbon's socket), as a box
+jm_plug = jm_dir == 0 ? [jm_x1, boards_mcu_conn_at[1] - jm_bb[1] / 2, jm_x1 + boards_mcu_plug_d, boards_mcu_conn_at[1] + jm_bb[1] / 2]
+        : jm_dir == 90 ? [jm_x0, boards_mcu_conn_at[1] + jm_bb[1] / 2, jm_x1, boards_mcu_conn_at[1] + jm_bb[1] / 2 + boards_mcu_plug_d]
+        : jm_dir == 270 ? [jm_x0, boards_mcu_conn_at[1] - jm_bb[1] / 2 - boards_mcu_plug_d, jm_x1, boards_mcu_conn_at[1] - jm_bb[1] / 2]
+        : [jm_x0 - boards_mcu_plug_d, boards_mcu_conn_at[1] - jm_bb[1] / 2, jm_x0, boards_mcu_conn_at[1] + jm_bb[1] / 2];
 
 // THE KEY BOARDS ARE ON RIBBONS (owner, 2026-09-26: ribbons rather than
 // blind-mating stacking headers, so the lid comes off with them attached -
@@ -1230,7 +1242,7 @@ module tail_wiring_3d() {
 // stands.
 tall_sz = [boards_tall_w, boards_tall_l];   // along x, across y
 far_y = cb_y[tube_side < 0 ? 1 : 0] + tube_side * (boards_tall_l / 2 + 0.5);
-tall_c = [[jm_x0 - boards_board_clear - boards_tall_w / 2, far_y]];   // just in front of J-MCU
+tall_c = [[boards_tall_at_x, far_y]];   // boards.tall_at_x (J-MCU no longer places it: it moved off the LED row, 2026-10-03)
 // Is any key board overhead? Tested against each key board's outline,
 // kb_rect - a full rectangle across the cavity since ADR 0025. (It used to
 // test per-key cluster_pcb_w squares, which predate those boards, and so
@@ -1271,9 +1283,9 @@ module cb_2d() {
     }
 }
 // J-MCU: on the tube side of the regulator block, at the board's tail edge.
-jm_sz = [boards_mcu_conn_w, boards_mcu_conn_l];
+jm_sz = jm_bb;                                   // along x, across y, as it faces
 // Across: under the Matrix's middle, so the ribbon comes straight down.
-jm_y = matrix_xy[1];
+jm_y = boards_mcu_conn_at[1];
 jm_z = cb_top + boards_mcu_conn_h / 2;
 mcu_r = 4;   // drawing convention: the ribbon's bends
 // Down just inside the Matrix's mouth edge (its USB-C plug leaves that
@@ -1556,31 +1568,55 @@ module drc_report() {
         drc(undef, "equal bands (mouth = between hands)", band,
             str("mm each; set by the ", band == mouth_req ? "mouth end" : "minimum gap",
                 " - mouth needs ", mouth_req, ", gap minimum ", layout_gap, "; the tail is sized on its own"));
-    drc(led_x0 >= led_span[0] - 1e-6 && led_x0 + led_run <= led_span[1] + 1e-6, "LED row on the main board",
-        [led_row_n, lighting_led_pitch, led_xy(lighting_led_count)[0], led_xy(2)[0], led_span],
-        "LEDs in the row (ADR 0028; lighting.led_count less the tail corner's), their pitch, the mouth-end and tail-end LED's centre along the body, and the span their centres may take (past the breath sensor to short of J-MCU)");
-    // THE LED IN THE TAIL CORNER (ADR 0028 amendment, 2026-10-02): its
-    // courtyard on the board and boards.board_clear clear of the Matrix
-    // ribbon's keep-out, J-MCU, the regulator block, J-UMB's parts band and the
-    // tongue's end mounts' nuts; under the USB-C receptacle's keep-out height
-    // (it stands in that keep-out, which limits height, not presence); and
-    // clear of HDR-SERVICE's pads.
-    let(t = led_tail_xy, ct = lighting_led_court,
-        lo = t - ct / 2, hi = t + ct / 2,
-        edge = min(ua_x0 - hi[0], lo[1] - cb_y[0], cb_y[1] - hi[1]),
-        ribbon = rect_gap_r([jm_x1, jm_y - routing_mcu_ribbon_w / 2, mcu_x, jm_y + routing_mcu_ribbon_w / 2], [lo[0], lo[1], hi[0], hi[1]]),
-        jmcu = rect_gap_r([jm_x0, jm_y - jm_sz[1] / 2, jm_x1, jm_y + jm_sz[1] / 2], [lo[0], lo[1], hi[0], hi[1]]),
-        block = rect_gap_r([tall_c[0][0] - tall_sz[0] / 2, tall_c[0][1] - tall_sz[1] / 2, tall_c[0][0] + tall_sz[0] / 2, tall_c[0][1] + tall_sz[1] / 2], [lo[0], lo[1], hi[0], hi[1]]),
-        umb = ua_x0 - umb_band_d - hi[0],
-        nut = min([for (c = cb_standoffs) rect_gap(c, t, ct, 0)]) - mb_keep_d / 2,
-        svc = rect_gap_r(pad_row(svc_at, svc_end), [lo[0], lo[1], hi[0], hi[1]]),
+    drc(led_xy(led_n)[0] >= led_lo - 1e-6 && led_xy(1)[0] <= led_hi + 1e-6, "LED row on the main board",
+        [led_n, led_pitch, led_margin, led_xy(led_n)[0], led_xy(1)[0], [led_lo, led_hi], led_p_even],
+        "LEDs (ADR 0028, amended 2026-10-03: one row, equal margins to the board's ends), their pitch, the margin at each end, the mouth-end (LED led_count) and tail-end (LED 1) centres along the body, the span their centres may take (past the breath sensor's courtyard + board_clear, short of J-UMB's pads + board_clear), and the even tiling's pitch (half a pitch at each end), which the sensor's bound overrides at the mouth");
+    // EVERY LED CLEAR OF ITS NEIGHBOURS (ADR 0028 amendment, 2026-10-03): each courtyard on
+    // the board and boards.board_clear clear of J-MCU and the regulator block; clear of the
+    // mounts' nut keep-outs and HDR-SERVICE's pads; its top under the USB-C receptacle's
+    // keep-out height wherever it stands in it. Its 100 nF is the layout's (layout.yaml led_caps).
+    let(ct = lighting_led_court,
+        box_of = function(n) [led_xy(n) - ct / 2, led_xy(n) + ct / 2],
+        edge = min([for (n = [1 : led_n]) let(b = box_of(n)) min(b[0][0] - mb_ends[0], mb_ends[1] - b[1][0], b[0][1] - cb_y[0], cb_y[1] - b[1][1])]),
+        jmcu = min([for (n = [1 : led_n]) let(b = box_of(n)) rect_gap_r([jm_x0, jm_y - jm_sz[1] / 2, jm_x1, jm_y + jm_sz[1] / 2], [b[0][0], b[0][1], b[1][0], b[1][1]])]),
+        block = min([for (n = [1 : led_n]) let(b = box_of(n)) rect_gap_r([tall_c[0][0] - tall_sz[0] / 2, tall_c[0][1] - tall_sz[1] / 2, tall_c[0][0] + tall_sz[0] / 2, tall_c[0][1] + tall_sz[1] / 2], [b[0][0], b[0][1], b[1][0], b[1][1]])]),
+        nut = min([for (n = [1 : led_n], c = cb_standoffs) rect_gap(c, led_xy(n), ct, 0)]) - mb_keep_d / 2,
+        svc = min([for (n = [1 : led_n]) let(b = box_of(n)) rect_gap_r(pad_row(svc_at, svc_end), [b[0][0], b[0][1], b[1][0], b[1][1]])]),
         usb_room = usb_c[1] - usb_sz[1] / 2 - boards_board_clear - cb_top - lighting_led_h)
-        drc(boards_main_tail == "full" && edge >= boards_board_clear && ribbon >= boards_board_clear && jmcu >= boards_board_clear
-            && block >= boards_board_clear && umb >= 0 && nut >= 0 && svc >= boards_board_clear && usb_room >= 0,
-            "LED in the tail corner clear of its neighbours",
-            [t, edge, ribbon, jmcu, block, umb, nut, svc, usb_room],
-            str("its centre (body frame; LED1 on the data line), then mm from its courtyard to: the board's nearest edge, the Matrix ribbon's keep-out, J-MCU, the regulator block (each against boards.board_clear ", boards_board_clear,
-                "), J-UMB's parts band and a mount's nut keep-out (against 0), HDR-SERVICE's pads; and its top below the USB-C receptacle's keep-out height (against 0). Its 100 nF is the layout's (layout.yaml led_caps)"));
+        drc(edge >= boards_board_clear && jmcu >= boards_board_clear && block >= boards_board_clear && nut >= 0 && svc >= boards_board_clear && usb_room >= 0,
+            "LED row clear of its neighbours",
+            [edge, jmcu, block, nut, svc, usb_room],
+            str("mm, the least over every LED, from its courtyard to: the board's nearest edge, J-MCU, the regulator block (each against boards.board_clear ", boards_board_clear,
+                "), a mount's nut keep-out (against 0), HDR-SERVICE's pads (board_clear); and an LED's top below the USB-C receptacle's keep-out height (against 0)"));
+    // THE LED ROW'S BAND (ADR 0028 amendment, 2026-10-03): the LEDs' courtyards across the
+    // body plus board_clear each side, over the row's length, at every height. Nothing of
+    // J-MCU, its mated plug or the Matrix ribbon's rise may stand in it - over or in the
+    // row is what the owner saw as "coverage of the led". (A 120-degree cone, the typical
+    // PLCC emission, cannot be the zone: a ribbon rising 15 mm to the key board would need
+    // 24 mm from the row, and the board's edge is 21 away - drc 'tall parts in the LEDs' cone'.)
+    let(band = [led_y - lighting_led_court[1] / 2 - boards_board_clear, led_y + lighting_led_court[1] / 2 + boards_board_clear],
+        stack = [min(jm_x0, jm_plug[0]), min(jm_y - jm_sz[1] / 2, jm_plug[1]), max(jm_x1, jm_plug[2]), max(jm_y + jm_sz[1] / 2, jm_plug[3])],
+        gap = max(band[0] - stack[3], stack[1] - band[1]))
+        drc(gap >= 0, "J-MCU, its plug and the Matrix ribbon off the LED row", [boards_mcu_conn_at, stack, band, gap],
+            "J-MCU's place and facing (boards.mcu_conn_at), the box of its insulator and mated plug, the LED row's band across the body (courtyards + board_clear), and mm between them (against 0)");
+    // THE LEDS' CONE (a NOTE, not a rule): each tall part the body CAD places, against the
+    // LEDs' emission cone, lighting.led_view_angle wide: a part h tall stands in an LED's
+    // cone where it is nearer that LED's courtyard than (h - the LED's height) x tan(half
+    // the angle). Printed per part: its height, its least distance to an LED's courtyard,
+    // the distance the cone asks, and how many mm of its top rise into the cone (0 = none).
+    // What it shades is for the side-light diffusion test to judge (ADR 0028).
+    let(t = tan(lighting_led_view_angle / 2),
+        court = function(n) [led_xy(n)[0] - lighting_led_court[0] / 2, led_xy(n)[1] - lighting_led_court[1] / 2,
+                             led_xy(n)[0] + lighting_led_court[0] / 2, led_xy(n)[1] + lighting_led_court[1] / 2],
+        dist = function(b) max(0, min([for (n = [1 : led_n]) rect_gap_r(b, court(n))])),
+        tall = [["regulator block", [tall_c[0][0] - tall_sz[0] / 2, tall_c[0][1] - tall_sz[1] / 2, tall_c[0][0] + tall_sz[0] / 2, tall_c[0][1] + tall_sz[1] / 2], boards_tall_h],
+                ["J-MCU", [jm_x0, jm_y - jm_sz[1] / 2, jm_x1, jm_y + jm_sz[1] / 2], boards_mcu_conn_h],
+                ["J-MCU's plug and ribbon rise", jm_plug, cb_room],
+                ["U-BREATH", [sensor_c[0] - boards_sensor_body / 2, sensor_c[1] - boards_sensor_leads / 2, sensor_c[0] + boards_sensor_body / 2, sensor_c[1] + boards_sensor_leads / 2], boards_sensor_h],
+                ["HDR-SERVICE", pad_row(svc_at, svc_end), boards_service_hdr_h]],
+        rows = [for (r = tall) let(d = dist(r[1]), need = max(0, (r[2] - lighting_led_h) * t)) [r[0], r[2], d, need, max(0, (r[2] - lighting_led_h) - d / t)]])
+        drc(undef, "tall parts in the LEDs' cone", rows,
+            str("each: height, least mm to an LED's courtyard, the mm a ", lighting_led_view_angle, "-degree cone asks, and the mm of its top inside the cone (lighting.led_view_angle; the J-CHAIN headers and the layout's own tall parts - C-STRIP-BULK, C-BUCK-IN - are the board README's to list)"));
     drc(p1_tip[2] - routing_tube_od * 0.4 >= cb_top + lighting_led_h + boards_board_clear, "breath tube crosses the LED row clear of it",
         p1_tip[2] - routing_tube_od * 0.4 - cb_top - lighting_led_h, "mm above the LEDs' top faces, wherever it crosses the centreline");
     // Each run's end keys put half a cap into the neighbouring band - the
@@ -1681,12 +1717,15 @@ module drc_report() {
     neck_out = strips(sort_lo(cuts_out), cb_y[0], cb_y[1]);
     drc(total(neck) >= boards_main_neck_min, "main board neck at the U-bolt station", [neck, total(neck), total(neck_out)],
         str("mm of board across the station, strip by strip, their total on the inner layers, and on the outer layers less 0.5 copper keep-out round each washer and nut; every trace from one half to the other passes here (boards.main_neck_min ", boards_main_neck_min, ")"));
-    // THE LED ROW OFF THE STATION (ADR 0028): the station midway between two
-    // LEDs, and every LED clear of the nuts' keep-out.
+    // THE LED ROW OFF THE STATION (ADR 0028): no LED between the U-bolt's legs - every
+    // courtyard off the station's line - and every LED clear of the nuts' keep-out. Since
+    // the 2026-10-03 amendment the row is set by the board's ends, not shifted to put the
+    // station exactly midway between two LEDs; the third figure is how far it is off that.
     led_dx = [for (n = [1 : lighting_led_count]) abs(led_xy(n)[0] - ubolt_c[0]) - lighting_led_court[0] / 2];
     led_nut = min([for (n = [1 : lighting_led_count], u = ubolt_legs()) rect_gap(u, led_xy(n), lighting_led_court, 0)]) - ubolt_keep_r;
-    drc(len(led_fits) > 0 && led_nut >= 0, "LED row off the U-bolt station", [min(led_dx), led_nut, led_x0 - led_centred],
-        "mm from the station's centreline to the nearest LED's courtyard along the body, from any LED's courtyard to a U-bolt nut's parts keep-out, and how far the row is shifted from centred in its span to put the station midway between two LEDs");
+    led_mid = min([for (n = [1 : led_n - 1]) abs((led_xy(n)[0] + led_xy(n + 1)[0]) / 2 - ubolt_c[0])]);
+    drc(min(led_dx) > 0 && led_nut >= 0, "LED row off the U-bolt station", [min(led_dx), led_nut, led_mid],
+        "mm from the station's centreline to the nearest LED's courtyard along the body (an LED between the legs would stand under the strap), from any LED's courtyard to a U-bolt nut's parts keep-out, and how far the station is from the midpoint between its two LEDs");
 
     // Sides in grooves
     drc(undef, "interior width between the acrylic sides", u_w, "mm - was the full width less two sides; the oak lips now come off it too");

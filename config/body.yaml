@@ -547,11 +547,28 @@ boards:
     value: 2.1
     status: settled
     source: "J-MCU's tails past its seating plane, 2.10 [ds XKB-X1270WR-2x12A-9TV01.pdf rev A1 side view; repo hardware/lib/README.md]"
+  mcu_conn_at:
+    value: [261.27, 12.29, 90]
+    status: tbd
+    source: "J-MCU's place, ONE figure: its insulator's centre along and across the body, and the way its mouth faces (0 the tail, 90 the far side, 270 the near side). Off the LED row (the owner, 2026-10-03: 'This connector needs moved to the side so that it doesn't cause coverage of the led'): turned along the body at the near edge, its tails at the edge and its mouth toward the row, in the tail strip between column mount H8 and the tail's end mount; drc.echo 'J-MCU, its plug and the Matrix ribbon off the LED row' holds it"
+    decided_by: "the RH key board's J-MCU-KB and the ribbon between them, set jointly with the Matrix move (#23): the owner's solid key-board extension"
+  mcu_plug_d:
+    value: 2.3
+    status: nominal
+    source: "how far the Matrix ribbon's mated IDC plug stands proud of J-MCU's mouth, its socket's depth past the insulator [repo: the Matrix branch's 'Matrix ribbon socket' keep-out, 250.3-252.6]"
+  tall_at_x:
+    value: 222.19
+    status: nominal
+    source: "the regulator block's centre along the body (U-BUCK and its parts), on the far side: where it stood in front of J-MCU when J-MCU stood in the LED row, kept when J-MCU moved off it (2026-10-03). It stands beside LED4 and shades it (drc.echo 'tall parts in the LEDs' cone'); the diffusion test judges it"
   service_hdr_at:
-    value: [262.6, 16.6]
+    value: [284.0, 9.3]
     status: nominal
     source: "HDR-SERVICE's pin 1, body frame, its five pins running toward the tail (+x): on the tongue between the right-hand key board's end and the tongue's end mounts, where the lid comes off over it - the first layout's place (hardware/boards/main-board/layout.yaml J2, 2026-10-01), taken here so the bottom plate's window under its tails is cut where it stands. The layout keeps it here or moves this"
     decided_by: "M4 main board layout"
+  service_hdr_h:
+    value: 8.5
+    status: nominal
+    source: "HDR-SERVICE's pins above the board, the 2.54 mm header's [from memory]; the service lead's plug goes on with the lid off. For the LEDs' cone NOTE (drc.echo 'tall parts in the LEDs' cone')"
   service_hdr_pins:
     value: 5
     status: settled
@@ -1140,27 +1157,25 @@ routing:
 
 # ------------------------------------------------------------ lighting ----
 lighting:
-  # THE LEDS (ADR 0028): WS2815B-V1 reflowed on the main board's top face,
-  # LEDs up, lighting both acrylic sides through the cavity. One row down the
-  # centreline, and one LED in the tail corner beside the etherCON adapter
-  # (ADR 0028 amendment, 2026-10-02). Numbered along the data line: LED 1 is
-  # the corner LED, where the data arrives; LED 2 is the row's tail end. The
-  # row is shifted along the body so the U-bolt station falls midway between
-  # two LEDs (drc.echo 'LED row off the U-bolt station').
+  # THE LEDS (ADR 0028, amended 2026-10-03): WS2815B-V1 reflowed on the main board's top
+  # face, LEDs up, lighting both acrylic sides through the cavity. ONE ROW down the
+  # centreline at one pitch, with EQUAL MARGINS to the main board's two ends (the owner,
+  # 2026-10-03: "all the 14 LEDs equidistant from board extents, and rework all components
+  # around them"). The pitch is DERIVED, not set here: woody_body.scad spreads led_count
+  # LEDs over the board with half a pitch at each end where it can, and the breath sensor
+  # holds the mouth-end LED further in, so both margins take that (drc.echo 'LED row on the
+  # main board' prints the pitch and the margins). Numbered along the data line: LED 1 at
+  # the tail end, where the data arrives; LED led_count at the mouth end.
   led_count:
     value: 14
     status: settled
-    source: "owner: thirteen in the row, 2026-09-30 (ADR 0028), the count the 60/m strip gave over the same run; and one in the main board's tail corner, 2026-10-02 ('Add it', ADR 0028 amendment). The row is this less the corner LED"
-  tail_led:
-    value: [3, 13.5]
-    status: nominal
-    source: "the corner LED's centre: along the body, this many lighting.led_pitch past the row's tail-end LED; across, mm off the centreline toward the near side (+y). The owner's study's place (ADR 0021 amendment 2026-10-02, 'A fourteenth LED' [calc, ray cast through the CAD's solids]: 17 / 59 / 36 % of the far side's inside face seen past the key board, 85 / 85 / 85 % of the near side's, where the row's tail-end LED sees 18 / 35 / 13 and 0 / 2 / 4). drc.echo 'LED in the tail corner clear of its neighbours' checks it"
-    decided_by: "the side-light diffusion test (ROADMAP), with the row's count and pitch"
-  led_pitch:
-    value: 16.67
+    source: "owner: thirteen, 2026-09-30 (ADR 0028), the count the 60/m strip gave over the same run; a fourteenth, 2026-10-02 ('Add it', ADR 0028 amendment), first in the tail corner and since 2026-10-03 in the row: 'it needs to be distance equalized and centered just like the other leds'"
+    decided_by: "the side-light diffusion test (ROADMAP): the count, and through the board's length the pitch it gives"
+  led_view_angle:
+    value: 120
     status: tbd
-    source: "centre to centre along the body: the strip's 60/m [calc: 1000 / 60 = 16.67], which ADR 0014 chose for how it diffuses"
-    decided_by: "the side-light diffusion test (ROADMAP), before the main board is ordered - the layout goes ahead with this value and is reshuffled if the test moves it (owner's choice (b), 2026-09-30, ADR 0028 amendment): a strip offcut at board height under a white-masked mock key board, with the real acrylic at the side distance"
+    source: "degrees, the full angle of the WS2815B-V1's emission cone, for the shading NOTE in drc.echo ('tall parts in the LEDs' cone'): a 5050 PLCC's typical viewing angle [from memory - the banked datasheets/led/WS2815B-V1.pdf publishes none]"
+    decided_by: "the side-light diffusion test (ADR 0028)"
   led_body:
     value: [5.4, 5.0]
     status: settled

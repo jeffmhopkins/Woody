@@ -500,7 +500,8 @@ is already an upper bound, and E6 measures it.
 
 ## Amendment 2026-10-02 — a fourteenth LED (ADR 0028 amendment)
 
-The owner added an LED in the main board's tail corner ("Add it",
+The owner added a fourteenth LED, in the main board's tail corner that day and
+in the row since ADR 0028's amendment of 2026-10-03 ("Add it",
 2026-10-02; ADR 0028's amendment of that date). It adds at most 15 mA at
 12 V `[calc: 0.18 W / 12 V, ds datasheets/led/WS2815B-V1.pdf p.2]` to every
 row of the load table that has the lights lit: the typical-play rows' 12 V

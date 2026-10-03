@@ -137,9 +137,10 @@ Several things can claim each end, and the largest wins:
   a straight USB-C plug cost about 24 mm of body, which is why the plug is
   right-angle (`openings.usb_plug_l`).
 - **The lights are a row of LEDs on the main board** (ADR 0028; before it
-  one strip, ADR 0016): `lighting.led_count` WS2815B-V1 at `lighting.led_pitch`,
-  LEDs up down the board's centreline, between the thumb switches' two rows
-  of pins, from past the breath sensor to short of J-MCU, lighting both sides
+  one strip, ADR 0016): `lighting.led_count` WS2815B-V1 at one pitch, equal
+  margins to the main board's ends (ADR 0028 amendment 2026-10-03; the pitch
+  is drc.echo's *"LED row on the main board"*), LEDs up down the board's
+  centreline, between the thumb switches' two rows of pins, lighting both sides
   through the cavity. The row is shifted along the body so the U-bolt station
   falls midway between two LEDs (*"LED row on the main board"*, *"LED row off
   the U-bolt station"*). How evenly the cavity lights the sides is the

@@ -31,28 +31,28 @@ ECHO: "PCB", "main", "switch", "RT3", 198, 18.5, 180
 ECHO: "PCB", "main", "switch", "RT4", 198, 38.5, 0
 ECHO: "PCB", "main", "chain", "J-CHAIN-LH", 79, 42.015, 1, 13.97, 7.86
 ECHO: "PCB", "main", "chain", "J-CHAIN-RH", 190, 42.015, 1, 13.97, 7.86
-ECHO: "PCB", "main", "connector", "J-MCU", 241.33, 250.3, 28.5, 21.54, 1
+ECHO: "PCB", "main", "connector", "J-MCU", 250.5, 272.04, 12.29, 8.97, 1, 90
 ECHO: "PCB", "main", "connector", "J-UMB", 297.4, 299.9, 21.5, 8, 2.54, 1.25
 ECHO: "PCB", "main", "part", "U-BREATH", 14.15, 39.6, 0, 12.3, 17.8, 18.8
-ECHO: "PCB", "main", "part", "HDR-SERVICE", 262.6, 16.6, 0, 5, 2.54
-ECHO: "PCB", "main", "plate", "window HDR-SERVICE", 260.25, 14.25, 275.11, 18.95
-ECHO: "PCB", "main", "plate", "window U-BUCK", 228.33, 32.5, 241.33, 51.8
+ECHO: "PCB", "main", "part", "HDR-SERVICE", 284, 9.3, 0, 5, 2.54
+ECHO: "PCB", "main", "plate", "window HDR-SERVICE", 281.65, 5.2, 296.51, 11.65
+ECHO: "PCB", "main", "plate", "window U-BUCK", 215.69, 32.5, 228.69, 51.8
 ECHO: "PCB", "main", "plate", "end", 293.25
-ECHO: "PCB", "main", "part", "REGULATOR-BLOCK", 234.83, 41.5, 0, 10, 15, 12.5
-ECHO: "PCB", "main", "led", "LED1", 274.695, 42, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED2", 224.685, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED3", 208.015, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED4", 191.345, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED5", 174.675, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED6", 158.005, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED7", 141.335, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED8", 124.665, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED9", 107.995, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED10", 91.325, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED11", 74.655, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED12", 57.985, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED13", 41.315, 28.5, 180, 7.6, 6.1, 1.65
-ECHO: "PCB", "main", "led", "LED14", 24.645, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "part", "REGULATOR-BLOCK", 222.19, 41.5, 0, 10, 15, 12.5
+ECHO: "PCB", "main", "led", "LED1", 282.85, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED2", 262.981, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED3", 243.112, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED4", 223.242, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED5", 203.373, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED6", 183.504, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED7", 163.635, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED8", 143.765, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED9", 123.896, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED10", 104.027, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED11", 84.1577, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED12", 64.2885, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED13", 44.4192, 28.5, 180, 7.6, 6.1, 1.65
+ECHO: "PCB", "main", "led", "LED14", 24.55, 28.5, 180, 7.6, 6.1, 1.65
 ECHO: "PCB", "main", "standoff", "M2.5", 40, 11.1, 2.7, 6.1735, 4.9, "column"
 ECHO: "PCB", "main", "standoff", "M2.5", 40, 45.9, 2.7, 6.1735, 4.9, "column"
 ECHO: "PCB", "main", "standoff", "M2.5", 121.7, 11.1, 2.7, 6.1735, 4.9, "column"
@@ -63,7 +63,7 @@ ECHO: "PCB", "main", "standoff", "M2.5", 247.7, 11.1, 2.7, 6.1735, 4.9, "column"
 ECHO: "PCB", "main", "standoff", "M2.5", 247.7, 45.9, 2.7, 6.1735, 4.9, "column"
 ECHO: "PCB", "main", "standoff", "M2.5", 11.5, 11.5, 2.7, 6.17, 4.9, "end"
 ECHO: "PCB", "main", "standoff", "M2.5", 278.313, 13, 2.7, 6.17, 4.9, "end"
-ECHO: "PCB", "main", "standoff", "M2.5", 278.313, 30, 2.7, 6.17, 4.9, "end"
+ECHO: "PCB", "main", "standoff", "M2.5", 275.313, 30, 2.7, 6.17, 4.9, "end"
 ECHO: "PCB", "main", "ubolt", "M3", 133, 18.5, 4, 6.35085, 6
 ECHO: "PCB", "main", "ubolt", "M3", 133, 38.5, 4, 6.35085, 6
 ECHO: "PCB", "main", "keepout", "under key board left_hand", 36.4, 7.5, 125.3, 49.5, 15.5
@@ -72,5 +72,5 @@ ECHO: "PCB", "main", "keepout", "elsewhere", 7.5, 7.5, 299.9, 49.5, 20.2
 ECHO: "PCB", "main", "keepout", "ribbon left_hand", 70.64, 35.03, 80.9, 49, 0
 ECHO: "PCB", "main", "keepout", "ribbon right_hand", 181.64, 35.03, 191.9, 49, 0
 ECHO: "PCB", "main", "keepout", "USB-C receptacle and lead", 251.3, 37.5, 299.9, 49.5, 2.62
-ECHO: "PCB", "main", "keepout", "Matrix ribbon", 250.3, 20.88, 273.4, 36.12, 2.15
+ECHO: "PCB", "main", "keepout", "Matrix ribbon", 250.5, 16.775, 272.04, 19.075, 0
 ECHO: "PCB", "main", "board", "thickness", 1.6, "smt_height_max", 2.62, "side", "parts on top; the thumb switches from below, their footprints on the underside"

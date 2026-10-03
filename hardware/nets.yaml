@@ -298,7 +298,7 @@ nets:
   IO1:
     kind: signal
     domain: digital
-    carries: "LED data to the main board's LEDs (lighting.led_count WS2815B-V1, the tail corner's first; ADR 0028), ESP32 GPIO1 to the level shifter"
+    carries: "LED data to the main board's LEDs (lighting.led_count WS2815B-V1 in one row, its tail end first; ADR 0028), ESP32 GPIO1 to the level shifter"
     driver: carrier/carrier
     receivers: [carrier/led-strip-drive]
     note: "HIGH-IMPEDANCE THROUGH THE BOOTLOADER WINDOW, which is why R-LED-PD exists: OE is tied low, so a floating AHCT input becomes clean 5 V edges into the LED row before any firmware runs"

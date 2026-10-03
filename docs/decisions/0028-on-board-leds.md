@@ -84,7 +84,9 @@ the current is the tracked figure `led-row-current`, blocked on E6.
   placement rule's whole margin. No switch was flipped, so no pin moved and
   no board was laid out again for it.
 - **LED 7 off the U-bolt station: the row is shifted, no station is skipped.**
-  The row at `lighting.led_pitch`, centred in the span the board allows,
+  *(Superseded by the amendment of 2026-10-03: the row is set by the board's
+  ends, and no LED stands between the legs.)* The row at the pitch then set
+  in config, centred in the span the board allows,
   would put one LED within a couple of millimetres of the station. The body
   CAD shifts the whole row toward the mouth until the station is midway
   between two LEDs, and fails if that pushes the row out of its span
@@ -106,7 +108,7 @@ the cavity as the diffuser (ADR 0014, ADR 0016). Two things move:
   test moves ahead of the main board's layout** (ROADMAP, *Side-light
   diffusion*): a strip offcut at board height under a white-masked mock key
   board, with the real acrylic at the side distance. It decides
-  `lighting.led_count` and `lighting.led_pitch`.
+  `lighting.led_count`, and with it the pitch the body CAD derives.
 
 ## Consequences
 
@@ -146,14 +148,14 @@ the cavity as the diffuser (ADR 0014, ADR 0016). Two things move:
 | Item | Decided by |
 |---|---|
 | The row's current at full white (`led-row-current`) | E6, a current probe on the row's feed |
-| `lighting.led_count` and `lighting.led_pitch` | The side-light diffusion test. **The layout no longer waits for it** (Amendment below, owner's choice (b)): if it moves them, the row is reshuffled |
+| `lighting.led_count`, and the pitch it gives | The side-light diffusion test. **The layout no longer waits for it** (Amendment below, owner's choice (b)): if it moves them, the row is reshuffled |
 | Whether the parts in hand have the chamfer at pin 1, as the footprint now draws | A diode test across pins 2 (VDD) and 5 (GND) on the first parts, then the first order's placement preview: JLCPCB's own footprint also puts pin 1 at the chamfer, and the silk triangle marks it so the preview can be checked by eye (`hardware/lib/README.md`) |
 | The U-bolt's size, now unbounded by the lights | ADR 0025's open item: the strap hardware chosen (M4) |
 
 ## Amendment, 2026-09-30 — the layout goes ahead of the diffusion test
 
 **Owner's choice (b), 2026-09-30:** the main board is laid out now with the
-row as it stands — `lighting.led_count` WS2815B-V1s at `lighting.led_pitch`,
+row as it stands — `lighting.led_count` WS2815B-V1s at the pitch then set,
 where the body CAD puts them (`mechanical/export/pcb-geometry.echo` `main`
 `led`) — accepting that the row is reshuffled if the side-light diffusion
 test moves its count or pitch. The test is still run before the board is
@@ -187,6 +189,9 @@ HASL under Economic, the owner chooses between Standard PCBA and a leaded
 finish. The finish is not changed here.
 
 ## Amendment, 2026-10-02 — a fourteenth LED, in the main board's tail corner
+
+*Superseded by the amendment of 2026-10-03 (below): the fourteenth LED is in
+the row, not the corner. Kept as the record of what was decided that day.*
 
 **The owner, 2026-10-02: "Add it."** — answering ADR 0021's study of the
 corner the full-width tail gained beside the etherCON adapter (ADR 0021,
@@ -224,3 +229,52 @@ The side-light diffusion test still decides the row's count and pitch, and
 now the corner LED's place and gain with them. The main board is re-laid out
 for it; its `.kicad_pcb` is the layout's to change, and `tools/pcb.py check`
 fails until it places `LED1` where the body CAD does.
+
+## Amendment, 2026-10-03 — fourteen in one row, equal margins to the board's ends
+
+**The owner, 2026-10-03**, on the main board's routed preview, circling the
+corner LED: *"If this is the led, we need to change location, it needs to be
+distance equalized and centered just like the other leds. I understand this is
+a [bigger] task, and might result it changing connector positions etc"*; then,
+shown a row extended at the old pitch and a row re-spaced over the old span:
+*"I feel like we need the lowest led lower, and said all the 14 LEDs
+equidistant from board extents, and rework all components around them"*.
+This supersedes the corner position of 2026-10-02.
+
+1. **One row of `lighting.led_count` (fourteen) on the centreline, at one
+   pitch, with equal margins to the main board's two ends.** The pitch is no
+   longer a config value: `mechanical/cad/woody_body.scad` derives it, and
+   `mechanical/drc.echo` *"LED row on the main board"* prints it with the
+   margins. The aim is the even tiling, half a pitch at each end; **the breath
+   sensor is the one thing that overrides it**: `U-BREATH` stands at the
+   mouth end where the body CAD puts it, and an LED's courtyard must clear its
+   courtyard by `boards.board_clear`, so the mouth-end LED cannot come as near
+   the board's mouth edge as half a pitch. Both ends take the margin the
+   sensor allows, and the pitch spreads the fourteen between them.
+2. **"The lowest LED lower"**: in playing position the tail end is the low
+   end, and the tail-end LED (LED 1, first on the data line) now stands that
+   same margin from the board's tail edge, past where the corner LED and the
+   row's old tail end stood.
+3. **Everything else moves round the row** (the owner: *"rework all components
+   around them"*). `J-MCU` stands in a gap of the row,
+   `boards.mcu_conn_led_gap` in `config/body.yaml`, which drags the regulator
+   block with it (it is placed in front of `J-MCU`); the tail's end mount
+   steps clear of the LEDs by the body CAD's own rule (`cb_ends`); the main
+   board's layout moves its parts round the row
+   (`hardware/boards/main-board/README.md`). The Matrix's ribbon is longer by
+   `J-MCU`'s move (*"Matrix ribbon length"*).
+4. **The U-bolt station is no longer exactly midway between two LEDs.** The
+   rule's purpose holds and the body CAD checks it: no LED's courtyard
+   reaches the station's line, so none stands under the strap, and every LED
+   is clear of the nuts' keep-out (*"LED row off the U-bolt station"*, which
+   prints how far the station is off the midpoint). Shifting the row to put
+   it exactly midway would break the equal margins the owner asked for.
+5. **The data chain is unchanged in order**: `R-LED-SER` → LED 1 at the tail
+   end → … → LED 14 at the mouth end. The references follow it (`D-LED-1` /
+   `C-LED-1` the tail end's; on the main board `D7` / `C25`).
+6. **The corner LED's study no longer applies**: its gain (a sixth) and its
+   special place in the frame go (`firmware/README.md`, *The lights*). The
+   near side past the regulator block is lit by the row, as the other 13 always
+   were; the side-light diffusion test (ROADMAP) judges it, with the count and
+   the pitch.
+
