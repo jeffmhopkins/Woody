@@ -363,7 +363,7 @@ parts:
   R38: [288.95, 30.39, 0]   # R-SER-BREATH-INST in BREATH
   R39: [288.95, 27.85, 0]   # R-SER-BREATH-INST in AGND_SENSE
   NT1: [293.0, 13.4, 90]    # NT-DIG at J-UMB pin 8 (ADR 0018)
-  D2:  [286.4, 20.0, 90]    # D-REVSHUNT, across pins 3 / 6, ahead of L-BUCK-IN
+  D2:  [286.4, 18.7, 90]    # D-REVSHUNT, across pins 3 / 6, ahead of L-BUCK-IN
   D3:  [291.6, 22.4, 270]   # D-TVS-PWR at J-UMB's pins 3 (+12 V, its cathode) and 6 (PWR_GND), #8-9
   # --- Q-INRUSH and its gate network (power-entry-instrument.md §1a) in the tail strip
   # above the LED row, between LED2 and LED1 (the full-width tail's corner, which the
@@ -395,14 +395,14 @@ parts:
   J2:  [284.0, 9.3, 90]   # HDR-SERVICE at config/body.yaml boards.service_hdr_at (pin 1), in the tail corner by J-UMB, off the LEDs' cone; reached with the lid off
   # --- the regulator block (the echo's REGULATOR-BLOCK) holds U-BUCK alone; the
   # buck's input LC and C-STRIP-BULK where their height fits (README, Open)
-  U5:  [219.94, 43.985, 270]   # U-BUCK, its courtyard centred in the block
+  U5:  [230.71, 42.75, 0]   # U-BUCK in the block against the far edge, its pins ALONG the body on the row's side, its body toward the edge (the owner, 2026-10-03: tall parts 'away from leds')
   # #8-7: the module's own caps at the module - C11 beside pin 1 (VIN) between L1 and U5,
   # C43 (owner, 2026-10-03, RECOM's application) at pin 3 (OUT), returned to pin 2 (GND)
-  C11: [212.86, 45.4, 180]   # C-BUCK-IN 100 uF (5.8 mm tall), its + pad toward pin 1
-  L1:  [204.6, 40.2, 0]   # L-BUCK-IN 22 uH, ahead of C11
-  C43: [215.36, 38.9, 180]   # C-BUCK-OUT 10 uF at pin 3, in the block's edge (keepouts: except_rows)
-  D4:  [214.0, 35.6, 0]   # D-USBOR, buck -> INST_5V_A, beside C43 at U5's OUT; its cathode toward J-MCU's 5 V pins
-  C10: [221.2, 16.4, 0]     # C-STRIP-BULK 470 uF, the LED row's bulk, under LED 4 and J-MCU's 5 V end
+  C11: [220.8, 45.7, 180]   # C-BUCK-IN 100 uF (5.8 mm) against the far edge at pin 1 (VIN), its + pad toward it
+  L1:  [219.5, 38.0, 0]   # L-BUCK-IN 22 uH, INST_POS12 into C11 and pin 1
+  C43: [236.9, 39.3, 0]   # C-BUCK-OUT 10 uF at pin 3 (OUT), returned to its own via beside pin 2 (GND)
+  D4:  [243.0, 39.0, 180]   # D-USBOR at C43, its cathode toward J-MCU's 5 V pins
+  C10: [209.0, 44.1, 0]   # C-STRIP-BULK 470 uF (10.2 mm) against the far edge, off the LED row as far as the board allows, on the INST_POS12 plane beside the buck's input
   U6:  [233.0, 11.7, 90]   # U-LVLSHIFT 74AHCT125
   C12: [239.9, 12.4, 90]   # its 100 nF, at VCC (pin 14) and GND (pin 13)
   R10: [240.3, 17.6, 90]   # R-LED-PD

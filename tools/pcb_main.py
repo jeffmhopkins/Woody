@@ -621,6 +621,7 @@ def check_heights(board, lay, geo, comps=None):
     else_room = k["elsewhere"][4]
     heights = lay.get("heights") or {}
     under_ok = set(lay.get("underside_rows") or [])
+    tall = []
     checked = 0
     for fp in board.GetFootprints():
         if fp.GetReference().startswith("H"):
@@ -656,6 +657,30 @@ def check_heights(board, lay, geo, comps=None):
                 room, where = r, nm
         if h > room + 1e-6:
             bad.append(f"error: [height] {fp.GetReference()} stands {h:g} mm; its room ({where}) is {room:g}")
+        tall.append((fp.GetReference(), h, cy))
+    # THE LEDS' CONE (ADR 0028 amendment 2026-10-03; the owner on the tall parts beside the
+    # row: "Move where it makes sense still away from leds"): every top part taller than the
+    # LEDs, against their emission cone (config/body.yaml lighting.led_view_angle). A part h
+    # tall rises into an LED's cone where it is nearer that LED's courtyard than (h - the
+    # LED's height) x tan(half the angle). A NOTE, worst first - no place on a 42 mm board
+    # keeps a 10 mm part out of a 120-degree cone; the side-light diffusion test judges it.
+    if geo.get("leds"):
+        body = yaml.safe_load(open(os.path.join(ROOT, "config", "body.yaml")))
+        t = math.tan(math.radians(float(body["lighting"]["led_view_angle"]["value"]) / 2))
+        leds = [box(x - a / 2, y - c / 2, x + a / 2, y + c / 2) for (x, y, r, a, c, lh) in geo["leds"].values()]
+        led_h = max(v[5] for v in geo["leds"].values())
+        led_set = unary_union(leds)
+        rows = []
+        for ref, h, cy in tall:
+            if h <= led_h or cy.intersects(led_set):
+                continue
+            d = cy.distance(led_set)
+            rows.append((max(0.0, (h - led_h) - d / t), ref, h, d))
+        rows.sort(reverse=True)
+        if rows:
+            bad.append("note: [cone] the top parts' tops inside the LEDs' cone, worst first (mm into it; height; mm to the "
+                       "nearest LED courtyard): " + "; ".join(f"{r} {i:.1f} ({h:g}; {d:.1f})" for i, r, h, d in rows if i > 0)
+                       + (" - none" if not any(i > 0 for i, *_ in rows) else ""))
     if not checked:
         bad.append("error: [height] no top-side part had a courtyard, so no height was checked - "
                    "the courtyard caches were not built (KiCad version?)")

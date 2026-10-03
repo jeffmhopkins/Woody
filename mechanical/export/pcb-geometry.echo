@@ -36,9 +36,9 @@ ECHO: "PCB", "main", "connector", "J-UMB", 297.4, 299.9, 21.5, 8, 2.54, 1.25
 ECHO: "PCB", "main", "part", "U-BREATH", 14.15, 39.6, 0, 12.3, 17.8, 18.8
 ECHO: "PCB", "main", "part", "HDR-SERVICE", 284, 9.3, 0, 5, 2.54
 ECHO: "PCB", "main", "plate", "window HDR-SERVICE", 281.65, 5.2, 296.51, 11.65
-ECHO: "PCB", "main", "plate", "window U-BUCK", 215.69, 32.5, 228.69, 51.8
+ECHO: "PCB", "main", "plate", "window U-BUCK", 224.2, 37.5, 242.2, 51.8
 ECHO: "PCB", "main", "plate", "end", 293.25
-ECHO: "PCB", "main", "part", "REGULATOR-BLOCK", 222.19, 41.5, 0, 10, 15, 12.5
+ECHO: "PCB", "main", "part", "REGULATOR-BLOCK", 233.2, 44, 0, 15, 10, 10.5
 ECHO: "PCB", "main", "led", "LED1", 282.85, 28.5, 180, 7.6, 6.1, 1.65
 ECHO: "PCB", "main", "led", "LED2", 262.981, 28.5, 180, 7.6, 6.1, 1.65
 ECHO: "PCB", "main", "led", "LED3", 243.112, 28.5, 180, 7.6, 6.1, 1.65
