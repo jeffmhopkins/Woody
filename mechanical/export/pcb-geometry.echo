@@ -31,7 +31,7 @@ ECHO: "PCB", "main", "switch", "RT3", 198, 18.5, 180
 ECHO: "PCB", "main", "switch", "RT4", 198, 38.5, 0
 ECHO: "PCB", "main", "chain", "J-CHAIN-LH", 79, 42.015, 1, 13.97, 7.86
 ECHO: "PCB", "main", "chain", "J-CHAIN-RH", 190, 42.015, 1, 13.97, 7.86
-ECHO: "PCB", "main", "connector", "J-MCU", 251.5, 273.04, 12.29, 8.97, 1, 90
+ECHO: "PCB", "main", "connector", "J-MCU", 251.5, 273.04, 14.9, 8.97, 1, 90
 ECHO: "PCB", "main", "connector", "J-UMB", 297.4, 299.9, 21.5, 8, 2.54, 1.25
 ECHO: "PCB", "main", "part", "U-BREATH", 14.15, 39.6, 0, 12.3, 17.8, 18.8
 ECHO: "PCB", "main", "part", "HDR-SERVICE", 284, 9.3, 0, 5, 2.54
@@ -71,5 +71,5 @@ ECHO: "PCB", "main", "keepout", "elsewhere", 7.5, 7.5, 299.9, 49.5, 20.2
 ECHO: "PCB", "main", "keepout", "ribbon left_hand", 70.64, 35.03, 80.9, 49, 0
 ECHO: "PCB", "main", "keepout", "ribbon right_hand", 181.64, 35.03, 191.9, 49, 0
 ECHO: "PCB", "main", "keepout", "USB-C receptacle and lead", 251.3, 37.5, 299.9, 49.5, 2.62
-ECHO: "PCB", "main", "keepout", "Matrix ribbon", 251.5, 16.775, 273.04, 19.075, 0
+ECHO: "PCB", "main", "keepout", "Matrix ribbon", 251.5, 19.385, 273.04, 21.685, 0
 ECHO: "PCB", "main", "board", "thickness", 1.6, "smt_height_max", 2.62, "side", "parts on top; the thumb switches from below, their footprints on the underside"

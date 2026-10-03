@@ -217,8 +217,11 @@ What the first layout settled, and where it is held:
 - **`Q-INRUSH` and its gate network** in the tail strip above the LED row, between LED2 and
   LED1, where the corner LED stood for a day; its drain meets the layer-3 plane by three
   vias (`fanout_count:`).
-- **The power paths carry no via** (#8-6): `UMBILICAL_POS12`, `BUCK_IN`, `BUCK_A_OUT` and
-  `INST_5V_A` route on layer 1 only (a net class's `layers:`), 0.5 mm; where a power part
+- **The power paths carry no small via** (#8-6): `UMBILICAL_POS12`, `BUCK_IN`, `BUCK_A_OUT`
+  and `INST_5V_A` route on layer 1, 0.5 mm, layer 4 costing them twenty times as much
+  (a net class's `layer_cost:`); where one must change layers - the 5 V crossing the
+  breath pair since the regulator block went to the far edge - it does so through one
+  1.0 / 0.6 mm via (a class's `via:`), not the signals' 0.3 drill; where a power part
   meets a plane it does so by two or three vias (`Q-INRUSH`'s drain, the clamps' and bulk
   capacitors' returns, `L-BUCK-IN`).
 - **The clamps at their connector** (#8-9): `D-TVS-PWR` (D3) beside `J-UMB`'s pins 3 and 6,

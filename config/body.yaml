@@ -548,7 +548,7 @@ boards:
     status: settled
     source: "J-MCU's tails past its seating plane, 2.10 [ds XKB-X1270WR-2x12A-9TV01.pdf rev A1 side view; repo hardware/lib/README.md]"
   mcu_conn_at:
-    value: [262.27, 12.29, 90]
+    value: [262.27, 14.9, 90]
     status: tbd
     source: "J-MCU's place, ONE figure: its insulator's centre along and across the body, and the way its mouth faces (0 the tail, 90 the far side, 270 the near side). Off the LED row (the owner, 2026-10-03: 'This connector needs moved to the side so that it doesn't cause coverage of the led'): turned along the body at the near edge, its tails at the edge and its mouth toward the row, in the tail strip between column mount H8 and the tail's end mount; drc.echo 'J-MCU, its plug and the Matrix ribbon off the LED row' holds it"
     decided_by: "the RH key board's J-MCU-KB and the ribbon between them, set jointly with the Matrix move (#23): the owner's solid key-board extension"

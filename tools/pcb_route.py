@@ -1493,8 +1493,16 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
     # ...or a class's `layer_cost:` - each step on that layer costs this many times more, so
     # its nets take it only for the hops they cannot make on the others
     lcost = {n: {LK_[L]: float(v) for L, v in c["layer_cost"].items()} for c in classes.values() if c.get("layer_cost") for n in c["nets"]}
+    # ...or a class's `via: [diameter, drill]` - its nets' vias at that size, not the
+    # board's (a power rail that must change layers does it through one via sized for
+    # its current, not a signal's 0.3 mm drill: #8-6)
+    via_of = {n: tuple(float(v) for v in c["via"]) for c in classes.values() if c.get("via") for n in c["nets"]}
+    via_default = (obs.via, obs.drill)
     while queue:
         net, pa, pb = queue.pop(0)
+        if (obs.via, obs.drill) != via_of.get(net, via_default):
+            obs.via, obs.drill = via_of.get(net, via_default)
+            obs._via_inner = None
         routed = [L for L in routed_all if L in only.get(net, routed_all)]
         lc_ = lcost.get(net, {})
         w = width_of(net)
@@ -1689,6 +1697,9 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
             if m + 1 < len(path):
                 lay_via(board, obs, net, *grids["F"].xy(path[m][1:]), locked=False)
             k = m + 1
+    if (obs.via, obs.drill) != via_default:
+        obs.via, obs.drill = via_default
+        obs._via_inner = None
     return failed
 
 

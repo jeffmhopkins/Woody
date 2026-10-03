@@ -138,19 +138,24 @@ pairs:
 # (the Matrix's regulator is on the Matrix), tens of mA: 0.3 mm.
 #
 # #8-6 (single 0.3 mm vias in series on the power paths): the rails that are tracks run
-# on LAYER 1 ONLY, so they carry no via at all (pcb_route.complete, a class's layers:) -
-# J-UMB's +12 V to the clamps and Q-INRUSH's source, the buck's input and output, and the
-# 5 V to J-MCU's pins; where a power part meets a plane it does so by more than one via
-# (fanout_count: below).
+# on LAYER 1 wherever they can - layer 4 costs them twenty times as much (layer_cost) -
+# and where one must change layers it does so through ONE via sized for it, 1.0 over a
+# 0.6 drill (a class's via:), not a signal's 0.3: J-UMB's +12 V to the clamps and
+# Q-INRUSH's source, the buck's input and output, and the 5 V to J-MCU's pins. Since
+# the regulator block went to the far edge (2026-10-03) the 5 V has to cross the breath
+# pair, which runs the board's length on layer 1 (pairs: below): layer 1 alone left it
+# open. Where a power part meets a plane it does so by more than one via (fanout_count:).
 net_classes:
   power5:
     nets: [INST_5V_A, BUCK_IN, /power-entry-instrument/BUCK_A_OUT]
     track: 0.5
-    layers: [F.Cu]
+    layer_cost: {B.Cu: 20.0}
+    via: [1.0, 0.6]
   power12_in:
     nets: [UMBILICAL_POS12]
     track: 0.5
-    layers: [F.Cu]
+    layer_cost: {B.Cu: 20.0}
+    via: [1.0, 0.6]
   rail3v3:
     nets: [DEV_3V3]
     track: 0.3
@@ -390,10 +395,10 @@ parts:
   R46: [275.3, 8.9, 0]   # R-TXD-SER past J-MCU's plug box, U0TXD pad toward pin 22, TXD_HDR on to J2
   # U-TVS-SPI clamps the pad side of R-SPI-SER (IO35, IO36, IO34 - spi-link), so it
   # stands on the J-MCU side of the resistors, below the chain's, clear of the column mount
-  U1:  [258.0, 21.5, 0]
-  R34: [249.0, 23.8, 90]   # R-CHAIN-SER SCK
-  R35: [251.6, 23.8, 90]   # R-CHAIN-SER SH/LD
-  R36: [254.2, 23.8, 90]   # R-CHAIN-SER SER (the chain's end)
+  U1:  [258.0, 23.6, 0]
+  R34: [249.0, 24.4, 90]   # R-CHAIN-SER SCK
+  R35: [251.6, 24.4, 90]   # R-CHAIN-SER SH/LD
+  R36: [254.2, 24.4, 90]   # R-CHAIN-SER SER (the chain's end)
   J2:  [284.0, 9.3, 90]   # HDR-SERVICE at config/body.yaml boards.service_hdr_at (pin 1), in the tail corner by J-UMB, off the LEDs' cone; reached with the lid off
   # --- the regulator block (the echo's REGULATOR-BLOCK) holds U-BUCK alone; the
   # buck's input LC and C-STRIP-BULK where their height fits (README, Open)
@@ -447,6 +452,11 @@ route: astar
 # first. A connection with no way through takes up the nets in its way and they are
 # routed again, each net at most this many times.
 rip_up: 10
+# The rails that are layer-1 tracks (#8-6, net_classes: layers) cannot hop a via, so
+# they route before the signals do: routed last, the 5 V from J-MCU to D-USBOR and
+# J-UMB's +12 V to Q-INRUSH's gate divider found layer 1 already crossed by the bus
+# running the board's length (the first wave-3 route left both open).
+route_first: [INST_5V_A, /power-entry-instrument/BUCK_A_OUT, BUCK_IN, UMBILICAL_POS12, DEV_3V3]
 directions:
   # each right-angle corner cut to two 45-degree bends, up to this far back (pcb_route.chamfer)
   chamfer: 0.6
