@@ -1,7 +1,10 @@
 # Instrument power entry — schematic
 
-**Status:** Split out of `carrier.md` 2026-09-21 (Phase B). Every line below was
-moved verbatim; nothing was reworded and no value was touched in the move. The
+**Status:** Split out of `carrier.md` 2026-09-21 (Phase B), and edited since.
+**The KiCad sheet `power-entry-instrument.kicad_sch` is the source** (ADR 0019);
+placed on the main board
+([`../../boards/main-board/README.md`](../../boards/main-board/README.md)), its
+datasheets banked. The
 board-level context this circuit sits in — the dev board's connector `J-MCU`,
 the umbilical's `J-UMB`, the block diagram, the board outline — stays on
 [`carrier.md`](../carrier.md).

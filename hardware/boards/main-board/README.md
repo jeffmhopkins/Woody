@@ -13,10 +13,14 @@ is part of the cassette (ADR 0025): every one of its mounts stands on the one
 bottom plate, and eight of them are columns up to the key boards (ADR 0022 as
 amended).
 
-> **Status: laid out and routed by `tools/pcb.py` (`kind: main`), finished by hand.**
-> `pcb.py check` passes: KiCad's DRC with schematic parity is clean, nothing is
-> unrouted, and the planes, the island and its one tie, the mounts and every
-> CAD-placed part pass. Layer 1 runs along the board and layer 4 across it
+> **Status: laid out and routed by `tools/pcb.py` (`kind: main`) to the 2026-10-01
+> outline, finished by hand (rev D below). The ADR 0021 amendment of 2026-10-02
+> (`boards.main_tail` `full`, the full-width tail) is not yet taken, so
+> `pcb.py check` FAILS on one error — `[cad]` the Edge.Cuts outline against
+> `mechanical/export/main-board.dxf` — until the new outline is laid in (*Open*
+> below); `kicad.py check` fails with it.** Everything else `check` tests passed at
+> rev D: KiCad's DRC with schematic parity, nothing unrouted, the planes, the
+> island and its one tie, the mounts and every CAD-placed part. Layer 1 runs along the board and layer 4 across it
 > (`layout.yaml` `directions:`; owner, 2026-10-01). The last connection, `IO34`
 > into `J-MCU` pin 14, was routed by a scripted hand edit of the board (*What
 > the first layout settled*). The renders (`*.pcb-*.png`) and `fab/` are written
@@ -160,6 +164,8 @@ finish, and every other open item:
 | **Passives may go on the underside** (owner, 2026-09-29). The underside faces the grounded bottom plate, `hardware.kb_spacer_l` below it, over the board's whole length since the cassette (ADR 0025). At `boards.board_clear` that leaves no room for a part (`mechanical/drc.echo` *"main board underside room over the bottom plate"*), so an underside part needs a **window cut through the bottom plate** under it, down to the oak (the second figure on that line), and must be clear of the thumb switches' housings, pins and the mounts' spacers. Through-hole tails face the plate too: the next row. The thumb switches are already underside parts | The layout; each window goes into the bottom plate's outline in the body CAD |
 | **Through-hole tails under the board** (2026-10-01): every part with plated through-hole pins pokes its tails out of the underside toward the grounded bottom plate — `J-CHAIN` ×2, `J-MCU`, `J-UMB`, `HDR-SERVICE` and `U-BUCK` (`config/body.yaml`, *THE THROUGH-HOLE TAILS UNDER THE MAIN BOARD*, says which and why these). `mechanical/drc.echo` *"through-hole tails under the main board clear of the bottom plate"* tests each against what is under it, and the body model draws them for `clash.txt`. `J-CHAIN`'s and `J-MCU`'s clear the plate as supplied. The plate ends short of `J-UMB`'s tail row, and has a window to the oak under `HDR-SERVICE` and under the regulator block (`pcb-geometry.echo` `main` `plate`). **`U-BUCK`'s pins are cut to `boards.tht_trim` below the board after soldering** — as supplied they reach the oak even through the window. `HDR-SERVICE` stands where `boards.service_hdr_at` puts it and `U-BUCK` inside the regulator block, or the window moves with them | A part moved off its window: move `boards.service_hdr_at` (or the block) and rebuild the body CAD; a new through-hole part: add it to `tht_tails` in `mechanical/cad/woody_body.scad` |
 | **The references with no clear place on the silkscreen** stay on the fabrication layer; the layout names them when it writes the board | Hand-placed in KiCad, or room made round them |
+| **The full-width tail** (ADR 0021 amendment 2026-10-02, `boards.main_tail` `full`): the body CAD's outline gained the corner beside the etherCON adapter (*"main board's tail end runs full width beside the etherCON adapter"* in `mechanical/drc.echo`) and this board has not. Take the new `main-board.dxf` outline and the USB-C keep-out, extend the pours and planes into the corner, re-check edge clearance along the old tongue's edge (ADR 0021, *What the layout has to do*). Until then `pcb.py check` fails on Edge.Cuts | A hand edit of `main-board.kicad_pcb` in KiCad, then `pcb.py check` and `render` |
+| **The revision letter on the silkscreen** reads `rev A  2026-09-30` (`layout.yaml` `silk:`, the `.kicad_pcb`), while the table below runs to D | **Decided (owner, 2026-10-03): this table's letters are design iterations only; the silkscreen reads `rev A` on the first board fabricated**, so it stays A until a board is made and the next order is B | First order |
 | **The umbilical adapter** (`PCB-UMB-ADAPTER`) is a separate small board: its schematic is [`../umb-adapter/`](../umb-adapter/README.md), not laid out | With this board's layout |
 
 What the first layout settled, and where it is held:
@@ -210,6 +216,6 @@ What the first layout settled, and where it is held:
 |---|---|---|---|
 | — | 2026-09-29 | Schematic: the carrier circuits migrated to KiCad and placed with the thumb clusters and the interfaces' main-board parts. Not laid out | git history of this directory |
 | A | 2026-09-30 | First layout by `tools/pcb.py` (`kind: main`): placed, four layers, planes and island, routed but for the connections under *Open* | `layout.yaml`, `main-board.kicad_pcb` |
-| B | 2026-10-01 | Re-laid out on the merged sheets (`Q-INRUSH`, `INST_POS12` the layer-3 plane) and footprints (`J-MCU`, `J-UMB`, the LED's chamfer at pin 1); `U-BREATH` turned so its ports face the tail; decouplers to their ICs' power pins; the reference's feedback network stacked as its ring; routed by the tool's own router with layer directions and rip-up, Freerouting dropped (owner: "routing is super sloppy... similar horizontal and vertical layers"); `pcb.py check` passes | `layout.yaml`, `main-board.kicad_pcb`, `docs/reference/tooling.md` §4 |
+| B | 2026-10-01 | Re-laid out on the merged sheets (`Q-INRUSH`, `INST_POS12` the layer-3 plane) and footprints (`J-MCU`, `J-UMB`, the LED's chamfer at pin 1); `U-BREATH` turned so its ports face the tail; decouplers to their ICs' power pins; the reference's feedback network stacked as its ring; routed by the tool's own router with layer directions and rip-up, Freerouting dropped (owner: "routing is super sloppy... similar horizontal and vertical layers"); `pcb.py check` passed then | `layout.yaml`, `main-board.kicad_pcb`, `docs/reference/tooling.md` §4 |
 | C | 2026-10-01 | Re-laid out with fix rounds F1 (`U-BREATH` and `U-BUF` decoupling, `C201`-`C204`), F6 (`R44` at `REG-LT`'s `QH`) and F4 (`KS-33` 2.8 mm pads, by `pcb.py update-footprints --pads-resized`); `VS`'s caps turned so their `VS` pads share a row; all but one connection routed | `layout.yaml`, `main-board.kicad_pcb` |
-| D | 2026-10-01 | `IO34` routed into `J-MCU` pin 14 by hand, `IO36`'s escape from pin 12 re-routed (*What the first layout settled*); `pcb.py check` passes; renders and `fab/` written | `main-board.kicad_pcb`, `fab/` |
+| D | 2026-10-01 | `IO34` routed into `J-MCU` pin 14 by hand, `IO36`'s escape from pin 12 re-routed (*What the first layout settled*); `pcb.py check` passed then, to the 2026-10-01 outline; renders and `fab/` written | `main-board.kicad_pcb`, `fab/` |

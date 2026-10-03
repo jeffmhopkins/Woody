@@ -1767,6 +1767,57 @@ def check_cad(board, lay, geo, comps):
     return bad
 
 
+def cad_export_problems(lay):
+    """The body CAD's exports this board is checked against must be current (issue #9, G8).
+    check_cad and pcb_main.check_cad read the outline DXF and pcb-geometry.echo as
+    committed; at a STALE export they compare the board with a body that may no longer
+    exist, and pass. Asks tools/cad.py's own ledger test, for those files only."""
+    import cad
+    want = {"mechanical/export/pcb-geometry.echo",
+            "mechanical/export/" + (lay["outline"] if lay.get("kind") == "main"
+                                    else f"key-board-{lay['suffix'].lower()}.dxf")}
+    outs = {o["out"]: o for o in cad.load_spec() if o["out"] in want}
+    ledger = cad.load_ledger()
+    behind = [p for p, _ in cad.params_problems()]
+    bad = [f"error: [cad-export] {p}: no tools/cad.py spec builds it, so its currency cannot be checked"
+           for p in sorted(want - set(outs))]
+    for p, o in sorted(outs.items()):
+        msgs = cad.problems_for(o, ledger.get(o["name"]))
+        if not msgs and any(b in cad.output_inputs(o) for b in behind):
+            msgs = [f"{o['name']}: built from generated params that are behind config/"]
+        bad += [f"error: [cad-export] {m} - this board is checked against {p}; run: "
+                f"python3 tools/cad.py build {o['name']}" for m in msgs]
+    return bad
+
+
+def jlc_rotation_problems(bdir, name, board=None):
+    """A machine-placed part whose LCSC number has no row in hardware/lib/jlc-rotation.csv
+    is placed at offset 0 - right for a 2-pad passive, wrong for a part whose package JLC
+    draws turned (SOIC -90, SOT-23 180 against KiCad's). That was a printed warning,
+    with 7 main-board parts placed rotated (issue #9, G4). Now it is an error for a part
+    with polarity (D, Q, U, LED references; an electrolytic) or with more than two pads
+    (counted on `board`, when given); a 2-pad non-polar part still only warns, at render."""
+    import csv
+    import kicad
+    comps, _ = kicad.kicad_netlist(os.path.join(bdir, name + ".kicad_sch"))
+    elsewhere = yaml.safe_load(open(os.path.join(bdir, "layout.yaml"))).get("not_on_board") or {}
+    have = {r["lcsc"] for r in csv.DictReader(open(JLC_ROTATION))}
+    pads = {fp.GetReference(): fp.GetPadCount() for fp in board.GetFootprints()} if board else {}
+    bad = []
+    for ref in sorted(comps):
+        f = comps[ref]["fields"]
+        if ref in elsewhere or f.get("Assembly") != "machine" or not f.get("LCSC") or f["LCSC"] in have:
+            continue
+        fp = comps[ref]["footprint"]
+        polar = re.match(r"(D|Q|U|LED)\d", ref) or ":CP_" in fp
+        if polar or pads.get(ref, 0) > 2:
+            bad.append(f"error: [jlc-rotation] {ref} ({f['LCSC']}, {fp.split(':')[-1]}) has no row in "
+                       f"{os.path.relpath(JLC_ROTATION, ROOT)} - a {'polarised' if polar else 'multi-pin'} part "
+                       f"at offset 0 may be fitted turned; add its offset with the evidence (JLC's EasyEDA "
+                       f"footprint, banked)")
+    return bad
+
+
 def cmd_check(bdir):
     """Every line is a failure, KiCad's DRC warnings included: the fab-limit tests (text
     height, hole to hole, silk at the edge) only ever warn (K3-2), and this board has none."""
@@ -1793,6 +1844,10 @@ def cmd_check(bdir):
             continue
         bad.append(f"error: [parity] {v['description']} - " + "; ".join(i["description"] for i in v.get("items", [])))
     board = pcbnew.LoadBoard(pcb)
+    for fp in board.GetFootprints():
+        fp.BuildCourtyardCaches()   # LoadBoard leaves them empty on some 9.0.x (issue #9, G2)
+    bad += cad_export_problems(lay)
+    bad += jlc_rotation_problems(bdir, name, board)
     bad += check_rules(board, bdir, name, lay)
     if lay.get("fab"):
         bad += check_silk(board, lay["fab"])

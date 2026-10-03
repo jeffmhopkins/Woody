@@ -1,0 +1,19 @@
+name: Defect
+description: Something in the design corpus is wrong
+labels: ["kind: defect", "status: queued"]
+body:
+  - type: input
+    id: node
+    attributes:
+      label: Node or reference
+      description: Circuit node, net, BOM reference or figures.yaml key — not a file and line.
+    validations: {required: true}
+  - type: textarea
+    id: wrong
+    attributes:
+      label: What is wrong, with provenance
+    validations: {required: true}
+  - type: textarea
+    id: right
+    attributes:
+      label: What it should be, and the check that would have caught it

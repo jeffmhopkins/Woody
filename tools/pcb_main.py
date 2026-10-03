@@ -397,6 +397,12 @@ def build(bdir, lay):
 def courtyard_body(fp):
     layer = pcbnew.B_CrtYd if fp.IsFlipped() else pcbnew.F_CrtYd
     c = fp.GetCourtyard(layer)
+    if not c.OutlineCount():
+        # a board from pcbnew.LoadBoard() carries no courtyard cache on some 9.0.x builds
+        # (empty on 9.0.2 for every part; built on 9.0.9): build it, never trust an empty one
+        # (issue #9, G2)
+        fp.BuildCourtyardCaches()
+        c = fp.GetCourtyard(layer)
     return unary_union([Polygon([to_body(*xy_mm(c.Outline(i).CPoint(j))) for j in range(c.Outline(i).PointCount())])
                         for i in range(c.OutlineCount())])
 
@@ -559,6 +565,7 @@ def check_heights(board, lay, geo):
     rooms = [(box(*v[:4]), v[4], name) for name, v in k.items() if name.startswith("under key board") or name == "Matrix ribbon"]
     else_room = k["elsewhere"][4]
     heights = lay.get("heights") or {}
+    checked = 0
     for fp in board.GetFootprints():
         if fp.IsFlipped() or fp.GetReference().startswith("H"):
             continue
@@ -569,7 +576,15 @@ def check_heights(board, lay, geo):
             continue
         cy = courtyard_body(fp)
         if cy.is_empty:
+            # a part with no courtyard used to be skipped in silence - and on KiCad 9.0.2,
+            # where LoadBoard builds none, that was every part: a 40 mm part passed (issue #9,
+            # G2). Copper only (a net tie) cannot stand in any room; anything else must
+            # have a courtyard to be checked.
+            if h > 0.1:
+                bad.append(f"error: [height] {fp.GetReference()} ({name}) stands {h:g} mm and has no "
+                           f"courtyard, so its room cannot be checked - give its footprint one")
             continue
+        checked += 1
         room, where = else_room, "where no key board is overhead"
         for rect, r, nm in rooms:
             if cy.intersects(rect) and cy.intersection(rect).area > 1e-3 and r < room:
@@ -578,6 +593,9 @@ def check_heights(board, lay, geo):
                 room, where = r, nm
         if h > room + 1e-6:
             bad.append(f"error: [height] {fp.GetReference()} stands {h:g} mm; its room ({where}) is {room:g}")
+    if not checked:
+        bad.append("error: [height] no top-side part had a courtyard, so no height was checked - "
+                   "the courtyard caches were not built (KiCad version?)")
     return bad
 
 

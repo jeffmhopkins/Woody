@@ -1,0 +1,13 @@
+# Python packages for tools/ (tools/setup-env.sh installs these), pinned to the
+# versions the committed outputs were built and checked with, 2026-10-03 (issue #9, G7).
+# PyYAML comes from apt (python3-yaml); pcbnew comes with KiCad.
+pillow==12.3.0          # stamps the fingerprint into each render (cad.py)
+gmsh==4.15.2            # meshes the vendor STEP files (cad.py)
+manifold3d==3.5.4       # the clash check (cad.py)
+trimesh==5.1.0
+numpy==1.26.4
+shapely==2.1.2          # pcb.py check's geometry, the router, panel-art.py
+fonttools==4.66.0       # panel-art.py
+ezdxf==1.4.4            # panel-art.py
+cadquery-ocp==8.0.1.0.0 # lib-models.py draws the woody footprints' 3D models
+bpy==5.0.1              # render-module.py (Blender 5 as a module; needs Python 3.11)
