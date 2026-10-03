@@ -812,6 +812,13 @@ because `sim.py` hashes itself into every `results.yaml`: an edit to `sim.py`
 makes every result stale until every sim is re-run. What it still cannot see:
 an edited number that no assert reads.
 
+**One ngspice for every result.** `sim_recheck.py` also fails a `results.yaml`
+made on another major version than `tools/toolchain.yaml`'s `ngspice_major`
+(#5, 2026-10-03). Results moved between 42 and 44.2 without crossing an
+assertion — an unquieted op-amp's noise by 3×, `SYNC`'s overshoot by 8× — so
+a corpus with both is not one measurement. Re-run on the pinned version, or
+move the pin and regenerate every result.
+
 **What a result is worth.** It proves the arithmetic and the wiring against the
 models it was given. Where a model is behavioural, as a Schmitt input modelled
 as its datasheet thresholds or a switch as two resistances, `sims.yaml` says
