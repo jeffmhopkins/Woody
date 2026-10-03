@@ -25,6 +25,12 @@ source (no DAC8568 model is published, fragment R29).
 | `loop` | channel 1's loop gain at the same loads | 91.6° at every load, crossover 2.3 MHz |
 | `crosstalk` | channel 1 full scale in one edge | the others' jacks move 0.1 mV; `VREF_MOD` 2.2 mV transiently |
 | `ref-current` | every channel at code 0 | 1.333 mA from the follower, the page's figure — its heaviest case. At full scale a channel draws the other way, (3.333 − 5.0)/10 kΩ = −0.17 mA `[calc]` |
+| `range-supply`, `step-supply`, `loop-supply` | `range`, a step into a VCO and the loop with the rails at 10.8–12.6 V each way (#5 finding 6) | the law within 0.05 mV at both ends, no overshoot, 91.6° at every rail corner: the ±10 V range does not clip at 10.8 V. `loop-supply` needs `gminsteps=100` in `mod-loop.cir` to find its operating point at 10.8 V / −12.6 V |
+
+`D-JACK-CLAMP` is not in this deck: reverse-biased while the op-amp's output
+is inside the rails. The same part, at the same place, is in `pitch-stage/sim`'s
+`pitch-stage.lib`, whose `patch` and `short` sims measure it carrying nothing
+but its own capacitance's charge with the rails up.
 
 ## What a result is worth
 
