@@ -118,7 +118,7 @@ these KiCad schematics actually be the source of truth of all the things.")
   CAD's switch positions. `docs/reference/tooling.md` §4.
 - **`kicad.py check` needs KiCad 9**, so it is not in the commit hook, which
   runs before every shell command. It is run by hand, and
-  `docs/reference/tooling.md` says when.
+  `docs/reference/tooling.md` says when; nothing reports that it was skipped.
 
 ## Amendment, 2026-09-27 — the sheet names the bought part
 

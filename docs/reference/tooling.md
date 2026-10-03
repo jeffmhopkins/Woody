@@ -39,8 +39,8 @@ It installs:
 | `poppler-utils` | `pdftoppm` renders sheets to PNG; `pdftotext` reads banked datasheets |
 | `librsvg2-bin` | `rsvg-convert`: `pcb.py render` turns its SVG copper plots into PNGs |
 | `shapely` (pip) | `pcb.py check`'s silkscreen and outline geometry, and the router's clearances |
-| `ngspice` (42, Ubuntu's) | `sim.py`: every circuit's SPICE simulation (§5) |
-| three KiCad 3D models (0805 resistor and capacitor, SOIC-16) | `pcb.py render`. The full `kicad-packages3D` library is 3 GB, so the script fetches only these, from the KiCad project's GitLab at tag `9.0.0`, into `/usr/share/kicad/3dmodels/`. The KS-33's model is banked in `datasheets/`, and the chain header has none |
+| `ngspice` (Ubuntu's; 42 on this setup, and 44.2 reported to give identical results — GitHub issue #10) | `sim.py`: every circuit's SPICE simulation (§5) |
+| the KiCad 3D models the boards' footprints use (the list is the loop in `setup-env.sh`) | `pcb.py render`. The full `kicad-packages3D` library is 3 GB, so the script fetches only these, from the KiCad project's GitLab at tag `9.0.0`, into `/usr/share/kicad/3dmodels/`. The KS-33's model is banked in `datasheets/`, and the chain header has none |
 
 **KiCad must be 9, not Ubuntu's 7.0.** KiCad 7's command line has no ERC, and
 the sheets are written in KiCad 9's format. The script adds the KiCad 9 archive
@@ -431,9 +431,7 @@ path at an acute angle is left out, the path already ending inside the pad;
 and the mount holes' copper keep-outs (ADR 0020) are obstacles on both layers.
 **It proves nothing about itself** — KiCad's DRC and `pcb.py check` do. It is
 for simple digital boards like the key boards; the main board uses its fanout,
-pair and moat pieces and `complete` for the rest (*The main board*, below). The module's
-own header docstring still says every single-sided ground pad gets a via;
-step 6 is what the code does.
+pair and moat pieces and `complete` for the rest (*The main board*, below).
 
 ### The main board — `kind: main` (`tools/pcb_main.py`)
 
@@ -681,6 +679,8 @@ Each render is generated; what it is rendered from is the source.
   a row's quantity is a count over all of them (ADR 0019).
 - **The commit gate.** `check-staleness.py` runs `cad.py check` but not
   `kicad.py check`, because that needs KiCad installed; run it by hand.
+  **Nothing prints that it was skipped**: a `check-staleness.py` PASS says
+  nothing about the sheets' exports, renders, ERC or `pcb.py check`.
 
 ### Ordering: JLC's stock, not LCSC's
 

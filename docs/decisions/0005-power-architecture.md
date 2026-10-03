@@ -9,8 +9,8 @@ note).
 
 ## Context
 
-Output requirements are 0–10V on breath and modulation channels and −2 to +7V on
-pitch. Both need rails beyond what USB or a single cell provides directly.
+Output requirements are 0–10V on breath, bipolar on the four modulation
+channels (`mod-jack-range`, `config/figures.yaml`), and −2 to +7V on pitch. Both need rails beyond what USB or a single cell provides directly.
 
 ## Superseded approach: onboard battery
 
