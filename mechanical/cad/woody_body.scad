@@ -988,7 +988,7 @@ module pcb_geometry() {
     // The Matrix ribbon (since 2026-10-02 an IDC ribbon up to the right-hand
     // key board): nothing under J-MCU's socket and the ribbon's rise off its
     // back; past it, parts under the closed fold's lowest leg there.
-    echo("PCB", "main", "keepout", "Matrix ribbon socket", jm_x1, jm_y - routing_mcu_ribbon_w / 2, mcu_xs + routing_mcu_ribbon_t / 2, jm_y + routing_mcu_ribbon_w / 2, 0);
+    echo("PCB", "main", "keepout", "Matrix ribbon socket", jm_x1, jm_y - boards_mcu_plug_l / 2, mcu_xs + routing_mcu_ribbon_t / 2, jm_y + boards_mcu_plug_l / 2, 0);
     echo("PCB", "main", "keepout", "Matrix ribbon", mcu_xs + routing_mcu_ribbon_t / 2, jm_y - routing_mcu_ribbon_w / 2, mcu_fold_x1, jm_y + routing_mcu_ribbon_w / 2,
          mcu_zs[1] - routing_mcu_ribbon_t / 2 - cb_top);
     echo("PCB", "main", "board", "thickness", switch_pcb_t, "smt_height_max", boards_smt_h,
@@ -1348,9 +1348,10 @@ mcu_len = (kbm_z - jm_z - boards_mcu_plug_t) + routing_chain_raise + routing_cha
 // CLOSED, the spare folds flat between the two sockets' heights in four legs:
 // back over J-MCU, forward toward the USB-C plug, back, and forward to the
 // key board's socket, each fold a half turn. Legs at mcu_zs, the lowest 0.3
-// over J-MCU, the highest a bend radius under the key board's socket.
+// over J-MCU, the highest a bend radius under the key board's socket and 0.3
+// under J-MCU-KB.
 mcu_zs = let(z0 = cb_top + boards_mcu_conn_h + routing_mcu_ribbon_t / 2 + 0.3,
-             z3 = kbm_z - boards_mcu_plug_t / 2 - routing_chain_bend_r - routing_mcu_ribbon_t / 2)
+             z3 = min(kbm_z - boards_mcu_plug_t / 2 - routing_chain_bend_r, top_z - boards_mcu_conn_h - 0.3) - routing_mcu_ribbon_t / 2)
     [for (i = [0 : 3]) z0 + (z3 - z0) * i / 3];
 mcu_fr = (mcu_zs[1] - mcu_zs[0]) / 2;   // each fold's radius
 mcu_rises = (mcu_zs[0] - (jm_z + boards_mcu_plug_t / 2)) + ((kbm_z - boards_mcu_plug_t / 2) - mcu_zs[3]);
@@ -1492,7 +1493,7 @@ module centre_board_3d() {
         translate([jm_x0 - 0.5, jm_y - jm_sz[1] / 2 - 0.5]) square(jm_sz + [1, 1]);
         translate([ua_x0 - boards_umb_joint_d - 0.5, ec_c[0] - ju_l / 2 - 0.5]) square([boards_umb_joint_d + 1, ju_l + 1]);
         // nothing under J-MCU's socket and the Matrix ribbon's rise off it
-        translate([jm_x1, jm_y - routing_mcu_ribbon_w / 2 - 0.5]) square([mcu_xs + routing_mcu_ribbon_t / 2 - jm_x1 + 0.5, routing_mcu_ribbon_w + 1]);
+        let(w = max(routing_mcu_ribbon_w, boards_mcu_plug_l)) translate([jm_x1, jm_y - w / 2 - 0.5]) square([mcu_xs + routing_mcu_ribbon_t / 2 - jm_x1 + 0.5, w + 1]);
         translate(sensor_c) square([boards_sensor_body + 1, boards_sensor_leads + 1], center = true);
         for (c = tall_c) translate(c) square(tall_sz + [1, 1], center = true);
         for (c = cb_standoffs) translate(c) circle(d = mb_keep_d + 1);
@@ -1542,8 +1543,10 @@ module parts_3d() {
                 // no parts under a column's standoff: the PCB keeps the same circle clear
                 for (m = kb_mounts(cl)) translate(m) circle(d = col_standoff_e + 2 * hardware_kb_mount_float);
             }
-    P([0.20, 0.20, 0.22], false, "Matrix underside parts") translate([matrix_xy[0] - 9.5, matrix_xy[1] - 9.5, matrix_board_z - boards_matrix_under_h + e_kb])
-        cube([19, 19, boards_matrix_under_h]);
+    // (the square's mouth side starts where the receptacle, drawn below, ends)
+    let(x0 = max(matrix_xy[0] - 9.5, matrix_xy[0] - boards_matrix_board / 2 + boards_matrix_usb[1]))
+        P([0.20, 0.20, 0.22], false, "Matrix underside parts") translate([x0, matrix_xy[1] - 9.5, matrix_board_z - boards_matrix_under_h + e_kb])
+            cube([matrix_xy[0] + 9.5 - x0, 19, boards_matrix_under_h]);
     // its USB-C receptacle, at the mouth edge and over it (boards.matrix_usb)
     P([0.20, 0.20, 0.22], false, "Matrix USB-C receptacle")
         translate([matrix_xy[0] - boards_matrix_board / 2 - boards_matrix_usb[0], matrix_xy[1] - boards_matrix_usb[2] / 2, matrix_board_z - boards_matrix_under_h + e_kb])
