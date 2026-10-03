@@ -237,8 +237,18 @@ for r in rows:
     # "SUPERSEDES" must be present too: plenty of rows legitimately MENTION a
     # part without closing its gap. The Waveshare schematic names WS2812B-0807
     # on every one of its 64 symbols and is emphatically not its datasheet.
+    # "RETIRES THE BLOCKED ROW '<part>'" is the same declaration in other
+    # words: the TE IDC-socket catalogue row says exactly that, with the exact
+    # part string, and went on counting as a live gap because only SUPERSEDES
+    # was read (issue #7, finding 12, 2026-10-03). It is matched only with the
+    # part string QUOTED right after it - a bare "RETIRES" anywhere is not
+    # enough, because the Waveshare schematic row says "THIS RETIRES THE
+    # BLOCKED ROW." about its own schematic and names WS2812B-0807 further
+    # on, and a loose rule declared it the LED's datasheet on its first run.
     hit = next((o for o in _ok
-                if part and part in o[7] and "SUPERSEDES" in o[7].upper()), None)
+                if part and part in o[7]
+                and ("SUPERSEDES" in o[7].upper()
+                     or f"RETIRES THE BLOCKED ROW '{part.upper()}'" in o[7].upper())), None)
     if hit is not None:
         declared.append((r, hit)); continue
     rt = {t for t in _tokens(part) if _freq.get(t, 99) <= DISTINCTIVE}
@@ -288,6 +298,16 @@ if declared:
     print(f"  SUPERSEDED (declared): {len(declared)} row(s) whose part string a banked row quotes:")
     for r, o in declared:
         print(f"        - {r[0]}  ->  {o[2]}")
+# THE LIVE COUNT. "41 blocked" on the summary line read as 41 open gaps when
+# a dozen were closed by a later bank (issue #7, finding 12). The headline is
+# kept - it counts rows, and the rows are the record - and this line says how
+# many of them are still gaps. CHECK rows below are NOT subtracted: they are a
+# heuristic, and a gap is closed by a declaration or an exact name, not a guess.
+_closed = {id(r) for r in superseded} | {id(r) for r, _ in declared}
+_live = [r for r in rows if not r[6].upper().startswith("OK") and id(r) not in _closed]
+print(f"  LIVE: {len(_live)} non-OK row(s) not closed by a banked row "
+      f"({len(rows) - ok - len(_live)} closed: {len(superseded)} by exact name, "
+      f"{len(declared)} declared SUPERSEDES/RETIRES)")
 if likely:
     print(f"  CHECK: {len(likely)} BLOCKED/NOT-FETCHED row(s) LOOK superseded by a banked row under a "
           f"different name. This is a heuristic - confirm the die and the product before believing it:")
