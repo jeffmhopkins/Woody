@@ -4,17 +4,17 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/carrier/power-entry-instrument/sim/sims.yaml: a16f7f2bedcc5fd0
+  hardware/carrier/power-entry-instrument/sim/sims.yaml: 25fc92c191c1f407
   hardware/carrier/power-entry-instrument/netlist.yaml: 2ced35d8a0373a19
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
   hardware/module/power-entry/netlist.yaml: 56b479e28aae437c
-  hardware/carrier/power-entry-instrument/sim/pei-z.cir: a1aee2ada3397cc1
+  hardware/carrier/power-entry-instrument/sim/pei-z.cir: 7257efe8f4f3ef30
   hardware/carrier/power-entry-instrument/sim/pei-start.cir: 514be1cedaf9a06a
   hardware/carrier/power-entry-instrument/sim/pei-pwm.cir: c8faaade2a9390f2
   hardware/module/umbilical-load-switch/sim/lt1641.inc: 59be165ccd4451a6
-  hardware/module/umbilical-load-switch/sim/sims.yaml: 85eec256fad8b2e5
+  hardware/module/umbilical-load-switch/sim/sims.yaml: c338c3bd07b25968
   figure:umbilical-current: 359 mA
-ngspice: '44.2'
+ngspice: '42'
 sims:
   input-z:
     corners: 9
@@ -23,17 +23,23 @@ sims:
         nominal: 0.570147
         min: 0.570147
         min_at: nominal
-        max: 1.85883
+        max: 1.859
         max_at: esr_buck+ esr_strip- r_cable-
       f_peak:
         nominal: 3845.92
-        min: 100.0
+        min: 1.0
         min_at: esr_buck- esr_strip- r_cable+
-        max: 1000000.0
+        max: 10000000.0
         max_at: esr_buck+ esr_strip- r_cable-
+      z_edge:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 1.0
+        max_at: esr_buck- esr_strip- r_cable+
       margin:
         nominal: 181.482
-        min: 55.6648
+        min: 55.6597
         min_at: esr_buck+ esr_strip- r_cable-
         max: 181.482
         max_at: nominal
@@ -44,7 +50,7 @@ sims:
         behind it, and lets C-BUCK-IN's ESR fall below its datasheet maximum
       pass: true
   cold-start:
-    corners: 33
+    corners: 65
     measures:
       latched:
         nominal: 0.0
@@ -54,16 +60,16 @@ sims:
         max_at: nominal
       t_up:
         nominal: 0.16317
-        min: 0.107952
-        min_at: igate+ itup- r_cable- t_iso- vto_q-
-        max: 0.237997
-        max_at: igate- itup+ r_cable+ t_iso+ vto_q+
+        min: 0.107951
+        min_at: R-ILIM- igate+ itup- r_cable- t_iso- vto_q-
+        max: 0.237999
+        max_at: R-ILIM+ igate- itup- r_cable+ t_iso+ vto_q+
       i_iso_peak:
         nominal: 0.514881
-        min: 0.497198
-        min_at: igate+ itup- r_cable+ t_iso+ vto_q+
-        max: 0.525351
-        max_at: igate- itup- r_cable- t_iso- vto_q-
+        min: 0.497189
+        min_at: R-ILIM+ igate+ itup- r_cable+ t_iso+ vto_q+
+        max: 0.525363
+        max_at: R-ILIM- igate- itup- r_cable- t_iso- vto_q-
       t_at_ocp:
         nominal: 0.0
         min: 0.0
@@ -72,10 +78,10 @@ sims:
         max_at: nominal
       v_in_peak:
         nominal: 12.0
-        min: 11.6448
-        min_at: igate- itup- r_cable+ t_iso+ vto_q-
+        min: 11.6446
+        min_at: R-ILIM+ igate- itup- r_cable+ t_iso+ vto_q-
         max: 12.0
-        max_at: igate+ itup- r_cable- t_iso- vto_q+
+        max_at: R-ILIM- igate+ itup- r_cable- t_iso- vto_q+
       v_buck_fallback:
         nominal: 0.0
         min: 0.0
@@ -85,9 +91,15 @@ sims:
       vcc_min:
         nominal: 11.9964
         min: 11.9963
-        min_at: igate- itup- r_cable- t_iso- vto_q-
+        min_at: R-ILIM- igate- itup- r_cable- t_iso- vto_q-
         max: 11.9965
-        max_at: igate- itup- r_cable+ t_iso- vto_q+
+        max_at: R-ILIM+ igate+ itup- r_cable+ t_iso+ vto_q+
+      timer_peak:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
     asserts:
     - expr: max['latched'] < 0.5
       why: the start completes without the LT1641's fault latch at every corner
@@ -104,8 +116,13 @@ sims:
     - expr: max['v_in_peak'] < 15.0
       why: no overshoot at the instrument's input reaches D-TVS-PWR's 15 V standoff (SMAJ15A)
       pass: true
+    - expr: max['timer_peak'] < 0.5 * 1.233
+      why: 'C-TIMER-LOADSW''s sizing (umbilical-load-switch.md, ''The two capacitors''): the fault TIMER rises under half
+        its 1.233 V threshold at every corner, R-ILIM''s 1 % and the fastest TIMER pull-up among them - the 2x the page asks
+        of worst-case silicon, on the circuit as built (Q-INRUSH and the cable in)'
+      pass: true
   hot-plug:
-    corners: 65
+    corners: 129
     measures:
       latched:
         nominal: 0.0
@@ -115,16 +132,16 @@ sims:
         max_at: nominal
       t_up:
         nominal: 0.134709
-        min: 0.0932808
-        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable- vhi- vto_q-
-        max: 0.181661
-        max_at: C-INRUSH-GD+ c_tvs+ igate+ r_cable+ vhi- vto_q+
+        min: 0.0932797
+        min_at: C-INRUSH-GD+ R-ILIM- c_tvs- igate+ r_cable- vhi- vto_q-
+        max: 0.181662
+        max_at: C-INRUSH-GD+ R-ILIM+ c_tvs+ igate+ r_cable+ vhi- vto_q+
       i_iso_peak:
         nominal: 0.514895
-        min: 0.490897
-        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ vhi- vto_q+
-        max: 0.544158
-        max_at: C-INRUSH-GD- c_tvs+ igate+ r_cable- vhi- vto_q-
+        min: 0.490889
+        min_at: C-INRUSH-GD+ R-ILIM+ c_tvs- igate- r_cable+ vhi- vto_q+
+        max: 0.54417
+        max_at: C-INRUSH-GD- R-ILIM- c_tvs- igate+ r_cable- vhi- vto_q-
       t_at_ocp:
         nominal: 0.0
         min: 0.0
@@ -133,10 +150,10 @@ sims:
         max_at: nominal
       v_in_peak:
         nominal: 13.6651
-        min: 12.9665
-        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ vhi- vto_q-
-        max: 14.2396
-        max_at: C-INRUSH-GD- c_tvs+ igate- r_cable- vhi- vto_q-
+        min: 12.9659
+        min_at: C-INRUSH-GD+ R-ILIM+ c_tvs- igate- r_cable+ vhi+ vto_q-
+        max: 14.238
+        max_at: C-INRUSH-GD- R-ILIM+ c_tvs+ igate- r_cable- vhi- vto_q-
       v_buck_fallback:
         nominal: 0.0
         min: 0.0
@@ -146,15 +163,21 @@ sims:
       vcc_min:
         nominal: 11.9964
         min: 11.9962
-        min_at: C-INRUSH-GD- c_tvs- igate- r_cable- vhi- vto_q-
+        min_at: C-INRUSH-GD- R-ILIM- c_tvs- igate- r_cable- vhi- vto_q-
         max: 11.9966
-        max_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ vhi- vto_q+
+        max_at: C-INRUSH-GD+ R-ILIM+ c_tvs- igate- r_cable+ vhi- vto_q+
       p_q_peak:
         nominal: 1.63654
-        min: 1.52024
-        min_at: C-INRUSH-GD+ c_tvs- igate- r_cable+ vhi- vto_q+
-        max: 1.79256
-        max_at: C-INRUSH-GD- c_tvs- igate+ r_cable- vhi- vto_q-
+        min: 1.52021
+        min_at: C-INRUSH-GD+ R-ILIM+ c_tvs- igate- r_cable+ vhi- vto_q+
+        max: 1.7926
+        max_at: C-INRUSH-GD- R-ILIM- c_tvs- igate+ r_cable- vhi- vto_q-
+      timer_peak:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
     asserts:
     - expr: max['latched'] < 0.5
       why: the start completes without the LT1641's fault latch at every corner
@@ -172,12 +195,16 @@ sims:
       why: the buck's input never falls back towards its minimum once running, and the ring at J-UMB when the plug makes contact
         stays under D-TVS-PWR's 15 V standoff (R-INRUSH-GD damps it)
       pass: true
+    - expr: max['timer_peak'] < 0.5 * 1.233
+      why: 'the hot-plug sizing case: the fault TIMER rises under half its 1.233 V threshold at every corner, R-ILIM''s 1
+        % among them'
+      pass: true
     - expr: max['p_q_peak'] < 3.0
       why: Q-INRUSH's dissipation during the ramp peaks under 3 W at every corner, a quarter of the AO3401A's single-pulse
         rating at 50 ms (~12 W, AOS-AO3401A.pdf p.4 Figure 10, read off the curve)
       pass: true
   replug-late:
-    corners: 5
+    corners: 9
     measures:
       latched:
         nominal: 0.0
@@ -187,10 +214,10 @@ sims:
         max_at: nominal
       i_iso_peak:
         nominal: 0.514901
-        min: 0.49721
-        min_at: r_cable+ vto_q+
-        max: 0.52129
-        max_at: r_cable- vto_q-
+        min: 0.497199
+        min_at: R-ILIM+ r_cable+ vto_q+
+        max: 0.521305
+        max_at: R-ILIM- r_cable- vto_q-
       t_at_ocp:
         nominal: 0.0
         min: 0.0
@@ -200,16 +227,22 @@ sims:
       vcc_min:
         nominal: 11.9964
         min: 11.9964
-        min_at: r_cable- vto_q-
+        min_at: R-ILIM- r_cable- vto_q-
         max: 11.9965
-        max_at: r_cable+ vto_q+
+        max_at: R-ILIM+ r_cable+ vto_q+
+      timer_peak:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
     asserts:
     - expr: max['latched'] < 0.5 and max['i_iso_peak'] < 0.5 * p['i_ocp']
       why: 'a replug once the instrument has drained starts from off, as a first plug-in does: U-ISO under half its over-current
         threshold, no fault latch'
       pass: true
   replug-early:
-    corners: 33
+    corners: 65
     measures:
       latched:
         nominal: 0.0
@@ -225,16 +258,22 @@ sims:
         max_at: nominal
       t_at_ocp:
         nominal: 0.000157346
-        min: 9.70094e-05
-        min_at: dvg- igate+ r_cable+ vhi- vto_q-
-        max: 0.000452873
-        max_at: dvg+ igate+ r_cable- vhi+ vto_q+
+        min: 9.4268e-05
+        min_at: R-ILIM- dvg- igate- r_cable+ vhi- vto_q+
+        max: 0.000464077
+        max_at: R-ILIM- dvg+ igate+ r_cable- vhi+ vto_q-
       vcc_min:
         nominal: 11.645
-        min: 10.2304
-        min_at: dvg+ igate+ r_cable- vhi+ vto_q-
-        max: 11.7355
-        max_at: dvg- igate- r_cable+ vhi- vto_q+
+        min: 10.1883
+        min_at: R-ILIM- dvg+ igate+ r_cable- vhi+ vto_q-
+        max: 11.7364
+        max_at: R-ILIM+ dvg- igate- r_cable+ vhi- vto_q-
+      timer_peak:
+        nominal: 0.00313443
+        min: 0.00298508
+        min_at: R-ILIM- dvg- igate- r_cable- vhi+ vto_q+
+        max: 0.00417324
+        max_at: R-ILIM+ dvg+ igate+ r_cable+ vhi- vto_q+
     asserts:
     - expr: max['latched'] < 0.5 and min['vcc_min'] > 9.90
       why: the restart completes without the fault latch and VCC stays above the ON pin's turn-off
