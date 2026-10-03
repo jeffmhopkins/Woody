@@ -1,0 +1,16 @@
+# The toolchain the committed outputs were made with (issue #9, G7). One place:
+# tools/setup-env.sh installs and warns from it, and tools/commit-gate.py prints a
+# TOOLCHAIN warning on every commit made with something else. A warning, not a
+# failure: a different version is a reason to look at what changed, not proof that
+# anything did. Change a line here only with the outputs regenerated on the new tool.
+#
+# KiCad: the fab outputs were produced with 9.0.9. On 9.0.2 (Debian trixie's) the
+# netlist exports and DRC agree, but the .gbrjob differs, ERC gives two extra library
+# warnings, and LoadBoard leaves every courtyard empty (G2, now built explicitly).
+kicad_min: 9.0.9
+# ngspice: every results.yaml records 42 (Ubuntu 24.04's). 44.2 reproduced
+# led-strip-drive, panel-led, breath-adc and power-entry-instrument identically,
+# but ngspice 42's own quirks are written into decks (docs/reference/tooling.md 5).
+ngspice_major: 42
+# OpenSCAD: Ubuntu's; the module CAD rebuilds byte-identical on it.
+openscad: 2021.01
