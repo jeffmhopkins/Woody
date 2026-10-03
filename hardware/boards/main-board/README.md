@@ -214,9 +214,9 @@ What the first layout settled, and where it is held:
 - **`U-REF-BREATH`'s input** (#8-7): `C6` (100 nF) across pins 2 and 4, `C4` (10 µF) above
   pin 2 between `U4` and `U3`.
 - **`R44`** (`R-HOP-SER`, fix round F6) at `REG-LT`'s `QH`, pin 9 (`layout.yaml` `parts:`).
-- **`Q-INRUSH` and its gate network** in the tail strip above the LED row, between LED2 and
-  LED1, where the corner LED stood for a day; its drain meets the layer-3 plane by three
-  vias (`fanout_count:`).
+- **`Q-INRUSH` and its gate network** by `J-UMB`, under the breath pair's far run (*The
+  breath corridor*), so `UMBILICAL_POS12` reaches it from pin 3 without crossing the pair;
+  its drain meets the layer-3 plane by three vias (`fanout_count:`).
 - **The power paths carry no small via** (#8-6): `UMBILICAL_POS12`, `BUCK_IN`, `BUCK_A_OUT`
   and `INST_5V_A` route on layer 1, 0.5 mm, layer 4 costing them twenty times as much
   (a net class's `layer_cost:`); where one must change layers - the 5 V crossing the
@@ -235,6 +235,46 @@ What the first layout settled, and where it is held:
   only where the block's density leaves no other way (VS across the feedback ring,
   REF_5V round U4). The breath pair is guarded: every other net the router lays keeps
   0.75 mm (3W) off its legs (`pairs:` `guard:`; #8-4).
+- **The breath corridor** (owner, 2026-10-03: *"Main board, analog breath should not run
+  under LEDs down the length"*; `layout.yaml` `pairs:`, `islands:`). The breath signal
+  and its `AGND` leg run from the sensor to `J-UMB` as two guarded pairs, joined at the
+  series resistors `R38` / `R39`, which stand where the pair changes layer:
+  - **Near edge, layer 4** - from the mouth along the board's near edge (y 9.4), stepping
+    inboard round the column mounts `H1`, `H3`, `H5` and rising before `H7` to `R38` /
+    `R39`. Layer 4, not 1: the near-row keys' T networks (LT1, LT3, RT1, RT3) stand on
+    layer 1 between the edge and their switch pins. Its reference is an `AGND_INST` strip
+    cut out of layer 3 under it (`strip: true`), so neither the LEDs' +12 V plane nor
+    their return is under it; the strip also runs under the pair's two legs at the mouth,
+    from the sensor's GND pin and the buffer's output down to the edge.
+  - **One crossing of the LED row**, at 90 degrees on layer 1, in the gap between LED2 and
+    `J-MCU` (x 249.5), over solid `PWR_GND` on layer 2: no strip under these ~15 mm, so
+    layer 2 stays one piece (the coordinator's option B); the pair's own `AGND` leg runs
+    beside the signal all the way. The LED chain's data (LED1 to LED2) crosses it there
+    at 90 degrees on layer 4, the only place it meets the pair.
+  - **Far side, layer 1** - from past `H8` along y 45.5, over an `AGND_INST` strip in
+    layer 2, down past `Q-INRUSH`'s network to `J-UMB`'s breath pins.
+  - **Distances** `[calc, body mm from the courtyards in layout.yaml]`: from the buck's
+    switching loop (`U5`, `L1`, `C11`) at least **9.9 mm** (the crossing's nearer leg at
+    x 249.1 against `U5`'s courtyard at 239.2; `L1` and `C11` 23.6 mm and more), with
+    no run beside it - the crossing is perpendicular to the block's face and leaves it
+    after under 1 mm of length; from the LEDs' courtyards 16 mm on the near run and
+    13.6 mm on the far run, 2.5 mm from LED2 where the pair crosses the row; `J-MCU`'s
+    SPI and IO lines leave it on its far side and the edge, and cross the pair at 90
+    degrees where they must. Moved for it: `U-LVLSHIFT` and the LED data by LED1,
+    `Q-INRUSH`'s network by `J-UMB`, `R-SPI-SER` between `J-MCU` and `J-UMB`,
+    `R-CHAIN-SER` on the mouth side of the crossing, `D-USBOR` off the crossing.
+  - **Guard traces** (`pairs:` `guard_traces:`, `pcb_route.guard_traces`): an `AGND_INST`
+    track each side of both coupled runs, one clearance off the legs, stitched into the
+    strip under it at least every 5 mm - about 500 mm of guard and ~100 vias on the
+    near-edge run, ~120 mm and ~25 vias on the crossing and far run, the crossing
+    included (the strips reach under its two ends for the stitching). **Left with the
+    3W keep-off only**, where another net's copper leaves no room for a guard with two
+    stitching vias: five short spans of 2.0-4.4 mm where the near run steps round the
+    column mounts H3, H5 and the T networks at x ~117, ~150, ~190 (body mm), and one of
+    2.8 mm where the far run turns down to `J-UMB`. `route` prints each one.
+  - **The crossing's band** is the board's one `directions:` region (`layout.yaml`):
+    layer 4 runs across the board between x 244 and 255, so what crosses the pair there
+    on layer 4 meets it at 90 degrees.
 
 ## Ordering it — JLCPCB
 
