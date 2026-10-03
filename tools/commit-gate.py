@@ -48,7 +48,15 @@ KICAD_INPUTS = ("hardware/", "mechanical/export/", "tools/kicad.py", "tools/pcb"
                 "tools/lib-models.py")
 
 
+def unquoted(cmd):
+    """The command with heredoc bodies and quoted strings blanked, so text that
+    merely mentions `git commit` (a comment body, a grep pattern) is not one."""
+    cmd = re.sub(r"<<-?\s*(['\"]?)(\w+)\1[^\n]*\n.*?\n\s*\2\s*(?:\n|$)", "<<H\n", cmd, flags=re.S)
+    return re.sub(r"\$?'[^']*'|\"(?:\\.|[^\"\\])*\"", "''", cmd)
+
+
 def is_commit(cmd):
+    cmd = unquoted(cmd)
     m = GIT_COMMIT.search(cmd)
     if not m:
         return False
@@ -195,7 +203,8 @@ def self_test():
     yes = ["git commit -m x", "cd /a && git commit -am 'x'", "git -C /r commit", "git merge origin/main",
            "git -c user.name=x commit --amend", "ls; git commit -F msg.txt", "(git merge --continue)"]
     no = ["ls", "git status", "git merge-base a b", "git merge --abort", "echo git commit-tree",
-          "git log --grep commit", "grep -n 'git commit' CLAUDE.md | head", "git diff --cached"]
+          "git log --grep commit", "grep -n 'git commit' CLAUDE.md | head", "git diff --cached",
+          "gh api x -f body=\"run \\`git commit\\` with Gate-Red\"", "python3 - <<'EOF'\nprint('git commit')\nEOF\nls"]
     bad = [c for c in yes if not is_commit(c)] + [c for c in no if is_commit(c)]
     print("commit-gate self-test:", "PASS" if not bad else f"FAIL {bad}")
     return 1 if bad else 0
