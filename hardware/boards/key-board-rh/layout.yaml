@@ -105,7 +105,12 @@ route: true
 # later it finds its via spots below the pin taken. Then J-CHAIN's far row (the
 # odd pins), reachable only from the header's back. KEY_RH1 last: routed early,
 # its via lands beside J-CHAIN's ground pin 4 and starves that pin's thermal.
-route_first: [/KEY_RH5, /KEY_RH6, /CHAIN_SCK, /CHAIN_SHLD, /HOP_LT_RH, /HOP_RH_RT, /KEY_RH1]
+# Then J2's (J-MCU-KB's) far row, the odd pins, reachable only from the
+# header's back - outermost first, as they wrap round its ends to the rails -
+# and its near row.
+route_first: [/KEY_RH5, /KEY_RH6, /CHAIN_SCK, /CHAIN_SHLD, /HOP_LT_RH, /HOP_RH_RT, /KEY_RH1,
+              /EN, /U0TXD, /IO1, /IO40, /IO7, /IO37, /IO38, /IO39, /IO35, /IO34, /IO36,
+              /IO0, /U0RXD, /IO2, /IO33, /IO3, /INST_5V_A, /DEV_3V3]
 connect_first:
   - {pads: [C7.2, U1.8], max_mm: 15, why: "the decoupling loop's ground half, in its own track"}
   # The register's two far-row ground pins are boxed in by the far-row key lines:
@@ -116,6 +121,8 @@ connect_first:
   - {pads: [U1.12, U1.8], max_mm: 20, why: "the low marker's strap to ground, boxed in between the high marker and RH6's line"}
   - {pads: [U1.15, U1.12], max_mm: 12, why: "CLK INH's strap to ground, boxed in between RH5's line and VCC"}
 ground_net: GND_CHAIN
-# The Matrix's 5 V and its 3V3 (the breath ADC's reference, carrier.md) at the
-# power width; its grounds are on GND_CHAIN, the pour (the sheet says why).
-power_nets: [V3V3_CHAIN_RH, INST_5V_A, DEV_3V3]
+# The Matrix's grounds are on GND_CHAIN, the pour (the sheet says why). Its
+# 5 V and 3V3 route at signal width: routed first at the power width they
+# closed the ways out of J2's two rows. Widen them in KiCad afterwards
+# (carrier.md: the 3V3 track adds to the breath ADC's reference drop).
+power_nets: [V3V3_CHAIN_RH]

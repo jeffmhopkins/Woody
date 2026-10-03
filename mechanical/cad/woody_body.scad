@@ -167,9 +167,13 @@ behind_matrix = usb_behind + layout_tail_clear + ec_stack_d + ends_tail_cap_t;
 // usb_plug_turn, 2026-10-02), the plug's overmould stands only its thickness
 // in front of the edge and its length below the Matrix.
 assert(openings_usb_plug_turn == "down" || openings_usb_plug_turn == "across", "openings.usb_plug_turn is down or across");
-usb_plug_d = openings_usb_plug_turn == "down" ? openings_usb_slot_h : openings_usb_plug_l;   // the plug along the body
-usb_plug_h = openings_usb_plug_turn == "down" ? openings_usb_plug_l : openings_usb_slot_h;   // and below the Matrix's underside
+// The plug's overmould is centred on the Matrix's receptacle (boards.matrix_usb,
+// review #19 F1), whose face stands its overhang past the board's edge.
+assert(openings_usb_plug_turn == "across" || !openings_matrix_usb_to_tail, "a turned-down plug is drawn at the mouth edge only");
+usb_plug_d = openings_usb_plug_turn == "down" ? boards_matrix_usb[0] + openings_usb_overmold[1] : openings_usb_plug_l;   // past the board's edge, along the body
+usb_plug_h = openings_usb_plug_turn == "down" ? openings_usb_plug_l : openings_usb_slot_h;   // its height
 usb_front = openings_matrix_usb_to_tail ? 0 : usb_plug_d;
+usb_plug_w = openings_usb_plug_turn == "down" ? openings_usb_overmold[0] : openings_usb_slot_w;   // across the body
 equip_start_rel = plate_cutout / 2 + tail_margin + layout_tail_clear;
 tail_claims_rel = [
     top_last_rel + equip_start_rel + boards_umb_joint_d + ec_stack_d + ends_tail_cap_t,
@@ -537,7 +541,15 @@ module oak_rebates_2d() { translate([-x_in0, 0]) translate(matrix_xy) square(mat
 // the rebates; their depth is the head's and a clearance
 // (drc.echo "column screw pockets leave wood over them"). Frame: as the oak panels.
 col_pocket_depth = hardware_col_screw_head_h + hardware_col_pocket_clear;
-module oak_pockets_2d() { translate([-x_in0, 0]) for (m = columns()) translate(m) circle(d = hardware_col_pocket_d); }
+// ...and one over the USB-C plug, where its overmould rises past the oak's
+// underside (review #19 F1): the same depth, cut in the same pass, ending at
+// the window's rebate.
+function usb_oak_pocket() = let(x1 = min(matrix_xy[0] - boards_matrix_board / 2 - boards_matrix_usb[0] + 0.3, matrix_xy[0] - matrix_rebate / 2))
+    [usb_plug_x0 - 0.5, matrix_xy[1] - usb_plug_w / 2 - 0.5, x1, matrix_xy[1] + usb_plug_w / 2 + 0.5];
+module oak_pockets_2d() { translate([-x_in0, 0]) {
+    for (m = columns()) translate(m) circle(d = hardware_col_pocket_d);
+    if (usb_pocket_need > 0) let(q = usb_oak_pocket()) translate([q[0], q[1]]) square([q[2] - q[0], q[3] - q[1]]);
+} }
 
 // THE MAKER'S MARK (owner, 2026-10-01: "Logo should be here, scale as
 // appropriate" - the plain oak between the mouth cap's seam and the first cap
@@ -623,7 +635,14 @@ matrix_gap = z_oak_top_bot - boards_matrix_t - (z_plate_top - switch_pcb_below_s
 matrix_board_z = z_plate_top - switch_pcb_below_seat + boards_matrix_shim_t;
 matrix_top_z = matrix_board_z + boards_matrix_t + boards_matrix_led_h;   // LED tops
 // The key plate ends before the Matrix, so past it the lid is the oak alone.
-plate_x1 = matrix_xy[0] - boards_matrix_board / 2 - 1;
+// AND SHORT OF THE USB-C PLUG (review #19 F1): the plug's overmould is centred
+// on the receptacle's axis, so it rises past the plate's underside; the plate
+// stops a millimetre in front of it, which also opens J-MCU's side to a hand.
+usb_axis_z = z_plate_top - switch_pcb_below_seat + boards_matrix_shim_t - boards_matrix_usb[3];   // matrix_board_z less the axis's depth
+usb_plug_top = openings_usb_plug_turn == "down" ? usb_axis_z + openings_usb_overmold[1] / 2 : usb_axis_z + openings_usb_slot_h / 2;
+usb_pocket_need = usb_plug_top + 0.3 - z_oak_top_bot;   // drawing convention: 0.3 of air over the overmould
+plate_x1 = min(matrix_xy[0] - boards_matrix_board / 2 - 1,
+               usb_plug_top > z_plate_bot ? matrix_xy[0] - boards_matrix_board / 2 - usb_plug_d - 1 : 1e9);
 // The USB-C extension's plug, in the Matrix's mouth or tail edge.
 usb_plug_x0 = openings_matrix_usb_to_tail ? matrix_xy[0] + boards_matrix_board / 2 : matrix_xy[0] - boards_matrix_board / 2 - usb_plug_d;
 // The shim strips' width across the body: a pin's pad and a little [drawing convention].
@@ -1001,8 +1020,8 @@ module tail_equipment() {
     P(C_PCB, false, "umbilical adapter") translate([ua_x0, ec_c[0] - ec_fl[0] / 2, ec_c[1] - ec_fl[1] / 2]) cube([boards_umb_adapter_t, ec_fl[0], ec_fl[1]]);
     // The USB-C extension's plug in the Matrix's USB-C edge, under the board:
     // along the body and down from it as openings.usb_plug_turn turns it.
-    P([0.35, 0.35, 0.38], false, "USB-C plug") translate([usb_plug_x0, matrix_xy[1] - openings_usb_slot_w / 2, matrix_board_z - usb_plug_h])
-        cube([usb_plug_d, openings_usb_slot_w, usb_plug_h]);
+    P([0.35, 0.35, 0.38], false, "USB-C plug") translate([usb_plug_x0, matrix_xy[1] - usb_plug_w / 2, usb_plug_top - usb_plug_h + e_kb])
+        cube([usb_plug_d - boards_matrix_usb[0], usb_plug_w, usb_plug_h]);
     // The USB-C extension: receptacle body behind the tail cap, and a cable
     // run to the Matrix board's edge (drawn straight; it is a flexible lead).
     // Its nose passes the panel under the overmould pocket, face level with
@@ -1326,38 +1345,40 @@ kbm_z = top_z - boards_mcu_conn_h / 2;
 // plus routing.chain_slack.
 mcu_xs = jm_x1 + boards_mcu_plug_proud + routing_mcu_ribbon_t / 2;   // the ribbon's centre where it rises
 mcu_len = (kbm_z - jm_z - boards_mcu_plug_t) + routing_chain_raise + routing_chain_slack;
-// CLOSED, the spare folds flat in an S between the two sockets' heights: a leg
-// back over J-MCU, one forward toward the USB-C plug and one back, each
-// fold a half turn. Legs at mcu_zs, the lowest boards.board_clear over
-// J-MCU, the highest a bend radius under the key board's socket.
+// CLOSED, the spare folds flat between the two sockets' heights in four legs:
+// back over J-MCU, forward toward the USB-C plug, back, and forward to the
+// key board's socket, each fold a half turn. Legs at mcu_zs, the lowest 0.3
+// over J-MCU, the highest a bend radius under the key board's socket.
 mcu_zs = let(z0 = cb_top + boards_mcu_conn_h + routing_mcu_ribbon_t / 2 + 0.3,
-             z2 = kbm_z - boards_mcu_plug_t / 2 - routing_chain_bend_r - routing_mcu_ribbon_t / 2)
-    [z0, (z0 + z2) / 2, z2];
+             z3 = kbm_z - boards_mcu_plug_t / 2 - routing_chain_bend_r - routing_mcu_ribbon_t / 2)
+    [for (i = [0 : 3]) z0 + (z3 - z0) * i / 3];
 mcu_fr = (mcu_zs[1] - mcu_zs[0]) / 2;   // each fold's radius
-mcu_rises = (mcu_zs[0] - (jm_z + boards_mcu_plug_t / 2)) + ((kbm_z - boards_mcu_plug_t / 2) - mcu_zs[2]);
+mcu_rises = (mcu_zs[0] - (jm_z + boards_mcu_plug_t / 2)) + ((kbm_z - boards_mcu_plug_t / 2) - mcu_zs[3]);
 // How far the legs reach back over J-MCU (to 1 mm short of its back) and
-// forward (boards.board_clear short of the USB-C plug), at most; forward as
-// far as half the spare needs, back the rest.
+// forward (boards.board_clear short of the USB-C plug), at most. The legs
+// run back 4 times and forward twice: forward as far as a third of the
+// spare, back the rest.
 mcu_reach_max = [mcu_xs - (jm_x0 + 1), usb_plug_x0 - boards_board_clear - mcu_fr - routing_mcu_ribbon_t - mcu_xs];
-mcu_spare = (mcu_len - mcu_rises - 2 * PI * mcu_fr) / 2;   // the legs' reach, back plus forward
-mcu_reach = let(f = min(mcu_reach_max[1], mcu_spare / 2)) [mcu_spare - f, f];
+mcu_spare = mcu_len - mcu_rises - 3 * PI * mcu_fr;   // the legs' run: 4 x back + 2 x forward
+mcu_reach = let(f = min(mcu_reach_max[1], mcu_spare / 6)) [(mcu_spare - 2 * f) / 4, f];
 mcu_fold_x1 = mcu_xs + mcu_reach[1] + mcu_fr + routing_mcu_ribbon_t / 2;
 function half_turn(c, r, a0, a1) = [for (i = [0 : 8]) let(a = a0 + (a1 - a0) * i / 8) [c[0] + r * cos(a), c[1] + r * sin(a)]];
 // The lead (4 mm, drawn straight between its bends): turned down, out of the
 // plug's bottom and across under the right-hand key board's far rail at
 // usb_lead_z, then up to the receptacle beside the etherCON; across, out of
 // the plug's far side at its own height.
-usb_lead_z = openings_usb_plug_turn == "down" ? max(matrix_board_z - usb_plug_h, cb_top + boards_smt_h + boards_board_clear + 2) : matrix_board_z - openings_usb_slot_h / 2;
+usb_lead_z = openings_usb_plug_turn == "down" ? max(usb_plug_top - usb_plug_h, cb_top + boards_smt_h + boards_board_clear + 2) : matrix_board_z - openings_usb_slot_h / 2;
 usb_lead = openings_usb_plug_turn == "down"
-    ? let(x = usb_plug_x0 + usb_plug_d / 2)
-        [[x, matrix_xy[1], matrix_board_z - usb_plug_h + 2], [x, matrix_xy[1], usb_lead_z], [x + 4, usb_c[0], usb_lead_z],
+    ? let(x = usb_plug_x0 + (usb_plug_d - boards_matrix_usb[0]) / 2)
+        [[x, matrix_xy[1], usb_plug_top - usb_plug_h + 2], [x, matrix_xy[1], usb_lead_z], [x + 4, usb_c[0], usb_lead_z],
          [x_in1 - openings_usb_ext_depth - 4, usb_c[0], usb_c[1]], [x_in1 - openings_usb_ext_depth, usb_c[0], usb_c[1]]]
     : let(f = [openings_matrix_usb_to_tail ? matrix_xy[0] + boards_matrix_board / 2 + usb_behind : usb_plug_x0, matrix_xy[1], matrix_board_z - openings_usb_slot_h / 2])
         [f, [f[0] + 4, usb_c[0], f[2]], [x_in1 - openings_usb_ext_depth - 4, usb_c[0], usb_c[1]], [x_in1 - openings_usb_ext_depth, usb_c[0], usb_c[1]]];
 mcu_path = concat([[mcu_xs, jm_z + boards_mcu_plug_t / 2], [mcu_xs, mcu_zs[0]]],
                   half_turn([mcu_xs - mcu_reach[0], (mcu_zs[0] + mcu_zs[1]) / 2], mcu_fr, 270, 90),
                   half_turn([mcu_xs + mcu_reach[1], (mcu_zs[1] + mcu_zs[2]) / 2], mcu_fr, -90, 90),
-                  [[mcu_xs, mcu_zs[2]], [mcu_xs, kbm_z - boards_mcu_plug_t / 2]]);
+                  half_turn([mcu_xs - mcu_reach[0], (mcu_zs[2] + mcu_zs[3]) / 2], mcu_fr, 270, 90),
+                  [[mcu_xs, mcu_zs[3]], [mcu_xs, kbm_z - boards_mcu_plug_t / 2]]);
 // J-UMB: one pin per umbilical conductor at 2.54 mm, centred on the
 // etherCON's axis across the body, its row meeting the adapter at
 // boards.umb_joint_row_h above the main board.
@@ -1523,6 +1544,10 @@ module parts_3d() {
             }
     P([0.20, 0.20, 0.22], false, "Matrix underside parts") translate([matrix_xy[0] - 9.5, matrix_xy[1] - 9.5, matrix_board_z - boards_matrix_under_h + e_kb])
         cube([19, 19, boards_matrix_under_h]);
+    // its USB-C receptacle, at the mouth edge and over it (boards.matrix_usb)
+    P([0.20, 0.20, 0.22], false, "Matrix USB-C receptacle")
+        translate([matrix_xy[0] - boards_matrix_board / 2 - boards_matrix_usb[0], matrix_xy[1] - boards_matrix_usb[2] / 2, matrix_board_z - boards_matrix_under_h + e_kb])
+            cube([boards_matrix_usb[0] + boards_matrix_usb[1], boards_matrix_usb[2], boards_matrix_under_h]);
 }
 
 module routing_3d() {
@@ -1852,7 +1877,7 @@ module drc_report() {
     drc(undef, "Matrix ribbon length", mcu_len,
         "mm of ribbon between the sockets (CBL-MCU-RIBBON): straight from J-MCU's socket up to J-MCU-KB's with the key plate raised routing.chain_raise off its columns, plus routing.chain_slack");
     drc(mcu_fr >= routing_chain_bend_r && mcu_reach[0] <= mcu_reach_max[0] + 0.01 && mcu_reach[1] <= mcu_reach_max[1] + 0.01,
-        "Matrix ribbon closed: its S between J-MCU and the USB-C plug", [mcu_reach, mcu_reach_max, mcu_fr, path_len(mcu_path)],
+        "Matrix ribbon closed: its folds between J-MCU and the USB-C plug", [mcu_reach, mcu_reach_max, mcu_fr, path_len(mcu_path)],
         "mm: the legs' reach back over J-MCU and forward from the sockets' backs; the most each may reach (1 mm short of J-MCU's back, boards.board_clear short of the USB-C plug); the folds' radius (against routing.chain_bend_r); the closed path's length");
     // THE MATRIX ON THE RIGHT-HAND KEY BOARD (boards.matrix_mount, ADR 0021
     // amendment 2026-10-02): the gap between the rails and the Matrix the
@@ -1863,10 +1888,17 @@ module drc_report() {
     let(q = matrix_rails(), cant = matrix_xy[0] - kb_mounts("right_hand")[2][0],
         parts = [matrix_xy[1] - 9.5, matrix_xy[1] + 9.5],
         g_parts = min(parts[0] - q[0][3], q[1][1] - parts[1]),
-        g_plug = min(matrix_xy[1] - openings_usb_slot_w / 2 - q[0][3], q[1][1] - (matrix_xy[1] + openings_usb_slot_w / 2)))
+        g_plug = min(matrix_xy[1] - usb_plug_w / 2 - q[0][3], q[1][1] - (matrix_xy[1] + usb_plug_w / 2)))
         drc(g_parts >= 0.5 && g_plug >= boards_board_clear, "Matrix on the right-hand key board's rails",
             [q[0][2] - kb_rect("right_hand")[2], cant, g_parts, g_plug],
             "mm: the board's run past its old tail end; the Matrix's centre past the tail columns (the cantilever, boards.matrix_support); the rails' inside edges to the Matrix's back-side parts (against 0.5) and to the USB-C plug between them (against boards.board_clear)");
+    // THE PLUG AGAINST THE KEY PLATE AND THE OAK (review #19 F1): centred on
+    // the receptacle, the overmould rises past the plate's underside, so the
+    // plate stops in front of it, and past the oak's, which is pocketed over it.
+    let(q = usb_oak_pocket(), rebate_x0 = matrix_xy[0] - matrix_rebate / 2)
+        drc(plate_x1 <= usb_plug_x0 - 1 + 0.01 && usb_pocket_need <= col_pocket_depth && q[2] <= rebate_x0 + 0.01,
+            "USB-C plug clear of the key plate and the oak top", [usb_plug_top, z_plate_bot, usb_plug_x0 - plate_x1, usb_pocket_need, col_pocket_depth],
+            "mm: the overmould's top (openings.usb_overmold, centred on boards.matrix_usb); the plate's underside; the plate's end in front of the plug; the oak pocket over it the overmould needs (0.3 of air) and the depth it is cut, the column pockets' (oak-pockets.dxf), ending at the window's rebate");
     let(q = matrix_rails()[1], lz = usb_lead_z + 2)
         drc(openings_usb_plug_turn == "down" && lz <= top_z - boards_cluster_smt_h - boards_board_clear,
             "USB-C plug and lead clear of the right-hand key board's rails", top_z - boards_cluster_smt_h - lz,

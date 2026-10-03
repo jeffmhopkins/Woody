@@ -649,6 +649,14 @@ boards:
     status: nominal
     source: "how far a mated IDC socket stands past its header's mouth, where the ribbon leaves the socket's back: the socket's height with its cover, 5.00 [ds YXCON-IDC3-24232A1AUC1-1.27MM-IDC-SOCKET.pdf], less the header shroud's inner depth, 3.50 [ds XKB-X1270WR-2x12A-9TV01.pdf; the drawing gives 3.70 and 3.50 inner without saying which is which, so the larger proud] [calc]"
     decided_by: "the first pair mated"
+  # THE MATRIX'S USB-C RECEPTACLE, on its underside at the mouth edge (review
+  # #19 F1, 2026-10-02: the plug was modelled below it, too low to meet the key
+  # plate it in fact runs into).
+  matrix_usb:
+    value: [0.76, 7.5, 9.5, 1.6]
+    status: nominal
+    source: "[overhang past the board's edge, reach in from it, width across, its axis below the Matrix's underside], measured off the vendor STEP [3D, datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-3D.stp, mesh extents, review #19 F1]; its depth below the board is boards.matrix_under_h. The plug's overmould (openings.usb_overmold) is centred on that axis"
+    decided_by: "calipers on the Matrix in hand"
   # CBL-MCU-RIBBON's IDC socket, at each end (the same part both ends).
   mcu_plug_t:
     value: 3.05
@@ -736,7 +744,7 @@ openings:
   usb_plug_turn:
     value: "down"
     status: nominal
-    source: "down = a right-angle plug whose lead leaves toward the main board: openings.usb_slot_h along the body in front of the Matrix's mouth edge and openings.usb_plug_l down from its underside; across = the lead leaves across the body at the plug's height (usb_plug_l along the body), which the far rail now stands in. Right-angle USB-C plugs are sold both ways [from memory]"
+    source: "down = a right-angle plug whose lead leaves toward the main board: its overmould (openings.usb_overmold) centred on the Matrix's receptacle (boards.matrix_usb), its thickness along the body in front of the receptacle's face and openings.usb_plug_l from its top down; across = the lead leaves across the body at the plug's height (usb_plug_l along the body), which the far rail now stands in. Right-angle USB-C plugs are sold both ways [from memory]"
     decided_by: "M4, against the extension bought"
   matrix_usb_to_tail:
     value: false

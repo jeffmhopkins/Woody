@@ -350,9 +350,12 @@ next amendment: no ESD protection is added.**
    (`check_matrix`) holds every pin of `J-MCU-KB`, `HDR-MATRIX` and
    `W-MATRIX` to the carrier's netlist. The ribbon's length is drc.echo
    *"Matrix ribbon length"*. It plugs at `J-MCU` with the key plate held
-   raised, as the key chain's ribbons do. Closed, it folds flat between `J-MCU`
-   and the USB-C plug (*"Matrix ribbon closed: its S between J-MCU and the
-   USB-C plug"*).
+   raised, as the key chain's ribbons do: its slack is `routing.chain_raise`
+   and `routing.chain_slack`, the same figures. Closed, that slack folds flat
+   in four legs over `J-MCU`, short of the USB-C plug (*"Matrix ribbon closed:
+   its folds between J-MCU and the USB-C plug"*). This answers review #19 F4:
+   the slack is a figure, it lies in a checked place, and `J-MCU` is reached
+   with the key plate raised, so the plate is not over it then.
 5. **The Matrix's grounds join the key board's `GND_CHAIN` pour.** That is
    the main board's ground under another name (`hardware/nets.yaml`). The
    Matrix's return therefore has both ribbons' grounds in parallel, and a pour
@@ -365,8 +368,21 @@ next amendment: no ESD protection is added.**
    there. A lead leaving across the body at the plug's height runs into the
    far rail. Turned down, the lead leaves below the rails and passes under
    the far rail to the receptacle (drc.echo *"USB-C plug and lead clear of
-   the right-hand key board's rails"*). The plug then stands less far in front
-   of the Matrix, and the body's length does not move.
+   the right-hand key board's rails"*). The body's length does not move.
+   **And the plug is drawn where it really is** (owner's review #19, F1).
+   The Matrix's USB-C receptacle sits on its underside at the mouth edge, its
+   axis `boards.matrix_usb` below the board, read off the vendor STEP. A
+   plug's overmould is centred on that axis, so it rises past the key
+   plate's underside and past the oak's. That was true on the lid too: the
+   old drawing hung the plug below the board and so did not show it. Now
+   the key plate stops a millimetre in front of the plug, which also opens
+   `J-MCU`'s side to a hand. The oak top has a pocket over the plug, cut
+   with the column-screw pockets to their depth (`oak-pockets.dxf`) and
+   ending at the window's rebate. The receptacle is now among the Matrix's
+   drawn parts, so the clash check sees it. The rule is drc.echo *"USB-C plug
+   clear of the key plate and the oak top"*. The real plug, once
+   `CBL-USB-EXT` is chosen, decides `openings.usb_overmold` and with it the
+   pocket's depth.
 7. **No ESD protection is added to the USB.** The Matrix's `D+`/`D−` reach
    the ESP32-S3 with nothing between, and the tail-face receptacle exposes
    them (*Found doing this*, above). The owner has heard that and accepts it.

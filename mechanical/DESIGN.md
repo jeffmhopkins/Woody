@@ -132,10 +132,14 @@ Several things can claim each end, and the largest wins:
   plug (*"Matrix on the right-hand key board's rails"*). The rails cantilever
   past the tail columns with no support (`boards.matrix_support` says why
   and what would change it). Under the Matrix: the extension's
-  **right-angle USB-C plug** off its mouth edge, turned so its lead leaves
-  downward and passes under the far rail (`openings.usb_plug_turn`, *"USB-C
-  plug and lead clear of the right-hand key board's rails"*), and the main
-  board's tail end with J-UMB on it. Behind it, the etherCON (an NE8FAV,
+  **right-angle USB-C plug** off its mouth edge, centred on the Matrix's
+  receptacle (`boards.matrix_usb`) and turned so its lead leaves downward and
+  passes under the far rail (`openings.usb_plug_turn`, *"USB-C plug and lead
+  clear of the right-hand key board's rails"*). Its overmould rises past the
+  key plate's underside, so the plate stops in front of it, and past the
+  oak's, which has a pocket over it (*"USB-C plug clear of the key plate and
+  the oak top"*; review #19 F1). Under it, the main board's tail end with
+  J-UMB on it. Behind it, the etherCON (an NE8FAV,
   ADR 0021) on its **adapter board**, which stands the connector's full
   height parallel to the tail cap. The connector **stands on the floor**, and
   the body is thick enough for it (owner, same day: set the body rather than
@@ -372,7 +376,7 @@ only as good as those envelopes. Group the report's lines by these causes
    straight above J-MCU, down into J-MCU beside the regulator block. It
    plugs there with the key plate raised, as the key chain's do (*"Matrix
    ribbon length"*), and closed it folds flat between J-MCU and the USB-C
-   plug (*"Matrix ribbon closed: its S between J-MCU and the USB-C plug"*). **The umbilical has no cable inside the body** (ADR
+   plug (*"Matrix ribbon closed: its folds between J-MCU and the USB-C plug"*). **The umbilical has no cable inside the body** (ADR
    0021): the etherCON is soldered to its adapter, and J-UMB, a right-angle
    header, is soldered into the adapter and the tongue (*"J-UMB on the main
    board's tongue…"*, *"J-UMB's row lands on the adapter clear of the
