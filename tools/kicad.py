@@ -36,7 +36,9 @@ without re-exporting is reported by name - the same contract as
 tools/cad.py for the body. It also runs tools/pcb.py check on every board
 with a layout, holds each key board's J-CHAIN pins to the ribbon's netlist
 (hardware/interfaces/key-chain-loom), and fails on any render or fab/ file
-the ledger does not know - a stray Gerber is uploaded with the rest.
+the ledger does not know - a stray Gerber is uploaded with the rest. It holds the
+Matrix carrier's connectors (J-MCU-C, HDR-MATRIX) to the
+carrier's J-MCU and U-MCU-RT the same way (check_matrix).
 
 Circuits not yet migrated keep a hand-written netlist.yaml and are untouched.
 """
@@ -784,6 +786,115 @@ def check_umbilical(board_docs):
     return problems
 
 
+# THE MATRIX ON ITS OWN CARRIER BOARD (ADR 0021 amendment 2026-10-03; until then on the
+# right-hand key board's rails). The carrier circuit's sheet holds the Matrix (U-MCU-RT, its
+# pads) and J-MCU, netted as one node per conductor; the matrix-carrier board draws the parts
+# between them: J-MCU-C, the ribbon's other end, hung upside down so its pin k is J-MCU's pin
+# 25 - k; HDR-MATRIX x2, headers through the Matrix's pad rows. Each of those pins is named for
+# what it meets (a J-MCU pin number, or a U-MCU-RT pin name in its Pins field) and must be on
+# the net the carrier puts that on.
+CARRIER = os.path.join(ROOT, "hardware", "carrier", "netlist.yaml")
+MATRIX_BOARD = "matrix-carrier"
+MATRIX_ROWS = {"J-MCU-C": 1, "HDR-MATRIX": 2}
+MATRIX_ALIAS = {}
+
+
+def check_matrix(board_docs):
+    """The Matrix's connectors on its board against the carrier's sheet: J-MCU-C pin k on the
+    net of J-MCU pin 25 - k, each HDR-MATRIX pin on the net of the U-MCU-RT pin
+    it is named for (a pad the carrier leaves on no net may be left open). A part missing, or
+    on another board, is a failure: the Matrix would have no way in."""
+    docs = dict(board_docs)
+    carrier = yaml.safe_load(open(CARRIER))
+    rel = os.path.relpath(CARRIER, ROOT)
+    cnet = {}
+    for net, nodes in carrier["nets"].items():
+        if len(nodes) < 2:      # a lone no-connect pin is exported as a net of its own, named for it: no net
+            continue
+        for n in nodes:
+            if isinstance(n, str):
+                cnet[n] = net
+    problems = []
+    for bname, doc in board_docs:
+        if bname == MATRIX_BOARD:
+            continue
+        for ref, c in doc["components"].items():
+            if c.get("of") in MATRIX_ROWS:
+                problems.append(f"matrix: {bname} has {ref} ({c['of']}); the Matrix is on {MATRIX_BOARD}")
+    doc = docs.get(MATRIX_BOARD)
+    if doc is None:
+        return problems + [f"matrix: there is no board {MATRIX_BOARD} to carry the Matrix"]
+    got = {}
+    for net, members in doc["nets"].items():
+        for p in members:
+            if isinstance(p, str):
+                # (a board whose ground goes by another name maps it here, MATRIX_ALIAS)
+                got[p] = (MATRIX_ALIAS.get(net.lstrip("/"), net.lstrip("/")), len(members))
+    for row, n in MATRIX_ROWS.items():
+        refs = [r for r, c in doc["components"].items() if c.get("of") == row]
+        if len(refs) != n:
+            problems.append(f"matrix: {MATRIX_BOARD} has {len(refs)} {row} part(s), not {n}")
+        for ref in refs:
+            for pin in doc["components"][ref]["pins"]:
+                key = f"J-MCU.{25 - int(pin)}" if row == "J-MCU-C" else f"U-MCU-RT.{pin}"
+                want = cnet.get(key)
+                net, size = got.get(f"{ref}.{pin}", (None, 0))
+                if want is None:
+                    if size > 1:
+                        problems.append(f"matrix: {MATRIX_BOARD} wires {ref}.{pin} ({row}) to {net}; {rel} has {key} on no net")
+                elif size <= 1:
+                    problems.append(f"matrix: {MATRIX_BOARD} leaves {ref}.{pin} ({row}) open; {rel} puts {key} on {want}")
+                elif net != want:
+                    problems.append(f"matrix: {MATRIX_BOARD} wires {ref}.{pin} ({row}) to {net}; {rel} puts {key} on {want}")
+    problems += check_matrix_pad_rows(doc)
+    return problems
+
+
+MATRIX_PINS_C = os.path.join(ROOT, "datasheets", "mechanical", "WAVESHARE-ESP32-S3-MATRIX-circuitpython-pins.c")
+
+
+def matrix_pad_rows():
+    """The Matrix's two pad rows, pin 1 first, read from the banked CircuitPython board file:
+    its 'left column' (5V, GND, 3V3, then the IOs it lists) and its 'right column', each IO
+    once in the order listed. WHICH END IS PIN 1 is the vendor pinout's
+    (datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-pinout.png, read 2026-10-03): with the
+    USB-C at the top both columns run top to bottom, 5V..GP1 and GP33..RX, so each list
+    starts at the USB-C edge. The file's own comment says the right column is listed
+    'bottom to top'; the image contradicts it and the list order agrees with the image."""
+    import re
+    text = open(MATRIX_PINS_C).read()
+    left = text.split("left column", 1)[1].split("right column", 1)[0]
+    right = text.split("right column", 1)[1].split("Neopixel", 1)[0]
+
+    def ios(s):
+        seen = []
+        for m in re.findall(r"MP_QSTR_IO(\d+)\b", s):
+            if f"IO{m}" not in seen:
+                seen.append(f"IO{m}")
+        return seen
+    return [["P5V", "GND", "P3V3"] + ios(left), ios(right)]
+
+
+def check_matrix_pad_rows(doc):
+    """Each HDR-MATRIX on the Matrix's board names its pins, pin 1 first, in one of the
+    Matrix's two pad rows' orders (matrix_pad_rows), and the two headers take both rows."""
+    rows = matrix_pad_rows()
+    problems, used = [], []
+    for ref, c in sorted(doc["components"].items()):
+        if c.get("of") != "HDR-MATRIX":
+            continue
+        pins = [str(p) for p in c["pins"]]
+        if pins in rows:
+            used.append(rows.index(pins))
+        else:
+            problems.append(f"matrix: {MATRIX_BOARD} {ref} (HDR-MATRIX) names its pins {' '.join(pins)}; the Matrix's pad rows are "
+                            f"{' '.join(rows[0])} and {' '.join(rows[1])} from the USB-C edge "
+                            f"({os.path.relpath(MATRIX_PINS_C, ROOT)}, the pinout image for the end)")
+    if sorted(used) != [0, 1] and not problems:
+        problems.append(f"matrix: {MATRIX_BOARD}'s HDR-MATRIX parts do not take both of the Matrix's pad rows")
+    return problems
+
+
 def board_outputs(d):
     """Every generated file beside a board: renders and fab/. What the ledger must know."""
     out = [os.path.join(d, f) for f in os.listdir(d) if f.endswith(".sch.png") or ".pcb-" in f]
@@ -822,6 +933,7 @@ def cmd_check():
     bad += check_chain(board_docs)
     bad += check_through(board_docs)
     bad += check_umbilical(board_docs)
+    bad += check_matrix(board_docs)
     rows = ledger_rows()
     stale = {}
     for r in rows.values():

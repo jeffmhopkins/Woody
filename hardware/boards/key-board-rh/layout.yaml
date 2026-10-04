@@ -39,9 +39,11 @@ fab:
 
 standoff_footprint: "MountingHole:MountingHole_2.7mm_M2.5"
 
-# Each key's network: the one pattern, as on the left-hand board.
+# Each key's network: the one pattern, as on the left-hand board - 9.0 from its
+# switch since the KS-33's 3.4 mm pads (wave 3, ADR 0020 Amendment 8): at 9.4 a
+# network's label lands on the bigger pads, here as there.
 networks:
-  pattern: {offset: [9.4, 0.0], axis: y, leg: -1, c: -1}
+  pattern: {offset: [9.0, 0.0], axis: y, leg: -1, c: -1}
   except: {}
 
 # Placed as the left-hand board's, 108.0 further along the body - the key row's own
@@ -72,6 +74,7 @@ parts:
   U1:  [204.0, 44.0, 90]     # U-KEYS, the register
   C7:  [197.5, 41.8, 90]     # C-DECOUPLE-165, beside pin 8 at the register's J-CHAIN end
   C8:  [178.0, 42.0, 90]     # C-BULK-CHAIN, beside J-CHAIN's 3V3 pin
+  C9:  [211.2, 46.47, 0]     # C-DECOUPLE-165-VCC, at U1's VCC (pin 16), review #6-5
 
 silk:
   at: [152.0, 12.5]
@@ -86,7 +89,9 @@ route: true
 # later it finds its via spots below the pin taken. Then J-CHAIN's far row (the
 # odd pins), reachable only from the header's back. KEY_RH1 last: routed early,
 # its via lands beside J-CHAIN's ground pin 4 and starves that pin's thermal.
-route_first: [/KEY_RH5, /KEY_RH6, /CHAIN_SCK, /CHAIN_SHLD, /HOP_LT_RH, /HOP_RH_RT, /KEY_RH1]
+# KEY_RH4 third since the networks moved to 9.0 (2026-10-03): later it found its way
+# out closed; README *Revisions* B names the two hand edits made after the layout.
+route_first: [/KEY_RH5, /KEY_RH6, /KEY_RH4, /CHAIN_SCK, /CHAIN_SHLD, /HOP_LT_RH, /HOP_RH_RT, /KEY_RH1]
 connect_first:
   - {pads: [C7.2, U1.8], max_mm: 15, why: "the decoupling loop's ground half, in its own track"}
   # The register's two far-row ground pins are boxed in by the far-row key lines:
@@ -96,5 +101,6 @@ connect_first:
   # strap of its own, routed before the key lines: 12 to the ground pin 8, 15 to 12.
   - {pads: [U1.12, U1.8], max_mm: 20, why: "the low marker's strap to ground, boxed in between the high marker and RH6's line"}
   - {pads: [U1.15, U1.12], max_mm: 12, why: "CLK INH's strap to ground, boxed in between RH5's line and VCC"}
+  - {pads: [C9.1, U1.16], max_mm: 4, why: "the second decoupler's VCC side, straight onto pin 16 (review #6-5)"}
 ground_net: GND_CHAIN
 power_nets: [V3V3_CHAIN_RH]

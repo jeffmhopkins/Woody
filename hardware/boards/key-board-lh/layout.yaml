@@ -95,6 +95,9 @@ parts:
   R11: [89.73, 48.2, 180]    # R-KEY-PU on sheet FREE3
   # The reservoir on the chain's 3V3, beside J-CHAIN's 3V3 pin (C-BULK-CHAIN row)
   C7:  [67.5, 42.0, 90]      # C-BULK-CHAIN
+  # U1's second decoupler (the shared REG sheet, review #6-5), under the register's ground
+  # pin 8 as the right-hand board's C7 is: placed by hand on the source board, 2026-10-03
+  C8:  [85.0, 38.6, 0]       # C-DECOUPLE-165
 
 # The silkscreen title blocks (tools/pcb.py add_silk, add_top_silk): the parts side's
 # and the switch side's, in body coordinates.
@@ -102,8 +105,8 @@ silk:
   at: [44.0, 12.5]
   top_at: [44.0, 14.3]       # the switch side's copy, left edge of the text
   title: "WOODY key board LH"
-  rev: "A"
-  date: "2026-09-27"
+  rev: "B"
+  date: "2026-10-03"
 
 # Routing (tools/pcb_route.py): ground is routed as a net, so no ground pin
 # depends on a pour finding its way round the tracks, and then poured on both

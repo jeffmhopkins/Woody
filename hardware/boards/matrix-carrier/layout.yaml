@@ -1,0 +1,103 @@
+# FIRST-LAYOUT INPUT for the Matrix carrier's PCB - tools/pcb.py layout, `kind: main`
+# (tools/pcb_main.py: the main board's kind, which reads its places from the body CAD's
+# pcb-geometry.echo by cluster). Once the .kicad_pcb exists it is the source; this file
+# records how the first layout was made.
+#
+# THE MATRIX CARRIER (owner, 2026-10-03: option (c), "SEPARATE SMALL MATRIX CARRIER", and
+# "Hang from the lid"; ADR 0021 amendment 2026-10-03). FROM THE BODY CAD, NOT HERE
+# (mechanical/export/pcb-geometry.echo, cluster "matrix"; the outline matrix-carrier.dxf):
+# the outline with its USB-C notch and its arm over J-MCU, J-MCU-C's place (straight above
+# J-MCU, its mouth the same way), HDR-MATRIX's two rows, the three hanging mounts and the
+# room on the top face under the Matrix. Coordinates are the body frame (x along the body
+# from the mouth, y across, seen from above), as the key boards' and the main board's.
+
+kind: main
+cluster: matrix
+outline: matrix-carrier.dxf
+layers: 2
+
+# The key boards' rules and board house, so one order makes them and this board.
+rules:
+  track: 0.25
+  track_min: 0.2
+  clearance: 0.2
+  via: 0.7
+  via_drill: 0.3
+  via_min: 0.66
+  drill_min: 0.3
+  edge_clearance: 0.3
+  power_track: 0.4
+
+fab:
+  house: JLCPCB
+  hole_clearance: 0.28
+  hole_to_hole: 0.45
+  annular_min: 0.18
+  silk_text_min: 1.0
+  silk_line_min: 0.15
+  silk_to_pad: 0.15
+  finish: "HAL lead-free"
+  mask: White               # ADR 0028: the instrument's boards are white; under the Matrix it is unseen
+  silk: Black
+  copper_oz: 1
+
+# The three hanging mounts (config/body.yaml hardware.mx_*, boards.matrix_mount_corners): plated holes on PWR_GND, pads
+# both faces; what bears on each face (the spacer on top, the washer under the screw's head
+# below) keeps other copper off (pcb-geometry.echo 'matrix' 'standoff').
+mounts:
+  footprint: "MountingHole:MountingHole_2.7mm_M2.5_Pad_TopBottom"
+  net: PWR_GND
+
+# J-MCU-C (J1), hung under the carrier's arm: its back pad row 8.00 behind the insulator's
+# mouth face, as the main board's J-MCU (its layout.yaml), on the bottom face. With the
+# echo's facing (90, mouth toward the far side) it lands straight above J-MCU, its pin
+# 25-k over J-MCU's pin k.
+connectors:
+  J-MCU-C: {row: J-MCU-C, rot: 0, back_row_from: x1, back_row_at: -8.00, bottom: true}
+
+# Parts whose courtyard is MEANT to lie off the board (pcb.py check_courtyards).
+courtyard_overhang:
+  J2:
+    reason: "HDR-MATRIX's insulator is ten pitches long, 25.4, under a Matrix 25.0 square whose pad rows it follows, so its mouth end stands 0.2 past the Matrix's edge - and the carrier's mouth edge is flush with the Matrix's, behind the extension's USB-C plug (owner, 2026-10-03, option A). The overhang is plastic over air, beside the plug, with no pad off the board"
+    source: "config/body.yaml boards.matrix_carrier_past (the mouth edge flush), openings.usb_ext_overmold_w; pcb-geometry.echo matrix pins (pin 1 1.07 in from the Matrix's edge); datasheets/connectors/HANXIA-HX-PZ2.54-1x10P-TP-YQ.pdf (B - 0.2 = 25.20 for 10 pins)"
+  J3:
+    reason: "as J2: the other pad row's header, its mouth end 0.2 past the carrier's mouth edge"
+    source: "as J2"
+  J1:
+    reason: "J-MCU-C's insulator overhangs the arm's mouth end by 0.3: the arm stops boards.matrix_carrier_past short of the right-hand key board's tail end, which stands just over it, and the insulator hangs under the carrier, clear of that board. Plastic over air; no pad off the board"
+    source: "config/body.yaml boards.matrix_carrier_past; mechanical/cad/woody_body.scad mx_arm and the outline's corner radius kb_corner_r"
+
+# Top-face parts' heights (pcb.py check_heights), against the one room the echo gives: under
+# the Matrix, HDR-MATRIX's plastic (config/body.yaml boards.matrix_hdr_h). Its posts go on
+# through the Matrix and are cut flush; the plastic is what stands on this board.
+heights:
+  PinHeader_1x10: 2.5            # [ds connectors/HANXIA-HX-PZ2.54-1x10P-TP-YQ.pdf, the insulator]
+underside_rows: [J-MCU-C]
+
+# HDR-MATRIX, pin 1 at the Matrix's USB-C edge (pcb-geometry.echo 'matrix' 'pins'): the
+# 5V..IO1 row on the near side, the IO33..RX row on the far side, on top, pins along +x.
+# SURFACE MOUNT (hanxia TP-YQ): nothing comes through to the underside, where J-MCU-C's
+# insulator lies under the 5V..IO1 row's first pins, and the bottom face is free for lines.
+parts:
+  J2: [272.97, 17.07, 90]        # HDR-MATRIX, the 5V..IO1 row
+  J3: [272.97, 39.93, 90]        # HDR-MATRIX, the IO33..RX row
+
+# PWR_GND poured on both faces: the Matrix's pad-row GND and J-MCU-C's four grounds join it,
+# and the mounts are on it.
+planes:
+  - {layer: F.Cu, net: PWR_GND}
+  - {layer: B.Cu, net: PWR_GND}
+
+silk:
+  at: [[252.5, 17.8], [262.0, 17.8]]   # the arm's top face beside J-MCU-C's tails (it hangs underneath)
+  search: true
+  title: "WOODY Matrix carrier"
+  rev: "A"
+  date: "2026-10-03"
+
+# EVERY TRACK IS DRAWN BY carrier_routes.py (run it instead of pcb.py layout): an orderly
+# two-layer bus with one ladder, because J-MCU-C's back row reaches J3 in the wrong order on
+# any one layer - the script says why. The autorouter after it finds nothing left to do.
+route: astar
+directions:
+  chamfer: 0.6

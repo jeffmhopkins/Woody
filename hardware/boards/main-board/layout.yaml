@@ -288,16 +288,15 @@ fanout_count:
   C11.2: 2       # C-BUCK-IN's return
   C43.2: 2       # C-BUCK-OUT's return
 
-# Parts the sheets carry that this board does not: A1 is the Matrix, on the lid
+# Parts the sheets carry that this board does not: A1 is the Matrix, on its lid-hung carrier
 # (on the sheet for its pad-to-pin map, reached through J-MCU); SW9 and SW10 are
 # the spare positions' switches, not fitted (config/key-layout.yaml
 # spare_bits_switches) and given no place by the body CAD. check reports each
 # as a note, not an error; anything else missing from the board is an error.
 not_on_board:
-  A1: "the Matrix: on the lid, no footprint; J-MCU is its connector"
+  A1: "the Matrix: on its carrier hung from the lid (#23), no footprint here; J-MCU is its connector"
   SW9: "sw+ spare switch: not fitted, no place in the body CAD"
   SW10: "sw- spare switch: not fitted, no place in the body CAD"
-  C41: "C-EN: USB-only programming (owner, 2026-10-03) drops EN and IO0 from J-MCU and HDR-SERVICE; the sheets lose C-EN with the Matrix branch's merge"
 
 # The mounts: every one plated on PWR_GND, pads on both faces (ADR 0022 point 6,
 # ADR 0025; the README's Open table: not _Pad_Via, whose ring of vias breaks the
@@ -394,7 +393,7 @@ heights:
   L_0805: 1.0                  # [from memory]
   NetTie: 0.05                 # copper only
   NXP_Case1351: 9.9            # [ds MPXV4006DP p.7, with its ports]
-  PinHeader_1x05_P2.54mm_Vertical: 8.5   # [from memory: the header's pins above the board; the service lead's plug goes on with the lid off]
+  PinHeader_1x03_P2.54mm_Vertical: 8.5   # [from memory: the header's pins above the board; the service lead's plug goes on with the lid off]
   # the two 1.27 mm IDC headers by name - the lookup takes the FIRST key a footprint's name
   # contains, so the specific ones come before anything they would also match (#19 F5: a bare
   # IDC-Header key gave both 4.9, under the Samtec's real height)
@@ -505,10 +504,12 @@ parts:
   U7:  [70.0, 19.2, 90]     # REG-LT
   R44: [76.9, 21.7, 0]      # R-HOP-SER, at U7's QH (pin 9): its pad 1 to the pin, pad 2 on toward J5 pin 6
   C13: [65.6, 24.2, 0]      # REG-LT's 100 nF, at VCC (pin 16) and GND (pin 15)
+  C206: [69.3, 24.2, 0]     # REG-LT's second 100 nF (key-register C-DECOUPLE-165-VCC, #6-5), beside C13
   R32: [63.2, 21.2, 90]     # FREE1 pull-up
   R33: [63.2, 17.3, 90]     # FREE2 pull-up
   U8:  [186.0, 19.2, 90]    # REG-RT
   C14: [181.6, 24.2, 0]     # REG-RT's 100 nF, at VCC (pin 16) and GND (pin 15)
+  C205: [185.3, 24.2, 0]    # REG-RT's second 100 nF (key-register C-DECOUPLE-165-VCC, #6-5), beside C14
   # --- the key chain's parts beside their J-CHAIN
   U9:  [64.6, 44.2, 0]      # U-TVS-CHAIN on SCK, SH/LD, SER_LH
   FB1: [66.4, 39.8, 90]     # FB-CHAIN, the LH ribbon's 3V3

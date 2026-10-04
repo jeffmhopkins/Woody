@@ -44,6 +44,7 @@ As the left-hand board's table, for six keys:
 | U1 | `U-KEYS` | the register, SN74HCS165 |
 | J1 | `J-CHAIN` | the key chain's header |
 | H1-H4 | (board only) | the corner mounts' holes |
+| C9 | `C-DECOUPLE-165` | U1's second decoupler, at VCC (pin 16), review #6-5 |
 
 ## Ordering
 
@@ -81,6 +82,7 @@ every key closed is six keys' `key-scan-current`.
 | Rev | Date | What changed | Where |
 |---|---|---|---|
 | A | 2026-09-28 | First layout, from the left-hand board's (`layout.yaml`). Not yet ordered; re-laid out 2026-09-29 for the cassette's columns (ADR 0025): the mouth end 0.6 and the tail end 0.2 longer, `J-CHAIN` 13.0 further toward the tail where the shorter ribbon lets the body CAD put it, the register, C7 and C8 following it, the switch side's title moved off the header's tails | git history of this directory |
+| B | 2026-10-03 | Laid out again: C9, U1's second decoupler at VCC (pin 16, review #6-5); white mask and black legend (ADR 0028); the KS-33's 3.0 mm holes, with the networks 9.0 mm from their switches as the left-hand board's (9.4 put a label on the bigger pads) and `/KEY_RH4` routed third. The board keeps its original outline: the Matrix is on its own carrier board (`hardware/boards/matrix-carrier/`, ADR 0021 amendment 2026-10-03). Two hand edits after `pcb.py layout`: C9's strap to U1 pin 16 (`connect_first`), which a later rip-up had taken; and `J1` pin 12's thermal, which had one spoke a face - `/CHAIN_SHLD` moved from y 46.3 to 46.85 beside it and `/CHAIN_SCK`'s via and detour off it, and pin 12 tied to pin 10. `pcb.py check` passes. Not yet ordered | `key-board-rh.kicad_pcb`, `layout.yaml` |
 
 ## Open, and what decides each
 

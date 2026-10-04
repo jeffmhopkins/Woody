@@ -9,6 +9,10 @@ title: Key shift register
 page: key-register.md
 replicated: 4
 ports:
+  GND_CHAIN:
+    dir: ref
+    from: interfaces/key-chain-loom
+    figure: chain-conductors
   V3V3_CHAIN:
     dir: in
     from: interfaces/key-chain-loom
@@ -28,10 +32,6 @@ ports:
     dir: out
     to: interfaces/key-chain-loom
     figure: chain-connectors
-  GND_CHAIN:
-    dir: ref
-    from: interfaces/key-chain-loom
-    figure: chain-conductors
 components:
   C-DECOUPLE-165:
     value: 100nF
@@ -40,6 +40,15 @@ components:
     - 2
     note: AT the package, on this board. A 74x165's output edges brown out a local rail with no reservoir, and on
       a key board the ribbon is the only other source
+  C-DECOUPLE-165-VCC:
+    of: C-DECOUPLE-165
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: 'The second decoupler, AT VCC (pin 16), its ground straight into the board''s ground - review #6-5: the
+      first one''s place on a board can leave it far from VCC (the right-hand board''s sits beside pin 8, 12 mm
+      from pin 16)'
   U-KEYS:
     value: 74HCS165
     pins:
@@ -79,6 +88,7 @@ nets:
   GND_CHAIN:
   - port: GND_CHAIN
   - C-DECOUPLE-165.2
+  - C-DECOUPLE-165-VCC.2
   - U-KEYS.CLKINH
   - U-KEYS.GND
   KEY_IN_A:
@@ -100,6 +110,7 @@ nets:
   V3V3_CHAIN:
   - port: V3V3_CHAIN
   - C-DECOUPLE-165.1
+  - C-DECOUPLE-165-VCC.1
   - U-KEYS.VCC
   QH_BAR:
   - U-KEYS.QH_BAR

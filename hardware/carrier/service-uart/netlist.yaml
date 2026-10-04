@@ -15,37 +15,19 @@ ports:
     dir: ref
     from: module/power-entry
     figure: dig-gnd-topology
-  EN:
-    dir: in
-    from: carrier/carrier
-  IO0:
-    dir: in
-    from: carrier/carrier
   U0TXD:
     dir: in
     from: carrier/carrier
 components:
-  C-EN:
-    value: 1uF
-    pins:
-    - 1
-    - 2
-    note: 'EN''s (CHIP_PU''s) delay capacitor (#14 A2, #11 F7): Espressif advises ''an RC delay circuit at the CHIP_PU
-      pin ... usually R = 10 kohm and C = 1 uF'' [ds logic/ESP-HARDWARE-DESIGN-GUIDELINES-ESP32S3.pdf p.11]. The
-      Matrix fits the R (R8, 10k to its 3V3) and no C, and EN runs down the ribbon and across this board to HDR-SERVICE.
-      1 uF against R8 is 10 ms, past the 50 us t_STBL [ds ESP32-S3-datasheet-v2.2.pdf Table 2-13]. At J-MCU pin
-      24, returned to J-MCU''s grounds. Key1, a jumper or an adapter''s open-collector reset still pulls it low
-      at once'
   HDR-SERVICE:
-    value: 1x5
+    value: 1x3
     pins:
     - 1
     - 2
     - 3
-    - 4
-    - 5
-    note: 'FIVE PINS (ADR 0018): 1 TXD, 2 RXD, 3 GND, 4 EN, 5 IO0 - the ground between the UART pair and the control
-      pair. EN and IO0 are pulled up on the Matrix; drive them to ground only'
+    note: 'THREE PINS: 1 TXD, 2 RXD, 3 GND - the UART and its ground. EN and IO0 were pins 4 and 5 until the owner
+      chose to program and recover the Matrix over its own USB-C only (2026-10-03, ADR 0021 amendment 2026-10-03):
+      its BOOT and RESET buttons do both with the lid off'
   R-TXD-SER:
     value: 499R 1%
     pins:
@@ -56,16 +38,8 @@ components:
       on IO43 after the ribbon, at J-MCU pin 22, and it also limits what a strike on HDR-SERVICE pin 1 can push
       into the pin. 499 ohm against a UART receiver''s input is nothing at 115200 baud'
 nets:
-  EN:
-  - port: EN
-  - C-EN.1
-  - HDR-SERVICE.4
-  IO0:
-  - port: IO0
-  - HDR-SERVICE.5
   PWR_GND:
   - port: PWR_GND
-  - C-EN.2
   - HDR-SERVICE.3
   TXD_HDR:
   - HDR-SERVICE.1

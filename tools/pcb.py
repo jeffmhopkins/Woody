@@ -873,9 +873,16 @@ def silk_off_vias(board):
             for v in board.GetTracks() if isinstance(v, pcbnew.PCB_VIA)]
     gone = {}
     for fp in board.GetFootprints():
-        for it in list(fp.GraphicalItems()):
+        try:
+            items = list(fp.GraphicalItems())
+        except TypeError:
+            continue        # a footprint with no drawings left: KiCad 9's SWIG hands back a bare object
+        for it in items:
             if it.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS) and isinstance(it, pcbnew.PCB_SHAPE):
-                g = item_shape(it, it.GetLayer())
+                try:
+                    g = item_shape(it, it.GetLayer())
+                except AttributeError:
+                    continue        # a stroke KiCad 9's SWIG cannot hand back as a polygon
                 if any(g.intersects(v) for v in vias):
                     fp.Remove(it)
                     gone.setdefault(fp.GetReference(), 0)

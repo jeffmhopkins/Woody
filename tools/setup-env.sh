@@ -92,7 +92,8 @@ done
 # it). The KS-33's model is banked in datasheets/; the woody footprints' drawn
 # models are in hardware/lib/woody.3dshapes (tools/lib-models.py). The first three
 # are the key boards'; the rest the main board's (2026-09-30); the 2x10 header the
-# module jack board's (2026-10-02); the 2x5 the iso board's (2026-10-03).
+# module jack board's (2026-10-02); the 2x5 the iso board's (2026-10-03); the 1x10
+# header and the 1x4 (the wire pads) the right-hand key board's Matrix parts (2026-10-03).
 models=/usr/share/kicad/3dmodels
 for m in Capacitor_SMD.3dshapes/C_0805_2012Metric.step \
          Resistor_SMD.3dshapes/R_0805_2012Metric.step \
@@ -116,6 +117,8 @@ for m in Capacitor_SMD.3dshapes/C_0805_2012Metric.step \
          Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x05_P2.54mm_Vertical.step \
          Connector_PinHeader_2.54mm.3dshapes/PinHeader_2x10_P2.54mm_Vertical.step \
          Connector_PinHeader_2.54mm.3dshapes/PinHeader_2x05_P2.54mm_Vertical.step \
+         Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x10_P2.54mm_Vertical.step \
+         Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x04_P2.54mm_Vertical.step \
          Converter_DCDC.3dshapes/Converter_DCDC_RECOM_R-78E-0.5_THT.step; do
   if [ ! -s "$models/$m" ]; then
     mkdir -p "$models/$(dirname "$m")"

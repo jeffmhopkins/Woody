@@ -58,6 +58,19 @@ only by the firmware clamp and the regulator (`U-BUCK`), so it all crosses
    `dig-gnd-topology`, disputed when this was written and settled on
    2026-09-30 (amendment below).
 
+   > **Amended 2026-10-02 (ADR 0021, *Amendment, 2026-10-02 (2)*):** the
+   > ribbon is no longer soldered to the Matrix. The Matrix sits on rails of
+   > the right-hand key board, its pad rows on header pins and `TP2`, `TP3`,
+   > `EN` and `IO0` on four short wires, and `CBL-MCU-RIBBON` is an IDC ribbon
+   > from that board's `J-MCU-KB` to `J-MCU`. The allocation and `J-MCU`'s pin
+   > map are unchanged; `J-MCU-KB` numbers them from the other edge.
+   >
+   > **Amended 2026-10-03 (ADR 0021, *Amendment, 2026-10-03*):** the Matrix
+   > is on a carrier board of its own, hung from the oak top, and the
+   > ribbon's other end is that board's `J-MCU-C`, numbered as `J-MCU-KB`
+   > was. `EN` and `IO0` are no longer wired out (program over USB only):
+   > `J-MCU` pins 23 and 24 are on no net.
+
 ## Options considered
 
 - **Ribbon:** keep 20-way and spend the five spares on 5 V and ground. That

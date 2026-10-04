@@ -244,10 +244,13 @@ exports:
   - {name: dxf-matrix-window, src: mechanical/cad/woody_body.scad, out: mechanical/export/matrix-window.dxf, defines: {part: "matrix_window"}}
   - {name: dxf-oak-rebates, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-rebates.dxf, defines: {part: "oak_rebates"}}
   - {name: dxf-oak-pockets, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-pockets.dxf, defines: {part: "oak_pockets"}}
+  - {name: dxf-oak-inserts, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-inserts.dxf, defines: {part: "oak_inserts"}}
+  - {name: dxf-oak-relief, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-relief.dxf, defines: {part: "oak_relief"}}
   - {name: dxf-oak-logo, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-logo.dxf, defines: {part: "oak_logo"}}
   - {name: dxf-key-board-lh, src: mechanical/cad/woody_body.scad, out: mechanical/export/key-board-lh.dxf, defines: {part: "key_board_left_hand"}}
   - {name: dxf-main-board, src: mechanical/cad/woody_body.scad, out: mechanical/export/main-board.dxf, defines: {part: "main_board"}}
   - {name: dxf-key-board-rh, src: mechanical/cad/woody_body.scad, out: mechanical/export/key-board-rh.dxf, defines: {part: "key_board_right_hand"}}
+  - {name: dxf-matrix-carrier, src: mechanical/cad/woody_body.scad, out: mechanical/export/matrix-carrier.dxf, defines: {part: "matrix_carrier"}}
   - {name: pcb-geometry, src: mechanical/cad/woody_body.scad, out: mechanical/export/pcb-geometry.echo, defines: {part: "pcb_geom"}}
 
 # The interference check: every named solid against every other. Report

@@ -34,8 +34,8 @@ ECHO: "PCB", "main", "chain", "J-CHAIN-RH", 190, 42.015, 1, 13.97, 7.86
 ECHO: "PCB", "main", "connector", "J-MCU", 251.5, 273.04, 14.9, 8.97, 1, 90
 ECHO: "PCB", "main", "connector", "J-UMB", 297.4, 299.9, 21.5, 8, 2.54, 1.25
 ECHO: "PCB", "main", "part", "U-BREATH", 14.15, 39.6, 0, 12.3, 17.8, 18.8
-ECHO: "PCB", "main", "part", "HDR-SERVICE", 284, 9.3, 0, 5, 2.54
-ECHO: "PCB", "main", "plate", "window HDR-SERVICE", 281.65, 5.2, 296.51, 11.65
+ECHO: "PCB", "main", "part", "HDR-SERVICE", 284, 9.3, 0, 3, 2.54
+ECHO: "PCB", "main", "plate", "window HDR-SERVICE", 281.65, 5.2, 291.43, 11.65
 ECHO: "PCB", "main", "plate", "window U-BUCK", 216, 5.2, 234, 19.5
 ECHO: "PCB", "main", "plate", "end", 293.25
 ECHO: "PCB", "main", "part", "REGULATOR-BLOCK", 225, 13, 0, 15, 10, 10.5
@@ -71,5 +71,14 @@ ECHO: "PCB", "main", "keepout", "elsewhere", 7.5, 7.5, 299.9, 49.5, 20.2
 ECHO: "PCB", "main", "keepout", "ribbon left_hand", 70.64, 35.03, 80.9, 49, 0
 ECHO: "PCB", "main", "keepout", "ribbon right_hand", 181.64, 35.03, 191.9, 49, 0
 ECHO: "PCB", "main", "keepout", "USB-C receptacle and lead", 251.3, 37.5, 299.9, 49.5, 2.62
-ECHO: "PCB", "main", "keepout", "Matrix ribbon", 251.5, 19.385, 273.04, 21.685, 0
+ECHO: "PCB", "main", "keepout", "Matrix ribbon", 251.5, 19.385, 273.04, 21.525, 0
+ECHO: "PCB", "main", "keepout", "Matrix ribbon fold", 252.55, 21.525, 271.99, 21.525, 7.30333
 ECHO: "PCB", "main", "board", "thickness", 1.6, "smt_height_max", 2.62, "side", "parts on top; the thumb switches from below, their footprints on the underside"
+ECHO: "PCB", "matrix", "board", "thickness", 1.6, "smt_height_max", 2.5, "side", "HDR-MATRIX on top under the Matrix; J-MCU-C hung from the underside"
+ECHO: "PCB", "matrix", "connector", "J-MCU-C", 251.5, 273.04, 14.9, 8.97, 1, 90
+ECHO: "PCB", "matrix", "pins", "HDR-MATRIX row 0", 272.97, 17.07, 295.83, 17.07, 2.54
+ECHO: "PCB", "matrix", "pins", "HDR-MATRIX row 1", 272.97, 39.93, 295.83, 39.93, 2.54
+ECHO: "PCB", "matrix", "standoff", "M2.5", 291.7, 11, 2.7, 4.5, 5, "hang"
+ECHO: "PCB", "matrix", "standoff", "M2.5", 277.1, 46, 2.7, 4.5, 5, "hang"
+ECHO: "PCB", "matrix", "standoff", "M2.5", 291.7, 46, 2.7, 4.5, 5, "hang"
+ECHO: "PCB", "matrix", "keepout", "elsewhere", 271.9, 7.5, 297.4, 49.5, 2.5
