@@ -46,3 +46,14 @@ On 2026-09-30 the owner replaced it with thirteen WS2815B-V1 reflowed onto the
 board (ADR 0028). `J-LED` and `LED-STRIP` went; the backup line, which the tape
 had carried internally, became board traces; and the threshold is now the
 B-V1's own, whose table is stated at the 12 V supply.
+
+## The LED in the tail corner (2026-10-02 to 2026-10-03)
+
+For a day the fourteenth LED stood in the main board's tail corner beside the
+etherCON adapter, 13.5 mm off the centreline, first on the data line (ADR
+0028's amendment of 2026-10-02, after ADR 0021's ray-cast study: the row's
+tail-end LED saw almost none of the tail's near side past the regulator
+block). It stood about six times nearer its acrylic than the row, so firmware
+was to scale it to about a sixth, and the data feed ran ~100 mm out to it and
+back to the row. On 2026-10-03 the owner moved it into the row (ADR 0028's
+amendment of that date): one row, one pitch, equal margins to the board's ends.

@@ -375,6 +375,10 @@ prints which, exits 1, and leaves any existing board as it was.
   position and rotation (on top) and its 3D model's height, each mount hole's
   position, and `J-CHAIN`'s position, the way its mouth faces, and its side
   (the bottom);
+- a part on the key board's switch side, which is pressed against the switch
+  housings, or one underneath taller than the echo's `smt_height_max`, J-CHAIN
+  excepted (`check_key_faces`, issue #19 F2; heights from `layout.yaml`
+  `heights:`, and a board without one gets a note that they were not checked);
 - a mount hole that is not NPTH at the body CAD's hole size, or any copper —
   track, via, pour or another part's pad — on either layer within its keep-out
   radius: the larger of the echo's two bearing diameters, halved, plus
@@ -507,7 +511,10 @@ unchanged: their `layout.yaml` names no kind.
 | Parts the board does not carry | `not_on_board:`, each with its reason; `check` prints them as notes, and any other missing footprint is still an error |
 | Layers and stackup | `layers: 4`, `stackup:` (the board house's named stack, banked); plane layers are set to KiCad's *power* type |
 | Planes, islands | `planes:` (a zone per layer and net), `islands:` (an island zone over a polygon, cut out of its plane with a `moat`, one `tie`, a `tie_window`, the pads allowed `off_island`) |
-| Net classes | `net_classes:`, written into the `.kicad_pro` with a pattern per net |
+| Net classes | `net_classes:`, written into the `.kicad_pro` with a pattern per net. A class may also say where its nets route (`pcb_route.complete`): `layers:` the only outer layers they may use (the main board's power tracks on layer 1, so they carry no via), or `layer_cost:` how many times a step on a layer costs (its analog nets kept over the island on layer 1, layer 4 only where nothing else gets through) |
+| More than one plane via | `fanout_count:` - a pad's plane transition by that many vias, each on its own stub (a power part's drain or return) |
+| A guarded pair | `pairs:` `guard:` - every other net's copper the router lays kept that much further off the pair's legs than the clearance (the breath pair beside clock lines: 3W) |
+| Parts allowed underneath | `underside_rows:` - the BOM rows that may sit on the underside (the thumb switches); `check` fails any other part there |
 
 **Routing (`route: astar`, the main board's; or `route: freerouting`).** In
 this order (step 4 is Freerouting's only):
@@ -579,11 +586,15 @@ from library"), and refuses one whose pads moved.
 mirrored switch has them; each chain header, connector, the sensor and each LED
 where the echo puts it; each mount plated on its net with no other net's
 copper under its hardware on either face; no copper of any net inside a U-bolt
-leg's outer-layer keep-out; every top part inside its height room (measured
-by its courtyard, which `check` builds itself: a board loaded on KiCad 9.0.2
+leg's outer-layer keep-out; every top part inside its height room - **every
+echo keep-out that carries a height** (under the key boards, the Matrix ribbon,
+the USB-C receptacle and its lead; issue #19 F2: only the first two used to be
+read) - measured
+by its courtyard, which `check` builds itself (a board loaded on KiCad 9.0.2
 has none, and the check once skipped every part in silence - a part over
 0.1 mm tall with no courtyard is now an error, and so is a board where none was
-checked); each plane
+checked); **no part on the underside but `underside_rows:`** (#19 F2: flipped
+parts were skipped); each plane
 and island zone present; every island-net pad on the island (but `off_island`)
 and every island via inside it, no other plane net's via on it or its moat;
 **exactly one tie**, the named net tie; and **no signal track on layer 1 or 4
@@ -1031,6 +1042,7 @@ circuit without a `sim/`, the answer was written nowhere.
 | `module/umbilical-load-switch` | own | |
 | `boards/key-board-lh` | own | |
 | `boards/key-board-rh` | own | |
+| `boards/matrix-carrier` | n/a | Connectors and copper only: the Matrix's two pad-row headers and J-MCU-C, each pin on the conductor `tools/kicad.py check` holds it to; the ribbon's grounds and supplies are `hardware/carrier/breath-adc/sim/`'s (`CBL-MCU-RIBBON`'s length, `drc:Matrix ribbon length`) |
 | `boards/main-board` | covered | its placed circuits, each by its own row; its root-sheet parts (`FB-CHAIN`, `R-CHAIN-SER`, `R-SER-TERM`, `U-TVS-CHAIN`) are `hardware/interfaces/key-chain-loom/sim/`'s, except `R-SER-TERM`, a static 10 kΩ pull-up on `SER`, which that sim drives instead and nothing simulates |
 | `boards/module-main` | n/a | Places circuit sheets, each covered by its own row; its own parts are two connectors |
 | `boards/module-jack` | n/a | Places circuit sheets, each covered by its own row; its own part is a connector |

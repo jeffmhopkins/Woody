@@ -84,6 +84,8 @@ def cad_geometry(cluster):
             geo["standoffs"].append(tuple(float(v) for v in rest[1:6]))
         elif kind == "board":
             geo["thickness"] = float(rest[1])
+            if len(rest) > 3 and rest[2] == "smt_height_max":
+                geo["smt_height_max"] = float(rest[3])
     return geo
 
 
@@ -1915,6 +1917,42 @@ def check_cad(board, lay, geo, comps):
                 bad.append(f"error: [cad] J-CHAIN's pads centre at {got}, facing {'+' if p2.x > p1.x else '-'}x; the body CAD puts them at ({tx:.2f}, {ty:.2f}) facing {'+' if d > 0 else '-'}x")
             if not fp.IsFlipped():
                 bad.append("error: [cad] J-CHAIN is on the top side; it belongs underneath, facing the main board")
+    bad += check_key_faces(board, lay, geo, comps)
+    return bad
+
+
+def check_key_faces(board, lay, geo, comps):
+    """A key board's two faces against the body CAD (issue #19 F2): its top is pressed
+    against the switches under the plate, with only the housings' height between them
+    (drc.echo "key-board mount gap"), so it carries nothing but the switches; each part
+    underneath stands no taller than the echo's smt_height_max, J-CHAIN excepted (its own
+    ribbon keep-out). Heights from layout.yaml heights:, by footprint name, the first key
+    a name contains (as the main board's, pcb_main.check_heights). A board whose
+    layout.yaml has no heights: gets a note that its underside was not checked, never
+    silence."""
+    bad = []
+    heights = lay.get("heights")
+    smax = geo.get("smt_height_max")
+    for fp in board.GetFootprints():
+        ref = fp.GetReference()
+        row = comps.get(ref, {}).get("row")
+        if ref.startswith("H") or row in ("SW1-n", "J-CHAIN"):
+            continue
+        name = fp.GetFPID().GetLibItemName().wx_str()
+        if not fp.IsFlipped():
+            bad.append(f"error: [height] {ref} ({name}) is on the switch side, pressed against the switch housings - "
+                       f"only the switches go there (drc.echo 'key-board mount gap')")
+            continue
+        if heights is None or smax is None:
+            continue
+        h = next((v for k, v in heights.items() if k in name), None)
+        if h is None:
+            bad.append(f"error: [height] {ref} ({name}) has no height in layout.yaml heights:")
+        elif h > smax + 1e-6:
+            bad.append(f"error: [height] {ref} ({name}) stands {h:g} mm under the board; the body CAD's room is {smax:g} "
+                       f"(pcb-geometry.echo smt_height_max)")
+    if heights is None:
+        bad.append("note: [height] layout.yaml has no heights:, so the underside parts' heights were not checked")
     return bad
 
 
@@ -2022,6 +2060,8 @@ def cmd_check(bdir):
     if lay.get("planes") or lay.get("islands"):
         import pcb_main
         bad += pcb_main.check_planes(board, lay)
+    notes += [b for b in bad if b.startswith("note:")]        # a check's note is not a failure
+    bad = [b for b in bad if not b.startswith("note:")]
     print(f"pcb: {os.path.relpath(pcb, ROOT)}: {len(bad)} error(s)")
     for b in notes + bad:
         print("  " + b)
@@ -2071,8 +2111,13 @@ def assembly_files(bdir, name, fab):
                 sys.exit(f"pcb: {ref} is machine-assembled but not in the placement export")
             if not f.get("LCSC"):
                 sys.exit(f"pcb: {ref} is machine-assembled but has no LCSC field on its sheet")
-            key = (comps[ref]["value"], comps[ref]["footprint"], f["LCSC"])
-            machine.setdefault(key, []).append(ref)
+            # one row per bought part - its LCSC number on its footprint - however the sheets'
+            # Value strings differ ("10k" and "10k 1%" were two rows for C17414: issue #17 D5);
+            # its Comment is the bought part's MPN, which every row of it shares (#8-12: the
+            # values' "or equivalent" read oddly on the order)
+            m = machine.setdefault((comps[ref]["footprint"], f["LCSC"]), {"refs": [], "comment": set()})
+            m["refs"].append(ref)
+            m["comment"].add(f.get("MPN") or comps[ref]["value"])
         elif how == "hand":
             hand.append((ref, comps[ref]["value"], f.get("Manufacturer", ""), f.get("MPN", "")))
         elif how != "none" and not ref.startswith("#"):
@@ -2080,14 +2125,18 @@ def assembly_files(bdir, name, fab):
     with open(os.path.join(fab, name + "-bom-jlc.csv"), "w", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(["Comment", "Designator", "Footprint", "JLCPCB Part #"])
-        for (val, fp, lcsc), refs in sorted(machine.items()):
-            w.writerow([val, ",".join(refs), fp.split(":")[-1], lcsc])
+        for (fp, lcsc), m in sorted(machine.items(), key=lambda kv: (min(kv[1]["comment"]), kv[0])):
+            if len(m["comment"]) > 1:
+                sys.exit(f"pcb: {lcsc} is bought for {','.join(sorted(m['refs']))} under {len(m['comment'])} MPNs "
+                         f"({', '.join(sorted(m['comment']))}) - one LCSC number is one part")
+            w.writerow([min(m["comment"]), ",".join(sorted(m["refs"], key=lambda r: (re.sub(r"\d", "", r), int(re.sub(r"\D", "", r) or 0)))), fp.split(":")[-1], lcsc])
     offsets = {r["lcsc"]: r for r in csv.DictReader(open(JLC_ROTATION))}
     unchecked = []
     with open(os.path.join(fab, name + "-cpl-jlc.csv"), "w", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(["Designator", "Mid X", "Mid Y", "Layer", "Rotation"])
-        for (_, fp, lcsc), refs in machine.items():
+        for (fp, lcsc), m in machine.items():
+            refs = m["refs"]
             o = offsets.get(lcsc)
             if o and o["footprint"] != fp.split(":")[-1]:
                 sys.exit(f"pcb: {lcsc}'s rotation offset in {os.path.relpath(JLC_ROTATION, ROOT)} is for "

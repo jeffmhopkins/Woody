@@ -1,0 +1,135 @@
+# GENERATED from the KiCad project hardware/boards/matrix-carrier/matrix-carrier.kicad_sch by tools/kicad.py - DO NOT EDIT.
+# The flattened netlist of this board, every sub-sheet instance expanded.
+
+board: matrix-carrier
+title: Matrix carrier (hardware/boards/matrix-carrier)
+components:
+  J1:
+    of: J-MCU-C
+    value: 2x12 1.27mm shrouded box header
+    pins:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+    - 21
+    - 22
+    - 23
+    - 24
+  J2:
+    of: HDR-MATRIX
+    value: 1x10 2.54mm pin header, SMD
+    pins:
+    - P5V
+    - GND
+    - P3V3
+    - IO7
+    - IO6
+    - IO5
+    - IO4
+    - IO3
+    - IO2
+    - IO1
+  J3:
+    of: HDR-MATRIX
+    value: 1x10 2.54mm pin header, SMD
+    pins:
+    - IO33
+    - IO34
+    - IO35
+    - IO36
+    - IO37
+    - IO38
+    - IO39
+    - IO40
+    - IO43
+    - IO44
+nets:
+  /DEV_3V3:
+  - J1.12
+  - J2.P3V3
+  /INST_5V_A:
+  - J1.22
+  - J1.24
+  - J1.8
+  - J2.P5V
+  /IO1:
+  - J1.21
+  - J2.IO1
+  /IO2:
+  - J1.20
+  - J2.IO2
+  /IO3:
+  - J1.18
+  - J2.IO3
+  /IO33:
+  - J1.6
+  - J3.IO33
+  /IO34:
+  - J1.11
+  - J3.IO34
+  /IO35:
+  - J1.15
+  - J3.IO35
+  /IO36:
+  - J1.13
+  - J3.IO36
+  /IO37:
+  - J1.7
+  - J3.IO37
+  /IO38:
+  - J1.17
+  - J3.IO38
+  /IO39:
+  - J1.9
+  - J3.IO39
+  /IO40:
+  - J1.5
+  - J3.IO40
+  /IO7:
+  - J1.19
+  - J2.IO7
+  /U0RXD:
+  - J1.4
+  - J3.IO44
+  /U0TXD:
+  - J1.3
+  - J3.IO43
+  J1.1:
+  - J1.1
+  J1.2:
+  - J1.2
+  J2.IO4:
+  - J2.IO4
+  J2.IO5:
+  - J2.IO5
+  J2.IO6:
+  - J2.IO6
+  PWR_GND:
+  - J1.10
+  - J1.14
+  - J1.16
+  - J1.23
+  - J2.GND
+external_endpoints:
+- J1.1
+- J1.2
+- J2.IO4
+- J2.IO5
+- J2.IO6

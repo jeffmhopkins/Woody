@@ -177,8 +177,6 @@ Pins: `SCK` IO38, `SH/LD` IO7, chain-end `SER` IO33, `QH` IO40.
 
 - **`IO2` and `IO3` driven low after boot** — shields on the ribbon
   (`carrier.md`, *The pin map*; recovery ladder, below).
-- **`EN` and `IO0` only ever pulled to ground** (*The instrument must stay
-  recoverable*, below).
 
 ### The lights
 
@@ -211,22 +209,13 @@ Pins: `SCK` IO38, `SH/LD` IO7, chain-end `SER` IO33, `QH` IO40.
   touched. Lift it when the host goes away. The per-LED current behind the
   estimate is `matrix-led-current`, still blocked on E1's measurement, so the
   clamp is a setting E1 confirms, not a constant.
-- **Fourteen pixels, the tail corner's first.** The data line reaches the LED
-  in the main board's tail corner before the row (ADR 0028's amendment of
-  2026-10-02; `led-strip-drive.md`, *The LED in the tail corner*), so a
-  frame is pixel 0 for the corner LED, then pixels 1–13 for the row from its
-  tail end to the mouth end. One more pixel is ~30 µs more per frame
-  `[calc: 24 bits / 800 kbit/s]`. Anything drawn *along* the body (the breath
-  bar, a sweep) addresses pixels 1–13; the corner LED is not a step of it,
-  and takes the colour of the row's tail end unless a pattern sets it.
-- **A per-LED gain, and the corner LED's is about a sixth.** It stands ~9 mm
-  from the near side's acrylic where the row stands ~22.5 mm from either
-  side, so at the same drive it lights its patch about six times as brightly
-  `[calc: (22.5 / 9)² = 6.25, ADR 0021's study]`. Scale each pixel by a
-  gain table — all 1.0 but pixel 0, which starts at 0.16 — applied before
-  the shared lighting budget's clamp, so the clamp sees what is actually drawn. A
-  setting, not a constant: the side-light diffusion test (ROADMAP) sets it,
-  by eye on the real acrylic.
+- **Fourteen pixels, one row, tail end first.** The data line reaches the
+  row's tail end first (ADR 0028, amendment of 2026-10-03: fourteen in one row
+  at one pitch, equal margins to the main board's ends), so a frame is pixel 0
+  for the tail-end LED, then pixels 1–13 toward the mouth end. Anything drawn
+  *along* the body (the breath bar, a sweep) addresses pixels 0–13 in order;
+  every pixel is a step of it. Every pixel takes the same gain: no LED stands
+  nearer its acrylic than the rest.
 
 ## The instrument must stay recoverable
 
@@ -249,15 +238,15 @@ fresh silicone. Everything here exists so that it never has to be the answer.
   through the tail USB-C slot — which is why MIDI is opt-in. (3) The console
   header on the main board, with the body opened (ADR 0025 — there is no
   service cover since 2026-09-26), for watching a board that boots
-  but misbehaves. (4) **Hardware boot-force on the same header**: `EN` and
-  `IO0` are not on the ESP32-S3-Matrix's pad rows, so two ribbon conductors
-  are soldered to its RESET and BOOT button pads and brought to
-  `HDR-SERVICE` (ADR 0018; `hardware/carrier/service-uart/`). Hold `IO0` low,
-  pulse `EN`, and the ROM download mode takes a UART flash over the console
-  pair — so a corrupted *bootloader* is recovered with the body opened and the
-  Matrix still in place. **Only pull `EN` and `IO0` to ground** (open-drain or
-  a switch to GND), never drive them high: the Matrix's own buttons short them
-  to GND. The two spare GPIO on the ribbon (`IO2`, `IO3`) sit beside fast
+  but misbehaves. (4) **The Matrix's own BOOT and RESET buttons.** Since 2026-10-03 the
+  Matrix is **programmed and recovered over USB-C only** (owner: "Program
+  over USB only"; ADR 0021, *Amendment, 2026-10-03*): `EN` and `IO0` are not
+  wired out, and `HDR-SERVICE` carries the console's TXD, RXD and GND only
+  (`hardware/carrier/service-uart/`). Hold BOOT, press RESET, and the ROM's
+  download mode takes a flash over USB-Serial-JTAG through the tail USB-C -
+  so a corrupted *bootloader* is recovered without a UART. The buttons are
+  on the Matrix's underside, over its carrier; how they are reached with the
+  lid lifted is open (ADR 0021, *Amendment, 2026-10-03*, *Open*). The two spare GPIO on the ribbon (`IO2`, `IO3`) sit beside fast
   lines as shields; drive them low after boot (`IO3` is a strapping pin
   [from memory], harmless once booted) — pin map in `hardware/carrier/carrier.md`.
 - **Exercise the ladder at M8**, before the body closes, so it is known good

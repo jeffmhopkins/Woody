@@ -3,9 +3,9 @@
 **Status:** Split out of `carrier.md` 2026-09-21 (Phase B). **The lights are
 on the main board since 2026-09-30**
 ([ADR 0028](../../../docs/decisions/0028-on-board-leds.md)): WS2815B-V1
-on the top face, `lighting.led_count` of them on one data line — one in the
-tail corner beside the etherCON adapter, where the data arrives (ADR 0028's
-amendment of 2026-10-02), then one row down the centreline — in place of
+on the top face, `lighting.led_count` of them on one data line, in one row
+down the centreline at one pitch with equal margins to the board's ends (ADR
+0028's amendment of 2026-10-03), the data arriving at its tail end — in place of
 the strip ADR 0016 laid there. The directory keeps its name. What the
 circuit used to be is in [`notes.md`](notes.md).
 
@@ -58,8 +58,8 @@ the two agree, and where they do not the netlist wins.*
     LED k:  DIN1 = LED_D(k-1)   (the DO of the LED before)
             DIN2 = LED_D(k-2)   (the DIN1 of the LED before: the backup line)
     D-LED-14's DO drives nothing.
-    D-LED-1 is the tail corner's LED; D-LED-2 to D-LED-14 the centreline
-    row from its tail end (pcb-geometry.echo 'led', in this order).
+    D-LED-1 is the row's tail-end LED, D-LED-14 its mouth-end one
+    (pcb-geometry.echo 'led', in this order).
 
   each LED: VDD (pin 2) = +12V, GND (pin 5), pin 1 NC
             [C-LED-1 100nF] ... [C-LED-14 100nF], one at each LED's VDD pin
@@ -152,10 +152,10 @@ now, so the case is weaker than it was for a strip; it stays, as one 0805.
 2.2 × 9.9 ≈ 22 ns, a tenth of the shortest pulse the LED must see
 (`T0H`, 220 ns minimum `[same, p.3, Data Transfer Time]`), so a few pF of
 trace more does not reach it. **Simulated 2026-09-30, re-run 2026-10-02** (`sim/`): with the gate's own
-output resistance and the trace added — about 100 mm since the fourteenth
-LED, out to the tail corner and back to the row — the edge is about two
-thirds slower than this (37 ns nominal, 50 ns at the worst corner), still
-under a quarter of `T0H`, and a 220 ns high arrives within a few
+output resistance and the trace added — about 65 mm since the row spans the
+board (ADR 0028, 2026-10-03), out to its tail-end LED and back to the next —
+the edge is about half as slow again as this (33 ns nominal, 42 ns at the
+worst corner), under a fifth of `T0H`, and a 220 ns high arrives within a few
 nanoseconds of itself at either end of the LED's threshold window — so the
 firmware's `T0H` must sit clear of the 220 ns minimum, not on it. Into a shorted data pin it holds the gate to
 5 V / 330 Ω ≈ 15 mA, inside its ±25 mA absolute maximum
@@ -209,26 +209,26 @@ rail, so it cannot fold the buck back and stop blank-at-boot from running.
 | `U-LVLSHIFT` | 74AHCT125 SOIC-14 | LED data, 5 V rail. One gate used | `[repo]`, `[ds]` |
 | **`R-LED-PD`** | **10 kΩ** | **Holds the row's data low through reset** | `[ds]`, `[calc]` |
 | **`R-LED-SER`** | **330 Ω** | **Damps the data line at its source** | `[ds]`, `[calc]` |
-| `D-LED-1` … `D-LED-14` | WS2815B-V1 (LCSC C5446699) | `D-LED-1` in the tail corner, then the row: 12 V, backup-chained. **The body's chamfer marks pin 1 (NC)**, as the sheet's numbered pin drawing places it (footprint `woody:LED_WS2815B-V1_PLCC6_5.4x5.0mm_P1.6mm`, `hardware/lib/README.md`) | `[ds]` |
+| `D-LED-1` … `D-LED-14` | WS2815B-V1 (LCSC C5446699) | One row, `D-LED-1` at its tail end: 12 V, backup-chained. **The body's chamfer marks pin 1 (NC)**, as the sheet's numbered pin drawing places it (footprint `woody:LED_WS2815B-V1_PLCC6_5.4x5.0mm_P1.6mm`, `hardware/lib/README.md`) | `[ds]` |
 | `C-LED-1` … `C-LED-14` | 100 nF X7R 50 V 0805 | One at each LED's `VDD` | `[ds]` |
 
 Where the LEDs sit is the body CAD's: `config/body.yaml` `lighting.*` and the
 `led` records in `mechanical/export/pcb-geometry.echo` (numbered along the data
-line: `LED1` the corner's), checked by `mechanical/drc.echo` *"LED row on the
-main board"* and *"LED in the tail corner clear of its neighbours"*.
+line: `LED1` the tail end's), checked by `mechanical/drc.echo` *"LED row on the
+main board"* and *"LED row clear of its neighbours"*.
 
-### The LED in the tail corner
+### The row since 2026-10-03
 
-Added 2026-10-02 (the owner: "Add it"; ADR 0028's amendment, after ADR 0021's
-study of the full-width tail). The row cannot light the tail's near side: the
-regulator block, 12.5 mm tall on that side in front of `J-MCU`, shadows it.
-**It is first on the data line**, because the data arrives at the tail:
-`R-LED-SER` → `D-LED-1` (the corner) → `D-LED-2` (the row's tail end) → … The
-backup line is ADR 0028 point 5 unchanged: `D-LED-1`'s `DIN2` to GND, and
-`D-LED-2`'s `DIN2` from the feed, `LED_DI`. So `R-LED-SER` still drives two
-inputs and the edge derivation above stands; the feed's trace is longer, about
-50 mm from `R-LED-SER` to the corner and 55 mm back along `LED_D1` to the row
-`[from ADR 0021's study]`: ~12 pF of trace `[from memory, ~1.2 pF/cm over a
-plane]` beside the inputs' 30 pF, which the simulation above already carries.
-It is about six times nearer the near side than the row is to either side, so
-firmware scales it down (`firmware/README.md`, *The lights*).
+The owner moved the fourteenth LED from the tail corner into the row: *"it
+needs to be distance equalized and centered just like the other leds"*, then
+*"all the 14 LEDs equidistant from board extents"* (ADR 0028's amendment of
+2026-10-03). The data still arrives at the tail: `R-LED-SER` → `D-LED-1` (the
+row's tail end) → … → `D-LED-14` (its mouth end). The backup line is ADR 0028
+point 5: `D-LED-1`'s `DIN2` to GND, `D-LED-2`'s `DIN2` from the feed,
+`LED_DI`, so `R-LED-SER` still drives two inputs. The feed runs from
+`R-LED-SER` beside `U-LVLSHIFT`, under `J-MCU`, out to the tail-end LED, about
+45 mm, and back to the next, about 20 mm: ~8 pF of trace `[from memory, ~1.2
+pF/cm over a plane]` beside the inputs' 30 pF, which `sim/` carries. Every
+LED stands the same distance from the acrylic, so firmware gives none of them
+its own gain (`firmware/README.md`, *The lights*). What the corner LED was is
+in [`notes.md`](notes.md).

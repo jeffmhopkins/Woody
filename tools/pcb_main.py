@@ -136,19 +136,45 @@ def place_switch(board, fp, x, y, r):
     raise SystemExit(f"pcb: no bottom-side rotation puts {fp.GetReference()}'s pins where the body CAD's mirror does")
 
 
-def place_connector(board, fp, spec, geo):
-    """J-MCU, J-UMB: layout.yaml connectors: - the pad row farthest from the mouth
-    (lowest body x; the mouth faces the tail) at `back_row_at` from the echo's
-    `back_row_from` (x0, the insulator's mouth-end face, or x1, its tail-end face),
-    the pads centred across the body on the echo's y."""
-    c = geo["connectors"][spec["cad"]]
+def connector_target(c, spec):
+    """Where a CAD-placed connector's pads go: the echo's insulator box (x0, x1 along the
+    body, its centre y and its length across) and - J-MCU's echo carries it, 2026-10-03 -
+    which way its mouth faces (0 the tail, 90 the far side, 270 the near side). Returns the
+    footprint's turn, the axis its mouth faces along (0 = x, 1 = y), the sign, where its
+    back pad row must stand along that axis (`back_row_at` in front of the face
+    `back_row_from` names: x0/x1, the insulator's faces along the mouth's axis), and the
+    pads' centre across it."""
     x0, x1, y = c[0], c[1], c[2]
-    pcb.place(board, fp, 0, 0, spec["rot"], spec.get("bottom", False))
-    xs = [pad_body(p)[0] for p in fp.Pads()]
-    ys = [pad_body(p)[1] for p in fp.Pads()]
-    want_x = {"x0": x0, "x1": x1}[spec["back_row_from"]] + spec["back_row_at"]
-    fp.Move(V(want_x - min(xs), -(y - (min(ys) + max(ys)) / 2)))
-    return want_x, y
+    # (J-UMB's sixth field is its pins' pitch row offset, not a facing: only a quarter turn counts)
+    facing = int(c[5]) if len(c) > 5 and not isinstance(c[5], str) and c[5] in (0, 90, 180, 270) else 0
+    if facing in (0, 180):
+        face = {"x0": x0, "x1": x1}[spec["back_row_from"]]
+        return spec["rot"] + facing, 0, 1 if facing == 0 else -1, face + spec["back_row_at"], y
+    half = c[3] / 2
+    y0, y1 = y - half, y + half
+    sign = 1 if facing == 90 else -1
+    # the mouth's face is x1's counterpart: the far face (y1) when it faces +y
+    face = (y1 if sign > 0 else y0) if spec["back_row_from"] == "x1" else (y0 if sign > 0 else y1)
+    return spec["rot"] + facing, 1, sign, face + sign * spec["back_row_at"], (x0 + x1) / 2
+
+
+def place_connector(board, fp, spec, geo):
+    """J-MCU, J-UMB: layout.yaml connectors: - the pad row farthest from the mouth at
+    `back_row_at` from the echo's `back_row_from` face (x0, the insulator's mouth-end
+    face, or x1, its tail-end face, for a mouth facing the tail; the same faces turned
+    with it for J-MCU turned across the body), the pads centred on the echo's centre."""
+    c = geo["connectors"][spec["cad"]]
+    rot, ax, sign, want, centre = connector_target(c, spec)
+    pcb.place(board, fp, 0, 0, rot, spec.get("bottom", False))
+    pts = [pad_body(p) for p in fp.Pads()]
+    along = [q[ax] for q in pts]
+    across = [q[1 - ax] for q in pts]
+    back = min(along) if sign > 0 else max(along)
+    d_along = want - back
+    d_across = centre - (min(across) + max(across)) / 2
+    dx, dy = (d_along, d_across) if ax == 0 else (d_across, d_along)
+    fp.Move(V(dx, -dy))
+    return want, centre
 
 
 def led_chain(comps, nets, row="D-LED"):
@@ -511,13 +537,17 @@ def check_cad(board, lay, comps):
     for cad, spec in (lay.get("connectors") or {}).items():
         ref = pcb.ref_of(comps, spec["row"])
         fp = fp_of[ref]
-        c = geo["connectors"][cad]
-        xs = [pad_body(p)[0] for p in fp.Pads()]
-        ys = [pad_body(p)[1] for p in fp.Pads()]
-        want_x = {"x0": c[0], "x1": c[1]}[spec["back_row_from"]] + spec["back_row_at"]
-        if abs(min(xs) - want_x) > 0.05 or abs((min(ys) + max(ys)) / 2 - c[2]) > 0.05:
-            bad.append(f"error: [cad] {ref} ({cad})'s back pad row is at x {min(xs):.2f}, centred y {(min(ys) + max(ys)) / 2:.2f}; "
-                       f"the body CAD and layout.yaml connectors: put it at x {want_x:.2f}, y {c[2]}")
+        rot, ax, sign, want, centre = connector_target(geo["connectors"][cad], spec)
+        pts = [pad_body(p) for p in fp.Pads()]
+        along = [q[ax] for q in pts]
+        across = [q[1 - ax] for q in pts]
+        back = min(along) if sign > 0 else max(along)
+        turned = abs(((fp.GetOrientationDegrees() - rot) + 180) % 360 - 180) > 0.01
+        if abs(back - want) > 0.05 or abs((min(across) + max(across)) / 2 - centre) > 0.05 or turned:
+            ax_n, cr_n = ("x", "y") if ax == 0 else ("y", "x")
+            bad.append(f"error: [cad] {ref} ({cad})'s back pad row is at {ax_n} {back:.2f}, centred {cr_n} {(min(across) + max(across)) / 2:.2f}, "
+                       f"turned {fp.GetOrientationDegrees():g}; the body CAD and layout.yaml connectors: put it at {ax_n} {want:.2f}, "
+                       f"{cr_n} {centre:.2f}, turned {rot % 360:g}")
     for cad, spec in (lay.get("cad_parts") or {}).items():
         ref = pcb.ref_of(comps, spec["row"])
         cx, cy = to_body(*pcb.pads_centre(fp_of[ref]))
@@ -561,7 +591,7 @@ def check_cad(board, lay, comps):
             if hits:
                 bad.append(f"error: [cad] {', '.join(hits)} within the U-bolt leg {j}'s {'washer and nut' if L == pcbnew.F_Cu else 'spacer'} "
                            f"keep-out on {board.GetLayerName(L)} (the leg is outside metal on the strap)")
-    bad += check_heights(board, lay, geo)
+    bad += check_heights(board, lay, geo, comps)
     return bad
 
 
@@ -574,18 +604,33 @@ def _nets_of(board):
     return list(out.items())
 
 
-def check_heights(board, lay, geo):
+def check_heights(board, lay, geo, comps=None):
     """Every top-face part inside its height room: under a key board, where none is
-    overhead, and under the Matrix ribbon's level run (pcb-geometry.echo keep-outs),
-    each part's height from layout.yaml heights: by footprint name."""
+    overhead, under the Matrix ribbon's level run, under the USB-C receptacle and its
+    lead - EVERY pcb-geometry.echo keep-out that carries a height (a zero-height one is
+    a no-parts area, which its rule area holds) - each part's height from layout.yaml
+    heights: by footprint name. And nothing on the UNDERSIDE but the rows layout.yaml
+    `underside_rows:` names (the thumb switches): the underside faces the bottom plate,
+    with no room for a part (mechanical/drc.echo "main board underside room over the
+    bottom plate"). Issue #19 F2: the check used to read only the key-board and ribbon
+    rooms and skip every flipped part, so the USB-C keep-out and the underside were held
+    by nothing."""
     bad = []
     k = geo["keepouts"]
-    rooms = [(box(*v[:4]), v[4], name) for name, v in k.items() if name.startswith("under key board") or name == "Matrix ribbon"]
+    rooms = [(box(*v[:4]), v[4], name) for name, v in k.items() if name != "elsewhere" and v[4] > 0]
     else_room = k["elsewhere"][4]
     heights = lay.get("heights") or {}
+    under_ok = set(lay.get("underside_rows") or [])
     checked = 0
     for fp in board.GetFootprints():
-        if fp.IsFlipped() or fp.GetReference().startswith("H"):
+        if fp.GetReference().startswith("H"):
+            continue
+        if fp.IsFlipped():
+            row = (comps or {}).get(fp.GetReference(), {}).get("row")
+            if comps is not None and row not in under_ok:
+                bad.append(f"error: [height] {fp.GetReference()} ({row}) is on the underside, which faces the bottom plate "
+                           f"with no room for a part (drc.echo 'main board underside room over the bottom plate'); "
+                           f"only layout.yaml underside_rows: {sorted(under_ok)} may be there")
             continue
         name = fp.GetFPID().GetLibItemName().wx_str()
         h = next((v for key, v in heights.items() if key in name), None)

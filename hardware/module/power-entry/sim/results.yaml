@@ -11,7 +11,7 @@ inputs:
   hardware/module/breath-output-stage/netlist.yaml: 63517b01fa4c02a2
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
   hardware/carrier/power-entry-instrument/netlist.yaml: 89f351c1b8aba0f0
-  hardware/carrier/led-strip-drive/netlist.yaml: 466ccae220ba1302
+  hardware/carrier/led-strip-drive/netlist.yaml: 9042cc93a19e6824
   hardware/module/power-entry/sim/poweron.cir: 0c1ee473967b4108
   hardware/module/power-entry/sim/groundshift.cir: 4aae040d6b7e03a1
   hardware/module/power-entry/sim/poweroff.cir: aa8a3991ce4d5a85

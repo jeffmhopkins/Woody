@@ -262,11 +262,11 @@
         "line_style": 0,
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
-        "name": "plane_nets",
+        "name": "power5",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 3,
+        "priority": 0,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.4,
+        "track_width": 0.5,
         "via_diameter": 0.7,
         "via_drill": 0.3,
         "wire_width": 6
@@ -298,11 +298,11 @@
         "line_style": 0,
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
-        "name": "power5",
+        "name": "rail3v3",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 0,
+        "priority": 2,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.5,
+        "track_width": 0.3,
         "via_diameter": 0.7,
         "via_drill": 0.3,
         "wire_width": 6
@@ -316,11 +316,47 @@
         "line_style": 0,
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
-        "name": "rail3v3",
+        "name": "analog_supply",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 2,
+        "priority": 3,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.3,
+        "via_diameter": 0.7,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "analog",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 4,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.25,
+        "via_diameter": 0.7,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "plane_nets",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 5,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.4,
         "via_diameter": 0.7,
         "via_drill": 0.3,
         "wire_width": 6
@@ -351,6 +387,42 @@
       {
         "netclass": "rail3v3",
         "pattern": "DEV_3V3"
+      },
+      {
+        "netclass": "analog_supply",
+        "pattern": "/breath-adc/ADC_VDD"
+      },
+      {
+        "netclass": "analog_supply",
+        "pattern": "REF_VIN"
+      },
+      {
+        "netclass": "analog_supply",
+        "pattern": "/breath-excitation-reference/REF_5V"
+      },
+      {
+        "netclass": "analog_supply",
+        "pattern": "VS"
+      },
+      {
+        "netclass": "analog",
+        "pattern": "/SENSOR_RAW"
+      },
+      {
+        "netclass": "analog",
+        "pattern": "/breath-adc/ADC_IN"
+      },
+      {
+        "netclass": "analog",
+        "pattern": "/breath-excitation-reference/REF_MINUS"
+      },
+      {
+        "netclass": "analog",
+        "pattern": "/breath-excitation-reference/BUF_OUT"
+      },
+      {
+        "netclass": "analog",
+        "pattern": "/breath-excitation-reference/AC_FB_MID"
       },
       {
         "netclass": "plane_nets",

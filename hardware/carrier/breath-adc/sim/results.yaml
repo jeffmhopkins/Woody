@@ -4,14 +4,14 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/carrier/breath-adc/sim/sims.yaml: cb6aafd15bc27c89
+  hardware/carrier/breath-adc/sim/sims.yaml: d7558234d030657c
   hardware/carrier/breath-adc/netlist.yaml: f742c4d67eea80fb
   hardware/carrier/breath-adc/sim/adc-ac.cir: 92db36d52ceba839
   hardware/carrier/breath-adc/sim/adc.cir: 3d5f71307efa775a
   hardware/carrier/breath-adc/sim/adc-powerup.cir: 66ddee5fef5a915c
   hardware/carrier/breath-adc/sim/adc-vdd.cir: 3468717b0fc97416
   hardware/carrier/breath-adc/sim/adc-vddload.cir: c3d7be54d359dff1
-  drc:Matrix ribbon length: '37.6231'
+  drc:Matrix ribbon length: '49.15'
   figure:sensor-full-scale: 4.86 V
 ngspice: '42'
 sims:
@@ -215,46 +215,46 @@ sims:
     corners: 257
     measures:
       h_fbuck_db:
-        nominal: -76.0682
-        min: -94.6152
+        nominal: -74.8948
+        min: -97.915
         min_at: C-ADC-BULK+ C-ADC-VDD+ R-ADC-VDD+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
-        max: -56.9654
+        max: -55.2207
         max_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       h_band_db:
-        nominal: -72.5091
-        min: -83.5907
+        nominal: -72.1116
+        min: -83.5024
         min_at: C-ADC-BULK+ C-ADC-VDD+ R-ADC-VDD+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
-        max: -52.2176
-        max_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+        max: -51.9733
+        max_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- c_vcc5- k_psrr+ l_rib_m+ len_rib+
       f_band_peak:
         nominal: 200678.0
         min: 200678.0
         min_at: nominal
-        max: 270707.0
-        max_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- c_vcc5- k_psrr- l_rib_m+ len_rib+
+        max: 492606.0
+        max_at: C-ADC-BULK- C-ADC-VDD+ R-ADC-VDD- c_ldo- c_vcc5- k_psrr- l_rib_m+ len_rib-
       vdd_pp_mv:
-        nominal: 0.0284267
-        min: 0.00793684
+        nominal: 0.0297578
+        min: 0.00801793
         min_at: C-ADC-BULK+ C-ADC-VDD+ R-ADC-VDD+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
-        max: 0.293969
-        max_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+        max: 0.302355
+        max_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- c_vcc5- k_psrr+ l_rib_m+ len_rib+
       lsb_pp:
-        nominal: 0.0311778
-        min: 0.00870497
+        nominal: 0.0326377
+        min: 0.00879391
         min_at: C-ADC-BULK+ C-ADC-VDD+ R-ADC-VDD+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
-        max: 0.32242
-        max_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
+        max: 0.331617
+        max_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- c_vcc5- k_psrr+ l_rib_m+ len_rib+
       lsb_pp_fbuck:
-        nominal: 0.0206961
-        min: 0.00244647
+        nominal: 0.0236897
+        min: 0.00167321
         min_at: C-ADC-BULK+ C-ADC-VDD+ R-ADC-VDD+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
-        max: 0.186651
+        max: 0.228174
         max_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       rip_budget_mv:
-        nominal: 7697.79
-        min: 744.371
-        min_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib+
-        max: 27570.4
+        nominal: 7353.45
+        min: 723.726
+        min_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- c_vcc5- k_psrr+ l_rib_m+ len_rib+
+        max: 27291.6
         max_at: C-ADC-BULK+ C-ADC-VDD+ R-ADC-VDD+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
     asserts:
     - expr: max['lsb_pp'] <= 2.0
@@ -268,21 +268,21 @@ sims:
     measures:
       droop_mv:
         nominal: 0.40739
-        min: 0.40734
+        min: 0.40735
         min_at: C-ADC-BULK+ C-ADC-VDD+ R-ADC-VDD- c_ldo- l_rib_m- len_rib-
-        max: 0.67136
+        max: 0.67141
         max_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD+ c_ldo- l_rib_m+ len_rib+
       lsb_droop:
         nominal: 0.446817
-        min: 0.446762
+        min: 0.446773
         min_at: C-ADC-BULK+ C-ADC-VDD+ R-ADC-VDD- c_ldo- l_rib_m- len_rib-
-        max: 0.736334
+        max: 0.736389
         max_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD+ c_ldo- l_rib_m+ len_rib+
       dc_drop_mv:
-        nominal: 0.40809
-        min: 0.30598
-        min_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- l_rib_m+ len_rib-
-        max: 0.41641
+        nominal: 0.40837
+        min: 0.30624
+        min_at: C-ADC-BULK- C-ADC-VDD- R-ADC-VDD- c_ldo- l_rib_m- len_rib-
+        max: 0.41751
         max_at: C-ADC-BULK+ C-ADC-VDD+ R-ADC-VDD+ c_ldo- l_rib_m- len_rib+
     asserts:
     - expr: max['lsb_droop'] <= 1.0
@@ -294,47 +294,47 @@ sims:
     corners: 65
     measures:
       h_fbuck_db:
-        nominal: -19.7328
-        min: -53.2563
+        nominal: -18.9575
+        min: -59.2746
         min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
-        max: -2.51629
+        max: -1.10662
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       h_band_db:
-        nominal: -19.1494
-        min: -33.5013
-        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
-        max: -1.19617
+        nominal: -18.9551
+        min: -36.1183
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
+        max: -1.10471
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       f_band_peak:
-        nominal: 391291.0
+        nominal: 333043.0
         min: 200678.0
-        min_at: C-ADC-BULK- c_ldo- c_vcc5- k_psrr- l_rib_m- len_rib-
+        min_at: C-ADC-BULK- c_ldo- c_vcc5- k_psrr- l_rib_m- len_rib+
         max: 498310.0
-        max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr- l_rib_m- len_rib-
+        max_at: C-ADC-BULK- c_ldo- c_vcc5- k_psrr- l_rib_m- len_rib-
       vdd_pp_mv:
-        nominal: 13.2347
-        min: 2.5358
-        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
-        max: 104.562
+        nominal: 13.534
+        min: 1.87615
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
+        max: 105.669
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       lsb_pp:
-        nominal: 14.5155
-        min: 2.78122
-        min_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
-        max: 114.681
+        nominal: 14.8439
+        min: 2.05772
+        min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
+        max: 115.895
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       lsb_pp_fbuck:
-        nominal: 13.5725
-        min: 0.286078
+        nominal: 14.8397
+        min: 0.143077
         min_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
-        max: 98.5114
+        max: 115.87
         max_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
       rip_budget_mv:
-        nominal: 16.534
-        min: 2.09276
+        nominal: 16.1683
+        min: 2.07084
         min_at: C-ADC-BULK- c_ldo- c_vcc5+ k_psrr+ l_rib_m+ len_rib-
-        max: 86.2931
-        max_at: C-ADC-BULK+ c_ldo+ c_vcc5- k_psrr- l_rib_m- len_rib-
+        max: 116.634
+        max_at: C-ADC-BULK+ c_ldo+ c_vcc5+ k_psrr- l_rib_m+ len_rib+
     asserts:
     - expr: max['lsb_pp'] > 2.0
       why: 'WHAT-IF: without R-ADC-VDD and C-ADC-VDD the same conservative model misses the 2 LSB budget - why the filter

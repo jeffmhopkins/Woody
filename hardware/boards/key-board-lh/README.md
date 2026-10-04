@@ -236,7 +236,7 @@ generated from them, so they are not repeated here.
 | `R-KEY-SER` | R1, R3, R5, R7, R9 | C17408 | **Basic** | 9.39 M | $0.0042 | 0 |
 | `R-KEY-PU` | R2, R4, R6, R8, R10, R11 | C17520 | **Basic** | 3.64 M | $0.0046 | 0 |
 | `C-KEY` | C1–C5 | C53134 | **Basic** | 202 k | $0.0173 | 0 |
-| `C-DECOUPLE-165` | C6 | C49678 | **Basic** | 19.3 M | $0.0189 | 0 |
+| `C-DECOUPLE-165` | C6, C8 | C49678 | **Basic** | 19.3 M | $0.0189 | 0 |
 | `C-BULK-CHAIN` | C7 | C15850 | **Basic** | 5.01 M | $0.0651 | 0 |
 | `U-KEYS` | U1 | C2864745 | **Extended** (not Preferred) | **112** | $1.086 | **−90** |
 
@@ -419,7 +419,8 @@ is how the tools find it.
 | R(2*n*): R2, R4, R6, R8, R10 | `R-KEY-PU` | key LH*n*'s pull-up |
 | C*n*: C1-C5 | `C-KEY` | key LH*n*'s capacitor |
 | R11 | `R-KEY-PU` | the free input's pull-up (sheet FREE3) |
-| C6 | `C-DECOUPLE-165` | the register's decoupler |
+| C6 | `C-DECOUPLE-165` | the register's decoupler, at VCC (pin 16) |
+| C8 | `C-DECOUPLE-165` | the register's second decoupler, under its ground pin 8 (review #6-5) |
 | C7 | `C-BULK-CHAIN` | the rail's reservoir, beside J1's 3V3 pin |
 | U1 | `U-KEYS` | the register, SN74HCS165 |
 | J1 | `J-CHAIN` | the key chain's header |
@@ -440,7 +441,8 @@ J1 with pin 1's dot and the arrow out of its mouth, where it is soldered;
 
 | Rev | Date | What changed | Where |
 |---|---|---|---|
-| A | 2026-09-27 | First layout: every key's network the same T in the same place round its switch, six test pads in one row (QH, SER, GND, SCK, SH/LD, 3V3), C7 (`C-BULK-CHAIN`), silkscreen on both sides, no acute track junction (`pcb.py check` tests every join, a track ending mid-track included). Not yet ordered; re-laid out on the same date for the screwed corner mount (keep-outs from the nut and the spacer/washer; ADR 0020 Amendment 3 then moved the heads from plugged bores into blind pockets, which changes nothing on the board); on 2026-09-28, C7 made a fitted, machine-placed part (it had been a do-not-fit footprint; owner: it costs cents) and J-CHAIN's pads lengthened on their free side; the same day the corner mounts went to M2.5 for PEM studs pressed flush into the plate (ADR 0020 Amendment 4: larger holes and keep-outs, mounts 0.2 further in), and the washer dropped, the spacer taking its length; on 2026-09-29 re-laid out for the cassette's columns (ADR 0025): no bonded mount (Amendment 5's is superseded), the mouth end 0.6 and the tail end 0.2 longer, J-CHAIN 0.5 further toward the tail and the register, its decoupler, R11 and C7 moved 0.5 with it | git history of this directory |
+| A | 2026-09-27 | First layout: every key's network the same T in the same place round its switch, six test pads in one row (QH, SER, GND, SCK, SH/LD, 3V3), C7 (`C-BULK-CHAIN`), silkscreen on both sides, no acute track junction (`pcb.py check` tests every join, a track ending mid-track included). Not yet ordered; re-laid out on the same date for the screwed corner mount (keep-outs from the nut and the spacer/washer; ADR 0020 Amendment 3 then moved the heads from plugged bores into blind pockets, which changes nothing on the board); on 2026-09-28, C7 made a fitted, machine-placed part (it had been a do-not-fit footprint; owner: it costs cents) and J-CHAIN's pads lengthened on their free side; the same day the corner mounts went to M2.5 for PEM studs pressed flush into the plate (ADR 0020 Amendment 4: larger holes and keep-outs, mounts 0.2 further in), and the washer dropped, the spacer taking its length; on 2026-09-29 re-laid out for the cassette's columns (ADR 0025): no bonded mount (Amendment 5's is superseded), the mouth end 0.6 and the tail end 0.2 longer, J-CHAIN 0.5 further toward the tail and the register, its decoupler, R11 and C7 moved 0.5 with it; on 2026-10-03 re-laid out for the KS-33's pin holes, Gateron's 3.0 mm on 3.4 mm pads (issue #6-1; ADR 0020 Amendment 8), each key's network 9.0 mm from its switch so its labels clear the bigger pads | git history of this directory |
+| B | 2026-10-03 | C8, the register's second decoupler (the shared REG sheet gained it for review #6-5; the right-hand board's C9), placed by hand under U1's ground pin 8 on the bottom face: its 3V3 pad squared onto the 3V3 track's 45-degree run, its ground pad onto pin 8's ground line, both 0.4 mm. Nothing else moved. `pcb.py check` passes. Not yet ordered | `key-board-lh.kicad_pcb`, `layout.yaml` |
 
 To make a revision, edit the board in KiCad, change the revision and date in
 the title block and in the silkscreen text, and copy them into

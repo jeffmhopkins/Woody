@@ -67,10 +67,11 @@ standoff_footprint: "MountingHole:MountingHole_2.7mm_M2.5"
 # Midway to the next switch along the body, standing across it: on this board
 # the one offset that clears every switch's pins and pole, J-CHAIN, the test
 # pads, the register, the corner mounts and the board's edge for all five keys.
-# 9.4, not 10.0, since the switch pads grew to 2.6 mm (ADR 0020 Amendment 6):
-# at 10.0 a resistor's label landed on the next switch's pin pad.
+# 9.0 since the switch pads grew to 3.4 mm on Gateron's 3.0 mm holes (issue #6-1,
+# 2026-10-03; hardware/lib/README.md): at 9.4 and over, a resistor's label landed
+# on the next switch's pin pad.
 networks:
-  pattern: {offset: [9.4, 0.0], axis: y, leg: -1, c: -1}
+  pattern: {offset: [9.0, 0.0], axis: y, leg: -1, c: -1}
   except: {}
 
 # References are plain numbers (R1, C6, U1: owner, 2026-09-27); each part's BOM
@@ -94,6 +95,9 @@ parts:
   R11: [89.73, 48.2, 180]    # R-KEY-PU on sheet FREE3
   # The reservoir on the chain's 3V3, beside J-CHAIN's 3V3 pin (C-BULK-CHAIN row)
   C7:  [67.5, 42.0, 90]      # C-BULK-CHAIN
+  # U1's second decoupler (the shared REG sheet, review #6-5), under the register's ground
+  # pin 8 as the right-hand board's C7 is: placed by hand on the source board, 2026-10-03
+  C8:  [85.0, 38.6, 0]       # C-DECOUPLE-165
 
 # The silkscreen title blocks (tools/pcb.py add_silk, add_top_silk): the parts side's
 # and the switch side's, in body coordinates.
@@ -101,8 +105,8 @@ silk:
   at: [44.0, 12.5]
   top_at: [44.0, 14.3]       # the switch side's copy, left edge of the text
   title: "WOODY key board LH"
-  rev: "A"
-  date: "2026-09-27"
+  rev: "B"
+  date: "2026-10-03"
 
 # Routing (tools/pcb_route.py): ground is routed as a net, so no ground pin
 # depends on a pour finding its way round the tracks, and then poured on both
@@ -126,3 +130,11 @@ connect_first:
   - {pads: [C6.2, U1.8], max_mm: 15, why: "the decoupling loop's ground half, in its own track"}
 ground_net: GND_CHAIN
 power_nets: [V3V3_CHAIN_LH]
+
+# How tall each underside part stands, for pcb.py check_key_faces (issue #19 F2): every
+# part under the board within the body CAD's smt_height_max (pcb-geometry.echo), J-CHAIN
+# in its own ribbon keep-out. The first key a footprint's name contains is its height.
+heights:
+  SOIC: 1.75                   # [from memory: JEDEC MS-012 max; the banked TI sheet's outline is not in its text layer]
+  C_0805: 1.45                 # [ds datasheets/discrete-and-power/SAMSUNG-CL21A106KAYNNNE-SPECSHEET.pdf: 1.25 +-0.20, the tallest 0805 here]
+  R_0805: 0.6                  # [from memory]

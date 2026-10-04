@@ -1,0 +1,4 @@
+Ref,Val,Package,PosX,PosY,Rot,Side
+"J1","2x12 1.27mm shrouded box header","IDC-Header_2x12_P1.27mm_XKB_X1270WR_Horizontal",329.255000,-138.615000,90.000000,bottom
+"J2","1x10 2.54mm pin header, SMD","PinHeader_1x10_P2.54mm_Vertical_SMD_Hanxia_PZ2.54-TP-YQ",332.970000,-132.930000,90.000000,top
+"J3","1x10 2.54mm pin header, SMD","PinHeader_1x10_P2.54mm_Vertical_SMD_Hanxia_PZ2.54-TP-YQ",332.970000,-110.070000,90.000000,top

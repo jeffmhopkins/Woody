@@ -2,7 +2,7 @@
 	(version 20241229)
 	(generator "woody")
 	(layer "F.Cu")
-	(descr "XKB Connection X1270WR-2x12A-9TV01: 2x12 1.27 mm shrouded box header, right-angle, through-hole, keyed. From the banked drawing rev A1 (datasheets/connectors/XKB-X1270WR-2x12A-9TV01.pdf): 0.70 holes on a 1.27 grid, body C 21.54 long and 5.40 deep, the far (odd, upper) tail row 2.60 behind the body's back, the near (even) row 1.27 in front of it; mouth at +x. Pads 1.50 x 1.07 with the hole 0.215 off centre, lengthened away from the other row, as the J-CHAIN header's")
+	(descr "XKB Connection X1270WR-2x12A-9TV01: 2x12 1.27 mm shrouded box header, right-angle, through-hole, keyed. From the banked drawing rev A1 (datasheets/connectors/XKB-X1270WR-2x12A-9TV01.pdf): 0.70 holes on a 1.27 grid, body C 21.54 long and 5.40 deep, the far (odd, upper) tail row 2.60 behind the body's back, the near (even) row 1.27 in front of it; mouth at +x. Pads 1.50 x 1.07 with the hole 0.215 off centre, lengthened away from the other row, as the J-CHAIN header's. Courtyard 0.25 round the insulator and, behind it, round the pad rows only, which are 15.04 long against its 21.54 (2026-10-03: J-MCU-KB stands with its pad rows beside the right-hand key board's tail column)")
 	(tags "IDC header 1.27mm shrouded right-angle XKB X1270WR 2x12")
 	(property "Reference" "REF**"
 		(at 4.5 -5.2 0)
@@ -93,9 +93,8 @@
 		(layer "F.SilkS")
 		(uuid "32bd80f0-c007-5c0e-8001-4abcb8b63b66")
 	)
-	(fp_rect
-		(start -1.215 -4.035)
-		(end 8.25 18.005)
+	(fp_poly
+		(pts (xy -1.215 -0.785) (xy 2.35 -0.785) (xy 2.35 -4.035) (xy 8.25 -4.035) (xy 8.25 18.005) (xy 2.35 18.005) (xy 2.35 14.755) (xy -1.215 14.755))
 		(stroke
 			(width 0.05)
 			(type solid)
