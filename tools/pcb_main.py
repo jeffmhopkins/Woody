@@ -434,6 +434,17 @@ def build(bdir, lay):
         for spec, p, moat in isl:
             if spec["layer"] == pl["layer"]:
                 region = region.difference(moat)
+        # a strip that loops round a standoff (the breath corridor's detours) cuts the
+        # plane off between the loop and the board's edge: a pocket no pin or via of the
+        # plane's net reaches, which KiCad reports as isolated copper. The plane keeps its
+        # main piece; the pockets carry no copper on that layer
+        if region.geom_type == "MultiPolygon" and any(s["layer"] == pl["layer"] and s.get("strip") for s, _, _ in isl):
+            main = max(region.geoms, key=lambda g: g.area)
+            for g in region.geoms:
+                if g is not main:
+                    print(f"pcb: {pl['net']} plane on {pl['layer']}: a {g.area:.0f} mm2 pocket cut off by a strip "
+                          f"at x {g.bounds[0]:.0f}-{g.bounds[2]:.0f} left unfilled")
+            region = main
         copper_zone(board, pl["net"], pl["layer"], region, 0, pl.get("name", pl["net"]))
     for spec, p, moat in isl:
         copper_zone(board, spec["net"], spec["layer"], p.intersection(outline), 1, spec["net"] + " island")
@@ -798,7 +809,9 @@ def check_planes(board, lay):
         moat = unary_union(moats[L])
         allowed = moat if t.GetNetname() in pair_nets else moat.intersection(unary_union(windows))
         on_moat = g.intersection(moat)
-        if g.within(solid[L].union(allowed).buffer(1e-3)) and (on_moat.is_empty or on_moat.within(allowed.buffer(1e-3))):
+        # a zero-area result is GEOS's overlay noise, not a crossing: a VS track 2 mm from
+        # the controller's moat came back as a 0.04 mm line on it (2026-10-04)
+        if g.within(solid[L].union(allowed).buffer(1e-3)) and (on_moat.area < 1e-4 or on_moat.within(allowed.buffer(1e-3))):
             continue
         c = g.centroid
         crossings.setdefault((t.GetNetname(), board.GetLayerName(t.GetLayer())), []).append(f"({c.x:.1f}, {c.y:.1f})")
