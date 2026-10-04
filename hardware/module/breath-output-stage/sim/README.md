@@ -15,11 +15,11 @@ OPA2197 model. `DAC_AVDD` is `dac-rail`, cited, varied over the C grade's
 
 | Sim | What | Result |
 |---|---|---|
-| `offset[p_off=…]` | breath at rest, `POT-OFFSET` at CCW, centre, the page's zero (p = 0.432) and CW | −4.89, +0.61, 0.00 and +5.06 V at the nominal — clockwise positive, as the panel's `+` says: **the page's table to 1 mV**, its wiper-impedance term included. The 1 % resistors and the rail's window move each point by up to ±0.8 V, which the knob absorbs |
+| `offset[p_off=…]` | breath at rest, `POT-OFFSET` at CCW, centre, the page's zero (p = 0.432) and CW | −4.88, +0.60, −0.01 and +5.03 V at the jack at the nominal — clockwise positive, as the panel's `+` says: **the page's derivation within 10 mV at every corner** (`page_err`; `dac-rail` at its nominal, the two `R-BREATH-OFFNEG` halves since #32), its wiper-impedance term included. The 1 % resistors and the rail's window move each point by up to ±0.8 V, which the knob absorbs |
 | `gain[p_gain=…]` | a 1 V breath step at the gain knob's ends and noon | 0.503×, 2.156× and 4.020× (`R-BREATH-FB`/`R-BREATH-IN` is 4.02, not 4) |
 | `clip` | offset +5 V, gain 4×, a hard blow | stops at **+11.89 V** on the deck's ideal +12.0 V rail: a hard wall, as the page says. Its "about ±11.5 V" is the same clip on the module's rails less their Schottky drops |
 | `step-mult`, `loop` | a hard-blow step and the summer's loop, into a module input and passive mults to the PITCH and a MOD jack | no overshoot (under 0.03 %) at any load; phase margin 95.4–95.6° (`C-OUT-BREATH` 10 nF since #32) |
-| `rail` | the −12 V rail's movement, through `R-BREATH-OFFNEG` | 0.418 V/V: **4.05 mV at the jack** for ADR 0027's 9.7 mV, the page's 4.1 mV |
+| `rail` | the −12 V rail's movement at 10 Hz, through `R-BREATH-OFFNEG`'s two halves and `C-BREATH-OFFNEG` (#32) | 0.233 V/V nominal (0.227–0.240 over the resistors' corners), within 5 % of `R-BREATH-FB / \|2R + jωR²C\|`: **2.26 mV at the jack** for ADR 0027's 9.7 mV, 2.32 mV worst, the page's 2.3 mV |
 | `chain-centre` | the response shaper and this stage together, `POT-RESP` at its click, GAIN at noon, OFFSET at its zero | a hard blow reaches **9.96 V**; `BREATH_OUT` clips from an in-amp output of −5.56 V, 1.20× a hard blow |
 | `chain[p_resp=…]`, `chain-trim` | the same with GAIN left at noon and the curve knob at CCW, ¼, centre, ¾ and CW; and at CW with `TRIM-RESP` at its ends | see below: `breath-chain-curve-clip` |
 | `noise[bw=…,p_resp=…,level=…]`, `noise-amps`, `noise-ref` | the whole breath chain's noise, sensor to jack and to the instrument's `ADC_IN`, per stage, at the curve knob's ends and click, at rest and at a hard blow; and the three TI models against their datasheets | see below: `breath-jack-noise` |

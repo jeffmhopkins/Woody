@@ -17,7 +17,10 @@ RIN bufo sum {{R-BREATH-IN}}
 ROCW 0 ow {{r_off_cw}}
 ROCCW ow avdd {{r_off_ccw}}
 ROFF ow sum {{R-BREATH-OFF}}
-ROFFN neg sum {{R-BREATH-OFFNEG}}
+* R-BREATH-OFFNEG as two halves with C-BREATH-OFFNEG at the split (#32): 6.7 Hz on the -12 V leg
+ROFFN1 neg offnm {{R-BREATH-OFFNEG}}
+COFFN offnm 0 {{C-BREATH-OFFNEG}}
+ROFFN2 offnm sum {{R-BREATH-OFFNEG}}
 RFB sum out {{R-BREATH-FB}}
 XB 0 inm pos neg out OPAx197
 LBRK sum inm {{l_brk}}
@@ -29,7 +32,10 @@ COUT jack 0 {{C-OUT-BREATH}}
 RLOAD jack 0 {{r_load}}
 CMULT jack 0 {{c_mult}}
 RMULT jack 0 {{r_mult}}
-.options method=gear rshunt=1e10
+* gminsteps=20 (spice3 gmin stepping): with R-BREATH-OFFNEG split around C-BREATH-OFFNEG (#32)
+* the default stepping found no operating point at R-BREATH-OFFNEG's low corner in rail mode
+* (ngspice fell back to a transient op, which tools/sim.py refuses); the same gains result, 2026-10-04
+.options method=gear rshunt=1e10 gminsteps=20
 .control
 ac dec 100 1 100meg
 let t = -v(sum)/v(inm)

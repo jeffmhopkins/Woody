@@ -20,7 +20,10 @@ ROCCW ow avdd {{r_off_ccw}}
 * -- copy A, with the LED driver
 RINA bufo suma {{R-BREATH-IN}}
 ROFFA ow suma {{R-BREATH-OFF}}
-ROFFNA neg suma {{R-BREATH-OFFNEG}}
+* R-BREATH-OFFNEG as two halves with C-BREATH-OFFNEG at the split (#32): 6.7 Hz on the -12 V leg
+ROFFNA1 neg offnma {{R-BREATH-OFFNEG}}
+COFFNA offnma 0 {{C-BREATH-OFFNEG}}
+ROFFNA2 offnma suma {{R-BREATH-OFFNEG}}
 RFBA suma outa {{R-BREATH-FB}}
 XBA 0 suma pos neg outa OPAx197
 ROUTA outa jacka {{R-OUT-PROT}}
@@ -29,7 +32,10 @@ RLOADA jacka 0 {{r_load}}
 * -- copy B, the same stage with nothing on BREATH_OUT
 RINB bufo sumb {{R-BREATH-IN}}
 ROFFB ow sumb {{R-BREATH-OFF}}
-ROFFNB neg sumb {{R-BREATH-OFFNEG}}
+* R-BREATH-OFFNEG as two halves with C-BREATH-OFFNEG at the split (#32): 6.7 Hz on the -12 V leg
+ROFFNB1 neg offnmb {{R-BREATH-OFFNEG}}
+COFFNB offnmb 0 {{C-BREATH-OFFNEG}}
+ROFFNB2 offnmb sumb {{R-BREATH-OFFNEG}}
 RFBB sumb outb {{R-BREATH-FB}}
 XBB 0 sumb pos neg outb OPAx197
 ROUTB outb jackb {{R-OUT-PROT}}

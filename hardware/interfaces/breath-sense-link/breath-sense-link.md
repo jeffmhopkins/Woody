@@ -531,10 +531,11 @@ matched pair, each within 0.5 % of the pair's mean (*And `C_cm` needs a
 tolerance*, below), and the worst corner then held 58.5 dB across the whole
 of that band. **Since #32 the pair is 68 pF** and the requirement is held per
 mode (`module/breath-receive-stage/sim`, `cmrr-500`, `cmrr-1k5`, `cmrr-wide`;
-`breath-link-cmrr`): **it holds to 500 Hz and to 1.5 kHz with margin, and
-WIDE fails it above about 7.4 kHz** at the worst corner, by up to 2.5 dB at
-10 kHz — the options are the sim README's, for the owner. No band was moved to
-make a mode pass. Both parts are inside a
+`breath-link-cmrr`): **it holds to 500 Hz and to 1.5 kHz with margin.** In
+WIDE the worst corner first falls through 58.5 dB at about 7.4 kHz and is about
+56 dB at 10 kHz, and **the owner set WIDE's band at DC to 7 kHz** (2026-10-04,
+*"Keep 10 kHz, accept"*; ADR 0003 and ADR 0004 amendments) — a requirement the
+owner changed, not a bar moved to pass: above 7 kHz the figure is recorded. Both parts are inside a
 body that is expensive to reopen (ADR 0009).
 
 > One correction to the receive page's own case for `R1b`: it claims the

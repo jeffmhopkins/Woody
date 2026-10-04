@@ -140,7 +140,7 @@ REF_VIN──┬─┤VIN VOUT├─┬── 5.000 V ─┤+IN                 
                      │
                      ├──[½ OPA2197 buffer]──┬──[R-SER-BREATH-INST 1k]── J-UMB pin 1
                      │   (V+ = +12V)        │        R1                  BREATH
-                     │                      │        [D-TVS-BREATH 12 V standoff]
+                     │                      │        [D-TVS-BREATH PESD12VL1BA]
                      │                      │
                      │                      └──[R-ADCDIV-U 10k]──┬──[R-ADCDIV-L 15k]──┐
                      │                                           │                    │
@@ -496,7 +496,7 @@ page and have no BOM entry yet.
 | `U-BUF` | OPA2197IDR | ½ reference buffer, ½ breath buffer, both on +12 V | `[repo]` |
 | `U-BREATH` | MPXV4006DP, case 1351-01, surface mount, soldered down | P1 to the tube, P2 open to the cavity | `[ds]` pp.1, 6, 7 |
 | `R-SER-BREATH-INST` | 1 kΩ | Output protection. **No series cap here** | `[repo]` |
-| `D-TVS-BREATH` ×2 | 12 V standoff, SOD-323 | `BREATH` and `AGND` legs | `[repo]` |
+| `D-TVS-BREATH` ×2 | PESD12VL1BA: 12 V standoff, 19 pF, bidirectional, SOD-323 (#32) | `BREATH` and `AGND` legs | `[repo]` |
 | `R-SPI-SER` ×3 | `spi-series-r` | Series at the driving end on `SCLK`, `MOSI`, `CS`, between the pads and `J-UMB` — see §4 and `interfaces/spi-link` | `[repo] bom.csv` |
 | `U-TVS-SPI` | SP0504BAHT, **SOT-23-5** | `IO35`, `IO36`, `IO34` + spare, to `PWR_GND`: on the **pad side** of `R-SPI-SER` (owner, 2026-09-30; `cs-fall-reentry`) | `[repo]` |
 | **`J-CHAIN`** ×2 here | **2×6 1.27 mm shrouded IDC header, right-angle, through-hole** | **One per key-board ribbon (`CBL-CHAIN`), in the far band beside the LED row, under its key board's; the mates are on the key boards (`chain-connectors` in all). 4 signals, 5 alternating grounds, 3V3, 2 spare. Part open until M4. `key-chain-loom.md`** | ribbon decided (ADR 0017), part open |

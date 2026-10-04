@@ -168,8 +168,8 @@ sims:
       out: "at(w['out'], p['t_end'])"
       jack: "at(w['jack'], p['t_end'])"
       # the page's arithmetic at this corner, wiper source impedance R p (1 - p) included:
-      # -R-BREATH-FB x (V_wiper/(R-BREATH-OFF + R p (1-p)) - 12/R-BREATH-OFFNEG)
-      page_err: "at(w['out'], p['t_end']) + p['R-BREATH-FB'] * (p['v_avdd'] * (1 - p['p_off']) / (p['R-BREATH-OFF'] + p['POT-OFFSET'] * p['p_off'] * (1 - p['p_off'])) + p['v_neg'] / p['R-BREATH-OFFNEG'])"
+      # -R-BREATH-FB x (V_wiper/(R-BREATH-OFF + R p (1-p)) - 12/(2 R-BREATH-OFFNEG)), two halves since #32
+      page_err: "at(w['out'], p['t_end']) + p['R-BREATH-FB'] * (p['v_avdd'] * (1 - p['p_off']) / (p['R-BREATH-OFF'] + p['POT-OFFSET'] * p['p_off'] * (1 - p['p_off'])) + p['v_neg'] / (2 * p['R-BREATH-OFFNEG']))"
     asserts:
       - expr: "max['page_err'] < 0.01 and min['page_err'] > -0.01"
         why: "the op-amp output agrees with the page's offset table and its derivation (-4.89 V CCW, +0.61 V at centre, 0 at p = 0.432, +5.06 V CW) within 10 mV at every corner - the wiper's own source impedance is the whole of the centre's offset"
@@ -243,8 +243,8 @@ sims:
       rail_gain: "at(w['railg'], 10.0)"
       jack_mv: "at(w['railg'], 10.0) * p['rail_mv'] * 1e3"
     asserts:
-      - expr: "max['jack_mv'] < 4.5 and min['jack_mv'] > 3.7"
-        why: "the page's 4.1 mV at the jack for 9.7 mV on the rail: R-BREATH-FB/R-BREATH-OFFNEG, less the 1 % R-OUT-PROT drop into the load"
+      - expr: "abs(nom['rail_gain'] / (0.99 * p['R-BREATH-FB'] / math.hypot(2 * p['R-BREATH-OFFNEG'], 2 * math.pi * 10.0 * p['R-BREATH-OFFNEG'] ** 2 * p['C-BREATH-OFFNEG'])) - 1) < 0.05 and max['jack_mv'] < 2.6"
+        why: "since #32 the -12 V leg is two halves with C-BREATH-OFFNEG at the split (owner, 2026-10-04: 'Add RC filter (Recommended)'): at 10 Hz the rail reaches the jack by R-BREATH-FB / |2R + j w R^2 C| [calc: 0.236 V/V, 2.3 mV for ADR 0027's 9.7 mV], less the 1 % R-OUT-PROT drop, within 5 %. It was 0.42 V/V and 4.1 mV with the one 95.3k"
   - name: chain-centre
     # the shaper and this stage one after the other, POT-RESP at its centre click, GAIN at
     # noon and OFFSET at its zero: the commissioned setting (breath-output-stage.md,
@@ -391,7 +391,7 @@ sims:
     post:
       out: "at(w['out'], p['t_end'])"
       jack: "at(w['jack'], p['t_end'])"
-      page_err: "at(w['out'], p['t_end']) + p['R-BREATH-FB'] * (p['v_avdd'] * (1 - p['p_off']) / (p['R-BREATH-OFF'] + p['POT-OFFSET'] * p['p_off'] * (1 - p['p_off'])) + p['v_neg'] / p['R-BREATH-OFFNEG'])"
+      page_err: "at(w['out'], p['t_end']) + p['R-BREATH-FB'] * (p['v_avdd'] * (1 - p['p_off']) / (p['R-BREATH-OFF'] + p['POT-OFFSET'] * p['p_off'] * (1 - p['p_off'])) + p['v_neg'] / (2 * p['R-BREATH-OFFNEG']))"
     asserts:
       - expr: "max['page_err'] < 0.01 and min['page_err'] > -0.01"
         why: "the page's offset arithmetic, -12 V's term included, holds within 10 mV at every rail corner: the rest level moves by exactly R-BREATH-FB/R-BREATH-OFFNEG times the -12 V rail's error, and nothing else"

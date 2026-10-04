@@ -4,27 +4,27 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/breath-output-stage/sim/sims.yaml: ffc08e4a4dd73b63
-  hardware/module/breath-output-stage/netlist.yaml: 8a1302cb7f7bd392
-  hardware/module/breath-response-shaper/netlist.yaml: 3f6549b620f9e912
+  hardware/module/breath-output-stage/sim/sims.yaml: e5483d8285264109
+  hardware/module/breath-output-stage/netlist.yaml: e28cccf37c29f7b1
+  hardware/module/breath-response-shaper/netlist.yaml: 86e851a6e5280c53
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/mod-channels/netlist.yaml: 00739b63d111a848
   hardware/module/breath-receive-stage/netlist.yaml: dab496982d183718
-  hardware/interfaces/breath-sense-link/netlist.yaml: 430f1e37ec9c97fa
+  hardware/interfaces/breath-sense-link/netlist.yaml: 3174b77569cdaf62
   hardware/carrier/breath-excitation-reference/netlist.yaml: 2d5ee10b223dc95d
   hardware/carrier/breath-adc/netlist.yaml: 60647f404552f147
   hardware/module/power-entry/netlist.yaml: 14fd898035959809
-  hardware/module/breath-output-stage/sim/bos.cir: e1b8c860686a0315
-  hardware/module/breath-output-stage/sim/bos-ac.cir: fbdf6f423bb51ac3
-  hardware/module/breath-output-stage/sim/chain.cir: 4d0415708dd3e5f3
-  hardware/module/breath-output-stage/sim/led.cir: d13049cac60c243a
-  hardware/module/breath-output-stage/sim/noise.cir: 8fe51d174a42a405
+  hardware/module/breath-output-stage/sim/bos.cir: e297daeb2283a454
+  hardware/module/breath-output-stage/sim/bos-ac.cir: 7b123bcb1e263136
+  hardware/module/breath-output-stage/sim/chain.cir: 0a71af2eaad355dd
+  hardware/module/breath-output-stage/sim/led.cir: 28843f7bfad9d678
+  hardware/module/breath-output-stage/sim/noise.cir: dd0e11e8c04f946d
   hardware/module/breath-output-stage/sim/noise-amps.cir: 21a815982953fb56
   hardware/module/breath-output-stage/sim/noise-ref.cir: d0abe4b8978e5e03
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
   datasheets/analog/INA828-ti-pspice-sbomag5c.lib: 6ae6e0285c98dc1e
   datasheets/analog/REF5050-ti-pspice-slim175a.lib: ed2d2602cfee90ae
-  hardware/module/breath-response-shaper/sim/sims.yaml: befba7f85cb5cd25
+  hardware/module/breath-response-shaper/sim/sims.yaml: cc575034f8557f82
   figure:inamp-full-scale: -9.94 V
   figure:dac-rail: 5.23 V
 ngspice: '42'
@@ -33,22 +33,22 @@ sims:
     corners: 17
     measures:
       out:
-        nominal: -4.94972
-        min: -5.74122
+        nominal: -4.93375
+        min: -5.72525
         min_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
-        max: -4.37404
+        max: -4.35807
         max_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
       jack:
-        nominal: -4.90071
-        min: -5.68438
+        nominal: -4.8849
+        min: -5.66856
         min_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
-        max: -4.33073
+        max: -4.31492
         max_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
       page_err:
-        nominal: 8.26171e-05
-        min: 7.96885e-05
+        nominal: 7.05689e-05
+        min: 6.77545e-05
         min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
-        max: 9.15581e-05
+        max: 7.9391e-05
         max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
     asserts:
     - expr: max['page_err'] < 0.01 and min['page_err'] > -0.01
@@ -60,22 +60,22 @@ sims:
     corners: 17
     measures:
       out:
-        nominal: 0.588661
-        min: 0.235438
+        nominal: 0.604634
+        min: 0.251094
         min_at: R-BREATH-FB- R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
-        max: 0.858434
+        max: 0.87473
         max_at: R-BREATH-FB+ R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
       jack:
-        nominal: 0.582833
-        min: 0.233107
+        nominal: 0.598648
+        min: 0.248608
         min_at: R-BREATH-FB- R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
-        max: 0.849935
+        max: 0.866069
         max_at: R-BREATH-FB+ R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
       page_err:
-        nominal: 7.07953e-05
-        min: 6.91502e-05
+        nominal: 5.87441e-05
+        min: 5.72302e-05
         min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
-        max: 7.51208e-05
+        max: 6.29497e-05
         max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
     asserts:
     - expr: max['page_err'] < 0.01 and min['page_err'] > -0.01
@@ -87,22 +87,22 @@ sims:
     corners: 17
     measures:
       out:
-        nominal: -0.0297278
-        min: -0.426465
+        nominal: -0.0137549
+        min: -0.410493
         min_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
-        max: 0.263287
+        max: 0.279583
         max_at: R-BREATH-FB+ R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
       jack:
-        nominal: -0.0294335
-        min: -0.422243
+        nominal: -0.0136187
+        min: -0.406428
         min_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
-        max: 0.260681
+        max: 0.276815
         max_at: R-BREATH-FB+ R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
       page_err:
-        nominal: 7.17194e-05
-        min: 6.99559e-05
+        nominal: 5.96803e-05
+        min: 5.8038e-05
         min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
-        max: 7.65438e-05
+        max: 6.43838e-05
         max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
     asserts:
     - expr: max['page_err'] < 0.01 and min['page_err'] > -0.01
@@ -114,22 +114,22 @@ sims:
     corners: 17
     measures:
       out:
-        nominal: 5.06198
-        min: 4.96174
+        nominal: 5.07795
+        min: 4.9774
         min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
-        max: 5.16424
+        max: 5.18053
         max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
       jack:
-        nominal: 5.01186
-        min: 4.91261
+        nominal: 5.02767
+        min: 4.92812
         min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
-        max: 5.11311
+        max: 5.12924
         max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
       page_err:
-        nominal: 6.78113e-05
-        min: 6.69281e-05
+        nominal: 5.57632e-05
+        min: 5.50042e-05
         min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
-        max: 6.86981e-05
+        max: 5.65211e-05
         max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
     asserts:
     - expr: max['page_err'] < 0.01 and min['page_err'] > -0.01
@@ -172,7 +172,7 @@ sims:
         nominal: 4.01999
         min: 3.94039
         min_at: R-BREATH-FB- R-BREATH-IN+
-        max: 4.1012
+        max: 4.10121
         max_at: R-BREATH-FB+ R-BREATH-IN-
     asserts:
     - expr: min['gain'] > 0.49 and max['gain'] < 4.11
@@ -183,16 +183,16 @@ sims:
     corners: 1
     measures:
       out_max:
-        nominal: 11.9701
-        min: 11.9701
+        nominal: 11.9702
+        min: 11.9702
         min_at: nominal
-        max: 11.9701
+        max: 11.9702
         max_at: nominal
       out_min_neg:
-        nominal: 5.06198
-        min: 5.06198
+        nominal: 5.07795
+        min: 5.07795
         min_at: nominal
-        max: 5.06198
+        max: 5.07795
         max_at: nominal
     asserts:
     - expr: nom['out_max'] > 11.3 and nom['out_max'] < 12.0
@@ -202,26 +202,26 @@ sims:
     corners: 1
     measures:
       out:
-        nominal: -4.94972
-        min: -4.94972
+        nominal: -4.93375
+        min: -4.93375
         min_at: nominal
-        max: -4.94972
+        max: -4.93375
         max_at: nominal
     asserts: []
   step-mult[mult=0]:
     corners: 1
     measures:
       overshoot_pct:
-        nominal: 2.15219e-13
-        min: 2.15219e-13
+        nominal: 1.695e-06
+        min: 1.695e-06
         min_at: nominal
-        max: 2.15219e-13
+        max: 1.695e-06
         max_at: nominal
       t_settle:
-        nominal: 6.79792e-05
-        min: 6.79792e-05
+        nominal: 6.8115e-05
+        min: 6.8115e-05
         min_at: nominal
-        max: 6.79792e-05
+        max: 6.8115e-05
         max_at: nominal
     asserts:
     - expr: max['overshoot_pct'] < 1
@@ -231,16 +231,16 @@ sims:
     corners: 1
     measures:
       overshoot_pct:
-        nominal: 2.15219e-13
-        min: 2.15219e-13
+        nominal: 1.56461e-06
+        min: 1.56461e-06
         min_at: nominal
-        max: 2.15219e-13
+        max: 1.56461e-06
         max_at: nominal
       t_settle:
-        nominal: 0.000136227
-        min: 0.000136227
+        nominal: 0.000136135
+        min: 0.000136135
         min_at: nominal
-        max: 0.000136227
+        max: 0.000136135
         max_at: nominal
     asserts:
     - expr: max['overshoot_pct'] < 1
@@ -250,16 +250,16 @@ sims:
     corners: 1
     measures:
       overshoot_pct:
-        nominal: 0.0
-        min: 0.0
+        nominal: 4.43307e-07
+        min: 4.43307e-07
         min_at: nominal
-        max: 0.0
+        max: 4.43307e-07
         max_at: nominal
       t_settle:
-        nominal: 0.000628301
-        min: 0.000628301
+        nominal: 0.000628625
+        min: 0.000628625
         min_at: nominal
-        max: 0.000628301
+        max: 0.000628625
         max_at: nominal
     asserts:
     - expr: max['overshoot_pct'] < 1
@@ -269,16 +269,16 @@ sims:
     corners: 1
     measures:
       pm:
-        nominal: 95.4107
-        min: 95.4107
+        nominal: 95.3547
+        min: 95.3547
         min_at: nominal
-        max: 95.4107
+        max: 95.3547
         max_at: nominal
       fc:
-        nominal: 1169400.0
-        min: 1169400.0
+        nominal: 1093900.0
+        min: 1093900.0
         min_at: nominal
-        max: 1169400.0
+        max: 1093900.0
         max_at: nominal
     asserts:
     - expr: min['pm'] - 10 > 45
@@ -288,16 +288,16 @@ sims:
     corners: 1
     measures:
       pm:
-        nominal: 95.4895
-        min: 95.4895
+        nominal: 95.442
+        min: 95.442
         min_at: nominal
-        max: 95.4895
+        max: 95.442
         max_at: nominal
       fc:
-        nominal: 1170400.0
-        min: 1170400.0
+        nominal: 1094850.0
+        min: 1094850.0
         min_at: nominal
-        max: 1170400.0
+        max: 1094850.0
         max_at: nominal
     asserts:
     - expr: min['pm'] - 10 > 45
@@ -307,16 +307,16 @@ sims:
     corners: 1
     measures:
       pm:
-        nominal: 95.5508
-        min: 95.5508
+        nominal: 95.5099
+        min: 95.5099
         min_at: nominal
-        max: 95.5508
+        max: 95.5099
         max_at: nominal
       fc:
-        nominal: 1171200.0
-        min: 1171200.0
+        nominal: 1095620.0
+        min: 1095620.0
         min_at: nominal
-        max: 1171200.0
+        max: 1095620.0
         max_at: nominal
     asserts:
     - expr: min['pm'] - 10 > 45
@@ -326,36 +326,38 @@ sims:
     corners: 5
     measures:
       rail_gain:
-        nominal: 0.41765
-        min: 0.40938
+        nominal: 0.233233
+        min: 0.227045
         min_at: R-BREATH-FB- R-BREATH-OFFNEG+
-        max: 0.426087
+        max: 0.239596
         max_at: R-BREATH-FB+ R-BREATH-OFFNEG-
       jack_mv:
-        nominal: 4.0512
-        min: 3.97098
+        nominal: 2.26236
+        min: 2.20234
         min_at: R-BREATH-FB- R-BREATH-OFFNEG+
-        max: 4.13305
+        max: 2.32408
         max_at: R-BREATH-FB+ R-BREATH-OFFNEG-
     asserts:
-    - expr: max['jack_mv'] < 4.5 and min['jack_mv'] > 3.7
-      why: 'the page''s 4.1 mV at the jack for 9.7 mV on the rail: R-BREATH-FB/R-BREATH-OFFNEG, less the 1 % R-OUT-PROT drop
-        into the load'
+    - expr: abs(nom['rail_gain'] / (0.99 * p['R-BREATH-FB'] / math.hypot(2 * p['R-BREATH-OFFNEG'], 2 * math.pi * 10.0 * p['R-BREATH-OFFNEG']
+        ** 2 * p['C-BREATH-OFFNEG'])) - 1) < 0.05 and max['jack_mv'] < 2.6
+      why: 'since #32 the -12 V leg is two halves with C-BREATH-OFFNEG at the split (owner, 2026-10-04: ''Add RC filter (Recommended)''):
+        at 10 Hz the rail reaches the jack by R-BREATH-FB / |2R + j w R^2 C| [calc: 0.236 V/V, 2.3 mV for ADR 0027''s 9.7
+        mV], less the 1 % R-OUT-PROT drop, within 5 %. It was 0.42 V/V and 4.1 mV with the one 95.3k'
       pass: true
   chain-centre:
     corners: 1
     measures:
       out_hard:
-        nominal: 9.95817
-        min: 9.95817
+        nominal: 9.97413
+        min: 9.97413
         min_at: nominal
-        max: 9.95817
+        max: 9.97413
         max_at: nominal
       clip_in:
-        nominal: -5.55722
-        min: -5.55722
+        nominal: -5.54975
+        min: -5.54975
         min_at: nominal
-        max: -5.55722
+        max: -5.54975
         max_at: nominal
     asserts:
     - expr: nom['out_hard'] > 9.8 and nom['out_hard'] < 10.2
@@ -366,10 +368,10 @@ sims:
     corners: 1
     measures:
       out_hard:
-        nominal: 4.87073
-        min: 4.87073
+        nominal: 4.8867
+        min: 4.8867
         min_at: nominal
-        max: 4.87073
+        max: 4.8867
         max_at: nominal
       ratio_hard:
         nominal: 0.48989
@@ -388,10 +390,10 @@ sims:
     corners: 1
     measures:
       out_hard:
-        nominal: 8.3981
-        min: 8.3981
+        nominal: 8.41406
+        min: 8.41406
         min_at: nominal
-        max: 8.3981
+        max: 8.41406
         max_at: nominal
       ratio_hard:
         nominal: 0.842522
@@ -400,20 +402,20 @@ sims:
         max: 0.842522
         max_at: nominal
       clip_in:
-        nominal: -6.75726
-        min: -6.75726
+        nominal: -6.74764
+        min: -6.74764
         min_at: nominal
-        max: -6.75726
+        max: -6.74764
         max_at: nominal
     asserts: []
   chain[p_resp=0.5]:
     corners: 1
     measures:
       out_hard:
-        nominal: 9.95817
-        min: 9.95817
+        nominal: 9.97413
+        min: 9.97413
         min_at: nominal
-        max: 9.95817
+        max: 9.97413
         max_at: nominal
       ratio_hard:
         nominal: 0.998485
@@ -422,20 +424,20 @@ sims:
         max: 0.998485
         max_at: nominal
       clip_in:
-        nominal: -5.55722
-        min: -5.55722
+        nominal: -5.54975
+        min: -5.54975
         min_at: nominal
-        max: -5.55722
+        max: -5.54975
         max_at: nominal
     asserts: []
   chain[p_resp=0.75]:
     corners: 1
     measures:
       out_hard:
-        nominal: 10.894
-        min: 10.894
+        nominal: 10.91
+        min: 10.91
         min_at: nominal
-        max: 10.894
+        max: 10.91
         max_at: nominal
       ratio_hard:
         nominal: 1.09205
@@ -444,10 +446,10 @@ sims:
         max: 1.09205
         max_at: nominal
       clip_in:
-        nominal: -5.05063
-        min: -5.05063
+        nominal: -5.04426
+        min: -5.04426
         min_at: nominal
-        max: -5.05063
+        max: -5.04426
         max_at: nominal
     asserts: []
   chain[p_resp=1.0]:
@@ -466,10 +468,10 @@ sims:
         max: 1.55422
         max_at: nominal
       clip_in:
-        nominal: -3.66949
-        min: -3.66949
+        nominal: -3.66517
+        min: -3.66517
         min_at: nominal
-        max: -3.66949
+        max: -3.66517
         max_at: nominal
     asserts: []
   chain-trim[p_trim=0.0]:
@@ -488,10 +490,10 @@ sims:
         max: 1.33965
         max_at: nominal
       clip_in:
-        nominal: -4.16828
-        min: -4.16828
+        nominal: -4.16312
+        min: -4.16312
         min_at: nominal
-        max: -4.16828
+        max: -4.16312
         max_at: nominal
     asserts: []
   chain-trim[p_trim=1.0]:
@@ -510,33 +512,33 @@ sims:
         max: 1.72756
         max_at: nominal
       clip_in:
-        nominal: -3.36989
-        min: -3.36989
+        nominal: -3.36608
+        min: -3.36608
         min_at: nominal
-        max: -3.36989
+        max: -3.36608
         max_at: nominal
     asserts: []
   led[led_is=7e-28]:
     corners: 5
     measures:
       dj_max:
-        nominal: 8.14806e-08
-        min: 7.86102e-08
+        nominal: 8.36837e-08
+        min: 8.07528e-08
         min_at: R-BREATH-FB- R-BREATH-IN+
-        max: 8.44573e-08
+        max: 8.39521e-08
         max_at: R-BREATH-FB+ R-BREATH-IN-
       dj_min:
-        nominal: -7.85637e-07
-        min: -8.03571e-07
+        nominal: -8.17322e-07
+        min: -8.36135e-07
         min_at: R-BREATH-FB+ R-BREATH-IN-
-        max: -7.68147e-07
+        max: -7.99101e-07
         max_at: R-BREATH-FB- R-BREATH-IN+
       i_off:
-        nominal: 4.39192e-09
+        nominal: 4.43266e-09
         min: 4.39192e-09
-        min_at: R-BREATH-FB+ R-BREATH-IN+
-        max: 4.43268e-09
-        max_at: R-BREATH-FB- R-BREATH-IN-
+        min_at: R-BREATH-FB+ R-BREATH-IN-
+        max: 4.43327e-09
+        max_at: R-BREATH-FB- R-BREATH-IN+
       i_5:
         nominal: 0.00250201
         min: 0.00250201
@@ -550,16 +552,16 @@ sims:
         max: 0.00500209
         max_at: R-BREATH-FB- R-BREATH-IN+
       i_max:
-        nominal: 0.0059852
-        min: 0.00598504
+        nominal: 0.00598517
+        min: 0.00598501
         min_at: R-BREATH-FB- R-BREATH-IN+
-        max: 0.00598535
+        max: 0.00598532
         max_at: R-BREATH-FB+ R-BREATH-IN-
       i_ovs_pct:
-        nominal: 2.53183
-        min: 2.45382
+        nominal: 2.51477
+        min: 2.4266
         min_at: R-BREATH-FB+ R-BREATH-IN-
-        max: 2.59838
+        max: 2.6038
         max_at: R-BREATH-FB- R-BREATH-IN+
     asserts:
     - expr: abs(max['dj_max']) < 153e-6 and abs(min['dj_min']) < 153e-6
@@ -586,23 +588,23 @@ sims:
     corners: 5
     measures:
       dj_max:
-        nominal: 8.14806e-08
-        min: 7.86102e-08
+        nominal: 8.36837e-08
+        min: 8.07528e-08
         min_at: R-BREATH-FB- R-BREATH-IN+
-        max: 8.44573e-08
+        max: 8.39521e-08
         max_at: R-BREATH-FB+ R-BREATH-IN-
       dj_min:
-        nominal: -7.85643e-07
-        min: -8.03579e-07
+        nominal: -8.17334e-07
+        min: -8.36082e-07
         min_at: R-BREATH-FB+ R-BREATH-IN-
-        max: -7.68164e-07
+        max: -7.9912e-07
         max_at: R-BREATH-FB- R-BREATH-IN+
       i_off:
-        nominal: 4.58345e-09
+        nominal: 4.62609e-09
         min: 4.58345e-09
-        min_at: R-BREATH-FB- R-BREATH-IN+
-        max: 4.62611e-09
-        max_at: R-BREATH-FB- R-BREATH-IN-
+        min_at: R-BREATH-FB+ R-BREATH-IN-
+        max: 4.6267e-09
+        max_at: R-BREATH-FB- R-BREATH-IN+
       i_5:
         nominal: 0.00250229
         min: 0.00250229
@@ -616,16 +618,16 @@ sims:
         max: 0.00500269
         max_at: R-BREATH-FB- R-BREATH-IN+
       i_max:
-        nominal: 0.00598593
-        min: 0.00598577
+        nominal: 0.0059859
+        min: 0.00598574
         min_at: R-BREATH-FB- R-BREATH-IN+
-        max: 0.00598608
+        max: 0.00598605
         max_at: R-BREATH-FB+ R-BREATH-IN-
       i_ovs_pct:
-        nominal: 2.52926
-        min: 2.45525
+        nominal: 2.50772
+        min: 2.42786
         min_at: R-BREATH-FB+ R-BREATH-IN-
-        max: 2.60918
+        max: 2.60389
         max_at: R-BREATH-FB- R-BREATH-IN+
     asserts:
     - expr: abs(max['dj_max']) < 153e-6 and abs(min['dj_min']) < 153e-6
@@ -658,10 +660,10 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.14335
-        min: -2.14335
+        nominal: -2.14321
+        min: -2.14321
         min_at: nominal
-        max: -2.14335
+        max: -2.14321
         max_at: nominal
       g_inc_hard:
         nominal: -0.79989
@@ -682,58 +684,58 @@ sims:
         max: 8.011e-05
         max_at: nominal
       jack_op:
-        nominal: -0.0294336
-        min: -0.0294336
+        nominal: -0.0136189
+        min: -0.0136189
         min_at: nominal
-        max: -0.0294336
+        max: -0.0136189
         max_at: nominal
       n_au_total:
-        nominal: 0.000464631
-        min: 0.000464631
+        nominal: 0.00046464
+        min: 0.00046464
         min_at: nominal
-        max: 0.000464631
+        max: 0.00046464
         max_at: nominal
       n_au_sensor:
-        nominal: 0.000463849
-        min: 0.000463849
+        nominal: 0.000463851
+        min: 0.000463851
         min_at: nominal
-        max: 0.000463849
+        max: 0.000463851
         max_at: nominal
       n_au_elec:
-        nominal: 2.69392e-05
-        min: 2.69392e-05
+        nominal: 2.70683e-05
+        min: 2.70683e-05
         min_at: nominal
-        max: 2.69392e-05
+        max: 2.70683e-05
         max_at: nominal
       n_au_ref:
-        nominal: 9.50262e-07
-        min: 9.50262e-07
+        nominal: 9.50265e-07
+        min: 9.50265e-07
         min_at: nominal
-        max: 9.50262e-07
+        max: 9.50265e-07
         max_at: nominal
       n_au_sbuf:
-        nominal: 9.97524e-07
-        min: 9.97524e-07
+        nominal: 9.97526e-07
+        min: 9.97526e-07
         min_at: nominal
-        max: 9.97524e-07
+        max: 9.97526e-07
         max_at: nominal
       n_au_link:
-        nominal: 7.21802e-07
-        min: 7.21802e-07
+        nominal: 7.21804e-07
+        min: 7.21804e-07
         min_at: nominal
-        max: 7.21802e-07
+        max: 7.21804e-07
         max_at: nominal
       n_au_recv:
-        nominal: 1.87476e-05
-        min: 1.87476e-05
+        nominal: 1.87485e-05
+        min: 1.87485e-05
         min_at: nominal
-        max: 1.87476e-05
+        max: 1.87485e-05
         max_at: nominal
       n_au_zero:
-        nominal: 2.76832e-06
-        min: 2.76832e-06
+        nominal: 2.76845e-06
+        min: 2.76845e-06
         min_at: nominal
-        max: 2.76832e-06
+        max: 2.76845e-06
         max_at: nominal
       n_au_dac:
         nominal: 6.52237e-06
@@ -742,40 +744,40 @@ sims:
         max: 6.52237e-06
         max_at: nominal
       n_au_shaper:
-        nominal: 1.30023e-05
-        min: 1.30023e-05
+        nominal: 1.3003e-05
+        min: 1.3003e-05
         min_at: nominal
-        max: 1.30023e-05
+        max: 1.3003e-05
         max_at: nominal
       n_au_out:
-        nominal: 1.23516e-05
-        min: 1.23516e-05
+        nominal: 1.26286e-05
+        min: 1.26286e-05
         min_at: nominal
-        max: 1.23516e-05
+        max: 1.26286e-05
         max_at: nominal
       n_au_rest:
-        nominal: 4.27177e-10
-        min: 4.27177e-10
+        nominal: 4.27207e-10
+        min: 4.27207e-10
         min_at: nominal
-        max: 4.27177e-10
+        max: 4.27207e-10
         max_at: nominal
       db_au:
-        nominal: -86.6578
-        min: -86.6578
+        nominal: -86.6577
+        min: -86.6577
         min_at: nominal
-        max: -86.6578
+        max: -86.6577
         max_at: nominal
       ppm_au:
-        nominal: 46.4631
-        min: 46.4631
+        nominal: 46.464
+        min: 46.464
         min_at: nominal
-        max: 46.4631
+        max: 46.464
         max_at: nominal
       n_cb_total:
-        nominal: 0.00032486
-        min: 0.00032486
+        nominal: 0.000324861
+        min: 0.000324861
         min_at: nominal
-        max: 0.00032486
+        max: 0.000324861
         max_at: nominal
       n_cb_sensor:
         nominal: 0.0003247
@@ -784,10 +786,10 @@ sims:
         max: 0.0003247
         max_at: nominal
       n_cb_elec:
-        nominal: 1.01807e-05
-        min: 1.01807e-05
+        nominal: 1.02003e-05
+        min: 1.02003e-05
         min_at: nominal
-        max: 1.01807e-05
+        max: 1.02003e-05
         max_at: nominal
       n_cb_ref:
         nominal: 6.65195e-07
@@ -826,22 +828,22 @@ sims:
         max: 7.95698e-06
         max_at: nominal
       n_cb_shaper:
-        nominal: 2.99822e-06
-        min: 2.99822e-06
+        nominal: 2.99823e-06
+        min: 2.99823e-06
         min_at: nominal
-        max: 2.99822e-06
+        max: 2.99823e-06
         max_at: nominal
       n_cb_out:
-        nominal: 2.78385e-06
-        min: 2.78385e-06
+        nominal: 2.85471e-06
+        min: 2.85471e-06
         min_at: nominal
-        max: 2.78385e-06
+        max: 2.85471e-06
         max_at: nominal
       n_cb_rest:
-        nominal: 8.80274e-13
-        min: 8.80274e-13
+        nominal: 2.10208e-12
+        min: 2.10208e-12
         min_at: nominal
-        max: 8.80274e-13
+        max: 2.10208e-12
         max_at: nominal
       db_cb:
         nominal: -89.7661
@@ -862,16 +864,16 @@ sims:
         max: 1.67048e-05
         max_at: nominal
       e_1k:
-        nominal: 7.60908e-06
-        min: 7.60908e-06
+        nominal: 7.60913e-06
+        min: 7.60913e-06
         min_at: nominal
-        max: 7.60908e-06
+        max: 7.60913e-06
         max_at: nominal
       e_1k_elec:
-        nominal: 2.26872e-07
-        min: 2.26872e-07
+        nominal: 2.27982e-07
+        min: 2.27982e-07
         min_at: nominal
-        max: 2.26872e-07
+        max: 2.27982e-07
         max_at: nominal
       n_adc_total:
         nominal: 0.000106709
@@ -928,10 +930,10 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.14335
-        min: -2.14335
+        nominal: -2.14321
+        min: -2.14321
         min_at: nominal
-        max: -2.14335
+        max: -2.14321
         max_at: nominal
       g_inc_hard:
         nominal: -0.79989
@@ -940,10 +942,10 @@ sims:
         max: -0.79989
         max_at: nominal
       r_b:
-        nominal: 0.373197
-        min: 0.373197
+        nominal: 0.373221
+        min: 0.373221
         min_at: nominal
-        max: 0.373197
+        max: 0.373221
         max_at: nominal
       ina_op:
         nominal: -4.63989
@@ -952,196 +954,196 @@ sims:
         max: -4.63989
         max_at: nominal
       jack_op:
-        nominal: -0.0294336
-        min: -0.0294336
+        nominal: -0.0136189
+        min: -0.0136189
         min_at: nominal
-        max: -0.0294336
+        max: -0.0136189
         max_at: nominal
       n_au_total:
-        nominal: 0.000174302
-        min: 0.000174302
+        nominal: 0.000174334
+        min: 0.000174334
         min_at: nominal
-        max: 0.000174302
+        max: 0.000174334
         max_at: nominal
       n_au_sensor:
-        nominal: 0.000173107
-        min: 0.000173107
+        nominal: 0.000173119
+        min: 0.000173119
         min_at: nominal
-        max: 0.000173107
+        max: 0.000173119
         max_at: nominal
       n_au_elec:
-        nominal: 2.0373e-05
-        min: 2.0373e-05
+        nominal: 2.05429e-05
+        min: 2.05429e-05
         min_at: nominal
-        max: 2.0373e-05
+        max: 2.05429e-05
         max_at: nominal
       n_au_ref:
-        nominal: 3.22797e-06
-        min: 3.22797e-06
+        nominal: 3.22819e-06
+        min: 3.22819e-06
         min_at: nominal
-        max: 3.22797e-06
+        max: 3.22819e-06
         max_at: nominal
       n_au_sbuf:
-        nominal: 3.72273e-07
-        min: 3.72273e-07
+        nominal: 3.72298e-07
+        min: 3.72298e-07
         min_at: nominal
-        max: 3.72273e-07
+        max: 3.72298e-07
         max_at: nominal
       n_au_link:
-        nominal: 2.69374e-07
-        min: 2.69374e-07
+        nominal: 2.69393e-07
+        min: 2.69393e-07
         min_at: nominal
-        max: 2.69374e-07
+        max: 2.69393e-07
         max_at: nominal
       n_au_recv:
-        nominal: 6.99656e-06
-        min: 6.99656e-06
+        nominal: 6.99736e-06
+        min: 6.99736e-06
         min_at: nominal
-        max: 6.99656e-06
+        max: 6.99736e-06
         max_at: nominal
       n_au_zero:
-        nominal: 1.03313e-06
-        min: 1.03313e-06
+        nominal: 1.03324e-06
+        min: 1.03324e-06
         min_at: nominal
-        max: 1.03313e-06
+        max: 1.03324e-06
         max_at: nominal
       n_au_dac:
-        nominal: 5.72597e-06
-        min: 5.72597e-06
+        nominal: 5.726e-06
+        min: 5.726e-06
         min_at: nominal
-        max: 5.72597e-06
+        max: 5.726e-06
         max_at: nominal
       n_au_shaper:
-        nominal: 1.30023e-05
-        min: 1.30023e-05
+        nominal: 1.3003e-05
+        min: 1.3003e-05
         min_at: nominal
-        max: 1.30023e-05
+        max: 1.3003e-05
         max_at: nominal
       n_au_out:
-        nominal: 1.23516e-05
-        min: 1.23516e-05
+        nominal: 1.26286e-05
+        min: 1.26286e-05
         min_at: nominal
-        max: 1.23516e-05
+        max: 1.26286e-05
         max_at: nominal
       n_au_rest:
-        nominal: 1.59427e-10
-        min: 1.59427e-10
+        nominal: 1.59443e-10
+        min: 1.59443e-10
         min_at: nominal
-        max: 1.59427e-10
+        max: 1.59443e-10
         max_at: nominal
       db_au:
-        nominal: -95.174
-        min: -95.174
+        nominal: -95.1724
+        min: -95.1724
         min_at: nominal
-        max: -95.174
+        max: -95.1724
         max_at: nominal
       ppm_au:
-        nominal: 17.4302
-        min: 17.4302
+        nominal: 17.4334
+        min: 17.4334
         min_at: nominal
-        max: 17.4302
+        max: 17.4334
         max_at: nominal
       n_cb_total:
-        nominal: 0.000121481
-        min: 0.000121481
+        nominal: 0.000121491
+        min: 0.000121491
         min_at: nominal
-        max: 0.000121481
+        max: 0.000121491
         max_at: nominal
       n_cb_sensor:
-        nominal: 0.000121177
-        min: 0.000121177
+        nominal: 0.000121185
+        min: 0.000121185
         min_at: nominal
-        max: 0.000121177
+        max: 0.000121185
         max_at: nominal
       n_cb_elec:
-        nominal: 8.5945e-06
-        min: 8.5945e-06
+        nominal: 8.61781e-06
+        min: 8.61781e-06
         min_at: nominal
-        max: 8.5945e-06
+        max: 8.61781e-06
         max_at: nominal
       n_cb_ref:
-        nominal: 2.25962e-06
-        min: 2.25962e-06
+        nominal: 2.25977e-06
+        min: 2.25977e-06
         min_at: nominal
-        max: 2.25962e-06
+        max: 2.25977e-06
         max_at: nominal
       n_cb_sbuf:
-        nominal: 4.05802e-07
-        min: 4.05802e-07
+        nominal: 4.05829e-07
+        min: 4.05829e-07
         min_at: nominal
-        max: 4.05802e-07
+        max: 4.05829e-07
         max_at: nominal
       n_cb_link:
-        nominal: 1.8857e-07
-        min: 1.8857e-07
+        nominal: 1.88582e-07
+        min: 1.88582e-07
         min_at: nominal
-        max: 1.8857e-07
+        max: 1.88582e-07
         max_at: nominal
       n_cb_recv:
-        nominal: 1.72112e-06
-        min: 1.72112e-06
+        nominal: 1.72124e-06
+        min: 1.72124e-06
         min_at: nominal
-        max: 1.72112e-06
+        max: 1.72124e-06
         max_at: nominal
       n_cb_zero:
-        nominal: 2.48953e-07
-        min: 2.48953e-07
+        nominal: 2.4897e-07
+        min: 2.4897e-07
         min_at: nominal
-        max: 2.48953e-07
+        max: 2.4897e-07
         max_at: nominal
       n_cb_dac:
-        nominal: 6.98541e-06
-        min: 6.98541e-06
+        nominal: 6.98544e-06
+        min: 6.98544e-06
         min_at: nominal
-        max: 6.98541e-06
+        max: 6.98544e-06
         max_at: nominal
       n_cb_shaper:
-        nominal: 2.99822e-06
-        min: 2.99822e-06
+        nominal: 2.99823e-06
+        min: 2.99823e-06
         min_at: nominal
-        max: 2.99822e-06
+        max: 2.99823e-06
         max_at: nominal
       n_cb_out:
-        nominal: 2.78385e-06
-        min: 2.78385e-06
+        nominal: 2.85471e-06
+        min: 2.85471e-06
         min_at: nominal
-        max: 2.78385e-06
+        max: 2.85471e-06
         max_at: nominal
       n_cb_rest:
-        nominal: 7.001e-13
-        min: 7.001e-13
+        nominal: 7.56096e-13
+        min: 7.56096e-13
         min_at: nominal
-        max: 7.001e-13
+        max: 7.56096e-13
         max_at: nominal
       db_cb:
-        nominal: -98.3098
-        min: -98.3098
+        nominal: -98.3091
+        min: -98.3091
         min_at: nominal
-        max: -98.3098
+        max: -98.3091
         max_at: nominal
       ppm_cb:
-        nominal: 12.1481
-        min: 12.1481
+        nominal: 12.1491
+        min: 12.1491
         min_at: nominal
-        max: 12.1481
+        max: 12.1491
         max_at: nominal
       e_100:
-        nominal: 6.24359e-06
-        min: 6.24359e-06
+        nominal: 6.24408e-06
+        min: 6.24408e-06
         min_at: nominal
-        max: 6.24359e-06
+        max: 6.24408e-06
         max_at: nominal
       e_1k:
-        nominal: 2.84379e-06
-        min: 2.84379e-06
+        nominal: 2.84407e-06
+        min: 2.84407e-06
         min_at: nominal
-        max: 2.84379e-06
+        max: 2.84407e-06
         max_at: nominal
       e_1k_elec:
-        nominal: 1.74593e-07
-        min: 1.74593e-07
+        nominal: 1.76035e-07
+        min: 1.76035e-07
         min_at: nominal
-        max: 1.74593e-07
+        max: 1.76035e-07
         max_at: nominal
       n_adc_total:
         nominal: 0.000106728
@@ -1198,16 +1200,16 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.14921
-        min: -2.14921
+        nominal: -2.14907
+        min: -2.14907
         min_at: nominal
-        max: -2.14921
+        max: -2.14907
         max_at: nominal
       g_inc_hard:
-        nominal: -2.14403
-        min: -2.14403
+        nominal: -2.14402
+        min: -2.14402
         min_at: nominal
-        max: -2.14403
+        max: -2.14402
         max_at: nominal
       r_b:
         nominal: 1.0
@@ -1222,100 +1224,100 @@ sims:
         max: 8.011e-05
         max_at: nominal
       jack_op:
-        nominal: -0.0294334
-        min: -0.0294334
+        nominal: -0.0136188
+        min: -0.0136188
         min_at: nominal
-        max: -0.0294334
+        max: -0.0136188
         max_at: nominal
       n_au_total:
-        nominal: 0.000465586
-        min: 0.000465586
+        nominal: 0.000465595
+        min: 0.000465595
         min_at: nominal
-        max: 0.000465586
+        max: 0.000465595
         max_at: nominal
       n_au_sensor:
-        nominal: 0.000464804
-        min: 0.000464804
+        nominal: 0.000464806
+        min: 0.000464806
         min_at: nominal
-        max: 0.000464804
+        max: 0.000464806
         max_at: nominal
       n_au_elec:
-        nominal: 2.69708e-05
-        min: 2.69708e-05
+        nominal: 2.70997e-05
+        min: 2.70997e-05
         min_at: nominal
-        max: 2.69708e-05
+        max: 2.70997e-05
         max_at: nominal
       n_au_ref:
-        nominal: 9.52219e-07
-        min: 9.52219e-07
+        nominal: 9.52222e-07
+        min: 9.52222e-07
         min_at: nominal
-        max: 9.52219e-07
+        max: 9.52222e-07
         max_at: nominal
       n_au_sbuf:
-        nominal: 9.99578e-07
-        min: 9.99578e-07
+        nominal: 9.99579e-07
+        min: 9.99579e-07
         min_at: nominal
-        max: 9.99578e-07
+        max: 9.99579e-07
         max_at: nominal
       n_au_link:
-        nominal: 7.23288e-07
-        min: 7.23288e-07
+        nominal: 7.2329e-07
+        min: 7.2329e-07
         min_at: nominal
-        max: 7.23288e-07
+        max: 7.2329e-07
         max_at: nominal
       n_au_recv:
-        nominal: 1.87863e-05
-        min: 1.87863e-05
+        nominal: 1.87872e-05
+        min: 1.87872e-05
         min_at: nominal
-        max: 1.87863e-05
+        max: 1.87872e-05
         max_at: nominal
       n_au_zero:
-        nominal: 2.77402e-06
-        min: 2.77402e-06
+        nominal: 2.77416e-06
+        min: 2.77416e-06
         min_at: nominal
-        max: 2.77402e-06
+        max: 2.77416e-06
         max_at: nominal
       n_au_dac:
-        nominal: 6.52498e-06
-        min: 6.52498e-06
+        nominal: 6.52499e-06
+        min: 6.52499e-06
         min_at: nominal
-        max: 6.52498e-06
+        max: 6.52499e-06
         max_at: nominal
       n_au_shaper:
-        nominal: 1.30091e-05
-        min: 1.30091e-05
+        nominal: 1.30097e-05
+        min: 1.30097e-05
         min_at: nominal
-        max: 1.30091e-05
+        max: 1.30097e-05
         max_at: nominal
       n_au_out:
-        nominal: 1.23516e-05
-        min: 1.23516e-05
+        nominal: 1.26286e-05
+        min: 1.26286e-05
         min_at: nominal
-        max: 1.23516e-05
+        max: 1.26286e-05
         max_at: nominal
       n_au_rest:
-        nominal: 4.28056e-10
-        min: 4.28056e-10
+        nominal: 4.28085e-10
+        min: 4.28085e-10
         min_at: nominal
-        max: 4.28056e-10
+        max: 4.28085e-10
         max_at: nominal
       db_au:
-        nominal: -86.64
-        min: -86.64
+        nominal: -86.6398
+        min: -86.6398
         min_at: nominal
-        max: -86.64
+        max: -86.6398
         max_at: nominal
       ppm_au:
-        nominal: 46.5586
-        min: 46.5586
+        nominal: 46.5595
+        min: 46.5595
         min_at: nominal
-        max: 46.5586
+        max: 46.5595
         max_at: nominal
       n_cb_total:
-        nominal: 0.000325528
-        min: 0.000325528
+        nominal: 0.000325529
+        min: 0.000325529
         min_at: nominal
-        max: 0.000325528
+        max: 0.000325529
         max_at: nominal
       n_cb_sensor:
         nominal: 0.000325369
@@ -1324,16 +1326,16 @@ sims:
         max: 0.000325369
         max_at: nominal
       n_cb_elec:
-        nominal: 1.01884e-05
-        min: 1.01884e-05
+        nominal: 1.0208e-05
+        min: 1.0208e-05
         min_at: nominal
-        max: 1.01884e-05
+        max: 1.0208e-05
         max_at: nominal
       n_cb_ref:
-        nominal: 6.66564e-07
-        min: 6.66564e-07
+        nominal: 6.66565e-07
+        min: 6.66565e-07
         min_at: nominal
-        max: 6.66564e-07
+        max: 6.66565e-07
         max_at: nominal
       n_cb_sbuf:
         nominal: 1.08961e-06
@@ -1342,10 +1344,10 @@ sims:
         max: 1.08961e-06
         max_at: nominal
       n_cb_link:
-        nominal: 5.06322e-07
-        min: 5.06322e-07
+        nominal: 5.06323e-07
+        min: 5.06323e-07
         min_at: nominal
-        max: 5.06322e-07
+        max: 5.06323e-07
         max_at: nominal
       n_cb_recv:
         nominal: 4.62133e-06
@@ -1372,16 +1374,16 @@ sims:
         max: 2.99977e-06
         max_at: nominal
       n_cb_out:
-        nominal: 2.78385e-06
-        min: 2.78385e-06
+        nominal: 2.85471e-06
+        min: 2.85471e-06
         min_at: nominal
-        max: 2.78385e-06
+        max: 2.85471e-06
         max_at: nominal
       n_cb_rest:
-        nominal: 1.2242e-12
-        min: 1.2242e-12
+        nominal: 1.83449e-12
+        min: 1.83449e-12
         min_at: nominal
-        max: 1.2242e-12
+        max: 1.83449e-12
         max_at: nominal
       db_cb:
         nominal: -89.7482
@@ -1390,28 +1392,28 @@ sims:
         max: -89.7482
         max_at: nominal
       ppm_cb:
-        nominal: 32.5528
-        min: 32.5528
+        nominal: 32.5529
+        min: 32.5529
         min_at: nominal
-        max: 32.5528
+        max: 32.5529
         max_at: nominal
       e_100:
-        nominal: 1.67391e-05
-        min: 1.67391e-05
+        nominal: 1.67392e-05
+        min: 1.67392e-05
         min_at: nominal
-        max: 1.67391e-05
+        max: 1.67392e-05
         max_at: nominal
       e_1k:
-        nominal: 7.62474e-06
-        min: 7.62474e-06
+        nominal: 7.62478e-06
+        min: 7.62478e-06
         min_at: nominal
-        max: 7.62474e-06
+        max: 7.62478e-06
         max_at: nominal
       e_1k_elec:
-        nominal: 2.27149e-07
-        min: 2.27149e-07
+        nominal: 2.28257e-07
+        min: 2.28257e-07
         min_at: nominal
-        max: 2.27149e-07
+        max: 2.28257e-07
         max_at: nominal
       n_adc_total:
         nominal: 0.000106709
@@ -1468,22 +1470,22 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.14921
-        min: -2.14921
+        nominal: -2.14907
+        min: -2.14907
         min_at: nominal
-        max: -2.14921
+        max: -2.14907
         max_at: nominal
       g_inc_hard:
-        nominal: -2.14403
-        min: -2.14403
+        nominal: -2.14402
+        min: -2.14402
         min_at: nominal
-        max: -2.14403
+        max: -2.14402
         max_at: nominal
       r_b:
-        nominal: 0.997588
-        min: 0.997588
+        nominal: 0.997648
+        min: 0.997648
         min_at: nominal
-        max: 0.997588
+        max: 0.997648
         max_at: nominal
       ina_op:
         nominal: -4.63989
@@ -1492,148 +1494,148 @@ sims:
         max: -4.63989
         max_at: nominal
       jack_op:
-        nominal: -0.0294334
-        min: -0.0294334
+        nominal: -0.0136188
+        min: -0.0136188
         min_at: nominal
-        max: -0.0294334
+        max: -0.0136188
         max_at: nominal
       n_au_total:
-        nominal: 0.000464544
-        min: 0.000464544
+        nominal: 0.000464582
+        min: 0.000464582
         min_at: nominal
-        max: 0.000464544
+        max: 0.000464582
         max_at: nominal
       n_au_sensor:
-        nominal: 0.000463683
-        min: 0.000463683
+        nominal: 0.000463713
+        min: 0.000463713
         min_at: nominal
-        max: 0.000463683
+        max: 0.000463713
         max_at: nominal
       n_au_elec:
-        nominal: 2.82753e-05
-        min: 2.82753e-05
+        nominal: 2.83992e-05
+        min: 2.83992e-05
         min_at: nominal
-        max: 2.82753e-05
+        max: 2.83992e-05
         max_at: nominal
       n_au_ref:
-        nominal: 8.6464e-06
-        min: 8.6464e-06
+        nominal: 8.64696e-06
+        min: 8.64696e-06
         min_at: nominal
-        max: 8.6464e-06
+        max: 8.64696e-06
         max_at: nominal
       n_au_sbuf:
-        nominal: 9.97166e-07
-        min: 9.97166e-07
+        nominal: 9.97229e-07
+        min: 9.97229e-07
         min_at: nominal
-        max: 9.97166e-07
+        max: 9.97229e-07
         max_at: nominal
       n_au_link:
-        nominal: 7.21543e-07
-        min: 7.21543e-07
+        nominal: 7.21589e-07
+        min: 7.21589e-07
         min_at: nominal
-        max: 7.21543e-07
+        max: 7.21589e-07
         max_at: nominal
       n_au_recv:
-        nominal: 1.8741e-05
-        min: 1.8741e-05
+        nominal: 1.8743e-05
+        min: 1.8743e-05
         min_at: nominal
-        max: 1.8741e-05
+        max: 1.8743e-05
         max_at: nominal
       n_au_zero:
-        nominal: 2.76733e-06
-        min: 2.76733e-06
+        nominal: 2.76763e-06
+        min: 2.76763e-06
         min_at: nominal
-        max: 2.76733e-06
+        max: 2.76763e-06
         max_at: nominal
       n_au_dac:
-        nominal: 6.52191e-06
-        min: 6.52191e-06
+        nominal: 6.52199e-06
+        min: 6.52199e-06
         min_at: nominal
-        max: 6.52191e-06
+        max: 6.52199e-06
         max_at: nominal
       n_au_shaper:
-        nominal: 1.30091e-05
-        min: 1.30091e-05
+        nominal: 1.30097e-05
+        min: 1.30097e-05
         min_at: nominal
-        max: 1.30091e-05
+        max: 1.30097e-05
         max_at: nominal
       n_au_out:
-        nominal: 1.23516e-05
-        min: 1.23516e-05
+        nominal: 1.26286e-05
+        min: 1.26286e-05
         min_at: nominal
-        max: 1.23516e-05
+        max: 1.26286e-05
         max_at: nominal
       n_au_rest:
-        nominal: 4.27029e-10
-        min: 4.27029e-10
+        nominal: 4.27093e-10
+        min: 4.27093e-10
         min_at: nominal
-        max: 4.27029e-10
+        max: 4.27093e-10
         max_at: nominal
       db_au:
-        nominal: -86.6595
-        min: -86.6595
+        nominal: -86.6588
+        min: -86.6588
         min_at: nominal
-        max: -86.6595
+        max: -86.6588
         max_at: nominal
       ppm_au:
-        nominal: 46.4544
-        min: 46.4544
+        nominal: 46.4582
+        min: 46.4582
         min_at: nominal
-        max: 46.4544
+        max: 46.4582
         max_at: nominal
       n_cb_total:
-        nominal: 0.000324799
-        min: 0.000324799
+        nominal: 0.00032482
+        min: 0.00032482
         min_at: nominal
-        max: 0.000324799
+        max: 0.00032482
         max_at: nominal
       n_cb_sensor:
-        nominal: 0.000324584
-        min: 0.000324584
+        nominal: 0.000324603
+        min: 0.000324603
         min_at: nominal
-        max: 0.000324584
+        max: 0.000324603
         max_at: nominal
       n_cb_elec:
-        nominal: 1.18246e-05
-        min: 1.18246e-05
+        nominal: 1.18419e-05
+        min: 1.18419e-05
         min_at: nominal
-        max: 1.18246e-05
+        max: 1.18419e-05
         max_at: nominal
       n_cb_ref:
-        nominal: 6.05258e-06
-        min: 6.05258e-06
+        nominal: 6.05295e-06
+        min: 6.05295e-06
         min_at: nominal
-        max: 6.05258e-06
+        max: 6.05295e-06
         max_at: nominal
       n_cb_sbuf:
-        nominal: 1.08698e-06
-        min: 1.08698e-06
+        nominal: 1.08704e-06
+        min: 1.08704e-06
         min_at: nominal
-        max: 1.08698e-06
+        max: 1.08704e-06
         max_at: nominal
       n_cb_link:
-        nominal: 5.05101e-07
-        min: 5.05101e-07
+        nominal: 5.05132e-07
+        min: 5.05132e-07
         min_at: nominal
-        max: 5.05101e-07
+        max: 5.05132e-07
         max_at: nominal
       n_cb_recv:
-        nominal: 4.61018e-06
-        min: 4.61018e-06
+        nominal: 4.61047e-06
+        min: 4.61047e-06
         min_at: nominal
-        max: 4.61018e-06
+        max: 4.61047e-06
         max_at: nominal
       n_cb_zero:
-        nominal: 6.66844e-07
-        min: 6.66844e-07
+        nominal: 6.66885e-07
+        min: 6.66885e-07
         min_at: nominal
-        max: 6.66844e-07
+        max: 6.66885e-07
         max_at: nominal
       n_cb_dac:
-        nominal: 7.95642e-06
-        min: 7.95642e-06
+        nominal: 7.95652e-06
+        min: 7.95652e-06
         min_at: nominal
-        max: 7.95642e-06
+        max: 7.95652e-06
         max_at: nominal
       n_cb_shaper:
         nominal: 2.99977e-06
@@ -1642,46 +1644,46 @@ sims:
         max: 2.99977e-06
         max_at: nominal
       n_cb_out:
-        nominal: 2.78385e-06
-        min: 2.78385e-06
+        nominal: 2.85471e-06
+        min: 2.85471e-06
         min_at: nominal
-        max: 2.78385e-06
+        max: 2.85471e-06
         max_at: nominal
       n_cb_rest:
-        nominal: 2.39758e-12
-        min: 2.39758e-12
+        nominal: 3.35863e-12
+        min: 3.35863e-12
         min_at: nominal
-        max: 2.39758e-12
+        max: 3.35863e-12
         max_at: nominal
       db_cb:
-        nominal: -89.7677
-        min: -89.7677
+        nominal: -89.7672
+        min: -89.7672
         min_at: nominal
-        max: -89.7677
+        max: -89.7672
         max_at: nominal
       ppm_cb:
-        nominal: 32.4799
-        min: 32.4799
+        nominal: 32.4819
+        min: 32.4819
         min_at: nominal
-        max: 32.4799
+        max: 32.4819
         max_at: nominal
       e_100:
-        nominal: 1.67016e-05
-        min: 1.67016e-05
+        nominal: 1.67027e-05
+        min: 1.67027e-05
         min_at: nominal
-        max: 1.67016e-05
+        max: 1.67027e-05
         max_at: nominal
       e_1k:
-        nominal: 7.60766e-06
-        min: 7.60766e-06
+        nominal: 7.60817e-06
+        min: 7.60817e-06
         min_at: nominal
-        max: 7.60766e-06
+        max: 7.60817e-06
         max_at: nominal
       e_1k_elec:
-        nominal: 2.67063e-07
-        min: 2.67063e-07
+        nominal: 2.68018e-07
+        min: 2.68018e-07
         min_at: nominal
-        max: 2.67063e-07
+        max: 2.68018e-07
         max_at: nominal
       n_adc_total:
         nominal: 0.000106728
@@ -1738,10 +1740,10 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.15469
-        min: -2.15469
+        nominal: -2.15455
+        min: -2.15455
         min_at: nominal
-        max: -2.15469
+        max: -2.15455
         max_at: nominal
       g_inc_hard:
         nominal: 0.0003
@@ -1762,34 +1764,34 @@ sims:
         max: 8.011e-05
         max_at: nominal
       jack_op:
-        nominal: -0.0294333
-        min: -0.0294333
+        nominal: -0.0136186
+        min: -0.0136186
         min_at: nominal
-        max: -0.0294333
+        max: -0.0136186
         max_at: nominal
       n_au_total:
-        nominal: 0.000466542
-        min: 0.000466542
+        nominal: 0.000466551
+        min: 0.000466551
         min_at: nominal
-        max: 0.000466542
+        max: 0.000466551
         max_at: nominal
       n_au_sensor:
-        nominal: 0.00046576
-        min: 0.00046576
+        nominal: 0.000465761
+        min: 0.000465761
         min_at: nominal
-        max: 0.00046576
+        max: 0.000465761
         max_at: nominal
       n_au_elec:
-        nominal: 2.70024e-05
-        min: 2.70024e-05
+        nominal: 2.71312e-05
+        min: 2.71312e-05
         min_at: nominal
-        max: 2.70024e-05
+        max: 2.71312e-05
         max_at: nominal
       n_au_ref:
-        nominal: 9.54176e-07
-        min: 9.54176e-07
+        nominal: 9.54179e-07
+        min: 9.54179e-07
         min_at: nominal
-        max: 9.54176e-07
+        max: 9.54179e-07
         max_at: nominal
       n_au_sbuf:
         nominal: 1.00163e-06
@@ -1798,22 +1800,22 @@ sims:
         max: 1.00163e-06
         max_at: nominal
       n_au_link:
-        nominal: 7.24774e-07
-        min: 7.24774e-07
+        nominal: 7.24777e-07
+        min: 7.24777e-07
         min_at: nominal
-        max: 7.24774e-07
+        max: 7.24777e-07
         max_at: nominal
       n_au_recv:
-        nominal: 1.8825e-05
-        min: 1.8825e-05
+        nominal: 1.88259e-05
+        min: 1.88259e-05
         min_at: nominal
-        max: 1.8825e-05
+        max: 1.88259e-05
         max_at: nominal
       n_au_zero:
-        nominal: 2.77974e-06
-        min: 2.77974e-06
+        nominal: 2.77988e-06
+        min: 2.77988e-06
         min_at: nominal
-        max: 2.77974e-06
+        max: 2.77988e-06
         max_at: nominal
       n_au_dac:
         nominal: 6.5276e-06
@@ -1822,34 +1824,34 @@ sims:
         max: 6.5276e-06
         max_at: nominal
       n_au_shaper:
-        nominal: 1.30157e-05
-        min: 1.30157e-05
+        nominal: 1.30164e-05
+        min: 1.30164e-05
         min_at: nominal
-        max: 1.30157e-05
+        max: 1.30164e-05
         max_at: nominal
       n_au_out:
-        nominal: 1.23516e-05
-        min: 1.23516e-05
+        nominal: 1.26286e-05
+        min: 1.26286e-05
         min_at: nominal
-        max: 1.23516e-05
+        max: 1.26286e-05
         max_at: nominal
       n_au_rest:
-        nominal: 4.28951e-10
-        min: 4.28951e-10
+        nominal: 4.2899e-10
+        min: 4.2899e-10
         min_at: nominal
-        max: 4.28951e-10
+        max: 4.2899e-10
         max_at: nominal
       db_au:
-        nominal: -86.6222
-        min: -86.6222
+        nominal: -86.622
+        min: -86.622
         min_at: nominal
-        max: -86.6222
+        max: -86.622
         max_at: nominal
       ppm_au:
-        nominal: 46.6542
-        min: 46.6542
+        nominal: 46.6551
+        min: 46.6551
         min_at: nominal
-        max: 46.6542
+        max: 46.6551
         max_at: nominal
       n_cb_total:
         nominal: 0.000326197
@@ -1864,10 +1866,10 @@ sims:
         max: 0.000326037
         max_at: nominal
       n_cb_elec:
-        nominal: 1.01962e-05
-        min: 1.01962e-05
+        nominal: 1.02157e-05
+        min: 1.02157e-05
         min_at: nominal
-        max: 1.01962e-05
+        max: 1.02157e-05
         max_at: nominal
       n_cb_ref:
         nominal: 6.67934e-07
@@ -1876,10 +1878,10 @@ sims:
         max: 6.67934e-07
         max_at: nominal
       n_cb_sbuf:
-        nominal: 1.09184e-06
-        min: 1.09184e-06
+        nominal: 1.09185e-06
+        min: 1.09185e-06
         min_at: nominal
-        max: 1.09184e-06
+        max: 1.09185e-06
         max_at: nominal
       n_cb_link:
         nominal: 5.07363e-07
@@ -1912,16 +1914,16 @@ sims:
         max: 3.00131e-06
         max_at: nominal
       n_cb_out:
-        nominal: 2.78385e-06
-        min: 2.78385e-06
+        nominal: 2.85471e-06
+        min: 2.85471e-06
         min_at: nominal
-        max: 2.78385e-06
+        max: 2.85471e-06
         max_at: nominal
       n_cb_rest:
-        nominal: 1.26241e-12
-        min: 1.26241e-12
+        nominal: 1.86086e-12
+        min: 1.86086e-12
         min_at: nominal
-        max: 1.26241e-12
+        max: 1.86086e-12
         max_at: nominal
       db_cb:
         nominal: -89.7304
@@ -1942,16 +1944,16 @@ sims:
         max: 1.67735e-05
         max_at: nominal
       e_1k:
-        nominal: 7.64041e-06
-        min: 7.64041e-06
+        nominal: 7.64045e-06
+        min: 7.64045e-06
         min_at: nominal
-        max: 7.64041e-06
+        max: 7.64045e-06
         max_at: nominal
       e_1k_elec:
-        nominal: 2.27426e-07
-        min: 2.27426e-07
+        nominal: 2.28533e-07
+        min: 2.28533e-07
         min_at: nominal
-        max: 2.27426e-07
+        max: 2.28533e-07
         max_at: nominal
       n_adc_total:
         nominal: 0.000106709
@@ -2008,10 +2010,10 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.15469
-        min: -2.15469
+        nominal: -2.15455
+        min: -2.15455
         min_at: nominal
-        max: -2.15469
+        max: -2.15455
         max_at: nominal
       g_inc_hard:
         nominal: 0.0003
@@ -2020,10 +2022,10 @@ sims:
         max: 0.0003
         max_at: nominal
       r_b:
-        nominal: -0.000139231
-        min: -0.000139231
+        nominal: -0.00013924
+        min: -0.00013924
         min_at: nominal
-        max: -0.000139231
+        max: -0.00013924
         max_at: nominal
       ina_op:
         nominal: -4.63989
@@ -2032,58 +2034,58 @@ sims:
         max: -4.63989
         max_at: nominal
       jack_op:
-        nominal: -0.0294333
-        min: -0.0294333
+        nominal: -0.0136186
+        min: -0.0136186
         min_at: nominal
-        max: -0.0294333
+        max: -0.0136186
         max_at: nominal
       n_au_total:
-        nominal: 1.86965e-05
-        min: 1.86965e-05
+        nominal: 1.88811e-05
+        min: 1.88811e-05
         min_at: nominal
-        max: 1.86965e-05
+        max: 1.88811e-05
         max_at: nominal
       n_au_sensor:
-        nominal: 6.48483e-08
-        min: 6.48483e-08
+        nominal: 6.48528e-08
+        min: 6.48528e-08
         min_at: nominal
-        max: 6.48483e-08
+        max: 6.48528e-08
         max_at: nominal
       n_au_elec:
-        nominal: 1.86964e-05
-        min: 1.86964e-05
+        nominal: 1.8881e-05
+        min: 1.8881e-05
         min_at: nominal
-        max: 1.86964e-05
+        max: 1.8881e-05
         max_at: nominal
       n_au_ref:
-        nominal: 1.20924e-09
-        min: 1.20924e-09
+        nominal: 1.20933e-09
+        min: 1.20933e-09
         min_at: nominal
-        max: 1.20924e-09
+        max: 1.20933e-09
         max_at: nominal
       n_au_sbuf:
-        nominal: 1.39459e-10
-        min: 1.39459e-10
+        nominal: 1.39468e-10
+        min: 1.39468e-10
         min_at: nominal
-        max: 1.39459e-10
+        max: 1.39468e-10
         max_at: nominal
       n_au_link:
-        nominal: 1.00911e-10
-        min: 1.00911e-10
+        nominal: 1.00918e-10
+        min: 1.00918e-10
         min_at: nominal
-        max: 1.00911e-10
+        max: 1.00918e-10
         max_at: nominal
       n_au_recv:
-        nominal: 2.62104e-09
-        min: 2.62104e-09
+        nominal: 2.62133e-09
+        min: 2.62133e-09
         min_at: nominal
-        max: 2.62104e-09
+        max: 2.62133e-09
         max_at: nominal
       n_au_zero:
-        nominal: 3.87027e-10
-        min: 3.87027e-10
+        nominal: 3.87071e-10
+        min: 3.87071e-10
         min_at: nominal
-        max: 3.87027e-10
+        max: 3.87071e-10
         max_at: nominal
       n_au_dac:
         nominal: 5.25197e-06
@@ -2092,82 +2094,82 @@ sims:
         max: 5.25197e-06
         max_at: nominal
       n_au_shaper:
-        nominal: 1.30157e-05
-        min: 1.30157e-05
+        nominal: 1.30164e-05
+        min: 1.30164e-05
         min_at: nominal
-        max: 1.30157e-05
+        max: 1.30164e-05
         max_at: nominal
       n_au_out:
-        nominal: 1.23516e-05
-        min: 1.23516e-05
+        nominal: 1.26286e-05
+        min: 1.26286e-05
         min_at: nominal
-        max: 1.23516e-05
+        max: 1.26286e-05
         max_at: nominal
       n_au_rest:
-        nominal: 1.13227e-12
-        min: 1.13227e-12
+        nominal: 1.13903e-12
+        min: 1.13903e-12
         min_at: nominal
-        max: 1.13227e-12
+        max: 1.13903e-12
         max_at: nominal
       db_au:
-        nominal: -114.565
-        min: -114.565
+        nominal: -114.479
+        min: -114.479
         min_at: nominal
-        max: -114.565
+        max: -114.479
         max_at: nominal
       ppm_au:
-        nominal: 1.86965
-        min: 1.86965
+        nominal: 1.88811
+        min: 1.88811
         min_at: nominal
-        max: 1.86965
+        max: 1.88811
         max_at: nominal
       n_cb_total:
-        nominal: 7.60338e-06
-        min: 7.60338e-06
+        nominal: 7.62961e-06
+        min: 7.62961e-06
         min_at: nominal
-        max: 7.60338e-06
+        max: 7.62961e-06
         max_at: nominal
       n_cb_sensor:
-        nominal: 4.53946e-08
-        min: 4.53946e-08
+        nominal: 4.53976e-08
+        min: 4.53976e-08
         min_at: nominal
-        max: 4.53946e-08
+        max: 4.53976e-08
         max_at: nominal
       n_cb_elec:
-        nominal: 7.60324e-06
-        min: 7.60324e-06
+        nominal: 7.62947e-06
+        min: 7.62947e-06
         min_at: nominal
-        max: 7.60324e-06
+        max: 7.62947e-06
         max_at: nominal
       n_cb_ref:
-        nominal: 8.46483e-10
-        min: 8.46483e-10
+        nominal: 8.46539e-10
+        min: 8.46539e-10
         min_at: nominal
-        max: 8.46483e-10
+        max: 8.46539e-10
         max_at: nominal
       n_cb_sbuf:
-        nominal: 1.52019e-10
-        min: 1.52019e-10
+        nominal: 1.52029e-10
+        min: 1.52029e-10
         min_at: nominal
-        max: 1.52019e-10
+        max: 1.52029e-10
         max_at: nominal
       n_cb_link:
-        nominal: 7.06408e-11
-        min: 7.06408e-11
+        nominal: 7.06455e-11
+        min: 7.06455e-11
         min_at: nominal
-        max: 7.06408e-11
+        max: 7.06455e-11
         max_at: nominal
       n_cb_recv:
-        nominal: 6.44757e-10
-        min: 6.44757e-10
+        nominal: 6.44799e-10
+        min: 6.44799e-10
         min_at: nominal
-        max: 6.44757e-10
+        max: 6.44799e-10
         max_at: nominal
       n_cb_zero:
-        nominal: 9.32614e-11
-        min: 9.32614e-11
+        nominal: 9.32675e-11
+        min: 9.32675e-11
         min_at: nominal
-        max: 9.32614e-11
+        max: 9.32675e-11
         max_at: nominal
       n_cb_dac:
         nominal: 6.40715e-06
@@ -2182,46 +2184,46 @@ sims:
         max: 3.00131e-06
         max_at: nominal
       n_cb_out:
-        nominal: 2.78385e-06
-        min: 2.78385e-06
+        nominal: 2.85471e-06
+        min: 2.85471e-06
         min_at: nominal
-        max: 2.78385e-06
+        max: 2.85471e-06
         max_at: nominal
       n_cb_rest:
-        nominal: 1.97123e-13
-        min: 1.97123e-13
+        nominal: 1.9764e-13
+        min: 1.9764e-13
         min_at: nominal
-        max: 1.97123e-13
+        max: 1.9764e-13
         max_at: nominal
       db_cb:
-        nominal: -122.38
-        min: -122.38
+        nominal: -122.35
+        min: -122.35
         min_at: nominal
-        max: -122.38
+        max: -122.35
         max_at: nominal
       ppm_cb:
-        nominal: 0.760338
-        min: 0.760338
+        nominal: 0.762961
+        min: 0.762961
         min_at: nominal
-        max: 0.760338
+        max: 0.762961
         max_at: nominal
       e_100:
-        nominal: 3.33183e-07
-        min: 3.33183e-07
+        nominal: 3.34575e-07
+        min: 3.34575e-07
         min_at: nominal
-        max: 3.33183e-07
+        max: 3.34575e-07
         max_at: nominal
       e_1k:
-        nominal: 1.54225e-07
-        min: 1.54225e-07
+        nominal: 1.55853e-07
+        min: 1.55853e-07
         min_at: nominal
-        max: 1.54225e-07
+        max: 1.55853e-07
         max_at: nominal
       e_1k_elec:
-        nominal: 1.54222e-07
-        min: 1.54222e-07
+        nominal: 1.5585e-07
+        min: 1.5585e-07
         min_at: nominal
-        max: 1.54222e-07
+        max: 1.5585e-07
         max_at: nominal
       n_adc_total:
         nominal: 0.000106728
@@ -2278,16 +2280,16 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.14335
-        min: -2.14335
+        nominal: -2.14321
+        min: -2.14321
         min_at: nominal
-        max: -2.14335
+        max: -2.14321
         max_at: nominal
       g_inc_hard:
-        nominal: -0.79988
-        min: -0.79988
+        nominal: -0.79989
+        min: -0.79989
         min_at: nominal
-        max: -0.79988
+        max: -0.79989
         max_at: nominal
       r_b:
         nominal: 1.0
@@ -2302,58 +2304,58 @@ sims:
         max: 8.011e-05
         max_at: nominal
       jack_op:
-        nominal: -0.0294336
-        min: -0.0294336
+        nominal: -0.0136189
+        min: -0.0136189
         min_at: nominal
-        max: -0.0294336
+        max: -0.0136189
         max_at: nominal
       n_au_total:
-        nominal: 0.000804567
-        min: 0.000804567
+        nominal: 0.000804578
+        min: 0.000804578
         min_at: nominal
-        max: 0.000804567
+        max: 0.000804578
         max_at: nominal
       n_au_sensor:
-        nominal: 0.000804106
-        min: 0.000804106
+        nominal: 0.000804114
+        min: 0.000804114
         min_at: nominal
-        max: 0.000804106
+        max: 0.000804114
         max_at: nominal
       n_au_elec:
-        nominal: 2.72121e-05
-        min: 2.72121e-05
+        nominal: 2.73399e-05
+        min: 2.73399e-05
         min_at: nominal
-        max: 2.72121e-05
+        max: 2.73399e-05
         max_at: nominal
       n_au_ref:
-        nominal: 1.64733e-06
-        min: 1.64733e-06
+        nominal: 1.64734e-06
+        min: 1.64734e-06
         min_at: nominal
-        max: 1.64733e-06
+        max: 1.64734e-06
         max_at: nominal
       n_au_sbuf:
-        nominal: 1.45462e-06
-        min: 1.45462e-06
+        nominal: 1.45463e-06
+        min: 1.45463e-06
         min_at: nominal
-        max: 1.45462e-06
+        max: 1.45463e-06
         max_at: nominal
       n_au_link:
-        nominal: 1.25128e-06
-        min: 1.25128e-06
+        nominal: 1.25129e-06
+        min: 1.25129e-06
         min_at: nominal
-        max: 1.25128e-06
+        max: 1.25129e-06
         max_at: nominal
       n_au_recv:
-        nominal: 1.90336e-05
-        min: 1.90336e-05
+        nominal: 1.90345e-05
+        min: 1.90345e-05
         min_at: nominal
-        max: 1.90336e-05
+        max: 1.90345e-05
         max_at: nominal
       n_au_zero:
-        nominal: 2.76832e-06
-        min: 2.76832e-06
+        nominal: 2.76845e-06
+        min: 2.76845e-06
         min_at: nominal
-        max: 2.76832e-06
+        max: 2.76845e-06
         max_at: nominal
       n_au_dac:
         nominal: 6.52237e-06
@@ -2362,40 +2364,40 @@ sims:
         max: 6.52237e-06
         max_at: nominal
       n_au_shaper:
-        nominal: 1.30023e-05
-        min: 1.30023e-05
+        nominal: 1.3003e-05
+        min: 1.3003e-05
         min_at: nominal
-        max: 1.30023e-05
+        max: 1.3003e-05
         max_at: nominal
       n_au_out:
-        nominal: 1.23516e-05
-        min: 1.23516e-05
+        nominal: 1.26286e-05
+        min: 1.26286e-05
         min_at: nominal
-        max: 1.23516e-05
+        max: 1.26286e-05
         max_at: nominal
       n_au_rest:
-        nominal: 4.28447e-10
-        min: 4.28447e-10
+        nominal: 4.28453e-10
+        min: 4.28453e-10
         min_at: nominal
-        max: 4.28447e-10
+        max: 4.28453e-10
         max_at: nominal
       db_au:
-        nominal: -81.8888
-        min: -81.8888
+        nominal: -81.8886
+        min: -81.8886
         min_at: nominal
-        max: -81.8888
+        max: -81.8886
         max_at: nominal
       ppm_au:
-        nominal: 80.4567
-        min: 80.4567
+        nominal: 80.4578
+        min: 80.4578
         min_at: nominal
-        max: 80.4567
+        max: 80.4578
         max_at: nominal
       n_cb_total:
-        nominal: 0.000577472
-        min: 0.000577472
+        nominal: 0.000577473
+        min: 0.000577473
         min_at: nominal
-        max: 0.000577472
+        max: 0.000577473
         max_at: nominal
       n_cb_sensor:
         nominal: 0.000577333
@@ -2404,10 +2406,10 @@ sims:
         max: 0.000577333
         max_at: nominal
       n_cb_elec:
-        nominal: 1.26707e-05
-        min: 1.26707e-05
+        nominal: 1.2706e-05
+        min: 1.2706e-05
         min_at: nominal
-        max: 1.26707e-05
+        max: 1.2706e-05
         max_at: nominal
       n_cb_ref:
         nominal: 1.18275e-06
@@ -2452,16 +2454,16 @@ sims:
         max: 4.55652e-06
         max_at: nominal
       n_cb_out:
-        nominal: 4.28128e-06
-        min: 4.28128e-06
+        nominal: 4.38468e-06
+        min: 4.38468e-06
         min_at: nominal
-        max: 4.28128e-06
+        max: 4.38468e-06
         max_at: nominal
       n_cb_rest:
-        nominal: 1.24189e-11
-        min: 1.24189e-11
+        nominal: 1.10422e-11
+        min: 1.10422e-11
         min_at: nominal
-        max: 1.24189e-11
+        max: 1.10422e-11
         max_at: nominal
       db_cb:
         nominal: -84.7694
@@ -2470,10 +2472,10 @@ sims:
         max: -84.7694
         max_at: nominal
       ppm_cb:
-        nominal: 57.7472
-        min: 57.7472
+        nominal: 57.7473
+        min: 57.7473
         min_at: nominal
-        max: 57.7472
+        max: 57.7473
         max_at: nominal
       e_100:
         nominal: 1.70012e-05
@@ -2488,10 +2490,10 @@ sims:
         max: 1.4372e-05
         max_at: nominal
       e_1k_elec:
-        nominal: 2.37872e-07
-        min: 2.37872e-07
+        nominal: 2.38931e-07
+        min: 2.38931e-07
         min_at: nominal
-        max: 2.37872e-07
+        max: 2.38931e-07
         max_at: nominal
       n_adc_total:
         nominal: 0.000106709
@@ -2548,22 +2550,22 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.14335
-        min: -2.14335
+        nominal: -2.14321
+        min: -2.14321
         min_at: nominal
-        max: -2.14335
+        max: -2.14321
         max_at: nominal
       g_inc_hard:
-        nominal: -0.79988
-        min: -0.79988
+        nominal: -0.79989
+        min: -0.79989
         min_at: nominal
-        max: -0.79988
+        max: -0.79989
         max_at: nominal
       r_b:
-        nominal: 0.373192
-        min: 0.373192
+        nominal: 0.373221
+        min: 0.373221
         min_at: nominal
-        max: 0.373192
+        max: 0.373221
         max_at: nominal
       ina_op:
         nominal: -4.63989
@@ -2572,148 +2574,148 @@ sims:
         max: -4.63989
         max_at: nominal
       jack_op:
-        nominal: -0.0294336
-        min: -0.0294336
+        nominal: -0.0136189
+        min: -0.0136189
         min_at: nominal
-        max: -0.0294336
+        max: -0.0136189
         max_at: nominal
       n_au_total:
-        nominal: 0.000300815
-        min: 0.000300815
+        nominal: 0.000300852
+        min: 0.000300852
         min_at: nominal
-        max: 0.000300815
+        max: 0.000300852
         max_at: nominal
       n_au_sensor:
-        nominal: 0.000300086
-        min: 0.000300086
+        nominal: 0.000300112
+        min: 0.000300112
         min_at: nominal
-        max: 0.000300086
+        max: 0.000300112
         max_at: nominal
       n_au_elec:
-        nominal: 2.09227e-05
-        min: 2.09227e-05
+        nominal: 2.10882e-05
+        min: 2.10882e-05
         min_at: nominal
-        max: 2.09227e-05
+        max: 2.10882e-05
         max_at: nominal
       n_au_ref:
-        nominal: 5.59577e-06
-        min: 5.59577e-06
+        nominal: 5.59626e-06
+        min: 5.59626e-06
         min_at: nominal
-        max: 5.59577e-06
+        max: 5.59626e-06
         max_at: nominal
       n_au_sbuf:
-        nominal: 5.42851e-07
-        min: 5.42851e-07
+        nominal: 5.42897e-07
+        min: 5.42897e-07
         min_at: nominal
-        max: 5.42851e-07
+        max: 5.42897e-07
         max_at: nominal
       n_au_link:
-        nominal: 4.66968e-07
-        min: 4.66968e-07
+        nominal: 4.67009e-07
+        min: 4.67009e-07
         min_at: nominal
-        max: 4.66968e-07
+        max: 4.67009e-07
         max_at: nominal
       n_au_recv:
-        nominal: 7.10318e-06
-        min: 7.10318e-06
+        nominal: 7.10407e-06
+        min: 7.10407e-06
         min_at: nominal
-        max: 7.10318e-06
+        max: 7.10407e-06
         max_at: nominal
       n_au_zero:
-        nominal: 1.03311e-06
-        min: 1.03311e-06
+        nominal: 1.03324e-06
+        min: 1.03324e-06
         min_at: nominal
-        max: 1.03311e-06
+        max: 1.03324e-06
         max_at: nominal
       n_au_dac:
-        nominal: 5.72596e-06
-        min: 5.72596e-06
+        nominal: 5.726e-06
+        min: 5.726e-06
         min_at: nominal
-        max: 5.72596e-06
+        max: 5.726e-06
         max_at: nominal
       n_au_shaper:
-        nominal: 1.30023e-05
-        min: 1.30023e-05
+        nominal: 1.3003e-05
+        min: 1.3003e-05
         min_at: nominal
-        max: 1.30023e-05
+        max: 1.3003e-05
         max_at: nominal
       n_au_out:
-        nominal: 1.23516e-05
-        min: 1.23516e-05
+        nominal: 1.26286e-05
+        min: 1.26286e-05
         min_at: nominal
-        max: 1.23516e-05
+        max: 1.26286e-05
         max_at: nominal
       n_au_rest:
-        nominal: 1.59893e-10
-        min: 1.59893e-10
+        nominal: 1.59926e-10
+        min: 1.59926e-10
         min_at: nominal
-        max: 1.59893e-10
+        max: 1.59926e-10
         max_at: nominal
       db_au:
-        nominal: -90.434
-        min: -90.434
+        nominal: -90.4329
+        min: -90.4329
         min_at: nominal
-        max: -90.434
+        max: -90.4329
         max_at: nominal
       ppm_au:
-        nominal: 30.0815
-        min: 30.0815
+        nominal: 30.0852
+        min: 30.0852
         min_at: nominal
-        max: 30.0815
+        max: 30.0852
         max_at: nominal
       n_cb_total:
-        nominal: 0.000215719
-        min: 0.000215719
+        nominal: 0.000215738
+        min: 0.000215738
         min_at: nominal
-        max: 0.000215719
+        max: 0.000215738
         max_at: nominal
       n_cb_sensor:
-        nominal: 0.000215456
-        min: 0.000215456
+        nominal: 0.000215473
+        min: 0.000215473
         min_at: nominal
-        max: 0.000215456
+        max: 0.000215473
         max_at: nominal
       n_cb_elec:
-        nominal: 1.06395e-05
-        min: 1.06395e-05
+        nominal: 1.06817e-05
+        min: 1.06817e-05
         min_at: nominal
-        max: 1.06395e-05
+        max: 1.06817e-05
         max_at: nominal
       n_cb_ref:
-        nominal: 4.01766e-06
-        min: 4.01766e-06
+        nominal: 4.01798e-06
+        min: 4.01798e-06
         min_at: nominal
-        max: 4.01766e-06
+        max: 4.01798e-06
         max_at: nominal
       n_cb_sbuf:
-        nominal: 5.09631e-07
-        min: 5.09631e-07
+        nominal: 5.09672e-07
+        min: 5.09672e-07
         min_at: nominal
-        max: 5.09631e-07
+        max: 5.09672e-07
         max_at: nominal
       n_cb_link:
-        nominal: 3.35282e-07
-        min: 3.35282e-07
+        nominal: 3.35308e-07
+        min: 3.35308e-07
         min_at: nominal
-        max: 3.35282e-07
+        max: 3.35308e-07
         max_at: nominal
       n_cb_recv:
-        nominal: 2.66727e-06
-        min: 2.66727e-06
+        nominal: 2.66748e-06
+        min: 2.66748e-06
         min_at: nominal
-        max: 2.66727e-06
+        max: 2.66748e-06
         max_at: nominal
       n_cb_zero:
-        nominal: 3.69961e-07
-        min: 3.69961e-07
+        nominal: 3.6999e-07
+        min: 3.6999e-07
         min_at: nominal
-        max: 3.69961e-07
+        max: 3.6999e-07
         max_at: nominal
       n_cb_dac:
-        nominal: 7.09521e-06
-        min: 7.09521e-06
+        nominal: 7.09526e-06
+        min: 7.09526e-06
         min_at: nominal
-        max: 7.09521e-06
+        max: 7.09526e-06
         max_at: nominal
       n_cb_shaper:
         nominal: 4.55652e-06
@@ -2722,46 +2724,46 @@ sims:
         max: 4.55652e-06
         max_at: nominal
       n_cb_out:
-        nominal: 4.28128e-06
-        min: 4.28128e-06
+        nominal: 4.38468e-06
+        min: 4.38468e-06
         min_at: nominal
-        max: 4.28128e-06
+        max: 4.38468e-06
         max_at: nominal
       n_cb_rest:
-        nominal: 4.46503e-12
-        min: 4.46503e-12
+        nominal: 4.44171e-12
+        min: 4.44171e-12
         min_at: nominal
-        max: 4.46503e-12
+        max: 4.44171e-12
         max_at: nominal
       db_cb:
-        nominal: -93.3222
-        min: -93.3222
+        nominal: -93.3215
+        min: -93.3215
         min_at: nominal
-        max: -93.3222
+        max: -93.3215
         max_at: nominal
       ppm_cb:
-        nominal: 21.5719
-        min: 21.5719
+        nominal: 21.5738
+        min: 21.5738
         min_at: nominal
-        max: 21.5719
+        max: 21.5738
         max_at: nominal
       e_100:
-        nominal: 6.35402e-06
-        min: 6.35402e-06
+        nominal: 6.35459e-06
+        min: 6.35459e-06
         min_at: nominal
-        max: 6.35402e-06
+        max: 6.35459e-06
         max_at: nominal
       e_1k:
-        nominal: 5.36635e-06
-        min: 5.36635e-06
+        nominal: 5.36682e-06
+        min: 5.36682e-06
         min_at: nominal
-        max: 5.36635e-06
+        max: 5.36682e-06
         max_at: nominal
       e_1k_elec:
-        nominal: 1.95719e-07
-        min: 1.95719e-07
+        nominal: 1.97011e-07
+        min: 1.97011e-07
         min_at: nominal
-        max: 1.95719e-07
+        max: 1.97011e-07
         max_at: nominal
       n_adc_total:
         nominal: 0.000106728
@@ -2818,16 +2820,16 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.14921
-        min: -2.14921
+        nominal: -2.14907
+        min: -2.14907
         min_at: nominal
-        max: -2.14921
+        max: -2.14907
         max_at: nominal
       g_inc_hard:
-        nominal: -2.14403
-        min: -2.14403
+        nominal: -2.14402
+        min: -2.14402
         min_at: nominal
-        max: -2.14403
+        max: -2.14402
         max_at: nominal
       r_b:
         nominal: 1.0
@@ -2842,112 +2844,112 @@ sims:
         max: 8.011e-05
         max_at: nominal
       jack_op:
-        nominal: -0.0294334
-        min: -0.0294334
+        nominal: -0.0136188
+        min: -0.0136188
         min_at: nominal
-        max: -0.0294334
+        max: -0.0136188
         max_at: nominal
       n_au_total:
-        nominal: 0.000806222
-        min: 0.000806222
+        nominal: 0.000806234
+        min: 0.000806234
         min_at: nominal
-        max: 0.000806222
+        max: 0.000806234
         max_at: nominal
       n_au_sensor:
-        nominal: 0.000805762
-        min: 0.000805762
+        nominal: 0.000805769
+        min: 0.000805769
         min_at: nominal
-        max: 0.000805762
+        max: 0.000805769
         max_at: nominal
       n_au_elec:
-        nominal: 2.72445e-05
-        min: 2.72445e-05
+        nominal: 2.73721e-05
+        min: 2.73721e-05
         min_at: nominal
-        max: 2.72445e-05
+        max: 2.73721e-05
         max_at: nominal
       n_au_ref:
-        nominal: 1.65072e-06
-        min: 1.65072e-06
+        nominal: 1.65073e-06
+        min: 1.65073e-06
         min_at: nominal
-        max: 1.65072e-06
+        max: 1.65073e-06
         max_at: nominal
       n_au_sbuf:
-        nominal: 1.45761e-06
-        min: 1.45761e-06
+        nominal: 1.45762e-06
+        min: 1.45762e-06
         min_at: nominal
-        max: 1.45761e-06
+        max: 1.45762e-06
         max_at: nominal
       n_au_link:
-        nominal: 1.25386e-06
-        min: 1.25386e-06
+        nominal: 1.25387e-06
+        min: 1.25387e-06
         min_at: nominal
-        max: 1.25386e-06
+        max: 1.25387e-06
         max_at: nominal
       n_au_recv:
-        nominal: 1.90728e-05
-        min: 1.90728e-05
+        nominal: 1.90737e-05
+        min: 1.90737e-05
         min_at: nominal
-        max: 1.90728e-05
+        max: 1.90737e-05
         max_at: nominal
       n_au_zero:
-        nominal: 2.77402e-06
-        min: 2.77402e-06
+        nominal: 2.77416e-06
+        min: 2.77416e-06
         min_at: nominal
-        max: 2.77402e-06
+        max: 2.77416e-06
         max_at: nominal
       n_au_dac:
-        nominal: 6.52498e-06
-        min: 6.52498e-06
+        nominal: 6.52499e-06
+        min: 6.52499e-06
         min_at: nominal
-        max: 6.52498e-06
+        max: 6.52499e-06
         max_at: nominal
       n_au_shaper:
-        nominal: 1.30091e-05
-        min: 1.30091e-05
+        nominal: 1.30097e-05
+        min: 1.30097e-05
         min_at: nominal
-        max: 1.30091e-05
+        max: 1.30097e-05
         max_at: nominal
       n_au_out:
-        nominal: 1.23516e-05
-        min: 1.23516e-05
+        nominal: 1.26286e-05
+        min: 1.26286e-05
         min_at: nominal
-        max: 1.23516e-05
+        max: 1.26286e-05
         max_at: nominal
       n_au_rest:
-        nominal: 4.29333e-10
-        min: 4.29333e-10
+        nominal: 4.2935e-10
+        min: 4.2935e-10
         min_at: nominal
-        max: 4.29333e-10
+        max: 4.2935e-10
         max_at: nominal
       db_au:
-        nominal: -81.8709
-        min: -81.8709
+        nominal: -81.8708
+        min: -81.8708
         min_at: nominal
-        max: -81.8709
+        max: -81.8708
         max_at: nominal
       ppm_au:
-        nominal: 80.6222
-        min: 80.6222
+        nominal: 80.6234
+        min: 80.6234
         min_at: nominal
-        max: 80.6222
+        max: 80.6234
         max_at: nominal
       n_cb_total:
-        nominal: 0.00057866
-        min: 0.00057866
+        nominal: 0.000578662
+        min: 0.000578662
         min_at: nominal
-        max: 0.00057866
+        max: 0.000578662
         max_at: nominal
       n_cb_sensor:
-        nominal: 0.000578521
-        min: 0.000578521
+        nominal: 0.000578522
+        min: 0.000578522
         min_at: nominal
-        max: 0.000578521
+        max: 0.000578522
         max_at: nominal
       n_cb_elec:
-        nominal: 1.26827e-05
-        min: 1.26827e-05
+        nominal: 1.2718e-05
+        min: 1.2718e-05
         min_at: nominal
-        max: 1.26827e-05
+        max: 1.2718e-05
         max_at: nominal
       n_cb_ref:
         nominal: 1.18518e-06
@@ -2962,10 +2964,10 @@ sims:
         max: 1.36841e-06
         max_at: nominal
       n_cb_link:
-        nominal: 9.00265e-07
-        min: 9.00265e-07
+        nominal: 9.00266e-07
+        min: 9.00266e-07
         min_at: nominal
-        max: 9.00265e-07
+        max: 9.00266e-07
         max_at: nominal
       n_cb_recv:
         nominal: 7.16188e-06
@@ -2974,10 +2976,10 @@ sims:
         max: 7.16188e-06
         max_at: nominal
       n_cb_zero:
-        nominal: 9.93381e-07
-        min: 9.93381e-07
+        nominal: 9.93382e-07
+        min: 9.93382e-07
         min_at: nominal
-        max: 9.93381e-07
+        max: 9.93382e-07
         max_at: nominal
       n_cb_dac:
         nominal: 8.0853e-06
@@ -2992,16 +2994,16 @@ sims:
         max: 4.55886e-06
         max_at: nominal
       n_cb_out:
-        nominal: 4.28128e-06
-        min: 4.28128e-06
+        nominal: 4.38468e-06
+        min: 4.38468e-06
         min_at: nominal
-        max: 4.28128e-06
+        max: 4.38468e-06
         max_at: nominal
       n_cb_rest:
-        nominal: 1.10222e-11
-        min: 1.10222e-11
+        nominal: 1.08665e-11
+        min: 1.08665e-11
         min_at: nominal
-        max: 1.10222e-11
+        max: 1.08665e-11
         max_at: nominal
       db_cb:
         nominal: -84.7515
@@ -3010,10 +3012,10 @@ sims:
         max: -84.7515
         max_at: nominal
       ppm_cb:
-        nominal: 57.866
-        min: 57.866
+        nominal: 57.8661
+        min: 57.8661
         min_at: nominal
-        max: 57.866
+        max: 57.8661
         max_at: nominal
       e_100:
         nominal: 1.70362e-05
@@ -3028,10 +3030,10 @@ sims:
         max: 1.44016e-05
         max_at: nominal
       e_1k_elec:
-        nominal: 2.3818e-07
-        min: 2.3818e-07
+        nominal: 2.39238e-07
+        min: 2.39238e-07
         min_at: nominal
-        max: 2.3818e-07
+        max: 2.39238e-07
         max_at: nominal
       n_adc_total:
         nominal: 0.000106709
@@ -3088,22 +3090,22 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.14921
-        min: -2.14921
+        nominal: -2.14907
+        min: -2.14907
         min_at: nominal
-        max: -2.14921
+        max: -2.14907
         max_at: nominal
       g_inc_hard:
-        nominal: -2.14403
-        min: -2.14403
+        nominal: -2.14402
+        min: -2.14402
         min_at: nominal
-        max: -2.14403
+        max: -2.14402
         max_at: nominal
       r_b:
-        nominal: 0.997588
-        min: 0.997588
+        nominal: 0.997648
+        min: 0.997648
         min_at: nominal
-        max: 0.997588
+        max: 0.997648
         max_at: nominal
       ina_op:
         nominal: -4.63989
@@ -3112,148 +3114,148 @@ sims:
         max: -4.63989
         max_at: nominal
       jack_op:
-        nominal: -0.0294334
-        min: -0.0294334
+        nominal: -0.0136188
+        min: -0.0136188
         min_at: nominal
-        max: -0.0294334
+        max: -0.0136188
         max_at: nominal
       n_au_total:
-        nominal: 0.000804417
-        min: 0.000804417
+        nominal: 0.000804477
+        min: 0.000804477
         min_at: nominal
-        max: 0.000804417
+        max: 0.000804477
         max_at: nominal
       n_au_sensor:
-        nominal: 0.000803818
-        min: 0.000803818
+        nominal: 0.000803874
+        min: 0.000803874
         min_at: nominal
-        max: 0.000803818
+        max: 0.000803874
         max_at: nominal
       n_au_elec:
-        nominal: 3.10219e-05
-        min: 3.10219e-05
+        nominal: 3.11353e-05
+        min: 3.11353e-05
         min_at: nominal
-        max: 3.10219e-05
+        max: 3.11353e-05
         max_at: nominal
       n_au_ref:
-        nominal: 1.4989e-05
-        min: 1.4989e-05
+        nominal: 1.499e-05
+        min: 1.499e-05
         min_at: nominal
-        max: 1.4989e-05
+        max: 1.499e-05
         max_at: nominal
       n_au_sbuf:
-        nominal: 1.4541e-06
-        min: 1.4541e-06
+        nominal: 1.45419e-06
+        min: 1.45419e-06
         min_at: nominal
-        max: 1.4541e-06
+        max: 1.45419e-06
         max_at: nominal
       n_au_link:
-        nominal: 1.25083e-06
-        min: 1.25083e-06
+        nominal: 1.25092e-06
+        min: 1.25092e-06
         min_at: nominal
-        max: 1.25083e-06
+        max: 1.25092e-06
         max_at: nominal
       n_au_recv:
-        nominal: 1.90268e-05
-        min: 1.90268e-05
+        nominal: 1.90289e-05
+        min: 1.90289e-05
         min_at: nominal
-        max: 1.90268e-05
+        max: 1.90289e-05
         max_at: nominal
       n_au_zero:
-        nominal: 2.76733e-06
-        min: 2.76733e-06
+        nominal: 2.76763e-06
+        min: 2.76763e-06
         min_at: nominal
-        max: 2.76733e-06
+        max: 2.76763e-06
         max_at: nominal
       n_au_dac:
-        nominal: 6.52191e-06
-        min: 6.52191e-06
+        nominal: 6.52199e-06
+        min: 6.52199e-06
         min_at: nominal
-        max: 6.52191e-06
+        max: 6.52199e-06
         max_at: nominal
       n_au_shaper:
-        nominal: 1.30091e-05
-        min: 1.30091e-05
+        nominal: 1.30097e-05
+        min: 1.30097e-05
         min_at: nominal
-        max: 1.30091e-05
+        max: 1.30097e-05
         max_at: nominal
       n_au_out:
-        nominal: 1.23516e-05
-        min: 1.23516e-05
+        nominal: 1.26286e-05
+        min: 1.26286e-05
         min_at: nominal
-        max: 1.23516e-05
+        max: 1.26286e-05
         max_at: nominal
       n_au_rest:
-        nominal: 4.28278e-10
-        min: 4.28278e-10
+        nominal: 4.28361e-10
+        min: 4.28361e-10
         min_at: nominal
-        max: 4.28278e-10
+        max: 4.28361e-10
         max_at: nominal
       db_au:
-        nominal: -81.8904
-        min: -81.8904
+        nominal: -81.8897
+        min: -81.8897
         min_at: nominal
-        max: -81.8904
+        max: -81.8897
         max_at: nominal
       ppm_au:
-        nominal: 80.4417
-        min: 80.4417
+        nominal: 80.4477
+        min: 80.4477
         min_at: nominal
-        max: 80.4417
+        max: 80.4477
         max_at: nominal
       n_cb_total:
-        nominal: 0.000577364
-        min: 0.000577364
+        nominal: 0.0005774
+        min: 0.0005774
         min_at: nominal
-        max: 0.000577364
+        max: 0.0005774
         max_at: nominal
       n_cb_sensor:
-        nominal: 0.000577126
-        min: 0.000577126
+        nominal: 0.000577161
+        min: 0.000577161
         min_at: nominal
-        max: 0.000577126
+        max: 0.000577161
         max_at: nominal
       n_cb_elec:
-        nominal: 1.65812e-05
-        min: 1.65812e-05
+        nominal: 1.66089e-05
+        min: 1.66089e-05
         min_at: nominal
-        max: 1.65812e-05
+        max: 1.66089e-05
         max_at: nominal
       n_cb_ref:
-        nominal: 1.07618e-05
-        min: 1.07618e-05
+        nominal: 1.07625e-05
+        min: 1.07625e-05
         min_at: nominal
-        max: 1.07618e-05
+        max: 1.07625e-05
         max_at: nominal
       n_cb_sbuf:
-        nominal: 1.36511e-06
-        min: 1.36511e-06
+        nominal: 1.36519e-06
+        min: 1.36519e-06
         min_at: nominal
-        max: 1.36511e-06
+        max: 1.36519e-06
         max_at: nominal
       n_cb_link:
-        nominal: 8.98093e-07
-        min: 8.98093e-07
+        nominal: 8.98149e-07
+        min: 8.98149e-07
         min_at: nominal
-        max: 8.98093e-07
+        max: 8.98149e-07
         max_at: nominal
       n_cb_recv:
-        nominal: 7.1446e-06
-        min: 7.1446e-06
+        nominal: 7.14504e-06
+        min: 7.14504e-06
         min_at: nominal
-        max: 7.1446e-06
+        max: 7.14504e-06
         max_at: nominal
       n_cb_zero:
-        nominal: 9.90985e-07
-        min: 9.90985e-07
+        nominal: 9.91046e-07
+        min: 9.91046e-07
         min_at: nominal
-        max: 9.90985e-07
+        max: 9.91046e-07
         max_at: nominal
       n_cb_dac:
-        nominal: 8.08149e-06
-        min: 8.08149e-06
+        nominal: 8.08159e-06
+        min: 8.08159e-06
         min_at: nominal
-        max: 8.08149e-06
+        max: 8.08159e-06
         max_at: nominal
       n_cb_shaper:
         nominal: 4.55886e-06
@@ -3262,46 +3264,46 @@ sims:
         max: 4.55886e-06
         max_at: nominal
       n_cb_out:
-        nominal: 4.28128e-06
-        min: 4.28128e-06
+        nominal: 4.38468e-06
+        min: 4.38468e-06
         min_at: nominal
-        max: 4.28128e-06
+        max: 4.38468e-06
         max_at: nominal
       n_cb_rest:
-        nominal: 1.21555e-11
-        min: 1.21555e-11
+        nominal: 1.12868e-11
+        min: 1.12868e-11
         min_at: nominal
-        max: 1.21555e-11
+        max: 1.12868e-11
         max_at: nominal
       db_cb:
-        nominal: -84.771
-        min: -84.771
+        nominal: -84.7705
+        min: -84.7705
         min_at: nominal
-        max: -84.771
+        max: -84.7705
         max_at: nominal
       ppm_cb:
-        nominal: 57.7364
-        min: 57.7364
+        nominal: 57.74
+        min: 57.74
         min_at: nominal
-        max: 57.7364
+        max: 57.74
         max_at: nominal
       e_100:
-        nominal: 1.6998e-05
-        min: 1.6998e-05
+        nominal: 1.69991e-05
+        min: 1.69991e-05
         min_at: nominal
-        max: 1.6998e-05
+        max: 1.69991e-05
         max_at: nominal
       e_1k:
-        nominal: 1.43693e-05
-        min: 1.43693e-05
+        nominal: 1.43702e-05
+        min: 1.43702e-05
         min_at: nominal
-        max: 1.43693e-05
+        max: 1.43702e-05
         max_at: nominal
       e_1k_elec:
-        nominal: 3.57012e-07
-        min: 3.57012e-07
+        nominal: 3.57736e-07
+        min: 3.57736e-07
         min_at: nominal
-        max: 3.57012e-07
+        max: 3.57736e-07
         max_at: nominal
       n_adc_total:
         nominal: 0.000106728
@@ -3358,10 +3360,10 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.15469
-        min: -2.15469
+        nominal: -2.15455
+        min: -2.15455
         min_at: nominal
-        max: -2.15469
+        max: -2.15455
         max_at: nominal
       g_inc_hard:
         nominal: 0.0003
@@ -3382,58 +3384,58 @@ sims:
         max: 8.011e-05
         max_at: nominal
       jack_op:
-        nominal: -0.0294333
-        min: -0.0294333
+        nominal: -0.0136186
+        min: -0.0136186
         min_at: nominal
-        max: -0.0294333
+        max: -0.0136186
         max_at: nominal
       n_au_total:
-        nominal: 0.000807879
-        min: 0.000807879
+        nominal: 0.000807891
+        min: 0.000807891
         min_at: nominal
-        max: 0.000807879
+        max: 0.000807891
         max_at: nominal
       n_au_sensor:
-        nominal: 0.000807419
-        min: 0.000807419
+        nominal: 0.000807426
+        min: 0.000807426
         min_at: nominal
-        max: 0.000807419
+        max: 0.000807426
         max_at: nominal
       n_au_elec:
-        nominal: 2.72769e-05
-        min: 2.72769e-05
+        nominal: 2.74044e-05
+        min: 2.74044e-05
         min_at: nominal
-        max: 2.72769e-05
+        max: 2.74044e-05
         max_at: nominal
       n_au_ref:
-        nominal: 1.65411e-06
-        min: 1.65411e-06
+        nominal: 1.65413e-06
+        min: 1.65413e-06
         min_at: nominal
-        max: 1.65411e-06
+        max: 1.65413e-06
         max_at: nominal
       n_au_sbuf:
-        nominal: 1.46061e-06
-        min: 1.46061e-06
+        nominal: 1.46062e-06
+        min: 1.46062e-06
         min_at: nominal
-        max: 1.46061e-06
+        max: 1.46062e-06
         max_at: nominal
       n_au_link:
-        nominal: 1.25644e-06
-        min: 1.25644e-06
+        nominal: 1.25645e-06
+        min: 1.25645e-06
         min_at: nominal
-        max: 1.25644e-06
+        max: 1.25645e-06
         max_at: nominal
       n_au_recv:
-        nominal: 1.91122e-05
-        min: 1.91122e-05
+        nominal: 1.9113e-05
+        min: 1.9113e-05
         min_at: nominal
-        max: 1.91122e-05
+        max: 1.9113e-05
         max_at: nominal
       n_au_zero:
-        nominal: 2.77974e-06
-        min: 2.77974e-06
+        nominal: 2.77988e-06
+        min: 2.77988e-06
         min_at: nominal
-        max: 2.77974e-06
+        max: 2.77988e-06
         max_at: nominal
       n_au_dac:
         nominal: 6.5276e-06
@@ -3442,52 +3444,52 @@ sims:
         max: 6.5276e-06
         max_at: nominal
       n_au_shaper:
-        nominal: 1.30157e-05
-        min: 1.30157e-05
+        nominal: 1.30164e-05
+        min: 1.30164e-05
         min_at: nominal
-        max: 1.30157e-05
+        max: 1.30164e-05
         max_at: nominal
       n_au_out:
-        nominal: 1.23516e-05
-        min: 1.23516e-05
+        nominal: 1.26286e-05
+        min: 1.26286e-05
         min_at: nominal
-        max: 1.23516e-05
+        max: 1.26286e-05
         max_at: nominal
       n_au_rest:
-        nominal: 4.30235e-10
-        min: 4.30235e-10
+        nominal: 4.30222e-10
+        min: 4.30222e-10
         min_at: nominal
-        max: 4.30235e-10
+        max: 4.30222e-10
         max_at: nominal
       db_au:
-        nominal: -81.8531
-        min: -81.8531
+        nominal: -81.8529
+        min: -81.8529
         min_at: nominal
-        max: -81.8531
+        max: -81.8529
         max_at: nominal
       ppm_au:
-        nominal: 80.7879
-        min: 80.7879
+        nominal: 80.7891
+        min: 80.7891
         min_at: nominal
-        max: 80.7879
+        max: 80.7891
         max_at: nominal
       n_cb_total:
-        nominal: 0.000579849
-        min: 0.000579849
+        nominal: 0.00057985
+        min: 0.00057985
         min_at: nominal
-        max: 0.000579849
+        max: 0.00057985
         max_at: nominal
       n_cb_sensor:
-        nominal: 0.00057971
-        min: 0.00057971
+        nominal: 0.000579711
+        min: 0.000579711
         min_at: nominal
-        max: 0.00057971
+        max: 0.000579711
         max_at: nominal
       n_cb_elec:
-        nominal: 1.26948e-05
-        min: 1.26948e-05
+        nominal: 1.273e-05
+        min: 1.273e-05
         min_at: nominal
-        max: 1.26948e-05
+        max: 1.273e-05
         max_at: nominal
       n_cb_ref:
         nominal: 1.18762e-06
@@ -3502,10 +3504,10 @@ sims:
         max: 1.37122e-06
         max_at: nominal
       n_cb_link:
-        nominal: 9.02115e-07
-        min: 9.02115e-07
+        nominal: 9.02116e-07
+        min: 9.02116e-07
         min_at: nominal
-        max: 9.02115e-07
+        max: 9.02116e-07
         max_at: nominal
       n_cb_recv:
         nominal: 7.1766e-06
@@ -3514,10 +3516,10 @@ sims:
         max: 7.1766e-06
         max_at: nominal
       n_cb_zero:
-        nominal: 9.95423e-07
-        min: 9.95423e-07
+        nominal: 9.95424e-07
+        min: 9.95424e-07
         min_at: nominal
-        max: 9.95423e-07
+        max: 9.95424e-07
         max_at: nominal
       n_cb_dac:
         nominal: 8.08854e-06
@@ -3532,16 +3534,16 @@ sims:
         max: 4.5612e-06
         max_at: nominal
       n_cb_out:
-        nominal: 4.28128e-06
-        min: 4.28128e-06
+        nominal: 4.38468e-06
+        min: 4.38468e-06
         min_at: nominal
-        max: 4.28128e-06
+        max: 4.38468e-06
         max_at: nominal
       n_cb_rest:
-        nominal: 1.07418e-11
-        min: 1.07418e-11
+        nominal: 1.11457e-11
+        min: 1.11457e-11
         min_at: nominal
-        max: 1.07418e-11
+        max: 1.11457e-11
         max_at: nominal
       db_cb:
         nominal: -84.7337
@@ -3550,10 +3552,10 @@ sims:
         max: -84.7337
         max_at: nominal
       ppm_cb:
-        nominal: 57.9849
-        min: 57.9849
+        nominal: 57.9851
+        min: 57.9851
         min_at: nominal
-        max: 57.9849
+        max: 57.9851
         max_at: nominal
       e_100:
         nominal: 1.70712e-05
@@ -3568,10 +3570,10 @@ sims:
         max: 1.44312e-05
         max_at: nominal
       e_1k_elec:
-        nominal: 2.38489e-07
-        min: 2.38489e-07
+        nominal: 2.39545e-07
+        min: 2.39545e-07
         min_at: nominal
-        max: 2.38489e-07
+        max: 2.39545e-07
         max_at: nominal
       n_adc_total:
         nominal: 0.000106709
@@ -3628,10 +3630,10 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.15469
-        min: -2.15469
+        nominal: -2.15455
+        min: -2.15455
         min_at: nominal
-        max: -2.15469
+        max: -2.15455
         max_at: nominal
       g_inc_hard:
         nominal: 0.0003
@@ -3640,10 +3642,10 @@ sims:
         max: 0.0003
         max_at: nominal
       r_b:
-        nominal: -0.000139231
-        min: -0.000139231
+        nominal: -0.00013924
+        min: -0.00013924
         min_at: nominal
-        max: -0.000139231
+        max: -0.00013924
         max_at: nominal
       ina_op:
         nominal: -4.63989
@@ -3652,58 +3654,58 @@ sims:
         max: -4.63989
         max_at: nominal
       jack_op:
-        nominal: -0.0294333
-        min: -0.0294333
+        nominal: -0.0136186
+        min: -0.0136186
         min_at: nominal
-        max: -0.0294333
+        max: -0.0136186
         max_at: nominal
       n_au_total:
-        nominal: 1.86967e-05
-        min: 1.86967e-05
+        nominal: 1.88813e-05
+        min: 1.88813e-05
         min_at: nominal
-        max: 1.86967e-05
+        max: 1.88813e-05
         max_at: nominal
       n_au_sensor:
-        nominal: 1.12418e-07
-        min: 1.12418e-07
+        nominal: 1.12426e-07
+        min: 1.12426e-07
         min_at: nominal
-        max: 1.12418e-07
+        max: 1.12426e-07
         max_at: nominal
       n_au_elec:
-        nominal: 1.86964e-05
-        min: 1.86964e-05
+        nominal: 1.8881e-05
+        min: 1.8881e-05
         min_at: nominal
-        max: 1.86964e-05
+        max: 1.8881e-05
         max_at: nominal
       n_au_ref:
-        nominal: 2.09628e-09
-        min: 2.09628e-09
+        nominal: 2.09644e-09
+        min: 2.09644e-09
         min_at: nominal
-        max: 2.09628e-09
+        max: 2.09644e-09
         max_at: nominal
       n_au_sbuf:
-        nominal: 2.03362e-10
-        min: 2.03362e-10
+        nominal: 2.03377e-10
+        min: 2.03377e-10
         min_at: nominal
-        max: 2.03362e-10
+        max: 2.03377e-10
         max_at: nominal
       n_au_link:
-        nominal: 1.74935e-10
-        min: 1.74935e-10
+        nominal: 1.74948e-10
+        min: 1.74948e-10
         min_at: nominal
-        max: 1.74935e-10
+        max: 1.74948e-10
         max_at: nominal
       n_au_recv:
-        nominal: 2.66101e-09
-        min: 2.66101e-09
+        nominal: 2.66131e-09
+        min: 2.66131e-09
         min_at: nominal
-        max: 2.66101e-09
+        max: 2.66131e-09
         max_at: nominal
       n_au_zero:
-        nominal: 3.87027e-10
-        min: 3.87027e-10
+        nominal: 3.87071e-10
+        min: 3.87071e-10
         min_at: nominal
-        max: 3.87027e-10
+        max: 3.87071e-10
         max_at: nominal
       n_au_dac:
         nominal: 5.25197e-06
@@ -3712,82 +3714,82 @@ sims:
         max: 5.25197e-06
         max_at: nominal
       n_au_shaper:
-        nominal: 1.30157e-05
-        min: 1.30157e-05
+        nominal: 1.30164e-05
+        min: 1.30164e-05
         min_at: nominal
-        max: 1.30157e-05
+        max: 1.30164e-05
         max_at: nominal
       n_au_out:
-        nominal: 1.23516e-05
-        min: 1.23516e-05
+        nominal: 1.26286e-05
+        min: 1.26286e-05
         min_at: nominal
-        max: 1.23516e-05
+        max: 1.26286e-05
         max_at: nominal
       n_au_rest:
-        nominal: 1.14088e-12
-        min: 1.14088e-12
+        nominal: 1.13667e-12
+        min: 1.13667e-12
         min_at: nominal
-        max: 1.14088e-12
+        max: 1.13667e-12
         max_at: nominal
       db_au:
-        nominal: -114.565
-        min: -114.565
+        nominal: -114.479
+        min: -114.479
         min_at: nominal
-        max: -114.565
+        max: -114.479
         max_at: nominal
       ppm_au:
-        nominal: 1.86967
-        min: 1.86967
+        nominal: 1.88813
+        min: 1.88813
         min_at: nominal
-        max: 1.86967
+        max: 1.88813
         max_at: nominal
       n_cb_total:
-        nominal: 9.02735e-06
-        min: 9.02735e-06
+        nominal: 9.07684e-06
+        min: 9.07684e-06
         min_at: nominal
-        max: 9.02735e-06
+        max: 9.07684e-06
         max_at: nominal
       n_cb_sensor:
-        nominal: 8.07138e-08
-        min: 8.07138e-08
+        nominal: 8.07192e-08
+        min: 8.07192e-08
         min_at: nominal
-        max: 8.07138e-08
+        max: 8.07192e-08
         max_at: nominal
       n_cb_elec:
-        nominal: 9.02699e-06
-        min: 9.02699e-06
+        nominal: 9.07648e-06
+        min: 9.07648e-06
         min_at: nominal
-        max: 9.02699e-06
+        max: 9.07648e-06
         max_at: nominal
       n_cb_ref:
-        nominal: 1.50509e-09
-        min: 1.50509e-09
+        nominal: 1.50519e-09
+        min: 1.50519e-09
         min_at: nominal
-        max: 1.50509e-09
+        max: 1.50519e-09
         max_at: nominal
       n_cb_sbuf:
-        nominal: 1.90917e-10
-        min: 1.90917e-10
+        nominal: 1.9093e-10
+        min: 1.9093e-10
         min_at: nominal
-        max: 1.90917e-10
+        max: 1.9093e-10
         max_at: nominal
       n_cb_link:
-        nominal: 1.25603e-10
-        min: 1.25603e-10
+        nominal: 1.25611e-10
+        min: 1.25611e-10
         min_at: nominal
-        max: 1.25603e-10
+        max: 1.25611e-10
         max_at: nominal
       n_cb_recv:
-        nominal: 9.99207e-10
-        min: 9.99207e-10
+        nominal: 9.99274e-10
+        min: 9.99274e-10
         min_at: nominal
-        max: 9.99207e-10
+        max: 9.99274e-10
         max_at: nominal
       n_cb_zero:
-        nominal: 1.38594e-10
-        min: 1.38594e-10
+        nominal: 1.38603e-10
+        min: 1.38603e-10
         min_at: nominal
-        max: 1.38594e-10
+        max: 1.38603e-10
         max_at: nominal
       n_cb_dac:
         nominal: 6.50788e-06
@@ -3802,46 +3804,46 @@ sims:
         max: 4.5612e-06
         max_at: nominal
       n_cb_out:
-        nominal: 4.28128e-06
-        min: 4.28128e-06
+        nominal: 4.38468e-06
+        min: 4.38468e-06
         min_at: nominal
-        max: 4.28128e-06
+        max: 4.38468e-06
         max_at: nominal
       n_cb_rest:
-        nominal: 3.52561e-13
-        min: 3.52561e-13
+        nominal: 3.59468e-13
+        min: 3.59468e-13
         min_at: nominal
-        max: 3.52561e-13
+        max: 3.59468e-13
         max_at: nominal
       db_cb:
-        nominal: -120.889
-        min: -120.889
+        nominal: -120.841
+        min: -120.841
         min_at: nominal
-        max: -120.889
+        max: -120.841
         max_at: nominal
       ppm_cb:
-        nominal: 0.902735
-        min: 0.902735
+        nominal: 0.907684
+        min: 0.907684
         min_at: nominal
-        max: 0.902735
+        max: 0.907684
         max_at: nominal
       e_100:
-        nominal: 3.33183e-07
-        min: 3.33183e-07
+        nominal: 3.34576e-07
+        min: 3.34576e-07
         min_at: nominal
-        max: 3.33183e-07
+        max: 3.34576e-07
         max_at: nominal
       e_1k:
-        nominal: 1.54235e-07
-        min: 1.54235e-07
+        nominal: 1.55863e-07
+        min: 1.55863e-07
         min_at: nominal
-        max: 1.54235e-07
+        max: 1.55863e-07
         max_at: nominal
       e_1k_elec:
-        nominal: 1.54222e-07
-        min: 1.54222e-07
+        nominal: 1.5585e-07
+        min: 1.5585e-07
         min_at: nominal
-        max: 1.54222e-07
+        max: 1.5585e-07
         max_at: nominal
       n_adc_total:
         nominal: 0.000106728
@@ -3898,16 +3900,16 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.14335
-        min: -2.14335
+        nominal: -2.14321
+        min: -2.14321
         min_at: nominal
-        max: -2.14335
+        max: -2.14321
         max_at: nominal
       g_inc_hard:
-        nominal: -0.79988
-        min: -0.79988
+        nominal: -0.79989
+        min: -0.79989
         min_at: nominal
-        max: -0.79988
+        max: -0.79989
         max_at: nominal
       r_b:
         nominal: 1.0
@@ -3922,58 +3924,58 @@ sims:
         max: 8.011e-05
         max_at: nominal
       jack_op:
-        nominal: -0.0294336
-        min: -0.0294336
+        nominal: -0.0136189
+        min: -0.0136189
         min_at: nominal
-        max: -0.0294336
+        max: -0.0136189
         max_at: nominal
       n_au_total:
-        nominal: 0.00162191
-        min: 0.00162191
+        nominal: 0.00162196
+        min: 0.00162196
         min_at: nominal
-        max: 0.00162191
+        max: 0.00162196
         max_at: nominal
       n_au_sensor:
-        nominal: 0.00162166
-        min: 0.00162166
+        nominal: 0.00162171
+        min: 0.00162171
         min_at: nominal
-        max: 0.00162166
+        max: 0.00162171
         max_at: nominal
       n_au_elec:
-        nominal: 2.84225e-05
-        min: 2.84225e-05
+        nominal: 2.8545e-05
+        min: 2.8545e-05
         min_at: nominal
-        max: 2.84225e-05
+        max: 2.8545e-05
         max_at: nominal
       n_au_ref:
-        nominal: 3.32219e-06
-        min: 3.32219e-06
+        nominal: 3.3223e-06
+        min: 3.3223e-06
         min_at: nominal
-        max: 3.32219e-06
+        max: 3.3223e-06
         max_at: nominal
       n_au_sbuf:
-        nominal: 2.58247e-06
-        min: 2.58247e-06
+        nominal: 2.58254e-06
+        min: 2.58254e-06
         min_at: nominal
-        max: 2.58247e-06
+        max: 2.58254e-06
         max_at: nominal
       n_au_link:
-        nominal: 2.5235e-06
-        min: 2.5235e-06
+        nominal: 2.52358e-06
+        min: 2.52358e-06
         min_at: nominal
-        max: 2.5235e-06
+        max: 2.52358e-06
         max_at: nominal
       n_au_recv:
-        nominal: 2.02962e-05
-        min: 2.02962e-05
+        nominal: 2.02971e-05
+        min: 2.02971e-05
         min_at: nominal
-        max: 2.02962e-05
+        max: 2.02971e-05
         max_at: nominal
       n_au_zero:
-        nominal: 2.76832e-06
-        min: 2.76832e-06
+        nominal: 2.76845e-06
+        min: 2.76845e-06
         min_at: nominal
-        max: 2.76832e-06
+        max: 2.76845e-06
         max_at: nominal
       n_au_dac:
         nominal: 6.52237e-06
@@ -3982,82 +3984,82 @@ sims:
         max: 6.52237e-06
         max_at: nominal
       n_au_shaper:
-        nominal: 1.30023e-05
-        min: 1.30023e-05
+        nominal: 1.3003e-05
+        min: 1.3003e-05
         min_at: nominal
-        max: 1.30023e-05
+        max: 1.3003e-05
         max_at: nominal
       n_au_out:
-        nominal: 1.23516e-05
-        min: 1.23516e-05
+        nominal: 1.26286e-05
+        min: 1.26286e-05
         min_at: nominal
-        max: 1.23516e-05
+        max: 1.26286e-05
         max_at: nominal
       n_au_rest:
-        nominal: 4.52806e-10
-        min: 4.52806e-10
+        nominal: 4.5286e-10
+        min: 4.5286e-10
         min_at: nominal
-        max: 4.52806e-10
+        max: 4.5286e-10
         max_at: nominal
       db_au:
-        nominal: -75.7995
-        min: -75.7995
+        nominal: -75.7992
+        min: -75.7992
         min_at: nominal
-        max: -75.7995
+        max: -75.7992
         max_at: nominal
       ppm_au:
-        nominal: 162.19
-        min: 162.19
+        nominal: 162.196
+        min: 162.196
         min_at: nominal
-        max: 162.19
+        max: 162.196
         max_at: nominal
       n_cb_total:
-        nominal: 0.00144451
-        min: 0.00144451
+        nominal: 0.00144454
+        min: 0.00144454
         min_at: nominal
-        max: 0.00144451
+        max: 0.00144454
         max_at: nominal
       n_cb_sensor:
-        nominal: 0.00144431
-        min: 0.00144431
+        nominal: 0.00144434
+        min: 0.00144434
         min_at: nominal
-        max: 0.00144431
+        max: 0.00144434
         max_at: nominal
       n_cb_elec:
-        nominal: 2.38902e-05
-        min: 2.38902e-05
+        nominal: 2.39835e-05
+        min: 2.39835e-05
         min_at: nominal
-        max: 2.38902e-05
+        max: 2.39835e-05
         max_at: nominal
       n_cb_ref:
-        nominal: 2.95888e-06
-        min: 2.95888e-06
+        nominal: 2.95894e-06
+        min: 2.95894e-06
         min_at: nominal
-        max: 2.95888e-06
+        max: 2.95894e-06
         max_at: nominal
       n_cb_sbuf:
-        nominal: 2.44106e-06
-        min: 2.44106e-06
+        nominal: 2.4411e-06
+        min: 2.4411e-06
         min_at: nominal
-        max: 2.44106e-06
+        max: 2.4411e-06
         max_at: nominal
       n_cb_link:
-        nominal: 2.24755e-06
-        min: 2.24755e-06
+        nominal: 2.24759e-06
+        min: 2.24759e-06
         min_at: nominal
-        max: 2.24755e-06
+        max: 2.24759e-06
         max_at: nominal
       n_cb_recv:
-        nominal: 1.65508e-05
-        min: 1.65508e-05
+        nominal: 1.65512e-05
+        min: 1.65512e-05
         min_at: nominal
-        max: 1.65508e-05
+        max: 1.65512e-05
         max_at: nominal
       n_cb_zero:
-        nominal: 2.22192e-06
-        min: 2.22192e-06
+        nominal: 2.22196e-06
+        min: 2.22196e-06
         min_at: nominal
-        max: 2.22192e-06
+        max: 2.22196e-06
         max_at: nominal
       n_cb_dac:
         nominal: 8.1291e-06
@@ -4066,34 +4068,34 @@ sims:
         max: 8.1291e-06
         max_at: nominal
       n_cb_shaper:
-        nominal: 1.04144e-05
-        min: 1.04144e-05
+        nominal: 1.04146e-05
+        min: 1.04146e-05
         min_at: nominal
-        max: 1.04144e-05
+        max: 1.04146e-05
         max_at: nominal
       n_cb_out:
-        nominal: 9.87753e-06
-        min: 9.87753e-06
+        nominal: 1.01003e-05
+        min: 1.01003e-05
         min_at: nominal
-        max: 9.87753e-06
+        max: 1.01003e-05
         max_at: nominal
       n_cb_rest:
-        nominal: 2.02155e-10
-        min: 2.02155e-10
+        nominal: 2.02116e-10
+        min: 2.02116e-10
         min_at: nominal
-        max: 2.02155e-10
+        max: 2.02116e-10
         max_at: nominal
       db_cb:
-        nominal: -76.8056
-        min: -76.8056
+        nominal: -76.8054
+        min: -76.8054
         min_at: nominal
-        max: -76.8056
+        max: -76.8054
         max_at: nominal
       ppm_cb:
-        nominal: 144.451
-        min: 144.451
+        nominal: 144.454
+        min: 144.454
         min_at: nominal
-        max: 144.451
+        max: 144.454
         max_at: nominal
       e_100:
         nominal: 1.70343e-05
@@ -4108,10 +4110,10 @@ sims:
         max: 1.69169e-05
         max_at: nominal
       e_1k_elec:
-        nominal: 2.4356e-07
-        min: 2.4356e-07
+        nominal: 2.44594e-07
+        min: 2.44594e-07
         min_at: nominal
-        max: 2.4356e-07
+        max: 2.44594e-07
         max_at: nominal
       n_adc_total:
         nominal: 0.00010671
@@ -4168,22 +4170,22 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.14335
-        min: -2.14335
+        nominal: -2.14321
+        min: -2.14321
         min_at: nominal
-        max: -2.14335
+        max: -2.14321
         max_at: nominal
       g_inc_hard:
-        nominal: -0.79988
-        min: -0.79988
+        nominal: -0.79989
+        min: -0.79989
         min_at: nominal
-        max: -0.79988
+        max: -0.79989
         max_at: nominal
       r_b:
-        nominal: 0.373192
-        min: 0.373192
+        nominal: 0.373221
+        min: 0.373221
         min_at: nominal
-        max: 0.373192
+        max: 0.373221
         max_at: nominal
       ina_op:
         nominal: -4.63989
@@ -4192,196 +4194,196 @@ sims:
         max: -4.63989
         max_at: nominal
       jack_op:
-        nominal: -0.0294336
-        min: -0.0294336
+        nominal: -0.0136189
+        min: -0.0136189
         min_at: nominal
-        max: -0.0294336
+        max: -0.0136189
         max_at: nominal
       n_au_total:
-        nominal: 0.000605637
-        min: 0.000605637
+        nominal: 0.00060571
+        min: 0.00060571
         min_at: nominal
-        max: 0.000605637
+        max: 0.00060571
         max_at: nominal
       n_au_sensor:
-        nominal: 0.000605189
-        min: 0.000605189
+        nominal: 0.000605257
+        min: 0.000605257
         min_at: nominal
-        max: 0.000605189
+        max: 0.000605257
         max_at: nominal
       n_au_elec:
-        nominal: 2.32813e-05
-        min: 2.32813e-05
+        nominal: 2.34307e-05
+        min: 2.34307e-05
         min_at: nominal
-        max: 2.32813e-05
+        max: 2.34307e-05
         max_at: nominal
       n_au_ref:
-        nominal: 1.12851e-05
-        min: 1.12851e-05
+        nominal: 1.12864e-05
+        min: 1.12864e-05
         min_at: nominal
-        max: 1.12851e-05
+        max: 1.12864e-05
         max_at: nominal
       n_au_sbuf:
-        nominal: 9.63756e-07
-        min: 9.63756e-07
+        nominal: 9.6386e-07
+        min: 9.6386e-07
         min_at: nominal
-        max: 9.63756e-07
+        max: 9.6386e-07
         max_at: nominal
       n_au_link:
-        nominal: 9.41749e-07
-        min: 9.41749e-07
+        nominal: 9.41854e-07
+        min: 9.41854e-07
         min_at: nominal
-        max: 9.41749e-07
+        max: 9.41854e-07
         max_at: nominal
       n_au_recv:
-        nominal: 7.57438e-06
-        min: 7.57438e-06
+        nominal: 7.57532e-06
+        min: 7.57532e-06
         min_at: nominal
-        max: 7.57438e-06
+        max: 7.57532e-06
         max_at: nominal
       n_au_zero:
-        nominal: 1.03311e-06
-        min: 1.03311e-06
+        nominal: 1.03324e-06
+        min: 1.03324e-06
         min_at: nominal
-        max: 1.03311e-06
+        max: 1.03324e-06
         max_at: nominal
       n_au_dac:
-        nominal: 5.72596e-06
-        min: 5.72596e-06
+        nominal: 5.726e-06
+        min: 5.726e-06
         min_at: nominal
-        max: 5.72596e-06
+        max: 5.726e-06
         max_at: nominal
       n_au_shaper:
-        nominal: 1.30023e-05
-        min: 1.30023e-05
+        nominal: 1.3003e-05
+        min: 1.3003e-05
         min_at: nominal
-        max: 1.30023e-05
+        max: 1.3003e-05
         max_at: nominal
       n_au_out:
-        nominal: 1.23516e-05
-        min: 1.23516e-05
+        nominal: 1.26286e-05
+        min: 1.26286e-05
         min_at: nominal
-        max: 1.23516e-05
+        max: 1.26286e-05
         max_at: nominal
       n_au_rest:
-        nominal: 1.68937e-10
-        min: 1.68937e-10
+        nominal: 1.69014e-10
+        min: 1.69014e-10
         min_at: nominal
-        max: 1.68937e-10
+        max: 1.69014e-10
         max_at: nominal
       db_au:
-        nominal: -84.3558
-        min: -84.3558
+        nominal: -84.3547
+        min: -84.3547
         min_at: nominal
-        max: -84.3558
+        max: -84.3547
         max_at: nominal
       ppm_au:
-        nominal: 60.5637
-        min: 60.5637
+        nominal: 60.571
+        min: 60.571
         min_at: nominal
-        max: 60.5637
+        max: 60.571
         max_at: nominal
       n_cb_total:
-        nominal: 0.000539376
-        min: 0.000539376
+        nominal: 0.000539432
+        min: 0.000539432
         min_at: nominal
-        max: 0.000539376
+        max: 0.000539432
         max_at: nominal
       n_cb_sensor:
-        nominal: 0.000539006
-        min: 0.000539006
+        nominal: 0.000539059
+        min: 0.000539059
         min_at: nominal
-        max: 0.000539006
+        max: 0.000539059
         max_at: nominal
       n_cb_elec:
-        nominal: 1.99587e-05
-        min: 1.99587e-05
+        nominal: 2.00707e-05
+        min: 2.00707e-05
         min_at: nominal
-        max: 1.99587e-05
+        max: 2.00707e-05
         max_at: nominal
       n_cb_ref:
-        nominal: 1.0051e-05
-        min: 1.0051e-05
+        nominal: 1.00519e-05
+        min: 1.00519e-05
         min_at: nominal
-        max: 1.0051e-05
+        max: 1.00519e-05
         max_at: nominal
       n_cb_sbuf:
-        nominal: 9.10985e-07
-        min: 9.10985e-07
+        nominal: 9.1107e-07
+        min: 9.1107e-07
         min_at: nominal
-        max: 9.10985e-07
+        max: 9.1107e-07
         max_at: nominal
       n_cb_link:
-        nominal: 8.38768e-07
-        min: 8.38768e-07
+        nominal: 8.38849e-07
+        min: 8.38849e-07
         min_at: nominal
-        max: 8.38768e-07
+        max: 8.38849e-07
         max_at: nominal
       n_cb_recv:
-        nominal: 6.17663e-06
-        min: 6.17663e-06
+        nominal: 6.17724e-06
+        min: 6.17724e-06
         min_at: nominal
-        max: 6.17663e-06
+        max: 6.17724e-06
         max_at: nominal
       n_cb_zero:
-        nominal: 8.29201e-07
-        min: 8.29201e-07
+        nominal: 8.29284e-07
+        min: 8.29284e-07
         min_at: nominal
-        max: 8.29201e-07
+        max: 8.29284e-07
         max_at: nominal
       n_cb_dac:
-        nominal: 7.13651e-06
-        min: 7.13651e-06
+        nominal: 7.13656e-06
+        min: 7.13656e-06
         min_at: nominal
-        max: 7.13651e-06
+        max: 7.13656e-06
         max_at: nominal
       n_cb_shaper:
-        nominal: 1.04144e-05
-        min: 1.04144e-05
+        nominal: 1.04146e-05
+        min: 1.04146e-05
         min_at: nominal
-        max: 1.04144e-05
+        max: 1.04146e-05
         max_at: nominal
       n_cb_out:
-        nominal: 9.87753e-06
-        min: 9.87753e-06
+        nominal: 1.01003e-05
+        min: 1.01003e-05
         min_at: nominal
-        max: 9.87753e-06
+        max: 1.01003e-05
         max_at: nominal
       n_cb_rest:
-        nominal: 7.52802e-11
-        min: 7.52802e-11
+        nominal: 7.52499e-11
+        min: 7.52499e-11
         min_at: nominal
-        max: 7.52802e-11
+        max: 7.52499e-11
         max_at: nominal
       db_cb:
-        nominal: -85.3622
-        min: -85.3622
+        nominal: -85.3613
+        min: -85.3613
         min_at: nominal
-        max: -85.3622
+        max: -85.3613
         max_at: nominal
       ppm_cb:
-        nominal: 53.9376
-        min: 53.9376
+        nominal: 53.9432
+        min: 53.9432
         min_at: nominal
-        max: 53.9376
+        max: 53.9432
         max_at: nominal
       e_100:
-        nominal: 6.36634e-06
-        min: 6.36634e-06
+        nominal: 6.36691e-06
+        min: 6.36691e-06
         min_at: nominal
-        max: 6.36634e-06
+        max: 6.36691e-06
         max_at: nominal
       e_1k:
-        nominal: 6.31595e-06
-        min: 6.31595e-06
+        nominal: 6.31649e-06
+        min: 6.31649e-06
         min_at: nominal
-        max: 6.31595e-06
+        max: 6.31649e-06
         max_at: nominal
       e_1k_elec:
-        nominal: 2.06148e-07
-        min: 2.06148e-07
+        nominal: 2.07375e-07
+        min: 2.07375e-07
         min_at: nominal
-        max: 2.06148e-07
+        max: 2.07375e-07
         max_at: nominal
       n_adc_total:
         nominal: 0.000106728
@@ -4438,16 +4440,16 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.14921
-        min: -2.14921
+        nominal: -2.14907
+        min: -2.14907
         min_at: nominal
-        max: -2.14921
+        max: -2.14907
         max_at: nominal
       g_inc_hard:
-        nominal: -2.14403
-        min: -2.14403
+        nominal: -2.14402
+        min: -2.14402
         min_at: nominal
-        max: -2.14403
+        max: -2.14402
         max_at: nominal
       r_b:
         nominal: 1.0
@@ -4462,142 +4464,142 @@ sims:
         max: 8.011e-05
         max_at: nominal
       jack_op:
-        nominal: -0.0294334
-        min: -0.0294334
+        nominal: -0.0136188
+        min: -0.0136188
         min_at: nominal
-        max: -0.0294334
+        max: -0.0136188
         max_at: nominal
       n_au_total:
-        nominal: 0.00162525
-        min: 0.00162525
+        nominal: 0.0016253
+        min: 0.0016253
         min_at: nominal
-        max: 0.00162525
+        max: 0.0016253
         max_at: nominal
       n_au_sensor:
-        nominal: 0.001625
-        min: 0.001625
+        nominal: 0.00162505
+        min: 0.00162505
         min_at: nominal
-        max: 0.001625
+        max: 0.00162505
         max_at: nominal
       n_au_elec:
-        nominal: 2.84584e-05
-        min: 2.84584e-05
+        nominal: 2.85807e-05
+        min: 2.85807e-05
         min_at: nominal
-        max: 2.84584e-05
+        max: 2.85807e-05
         max_at: nominal
       n_au_ref:
-        nominal: 3.32904e-06
-        min: 3.32904e-06
+        nominal: 3.32915e-06
+        min: 3.32915e-06
         min_at: nominal
-        max: 3.32904e-06
+        max: 3.32915e-06
         max_at: nominal
       n_au_sbuf:
-        nominal: 2.58779e-06
-        min: 2.58779e-06
+        nominal: 2.58786e-06
+        min: 2.58786e-06
         min_at: nominal
-        max: 2.58779e-06
+        max: 2.58786e-06
         max_at: nominal
       n_au_link:
-        nominal: 2.5287e-06
-        min: 2.5287e-06
+        nominal: 2.52878e-06
+        min: 2.52878e-06
         min_at: nominal
-        max: 2.5287e-06
+        max: 2.52878e-06
         max_at: nominal
       n_au_recv:
-        nominal: 2.03381e-05
-        min: 2.03381e-05
+        nominal: 2.0339e-05
+        min: 2.0339e-05
         min_at: nominal
-        max: 2.03381e-05
+        max: 2.0339e-05
         max_at: nominal
       n_au_zero:
-        nominal: 2.77402e-06
-        min: 2.77402e-06
+        nominal: 2.77416e-06
+        min: 2.77416e-06
         min_at: nominal
-        max: 2.77402e-06
+        max: 2.77416e-06
         max_at: nominal
       n_au_dac:
-        nominal: 6.52498e-06
-        min: 6.52498e-06
+        nominal: 6.52499e-06
+        min: 6.52499e-06
         min_at: nominal
-        max: 6.52498e-06
+        max: 6.52499e-06
         max_at: nominal
       n_au_shaper:
-        nominal: 1.30091e-05
-        min: 1.30091e-05
+        nominal: 1.30097e-05
+        min: 1.30097e-05
         min_at: nominal
-        max: 1.30091e-05
+        max: 1.30097e-05
         max_at: nominal
       n_au_out:
-        nominal: 1.23516e-05
-        min: 1.23516e-05
+        nominal: 1.26286e-05
+        min: 1.26286e-05
         min_at: nominal
-        max: 1.23516e-05
+        max: 1.26286e-05
         max_at: nominal
       n_au_rest:
-        nominal: 4.5374e-10
-        min: 4.5374e-10
+        nominal: 4.53756e-10
+        min: 4.53756e-10
         min_at: nominal
-        max: 4.5374e-10
+        max: 4.53756e-10
         max_at: nominal
       db_au:
-        nominal: -75.7816
-        min: -75.7816
+        nominal: -75.7813
+        min: -75.7813
         min_at: nominal
-        max: -75.7816
+        max: -75.7813
         max_at: nominal
       ppm_au:
-        nominal: 162.525
-        min: 162.525
+        nominal: 162.53
+        min: 162.53
         min_at: nominal
-        max: 162.525
+        max: 162.53
         max_at: nominal
       n_cb_total:
-        nominal: 0.00144749
-        min: 0.00144749
+        nominal: 0.00144751
+        min: 0.00144751
         min_at: nominal
-        max: 0.00144749
+        max: 0.00144751
         max_at: nominal
       n_cb_sensor:
-        nominal: 0.00144729
-        min: 0.00144729
+        nominal: 0.00144732
+        min: 0.00144732
         min_at: nominal
-        max: 0.00144729
+        max: 0.00144732
         max_at: nominal
       n_cb_elec:
-        nominal: 2.39193e-05
-        min: 2.39193e-05
+        nominal: 2.40125e-05
+        min: 2.40125e-05
         min_at: nominal
-        max: 2.39193e-05
+        max: 2.40125e-05
         max_at: nominal
       n_cb_ref:
-        nominal: 2.96498e-06
-        min: 2.96498e-06
+        nominal: 2.96503e-06
+        min: 2.96503e-06
         min_at: nominal
-        max: 2.96498e-06
+        max: 2.96503e-06
         max_at: nominal
       n_cb_sbuf:
-        nominal: 2.44609e-06
-        min: 2.44609e-06
+        nominal: 2.44613e-06
+        min: 2.44613e-06
         min_at: nominal
-        max: 2.44609e-06
+        max: 2.44613e-06
         max_at: nominal
       n_cb_link:
-        nominal: 2.25218e-06
-        min: 2.25218e-06
+        nominal: 2.25222e-06
+        min: 2.25222e-06
         min_at: nominal
-        max: 2.25218e-06
+        max: 2.25222e-06
         max_at: nominal
       n_cb_recv:
-        nominal: 1.65849e-05
-        min: 1.65849e-05
+        nominal: 1.65852e-05
+        min: 1.65852e-05
         min_at: nominal
-        max: 1.65849e-05
+        max: 1.65852e-05
         max_at: nominal
       n_cb_zero:
-        nominal: 2.22649e-06
-        min: 2.22649e-06
+        nominal: 2.22654e-06
+        min: 2.22654e-06
         min_at: nominal
-        max: 2.22649e-06
+        max: 2.22654e-06
         max_at: nominal
       n_cb_dac:
         nominal: 8.13236e-06
@@ -4606,34 +4608,34 @@ sims:
         max: 8.13236e-06
         max_at: nominal
       n_cb_shaper:
-        nominal: 1.04198e-05
-        min: 1.04198e-05
+        nominal: 1.042e-05
+        min: 1.042e-05
         min_at: nominal
-        max: 1.04198e-05
+        max: 1.042e-05
         max_at: nominal
       n_cb_out:
-        nominal: 9.87753e-06
-        min: 9.87753e-06
+        nominal: 1.01003e-05
+        min: 1.01003e-05
         min_at: nominal
-        max: 9.87753e-06
+        max: 1.01003e-05
         max_at: nominal
       n_cb_rest:
-        nominal: 2.0248e-10
-        min: 2.0248e-10
+        nominal: 2.02444e-10
+        min: 2.02444e-10
         min_at: nominal
-        max: 2.0248e-10
+        max: 2.02444e-10
         max_at: nominal
       db_cb:
-        nominal: -76.7877
-        min: -76.7877
+        nominal: -76.7875
+        min: -76.7875
         min_at: nominal
-        max: -76.7877
+        max: -76.7875
         max_at: nominal
       ppm_cb:
-        nominal: 144.749
-        min: 144.749
+        nominal: 144.751
+        min: 144.751
         min_at: nominal
-        max: 144.749
+        max: 144.751
         max_at: nominal
       e_100:
         nominal: 1.70693e-05
@@ -4648,10 +4650,10 @@ sims:
         max: 1.69517e-05
         max_at: nominal
       e_1k_elec:
-        nominal: 2.43884e-07
-        min: 2.43884e-07
+        nominal: 2.44917e-07
+        min: 2.44917e-07
         min_at: nominal
-        max: 2.43884e-07
+        max: 2.44917e-07
         max_at: nominal
       n_adc_total:
         nominal: 0.00010671
@@ -4708,22 +4710,22 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.14921
-        min: -2.14921
+        nominal: -2.14907
+        min: -2.14907
         min_at: nominal
-        max: -2.14921
+        max: -2.14907
         max_at: nominal
       g_inc_hard:
-        nominal: -2.14403
-        min: -2.14403
+        nominal: -2.14402
+        min: -2.14402
         min_at: nominal
-        max: -2.14403
+        max: -2.14402
         max_at: nominal
       r_b:
-        nominal: 0.997588
-        min: 0.997588
+        nominal: 0.997648
+        min: 0.997648
         min_at: nominal
-        max: 0.997588
+        max: 0.997648
         max_at: nominal
       ina_op:
         nominal: -4.63989
@@ -4732,196 +4734,196 @@ sims:
         max: -4.63989
         max_at: nominal
       jack_op:
-        nominal: -0.0294334
-        min: -0.0294334
+        nominal: -0.0136188
+        min: -0.0136188
         min_at: nominal
-        max: -0.0294334
+        max: -0.0136188
         max_at: nominal
       n_au_total:
-        nominal: 0.0016216
-        min: 0.0016216
+        nominal: 0.00162176
+        min: 0.00162176
         min_at: nominal
-        max: 0.0016216
+        max: 0.00162176
         max_at: nominal
       n_au_sensor:
-        nominal: 0.00162108
-        min: 0.00162108
+        nominal: 0.00162123
+        min: 0.00162123
         min_at: nominal
-        max: 0.00162108
+        max: 0.00162123
         max_at: nominal
       n_au_elec:
-        nominal: 4.13574e-05
-        min: 4.13574e-05
+        nominal: 4.14443e-05
+        min: 4.14443e-05
         min_at: nominal
-        max: 4.13574e-05
+        max: 4.14443e-05
         max_at: nominal
       n_au_ref:
-        nominal: 3.02286e-05
-        min: 3.02286e-05
+        nominal: 3.02314e-05
+        min: 3.02314e-05
         min_at: nominal
-        max: 3.02286e-05
+        max: 3.02314e-05
         max_at: nominal
       n_au_sbuf:
-        nominal: 2.58154e-06
-        min: 2.58154e-06
+        nominal: 2.58178e-06
+        min: 2.58178e-06
         min_at: nominal
-        max: 2.58154e-06
+        max: 2.58178e-06
         max_at: nominal
       n_au_link:
-        nominal: 2.5226e-06
-        min: 2.5226e-06
+        nominal: 2.52283e-06
+        min: 2.52283e-06
         min_at: nominal
-        max: 2.5226e-06
+        max: 2.52283e-06
         max_at: nominal
       n_au_recv:
-        nominal: 2.0289e-05
-        min: 2.0289e-05
+        nominal: 2.02912e-05
+        min: 2.02912e-05
         min_at: nominal
-        max: 2.0289e-05
+        max: 2.02912e-05
         max_at: nominal
       n_au_zero:
-        nominal: 2.76733e-06
-        min: 2.76733e-06
+        nominal: 2.76763e-06
+        min: 2.76763e-06
         min_at: nominal
-        max: 2.76733e-06
+        max: 2.76763e-06
         max_at: nominal
       n_au_dac:
-        nominal: 6.52191e-06
-        min: 6.52191e-06
+        nominal: 6.52199e-06
+        min: 6.52199e-06
         min_at: nominal
-        max: 6.52191e-06
+        max: 6.52199e-06
         max_at: nominal
       n_au_shaper:
-        nominal: 1.30091e-05
-        min: 1.30091e-05
+        nominal: 1.30097e-05
+        min: 1.30097e-05
         min_at: nominal
-        max: 1.30091e-05
+        max: 1.30097e-05
         max_at: nominal
       n_au_out:
-        nominal: 1.23516e-05
-        min: 1.23516e-05
+        nominal: 1.26286e-05
+        min: 1.26286e-05
         min_at: nominal
-        max: 1.23516e-05
+        max: 1.26286e-05
         max_at: nominal
       n_au_rest:
-        nominal: 4.52675e-10
-        min: 4.52675e-10
+        nominal: 4.52714e-10
+        min: 4.52714e-10
         min_at: nominal
-        max: 4.52675e-10
+        max: 4.52714e-10
         max_at: nominal
       db_au:
-        nominal: -75.8011
-        min: -75.8011
+        nominal: -75.8003
+        min: -75.8003
         min_at: nominal
-        max: -75.8011
+        max: -75.8003
         max_at: nominal
       ppm_au:
-        nominal: 162.161
-        min: 162.161
+        nominal: 162.176
+        min: 162.176
         min_at: nominal
-        max: 162.161
+        max: 162.176
         max_at: nominal
       n_cb_total:
-        nominal: 0.00144424
-        min: 0.00144424
+        nominal: 0.00144436
+        min: 0.00144436
         min_at: nominal
-        max: 0.00144424
+        max: 0.00144436
         max_at: nominal
       n_cb_sensor:
-        nominal: 0.0014438
-        min: 0.0014438
+        nominal: 0.00144391
+        min: 0.00144391
         min_at: nominal
-        max: 0.0014438
+        max: 0.00144391
         max_at: nominal
       n_cb_elec:
-        nominal: 3.58708e-05
-        min: 3.58708e-05
+        nominal: 3.59351e-05
+        min: 3.59351e-05
         min_at: nominal
-        max: 3.58708e-05
+        max: 3.59351e-05
         max_at: nominal
       n_cb_ref:
-        nominal: 2.69228e-05
-        min: 2.69228e-05
+        nominal: 2.69249e-05
+        min: 2.69249e-05
         min_at: nominal
-        max: 2.69228e-05
+        max: 2.69249e-05
         max_at: nominal
       n_cb_sbuf:
-        nominal: 2.44019e-06
-        min: 2.44019e-06
+        nominal: 2.44037e-06
+        min: 2.44037e-06
         min_at: nominal
-        max: 2.44019e-06
+        max: 2.44037e-06
         max_at: nominal
       n_cb_link:
-        nominal: 2.24675e-06
-        min: 2.24675e-06
+        nominal: 2.24692e-06
+        min: 2.24692e-06
         min_at: nominal
-        max: 2.24675e-06
+        max: 2.24692e-06
         max_at: nominal
       n_cb_recv:
-        nominal: 1.65449e-05
-        min: 1.65449e-05
+        nominal: 1.65462e-05
+        min: 1.65462e-05
         min_at: nominal
-        max: 1.65449e-05
+        max: 1.65462e-05
         max_at: nominal
       n_cb_zero:
-        nominal: 2.22112e-06
-        min: 2.22112e-06
+        nominal: 2.2213e-06
+        min: 2.2213e-06
         min_at: nominal
-        max: 2.22112e-06
+        max: 2.2213e-06
         max_at: nominal
       n_cb_dac:
-        nominal: 8.12853e-06
-        min: 8.12853e-06
+        nominal: 8.12863e-06
+        min: 8.12863e-06
         min_at: nominal
-        max: 8.12853e-06
+        max: 8.12863e-06
         max_at: nominal
       n_cb_shaper:
-        nominal: 1.04198e-05
-        min: 1.04198e-05
+        nominal: 1.042e-05
+        min: 1.042e-05
         min_at: nominal
-        max: 1.04198e-05
+        max: 1.042e-05
         max_at: nominal
       n_cb_out:
-        nominal: 9.87753e-06
-        min: 9.87753e-06
+        nominal: 1.01003e-05
+        min: 1.01003e-05
         min_at: nominal
-        max: 9.87753e-06
+        max: 1.01003e-05
         max_at: nominal
       n_cb_rest:
-        nominal: 2.01406e-10
-        min: 2.01406e-10
+        nominal: 2.01713e-10
+        min: 2.01713e-10
         min_at: nominal
-        max: 2.01406e-10
+        max: 2.01713e-10
         max_at: nominal
       db_cb:
-        nominal: -76.8072
-        min: -76.8072
+        nominal: -76.8065
+        min: -76.8065
         min_at: nominal
-        max: -76.8072
+        max: -76.8065
         max_at: nominal
       ppm_cb:
-        nominal: 144.424
-        min: 144.424
+        nominal: 144.436
+        min: 144.436
         min_at: nominal
-        max: 144.424
+        max: 144.436
         max_at: nominal
       e_100:
-        nominal: 1.70311e-05
-        min: 1.70311e-05
+        nominal: 1.70321e-05
+        min: 1.70321e-05
         min_at: nominal
-        max: 1.70311e-05
+        max: 1.70321e-05
         max_at: nominal
       e_1k:
-        nominal: 1.69137e-05
-        min: 1.69137e-05
+        nominal: 1.69148e-05
+        min: 1.69148e-05
         min_at: nominal
-        max: 1.69137e-05
+        max: 1.69148e-05
         max_at: nominal
       e_1k_elec:
-        nominal: 3.96896e-07
-        min: 3.96896e-07
+        nominal: 3.97552e-07
+        min: 3.97552e-07
         min_at: nominal
-        max: 3.96896e-07
+        max: 3.97552e-07
         max_at: nominal
       n_adc_total:
         nominal: 0.000106728
@@ -4978,10 +4980,10 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.15469
-        min: -2.15469
+        nominal: -2.15455
+        min: -2.15455
         min_at: nominal
-        max: -2.15469
+        max: -2.15455
         max_at: nominal
       g_inc_hard:
         nominal: 0.0003
@@ -5002,58 +5004,58 @@ sims:
         max: 8.011e-05
         max_at: nominal
       jack_op:
-        nominal: -0.0294333
-        min: -0.0294333
+        nominal: -0.0136186
+        min: -0.0136186
         min_at: nominal
-        max: -0.0294333
+        max: -0.0136186
         max_at: nominal
       n_au_total:
-        nominal: 0.00162859
-        min: 0.00162859
+        nominal: 0.00162865
+        min: 0.00162865
         min_at: nominal
-        max: 0.00162859
+        max: 0.00162865
         max_at: nominal
       n_au_sensor:
-        nominal: 0.00162834
-        min: 0.00162834
+        nominal: 0.0016284
+        min: 0.0016284
         min_at: nominal
-        max: 0.00162834
+        max: 0.0016284
         max_at: nominal
       n_au_elec:
-        nominal: 2.84943e-05
-        min: 2.84943e-05
+        nominal: 2.86165e-05
+        min: 2.86165e-05
         min_at: nominal
-        max: 2.84943e-05
+        max: 2.86165e-05
         max_at: nominal
       n_au_ref:
-        nominal: 3.3359e-06
-        min: 3.3359e-06
+        nominal: 3.33601e-06
+        min: 3.33601e-06
         min_at: nominal
-        max: 3.3359e-06
+        max: 3.33601e-06
         max_at: nominal
       n_au_sbuf:
-        nominal: 2.59311e-06
-        min: 2.59311e-06
+        nominal: 2.59319e-06
+        min: 2.59319e-06
         min_at: nominal
-        max: 2.59311e-06
+        max: 2.59319e-06
         max_at: nominal
       n_au_link:
-        nominal: 2.5339e-06
-        min: 2.5339e-06
+        nominal: 2.53399e-06
+        min: 2.53399e-06
         min_at: nominal
-        max: 2.5339e-06
+        max: 2.53399e-06
         max_at: nominal
       n_au_recv:
-        nominal: 2.038e-05
-        min: 2.038e-05
+        nominal: 2.03809e-05
+        min: 2.03809e-05
         min_at: nominal
-        max: 2.038e-05
+        max: 2.03809e-05
         max_at: nominal
       n_au_zero:
-        nominal: 2.77974e-06
-        min: 2.77974e-06
+        nominal: 2.77988e-06
+        min: 2.77988e-06
         min_at: nominal
-        max: 2.77974e-06
+        max: 2.77988e-06
         max_at: nominal
       n_au_dac:
         nominal: 6.5276e-06
@@ -5062,82 +5064,82 @@ sims:
         max: 6.5276e-06
         max_at: nominal
       n_au_shaper:
-        nominal: 1.30157e-05
-        min: 1.30157e-05
+        nominal: 1.30164e-05
+        min: 1.30164e-05
         min_at: nominal
-        max: 1.30157e-05
+        max: 1.30164e-05
         max_at: nominal
       n_au_out:
-        nominal: 1.23516e-05
-        min: 1.23516e-05
+        nominal: 1.26286e-05
+        min: 1.26286e-05
         min_at: nominal
-        max: 1.23516e-05
+        max: 1.26286e-05
         max_at: nominal
       n_au_rest:
-        nominal: 4.54774e-10
-        min: 4.54774e-10
+        nominal: 4.54707e-10
+        min: 4.54707e-10
         min_at: nominal
-        max: 4.54774e-10
+        max: 4.54707e-10
         max_at: nominal
       db_au:
-        nominal: -75.7637
-        min: -75.7637
+        nominal: -75.7635
+        min: -75.7635
         min_at: nominal
-        max: -75.7637
+        max: -75.7635
         max_at: nominal
       ppm_au:
-        nominal: 162.859
-        min: 162.859
+        nominal: 162.865
+        min: 162.865
         min_at: nominal
-        max: 162.859
+        max: 162.865
         max_at: nominal
       n_cb_total:
-        nominal: 0.00145046
-        min: 0.00145046
+        nominal: 0.00145049
+        min: 0.00145049
         min_at: nominal
-        max: 0.00145046
+        max: 0.00145049
         max_at: nominal
       n_cb_sensor:
-        nominal: 0.00145027
-        min: 0.00145027
+        nominal: 0.00145029
+        min: 0.00145029
         min_at: nominal
-        max: 0.00145027
+        max: 0.00145029
         max_at: nominal
       n_cb_elec:
-        nominal: 2.39486e-05
-        min: 2.39486e-05
+        nominal: 2.40417e-05
+        min: 2.40417e-05
         min_at: nominal
-        max: 2.39486e-05
+        max: 2.40417e-05
         max_at: nominal
       n_cb_ref:
-        nominal: 2.97108e-06
-        min: 2.97108e-06
+        nominal: 2.97113e-06
+        min: 2.97113e-06
         min_at: nominal
-        max: 2.97108e-06
+        max: 2.97113e-06
         max_at: nominal
       n_cb_sbuf:
-        nominal: 2.45112e-06
-        min: 2.45112e-06
+        nominal: 2.45116e-06
+        min: 2.45116e-06
         min_at: nominal
-        max: 2.45112e-06
+        max: 2.45116e-06
         max_at: nominal
       n_cb_link:
-        nominal: 2.25681e-06
-        min: 2.25681e-06
+        nominal: 2.25685e-06
+        min: 2.25685e-06
         min_at: nominal
-        max: 2.25681e-06
+        max: 2.25685e-06
         max_at: nominal
       n_cb_recv:
-        nominal: 1.6619e-05
-        min: 1.6619e-05
+        nominal: 1.66194e-05
+        min: 1.66194e-05
         min_at: nominal
-        max: 1.6619e-05
+        max: 1.66194e-05
         max_at: nominal
       n_cb_zero:
-        nominal: 2.23107e-06
-        min: 2.23107e-06
+        nominal: 2.23112e-06
+        min: 2.23112e-06
         min_at: nominal
-        max: 2.23107e-06
+        max: 2.23112e-06
         max_at: nominal
       n_cb_dac:
         nominal: 8.13562e-06
@@ -5146,34 +5148,34 @@ sims:
         max: 8.13562e-06
         max_at: nominal
       n_cb_shaper:
-        nominal: 1.04251e-05
-        min: 1.04251e-05
+        nominal: 1.04253e-05
+        min: 1.04253e-05
         min_at: nominal
-        max: 1.04251e-05
+        max: 1.04253e-05
         max_at: nominal
       n_cb_out:
-        nominal: 9.87753e-06
-        min: 9.87753e-06
+        nominal: 1.01003e-05
+        min: 1.01003e-05
         min_at: nominal
-        max: 9.87753e-06
+        max: 1.01003e-05
         max_at: nominal
       n_cb_rest:
-        nominal: 2.02743e-10
-        min: 2.02743e-10
+        nominal: 2.02709e-10
+        min: 2.02709e-10
         min_at: nominal
-        max: 2.02743e-10
+        max: 2.02709e-10
         max_at: nominal
       db_cb:
-        nominal: -76.7699
-        min: -76.7699
+        nominal: -76.7697
+        min: -76.7697
         min_at: nominal
-        max: -76.7699
+        max: -76.7697
         max_at: nominal
       ppm_cb:
-        nominal: 145.046
-        min: 145.046
+        nominal: 145.049
+        min: 145.049
         min_at: nominal
-        max: 145.046
+        max: 145.049
         max_at: nominal
       e_100:
         nominal: 1.71044e-05
@@ -5188,10 +5190,10 @@ sims:
         max: 1.69865e-05
         max_at: nominal
       e_1k_elec:
-        nominal: 2.44209e-07
-        min: 2.44209e-07
+        nominal: 2.4524e-07
+        min: 2.4524e-07
         min_at: nominal
-        max: 2.44209e-07
+        max: 2.4524e-07
         max_at: nominal
       n_adc_total:
         nominal: 0.00010671
@@ -5248,10 +5250,10 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.15469
-        min: -2.15469
+        nominal: -2.15455
+        min: -2.15455
         min_at: nominal
-        max: -2.15469
+        max: -2.15455
         max_at: nominal
       g_inc_hard:
         nominal: 0.0003
@@ -5260,10 +5262,10 @@ sims:
         max: 0.0003
         max_at: nominal
       r_b:
-        nominal: -0.000139231
-        min: -0.000139231
+        nominal: -0.00013924
+        min: -0.00013924
         min_at: nominal
-        max: -0.000139231
+        max: -0.00013924
         max_at: nominal
       ina_op:
         nominal: -4.63989
@@ -5272,58 +5274,58 @@ sims:
         max: -4.63989
         max_at: nominal
       jack_op:
-        nominal: -0.0294333
-        min: -0.0294333
+        nominal: -0.0136186
+        min: -0.0136186
         min_at: nominal
-        max: -0.0294333
+        max: -0.0136186
         max_at: nominal
       n_au_total:
-        nominal: 1.86978e-05
-        min: 1.86978e-05
+        nominal: 1.88824e-05
+        min: 1.88824e-05
         min_at: nominal
-        max: 1.86978e-05
+        max: 1.88824e-05
         max_at: nominal
       n_au_sensor:
-        nominal: 2.26716e-07
-        min: 2.26716e-07
+        nominal: 2.26739e-07
+        min: 2.26739e-07
         min_at: nominal
-        max: 2.26716e-07
+        max: 2.26739e-07
         max_at: nominal
       n_au_elec:
-        nominal: 1.86964e-05
-        min: 1.86964e-05
+        nominal: 1.8881e-05
+        min: 1.8881e-05
         min_at: nominal
-        max: 1.86964e-05
+        max: 1.8881e-05
         max_at: nominal
       n_au_ref:
-        nominal: 4.22763e-09
-        min: 4.22763e-09
+        nominal: 4.22805e-09
+        min: 4.22805e-09
         min_at: nominal
-        max: 4.22763e-09
+        max: 4.22805e-09
         max_at: nominal
       n_au_sbuf:
-        nominal: 3.61043e-10
-        min: 3.61043e-10
+        nominal: 3.61077e-10
+        min: 3.61077e-10
         min_at: nominal
-        max: 3.61043e-10
+        max: 3.61077e-10
         max_at: nominal
       n_au_link:
-        nominal: 3.52799e-10
-        min: 3.52799e-10
+        nominal: 3.52834e-10
+        min: 3.52834e-10
         min_at: nominal
-        max: 3.52799e-10
+        max: 3.52834e-10
         max_at: nominal
       n_au_recv:
-        nominal: 2.83753e-09
-        min: 2.83753e-09
+        nominal: 2.83785e-09
+        min: 2.83785e-09
         min_at: nominal
-        max: 2.83753e-09
+        max: 2.83785e-09
         max_at: nominal
       n_au_zero:
-        nominal: 3.87027e-10
-        min: 3.87027e-10
+        nominal: 3.87071e-10
+        min: 3.87071e-10
         min_at: nominal
-        max: 3.87027e-10
+        max: 3.87071e-10
         max_at: nominal
       n_au_dac:
         nominal: 5.25197e-06
@@ -5332,82 +5334,82 @@ sims:
         max: 5.25197e-06
         max_at: nominal
       n_au_shaper:
-        nominal: 1.30157e-05
-        min: 1.30157e-05
+        nominal: 1.30164e-05
+        min: 1.30164e-05
         min_at: nominal
-        max: 1.30157e-05
+        max: 1.30164e-05
         max_at: nominal
       n_au_out:
-        nominal: 1.23516e-05
-        min: 1.23516e-05
+        nominal: 1.26286e-05
+        min: 1.26286e-05
         min_at: nominal
-        max: 1.23516e-05
+        max: 1.26286e-05
         max_at: nominal
       n_au_rest:
-        nominal: 1.12899e-12
-        min: 1.12899e-12
+        nominal: 1.14196e-12
+        min: 1.14196e-12
         min_at: nominal
-        max: 1.12899e-12
+        max: 1.14196e-12
         max_at: nominal
       db_au:
-        nominal: -114.564
-        min: -114.564
+        nominal: -114.479
+        min: -114.479
         min_at: nominal
-        max: -114.564
+        max: -114.479
         max_at: nominal
       ppm_au:
-        nominal: 1.86978
-        min: 1.86978
+        nominal: 1.88824
+        min: 1.88824
         min_at: nominal
-        max: 1.86978
+        max: 1.88824
         max_at: nominal
       n_cb_total:
-        nominal: 1.57841e-05
-        min: 1.57841e-05
+        nominal: 1.59245e-05
+        min: 1.59245e-05
         min_at: nominal
-        max: 1.57841e-05
+        max: 1.59245e-05
         max_at: nominal
       n_cb_sensor:
-        nominal: 2.01922e-07
-        min: 2.01922e-07
+        nominal: 2.01939e-07
+        min: 2.01939e-07
         min_at: nominal
-        max: 2.01922e-07
+        max: 2.01939e-07
         max_at: nominal
       n_cb_elec:
-        nominal: 1.57828e-05
-        min: 1.57828e-05
+        nominal: 1.59233e-05
+        min: 1.59233e-05
         min_at: nominal
-        max: 1.57828e-05
+        max: 1.59233e-05
         max_at: nominal
       n_cb_ref:
-        nominal: 3.76529e-09
-        min: 3.76529e-09
+        nominal: 3.76561e-09
+        min: 3.76561e-09
         min_at: nominal
-        max: 3.76529e-09
+        max: 3.76561e-09
         max_at: nominal
       n_cb_sbuf:
-        nominal: 3.41273e-10
-        min: 3.41273e-10
+        nominal: 3.413e-10
+        min: 3.413e-10
         min_at: nominal
-        max: 3.41273e-10
+        max: 3.413e-10
         max_at: nominal
       n_cb_link:
-        nominal: 3.14219e-10
-        min: 3.14219e-10
+        nominal: 3.14245e-10
+        min: 3.14245e-10
         min_at: nominal
-        max: 3.14219e-10
+        max: 3.14245e-10
         max_at: nominal
       n_cb_recv:
-        nominal: 2.31389e-09
-        min: 2.31389e-09
+        nominal: 2.31409e-09
+        min: 2.31409e-09
         min_at: nominal
-        max: 2.31389e-09
+        max: 2.31409e-09
         max_at: nominal
       n_cb_zero:
-        nominal: 3.10635e-10
-        min: 3.10635e-10
+        nominal: 3.10662e-10
+        min: 3.10662e-10
         min_at: nominal
-        max: 3.10635e-10
+        max: 3.10662e-10
         max_at: nominal
       n_cb_dac:
         nominal: 6.54576e-06
@@ -5416,52 +5418,52 @@ sims:
         max: 6.54576e-06
         max_at: nominal
       n_cb_shaper:
-        nominal: 1.04251e-05
-        min: 1.04251e-05
+        nominal: 1.04253e-05
+        min: 1.04253e-05
         min_at: nominal
-        max: 1.04251e-05
+        max: 1.04253e-05
         max_at: nominal
       n_cb_out:
-        nominal: 9.87753e-06
-        min: 9.87753e-06
+        nominal: 1.01003e-05
+        min: 1.01003e-05
         min_at: nominal
-        max: 9.87753e-06
+        max: 1.01003e-05
         max_at: nominal
       n_cb_rest:
-        nominal: 8.97601e-13
-        min: 8.97601e-13
+        nominal: 9.00662e-13
+        min: 9.00662e-13
         min_at: nominal
-        max: 8.97601e-13
+        max: 9.00662e-13
         max_at: nominal
       db_cb:
-        nominal: -116.036
-        min: -116.036
+        nominal: -115.959
+        min: -115.959
         min_at: nominal
-        max: -116.036
+        max: -115.959
         max_at: nominal
       ppm_cb:
-        nominal: 1.57841
-        min: 1.57841
+        nominal: 1.59245
+        min: 1.59245
         min_at: nominal
-        max: 1.57841
+        max: 1.59245
         max_at: nominal
       e_100:
-        nominal: 3.33184e-07
-        min: 3.33184e-07
+        nominal: 3.34576e-07
+        min: 3.34576e-07
         min_at: nominal
-        max: 3.33184e-07
+        max: 3.34576e-07
         max_at: nominal
       e_1k:
-        nominal: 1.5424e-07
-        min: 1.5424e-07
+        nominal: 1.55868e-07
+        min: 1.55868e-07
         min_at: nominal
-        max: 1.5424e-07
+        max: 1.55868e-07
         max_at: nominal
       e_1k_elec:
-        nominal: 1.54222e-07
-        min: 1.54222e-07
+        nominal: 1.5585e-07
+        min: 1.5585e-07
         min_at: nominal
-        max: 1.54222e-07
+        max: 1.5585e-07
         max_at: nominal
       n_adc_total:
         nominal: 0.000106728
@@ -5595,22 +5597,22 @@ sims:
     corners: 5
     measures:
       out:
-        nominal: -0.0297278
-        min: -0.535925
+        nominal: -0.0137549
+        min: -0.521549
         min_at: v_neg- v_pos+
-        max: 0.223373
+        max: 0.240145
         max_at: v_neg+ v_pos-
       jack:
-        nominal: -0.0294335
-        min: -0.530618
+        nominal: -0.0136187
+        min: -0.516385
         min_at: v_neg- v_pos+
-        max: 0.221161
+        max: 0.237767
         max_at: v_neg+ v_pos-
       page_err:
-        nominal: 7.17194e-05
-        min: 6.5929e-05
+        nominal: 5.96803e-05
+        min: 5.50766e-05
         min_at: v_neg- v_pos+
-        max: 7.70122e-05
+        max: 6.43671e-05
         max_at: v_neg+ v_pos-
     asserts:
     - expr: max['page_err'] < 0.01 and min['page_err'] > -0.01
@@ -5625,28 +5627,28 @@ sims:
     corners: 5
     measures:
       out_hard:
-        nominal: 9.95817
-        min: 9.45198
+        nominal: 9.97413
+        min: 9.46634
         min_at: v_neg- v_pos+
-        max: 10.2113
+        max: 10.228
         max_at: v_neg+ v_pos-
       out_rest:
-        nominal: 0.0124843
-        min: -0.493847
+        nominal: 0.028442
+        min: -0.479352
         min_at: v_neg- v_pos+
-        max: 0.265585
+        max: 0.282342
         max_at: v_neg+ v_pos-
       span_hard:
         nominal: 9.94569
         min: 9.94569
         min_at: v_neg+ v_pos-
-        max: 9.94582
-        max_at: v_neg- v_pos+
+        max: 9.94569
+        max_at: nominal
       clip_in:
-        nominal: -5.55722
-        min: -6.07566
+        nominal: -5.54975
+        min: -6.06891
         min_at: v_neg- v_pos+
-        max: -4.87834
+        max: -4.87052
         max_at: v_neg+ v_pos-
     asserts:
     - expr: min['span_hard'] > 9.8 and max['span_hard'] < 10.2

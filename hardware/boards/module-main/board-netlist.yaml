@@ -340,6 +340,13 @@ components:
     - 1
     - 2
     sheet: breath-receive-stage
+  C58:
+    of: C-BREATH-OFFNEG
+    value: 1uF X7R 50V
+    pins:
+    - 1
+    - 2
+    sheet: breath-output-stage
   C6:
     of: C-REG-DAC
     value: 10uF
@@ -789,7 +796,7 @@ components:
     sheet: breath-output-stage
   R24:
     of: R-BREATH-OFFNEG
-    value: 95.3k 1%
+    value: 47.5k 1%
     pins:
     - 1
     - 2
@@ -1228,6 +1235,13 @@ components:
     - 1
     - 2
     sheet: breath-receive-stage
+  R82:
+    of: R-BREATH-OFFNEG
+    value: 47.5k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-output-stage
   R9:
     of: R-LDAC
     value: 0R strap
@@ -1275,7 +1289,7 @@ components:
     sheet: pitch-stage
   RV4:
     of: TRIM-RESP
-    value: 10k 10% sealed SMD cermet
+    value: 10k 10% sealed cermet
     pins:
     - CW
     - W
@@ -1672,11 +1686,15 @@ nets:
   - R22.1
   - U7.OUTA
   - U7.INA-
+  /breath-output-stage/OFFNEG_MID:
+  - C58.1
+  - R24.2
+  - R82.1
   /breath-output-stage/SUM_NODE:
   - R22.2
   - R23.2
-  - R24.2
   - R25.1
+  - R82.2
   - U7.INB-
   /breath-receive-stage/BW0:
   - C57.1
@@ -2034,6 +2052,7 @@ nets:
   - C55.2
   - C56.2
   - C57.2
+  - C58.2
   - C6.2
   - C7.2
   - D16.K

@@ -78,7 +78,12 @@ the two agree, and where they do not the netlist wins.*
                             │                            │
                        [R-OFF 21.0k]────────────────┬────┤
                                                     │    │
-              −12 V ────[R-OFFNEG 95.3k]────────────┘    │
+                                        [R-BREATH-OFFNEG-B 47.5k]
+                                                    │    │
+   −12 V ──[R-BREATH-OFFNEG-A 47.5k]──┬─────────────┘    │
+                                      │                  │
+                [C-BREATH-OFFNEG 1uF X7R 50V]── AGND     │
+                (6.7 Hz on the −12 V leg, #32)           │
                                                          │
                                             ┌────────────┴───┐
                                             │ −          ┌───┤
@@ -144,7 +149,7 @@ toward `+` drove the jack to −4.91 V.
 > `R_pot·p·(1−p)`, zero at both ends and **R/4 = 2.5 kΩ at centre** — sits in
 > series with `R-OFF`. The endpoints are exact because that term vanishes
 > there; the middle does not. `[calc]` `−40.2k × (2.60/(21.0k + 2.5k) −
-> 12/95.3k)` = **+0.614 V**, and the zero crossing lands where the wiper is 0.568
+> 12/95.3k)` = **+0.614 V** (95.0k since #32: 16 mV higher, so the zero moves by under 1° of rotation), and the zero crossing lands where the wiper is 0.568
 > of the way from 0 V to `DAC AVDD`: rotation p = 0.432 from CCW, **19.0°
 > counter-clockwise of centre on the R0904N's 280° track** `[ds R0904N-thonk.pdf:
 > 280° ± 10°]` — `(0.5 − 0.432) × 280°`. The distance matches `panel.md`'s
@@ -166,23 +171,24 @@ slightly non-linear in rotation. For an offset knob that is feel, not error.
 
 **Why −12 V is acceptable here and would not be on pitch.** ADR 0006 moved the
 *pitch* offset off a rail divider because 50 mV of rail movement is 12.5 cents
-of transposition. Here 50 mV moves the jack by `40.2k/95.3k × 50 mV` = **21 mV,
-0.21 % of span**. The −12 V rail does carry the instrument's LED current
+of transposition. Here 50 mV of slow drift moves the jack by
+`40.2k/95.0k × 50 mV` = **21 mV, 0.21 % of span**. The −12 V rail does carry the instrument's LED current
 now: `U-ISO` draws rail to rail (ADR 0027), so both rails move with breath,
-by 9.7 mV at the header (ADR 0027's residual table). Through this divider
-that is `40.2k/95.3k × 9.7 mV` = **4.1 mV, 0.04 % of span** `[calc]`, and it
-follows breath, as this output does. The same divider carries the instrument
-LED row's 2–4 kHz PWM off −12 V. `R-OUT-PROT` and `C-OUT-BREATH` no longer
-filter it (their corner is 15.9 kHz since #32), so the divider's share reaches
-the jack: **up to 1.14 mV p-p at 2 kHz on the worst corner, 0.50 mV nominal,
-against `power-entry/sim`'s 1 mV bar** (`led-pwm`; it was 0.26 mV behind the
-old 330 nF). It is below the jack's own noise in every mode, and the bar was
-not moved. **Open, for the owner (#32):** the cheap fix is to filter this leg
-where it enters — `R-BREATH-OFFNEG` as two 47.5 kΩ in series with 1 µF from
-their midpoint to `AGND_MOD`, about 6.7 Hz `[calc: 1/(2π × 23.75 kΩ × 1 µF)]`,
-which takes the PWM down by ~50 dB and the rail's breath-rate movement with
-it, at no DC change; one part and a split, on a sheet the module re-layout is
-placing anyway.
+by 9.7 mV at the header (ADR 0027's residual table). At a 10 Hz breath
+rate, through the filtered leg below, that is **2.3 mV, 0.02 % of span**
+(`sim/`, `rail`: 2.26 mV nominal, 2.32 mV worst; `40.2k / |2R + jωR²C|`
+`[calc]`), and it follows breath, as this output does. The same divider carries the instrument
+LED row's 2–4 kHz PWM off −12 V. Since #32 `R-OUT-PROT` and `C-OUT-BREATH`
+no longer filter it (their corner is 15.9 kHz), and with the leg as one
+95.3 kΩ the PWM reached the jack at 1.14 mV p-p on the worst corner, over
+`power-entry/sim`'s 1 mV bar. **So the leg is filtered where it enters**
+(owner, 2026-10-04: *"Add RC filter (Recommended)"*): `R-BREATH-OFFNEG-A` and
+`-B`, 47.5 kΩ each, with `C-BREATH-OFFNEG`, 1 µF X7R 50 V, from their midpoint
+to `AGND_MOD` — 6.7 Hz `[calc: 1/(2π × 23.75 kΩ × 1 µF)]`. The PWM and the
+rail's faster breath-rate movement are taken down before the summer; the DC
+gain from −12 V is 40.2k/95.0k: the rest level is 16 mV higher than with 95.3k (0.16 % of span),
+which `POT-OFFSET` trims (`sim/`, `offset`). What reaches the jack now is in
+`power-entry/sim` (`led-pwm`) and `sim/` (`rail`).
 
 ## Values
 
@@ -194,7 +200,8 @@ placing anyway.
 | **R-FB** | 40.2 kΩ 1 % | Fixed ×4. **Not** the same value as `R-MODGAIN-IN`/`R-MODGAIN-FB`, which are 10k/30k — this row claimed a shared reel until 2026-09-22 |
 | **POT-OFFSET** | 10 kΩ linear | ±5 V, clockwise positive; **zero sits ~19° counter-clockwise of centre**, see above |
 | **R-OFF** | 21.0 kΩ 1 % | Variable positive leg |
-| **R-OFFNEG** | 95.3 kΩ 1 % | Fixed negative leg from −12 V |
+| **R-OFFNEG** (`R-BREATH-OFFNEG-A`, `-B`) | 2 × 47.5 kΩ 1 % | Fixed negative leg from −12 V, split (#32) |
+| **C-BREATH-OFFNEG** | 1 µF X7R 50 V, 1206 | At the split, to `AGND_MOD`: 6.7 Hz on the −12 V leg (#32) |
 | **R-OUT-PROT** | 1 kΩ, 1206 ≥500 mW | Shared spec with the other five outputs |
 | **C-OUT-BREATH** | 10 nF C0G | 15.9 kHz with `R-OUT-PROT`, jack side, feedback from the op-amp: above the receive stage's widest mode, so the jack sets no band-limit of its own (#32, ADR 0003 *Amendment, 2026-10-04*) |
 

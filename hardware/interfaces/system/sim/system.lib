@@ -265,7 +265,10 @@ RBIN bufo bsum {{R-BREATH-IN}}
 ROCW agnd ow {{r_off_cw}}
 ROCCW ow avdd {{r_off_ccw}}
 ROFF ow bsum {{R-BREATH-OFF}}
-ROFFN n12 bsum {{R-BREATH-OFFNEG}}
+* R-BREATH-OFFNEG as two halves with C-BREATH-OFFNEG at the split (#32): 6.7 Hz on the -12 V leg
+ROFFN1 n12 offnm {{R-BREATH-OFFNEG}}
+COFFN offnm agnd {{C-BREATH-OFFNEG}}
+ROFFN2 offnm bsum {{R-BREATH-OFFNEG}}
 RBFB bsum bout {{R-BREATH-FB}}
 XBB agnd bsum p12 n12 bout BOPA
 RBOUT bout jb {{R-OUT-PROT}}

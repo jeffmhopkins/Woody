@@ -37,7 +37,7 @@ capacitance off and on at its maximum, an open channel's 0.2 pF across it.
 |---|---|---|
 | `cmrr-500` | 500 Hz mode: the corner; CMRR at DC, 50, 60 and 500 Hz; the least in DC–500 Hz | corner **493 Hz**; least in the band **71.0 dB** at the worst corner; mains **71.7 dB**; the page's 73 dB bias-pair floor within 3 dB |
 | `cmrr-1k5` | 1.5 kHz mode: the same to 1.5 kHz | corner **1555 Hz**; least in the band **68.3 dB** at the worst corner (68.1 dB at 1.5 kHz) |
-| `cmrr-wide` | WIDE: the same to 10 kHz | corner **10.09 kHz**; 69.1 dB at 1.5 kHz; **FAILS above ~7.4 kHz**: the worst corner first falls through 58.5 dB at 7.4 kHz and reaches **56.0 dB at 10 kHz** — for the owner (below) |
+| `cmrr-wide` | WIDE: the corner, and the requirement over **DC to 7 kHz**, WIDE's band as the owner set it | corner **10.09 kHz**; least in DC–7 kHz above 58.5 dB at every corner (it first reaches 58.5 dB at **7.40 kHz**); 69.1 dB at 1.5 kHz. **Recorded, not passed:** 56.0 dB at 10 kHz at the worst corner |
 | `cmrr-sw-spread` | WIDE, the switch's pins at its typ-to-max spread, one leg each way | what-if: 68.8 dB at 1.5 kHz, 55.4 dB at 10 kHz |
 | `cmrr-without-r1b` | the 500 Hz mode with `R1b` shorted | the page's 60.2 dB at the nominal (60.1), 58.2 dB worst: below the requirement |
 | `cmrr-ccm-5pct` | the 1.5 kHz mode with `C_cm` at ±5 % | 62.1 dB at 1.5 kHz against a 71.7 dB floor: the pair's mismatch is what sets the top |
@@ -52,23 +52,20 @@ What the runs say:
   switch's capacitance are fixed, and below each corner `C_diff` does not
   enter the conversion. What the toggle changes is how far the band reaches,
   so what each mode is held to is its own top.
-- **WIDE does not hold the requirement to 10 kHz.** The common-mode
-  capacitance on each leg — `C_cm` and the switch's pins — converts common
-  mode in proportion to frequency; at 10 kHz the worst corner's 1 % pair
-  mismatch and 20 % switch-pin mismatch together leave 56.0 dB. The
-  requirement was not moved to make it pass. **Owner's choice** (#32, asked in
-  the working chat), each estimated against an ideal difference amplifier,
-  which reads about 0.5 dB above the INA828 here `[calc]`:
-  1. **WIDE at ~7 kHz**: the fixed `C_diff` 680 pF → 1.0 nF, 7.1 kHz, about
-     59.4 dB at its top. One value on the sheet.
-  2. **Keep ~10 kHz and hold WIDE's requirement to ~7 kHz**, with a reason for
-     the band: the common mode the requirement is derived from is the
-     umbilical's `PWR_GND` drop, and what of it lies at 7–10 kHz is the LED
-     row's PWM harmonics, which `interfaces/system/sim` holds at the jack end
-     to end.
-  3. **Keep ~10 kHz and tighten the match**: `C_cm` to ±0.25 % alone reaches
-     about 57.5 dB, not enough; the switch's channel match is the larger term
-     and no catalogue part states it — it would have to be measured.
+- **WIDE does not hold the requirement to 10 kHz, and its band is now
+  DC to 7 kHz by the owner's decision.** The common-mode capacitance on each
+  leg — `C_cm` and the switch's pins — converts common mode in proportion to
+  frequency; at 10 kHz the worst corner's 1 % pair mismatch and 20 %
+  switch-pin mismatch together leave 56.0 dB. Offered *"Keep wide at ~10 kHz
+  and only require the target up to ~7 kHz. No parts change."*, the owner
+  chose **"Keep 10 kHz, accept"** (2026-10-04, ADR 0003 *The owner's three
+  answers*, ADR 0004's amendment). 7 kHz is where the worst corner first
+  crosses 58.5 dB (7.40 kHz), rounded down. **This is a requirement the owner
+  changed, not a bar moved to make a result pass**: `cmrr-wide` holds 58.5 dB
+  over DC–7 kHz and records `cmrr_top`, 56.0 dB at 10 kHz, as a figure.
+  The options that were not taken: WIDE at ~7 kHz (fixed `C_diff` 1.0 nF), or
+  a tighter match (`C_cm` to ±0.25 % alone reaches about 57.5 dB; the switch's
+  match is the larger term and no datasheet states it).
 - **Without `R1b` the margin was negative, not 1.7 dB.** 60.2 dB is the
   nominal. At the worst tolerance corner the unmatched link is 58.2 dB at DC,
   below the requirement. `R1b` is fitted, so this argues for the part, not

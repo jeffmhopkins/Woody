@@ -509,14 +509,14 @@ components:
     sheet: power-entry-instrument
   D5:
     of: D-TVS-BREATH
-    value: PESD12VS1UA or equivalent 12V-standoff ESD diode
+    value: PESD12VL1BA
     pins:
     - A
     - K
     sheet: breath-sense-link
   D6:
     of: D-TVS-BREATH
-    value: PESD12VS1UA or equivalent 12V-standoff ESD diode
+    value: PESD12VL1BA
     pins:
     - A
     - K

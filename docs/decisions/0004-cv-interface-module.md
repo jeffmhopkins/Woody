@@ -1107,6 +1107,12 @@ now the panel's to set. What changes in this ADR's scope:
   *The bandwidth toggle*.
 - **The breath jack's own RC no longer band-limits.** `C-OUT-BREATH` moved to
   15.9 kHz with `R-OUT-PROT` (ADR 0006's output table).
+- **WIDE's requirement band is DC to 7 kHz, by the owner's choice.** Offered
+  *"Keep wide at ~10 kHz and only require the target up to ~7 kHz. No parts
+  change."*, the owner answered **"Keep 10 kHz, accept"** (2026-10-04, #32).
+  The 58.5 dB is held over 500 Hz, 1.5 kHz and DC–7 kHz in the three modes;
+  WIDE above 7 kHz is recorded, not passed (ADR 0003, *The owner's three
+  answers*).
 
 ## Open
 

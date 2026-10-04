@@ -43,7 +43,7 @@ params:
 derived:
   r_pot_cw: "max(v['POT-RESP'] * (1 - v['p_resp']), 1e-3)"
   r_pot_ccw: "max(v['POT-RESP'] * v['p_resp'], 1e-3)"
-  # the trimmer's end resistance, 1 % of its track or 2 ohm, whichever is greater [ds BOURNS-3224-TRIMPOT.pdf p.1]
+  # the trimmer's end resistance, 1 % of its track or 2 ohm, whichever is greater [ds BOURNS-3296-TRIMPOT.pdf p.1]
   r_trim_end: "max(0.01 * v['TRIM-RESP'], 2.0)"
   r_trim: "max(v['TRIM-RESP'] * (1 - v['p_trim']), max(0.01 * v['TRIM-RESP'], 2.0))"
   t_hard: "v['v_hard'] * v['t_ramp'] / v['v_mag']"
@@ -61,7 +61,7 @@ vary:
   # POT-RESP's track: the RV09 sheet states no resistance tolerance [datasheets/connectors/RV09AF-40.pdf];
   # +/-20 % is the usual carbon-track figure [assumption]. It sets how hard the pot loads the divider
   POT-RESP: {tol: [-0.2, 0.2]}
-  # TRIM-RESP's track: +/-10 % [ds BOURNS-3224-TRIMPOT.pdf p.1]
+  # TRIM-RESP's track: +/-10 % [ds BOURNS-3296-TRIMPOT.pdf p.1]
   TRIM-RESP: {tol: from-value}
   v_pos: {tol: [-0.1, 0.05], source: "the analog +12 V from 10.8 V (a tripped PTC-POS12 and D1) to 12.6 V (the bus maximum), as module/power-entry/sim's v_in_dac and pitch-stage/sim; only the *-supply sims name it (#5 finding 6)"}
   v_neg: {tol: [-0.1, 0.05], source: "the analog -12 V, -10.8 to -12.6 V"}

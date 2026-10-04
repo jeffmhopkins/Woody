@@ -365,8 +365,8 @@ sims:
     asserts:
       - expr: "max['pitch_cents'] < 0.1 * fig['pitch-cents-budget']"
         why: "a light pattern at 200 Hz, inside the pitch band where nothing filters it, moves the pitch jack under a tenth of pitch-cents-budget at every corner"
-      - expr: "max['breath_mv'] < 1.2 * p['R-BREATH-FB'] / p['R-BREATH-OFFNEG'] * max['hdr_neg_mv'] and min['breath_mv'] > 0.8 * p['R-BREATH-FB'] / p['R-BREATH-OFFNEG'] * min['hdr_neg_mv']"
-        why: "the breath jack moves by R-BREATH-FB / R-BREATH-OFFNEG of the -12 V rail's ripple, the path breath-output-stage.md names ('Why -12 V is acceptable here'), within 20 %: the deck finds no other path of that size"
+      - expr: "max['breath_mv'] < 0.1 * p['R-BREATH-FB'] / (2 * p['R-BREATH-OFFNEG']) * max['hdr_neg_mv']"
+        why: "the -12 V path breath-output-stage.md names ('Why -12 V is acceptable here') is filtered since #32 (owner, 2026-10-04: 'Add RC filter (Recommended)'; C-BREATH-OFFNEG at the split of R-BREATH-OFFNEG, 6.7 Hz): a 200 Hz light pattern now moves the breath jack by under a tenth of what the unfiltered R-BREATH-FB / R-BREATH-OFFNEG share of the -12 V ripple used to put there (the run before #32 held it to that share within 20 %)"
       - expr: "max['pre_pitch_cents'] < 0.01 * min['pitch_cents'] and max['pre_breath_mv'] < 0.01 * min['breath_mv']"
         why: "the solver's floor is under 1 % of every result"
   - name: led-off

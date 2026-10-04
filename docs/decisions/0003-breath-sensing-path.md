@@ -939,3 +939,34 @@ datasheet's figure, not a measurement]`.
   jack by `hardware/interfaces/system/sim` in the 500 Hz mode, against the
   jack's own noise in that mode, and recorded in WIDE (`led-pwm-wide`,
   `burst-wide`).
+
+### The owner's three answers, 2026-10-04 (#32)
+
+The simulations left three results failing their bars. Each was put to the
+owner in the working chat with its options; no bar was moved to make a result
+pass.
+
+1. **WIDE's CMRR.** Offered *"Keep wide at ~10 kHz and only require the target
+   up to ~7 kHz. No parts change."*, the owner chose **"Keep 10 kHz, accept"**.
+   So the link's 58.5 dB requirement **in WIDE runs from DC to 7 kHz** — where
+   the worst tolerance corner first crosses 58.5 dB (7.40 kHz), rounded down.
+   This is a requirement the owner changed, not a bar moved to pass: above
+   7 kHz, to WIDE's ~10 kHz corner, the CMRR is a recorded figure (about 56 dB
+   at 10 kHz at the worst corner), not a pass. The 500 Hz and 1.5 kHz modes
+   keep their whole bands. Assertion and numbers:
+   `hardware/module/breath-receive-stage/sim/` (`cmrr-wide`).
+2. **`PWR_GND` through the TVS diodes.** Offered *"The end-to-end simulation
+   holds the output jack within limits in the 500 Hz mode. In wide mode it's
+   about 4× better with a lower-capacitance diode, so take that too if wide
+   stays at 10 kHz."*, the owner chose **"Accept (Recommended)"**. WIDE stays
+   at 10 kHz, so `D-TVS-BREATH` goes from the PESD12VS1UA (160 pF) to the
+   **PESD12VL1BA** (19 pF typ, 12 V standoff, bidirectional, the same SOD-323)
+   `[ds NEXPERIA-PESDXL1BA-SER.pdf p.5]`. The −60 dB bound now applies **inside
+   each mode's band**; the out-of-band peak (~70 kHz–1 MHz) is a recorded
+   figure. Numbers: `hardware/interfaces/breath-sense-link/sim/`.
+3. **The LED row's PWM at the jack.** Offered splitting `R-BREATH-OFFNEG` into
+   2 × 47.5 kΩ with 1 µF to `AGND` between them, the owner chose **"Add RC
+   filter (Recommended)"**: `R-BREATH-OFFNEG-A`, `-B` and `C-BREATH-OFFNEG`,
+   6.7 Hz on the offset's −12 V leg (`breath-output-stage.md`, *Why −12 V is
+   acceptable here*). It raises the jack's rest level by 16 mV, which
+   `POT-OFFSET` trims.

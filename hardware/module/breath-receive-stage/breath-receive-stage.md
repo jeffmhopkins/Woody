@@ -440,30 +440,30 @@ page's in-amp and that stage's `POT-GAIN`
 *(The instrument-side reference buffer, which is not this page's circuit but
 sets the number this page multiplies, settled 2026-09-21 — [`notes.md`](notes.md).)*
 
-## Still open (#32)
+## Decided, and still open (#32)
 
-Each of these is the owner's to decide (#32); none was settled by moving a
-number.
+**Decided by the owner, 2026-10-04** (ADR 0003, *The owner's three answers*;
+ADR 0004's amendment):
 
-- **WIDE misses the CMRR requirement at its top.** The worst corner holds
-  58.5 dB to about 7.4 kHz and reaches about 56 dB at 10 kHz
-  (`sim/README.md`, `cmrr-wide`, with the three ways out: WIDE at ~7 kHz, a
-  stated band for WIDE's requirement, or a tighter match). The 500 Hz and
-  1.5 kHz modes hold it with margin.
-- **High-frequency common mode is less filtered.** With `C_cm` at 68 pF the
-  common-mode pole is ~213 kHz rather than ~9.6 kHz, so `PWR_GND` noise from
-  ~70 kHz to 1 MHz reaches the in-amp's output at up to about −37 dB through
-  the TVS diodes' mismatch (`../../interfaces/breath-sense-link/sim`,
-  `with-tvs-*`: its "under −60 dB at every frequency to 1 MHz" now fails in
-  every mode). The shaper, the output stage and the jack's RC take it down
-  again; `interfaces/system/sim` holds the jack end to end.
+- **WIDE's CMRR requirement runs DC to 7 kHz** — *"Keep 10 kHz, accept"*. The
+  worst corner first crosses 58.5 dB at 7.4 kHz and is about 56 dB at 10 kHz;
+  above 7 kHz that is recorded, not passed. A requirement the owner changed,
+  not a bar moved (`sim/README.md`, `cmrr-wide`). The 500 Hz and 1.5 kHz modes
+  hold it over their whole bands.
+- **`PWR_GND` through the TVS diodes** — *"Accept (Recommended)"*, with the
+  lower-capacitance diode because WIDE stays at 10 kHz: `D-TVS-BREATH` is the
+  PESD12VL1BA (19 pF) on the main board. Held under −60 dB inside each mode's
+  band; the out-of-band peak (~70 kHz–1 MHz, from `C_cm`'s ~213 kHz pole) is
+  recorded (`../../interfaces/breath-sense-link/sim/README.md`).
+- **The LED row's PWM on −12 V** — *"Add RC filter (Recommended)"*:
+  `R-BREATH-OFFNEG-A`/`-B` and `C-BREATH-OFFNEG`, 6.7 Hz on that leg
+  (`../breath-output-stage/breath-output-stage.md`).
+
+**Still open:**
+
 - **The noise grows with the band** and no page sets a limit
   (`breath-jack-noise`): in WIDE the audio-band noise is above the −80 dB of
   10 V that figure's note offers as an example.
-- **The LED row's PWM on −12 V reaches the jack** through `R-BREATH-OFFNEG`
-  now that the jack's RC is at 15.9 kHz: 1.14 mV p-p at the worst corner,
-  over `power-entry/sim`'s 1 mV bar (`../breath-output-stage/breath-output-stage.md`,
-  *Why −12 V is acceptable here*, which proposes an RC on that leg).
 - **The switch's channel match is unstated** by its datasheet; the sim
   assumes 20 % between legs. E11's measurement of the pair in WIDE is the check.
 - **Where the toggle and the LED sit** is the module re-layout's
