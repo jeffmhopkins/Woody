@@ -146,9 +146,9 @@ layout:
   # first three keys of each hand are index, middle, ring.
   lh_gaps:
     value: [20.0, 20.0, 18.0, 0.0]
-    status: nominal
-    source: "[research] soprano recorder L1-L2-L3 21.0/22.3, D whistle 20/20; pad widths put touching fingers 15-22 apart (P5 F - P95 M). 18 to the little-finger keys (soprano R3-R4 18.0; 1.5 mm between MT165 caps). The final 0 is the side-by-side pair LH4 / LH5 (owner, 2026-09-26)"
-    decided_by: "M2 - replaced key by key by x/y in config/key-layout.yaml"
+    status: settled
+    source: "owner 2026-10-04, chat: final for rev A ('I think we're good to mark them final for rev-A. We won't know again until they are actually in my hands and we can double check'); re-checked on the rev A boards in hand (ADR 0010, Amendment 2026-10-04). [research] soprano recorder L1-L2-L3 21.0/22.3, D whistle 20/20; pad widths put touching fingers 15-22 apart (P5 F - P95 M). 18 to the little-finger keys (soprano R3-R4 18.0; 1.5 mm between MT165 caps). The final 0 is the side-by-side pair LH4 / LH5 (owner, 2026-09-26)"
+    decided_by: "the rev A boards in hand: a change there is a rev B layout"
   # SIDEWAYS OFFSETS, per key, mm from the centreline (owner, 2026-09-26):
   # each little finger's first position is a side-by-side PAIR (a 0 in the
   # gaps list); the right little finger then has a single key below it, off
@@ -162,14 +162,14 @@ layout:
   # Confirm on the mule.
   lh_offsets:
     value: [0.0, 0.0, 0.0, -9.0, 9.0]
-    status: tbd
-    source: "LH1-3 on the centreline; LH4 / LH5 the little finger's side-by-side pair, one cap pitch apart across the body, centred so both switch bodies stay inside the plate"
-    decided_by: "M2 - hands on the mule; the sign too"
+    status: settled
+    source: "owner 2026-10-04, chat: final for rev A ('I think we're good to mark them final for rev-A. We won't know again until they are actually in my hands and we can double check'); re-checked on the rev A boards in hand (ADR 0010, Amendment 2026-10-04). LH1-3 on the centreline; LH4 / LH5 the little finger's side-by-side pair, one cap pitch apart across the body, centred so both switch bodies stay inside the plate"
+    decided_by: "the rev A boards in hand: a change there is a rev B layout"
   rh_offsets:
     value: [0.0, 0.0, 0.0, -9.0, 9.0, -9.0]
-    status: tbd
-    source: "RH1-3 on the centreline; RH4 / RH5 the little finger's side-by-side pair, centred as LH4 / LH5; RH6 the single key below it, IN LINE with RH4 - the pair key on the player's right, the recorder's direction (owner, 2026-09-26)"
-    decided_by: "M2 - hands on the mule; the sign too"
+    status: settled
+    source: "owner 2026-10-04, chat: final for rev A ('I think we're good to mark them final for rev-A. We won't know again until they are actually in my hands and we can double check'); re-checked on the rev A boards in hand (ADR 0010, Amendment 2026-10-04). RH1-3 on the centreline; RH4 / RH5 the little finger's side-by-side pair, centred as LH4 / LH5; RH6 the single key below it, IN LINE with RH4 - the pair key on the player's right, the recorder's direction (owner, 2026-09-26)"
+    decided_by: "the rev A boards in hand: a change there is a rev B layout"
   # EQUAL BANDS (owner, 2026-09-26): the space before the left hand and
   # between the hands are made the same - the larger that either needs.
   # The TAIL is sized on its own since the LED
@@ -193,34 +193,34 @@ layout:
     source: "[adr] ADR 0009 length table - the U-bolt band. A MINIMUM while equal_bands is on"
   rh_gaps:
     value: [20.0, 20.0, 18.0, 0.0, 18.0]
-    status: nominal
-    source: "[research] as lh_gaps; soprano R1-R2-R3 20.8/20.1, R3-R4 18.0. A 0 GAP IS A SIDE-BY-SIDE PAIR: RH4 / RH5 share the first little-finger position, RH6 is the single key one step further down (owner, 2026-09-26)"
-    decided_by: "M2 - replaced key by key by x/y in config/key-layout.yaml"
+    status: settled
+    source: "owner 2026-10-04, chat: final for rev A ('I think we're good to mark them final for rev-A. We won't know again until they are actually in my hands and we can double check'); re-checked on the rev A boards in hand (ADR 0010, Amendment 2026-10-04). [research] as lh_gaps; soprano R1-R2-R3 20.8/20.1, R3-R4 18.0. A 0 GAP IS A SIDE-BY-SIDE PAIR: RH4 / RH5 share the first little-finger position, RH6 is the single key one step further down (owner, 2026-09-26)"
+    decided_by: "the rev A boards in hand: a change there is a rev B layout"
   # THE LEFT THUMB IS TWO ROWS ACROSS THE BODY with the rest between them,
   # like the right thumb's pair (owner, 2026-09-26: "dual horizontal rows
   # too, with gap still in the middle"): LT1 LT2, the rest, LT3 LT4.
   lt_rest_under:
     value: "LH2"
-    status: tbd
-    source: "the left thumb rest is directly under the middle-finger key (owner, 2026-09-26); LH2 is the middle finger on the index-middle-ring order key-layout.yaml assumes until M2 assigns fingers"
-    decided_by: "M2 - finger assignment"
+    status: settled
+    source: "owner 2026-10-04, chat: final for rev A ('I think we're good to mark them final for rev-A. We won't know again until they are actually in my hands and we can double check'); re-checked on the rev A boards in hand (ADR 0010, Amendment 2026-10-04). the left thumb rest is directly under the middle-finger key (owner, 2026-09-26); LH2 is the middle finger on the index-middle-ring order key-layout.yaml assumes until M2 assigns fingers"
+    decided_by: "the rev A boards in hand: a change there is a rev B layout"
   lt_rest:
     value: 40.0
-    status: tbd
-    source: "the LT1/LT2 row to the LT3/LT4 row, centre to centre, across the thumb rest: about a thumb pad clear between the cap holes. Each row's two keys are at the top keys' pitch (owner, 2026-09-26)"
-    decided_by: "M2"
+    status: settled
+    source: "owner 2026-10-04, chat: final for rev A ('I think we're good to mark them final for rev-A. We won't know again until they are actually in my hands and we can double check'); re-checked on the rev A boards in hand (ADR 0010, Amendment 2026-10-04). the LT1/LT2 row to the LT3/LT4 row, centre to centre, across the thumb rest: about a thumb pad clear between the cap holes. Each row's two keys are at the top keys' pitch (owner, 2026-09-26)"
+    decided_by: "the rev A boards in hand: a change there is a rev B layout"
   rt_rest_under:
     value: "RH2"
-    status: tbd
-    source: "the right thumb rest is directly under the middle-finger key (owner, 2026-09-26); RH2 on the same assumption as lt_rest_under"
-    decided_by: "M2 - finger assignment"
+    status: settled
+    source: "owner 2026-10-04, chat: final for rev A ('I think we're good to mark them final for rev-A. We won't know again until they are actually in my hands and we can double check'); re-checked on the rev A boards in hand (ADR 0010, Amendment 2026-10-04). the right thumb rest is directly under the middle-finger key (owner, 2026-09-26); RH2 on the same assumption as lt_rest_under"
+    decided_by: "the rev A boards in hand: a change there is a rev B layout"
   # THE RIGHT THUMB: two rows across the body with the rest between them,
   # like the left (owner, 2026-09-26: "four keys right thumb too").
   rt_rest:
     value: 40.0
-    status: tbd
-    source: "the RT1/RT2 row to the RT3/RT4 row, centre to centre, across the thumb rest - the same as the left thumb's. Each row's two keys are at the top keys' pitch (owner, 2026-09-26)"
-    decided_by: "M2"
+    status: settled
+    source: "owner 2026-10-04, chat: final for rev A ('I think we're good to mark them final for rev-A. We won't know again until they are actually in my hands and we can double check'); re-checked on the rev A boards in hand (ADR 0010, Amendment 2026-10-04). the RT1/RT2 row to the RT3/RT4 row, centre to centre, across the thumb rest - the same as the left thumb's. Each row's two keys are at the top keys' pitch (owner, 2026-09-26)"
+    decided_by: "the rev A boards in hand: a change there is a rev B layout"
 
 # -------------------------------------------------------------- switches ----
 switch:

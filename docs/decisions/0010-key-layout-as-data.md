@@ -1,6 +1,6 @@
 # 0010 — Key layout as data
 
-**Status:** Accepted
+**Status:** Accepted. **Amended 2026-10-04** (the provisional layout is final for rev A: *Amendment* below).
 
 ## Context
 
@@ -259,3 +259,26 @@ M2 when there is something to put hands on.
 are octave/register keys, as on a conventional woodwind. The 2021 firmware used
 three left-thumb inputs for octave selection across a four-octave span,
 including bridged positions. Confirm at M2.
+
+## Amendment, 2026-10-04 — the provisional layout is final for rev A
+
+**The owner, 2026-10-04** (working chat, review #6): **"I think we're good to
+mark them final for rev-A. We won't know again until they are actually in my
+hands and we can double check."**
+
+1. **The key positions the body CAD derives today are final for rev A.** The
+   `config/body.yaml` `layout:` figures that place every key — `lh_gaps`,
+   `lh_offsets`, `rh_gaps`, `rh_offsets`, `lt_rest_under`, `lt_rest`,
+   `rt_rest_under`, `rt_rest` — are `settled`, at their values unchanged; no
+   key moves.
+2. **`config/key-layout.yaml` x/y stay null.** The keys are still placed from
+   those figures (the CAD's `prov_xy`), so the bands, the derived length and
+   the boards keep following them; copying the derived coordinates into x/y
+   would freeze numbers that the body's other figures move. `tools/cad.py`
+   treats the layout as final when every one of those figures is `settled`
+   (`LAYOUT_FIGURES`; the renders' PROVISIONAL band and `drc.echo`'s
+   `PROVISIONAL` go with it). Filling x/y key by key is still how a measured
+   position replaces a derived one.
+3. **The check moves to the boards in hand.** M2/M3's ergonomic check is made
+   on the rev A boards once they are built (ROADMAP, Track M); a change it
+   finds is a rev B layout, not an edit before this order.

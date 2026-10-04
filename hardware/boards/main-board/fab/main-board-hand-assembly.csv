@@ -1,8 +1,8 @@
 Designator,Value,Manufacturer,MPN,Fit
-J1,2x12 1.27mm shrouded box header,XKB Connection,X1270WR-2x12A-9TV01,
+J1,2x12 1.27mm shrouded box header,XKB Connection,X1270WR-2x12A-9TV01,"cut its tails and their solder to at most 0.8 mm below the board's bottom face [calc: hardware.kb_spacer_l 1.3 - boards.tail_clear 0.5]: J-MCU, over the grounded bottom plate (#8-11)"
 J2,1x3,hanxia,HX PZ2.54-1x3P ZZ,
-J4,12-way,Samtec,SHF-106-01-L-D-RA,
-J5,12-way,Samtec,SHF-106-01-L-D-RA,
+J4,12-way,Samtec,SHF-106-01-L-D-RA,"cut its tails and their solder to at most 0.8 mm below the board's bottom face [calc: hardware.kb_spacer_l 1.3 - boards.tail_clear 0.5]: J-CHAIN (LH), over the grounded bottom plate (#8-11)"
+J5,12-way,Samtec,SHF-106-01-L-D-RA,"cut its tails and their solder to at most 0.8 mm below the board's bottom face [calc: hardware.kb_spacer_l 1.3 - boards.tail_clear 0.5]: J-CHAIN (RH), over the grounded bottom plate (#8-11)"
 J6,8-way 2.54mm right-angle pin header,hanxia,HX PZ2.54-1x8P WZ,
 SW1,KS-33,Gateron,KS-33H10B050NN-Y24,
 SW2,KS-33,Gateron,KS-33H10B050NN-Y24,
@@ -13,4 +13,4 @@ SW6,KS-33,Gateron,KS-33H10B050NN-Y24,
 SW7,KS-33,Gateron,KS-33H10B050NN-Y24,
 SW8,KS-33,Gateron,KS-33H10B050NN-Y24,
 U10,MPXV4006DP,STMicroelectronics,MPXV4006DP,"First of the hand-fitted parts. Fine conical tip, 0.8-1.0 mm. Pins 1-4 (NC, VS, GND, Vout: the far-edge row) have open room. Pins 5-8 (no-connect, the mechanical joints) face the machine-fitted R7 (0.80 mm pad to pad, from pin 5) and U3 (1.59 mm, from pins 5-8): mask R7 and U3 with polyimide tape, land the tip on each pin's outer end coming from down the board (pin 5 from the mouth end), one pin at a time - no drag soldering - and check R7 and U3 for bridges after"
-U5,R-78E5.0-1.0,Recom,R-78E5.0-1.0,
+U5,R-78E5.0-1.0,Recom,R-78E5.0-1.0,"cut its tails and their solder to at most 1.5 mm below the board's bottom face [calc: boards.tht_trim 1.5]: U-BUCK, over its window to the oak: as supplied its pins reach the oak (drc.echo, through-hole tails)"

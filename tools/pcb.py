@@ -2348,16 +2348,40 @@ def assembly_files(bdir, name, fab):
                 w.writerow([ref, r["PosX"], r["PosY"], "Bottom" if r["Side"] == "bottom" else "Top", f"{rot:.6f}"])
     if unchecked:
         print(f"pcb: no JLC rotation offset for {', '.join(sorted(unchecked))} - confirm them in JLC's preview")
+    # layout.yaml hand_trim: a hand part's tails, cut after soldering to at most a length
+    # below the board's bottom face, computed from the config/body.yaml figures the layout
+    # names (issue #8-11). Only a board that has one gets the Fit column, and then the
+    # layout and body.yaml are inputs of these files, so the length follows its figures.
+    trims = yaml.safe_load(open(os.path.join(bdir, "layout.yaml"))).get("hand_trim") or {}
+    fit = {}
+    if trims:
+        body = yaml.safe_load(open(os.path.join(ROOT, "config", "body.yaml")))
+        for ref, t in trims.items():
+            vals = []
+            for sign, key in re.findall(r"([+-]?)\s*([a-z_]+\.[a-z_0-9]+)", t["max"]):
+                sect, k = key.split(".")
+                v = float(body[sect][k]["value"])
+                vals.append((-v if sign == "-" else v, key))
+            mm = round(sum(v for v, _ in vals), 3)
+            calc = " ".join(f"{'-' if v < 0 else '+'} {key} {abs(v):g}" for v, key in vals)[2:]
+            fit[ref] = f"cut its tails and their solder to at most {mm:g} mm below the board's bottom face [calc: {calc}]: {t['why']}"
+        missing = sorted(set(fit) - {h[0] for h in hand})
+        if missing:
+            sys.exit(f"pcb: layout.yaml hand_trim: names {', '.join(missing)}, not a hand part on this board")
     with open(os.path.join(fab, name + "-hand-assembly.csv"), "w", newline="") as fh:
         w = csv.writer(fh)
-        # the Fit column only where a part has one: a board with none keeps its four columns
-        fit = any(h[4] for h in hand)
-        w.writerow(["Designator", "Value", "Manufacturer", "MPN"] + (["Fit"] if fit else []))
-        w.writerows([h if fit else h[:4] for h in hand])
+        # ONE Fit column: the symbol's own Fit field (how to fit it by hand - order, tip, what
+        # to mask, #34) and layout.yaml hand_trim:'s cut length (#8-11), joined by "; " where a
+        # part has both. Only a board where some hand part has either gets the column.
+        fits = {h[0]: "; ".join(x for x in (h[4], fit.get(h[0], "")) if x) for h in hand}
+        col = any(fits.values())
+        w.writerow(["Designator", "Value", "Manufacturer", "MPN"] + (["Fit"] if col else []))
+        w.writerows([list(h[:4]) + ([fits[h[0]]] if col else []) for h in hand])
     if none:
         print(f"pcb: not in any order (Assembly = none: excluded from the BOM, or a net tie drawn in copper): {', '.join(none)}")
     subs = re.findall(r'\(property "Sheetfile" "([^"]+)"', open(root).read())
-    return [root] + sorted({os.path.normpath(os.path.join(bdir, s)) for s in subs}) + [JLC_ROTATION]
+    extra = [os.path.join(bdir, "layout.yaml"), os.path.join(ROOT, "config", "body.yaml")] if fit else []
+    return [root] + sorted({os.path.normpath(os.path.join(bdir, s)) for s in subs}) + [JLC_ROTATION] + extra
 
 
 def cmd_render(bdir, preview=None):

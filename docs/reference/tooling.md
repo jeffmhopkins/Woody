@@ -208,7 +208,15 @@ python3 tools/kicad.py export hardware/cluster/key-register   # sheet -> netlist
 python3 tools/kicad.py export hardware/boards/key-board-rh    # board -> board-netlist.yaml, with KiCad's ERC
 python3 tools/kicad.py render hardware/boards/key-board-rh    # a PNG of every page
 python3 tools/kicad.py check                                  # everything above, compared with what is committed
+python3 tools/kicad.py check --board key-board-lh             # the same, scoped to one board: its order sheet's gate
 ```
+
+**`--board <name>`** checks that board's export, ERC, layout (`pcb.py check`)
+and renders, and the circuit sheets it places with their renders; the
+cross-board checks below still read every board's netlist, because a
+connector is only right if it matches its peer. Another board's layout, ERC
+and renders are left out, so a board under work does not block an order of a
+finished one (review #6-3). The commit gate still runs the full check.
 
 **`kicad.py check` fails when:**
 - a sheet was edited and not re-exported;
@@ -331,8 +339,19 @@ assemble and bring it up, what is open.
 ```
 python3 tools/pcb.py layout hardware/boards/key-board-lh   # FIRST layout: place, route, pour, fill (refuses if the board exists; --force)
 python3 tools/pcb.py check  hardware/boards/key-board-lh   # DRC + parity + fab limits + the body CAD's outline, thickness and positions
-python3 tools/pcb.py render hardware/boards/key-board-lh   # 3D both sides, 2D copper, and fab/ (Gerbers, PTH and NPTH drills, placement, and the JLCPCB BOM, CPL and hand-assembly list - with a Fit column, from each symbol's `Fit` field, when any hand-fitted part has one)
+python3 tools/pcb.py render hardware/boards/key-board-lh   # 3D both sides, 2D copper, and fab/ (Gerbers, PTH and NPTH drills, placement, and the JLCPCB BOM, CPL and hand-assembly list, with its Fit column)
 ```
+
+**The hand-assembly list's Fit column.** A board whose `layout.yaml` has
+`hand_trim:` (a hand part's reference, `max:` a sum or difference of
+`config/body.yaml` figures by name, and `why:`) gets a Fit column: each listed
+part's tails, with their solder, cut to at most that length below the board,
+the arithmetic in the cell. The layout and `config/body.yaml` then become
+inputs of that board's renders, so the length goes stale with its figures. The
+main board's is #8-11 (ADR 0017, *Amendment, 2026-10-04*). A symbol's own `Fit` field (how to fit
+the part by hand - solder order, tip, what to mask; the main board's `U10`,
+#34) goes in the same column; a part with both gets them joined by "; ", and a
+board where no hand part has either keeps four columns.
 
 **3D models for `woody` footprints** whose maker's STEP could not be had are
 drawn from the banked drawings by `python3 tools/lib-models.py` into
@@ -806,9 +825,9 @@ Each render is generated; what it is rendered from is the source.
   `hardware/boards/main-board/README.md`, *Open*.
 - **The BOM fragments** become exports once every board is in KiCad, because
   a row's quantity is a count over all of them (ADR 0019).
-- **A gate outside Claude Code.** The commit gate below is a Claude Code hook.
-  A human's `git commit` and any other client pass no gate; there is no CI and
-  no committed git hook (issue #9, G1, left to the owner).
+- **A committed git hook.** The commit gate below is a Claude Code hook, and
+  CI (*CI*, below) reports a red push only after it lands; nothing refuses a
+  human's red `git commit` before it exists (issue #31).
 
 ### The commit gate — `tools/commit-gate.py`
 
@@ -838,6 +857,38 @@ and goes ahead with the failures shown. The trailer stays in the log, and
 or times out (each has 200 s) is a FAIL. Detail is in `.staleness/report.txt`
 and `.staleness/gate.txt`. `python3 tools/commit-gate.py --self-test` checks
 which commands it treats as commits.
+
+### CI — `.github/workflows/gate.yml`
+
+The hook guards only the commits Claude Code makes. **CI runs the same checks
+on every push and pull request, to any branch**, so a commit made any other
+way is checked too (issue #31). The hook stays: it refuses a red commit before
+it exists, while CI reports one after it is pushed and blocks nothing — there
+is no branch protection. Two jobs:
+
+- **`corpus (no KiCad)`** — `check-staleness.py`, then each tool it shells out
+  to as a step of its own, so the run names *which* check is red:
+  `merge-bom.py --check`, `merge-manifests.py --check`, `verify-datasheets.py`,
+  `check-netlist.py --strict`, `adr-index.py --check`, `cad.py check`,
+  `sim.py check`, `sim_coverage.py`, `sim_recheck.py`, and
+  `commit-gate.py --self-test`. Python and PyYAML only: `cad.py check` reads
+  fingerprints and builds nothing.
+- **`kicad (kicad.py check, KiCad 9)`** — KiCad 9 from the PPA `setup-env.sh`
+  adds (its KiCad part only), the library tables, the pinned `shapely`, then
+  `kicad.py check` on the system `python3`, the one `pcbnew` is built for. It
+  runs on every push, not only when a KiCad input changed: the hook already
+  skips it when nothing staged is one, and CI is where that gets caught. A
+  KiCad other than `tools/toolchain.yaml`'s is a warning, as in the hook.
+
+**Nothing is allow-listed.** Every step runs even when an earlier one failed,
+and a red tree shows red: no `continue-on-error`, no per-check exemption, and
+a `Gate-Red:` trailer explains a red commit in the log without making it green
+here. When CI was added (2026-10-04, on `29c8ca7`) both jobs were red on
+failures that predate it: `sim_coverage.py` — and so `check-staleness.py` — on
+`boards/module-iso`, which has no row in *Coverage* (§5); and `kicad.py check`
+on `module-main`, whose `pcb.py check` errors and stale `.sch.png` renders
+followed a `power-entry.main.kicad_sch` change. The latest run is the current
+list; this paragraph is not.
 
 ### Ordering: JLC's stock, not LCSC's
 
@@ -1085,6 +1136,7 @@ re-described here.
 | `lib-models.py` | 3D models drawn from banked drawings | §4 |
 | `sim.py`, `sim_coverage.py` | Circuit simulation and its coverage table | §5 |
 | `check-staleness.py` | The commit gate: figures, links and their anchors, generated files, CAD, sims | `repo-maintenance.md` §2 |
+| `commit-gate.py` | The Claude Code hook that runs `check-staleness.py` (and `kicad.py check`) on a commit; `.github/workflows/gate.yml` runs the same checks in CI | §4, *The commit gate* and *CI* |
 | `check-netlist.py` | Netlists against the BOM and the drawings | `CLAUDE.md`, *Hardware conventions*; `repo-maintenance.md` |
 | `merge-bom.py` | Regenerates `hardware/bom.csv` from the fragments; `--check` | `repo-maintenance.md` §4, §6 |
 | `merge-manifests.py`, `verify-datasheets.py` | Regenerates `datasheets/MANIFEST.csv`; verifies the banked files | `repo-maintenance.md` §3, §6 |
