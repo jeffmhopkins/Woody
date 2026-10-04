@@ -1868,7 +1868,7 @@ module drc_report() {
         dyz = max(0, norm([max(0, sy[0] - tube_yz[0], tube_yz[0] - sy[1]), max(0, sz[0] - tube_yz[1], tube_yz[1] - sz[1])]) - inlet_insert_d / 2),
         gap = norm([dx, dyz]))
         drc(gap >= 1.0, "breath inlet insert clear of U-BREATH", [gap, dx, dyz, inlet_insert_l - ends_mouth_cap_t],
-            "mm: the inlet's insert to U-BREATH's body, against 1.0 (the part-to-board class of issue #34's config/clearance.yaml, not on this branch); along the body and across it; and how far the insert stands into the cavity past the cap's inside face");
+            "mm: the inlet's insert to U-BREATH's body, against 1.0, config/clearance.yaml's part-to-board minimum for 'breath sensor' (the clash step enforces the same pair); along the body and across it; and how far the insert stands into the cavity past the cap's inside face");
     drc(inlet_barb_a <= inlet_barb_proud_max, "breath inlet barb proud of the oak", [inlet_barb_a, inlet_barb_proud_max],
         "mm the outer barb stands proud of the mouth cap's face, against inlet.barb_proud_max (owner, 2026-10-04: 'just a Barb or something at the top')");
     let(trap_x0 = x_lh0 - board_lead - boards_board_clear - routing_trap_l,
