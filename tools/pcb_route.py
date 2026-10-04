@@ -1586,10 +1586,40 @@ def route_pair_smooth(board, lay, obs, spec):
     for net, d in zip(nets, sides):
         for p in prims:
             lay_prim(board, obs, net, p.offset(d), w, L)
+    # `tails:` - each leg's end to its pad on the other face, drawn: a track on the pair's
+    # layer along `path` (body mm, from the leg's end), a via, and a track to the pad
+    other = "F" if L == "B" else "B"
+    for tl in spec.get("tails") or []:
+        net = tl["net"]
+        pts = [pcb.to_pcb(*q) for q in tl["path"]]
+        vx, vy = pcb.to_pcb(*tl["via"])
+        ref, num = tl["pad"].split(".")
+        q = board.FindFootprintByReference(ref).FindPadByNumber(num).GetPosition()
+        pad_at = (TO(q.x), TO(q.y))
+        segs = [(a, b, L) for a, b in zip(pts + [(vx, vy)], pts[1:] + [(vx, vy)]) if math.dist(a, b) > 1e-3] + [((vx, vy), pad_at, other)]
+        for a, b, lyr in segs:
+            g = LineString([a, b]).buffer(w / 2, cap_style=1)
+            for geom, n, ls, kind in obs.near(g, 1.0):
+                if kind in ("hole", "vhole", "npth") and n != net:
+                    hit = geom.distance(g) < obs.hclear - 1e-3
+                elif lyr not in ls or kind in ("silk", "guard") or n == net:
+                    continue
+                else:
+                    hit = geom.intersects(g) if kind == "keepout" else geom.distance(g) < obs.clear - 1e-3
+                if hit:
+                    sys.exit(f"pcb: pair tail {net} to {tl['pad']}: {n or kind} {kind} in the way near "
+                             f"({geom.centroid.x:.1f}, {geom.centroid.y:.1f}) (layout.yaml pairs: tails:)")
+        if not obs.via_ok(vx, vy, net):
+            sys.exit(f"pcb: pair tail {net} to {tl['pad']}: no room for its via at {tl['via']}")
+        for a, b, lyr in segs:
+            lay_track(board, obs, net, a, b, w, lyr)
+        lay_via(board, obs, net, vx, vy)
     total = sum(p.length() for p in prims)
     print(f"route: pair {' / '.join(nets)} - {total:.1f} mm side by side on {spec['layer']}, "
           f"{sum(1 for p in prims if p.kind == 'A')} arc(s), round {len(dets)} mount(s)")
-    report = [f"pair {n}: its ends to {spec['from'][i]} and {spec['to'][i]} left to the autorouter" for i, n in enumerate(nets)]
+    drawn = {t["pad"] for t in spec.get("tails") or []}
+    report = [f"pair {n}: its end to {pd} left to the autorouter" for i, n in enumerate(nets)
+              for pd in (spec["from"][i], spec["to"][i]) if pd not in drawn]
     if spec.get("guard_traces"):
         report += guard_prims(board, lay, obs, spec, prims, L)
     return report

@@ -198,6 +198,13 @@ pairs:
     through: [[19.5, 47.3], [289.5, 47.3], [289.5, 33.0]]
     fillet: 3.0
     fillet_mid: 1.5
+    # each leg's end to its pad on layer 1, drawn (pcb_route: the autorouter could not
+    # reach them through the guards): along layer 4 to a via, then a short track to the pad
+    tails:
+      - {net: /SENSOR_BUFFERED_OUT, pad: U3.7, path: [[19.5, 47.05], [18.6, 46.15]], via: [18.6, 27.9]}
+      - {net: AGND_INST, pad: U10.3, path: [[19.5, 47.55], [12.88, 47.55]], via: [12.88, 45.6]}
+      - {net: /SENSOR_BUFFERED_OUT, pad: R38.1, path: [[289.25, 33.0]], via: [288.3, 32.5]}
+      - {net: AGND_INST, pad: R39.1, path: [[289.75, 33.0]], via: [289.75, 32.3]}
     detours:
       - {at: [40.0, 45.9], r: 5.0, then: [{at: [45.6, 43.2], r: 3.0}]}     # H2, then SW2 pin 1
       - {at: [121.7, 45.9], r: 5.0}                                        # H4
