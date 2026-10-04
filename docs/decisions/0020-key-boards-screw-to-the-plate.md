@@ -12,7 +12,8 @@ sheet, which the standoff this page first chose did not have. **Amendment 7,
 2026-09-29 ([ADR 0025](0025-the-cassette.md)), is the current mount:** each
 corner is a column from the bottom plate to the key plate, and the key board is
 clamped in it by a screw down through the plate. Amendment 5's bonded mount is
-superseded.
+superseded. **Amendment 9, 2026-10-04**: every board's silkscreen reads rev A on
+its first fabrication.
 
 ## Context
 
@@ -768,3 +769,13 @@ of their own, so the drawing's general ±0.2 mm applies [ds
 - What the pin leaves to solder, the board's depth and the spacer are
   unchanged: the hole's size moves none of them.
 
+
+## Amendment 9, 2026-10-04 — every board's silkscreen reads rev A on its first fabrication
+
+**The owner, 2026-10-04** (asked in the working chat, review #6-7): **"Yes,
+all rev A"**. The main board's rule (owner, 2026-10-03) now covers the key
+boards too: a board's silkscreen and title block read `rev A` until a board
+has been made, and the next order is B; the letters in each README's
+*Revisions* table are design history only. The rule is stated once, in
+`hardware/boards/main-board/README.md`, *Ordering it* (**Revision**); the
+key-board pages cite it.

@@ -9,7 +9,7 @@
 	(paper "A4")
 	(title_block
 		(title "WOODY key board RH")
-		(date "2026-09-28")
+		(date "2026-10-03")
 		(rev "A")
 	)
 	(layers
@@ -6062,7 +6062,7 @@
 			(justify left)
 		)
 	)
-	(gr_text "rev A  2026-09-28"
+	(gr_text "rev A  2026-10-03"
 		(at 212 137.5 0)
 		(layer "F.SilkS")
 		(uuid "4f6f00d6-9e9b-4e18-ab8d-4498d4d3b866")
@@ -6390,7 +6390,7 @@
 			(justify right mirror)
 		)
 	)
-	(gr_text "rev A  2026-09-28"
+	(gr_text "rev A  2026-10-03"
 		(at 212 139.3 0)
 		(layer "B.SilkS")
 		(uuid "9bb9ce07-a411-43f5-bfe4-ae1fc30e9307")

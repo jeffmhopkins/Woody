@@ -8,10 +8,10 @@
 # When a key moves, both stay in sync by construction. Do not hand-edit the
 # generated plate or the firmware mapping.
 #
-# STATUS: key count and grouping are decided. Physical positions are NOT —
-# they come out of ergonomic iteration at M2/M3. Every x/y below is null on
-# purpose; the first laser-cut plate is generated from this file once they
-# are filled in.
+# STATUS: key count and grouping are decided. Every x/y below is null on
+# purpose: the keys are placed from config/body.yaml `layout:`, whose figures
+# are settled - final for rev A (owner, 2026-10-04; ADR 0010, Amendment
+# 2026-10-04). The check on the rev A boards in hand may fill x/y key by key.
 
 meta:
   units: mm

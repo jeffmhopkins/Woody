@@ -105,7 +105,7 @@ silk:
   at: [44.0, 12.5]
   top_at: [44.0, 14.3]       # the switch side's copy, left edge of the text
   title: "WOODY key board LH"
-  rev: "B"
+  rev: "A"                  # the first fabrication is A: main-board README, Ordering it, Revision (ADR 0020 Amendment 9)
   date: "2026-10-03"
 
 # Routing (tools/pcb_route.py): ground is routed as a net, so no ground pin

@@ -10,7 +10,7 @@
 	(title_block
 		(title "WOODY key board LH")
 		(date "2026-10-03")
-		(rev "B")
+		(rev "A")
 	)
 	(layers
 		(0 "F.Cu" signal)
@@ -5547,7 +5547,7 @@
 			(justify left)
 		)
 	)
-	(gr_text "rev B  2026-10-03"
+	(gr_text "rev A  2026-10-03"
 		(at 104 137.5 0)
 		(layer "F.SilkS")
 		(uuid "ba92df10-3402-4426-bc42-9e8a63871741")
@@ -5840,7 +5840,7 @@
 			(justify right mirror)
 		)
 	)
-	(gr_text "rev B  2026-10-03"
+	(gr_text "rev A  2026-10-03"
 		(at 104 139.3 0)
 		(layer "B.SilkS")
 		(uuid "8e4a5863-bf53-4d23-9f7d-f51079e841ee")

@@ -26,7 +26,8 @@ dim([L + 12, 0, z], [L + 12, W, z], str("W ", W), [12, 0, 0], size = s);
 label([matrix_xy[0], matrix_xy[1] - 17, z], "LED matrix", size = 3.5, c = "DarkRed");
 for (k = top_keys) label([key_xy(k)[0], key_xy(k)[1] - 13, z], k[0], size = 3.5, c = "DarkRed");
 label([L / 2, W + 30, z], keys_placed == len(keys) ? "LAYOUT FROM config/key-layout.yaml"
+      : layout_final ? "LAYOUT FROM config/body.yaml, FINAL FOR REV A"
       : str("PROVISIONAL: ", len(keys) - keys_placed, " of ", len(keys), " keys unplaced - length derived from the provisional layout"),
-      size = s, c = keys_placed == len(keys) ? "Black" : "DarkRed");
+      size = s, c = keys_placed == len(keys) || layout_final ? "Black" : "DarkRed");
 }
 at_origin() fig();

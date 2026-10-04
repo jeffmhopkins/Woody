@@ -208,7 +208,15 @@ python3 tools/kicad.py export hardware/cluster/key-register   # sheet -> netlist
 python3 tools/kicad.py export hardware/boards/key-board-rh    # board -> board-netlist.yaml, with KiCad's ERC
 python3 tools/kicad.py render hardware/boards/key-board-rh    # a PNG of every page
 python3 tools/kicad.py check                                  # everything above, compared with what is committed
+python3 tools/kicad.py check --board key-board-lh             # the same, scoped to one board: its order sheet's gate
 ```
+
+**`--board <name>`** checks that board's export, ERC, layout (`pcb.py check`)
+and renders, and the circuit sheets it places with their renders; the
+cross-board checks below still read every board's netlist, because a
+connector is only right if it matches its peer. Another board's layout, ERC
+and renders are left out, so a board under work does not block an order of a
+finished one (review #6-3). The commit gate still runs the full check.
 
 **`kicad.py check` fails when:**
 - a sheet was edited and not re-exported;
@@ -333,6 +341,14 @@ python3 tools/pcb.py layout hardware/boards/key-board-lh   # FIRST layout: place
 python3 tools/pcb.py check  hardware/boards/key-board-lh   # DRC + parity + fab limits + the body CAD's outline, thickness and positions
 python3 tools/pcb.py render hardware/boards/key-board-lh   # 3D both sides, 2D copper, and fab/ (Gerbers, PTH and NPTH drills, placement, and the JLCPCB BOM, CPL and hand-assembly list)
 ```
+
+**The hand-assembly list's Fit column.** A board whose `layout.yaml` has
+`hand_trim:` (a hand part's reference, `max:` a sum or difference of
+`config/body.yaml` figures by name, and `why:`) gets a Fit column: each listed
+part's tails, with their solder, cut to at most that length below the board,
+the arithmetic in the cell. The layout and `config/body.yaml` then become
+inputs of that board's renders, so the length goes stale with its figures. The
+main board's is #8-11 (ADR 0017, *Amendment, 2026-10-04*).
 
 **3D models for `woody` footprints** whose maker's STEP could not be had are
 drawn from the banked drawings by `python3 tools/lib-models.py` into

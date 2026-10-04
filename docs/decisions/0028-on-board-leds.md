@@ -5,7 +5,7 @@
 prototype's timing) and [ADR 0016](0016-one-strip-on-the-centre-board.md)
 (one strip on the centre board, whose "LEDs populated directly on the centre
 board ... not decided here" this decides). Each carries a dated note pointing
-here. Numbering: 0025–0027 are taken. **Amended 2026-09-30** (the layout goes ahead of the diffusion test, *Amendment* below), 2026-10-02 (a fourteenth LED) and twice 2026-10-03 (one row at equal margins; then thirteen again, the tail-end LED removed: *Amendments* below).
+here. Numbering: 0025–0027 are taken. **Amended 2026-09-30** (the layout goes ahead of the diffusion test, *Amendment* below), 2026-10-02 (a fourteenth LED) and twice 2026-10-03 (one row at equal margins; then thirteen again, the tail-end LED removed: *Amendments* below), and 2026-10-04 (Standard PCBA, white on every board: *Amendment* below).
 
 ## Context
 
@@ -315,3 +315,33 @@ fourteen.
 
 The side-light diffusion test (ROADMAP) still decides the count and the
 pitch.
+
+## Amendment, 2026-10-04 — Standard PCBA, white on every board
+
+**The owner, 2026-10-04** (asked in the working chat, #17 D1): **"Standard
+PCBA (Recommended)"**. The open question of the 2026-10-02 amendment is
+closed this way, not by a leaded finish and not by green mask:
+
+1. **White stays on all three boards**, both faces, black legend, lead-free
+   HASL: the main board and both key boards keep their `layout.yaml` `fab:`
+   as it is.
+2. **All three are ordered as Standard PCBA**, which has no colour or finish
+   limit `[ds datasheets/fab/JLCPCB-PCBA-CAPABILITIES.pdf, "PCB Assembly
+   Technical Capabilities": Standard, Surface Finish and PCB Color "No limit"]`.
+   Economic PCBA lists white at 1.6 mm only with leaded HASL and the main
+   board's four layers only in green (the main board's README, *Ordering it*).
+3. **Rails and fiducials are JLC's.** Standard PCBA makes edge rails and
+   fiducials "Necessary" and takes a single board from 70 × 70 mm (the same
+   page). No board here has rails or fiducials of its own, and all three are
+   narrower than 70 mm (each board's outline, `mechanical/export/*.dxf`), so
+   each is ordered with rails and fiducials added by JLCPCB. Where JLC's rails
+   and their tooling holes land is checked in the placement preview before
+   paying (each order sheet's preview checklist, review #6-6).
+4. **#17 D6 is moot.** It asked that the order sheets say the Extended-part
+   count matters only under Economic PCBA; the order is Standard. Each
+   Extended part's feeder fee is still on the order sheets' cost lines
+   `[ds datasheets/fab/JLCPCB-PCBA-FAQ.pdf, FAQ 6]`; the live quote confirms it.
+
+The order sheets are `hardware/boards/key-board-lh/README.md` (both key
+boards; the right-hand page cites it) and `hardware/boards/main-board/README.md`,
+*Ordering it*.

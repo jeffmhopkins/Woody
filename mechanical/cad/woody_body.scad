@@ -1736,8 +1736,9 @@ module drc(ok, rule, v, why) {
 }
 
 module drc_report() {
-    echo("DRC", "INFO", "layout", keys_placed == len(keys) ? "placed" : "PROVISIONAL",
-         str(keys_placed, " of ", len(keys), " keys placed in config/key-layout.yaml"));
+    echo("DRC", "INFO", "layout", keys_placed == len(keys) ? "placed" : layout_final ? "final" : "PROVISIONAL",
+         keys_placed == len(keys) || !layout_final ? str(keys_placed, " of ", len(keys), " keys placed in config/key-layout.yaml")
+         : "every key placed from config/body.yaml layout, settled (final for rev A, ADR 0010)");
     echo("DRC", "INFO", "tbd parameters in play", len(tbd_params), tbd_params);
 
     echo("DRC", "INFO", "overall length (derived)", L, str("mm = ", L / 25.4, " in; mouth cap to LH1 ", x_lh0,

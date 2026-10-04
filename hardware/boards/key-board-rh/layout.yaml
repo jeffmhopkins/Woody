@@ -80,8 +80,8 @@ silk:
   at: [152.0, 12.5]
   top_at: [152.0, 14.3]     # the switch side's copy in the near band, as the left-hand board's: J-CHAIN's through-hole tails now stand where it was
   title: "WOODY key board RH"
-  rev: "A"
-  date: "2026-09-28"
+  rev: "A"                  # the first fabrication is A: main-board README, Ordering it, Revision (ADR 0020 Amendment 9)
+  date: "2026-10-03"         # the latest layout (README, Revisions B)
 
 route: true
 # The two key lines from the register's far row first, as the left-hand board
@@ -104,3 +104,12 @@ connect_first:
   - {pads: [C9.1, U1.16], max_mm: 4, why: "the second decoupler's VCC side, straight onto pin 16 (review #6-5)"}
 ground_net: GND_CHAIN
 power_nets: [V3V3_CHAIN_RH]
+
+# How tall each underside part stands, for pcb.py check_key_faces (issue #19 F2), as
+# the left-hand board's, which says what the table means. The same parts in the same
+# footprints: C9 (C-DECOUPLE-165-VCC, review #6-5) is the one part the left-hand board
+# lacks, a 100 nF in C_0805, under the same key; no RH-only footprint.
+heights:
+  SOIC: 1.75                   # [from memory: JEDEC MS-012 max; the banked TI sheet's outline is not in its text layer]
+  C_0805: 1.45                 # [ds datasheets/discrete-and-power/SAMSUNG-CL21A106KAYNNNE-SPECSHEET.pdf: 1.25 +-0.20, the tallest 0805 here (C8, C-BULK-CHAIN)]
+  R_0805: 0.6                  # [from memory]
