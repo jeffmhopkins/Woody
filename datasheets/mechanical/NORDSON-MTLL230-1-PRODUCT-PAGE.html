@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr"><head><meta charset="utf-8">
+    <base href="/">
+    <link rel="shortcut icon" href="/favicon.ico?v=2" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico?v=2" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
+
+    
+    <link href="/files/staticcontent/styles/main.css" rel="stylesheet">
+    
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/app.css">
+    <link rel="stylesheet" href="_content/Telerik.UI.for.Blazor/css/kendo-theme-default/all.css">
+    <script src="_content/Telerik.UI.for.Blazor/js/telerik-blazor.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAvZzQOLlyHlcAnN9MrPQyhdTQvPnbbRNY&libraries=places" async defer></script>
+    <link rel="stylesheet" href="/css/shop.css">
+
+    
+    
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){ dataLayer.push(arguments); }
+
+        // Global default: GRANTED (so you don't get 0% consent warnings outside EEA/UK)
+        gtag('consent', 'default', {
+          'analytics_storage': 'granted',
+          'ad_storage': 'granted',
+          'ad_user_data': 'granted',
+          'ad_personalization': 'granted'
+        });
+
+        // Override for EEA + UK: DENIED until user chooses
+        gtag('consent', 'default', {
+          'analytics_storage': 'denied',
+          'ad_storage': 'denied',
+          'ad_user_data': 'denied',
+          'ad_personalization': 'denied'
+        }, {
+          'region': ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE','IS','LI','NO','GB']
+        });
+    </script>
+    
+    
+    <script>
+        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-WSDWR6');
+    </script>
+    
+    <script type="text/javascript">
+        window.seoHead = {
+          getLocation: () => ({ origin: window.location.origin, pathname: window.location.pathname })
+        };
+
+        // Resource click tracking. The Resources listing is statically server-rendered,
+        // so Blazor click handlers and WASM injection don't run there. Instead, each
+        // anchor in ResourceItem.razor carries data-track-resource="1" plus title,
+        // category and site attributes, and this delegated listener fires a sendBeacon
+        // POST at click time. sendBeacon is guaranteed to complete even as the page
+        // unloads, so the browser can follow the link (to /files/... or an external
+        // URL) without waiting for the tracker.
+        document.addEventListener('click', function (e) {
+          var a = e.target && e.target.closest ? e.target.closest('a[data-track-resource]') : null;
+          if (!a) return;
+          try {
+            var sessionId = (document.cookie.match(/(?:^|; )nm_session_id=([^;]*)/) || [])[1] || '';
+            if (!sessionId) {
+              try { sessionId = sessionStorage.getItem('nm_session_id') || ''; } catch (err) { sessionId = ''; }
+            }
+            var url       = a.getAttribute('href') || '';
+            var title     = a.getAttribute('data-track-title') || null;
+            var category  = a.getAttribute('data-track-category') || null;
+            var siteUrl   = a.getAttribute('data-track-site') || null;
+            var dto = {
+              SessionId:     sessionId,
+              UserId:        null,
+              ResourceId:    url,
+              ResourceTitle: title,
+              Category:      category,
+              SiteUrl:       siteUrl,
+              DocumentUrl:   url
+            };
+            var blob = new Blob([JSON.stringify(dto)], { type: 'application/json' });
+            navigator.sendBeacon('/api/store/analytics/resource-view', blob);
+          } catch (err) { /* analytics must never break the click */ }
+        }, true);
+    </script>
+    <title>MTLL230-1 | Nordson MEDICAL</title><meta name="description" content="Nordson MEDICAL Fluid Management MTLL230-1: Male Luer Integral Lock Ring to 200 Series Barb, 1/8&quot; (3.2 mm) ID Tubing, White Nylon" /><meta property="og:title" content="MTLL230-1 | Nordson MEDICAL" /><meta property="og:description" content="Nordson MEDICAL Fluid Management MTLL230-1: Male Luer Integral Lock Ring to 200 Series Barb, 1/8&quot; (3.2 mm) ID Tubing, White Nylon" /><meta property="og:type" content="website"></head>
+
+<body><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WSDWR6" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    
+
+    <blazor-focus-on-navigate selector="body"></blazor-focus-on-navigate>
+                    <div class="wrapper" b-hx6gwsttme><header b-hx6gwsttme><div class="container" b-9wxv18a56k><div class="row" b-9wxv18a56k><div class="col" b-9wxv18a56k><a href="/" b-9wxv18a56k><div class="position-absolute top-0 logobox px-4 py-4" b-9wxv18a56k><img src="/images/logo-nordson-medical.svg" alt="Nordson MEDICAL Logo" class="mx-auto d-block" b-9wxv18a56k></div></a></div></div></div><nav class="py-1 nm-blue" b-9wxv18a56k><div class="container d-flex flex-wrap justify-content-end" b-9wxv18a56k><div class="row" b-9wxv18a56k><div class="col" b-9wxv18a56k><ul class="nav ms-auto" b-9wxv18a56k><li class="nav-item" b-9wxv18a56k><a class="nav-link-topnav px-2" data-bs-toggle="collapse" href="#search-collapse" role="button" aria-expanded="false" aria-controls="collapseExample" b-9wxv18a56k><i class="bi-search" b-9wxv18a56k></i></a></li>
+                        <li class="nav-item" b-9wxv18a56k><a class="nav-link-topnav px-2" data-bs-toggle="modal" href="#login-modal" b-9wxv18a56k><i class="bi-person" b-9wxv18a56k></i></a></li>
+                        <li class="nav-item" b-9wxv18a56k><!--Blazor-WebAssembly:{"environmentName":"Production","environmentVariables":{}}--><!--Blazor:{"type":"webassembly","prerenderId":"e59ac605bc634f4d85bb9b82057be3e0","key":{"locationHash":"3969604AC227F4E2F1D11B06262B940E56A9518349A07F2CFB67927CA8D5841A:45","formattedComponentKey":""},"assembly":"Ecommerce.UI.Client","typeName":"Ecommerce.UI.Client.Components.Shared.CartHeader","parameterDefinitions":"W10=","parameterValues":"W10="}--><style>
+    .cart-offcanvas {
+        min-width: 550px;
+        max-width: 100vw;
+    }
+
+    @media (max-width: 576px) {
+        .cart-offcanvas {
+            width: 100vw !important;
+            min-width: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+        }
+    }
+</style><a href="#" class="nav-link-topnav ps-2 pe-0 position-relative disabled"><i class="bi-cart3"></i>
+        <span class="badge mx-1" style="background-color: #ff7800 !important; color: #FFF !important; font-size:.75rem;"><span class="spinner-border spinner-border-sm"></span></span></a><!--Blazor:{"prerenderId":"e59ac605bc634f4d85bb9b82057be3e0"}--></li>
+                        <li class="nav-item py-2 py-lg-1" b-9wxv18a56k><div class="vr d-none d-lg-flex h-100 mx-lg-2 text-white" b-9wxv18a56k></div></li>
+                        <li class="nav-item px-sm-1" b-9wxv18a56k><!--Blazor:{"type":"webassembly","prerenderId":"008c9f40803a4228b8ea510b7a588a7c","key":{"locationHash":"07959DA588B34C2536D7770906C91F7670DD98CB79CA3283D5981FC7FEDB85BB:51","formattedComponentKey":""},"assembly":"Ecommerce.UI.Client","typeName":"Ecommerce.UI.Client.Components.Shared.LanguageSelector","parameterDefinitions":"W10=","parameterValues":"W10="}--><div class="dropdown" style="margin-top: .35rem;"><button class="btn btn-outline-light dropdown-toggle d-flex align-items-center lang-btn p-1" type="button" data-bs-toggle="dropdown" aria-expanded="false"><img src="images/flags/en.svg" alt="Lang" width="24" height="24" class="me-2 lang-flag" />
+        <span class="d-none d-sm-inline lang-label">EN</span></button>
+
+    <ul class="dropdown-menu dropdown-menu-end"><li><button type="button" class="dropdown-item d-flex align-items-center"><img src="images/flags/en.svg" alt="English" width="24" height="18" class="me-2" />
+                    English</button></li><li><button type="button" class="dropdown-item d-flex align-items-center"><img src="images/flags/es.svg" alt="Espa&#xF1;ol" width="24" height="18" class="me-2" />
+                    Espa&#xF1;ol</button></li><li><button type="button" class="dropdown-item d-flex align-items-center"><img src="images/flags/fr.svg" alt="Fran&#xE7;ais" width="24" height="18" class="me-2" />
+                    Fran&#xE7;ais</button></li><li><button type="button" class="dropdown-item d-flex align-items-center"><img src="images/flags/de.svg" alt="Deutsch" width="24" height="18" class="me-2" />
+                    Deutsch</button></li><li><button type="button" class="dropdown-item d-flex align-items-center"><img src="images/flags/ar.svg" alt="&#x627;&#x644;&#x639;&#x631;&#x628;&#x64A;&#x629;" width="24" height="18" class="me-2" />
+                    &#x627;&#x644;&#x639;&#x631;&#x628;&#x64A;&#x629;</button></li><li><button type="button" class="dropdown-item d-flex align-items-center"><img src="images/flags/ja.svg" alt="&#x65E5;&#x672C;&#x8A9E;" width="24" height="18" class="me-2" />
+                    &#x65E5;&#x672C;&#x8A9E;</button></li><li><button type="button" class="dropdown-item d-flex align-items-center"><img src="images/flags/ko.svg" alt="&#xD55C;&#xAD6D;&#xC5B4;" width="24" height="18" class="me-2" />
+                    &#xD55C;&#xAD6D;&#xC5B4;</button></li><li><button type="button" class="dropdown-item d-flex align-items-center"><img src="images/flags/zh.svg" alt="&#x4E2D;&#x6587;" width="24" height="18" class="me-2" />
+                    &#x4E2D;&#x6587;</button></li><li><button type="button" class="dropdown-item d-flex align-items-center"><img src="images/flags/it.svg" alt="Italiano" width="24" height="18" class="me-2" />
+                    Italiano</button></li></ul></div>
+
+<style>
+    .dropdown-menu {
+        flex-direction: column !important;
+    }
+</style><!--Blazor:{"prerenderId":"008c9f40803a4228b8ea510b7a588a7c"}--></li></ul></div></div></div>
+        
+        <div class="container d-flex flex-wrap justify-content-end" b-9wxv18a56k><div class="row justify-content-end col-6" b-9wxv18a56k><div class="col" b-9wxv18a56k><div class="collapse" id="search-collapse" b-9wxv18a56k><div class="card card-body mt-2 mb-2" b-9wxv18a56k><!--Blazor:{"type":"webassembly","prerenderId":"2138c231a043435b8fbe28c8ed8d5d82","key":{"locationHash":"BF470D02C1E72429865D1C18F325F53E3A0F92632160ECA05BC5E8B257A7B764:69","formattedComponentKey":""},"assembly":"Ecommerce.UI.Client","typeName":"Ecommerce.UI.Client.Components.Shared.SearchHeader","parameterDefinitions":"W3sibmFtZSI6IlNpdGVVcmwiLCJ0eXBlTmFtZSI6IlN5c3RlbS5TdHJpbmciLCJhc3NlbWJseSI6IlN5c3RlbS5Qcml2YXRlLkNvcmVMaWIifV0=","parameterValues":"WyJmbHVpZC1jb21wb25lbnRzLm5vcmRzb25tZWRpY2FsLmNvbSJd"}--><style>
+    .search-link, .search-link:visited {
+        color: #007ac9;
+        text-decoration: underline;
+    }
+
+        .search-link:hover {
+            color: #ff7800;
+        }
+    .search-results-list {
+        max-height: 500px;
+        overflow-y: auto;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        z-index: 1000 !important;
+        background: #fff;
+        position: absolute;
+        width: 100%;
+        left: 0;
+        margin-top: 1rem;
+        transition: opacity 0.15s;
+        opacity: 1;
+        pointer-events: auto;
+        display: block;
+    }
+
+        .search-results-list.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .search-results-list::-webkit-scrollbar {
+            width: 8px;
+            border-radius: 0.5rem;
+            background: transparent;
+        }
+
+        .search-results-list::-webkit-scrollbar-thumb {
+            background: #dee2e6;
+            border-radius: 0.5rem;
+        }
+
+        .search-results-list::-webkit-scrollbar-track {
+            background: transparent;
+            border-radius: 0.5rem;
+        }
+
+    .search-results-list {
+        scrollbar-width: thin;
+        scrollbar-color: #dee2e6 transparent;
+    }
+</style>
+
+<div class="search-component position-relative"><form class="d-flex" action="/shop/fluid-components/Luer%20Fitting/MTLL230-1"><input class="form-control me-2" type="search" placeholder="Search site..." autocomplete="off" />
+        <button class="btn btn-search" type="button">Search</button></form>
+
+    <ul class="search-results-list list-group position-absolute w-100 mt-4 hidden"></ul></div><!--Blazor:{"prerenderId":"2138c231a043435b8fbe28c8ed8d5d82"}--></div></div></div></div></div></nav>
+    <div class="container" b-9wxv18a56k><div class="row" b-9wxv18a56k><div class="col" b-9wxv18a56k><div class="modal fade" id="login-modal" tabindex="-1" aria-labelledby="login-modal" aria-hidden="true" b-9wxv18a56k><div class="modal-dialog modal-dialog-centered" b-9wxv18a56k><div class="modal-content" b-9wxv18a56k><div class="modal-header" b-9wxv18a56k><h4 class="modal-title" b-9wxv18a56k>Sign into your Account</h4>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" b-9wxv18a56k></button></div>
+                            <div class="modal-body" b-9wxv18a56k><div id="login-wasm" b-9wxv18a56k><!--Blazor:{"type":"webassembly","prerenderId":"70736607181b40dea4b6053020f47002","key":{"locationHash":"1AFE04CBFF564093C533CFDD5BA1CF396B6A7F3199C48D90B524D0C355E1DC2E:101","formattedComponentKey":""},"assembly":"Ecommerce.UI.Client","typeName":"Ecommerce.UI.Client.Components.Account.LoginControl","parameterDefinitions":"W3sibmFtZSI6IkZvcm1OYW1lTG9naW4iLCJ0eXBlTmFtZSI6IlN5c3RlbS5TdHJpbmciLCJhc3NlbWJseSI6IlN5c3RlbS5Qcml2YXRlLkNvcmVMaWIifV0=","parameterValues":"WyJsb2dpbkhlYWRlciJd"}--><style>
+    a.btn-outline-primary{
+        #color: #0d6efd;
+    }
+</style>
+
+<div class="login-control"><form method="post" action="/shop/fluid-components/Luer%20Fitting/MTLL230-1"><input type="hidden" name="_handler" value="loginHeader" /><input type="hidden" name="__RequestVerificationToken" value="CfDJ8ESGRy3ZfytFtsx3veT-tEs92pYifidau0Z1TzNPXmuVs1iX4tFOFhK7XXp2yB4B55f4hpaW95--ezRZLKo9oFch_huVpSXR2qK2bDKeQxtIXHSN1AMd30eGgKYsy9OBETxXTTB6c7kwhvTr8ulHXPA" />
+            
+
+            <div class="mb-3"><label class="form-label">Email</label>
+                <input name="loginModel.Email" class="form-control valid" /></div>
+
+            <div class="mb-3"><label class="form-label">Password</label>
+                <input type="password" name="loginModel.Password" class="form-control valid" />
+                <a href="/account/forgot-password" class="link-primary" style="cursor:pointer">Forgot password?</a></div><div class="row"><div class="col"><button type="button" class="btn btn-outline-primary float-start">Sign up</button></div>
+                <div class="col"><button type="submit" class="btn btn-primary float-end">Login</button></div></div></form></div><!--Blazor:{"prerenderId":"70736607181b40dea4b6053020f47002"}--></div></div></div></div></div></div></div></div></header><div class="sidebar" b-hx6gwsttme><style>
+    .nav-item {
+        font-weight: 400;
+    }
+
+    a.list-group-item {
+        padding: 4px 16px;
+        font-size: 1.2rem;
+        font-weight: 400;
+    }
+</style><nav class="navbar navbar-expand-md container"><div class="container-fluid justify-content-end"><button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main_nav"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse justify-content-end" id="main_nav"><ul class="navbar-nav"><li class="nav-item dropdown has-megamenu"><a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">Products</a>
+    <div class="dropdown-menu megamenu shadow-sm py-5" role="menu"><div class="mega-menu-sections"><section class="mega-menu-section" style="--section-columns: 2;" aria-label="Fluid Components"><div class="mega-menu-column"><div class="list-group"><h5 class="text-nordson">Fluid Components</h5><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/Aseptic-Disconnects/">Aseptic Disconnects</a><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/Bag-Ports/">Bag Ports</a><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/Build-a-Part-Fittings/">Build-a-Part Fittings</a><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/Check-Valves/">Check Valves</a><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/Custom-Fluid-Components/">Custom Fluid Components</a><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/Gaskets/">Gaskets</a><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/ISO-80369-Compliant-Parts/">ISO 80369-Compliant Parts</a><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/Luer-Fittings/">Luer Fittings</a><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/Manifolds/">Manifolds</a><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/New-Products/">New Products</a><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/Other-Products/">Other Products</a></div></div><div class="mega-menu-column"><div class="list-group"><h5 class="text-nordson mega-menu-heading-placeholder" aria-hidden="true">Fluid Components</h5><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/Quick-Connect-Couplings/">Quick Connect Couplings</a><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/Sanitary-Clamps/">Sanitary Clamps</a><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/Sanitary-Fittings/">Sanitary Fittings</a><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/Stopcocks/">Stopcocks</a><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/Tapered-Seal-Connectors/">Tapered Seal Connectors</a><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/Threaded-Fittings/">Threaded Fittings</a><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/Tube-Clamps/">Tube Clamps</a><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/Tube-Fittings/">Tube Fittings</a><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/Tubing/">Tubing</a><a class="list-group-item mega-menu-item" href="/Products/Fluid-Components/Tubing-Retainers/">Tubing Retainers</a></div></div></section><section class="mega-menu-section" style="--section-columns: 1;" aria-label="Halkey-Roberts Components"><div class="mega-menu-column"><div class="list-group"><h5 class="text-nordson">Halkey-Roberts Components</h5><a class="list-group-item mega-menu-item" href="/Products/Halkey-Roberts-Components/Check-Valves/">Check Valves</a><a class="list-group-item mega-menu-item" href="/Products/Halkey-Roberts-Components/Inflation-Products/">Inflation Products</a><a class="list-group-item mega-menu-item" href="/Products/Halkey-Roberts-Components/Luer-Fittings/">Luer Fittings</a><a class="list-group-item mega-menu-item" href="/Products/Halkey-Roberts-Components/Needlefree-Swabable-Valves/">Needlefree Swabable Valves</a><a class="list-group-item mega-menu-item" href="/Products/Halkey-Roberts-Components/New-Products/">New Products</a><a class="list-group-item mega-menu-item" href="/Products/Halkey-Roberts-Components/Other-Products/">Other Products</a><a class="list-group-item mega-menu-item" href="/Products/Halkey-Roberts-Components/Pressure-Relief-Valves/">Pressure-Relief Valves</a><a class="list-group-item mega-menu-item" href="/Products/Halkey-Roberts-Components/Tube-Clamps/">Tube Clamps</a></div></div></section><section class="mega-menu-section" style="--section-columns: 1;" aria-label="Other Medical Divisions"><div class="mega-menu-column"><div class="list-group"><h5 class="text-nordson">Other Medical Divisions</h5><a class="list-group-item mega-menu-item" href="https://interventional-solutions.nordsonmedical.com/" target="_blank">Interventional Solutions</a><a class="list-group-item mega-menu-item" href="https://surgical-solutions.nordsonmedical.com/" target="_blank">Surgical Solutions</a></div></div></section></div></div></li>
+
+
+<style>
+    .mega-menu-sections {
+        display: flex;
+        flex-wrap: wrap;
+        margin-right: -.75rem;
+        margin-left: -.75rem;
+    }
+
+    .mega-menu-section {
+        display: grid;
+        grid-template-columns: repeat(var(--section-columns), minmax(0, 1fr));
+        flex: var(--section-columns) 1 0%;
+        min-width: 0;
+    }
+
+    .mega-menu-column {
+        min-width: 0;
+        padding-right: .75rem;
+        padding-left: .75rem;
+    }
+
+    .mega-menu-column a.mega-menu-item {
+        padding-left: 0;
+    }
+
+    .mega-menu-column a.mega-menu-subitem,
+    .mega-menu-column h5.mega-menu-subitem {
+        padding-left: 1.5rem;
+    }
+
+    .mega-menu-heading-placeholder {
+        visibility: hidden;
+        user-select: none;
+    }
+
+    @media (max-width: 767.98px) {
+        .mega-menu-sections,
+        .mega-menu-section {
+            display: block;
+        }
+
+        .mega-menu-heading-placeholder {
+            display: none;
+        }
+    }
+</style><li class="nav-item dropdown has-megamenu"><a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">Markets</a>
+    <div class="dropdown-menu megamenu shadow-sm py-5" role="menu"><div class="mega-menu-sections"><section class="mega-menu-section" style="--section-columns: 1;"><div class="mega-menu-column"><div class="list-group"><a class="list-group-item mega-menu-item" href="/Markets/BioProcessing/">BioProcessing</a><a class="list-group-item mega-menu-item" href="/Markets/Diagnostics/">Diagnostics</a><a class="list-group-item mega-menu-item" href="/Markets/Drug-Delivery/">Drug Delivery</a><a class="list-group-item mega-menu-item" href="/Markets/Intravenous/">Intravenous</a><a class="list-group-item mega-menu-item" href="/Markets/Inflation-&amp;-Volumetric-Containers/">Inflation &amp; Volumetric Containers</a></div></div></section><section class="mega-menu-section" style="--section-columns: 1;"><div class="mega-menu-column"><div class="list-group"><a class="list-group-item mega-menu-item" href="/Markets/Non-Medical/">Non-Medical</a><a class="list-group-item mega-menu-subitem" href="/Markets/Non-Medical/Analytical-Instrumentation/">Analytical Instrumentation</a><a class="list-group-item mega-menu-subitem" href="/Markets/Non-Medical/Food-and-Beverage/">Food and Beverage</a><a class="list-group-item mega-menu-subitem" href="/Markets/Non-Medical/Inkjet/">Inkjet</a></div></div></section><section class="mega-menu-section" style="--section-columns: 1;"><div class="mega-menu-column"><div class="list-group"><a class="list-group-item mega-menu-item" href="/Markets/Patient-Care/">Patient Care</a><a class="list-group-item mega-menu-subitem" href="/Markets/Patient-Care/Blood-Pressure/">Blood Pressure</a><a class="list-group-item mega-menu-subitem" href="/Markets/Patient-Care/Dialysis/">Dialysis</a><a class="list-group-item mega-menu-subitem" href="/Markets/Patient-Care/Neuraxial/">Neuraxial</a></div></div></section><section class="mega-menu-section" style="--section-columns: 1;"><div class="mega-menu-column"><div class="list-group"><a class="list-group-item mega-menu-item" href="/Markets/Surgical/">Surgical</a><a class="list-group-item mega-menu-subitem" href="/Markets/Surgical/Gastrointestinal/">Gastrointestinal</a><a class="list-group-item mega-menu-subitem" href="/Markets/Surgical/Interventional/">Interventional</a><a class="list-group-item mega-menu-subitem" href="/Markets/Surgical/Neurovascular/">Neurovascular</a><a class="list-group-item mega-menu-subitem" href="/Markets/Surgical/Ophthalmic/">Ophthalmic</a><a class="list-group-item mega-menu-subitem" href="/Markets/Surgical/Orthopedic/">Orthopedic</a><a class="list-group-item mega-menu-subitem" href="/Markets/Surgical/Urology/">Urology</a></div></div></section></div></div></li>
+
+
+<style>
+    .mega-menu-sections {
+        display: flex;
+        flex-wrap: wrap;
+        margin-right: -.75rem;
+        margin-left: -.75rem;
+    }
+
+    .mega-menu-section {
+        display: grid;
+        grid-template-columns: repeat(var(--section-columns), minmax(0, 1fr));
+        flex: var(--section-columns) 1 0%;
+        min-width: 0;
+    }
+
+    .mega-menu-column {
+        min-width: 0;
+        padding-right: .75rem;
+        padding-left: .75rem;
+    }
+
+    .mega-menu-column a.mega-menu-item {
+        padding-left: 0;
+    }
+
+    .mega-menu-column a.mega-menu-subitem,
+    .mega-menu-column h5.mega-menu-subitem {
+        padding-left: 1.5rem;
+    }
+
+    .mega-menu-heading-placeholder {
+        visibility: hidden;
+        user-select: none;
+    }
+
+    @media (max-width: 767.98px) {
+        .mega-menu-sections,
+        .mega-menu-section {
+            display: block;
+        }
+
+        .mega-menu-heading-placeholder {
+            display: none;
+        }
+    }
+</style><li class="nav-item"><a class="nav-link" href="/Brands/">Brands</a></li><li class="nav-item dropdown has-megamenu"><a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">Resources</a>
+    <div class="dropdown-menu megamenu shadow-sm py-5" role="menu"><div class="mega-menu-sections"><section class="mega-menu-section" style="--section-columns: 1;"><div class="mega-menu-column"><div class="list-group"><a class="list-group-item mega-menu-item" href="/Resources/Alliances/">Alliances</a><a class="list-group-item mega-menu-item" href="/files/fluid-components-nordsonmedical-com/Quality and Supplier Information/Credit Application/fc-credit-application.pdf" target="_blank">Credit Application</a><a class="list-group-item mega-menu-item" href="/Resources/FAQs/">FAQs</a><a class="list-group-item mega-menu-item" href="/Resources/Material-Information/">Material Information</a></div></div></section><section class="mega-menu-section" style="--section-columns: 1;"><div class="mega-menu-column"><div class="list-group"><a class="list-group-item mega-menu-item" href="/Resources/Orders/">Orders</a><a class="list-group-item mega-menu-item" href="/Resources/Product-Change-Notifications/">Product Change Notifications</a><a class="list-group-item mega-menu-item" href="/Resources/Quality/">Quality</a><a class="list-group-item mega-menu-item" href="/Resources/Resource-Library/">Resource Library</a></div></div></section><section class="mega-menu-section" style="--section-columns: 1;"><div class="mega-menu-column"><div class="list-group"><a class="list-group-item mega-menu-item" href="https://terms.nordson.com/PO/PO_Terms_Conditions.pdf" target="_blank">Terms and Conditions of Purchase</a><a class="list-group-item mega-menu-item" href="https://www.nordson.com/en/about-us/resources/globalcos/medcos" target="_blank">Terms and Conditions of Sale</a></div></div></section></div></div></li>
+
+
+<style>
+    .mega-menu-sections {
+        display: flex;
+        flex-wrap: wrap;
+        margin-right: -.75rem;
+        margin-left: -.75rem;
+    }
+
+    .mega-menu-section {
+        display: grid;
+        grid-template-columns: repeat(var(--section-columns), minmax(0, 1fr));
+        flex: var(--section-columns) 1 0%;
+        min-width: 0;
+    }
+
+    .mega-menu-column {
+        min-width: 0;
+        padding-right: .75rem;
+        padding-left: .75rem;
+    }
+
+    .mega-menu-column a.mega-menu-item {
+        padding-left: 0;
+    }
+
+    .mega-menu-column a.mega-menu-subitem,
+    .mega-menu-column h5.mega-menu-subitem {
+        padding-left: 1.5rem;
+    }
+
+    .mega-menu-heading-placeholder {
+        visibility: hidden;
+        user-select: none;
+    }
+
+    @media (max-width: 767.98px) {
+        .mega-menu-sections,
+        .mega-menu-section {
+            display: block;
+        }
+
+        .mega-menu-heading-placeholder {
+            display: none;
+        }
+    }
+</style><li class="nav-item dropdown"><a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">About</a>
+                                        <div class="dropdown-menu shadow-sm py-5" style="width: max-content !important;" role="menu"><div class="row"><div class="col-md col-12"><div class="list-group"><a class="list-group-item" href="/About/Careers/">Careers</a><a class="list-group-item" href="/About/Company/">Company</a><a class="list-group-item" href="/About/Contact-Us/">Contact Us</a><a class="list-group-item" href="/About/Locations/" data-enhance-nav="false">Locations</a><a class="list-group-item" href="/About/News-and-Events/">News and Events</a><a class="list-group-item" href="/About/Strategy-and-Vision/">Strategy and Vision</a></div></div></div></div></li><li class="nav-item"><a class="nav-link" href="/Shop/">Shop</a></li></ul></div></div></nav></div><main b-hx6gwsttme><article class="content" b-hx6gwsttme><!--Blazor:{"type":"webassembly","prerenderId":"1a6d27760469430cbb71611d3d1ecce8","key":{"locationHash":"DBDF23763E226489E6C74CC9BE46A6E588E7B418EF9AE73264AA256B24601237:19","formattedComponentKey":""},"assembly":"Ecommerce.UI.Client","typeName":"Ecommerce.UI.Client.Components.Shared.CartInitializer","parameterDefinitions":"W10=","parameterValues":"W10="}--><!--Blazor:{"prerenderId":"1a6d27760469430cbb71611d3d1ecce8"}--><!--Blazor:{"type":"webassembly","prerenderId":"58921f42da7e4a35b172280e8f23877d","key":{"locationHash":"809260D3B897648C25A94A03E3F0ABF64B28205B93426DB777FE59909828BEC6:0","formattedComponentKey":""},"assembly":"Ecommerce.UI.Client","typeName":"Ecommerce.UI.Client.Components.Pages.FluidComponents.FCProductPage","parameterDefinitions":"W3sibmFtZSI6IlBhcnRGYW1pbHkiLCJ0eXBlTmFtZSI6IlN5c3RlbS5TdHJpbmciLCJhc3NlbWJseSI6IlN5c3RlbS5Qcml2YXRlLkNvcmVMaWIifSx7Im5hbWUiOiJQYXJ0TnVtYmVyIiwidHlwZU5hbWUiOiJTeXN0ZW0uU3RyaW5nIiwiYXNzZW1ibHkiOiJTeXN0ZW0uUHJpdmF0ZS5Db3JlTGliIn1d","parameterValues":"WyJMdWVyIEZpdHRpbmciLCJNVExMMjMwLTEiXQ=="}--><div class="container-xxl mx-auto my-5"><nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="/">Home</a></li><li class="breadcrumb-item"><a href="/shop">Shop</a></li><li class="breadcrumb-item"><a href="/shop/fluid-components">Fluid Components</a></li><li class="breadcrumb-item"><a href="/shop/fluid-components/Luer%20Fitting">Luer%20Fitting</a></li><li class="breadcrumb-item active" aria-current="page">MTLL230-1</li></ol></nav>
+        <style>
+    .card-image-shop-detail {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 350px;
+        max-width: 100%;
+        margin-bottom: 20px;
+        border: solid 1px #dee2e6;
+        border-radius: 1rem;
+        box-shadow: -6px 6px 6px 0px rgba(0, 0, 0, 0.2);
+        overflow: hidden; /* Keep image inside the card */
+    }
+
+        .card-image-shop-detail img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+</style>
+<div class="row featurette"><div class="col-xs-12"><h1>MTLL230-1</h1>
+        <h4 style="color:#000;">Male Luer Integral Lock Ring to 200 Series Barb, 1/8&quot; (3.2 mm) ID Tubing, White Nylon</h4></div>
+    <h3>Product Details</h3>
+    <div class="col-md-7 col-sm-12"><table class="table table-striped"><tbody><tr><td>Material</td>
+                <td>Nylon</td></tr>
+            <tr><td>Category</td>
+                <td>Male Luer</td></tr>
+            <tr><td>Family</td>
+                <td>Luer Fitting</td></tr>
+            <tr><td>Style</td>
+                <td>Integral Lock Ring</td></tr>
+            <tr><td>Tube ID</td>
+                <td>1/8&quot; (3.2mm)</td></tr></tbody></table>
+        <h3>Order Online</h3>
+<table class="table table-striped"><tbody><tr><td>Price per piece</td>
+            <td>$0.2075</td></tr>
+        <tr><td>Minimum order quantity</td>
+            <td>1000 pcs</td></tr></tbody></table>
+<div class="row my-2"><div class="col-md col-sm-12 my-1"><div class="text-secondary"><span class="text-primary"><i class="bi bi-check-circle-fill text-success"></i>
+                    In Stock &mdash; Items in stock are typically shipped within 1-2 business days.
+                </span></div></div></div>
+<div class="input-group flex-nowrap"><input type="number" class="form-control" aria-label="Number of Bags" min="1" step="1" value="1" />
+    <span class="input-group-text me-2 border-input-fix">Bag(s) of 1000</span>
+    <button class="btn btn-primary border-btn-fix" type="button" id="bAddToCart"><span>Add to Cart</span></button></div><div class="row my-2"><div class="col-md col-sm-12 my-1"><div class="text-secondary">
+                All parts must be ordered in bags of 1000.<br></div></div>
+        <div class="col-md col-sm-12"><h4 class="my-2 text-md-end">
+                Total Price: <span class="text-primary">$207.50</span></h4></div></div><div class="fixed-link" style="z-index:3 !important;top:25% !important;"><button class="btn btn-primary btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        Request<br>
+        Samples
+    </button></div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h2 class="modal-title" id="exampleModalLabel">Request Samples</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+            <div class="modal-body"><form method="post" action="/shop/fluid-components/Luer%20Fitting/MTLL230-1"><input type="hidden" name="__RequestVerificationToken" value="CfDJ8ESGRy3ZfytFtsx3veT-tEs92pYifidau0Z1TzNPXmuVs1iX4tFOFhK7XXp2yB4B55f4hpaW95--ezRZLKo9oFch_huVpSXR2qK2bDKeQxtIXHSN1AMd30eGgKYsy9OBETxXTTB6c7kwhvTr8ulHXPA" />
+    
+
+    <div class="row g-3"><div class="form-group col-md-6 mb-3"><label class="form-label" for="FirstName">*First Name</label>
+                <input id="FirstName" required name="Lead.FirstName" class="form-control valid" />
+                </div><div class="form-group col-md-6 mb-3"><label class="form-label" for="LastName">*Last Name</label>
+                <input id="LastName" required name="Lead.LastName" class="form-control valid" />
+                </div><div class="form-group col-md-6 mb-3"><label class="form-label" for="Company">*Company</label>
+                <input id="Company" required name="Lead.Company" class="form-control valid" />
+                </div><div class="form-group col-md-6 mb-3"><label class="form-label" for="Email">*Email</label>
+                <input id="Email" required name="Lead.Email" class="form-control valid" />
+                </div><div class="form-group col-md-6 mb-3"><label class="form-label" for="Street">*Street</label>
+                <input id="Street" required name="Lead.Street" class="form-control valid" />
+                </div><div class="form-group col-md-6 mb-3"><label class="form-label" for="City">*City</label>
+                <input id="City" required name="Lead.City" class="form-control valid" />
+                </div><div class="form-group col-md-4 mb-3"><label class="form-label" for="CountryCode">*Country</label>
+                <select id="CountryCode" name="Lead.CountryCode" class="form-select valid"><option value>Select a Country</option><option value="AD">Andorra</option><option value="AE">United Arab Emirates</option><option value="AF">Afghanistan</option><option value="AG">Antigua and Barbuda</option><option value="AI">Anguilla</option><option value="AL">Albania</option><option value="AM">Armenia</option><option value="AO">Angola</option><option value="AQ">Antarctica</option><option value="AR">Argentina</option><option value="AT">Austria</option><option value="AU">Australia</option><option value="AW">Aruba</option><option value="AX">Aland Islands</option><option value="AZ">Azerbaijan</option><option value="BA">Bosnia and Herzegovina</option><option value="BB">Barbados</option><option value="BD">Bangladesh</option><option value="BE">Belgium</option><option value="BF">Burkina Faso</option><option value="BG">Bulgaria</option><option value="BH">Bahrain</option><option value="BI">Burundi</option><option value="BJ">Benin</option><option value="BL">Saint Barth&#xFFFD;lemy</option><option value="BM">Bermuda</option><option value="BN">Brunei Darussalam</option><option value="BO">Bolivia, Plurinational State of</option><option value="BQ">Bonaire, Sint Eustatius, and Saba</option><option value="BR">Brazil</option><option value="BS">Bahamas</option><option value="BT">Bhutan</option><option value="BV">Bouvet Island</option><option value="BW">Botswana</option><option value="BY">Belarus</option><option value="BZ">Belize</option><option value="CA">Canada</option><option value="CC">Cocos (Keeling) Islands</option><option value="CD">Congo, the Democratic Republic of the</option><option value="CF">Central African Republic</option><option value="CG">Congo</option><option value="CH">Switzerland</option><option value="CI">Cote d&#x27;Ivoire</option><option value="CK">Cook Islands</option><option value="CL">Chile</option><option value="CM">Cameroon</option><option value="CN">China</option><option value="CO">Colombia</option><option value="CR">Costa Rica</option><option value="CV">Cape Verde</option><option value="CW">Cura&#xFFFD;ao</option><option value="CX">Christmas Island</option><option value="CY">Cyprus</option><option value="CZ">Czechia</option><option value="DE">Germany</option><option value="DJ">Djibouti</option><option value="DK">Denmark</option><option value="DM">Dominica</option><option value="DO">Dominican Republic</option><option value="DZ">Algeria</option><option value="EC">Ecuador</option><option value="EE">Estonia</option><option value="EG">Egypt</option><option value="EH">Western Sahara</option><option value="ER">Eritrea</option><option value="ES">Spain</option><option value="ET">Ethiopia</option><option value="FI">Finland</option><option value="FJ">Fiji</option><option value="FK">Falkland Islands (Malvinas)</option><option value="FO">Faroe Islands</option><option value="FR">France</option><option value="GA">Gabon</option><option value="GB">United Kingdom</option><option value="GD">Grenada</option><option value="GE">Georgia</option><option value="GF">French Guiana</option><option value="GG">Guernsey</option><option value="GH">Ghana</option><option value="GI">Gibraltar</option><option value="GL">Greenland</option><option value="GM">Gambia</option><option value="GN">Guinea</option><option value="GP">Guadeloupe</option><option value="GQ">Equatorial Guinea</option><option value="GR">Greece</option><option value="GS">South Georgia and the South Sandwich Islands</option><option value="GT">Guatemala</option><option value="GW">Guinea-Bissau</option><option value="GY">Guyana</option><option value="HM">Heard Island and McDonald Islands</option><option value="HN">Honduras</option><option value="HR">Croatia</option><option value="HT">Haiti</option><option value="HU">Hungary</option><option value="ID">Indonesia</option><option value="IE">Ireland</option><option value="IL">Israel</option><option value="IM">Isle of Man</option><option value="IN">India</option><option value="IO">British Indian Ocean Territory</option><option value="IQ">Iraq</option><option value="IT">Italy</option><option value="JE">Jersey</option><option value="JM">Jamaica</option><option value="JO">Jordan</option><option value="JP">Japan</option><option value="KE">Kenya</option><option value="KG">Kyrgyzstan</option><option value="KH">Cambodia</option><option value="KI">Kiribati</option><option value="KM">Comoros</option><option value="KN">Saint Kitts and Nevis</option><option value="KR">Korea, Republic of</option><option value="KW">Kuwait</option><option value="KY">Cayman Islands</option><option value="KZ">Kazakhstan</option><option value="LA">Lao People&#x27;s Democratic Republic</option><option value="LB">Lebanon</option><option value="LC">Saint Lucia</option><option value="LI">Liechtenstein</option><option value="LK">Sri Lanka</option><option value="LR">Liberia</option><option value="LS">Lesotho</option><option value="LT">Lithuania</option><option value="LU">Luxembourg</option><option value="LV">Latvia</option><option value="LY">Libya</option><option value="MA">Morocco</option><option value="MC">Monaco</option><option value="MD">Moldova, Republic of</option><option value="ME">Montenegro</option><option value="MF">Saint Martin (French part)</option><option value="MG">Madagascar</option><option value="MK">North Macedonia</option><option value="ML">Mali</option><option value="MM">Myanmar</option><option value="MN">Mongolia</option><option value="MO">Macao</option><option value="MQ">Martinique</option><option value="MR">Mauritania</option><option value="MS">Montserrat</option><option value="MT">Malta</option><option value="MU">Mauritius</option><option value="MV">Maldives</option><option value="MW">Malawi</option><option value="MX">Mexico</option><option value="MY">Malaysia</option><option value="MZ">Mozambique</option><option value="NA">Namibia</option><option value="NC">New Caledonia</option><option value="NE">Niger</option><option value="NF">Norfolk Island</option><option value="NG">Nigeria</option><option value="NI">Nicaragua</option><option value="NL">Netherlands</option><option value="NO">Norway</option><option value="NP">Nepal</option><option value="NR">Nauru</option><option value="NU">Niue</option><option value="NZ">New Zealand</option><option value="OM">Oman</option><option value="PA">Panama</option><option value="PE">Peru</option><option value="PF">French Polynesia</option><option value="PG">Papua New Guinea</option><option value="PH">Philippines</option><option value="PK">Pakistan</option><option value="PL">Poland</option><option value="PM">Saint Pierre and Miquelon</option><option value="PN">Pitcairn</option><option value="PS">Palestine</option><option value="PT">Portugal</option><option value="PY">Paraguay</option><option value="QA">Qatar</option><option value="RE">Reunion</option><option value="RO">Romania</option><option value="RS">Serbia</option><option value="RU">Russian Federation</option><option value="RW">Rwanda</option><option value="SA">Saudi Arabia</option><option value="SB">Solomon Islands</option><option value="SC">Seychelles</option><option value="SE">Sweden</option><option value="SG">Singapore</option><option value="SH">Saint Helena, Ascension and Tristan da Cunha</option><option value="SI">Slovenia</option><option value="SJ">Svalbard and Jan Mayen</option><option value="SK">Slovakia</option><option value="SL">Sierra Leone</option><option value="SM">San Marino</option><option value="SN">Senegal</option><option value="SO">Somalia</option><option value="SR">SuriCountryName</option><option value="SS">South Sudan</option><option value="ST">Sao Tome and Principe</option><option value="SV">El Salvador</option><option value="SX">Sint Maarten (Dutch part)</option><option value="SZ">Eswatini</option><option value="TC">Turks and Caicos Islands</option><option value="TD">Chad</option><option value="TF">French Southern Territories</option><option value="TG">Togo</option><option value="TH">Thailand</option><option value="TJ">Tajikistan</option><option value="TK">Tokelau</option><option value="TL">Timor-Leste</option><option value="TM">Turkmenistan</option><option value="TN">Tunisia</option><option value="TO">Tonga</option><option value="TR">T&#xFFFD;rkiye</option><option value="TT">Trinidad and Tobago</option><option value="TV">Tuvalu</option><option value="TW">Taiwan</option><option value="TZ">Tanzania, United Republic of</option><option value="UA">Ukraine</option><option value="UG">Uganda</option><option value="US">United States</option><option value="UY">Uruguay</option><option value="UZ">Uzbekistan</option><option value="VA">Holy See (Vatican City State)</option><option value="VC">Saint Vincent and the Grenadines</option><option value="VE">Venezuela, Bolivarian Republic of</option><option value="VG">Virgin Islands, British</option><option value="VN">Vietnam</option><option value="VU">Vanuatu</option><option value="WF">Wallis and Futuna</option><option value="WS">Samoa</option><option value="XK">Kosovo</option><option value="YE">Yemen</option><option value="YT">Mayotte</option><option value="ZA">South Africa</option><option value="ZM">Zambia</option><option value="ZW">Zimbabwe</option></select>
+                </div><div class="form-group col-md-4 mb-3"><label class="form-label" for="StateCode">State/Province</label>
+                <select id="StateCode" disabled name="Lead.StateCode" class="form-select state-select valid"><option value>Select a State/Province</option></select>
+                </div><div class="form-group col-md-4 mb-3"><label class="form-label" for="PostalCode">*Zip</label>
+                <input id="PostalCode" name="Lead.PostalCode" class="form-control valid" />
+                </div><input type="hidden" name="FmProductCategory" value="Luer Fitting" /><input type="hidden" name="IsProductCategory" /><div class="form-group col-md-12 mb-3"><label class="form-label" for="Notes">Notes</label>
+                <textarea id="Notes" name="Notes" class="form-control valid"></textarea>
+                </div><input type="hidden" name="Phone" value="" /><input type="hidden" name="Status" value="" /><input type="hidden" name="State" value="" /><input type="hidden" name="Campaign" value="701Un00000SQFMkIAP" /><input type="hidden" name="LeadSource" value="Website Inquiry" /><input type="hidden" name="FmEndMarket" value="" /><input type="hidden" name="IsEndMarket" value="" /><input type="hidden" name="EngagementScore" value="" /><div class="form-group col-md-12"><button type="submit" class="btn btn-primary"><span>Submit</span></button></div></div></form></div></div></div></div></div>
+    <div class="col-md-5 col-sm-12"><div class="card card-image-shop-detail"><img class="img-fluid" src="/files/partcontent/part-images/fluid-components/MTLL230-1.png" alt="Image of MTLL230-1.png" /></div></div></div>
+        <hr class="featurette-divider">
+        <h2>Product Resources</h2>
+        <style>
+    .folder-tabs {
+        border: 1px solid #dee2e6;
+        border-radius: 1rem;
+        border-top: none !important;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+        padding: 1rem;
+    }
+</style>
+
+<nav><div class="nav nav-tabs" id="nav-tab" role="tablist"><button class="nav-link active" id="nav-model-tab" data-bs-toggle="tab" data-bs-target="#nav-model" type="button" role="tab" aria-controls="nav-model" aria-selected="true">3D Model</button>
+        <button class="nav-link" id="nav-drawing-tab" data-bs-toggle="tab" data-bs-target="#nav-drawing" type="button" role="tab" aria-controls="nav-drawing" aria-selected="false">Part Drawing</button>
+        <button class="nav-link" id="nav-material-tab" data-bs-toggle="tab" data-bs-target="#nav-material" type="button" role="tab" aria-controls="nav-material" aria-selected="false">Material Information</button></div></nav>
+<div class="tab-content folder-tabs" id="nav-tabContent"><div class="tab-pane fade show active" id="nav-model" role="tabpanel" aria-labelledby="nav-model-tab" tabindex="0"><style>
+    #cds-cad-viewer-container, .cds-cad-viewer-container {
+        width: 95%;
+        min-height: 450px;
+        max-height: 850px;
+    }
+    /** CDS Download Modal Styling **/
+
+    .ui-dialog.ui-corner-all.ui-widget.ui-widget-content.ui-front.ui-draggable {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        border-radius: 6px;
+        padding: 0;
+        width: 500px !important;
+        /* height: 175px !important; */
+    }
+
+    .ui-dialog-titlebar.ui-corner-all.ui-widget-header.ui-helper-clearfix.ui-draggable-handle {
+        padding: 15px;
+        border: none;
+        border-bottom: 1px solid #d5d5d5;
+        background: #FFF;
+        border-radius: 6px 6px 0 0;
+    }
+
+    .ui-widget-overlay {
+        background: rgba(0, 0, 0, 0.8);
+        opacity: .6;
+    }
+
+    #cds-cad-request-dialog table {
+        margin-top: 15px;
+        width: 100%;
+    }
+
+    div#cds-cad-request-dialog {
+        padding: 1rem;
+        background-color: #FFF;
+    }
+
+    button.ui-dialog-titlebar-close::after {
+        content: "x";
+        font-family: Helvetica, Arial, sans-serif;
+        float: right;
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1;
+        color: #007ac9;
+        text-shadow: 0 1px 0 #fff;
+        padding-top: 3px;
+    }
+
+    button.ui-dialog-titlebar-close {
+        color: #FFF;
+    }
+
+    .ui-dialog-titlebar.ui-corner-all.ui-widget-header.ui-helper-clearfix.ui-draggable-handle .ui-dialog-titlebar-close {
+        z-index: 100;
+        position: absolute;
+        right: .5em;
+        width: 21px;
+        margin: -10px 0 0 0;
+        padding: 1px;
+        height: 20px;
+        margin-right: 25px;
+        top: 0px;
+        color: transparent;
+        background: none;
+        border: none;
+    }
+
+    span.ui-dialog-title {
+        color: #007ac9;
+        font-size: 25px;
+        font-weight: 500;
+        float: none;
+        font-family: "HelveticaNeueLT-Thin", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .ui-widget-overlay.ui-front {
+        background: rgba(0,0,0);
+        opacity: .5;
+    }
+
+    button.ui-dialog-titlebar-close:focus {
+        outline: none;
+    }
+
+    div#cds-cad-request-dialog {
+        font-family: Helvetica, Arial, sans-serif;
+    }
+
+    @media(max - width:768px) {
+        .rectanglesingle {
+            font-size: 36px;
+        }
+    }
+
+</style>    <span class="k-skeleton telerik-blazor k-skeleton-rect k-skeleton-pulse" dir="ltr" style="height: 35px;width: 100%"></span>
+<div class="p-3"><div id="cds-icon-container" class="margin-bottom-20"><img onclick="cds.cadViewer.setRenderMode(cds.cadViewer.MODE_SHADED)" src="https://www.product-config.net/cadviewer/images/icons/solid.png">
+        <img onclick="cds.cadViewer.setRenderMode(cds.cadViewer.MODE_TRANSPARENT)" src="https://www.product-config.net/cadviewer/images/icons/transparent.png">
+        <img onclick="cds.cadViewer.setOrientation(cds.cadViewer.VIEW_ISOMETRIC)" src="https://www.product-config.net/cadviewer/images/icons/camera_perspective.png">
+        <img onclick="cds.cadViewer.setOrientation(cds.cadViewer.VIEW_TOP)" src="https://www.product-config.net/cadviewer/images/icons/camera_top.png">
+        <img onclick="cds.cadViewer.setOrientation(cds.cadViewer.VIEW_LEFT)" src="https://www.product-config.net/cadviewer/images/icons/camera_left.png">
+        <img onclick="cds.cadViewer.setOrientation(cds.cadViewer.VIEW_BOTTOM)" src="https://www.product-config.net/cadviewer/images/icons/camera_bottom.png">
+        <img onclick="cds.cadViewer.setOrientation(cds.cadViewer.VIEW_RIGHT)" src="https://www.product-config.net/cadviewer/images/icons/camera_right.png">
+        <img onclick="cds.cadViewer.setFullScreen();" src="https://www.product-config.net/cadviewer/images/icons/fullscreen.png">
+        <img onclick="cds.cadViewer.toggleBaseGrid();" src="https://www.product-config.net/cadviewer/images/icons/grid_on.png">
+        <img onclick="cds.cadViewer.toggleShadowinViewer();" src="https://www.product-config.net/cadviewer/images/icons/shadow.png"></div>
+    
+    <div id="cds-cad-viewer-container" class="cds-cad-viewer-container"></div></div></div>
+    <div class="tab-pane fade" id="nav-drawing" role="tabpanel" aria-labelledby="nav-drawing-tab" tabindex="0">    <span class="k-skeleton telerik-blazor k-skeleton-rect k-skeleton-pulse" dir="ltr" style="height: 35px;width: 100%"></span>
+<div class="ratio ratio-16x9"><object data="/api/PartDrawing/MTLL230-1#toolbar=0" width="100%" height="100%" type="application/pdf"></object></div></div>
+    <div class="tab-pane fade" id="nav-material" role="tabpanel" aria-labelledby="nav-material-tab" tabindex="0"><style>
+    .card-header {
+        background: transparent !important;
+    }
+</style><div class="mb-3">
+  <div class="card">
+    <div class="card-header">
+      <ul class="nav nav-tabs card-header-tabs" id="materialTab-7" role="tablist">
+        <li class="nav-item" role="presentation">
+          <a class="nav-link active" id="Documentation-7-tab" data-bs-toggle="tab" href="#Documentation-7" role="tab"
+            aria-controls="Documentation-7" aria-selected="true">Documentation</a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" id="TypicalResinProperties-7-tab" data-bs-toggle="tab" href="#TypicalResinProperties-7"
+            role="tab" aria-controls="TypicalResinProperties-7" aria-selected="false">Typical Resin Properties</a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" id="SterilizationStability-7-tab" data-bs-toggle="tab" href="#SterilizationStability-7"
+            role="tab" aria-controls="SterilizationStability-7" aria-selected="false">Sterilization Stability</a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" id="ChemicalResistance-7-tab" data-bs-toggle="tab" href="#ChemicalResistance-7" role="tab"
+            aria-controls="ChemicalResistance-7" aria-selected="false">Chemical Resistance</a>
+        </li>
+      </ul>
+    </div>
+    <div class="card-body">
+      <div class="tab-content" id="materialTabContent-7">
+        <div class="tab-pane fade show active" id="Documentation-7" role="tabpanel"
+          aria-labelledby="Documentation-7-tab">
+
+          <table class="table table-hover table-striped">
+            <thead>
+              <tr class="text-center">
+                <th>Regulatory Data</th>
+                <th>Material Data</th>
+                <th>MSDS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="text-center">
+                <td>
+                  <a target="_blank" href="/api/documents/72502A363F4E3C5F567D6658246C782A5D36576663344852232D314C3664684B65222E617C2847465D6A7C37516C2879792F457D375F443659">Nylon Regulatory Data</a>
+                </td>
+                <td>
+                  <a target="_blank" href="/api/documents/72502A36474B405F567D6658246C782A5D36576663344852252D314C3664684B65222E617C28474658662B27577473762C465031683144">Nylon Material Data</a>
+                </td>
+                <td>
+                  <a target="_blank" href="/api/documents/72502A36474B3F5F567D6658246C782A5D36576663344852242D314C3664684B65222E617C28474658585973">Nylon MSDS</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+        <div class="tab-pane fade" id="TypicalResinProperties-7" role="tabpanel"
+          aria-labelledby="TypicalResinProperties-7-tab">
+
+          <table class="table table-hover table-striped table-sm">
+            <thead>
+              <tr>
+                <th>Test Method/Material Property</th>
+                <th>ASTM Test Method</th>
+                <th> </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Tensile Strength</td>
+                <td>D638</td>
+                <td>12,000</td>
+              </tr>
+              <tr>
+                <td>Elongation at Break, %</td>
+                <td>D638</td>
+                <td>300</td>
+              </tr>
+              <tr>
+                <td>Tensile Yield Strength, psi</td>
+                <td>D638</td>
+                <td>12,000</td>
+              </tr>
+              <tr>
+                <td>Flexural Modulus, kpsi</td>
+                <td>D790</td>
+                <td>410</td>
+              </tr>
+              <tr>
+                <td>Rockwell Hardness D</td>
+                <td>D785</td>
+                <td>R121</td>
+              </tr>
+              <tr>
+                <td>Rockwell Hardness M</td>
+                <td>—</td>
+                <td>M79</td>
+              </tr>
+              <tr>
+                <td>Shore Hardness D</td>
+                <td>D2240</td>
+                <td>N/A</td>
+              </tr>
+              <tr>
+                <td>Coef. of Linear 10-5 in/in/°F</td>
+                <td>D696</td>
+                <td>4</td>
+              </tr>
+              <tr>
+                <td>Deflection Temp °F @264psi</td>
+                <td>D648</td>
+                <td>194</td>
+              </tr>
+              <tr>
+                <td>Deflection Temp °F @66psi</td>
+                <td>D648</td>
+                <td>455</td>
+              </tr>
+              <tr>
+                <td>Water Absorption, %, 24 h</td>
+                <td>D570</td>
+                <td>1.2</td>
+              </tr>
+              <tr>
+                <td>Izod Impact, (Notched) ft-lb/in</td>
+                <td>D256</td>
+                <td>1.0</td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+        <div class="tab-pane fade" id="SterilizationStability-7" role="tabpanel"
+          aria-labelledby="SterilizationStability-7-tab">
+
+          <table class="table table-hover table-striped">
+            <thead>
+              <tr class="text-center">
+                <th colspan="2">Sterilization Stability</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Gamma Radiation</td>
+                <td>Very good; may discolor to brownish hue</td>
+              </tr>
+              <tr>
+                <td>Ethylene Oxide (EtO)</td>
+                <td>Very good; some suceptibility to oxidizing agents</td>
+              </tr>
+              <tr>
+                <td>Autoclave</td>
+                <td>Excellent</td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+        <div class="tab-pane fade" id="ChemicalResistance-7" role="tabpanel" aria-labelledby="ChemicalResistance-7-tab">
+
+          <table class="table table-hover table-striped table-sm">
+            <thead>
+              <tr>
+                <th>Chemical</th>
+                <th>%</th>
+                <th>Temperature° C</th>
+                <th>Temperature° F</th>
+                <th>Recommendation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Acetic Acid</td>
+                <td>5%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Satisfactory</td>
+              </tr>
+              <tr>
+                <td>Acetone</td>
+                <td>100%</td>
+                <td>50° C</td>
+                <td>122° F</td>
+                <td>Satisfactory</td>
+              </tr>
+              <tr>
+                <td>Acetophenone</td>
+                <td>100%</td>
+                <td>24° C</td>
+                <td>75° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Acetylene</td>
+                <td>100%</td>
+                <td>24° C</td>
+                <td>75° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Air</td>
+                <td>100%</td>
+                <td>82° C</td>
+                <td>180° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Ammonia, Liquid</td>
+                <td>100%</td>
+                <td>24° C</td>
+                <td>75° F</td>
+                <td>Satisfactory</td>
+              </tr>
+              <tr>
+                <td>Ammonium Hydroxide</td>
+                <td>10%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Ammonium Hydroxide</td>
+                <td>10%</td>
+                <td>70° C</td>
+                <td>158° F</td>
+                <td>Unsatisfactory</td>
+              </tr>
+              <tr>
+                <td>Barium Sulfide</td>
+                <td>100%</td>
+                <td>24° C</td>
+                <td>75° F</td>
+                <td>Satisfactory</td>
+              </tr>
+              <tr>
+                <td>Benzene</td>
+                <td>100%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Bleach</td>
+                <td>100%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Satisfactory</td>
+              </tr>
+              <tr>
+                <td>Boric Acid</td>
+                <td>7%</td>
+                <td>35° C</td>
+                <td>95° F</td>
+                <td>Unsatisfactory</td>
+              </tr>
+              <tr>
+                <td>Calcium Carbonate</td>
+                <td>Sat. sol.</td>
+                <td>24° C</td>
+                <td>75° F</td>
+                <td>N/A</td>
+              </tr>
+              <tr>
+                <td>Carbon Dioxide</td>
+                <td>100%</td>
+                <td>50° C</td>
+                <td>122° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Carbon Monoxide</td>
+                <td>100%</td>
+                <td>50° C</td>
+                <td>122° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Carbon Tetrachloride</td>
+                <td>100%</td>
+                <td>50° C</td>
+                <td>122° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Chlorine Water</td>
+                <td>Dilute</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Satisfactory</td>
+              </tr>
+              <tr>
+                <td>Chlorine Water</td>
+                <td>Concen.</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Unsatisfactory</td>
+              </tr>
+              <tr>
+                <td>Chlorobenzene</td>
+                <td>100%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Chlorofluorocarbon 11</td>
+                <td>100%</td>
+                <td>24° C</td>
+                <td>75° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Chloroform</td>
+                <td>100%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Satisfactory</td>
+              </tr>
+              <tr>
+                <td>Cyclohexanone</td>
+                <td>100%</td>
+                <td>24° C</td>
+                <td>75° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Dichlorethylene</td>
+                <td>100%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Satisfactory</td>
+              </tr>
+              <tr>
+                <td>Ethanol</td>
+                <td>95%</td>
+                <td>50° C</td>
+                <td>122° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Ethyl Acetate</td>
+                <td>95%</td>
+                <td>50° C</td>
+                <td>122° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Ethylene Glycol</td>
+                <td>100%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Ethylene Oxide</td>
+                <td>100%</td>
+                <td>24° C</td>
+                <td>75° F</td>
+                <td>Satisfactory</td>
+              </tr>
+              <tr>
+                <td>Ethylene Oxide</td>
+                <td>100%</td>
+                <td>79° C</td>
+                <td>175° F</td>
+                <td>Satisfactory</td>
+              </tr>
+              <tr>
+                <td>Fatty Acids</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>N/A</td>
+              </tr>
+              <tr>
+                <td>Fluorine</td>
+                <td>100%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Unsatisfactory</td>
+              </tr>
+              <tr>
+                <td>Formaldehyde</td>
+                <td>37%</td>
+                <td>24° C</td>
+                <td>75° F</td>
+                <td>N/A</td>
+              </tr>
+              <tr>
+                <td>Gasoline</td>
+                <td>100%</td>
+                <td>85° C</td>
+                <td>185° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Glucose</td>
+                <td>Concen.</td>
+                <td>24° C</td>
+                <td>75° F</td>
+                <td>N/A</td>
+              </tr>
+              <tr>
+                <td>Glycerin</td>
+                <td>100%</td>
+                <td>24° C</td>
+                <td>75° F</td>
+                <td>N/A</td>
+              </tr>
+              <tr>
+                <td>Hydrochloric Acid</td>
+                <td>2%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Hydrochloric Acid</td>
+                <td>10%</td>
+                <td>25° C</td>
+                <td>77° F</td>
+                <td>Unsatisfactory</td>
+              </tr>
+              <tr>
+                <td>Hydrofluoric Acid</td>
+                <td>10%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Unsatisfactory</td>
+              </tr>
+              <tr>
+                <td>Hydrogen Peroxide</td>
+                <td>1%</td>
+                <td>24° C</td>
+                <td>75° F</td>
+                <td>Satisfactory</td>
+              </tr>
+              <tr>
+                <td>Hydrogen Peroxide</td>
+                <td>5%</td>
+                <td>43° C</td>
+                <td>110° F</td>
+                <td>Unsatisfactory</td>
+              </tr>
+              <tr>
+                <td>Isopropanol</td>
+                <td>70%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Kerosene</td>
+                <td>100%</td>
+                <td>85° C</td>
+                <td>185° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Methyl Ethyl Ketone</td>
+                <td>100%</td>
+                <td>50° C</td>
+                <td>122° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Methylene Chloride</td>
+                <td>100%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Satisfactory</td>
+              </tr>
+              <tr>
+                <td>Methanol</td>
+                <td>100%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Nitric Acid</td>
+                <td>10%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Unsatisfactory</td>
+              </tr>
+              <tr>
+                <td>Oxygen</td>
+                <td>100%</td>
+                <td>24° C</td>
+                <td>75° F</td>
+                <td>Satisfactory</td>
+              </tr>
+              <tr>
+                <td>Ozone</td>
+                <td>100%</td>
+                <td>43° C</td>
+                <td>110° F</td>
+                <td>Unsatisfactory</td>
+              </tr>
+              <tr>
+                <td>Phenol</td>
+                <td>90%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Unsatisfactory</td>
+              </tr>
+              <tr>
+                <td>Phosphoric Acid</td>
+                <td>5%</td>
+                <td>98° C</td>
+                <td>208° F</td>
+                <td>Unsatisfactory</td>
+              </tr>
+              <tr>
+                <td>Propane</td>
+                <td>100%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Sodium Bicarbonate</td>
+                <td>Concen.</td>
+                <td>24° C</td>
+                <td>75° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Sodium Chloride</td>
+                <td>10%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Sodium Chloride</td>
+                <td>Sat. sol.</td>
+                <td>24° C</td>
+                <td>75° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Sodium Hydroxide</td>
+                <td>10%</td>
+                <td>70° C</td>
+                <td>158° F</td>
+                <td>Satisfactory</td>
+              </tr>
+              <tr>
+                <td>Steam</td>
+                <td>—</td>
+                <td>120° C</td>
+                <td>248° F</td>
+                <td>Unsatisfactory</td>
+              </tr>
+              <tr>
+                <td>Sulfuric Acid</td>
+                <td>30%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Unsatisfactory</td>
+              </tr>
+              <tr>
+                <td>Tetrahydrofuran</td>
+                <td>100%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Toluene</td>
+                <td>100%</td>
+                <td>50° C</td>
+                <td>122° F</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td>Trichloroethylene</td>
+                <td>100%</td>
+                <td>23° C</td>
+                <td>73° F</td>
+                <td>Satisfactory</td>
+              </tr>
+              <tr>
+                <td>Water</td>
+                <td>100%</td>
+                <td>79° C</td>
+                <td>175° F</td>
+                <td>Excellent</td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div></div></div>
+        <hr class="featurette-divider">
+        <style>
+    .nordson-text {
+        color: #007ac9;
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    .image-box {
+        width: 100%;
+        max-width: 230px;
+        padding-top: 100%; /* 1:1 aspect ratio (square) */
+        position: relative;
+        overflow: hidden;
+    }
+
+        .image-box img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+    .card-custom {
+        border-radius: 1rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .carousel-control-custom {
+        width: 40px;
+        height: 40px;
+        background-color: #ff8200;
+        border: none;
+        border-radius: 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* override Bootstrap's absolute positioning */
+        position: static !important;
+        top: auto !important;
+        bottom: auto !important;
+        left: auto !important;
+        right: auto !important;
+    }
+
+        .carousel-control-custom .bi {
+            color: #fff;
+            font-size: 1.25rem;
+        }
+    /* Prevent cards from overflowing and ensure smooth slide */
+    #alsoPurchasedCarousel .carousel-inner {
+        overflow: hidden;
+    }
+
+    #alsoPurchasedCarousel .carousel-item {
+        transition: transform 0.5s ease;
+    }
+
+        #alsoPurchasedCarousel .carousel-item .row {
+            display: flex;
+            flex-wrap: nowrap;
+        }
+        /* Force each card column to occupy one-third width */
+        #alsoPurchasedCarousel .carousel-item .col-12 {
+            flex: 0 0 33.333%;
+            max-width: 33.333%;
+        }
+</style><div class="container py-4"><h2 class>Customers Also Purchased</h2>
+
+    
+    <div class="d-flex mb-4"><button class="carousel-control-custom me-2" type="button" data-bs-target="#alsoPurchasedCarousel" data-bs-slide="prev"><i class="bi bi-chevron-left"></i></button>
+        <button class="carousel-control-custom" type="button" data-bs-target="#alsoPurchasedCarousel" data-bs-slide="next"><i class="bi bi-chevron-right"></i></button></div>
+
+    <div id="alsoPurchasedCarousel" class="carousel slide" data-bs-ride="carousel"><div class="carousel-inner"><div class="carousel-item active"><div class="row g-4"><div class="col-md-12 col-lg-6"><div class="card card-custom h-100"><div class="card-body d-flex flex-column"><div class="card-image-shop"><a href="/shop/fluid-components/fluid-components/Luer Fitting/FTLL230-1"><img src="/files/partcontent/part-images/fluid-components/FTLL230-1.png" class="img-fluid img-fluid-shop" loading="lazy" alt="FTLL230-1" /></a></div>
+                                        <h5 class="card-title text-primary"><a class="nordson-text" href="/shop/fluid-components/Luer Fitting/FTLL230-1">FTLL230-1</a></h5>
+
+                                        <p class="card-text flex-grow-1">Female Luer Thread Style to 200 Series Barb, 1/8&quot; (3.2 mm) ID Tubing, White Nylon</p>
+                                        <div><a href="/shop/fluid-components/Luer Fitting/FTLL230-1" class="btn btn-primary mt-auto">
+                                            View Product
+                                            </a></div></div></div></div><div class="col-md-12 col-lg-6"><div class="card card-custom h-100"><div class="card-body d-flex flex-column"><div class="card-image-shop"><a href="/shop/fluid-components/fluid-components/Luer Fitting/FTLLP-1"><img src="/files/partcontent/part-images/fluid-components/FTLLP-1.png" class="img-fluid img-fluid-shop" loading="lazy" alt="FTLLP-1" /></a></div>
+                                        <h5 class="card-title text-primary"><a class="nordson-text" href="/shop/fluid-components/Luer Fitting/FTLLP-1">FTLLP-1</a></h5>
+
+                                        <p class="card-text flex-grow-1">Female Luer Thread Style Cap, White Nylon</p>
+                                        <div><a href="/shop/fluid-components/Luer Fitting/FTLLP-1" class="btn btn-primary mt-auto">
+                                            View Product
+                                            </a></div></div></div></div><div class="col-md-12 col-lg-6"><div class="card card-custom h-100"><div class="card-body d-flex flex-column"><div class="card-image-shop"><a href="/shop/fluid-components/fluid-components/Luer Fitting/MTLL230-6005"><img src="/files/partcontent/part-images/fluid-components/MTLL230-6005.png" class="img-fluid img-fluid-shop" loading="lazy" alt="MTLL230-6005" /></a></div>
+                                        <h5 class="card-title text-primary"><a class="nordson-text" href="/shop/fluid-components/Luer Fitting/MTLL230-6005">MTLL230-6005</a></h5>
+
+                                        <p class="card-text flex-grow-1">Male Luer Integral Lock Ring to 200 Series Barb, 1/8&quot; (3.2 mm) ID Tubing, Animal-Free Natural Polypropylene</p>
+                                        <div><a href="/shop/fluid-components/Luer Fitting/MTLL230-6005" class="btn btn-primary mt-auto">
+                                            View Product
+                                            </a></div></div></div></div></div></div><div class="carousel-item "><div class="row g-4"><div class="col-md-12 col-lg-6"><div class="card card-custom h-100"><div class="card-body d-flex flex-column"><div class="card-image-shop"><a href="/shop/fluid-components/fluid-components/Luer Fitting/FTLL230-6005"><img src="/files/partcontent/part-images/fluid-components/FTLL230-6005.png" class="img-fluid img-fluid-shop" loading="lazy" alt="FTLL230-6005" /></a></div>
+                                        <h5 class="card-title text-primary"><a class="nordson-text" href="/shop/fluid-components/Luer Fitting/FTLL230-6005">FTLL230-6005</a></h5>
+
+                                        <p class="card-text flex-grow-1">Female Luer Thread Style to 200 Series Barb, 1/8&quot; (3.2 mm) ID Tubing, Animal-Free Natural Polypropylene</p>
+                                        <div><a href="/shop/fluid-components/Luer Fitting/FTLL230-6005" class="btn btn-primary mt-auto">
+                                            View Product
+                                            </a></div></div></div></div><div class="col-md-12 col-lg-6"><div class="card card-custom h-100"><div class="card-body d-flex flex-column"><div class="card-image-shop"><a href="/shop/fluid-components/fluid-components/Luer Fitting/LP4-1"><img src="/files/partcontent/part-images/fluid-components/LP4-1.png" class="img-fluid img-fluid-shop" loading="lazy" alt="LP4-1" /></a></div>
+                                        <h5 class="card-title text-primary"><a class="nordson-text" href="/shop/fluid-components/Luer Fitting/LP4-1">LP4-1</a></h5>
+
+                                        <p class="card-text flex-grow-1">Male Luer Integral Lock Ring Plug, Closed at Grip, White Nylon</p>
+                                        <div><a href="/shop/fluid-components/Luer Fitting/LP4-1" class="btn btn-primary mt-auto">
+                                            View Product
+                                            </a></div></div></div></div><div class="col-md-12 col-lg-6"><div class="card card-custom h-100"><div class="card-body d-flex flex-column"><div class="card-image-shop"><a href="/shop/fluid-components/fluid-components/Luer Fitting/MTLL210-1"><img src="/files/partcontent/part-images/fluid-components/MTLL210-1.png" class="img-fluid img-fluid-shop" loading="lazy" alt="MTLL210-1" /></a></div>
+                                        <h5 class="card-title text-primary"><a class="nordson-text" href="/shop/fluid-components/Luer Fitting/MTLL210-1">MTLL210-1</a></h5>
+
+                                        <p class="card-text flex-grow-1">Value Plastics Male Luer Integral Lock Ring to 200 Series Barb, 1/16&quot; (1.6 mm) ID Tubing, White Nylon</p>
+                                        <div><a href="/shop/fluid-components/Luer Fitting/MTLL210-1" class="btn btn-primary mt-auto">
+                                            View Product
+                                            </a></div></div></div></div></div></div><div class="carousel-item "><div class="row g-4"><div class="col-md-12 col-lg-6"><div class="card card-custom h-100"><div class="card-body d-flex flex-column"><div class="card-image-shop"><a href="/shop/fluid-components/fluid-components/Luer Fitting/MTLLP-1"><img src="/files/partcontent/part-images/fluid-components/MTLLP-1.png" class="img-fluid img-fluid-shop" loading="lazy" alt="MTLLP-1" /></a></div>
+                                        <h5 class="card-title text-primary"><a class="nordson-text" href="/shop/fluid-components/Luer Fitting/MTLLP-1">MTLLP-1</a></h5>
+
+                                        <p class="card-text flex-grow-1">Male Luer Integral Lock Ring Plug, Closed at Luer Tip, White Nylon</p>
+                                        <div><a href="/shop/fluid-components/Luer Fitting/MTLLP-1" class="btn btn-primary mt-auto">
+                                            View Product
+                                            </a></div></div></div></div><div class="col-md-12 col-lg-6"><div class="card card-custom h-100"><div class="card-body d-flex flex-column"><div class="card-image-shop"><a href="/shop/fluid-components/fluid-components/Luer Fitting/MTLL220-1"><img src="/files/partcontent/part-images/fluid-components/MTLL220-1.png" class="img-fluid img-fluid-shop" loading="lazy" alt="MTLL220-1" /></a></div>
+                                        <h5 class="card-title text-primary"><a class="nordson-text" href="/shop/fluid-components/Luer Fitting/MTLL220-1">MTLL220-1</a></h5>
+
+                                        <p class="card-text flex-grow-1">Male Luer Integral Lock Ring to 200 Series Barb, 3/32&quot; (2.4 mm) ID Tubing, White Nylon</p>
+                                        <div><a href="/shop/fluid-components/Luer Fitting/MTLL220-1" class="btn btn-primary mt-auto">
+                                            View Product
+                                            </a></div></div></div></div><div class="col-md-12 col-lg-6"><div class="card card-custom h-100"><div class="card-body d-flex flex-column"><div class="card-image-shop"><a href="/shop/fluid-components/fluid-components/Other Products/LNS-1"><img src="/files/partcontent/part-images/fluid-components/LNS-1.png" class="img-fluid img-fluid-shop" loading="lazy" alt="LNS-1" /></a></div>
+                                        <h5 class="card-title text-primary"><a class="nordson-text" href="/shop/fluid-components/Other Products/LNS-1">LNS-1</a></h5>
+
+                                        <p class="card-text flex-grow-1">1/4-28 UNF Panel Mount Lock Nut (For use with FTLLB or FTLB panel mount fittings), White Nylon</p>
+                                        <div><a href="/shop/fluid-components/Other Products/LNS-1" class="btn btn-primary mt-auto">
+                                            View Product
+                                            </a></div></div></div></div></div></div><div class="carousel-item "><div class="row g-4"><div class="col-md-12 col-lg-6"><div class="card card-custom h-100"><div class="card-body d-flex flex-column"><div class="card-image-shop"><a href="/shop/fluid-components/fluid-components/Luer Fitting/MTLL210-6005"><img src="/files/partcontent/part-images/fluid-components/MTLL210-6005.png" class="img-fluid img-fluid-shop" loading="lazy" alt="MTLL210-6005" /></a></div>
+                                        <h5 class="card-title text-primary"><a class="nordson-text" href="/shop/fluid-components/Luer Fitting/MTLL210-6005">MTLL210-6005</a></h5>
+
+                                        <p class="card-text flex-grow-1">Male Luer Integral Lock Ring to 200 Series Barb, 1/16&quot; (1.6 mm) ID Tubing, Animal-Free Natural Polypropylene</p>
+                                        <div><a href="/shop/fluid-components/Luer Fitting/MTLL210-6005" class="btn btn-primary mt-auto">
+                                            View Product
+                                            </a></div></div></div></div><div class="col-md-12 col-lg-6"><div class="card card-custom h-100"><div class="card-body d-flex flex-column"><div class="card-image-shop"><a href="/shop/fluid-components/fluid-components/Luer Fitting/FTLLP-6005"><img src="/files/partcontent/part-images/fluid-components/FTLLP-6005.png" class="img-fluid img-fluid-shop" loading="lazy" alt="FTLLP-6005" /></a></div>
+                                        <h5 class="card-title text-primary"><a class="nordson-text" href="/shop/fluid-components/Luer Fitting/FTLLP-6005">FTLLP-6005</a></h5>
+
+                                        <p class="card-text flex-grow-1">Female Luer Thread Style Cap, Animal-free Natural Polypropylene</p>
+                                        <div><a href="/shop/fluid-components/Luer Fitting/FTLLP-6005" class="btn btn-primary mt-auto">
+                                            View Product
+                                            </a></div></div></div></div><div class="col-md-12 col-lg-6"><div class="card card-custom h-100"><div class="card-body d-flex flex-column"><div class="card-image-shop"><a href="/shop/fluid-components/fluid-components/Luer Fitting/FTLL210-6005"><img src="/files/partcontent/part-images/fluid-components/FTLL210-6005.png" class="img-fluid img-fluid-shop" loading="lazy" alt="FTLL210-6005" /></a></div>
+                                        <h5 class="card-title text-primary"><a class="nordson-text" href="/shop/fluid-components/Luer Fitting/FTLL210-6005">FTLL210-6005</a></h5>
+
+                                        <p class="card-text flex-grow-1">Female Luer Thread Style to 200 Series Barb, 1/16&quot; (1.6 mm) ID Tubing, Animal-Free Natural Polypropylene</p>
+                                        <div><a href="/shop/fluid-components/Luer Fitting/FTLL210-6005" class="btn btn-primary mt-auto">
+                                            View Product
+                                            </a></div></div></div></div></div></div><div class="carousel-item "><div class="row g-4"><div class="col-md-12 col-lg-6"><div class="card card-custom h-100"><div class="card-body d-flex flex-column"><div class="card-image-shop"><a href="/shop/fluid-components/fluid-components/Tube to Tube Fitting/Y210-6005"><img src="/files/partcontent/part-images/fluid-components/Y210-6005.png" class="img-fluid img-fluid-shop" loading="lazy" alt="Y210-6005" /></a></div>
+                                        <h5 class="card-title text-primary"><a class="nordson-text" href="/shop/fluid-components/Tube to Tube Fitting/Y210-6005">Y210-6005</a></h5>
+
+                                        <p class="card-text flex-grow-1">Y Connector with 200 Series Barbs, 1/16&quot; (1.6 mm) ID Tubing, Animal-Free Natural Polypropylene</p>
+                                        <div><a href="/shop/fluid-components/Tube to Tube Fitting/Y210-6005" class="btn btn-primary mt-auto">
+                                            View Product
+                                            </a></div></div></div></div><div class="col-md-12 col-lg-6"><div class="card card-custom h-100"><div class="card-body d-flex flex-column"><div class="card-image-shop"><a href="/shop/fluid-components/fluid-components/Luer Fitting/FTLL210-1"><img src="/files/partcontent/part-images/fluid-components/FTLL210-1.png" class="img-fluid img-fluid-shop" loading="lazy" alt="FTLL210-1" /></a></div>
+                                        <h5 class="card-title text-primary"><a class="nordson-text" href="/shop/fluid-components/Luer Fitting/FTLL210-1">FTLL210-1</a></h5>
+
+                                        <p class="card-text flex-grow-1">Value Plastics Female Luer Thread Style to 200 Series Barb, 1/16&quot; (1.6 mm) ID Tubing, White Nylon</p>
+                                        <div><a href="/shop/fluid-components/Luer Fitting/FTLL210-1" class="btn btn-primary mt-auto">
+                                            View Product
+                                            </a></div></div></div></div><div class="col-md-12 col-lg-6"><div class="card card-custom h-100"><div class="card-body d-flex flex-column"><div class="card-image-shop"><a href="/shop/fluid-components/fluid-components/Luer Fitting/FTLLB230-1"><img src="/files/partcontent/part-images/fluid-components/FTLLB230-1.png" class="img-fluid img-fluid-shop" loading="lazy" alt="FTLLB230-1" /></a></div>
+                                        <h5 class="card-title text-primary"><a class="nordson-text" href="/shop/fluid-components/Luer Fitting/FTLLB230-1">FTLLB230-1</a></h5>
+
+                                        <p class="card-text flex-grow-1">Female Luer Thread Style Panel Mount 1/4-28 UNF to 200 Series Barb, 1/8&quot; (3.2 mm) ID Tubing, White Nylon</p>
+                                        <div><a href="/shop/fluid-components/Luer Fitting/FTLLB230-1" class="btn btn-primary mt-auto">
+                                            View Product
+                                            </a></div></div></div></div></div></div><div class="carousel-item "><div class="row g-4"><div class="col-md-12 col-lg-6"><div class="card card-custom h-100"><div class="card-body d-flex flex-column"><div class="card-image-shop"><a href="/shop/fluid-components/fluid-components/Luer Fitting/SFTLL-1"><img src="/files/partcontent/part-images/fluid-components/SFTLL-1.png" class="img-fluid img-fluid-shop" loading="lazy" alt="SFTLL-1" /></a></div>
+                                        <h5 class="card-title text-primary"><a class="nordson-text" href="/shop/fluid-components/Luer Fitting/SFTLL-1">SFTLL-1</a></h5>
+
+                                        <p class="card-text flex-grow-1">Female Luer Thread Style with 5/16&quot; Hex to 1/4-28 UNF Thread, White Nylon</p>
+                                        <div><a href="/shop/fluid-components/Luer Fitting/SFTLL-1" class="btn btn-primary mt-auto">
+                                            View Product
+                                            </a></div></div></div></div><div class="col-md-12 col-lg-6"><div class="card card-custom h-100"><div class="card-body d-flex flex-column"><div class="card-image-shop"><a href="/shop/fluid-components/fluid-components/Tube to Tube Fitting/Y230-1"><img src="/files/partcontent/part-images/fluid-components/Y230-1.png" class="img-fluid img-fluid-shop" loading="lazy" alt="Y230-1" /></a></div>
+                                        <h5 class="card-title text-primary"><a class="nordson-text" href="/shop/fluid-components/Tube to Tube Fitting/Y230-1">Y230-1</a></h5>
+
+                                        <p class="card-text flex-grow-1">Y Tube Fitting with 200 Series Barbs, 1/8&quot; (3.2 mm) ID Tubing, White Nylon</p>
+                                        <div><a href="/shop/fluid-components/Tube to Tube Fitting/Y230-1" class="btn btn-primary mt-auto">
+                                            View Product
+                                            </a></div></div></div></div><div class="col-md-12 col-lg-6"><div class="card card-custom h-100"><div class="card-body d-flex flex-column"><div class="card-image-shop"><a href="/shop/fluid-components/fluid-components/Luer Fitting/MTLL250-6005"><img src="/files/partcontent/part-images/fluid-components/MTLL250-6005.png" class="img-fluid img-fluid-shop" loading="lazy" alt="MTLL250-6005" /></a></div>
+                                        <h5 class="card-title text-primary"><a class="nordson-text" href="/shop/fluid-components/Luer Fitting/MTLL250-6005">MTLL250-6005</a></h5>
+
+                                        <p class="card-text flex-grow-1">Male Luer Integral Lock Ring to 200 Series Barb, 3/16&quot; (4.8 mm) ID Tubing, Animal-Free Natural Polypropylene</p>
+                                        <div><a href="/shop/fluid-components/Luer Fitting/MTLL250-6005" class="btn btn-primary mt-auto">
+                                            View Product
+                                            </a></div></div></div></div></div></div><div class="carousel-item "><div class="row g-4"><div class="col-md-12 col-lg-6"><div class="card card-custom h-100"><div class="card-body d-flex flex-column"><div class="card-image-shop"><a href="/shop/fluid-components/fluid-components/Luer Fitting/FTLL360-6005"><img src="/files/partcontent/part-images/fluid-components/FTLL360-6005.png" class="img-fluid img-fluid-shop" loading="lazy" alt="FTLL360-6005" /></a></div>
+                                        <h5 class="card-title text-primary"><a class="nordson-text" href="/shop/fluid-components/Luer Fitting/FTLL360-6005">FTLL360-6005</a></h5>
+
+                                        <p class="card-text flex-grow-1">Female Luer Thread Style to 300 Series Barb, 1/4&quot; (6.4 mm) ID Tubing, Animal-Free Natural Polypropylene</p>
+                                        <div><a href="/shop/fluid-components/Luer Fitting/FTLL360-6005" class="btn btn-primary mt-auto">
+                                            View Product
+                                            </a></div></div></div></div><div class="col-md-12 col-lg-6"><div class="card card-custom h-100"><div class="card-body d-flex flex-column"><div class="card-image-shop"><a href="/shop/fluid-components/fluid-components/Luer Fitting/FTLL220-1"><img src="/files/partcontent/part-images/fluid-components/FTLL220-1.png" class="img-fluid img-fluid-shop" loading="lazy" alt="FTLL220-1" /></a></div>
+                                        <h5 class="card-title text-primary"><a class="nordson-text" href="/shop/fluid-components/Luer Fitting/FTLL220-1">FTLL220-1</a></h5>
+
+                                        <p class="card-text flex-grow-1">Female Luer Thread Style to 200 Series Barb, 3/32&quot; (2.4 mm) ID Tubing, White Nylon</p>
+                                        <div><a href="/shop/fluid-components/Luer Fitting/FTLL220-1" class="btn btn-primary mt-auto">
+                                            View Product
+                                            </a></div></div></div></div></div></div></div></div></div></div><!--Blazor:{"prerenderId":"58921f42da7e4a35b172280e8f23877d"}--></article></main><footer b-hx6gwsttme><div class="mt-5"><style>
+        .waves {
+            width: 100%;
+            height: 15vh;
+            margin-bottom: -7px; /*Fix for safari gap*/
+            min-height: 100px;
+            max-height: 150px;
+        }
+
+        .parallax > use {
+            animation: wave-oscillate 20s ease-in-out infinite;
+        }
+
+            .parallax > use:nth-child(1) {
+                animation-delay: 0s;
+                animation-duration: 18s;
+            }
+
+            .parallax > use:nth-child(2) {
+                animation-delay: -1s;
+                animation-duration: 20s;
+            }
+
+            .parallax > use:nth-child(3) {
+                animation-delay: -2s;
+                animation-duration: 22s;
+            }
+
+            .parallax > use:nth-child(4) {
+                animation-delay: -3s;
+                animation-duration: 25s;
+            }
+
+        @keyframes move-forever {
+            0% {
+                transform: translate3d(-90px,0,0);
+            }
+
+            100% {
+                transform: translate3d(85px,0,0);
+            }
+        }
+
+        @keyframes wave-oscillate {
+            0% {
+                transform: translate3d(0px, 0, 0);
+            }
+
+            25% {
+                transform: translate3d(-50px, 0, 0);
+            }
+
+            50% {
+                transform: translate3d(0px, 0, 0);
+            }
+
+            75% {
+                transform: translate3d(50px, 0, 0);
+            }
+
+            100% {
+                transform: translate3d(0px, 0, 0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .waves {
+                height: 40px;
+                min-height: 40px;
+            }
+        }
+    </style>
+    
+    <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><linearGradient id="waveGradient" gradientTransform="rotate(90)"><stop offset="0%" stop-color="#ffffff"></stop>
+                <stop offset="100%" stop-color="#0071be"></stop></linearGradient>
+            <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"></path></defs>
+        <g class="parallax"><use xlink:href="#gentle-wave" x="100" y="0" fill="rgba(0, 113, 190, 0.1)"></use>
+            <use xlink:href="#gentle-wave" x="100" y="3" fill="rgba(0, 113, 190, 0.2)"></use>
+            <use xlink:href="#gentle-wave" x="100" y="5" fill="rgba(0, 113, 190, 0.3)"></use>
+            <use xlink:href="#gentle-wave" x="100" y="7" fill="rgba(0, 113, 190, 0.4)"></use></g></svg>
+
+    
+    
+    <div class="container-fluid bg-primary bg-gradient"><div class="py-5 container"><div class="row"><div class="col"><h5>Resources</h5>
+                            <hr class="footer-divider">
+                            <ul class="nav flex-column"><li class="nav-item"><a href="/Resources/Alliances/" class="nav-link-footer p-0">Alliances</a></li><li class="nav-item"><a href="/files/fluid-components-nordsonmedical-com/Quality and Supplier Information/Credit Application/fc-credit-application.pdf" class="nav-link-footer p-0" target="_blank">Credit Application</a></li><li class="nav-item"><a href="/Resources/FAQs/" class="nav-link-footer p-0">FAQs</a></li><li class="nav-item"><a href="/Resources/Orders/" class="nav-link-footer p-0">Orders</a></li><li class="nav-item"><a href="/Resources/Quality/" class="nav-link-footer p-0">Quality</a></li><li class="nav-item"><a href="/Resources/Resource-Library" class="nav-link-footer p-0">Resource Library</a></li><li class="nav-item"><a href="https://terms.nordson.com/PO/PO_Terms_Conditions.pdf" class="nav-link-footer p-0" target="_blank">Terms and Conditions of Purchase</a></li><li class="nav-item"><a href="https://www.nordson.com/en/about-us/resources/globalcos/medcos" class="nav-link-footer p-0" target="_blank">Terms and Conditions of Sale</a></li></ul></div><div class="col"><h5>About</h5>
+                            <hr class="footer-divider">
+                            <ul class="nav flex-column"><li class="nav-item"><a href="/About/Careers/" class="nav-link-footer p-0">Careers</a></li><li class="nav-item"><a href="/About/Company/" class="nav-link-footer p-0">Company</a></li><li class="nav-item"><a href="/About/Contact-Us/" class="nav-link-footer p-0">Contact Us</a></li><li class="nav-item"><a href="/About/Locations/" class="nav-link-footer p-0">Locations</a></li><li class="nav-item"><a href="/About/News-and-Events/" class="nav-link-footer p-0">News and Events</a></li><li class="nav-item"><a href="/About/Strategy-and-Vision/" class="nav-link-footer p-0">Strategy and Vision</a></li></ul></div><div class="col"><h5>Corporate</h5>
+                            <hr class="footer-divider">
+                            <ul class="nav flex-column"><li class="nav-item"><a href="https://www.nordson.com/" class="nav-link-footer p-0">Nordson Corporation</a></li><li class="nav-item"><a href="https://www.nordson.com/en/about-us/privacy-statement" class="nav-link-footer p-0">Privacy Policy</a></li></ul></div><div class="col-3 footer-logo d-flex ms-auto"><a href="/"><img src="/images/logo-nordson-medical-white.svg" style="max-width:225px;"></a></div></div>
+            <div class="d-flex flex-sm-row justify-content-center mt-5 border-top"><p class="m-0">&#xA9; 2026 Nordson Corporation</p></div></div></div></div></footer></div>
+
+<div id="blazor-error-ui" b-hx6gwsttme>
+    An unhandled error has occurred.
+    <a href class="reload" b-hx6gwsttme>Reload</a>
+    <a class="dismiss" b-hx6gwsttme>🗙</a></div>
+
+    <script src="https://www.google.com/recaptcha/api.js?render=6LdeYJorAAAAACqmMoRV-zjr3d1SVc3t0iGuCLYW" async defer></script>
+    <script src="/js/recaptcha-handler.js"></script>
+    <script src="/js/encryption.js"></script>
+    <script src="/js/crypto-js.min.js"></script>
+    <script src="/js/setAuthCookie.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/sessionEnd.js"></script>
+    <script src="/files/staticcontent/scripts/salesforce-form.js"></script>
+    <script src="/_framework/blazor.web.js"></script>
+
+    <script>
+        Blazor.addEventListener('enhancedload', () => {
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            let closeCanvas = document.querySelector('[data-bs-dismiss="offcanvas"]');
+            window.setupVideoModals();
+            window.closeMenus();
+            if (closeCanvas) {
+               closeCanvas.click();
+            }
+            window.countryStateDropdowns.setup();
+            window.cleanRecaptcha();
+            window.handleRecaptchaForms();
+            scriptManager.executeInlineScripts("#dynamic-marcom-content");
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            window.handleRecaptchaForms();
+            window.setupVideoModals();
+            scriptManager.executeInlineScripts("#dynamic-marcom-content");
+        });
+    </script>
+
+    
+    <script>
+        (function () {
+          /* ============== Inject minimal CSS ============== */
+          var css = `
+            .nm-cookie-banner{position:fixed;inset-inline:0;bottom:0;z-index:2147483000;background:#0b253a;color:#fff;font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;box-shadow:0 -6px 24px rgba(0,0,0,.25)}
+            .nm-cookie-wrap{max-width:1200px;margin:0 auto;padding:16px;display:grid;gap:12px;grid-template-columns:1fr auto;align-items:start}
+            .nm-cookie-text{margin-right:16px}
+            .nm-cookie-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+            .nm-btn{appearance:none;border:0;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:600}
+            .nm-btn-primary{background:#ff7800;color:#fff}
+            .nm-btn-outline{background:transparent;color:#fff;outline:1px solid #6b7c8c}
+            .nm-cookie-link,.nm-cookie-link:visited{color:#007ac9 !important;text-decoration:underline}
+            .nm-pref-panel{background:#152b41;border-radius:10px;padding:12px;margin-top:8px}
+            .nm-switch{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+            .nm-switch input{position:absolute;opacity:0;width:0;height:0}
+            .nm-switch .track{width:42px;height:24px;background:#5a6a79;border-radius:999px;position:relative;transition:background .2s}
+            .nm-switch .thumb{width:18px;height:18px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:left .2s}
+            .nm-switch input:checked + .track{background:#37d67a}
+            .nm-switch input:checked + .track .thumb{left:21px}
+            @media (max-width:720px){.nm-cookie-wrap{grid-template-columns:1fr}.nm-cookie-actions{justify-content:stretch}.nm-btn{flex:1 1 auto}}
+          `;
+          var style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
+
+          /* ============== Config ============== */
+          var PROD_SUFFIX = 'nordsonmedical.com';
+          var host = location.hostname.toLowerCase();
+          var ROOT_COOKIE_DOMAIN = (host === PROD_SUFFIX || host.endsWith('.' + PROD_SUFFIX)) ? '.' + PROD_SUFFIX : '';
+          var COOKIE_NAME = 'nm_consents_v2';
+          var COOKIE_AGE_DAYS = 180;
+          var DEFAULTS = { analytics_storage:false, ad_storage:false, ad_user_data:false, ad_personalization:false };
+
+          /* ============== Cookie helpers ============== */
+          function setCookie(name, value, days, domain) {
+            var maxAge = days * 24 * 60 * 60;
+            var cookie = name + '=' + encodeURIComponent(value) + '; Path=/; Max-Age=' + maxAge + '; SameSite=Lax';
+            if (domain) cookie += '; Domain=' + domain;
+            if (location.protocol === 'https:') cookie += '; Secure';
+            document.cookie = cookie;
+          }
+          function getCookie(name) {
+            var matches = document.cookie.split(';').map(function(c){return c.trim();}).filter(function(c){return c.indexOf(name + '=') === 0;});
+            if (!matches.length) return '';
+            return matches[matches.length - 1].split('=').slice(1).join('=');
+          }
+
+          /* ============== Consent helpers (GTM-friendly) ============== */
+          function saveChoice(purposes) { setCookie(COOKIE_NAME, JSON.stringify(purposes), COOKIE_AGE_DAYS, ROOT_COOKIE_DOMAIN); }
+          function loadChoice() { try { var raw = getCookie(COOKIE_NAME); return raw ? JSON.parse(decodeURIComponent(raw)) : null; } catch { return null; } }
+          function updateConsentMode(purposes) {
+            var map = {};
+            ['analytics_storage','ad_storage','ad_user_data','ad_personalization'].forEach(function(k){ map[k] = purposes[k] ? 'granted' : 'denied'; });
+            if (typeof gtag === 'function') { gtag('consent','update', map); }
+            else { window.dataLayer = window.dataLayer || []; dataLayer.push(['consent','update', map]); }
+          }
+
+          /* ============== Public analytics helpers (for SPA + banner) ============== */
+          window.nm = window.nm || {};
+          nm.analyticsAllowed = function () {
+            try {
+              var raw = (document.cookie.split(';').map(function(c){return c.trim();}).filter(function(c){return c.indexOf(COOKIE_NAME + '=') === 0;}).pop() || '').split('=').slice(1).join('=');
+              return raw && JSON.parse(decodeURIComponent(raw)).analytics_storage === true;
+            } catch { return false; }
+          };
+          // Push a GTM custom event; GTM should map this to GA4 page_view
+          nm.pageView = function (extra) {
+            var payload = Object.assign({
+              page_location: location.href,
+              page_path: location.pathname + location.search + location.hash,
+              page_title: document.title
+            }, extra || {});
+            window.dataLayer = window.dataLayer || [];
+            dataLayer.push({ event: 'virtual_page_view', page_location: payload.page_location, page_path: payload.page_path, page_title: payload.page_title });
+          };
+
+          /* ============== Banner UI ============== */
+          var HTML = '' +
+          '<div class="nm-cookie-banner" role="dialog" aria-live="polite" aria-label="Cookie consent">' +
+          '  <div class="nm-cookie-wrap">' +
+          '    <div class="nm-cookie-text">' +
+          '      <strong>We use cookies to improve your experience.</strong>' +
+          '      <div>Analytics cookies help us understand site usage. You can change your choice anytime in “Cookie Settings”. See our <a class="nm-cookie-link" href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</div>' +
+          '      <div class="nm-pref-panel" id="nm-pref-panel" hidden>' +
+          '        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
+          '          <div><strong>Preferences</strong></div><div style="opacity:.8">Required cookies are always on</div>' +
+          '        </div>' +
+          '        <label class="nm-switch" for="nm-analytics">' +
+          '          <input id="nm-analytics" type="checkbox" />' +
+          '          <span class="track"><span class="thumb"></span></span>' +
+          '          <span>Analytics (Google Tag Manager → GA4)</span>' +
+          '        </label>' +
+          '      </div>' +
+          '      <a href="#" class="nm-cookie-link" id="nm-toggle-prefs" aria-expanded="false">Cookie preferences</a>' +
+          '    </div>' +
+          '    <div class="nm-cookie-actions">' +
+          '      <button class="nm-btn nm-btn-outline" id="nm-reject">Reject all</button>' +
+          '      <button class="nm-btn nm-btn-outline" id="nm-save">Save</button>' +
+          '      <button class="nm-btn nm-btn-primary" id="nm-accept">Accept all</button>' +
+          '    </div>' +
+          '  </div>' +
+          '</div>';
+
+          function mountBanner(initial) {
+            if (document.getElementById('nm-cookie-banner')) return;
+            var root = document.createElement('div');
+            root.id = 'nm-cookie-banner';
+            root.innerHTML = HTML;
+            document.body.appendChild(root);
+
+            var prefPanel = root.querySelector('#nm-pref-panel');
+            var togglePrefs = root.querySelector('#nm-toggle-prefs');
+            var analyticsChk = root.querySelector('#nm-analytics');
+            var btnAccept = root.querySelector('#nm-accept');
+            var btnReject = root.querySelector('#nm-reject');
+            var btnSave = root.querySelector('#nm-save');
+
+            analyticsChk.checked = !!initial.analytics_storage;
+
+            togglePrefs.addEventListener('click', function (e) {
+              e.preventDefault();
+              var hidden = prefPanel.hasAttribute('hidden');
+              if (hidden) { prefPanel.removeAttribute('hidden'); togglePrefs.setAttribute('aria-expanded','true'); }
+              else { prefPanel.setAttribute('hidden',''); togglePrefs.setAttribute('aria-expanded','false'); }
+            });
+
+            btnAccept.addEventListener('click', function () {
+              var granted = { analytics_storage:true, ad_storage:false, ad_user_data:false, ad_personalization:false };
+              updateConsentMode(granted);
+              saveChoice(granted);
+              unmount();
+              try { nm.pageView(); } catch {}
+            });
+
+            btnReject.addEventListener('click', function () {
+              var denied = { analytics_storage:false, ad_storage:false, ad_user_data:false, ad_personalization:false };
+              updateConsentMode(denied);
+              saveChoice(denied);
+              unmount();
+            });
+
+            btnSave.addEventListener('click', function () {
+              var chosen = { analytics_storage:!!analyticsChk.checked, ad_storage:false, ad_user_data:false, ad_personalization:false };
+              updateConsentMode(chosen);
+              saveChoice(chosen);
+              unmount();
+              if (chosen.analytics_storage) { try { nm.pageView(); } catch {} }
+            });
+
+            function unmount(){ root.remove(); }
+          }
+
+          /* ============== Boot: restore or show banner ============== */
+          var existing = loadChoice();
+          if (existing) {
+            updateConsentMode(existing);
+            window.openCookieSettings = function(){ mountBanner(existing); document.getElementById('nm-toggle-prefs')?.click(); };
+          } else {
+            window.addEventListener('load', function(){ mountBanner(DEFAULTS); });
+            window.openCookieSettings = function(){ mountBanner(DEFAULTS); document.getElementById('nm-toggle-prefs')?.click(); };
+          }
+
+          /* ============== SPA pageviews via GTM custom event ============== */
+          // Initial load
+          window.addEventListener('load', function(){ if (nm.analyticsAllowed()) nm.pageView(); });
+
+          // Watch History API changes
+          (function (history) {
+            var ps = history.pushState, rs = history.replaceState;
+            history.pushState = function(){ var r = ps.apply(history, arguments); window.dispatchEvent(new Event('locationchange')); return r; };
+            history.replaceState = function(){ var r = rs.apply(history, arguments); window.dispatchEvent(new Event('locationchange')); return r; };
+          })(window.history);
+          window.addEventListener('popstate', function(){ window.dispatchEvent(new Event('locationchange')); });
+          window.addEventListener('locationchange', function(){ if (nm.analyticsAllowed()) nm.pageView(); });
+
+          /* ============== Content page view tracking ============== */
+          window.nmTrackContentPageView = function(pagePath, pageTitle, pageId, siteUrl, language) {
+            var sessionId = sessionStorage.getItem('nm_session_id');
+            if (!sessionId) return;
+            fetch('/api/store/analytics/content-page-view', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                sessionId: sessionId,
+                pagePath: pagePath,
+                pageTitle: pageTitle,
+                pageId: pageId,
+                siteUrl: siteUrl,
+                language: language
+              })
+            }).catch(function() {});
+          };
+
+          /* ============== Utilities ============== */
+          window.__resetNmConsent = function(){
+            setCookie(COOKIE_NAME, '', 0, '');
+            setCookie(COOKIE_NAME, '', 0, ROOT_COOKIE_DOMAIN);
+          };
+        })();
+    </script></body></html><!--Blazor-Server-Component-State:CfDJ8ESGRy3ZfytFtsx3veT+tEswD6pyhf//KD8MaWNin+hliwFY8LlDM0E2+2qDHbKnsWu7p4limtWDE6ZfAoift2/PVKumFH9eGE0UMAmMLk/ROFJVg0QyOXd77MsXwye7RYDn0hTmOS7G3JCOGyJ1Es8WMnSevdKA4nGZWszIl/2tFlIzYe2ofyIvROdvDxEQl5OM7BGHIu0ziBb/qjCpdVn4vqAC3hIPHzl9QcYJmYDik1wUD0AWaUMVUNFZAl0lAKxS8BpPOTIf3KAKuqfXCGX306dSXhQ/9rNt6IVDFPRIR3lgu1w974diyRU6JGiaDLfq1tYFrtw+uo69/oqlhsqJ+TNfeIQTxWmVTP/u3POao/Bh6EKLBxa9v9uVEsCvHZGB1sM3T33DlEfFue/6Jxe/CJk4IT83h758yuQ7XAu9JwFuMdkLDv77C7PhoV3OvpgFaX0XXrFbQTtAUO7AnqWXH0T/M/U3iOGFL/jfz3Y0JixF1pB/uCaaqB95ZfSOc1UqxOCuuCiUep25aBH2GkcGQlBHwO4V5Ft6FQlgd37mWOmlyVHihIGxQ9hO5QaXKLCszREkDYWHbXzEKFPHMsYY/SX+7UMKhgNasYetOpXE0XcokSvcOfhtc3dDRInbVJIy4/VHEE9uUOsvOVaUFsF6V3Z+y4jwzoFDfijmoAXKbzDgWdATp1ADDbeRV2QM1YQZev7kHpnta3K0QmQ+cQinPpta3WiMmnpC86bB42ybRfoP3qbn30h+LwR080zQWzoJQ6ry35QC1tI/HDz3Ab9+P/DymLalVd5WfEogrzLNy0a5gnLWfxiZv4iPp65lUjv2RH+JAqgzWe+UmS2vylPYThsm5+ad4coBpw+Q/v6C/lPIm42IWJzDwzt2uXs4Q8NHeBB2i/S43NacqI0EKODqqaqzXBoFVOu9eYQ4q13CeccWTmhRxs46y8JoNEF6Byev/aI2X3R9s2l2QJSsRTEPTmczs+/qQochOdUsFyo+3WA3FTNntBKZXEThfBLSwvFc2ElzKZdzwpAv8vB2c+lesqnW49aBMONc9x/tjvpaKJH27Q7zoZ/25YBwYo7B7icmI8xAuBcCSYUVtl/fNXh83g8ehks+F52QBkEyC3+SFm5hWw2lo5lHcHVwqNCNmw==--><!--Blazor-WebAssembly-Component-State:eyJNaWNyb3NvZnQuQXNwTmV0Q29yZS5Db21wb25lbnRzLkluZnJhc3RydWN0dXJlLlBlcnNpc3RlbnRTZXJ2aWNlc1JlZ2lzdHJ5IjoiVzNzaVlYTnpaVzFpYkhraU9pSk5hV055YjNOdlpuUXVRWE53VG1WMFEyOXlaUzVEYjIxd2IyNWxiblJ6TGtWdVpIQnZhVzUwY3lJc0ltWjFiR3hVZVhCbFRtRnRaU0k2SWsxcFkzSnZjMjltZEM1QmMzQk9aWFJEYjNKbExrTnZiWEJ2Ym1WdWRITXVVbVZ6YjNWeVkyVkRiMnhzWldOMGFXOXVVSEp2ZG1sa1pYSWlmU3g3SW1GemMyVnRZbXg1SWpvaVRXbGpjbTl6YjJaMExrRnpjRTVsZEVOdmNtVXVRMjl0Y0c5dVpXNTBjeTVYWldJaUxDSm1kV3hzVkhsd1pVNWhiV1VpT2lKTmFXTnliM052Wm5RdVFYTndUbVYwUTI5eVpTNURiMjF3YjI1bGJuUnpMa1p2Y20xekxrRnVkR2xtYjNKblpYSjVVM1JoZEdWUWNtOTJhV1JsY2lKOVhRPT0iLCJLU3p0VDg0Z0FpVjBJTy9VQlJScE9tOEs0anFFZlx1MDAyQjFKenZWT0NNQmxzaVU9IjoiZXlKMllXeDFaU0k2SWtObVJFbzRSVk5IVW5reldtWjVkRVowYzNnemRtVlVMWFJGY3preWNGbHBabWxrWVhVd1dqRlVlazVRV0cxMVZuTXhhVmcwZEVaUFJtaExOMWhZY0RKNVFqUkNOVFZtTkdod1lWYzVOUzB0WlhwU1dreExiemx2Um1Ob1gyaDFWbkJUV0ZJeWNVc3lZa1JMWlZGNGRFbFlTRk5PTVVGTlpETXdaVWRuUzFsemVUbFBRa1ZVZUZoVVZFSTJZemRyZDJoMlZISTRkV3hJV0ZCQklpd2labTl5YlVacFpXeGtUbUZ0WlNJNklsOWZVbVZ4ZFdWemRGWmxjbWxtYVdOaGRHbHZibFJ2YTJWdUluMD0ifQ==-->
