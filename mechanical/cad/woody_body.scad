@@ -362,7 +362,7 @@ module cutout_at(xy, rot, s) {
 // to its standoff (ADR 0025).
 module plate_top_2d() {
     difference() {
-        translate([0, stack_groove_clear]) square([plate_x1 - x_in0, u_w - 2 * stack_groove_clear]);
+        translate([0, stack_plate_side_clear]) square([plate_x1 - x_in0, u_w - 2 * stack_plate_side_clear]);
         translate([-plate_x0, -plate_y0]) {
             for (k = top_keys) cutout_at(key_xy(k), key_rot(k), plate_cutout);
             for (m = columns()) translate(m) circle(d = hardware_col_plate_hole);
@@ -421,7 +421,7 @@ function thumb_pts(cl) = [for (k = cluster_keys(cl)) key_xy(k)];
 // Its extent, bplate_x1 and bplate_y, is set below the etherCON's placement.
 module plate_bottom_2d() {
     difference() {
-        translate([0, stack_groove_clear]) square([bplate_x1 - x_in0, u_w - 2 * stack_groove_clear]);
+        translate([0, stack_plate_side_clear]) square([bplate_x1 - x_in0, u_w - 2 * stack_plate_side_clear]);
         translate([-plate_x0, -plate_y0]) {
             for (k = bottom_keys) cutout_at(key_xy(k), key_rot(k), plate_cutout);
             for (u = ubolt_legs()) translate(u) circle(d = ubolt_hole_d);
@@ -458,7 +458,7 @@ tube_yz = [W / 2, z_floor + cavity_h / 2];
 // PUSH tab on top, the contact rows above the axis and G below it.
 ec_rot = ethercon_rotated ? 90 : 0;
 ec_fl = ethercon_rotated ? [ethercon_flange_h, ethercon_flange_w] : [ethercon_flange_w, ethercon_flange_h];   // [across Y, height Z]
-ec_clear = 0.3;    // drawing convention: connector envelope to the floor
+ec_clear = ethercon_floor_clear;    // connector envelope to the floor (config/body.yaml ethercon.floor_clear)
 // THE CONNECTOR STANDS ON THE FLOOR (owner, 2026-09-26: raise the body's
 // thickness rather than pocket the oak bottom): the flange's lower edge
 // ec_clear above the oak bottom, the axis half a flange above that.
@@ -473,7 +473,7 @@ ua_x0 = ec_pcb_x1 - boards_umb_adapter_t;          // the adapter's rear face
 // board clear of the bottom plate').
 ju_tail_x = ua_x0 - boards_umb_joint_d - boards_umb_joint_row_back;   // J-UMB's tail row, along the body
 bplate_x1 = ju_tail_x - boards_pin_pad / 2 - boards_board_clear;
-bplate_y = [u_y0 + stack_groove_clear, W - u_y0 - stack_groove_clear];
+bplate_y = [u_y0 + stack_plate_side_clear, W - u_y0 - stack_plate_side_clear];
 // The panel holes, upper left and lower right seen from the front ([ds]);
 // from the front, +Y is on the right. (Y, Z) on the tail face.
 ec_holes = [for (s = [-1, 1]) ec_c + s * [ethercon_hole_dx, -ethercon_hole_dy] / 2];
@@ -544,7 +544,7 @@ col_pocket_depth = hardware_col_screw_head_h + hardware_col_pocket_clear;
 // ...and one over the USB-C plug, where its overmould rises past the oak's
 // underside (review #19 F1): the same depth, cut in the same pass, ending at
 // the window's rebate.
-function usb_oak_pocket() = let(x1 = min(matrix_xy[0] - boards_matrix_board / 2 - boards_matrix_usb[0] + 0.3, matrix_xy[0] - matrix_rebate / 2))
+function usb_oak_pocket() = let(x1 = min(matrix_xy[0] - boards_matrix_board / 2 - boards_matrix_usb[0] + openings_usb_pocket_clear, matrix_xy[0] - matrix_rebate / 2))
     [usb_plug_x0 - 0.5, matrix_xy[1] - usb_plug_w / 2 - 0.5, x1, matrix_xy[1] + usb_plug_w / 2 + 0.5];
 // THE MATRIX CARRIER'S INSERTS (hardware.mx_insert_*): blind holes drilled up
 // into the oak top's underside, one per hanging mount, deeper than the
@@ -650,7 +650,7 @@ matrix_top_z = matrix_board_z + boards_matrix_t + boards_matrix_led_h;   // LED 
 // stops a millimetre in front of it, which also opens J-MCU's side to a hand.
 usb_axis_z = matrix_board_z - boards_matrix_usb[3];   // the receptacle's axis, below the Matrix's underside
 usb_plug_top = openings_usb_plug_turn == "down" ? usb_axis_z + openings_usb_overmold[1] / 2 : usb_axis_z + openings_usb_slot_h / 2;
-usb_pocket_need = usb_plug_top + 0.3 - z_oak_top_bot;   // drawing convention: 0.3 of air over the overmould
+usb_pocket_need = usb_plug_top + openings_usb_pocket_clear - z_oak_top_bot;   // openings.usb_pocket_clear of air over the overmould
 plate_x1 = min(matrix_xy[0] - boards_matrix_board / 2 - 1,
                usb_plug_top > z_plate_bot ? matrix_xy[0] - boards_matrix_board / 2 - usb_plug_d - 1 : 1e9);
 // The USB-C extension's plug, in the Matrix's mouth or tail edge.
@@ -1461,6 +1461,8 @@ mcu_fold = mcu_rect(mcu_fold_u[0], mcu_fold_u[1], min(mcu_c) - mcu_cw / 2, max(m
 mx_x0 = matrix_xy[0] - boards_matrix_board / 2;
 mx_x1 = matrix_xy[0] + boards_matrix_board / 2 + boards_matrix_carrier_past;
 mx_notch_w = boards_matrix_usb[2] + 2 * boards_matrix_notch_clear;
+mx_shell = [mx_x0 - 1 - boards_matrix_notch_clear, matrix_xy[1] - boards_matrix_usb[2] / 2,
+            matrix_xy[0] - boards_matrix_board / 2 + boards_matrix_usb[1], matrix_xy[1] + boards_matrix_usb[2] / 2];
 mx_notch = [mx_x0 - 1, matrix_xy[1] - mx_notch_w / 2,
             matrix_xy[0] - boards_matrix_board / 2 + boards_matrix_usb[1] + boards_matrix_notch_clear, matrix_xy[1] + mx_notch_w / 2];
 // the arm's mouth end: past J-MCU-C's insulator, but short of the right-hand key board's
@@ -1468,12 +1470,15 @@ mx_notch = [mx_x0 - 1, matrix_xy[1] - mx_notch_w / 2,
 mx_arm = [max(jk_x0 - boards_matrix_carrier_past, kb_rect("right_hand")[2] + boards_matrix_carrier_past), cb_y[0], mx_x0 + 1, jk_y + jm_sz[1] / 2 + boards_matrix_carrier_past];
 mx_mounts = [for (c = boards_matrix_mount_corners) matrix_xy + [c[0] * boards_matrix_mount_dxy[0], c[1] * boards_matrix_mount_dxy[1]]];
 module matrix_carrier_2d() {
-    offset(r = kb_corner_r) offset(delta = -kb_corner_r) offset(r = -kb_corner_r) offset(delta = kb_corner_r) difference() {
-        union() {
+    // the slot is cut after the outline's rounding, as the receptacle's shell grown by
+    // boards.matrix_notch_clear with its corners round about the shell's: rounded with the
+    // outline, its inside corners were filleted back into the clearance (issue #34 C8)
+    difference() {
+        offset(r = kb_corner_r) offset(delta = -kb_corner_r) offset(r = -kb_corner_r) offset(delta = kb_corner_r) union() {
             translate([mx_x0, cb_y[0]]) square([mx_x1 - mx_x0, cb_y[1] - cb_y[0]]);
             translate([mx_arm[0], mx_arm[1]]) square([mx_arm[2] - mx_arm[0], mx_arm[3] - mx_arm[1]]);
         }
-        translate([mx_notch[0], mx_notch[1]]) square([mx_notch[2] - mx_notch[0], mx_notch[3] - mx_notch[1]]);
+        offset(r = boards_matrix_notch_clear) translate([mx_shell[0], mx_shell[1]]) square([mx_shell[2] - mx_shell[0], mx_shell[3] - mx_shell[1]]);
     }
 }
 function half_turn(c, r, a0, a1) = [for (i = [0 : 8]) let(a = a0 + (a1 - a0) * i / 8) [c[0] + r * cos(a), c[1] + r * sin(a)]];
@@ -1850,8 +1855,8 @@ module drc_report() {
         stack_cap_holes == "slot" ? "n/a - one slot per hand" : cap_gap - 2 * stack_cap_clear,
         "mm of oak between adjacent holes; under 2 mm, cross-grain, it will not survive - use slots");
     drc(min_pair(plate_cutout) >= 2.0, "key plate web between cutouts", min_pair(plate_cutout), "mm of aluminium");
-    edge_web = min([for (k = top_keys) min(key_xy(k)[1] - plate_cutout / 2 - (u_y0 + stack_groove_clear),
-                                            (W - u_y0 - stack_groove_clear) - key_xy(k)[1] - plate_cutout / 2)]);
+    edge_web = min([for (k = top_keys) min(key_xy(k)[1] - plate_cutout / 2 - (u_y0 + stack_plate_side_clear),
+                                            (W - u_y0 - stack_plate_side_clear) - key_xy(k)[1] - plate_cutout / 2)]);
     drc(edge_web >= 3, "key plate web from a cutout to the plate edge", edge_web,
         "mm; the switch's latch arms need plate round them, and the plate edge sits in the side grooves' shadow");
     edge_cap = min([for (k = top_keys) min(key_xy(k)[1] - switch_keycap / 2 - stack_cap_clear, W - key_xy(k)[1] - switch_keycap / 2 - stack_cap_clear)]);

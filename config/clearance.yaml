@@ -136,13 +136,16 @@ sets:
         - ["oak *", "*"]
         - ["mouth cap", "*"]
         - ["tail cap", "*"]
+    - class: slot-round-smd
+      min: {value: 0.5, status: nominal, source: "[calc] a board's slot round a surface-mount part on ANOTHER board, in plan: the slot's routed outline +/-0.2 [ds JLCPCB, Outline] and the other board's place on the header that locates it, +/-0.2 [from memory: a 2.54 header's pins in their holes] = 0.4, held at 0.5. No lean term: an SMD shell does not lean as a through-hole part does (part-to-board's 1.0 carries one). Issue #34 C8"}
+      pairs:
+        - ["Matrix USB-C receptacle", "Matrix carrier"]
     - class: part-to-board
       min: {value: 1.0, status: nominal, source: "[calc] a part's envelope beside or facing a board it is not on: placement +/-0.2 (THT, hand) + outline +/-0.2 [ds JLCPCB] + lean 2 deg x ~10 mm = 0.35 [from memory] + board thickness 0.16 [ds JLCPCB] = 0.91, rounded up. Under boards.board_clear (1.5, owner 2026-09-26), which is the DESIGN target; this is the least the tolerances allow"}
       pairs:
         - ["switch *", "*"]
         - ["J-*", "*"]
         - ["breath sensor", "*"]
-        - ["Matrix USB-C receptacle", "Matrix carrier"]
     - class: default
       min: {value: 0.5, status: nominal, source: "[calc] two rigid solids: each one's own placement or cut tolerance, +/-0.2 [ds JLCPCB outline] and +/-0.13 [from memory, cut], plus the 0.2 a clearance hole lets a part float (hardware.kb_mount_float) = 0.53, held at 0.5 - the module's boards.part_clear, ADR 0024"}
       pairs:

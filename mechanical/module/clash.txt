@@ -4,7 +4,8 @@
 # (config/body.yaml), so a clean result is only as good as those envelopes.
 # Clearance: config/clearance.yaml set 'module' - each pair's class sets its minimum gap;
 # every pair under 1 mm (or its class's minimum, if larger) is listed. Gaps are exact
-# mesh distances (manifold3d min_gap); 'at' is approximate. `cad.py check` fails on UNDER MINIMUM.
+# mesh distances (manifold3d min_gap) on float32 meshes, so a gap within 0.005 of its minimum
+# meets it; 'at' is approximate. `cad.py check` fails on UNDER MINIMUM.
 
 CLASH 0 - none
 

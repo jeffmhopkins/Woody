@@ -582,6 +582,7 @@ def mesh_step(o, out_abs):
 
 CLASH_EPS = 0.05   # mm^3 - below this, two faces touching, not two parts overlapping
 SEATED_EPS = 0.01  # mm - a gap this small is two faces touching
+GAP_EPS = 0.005    # mm - the meshes are float32: a gap drawn AT its class's minimum measures a few microns either side of it
 CLEARANCE = "config/clearance.yaml"
 
 # THE NEAR-MISS CHECK (issue #34). An intersection test is silent on a pair
@@ -794,7 +795,7 @@ def clash_step(o, out_abs, inputs):
             at = near_location(ta, tb, g)
             at = "" if at is None else "at %.1f, %.1f, %.1f" % tuple(at)
             row = (g, mn, cid, a, b, at)
-            if g < mn:
+            if g < mn - GAP_EPS:
                 n = match(near_rules, a, b)
                 if n is None:
                     under.append(row)
@@ -812,7 +813,8 @@ def clash_step(o, out_abs, inputs):
     if cs:
         L += [f"# Clearance: {o['clearance']} set {o['clearance_set']!r} - each pair's class sets its minimum gap;",
               f"# every pair under {report:g} mm (or its class's minimum, if larger) is listed. Gaps are exact",
-              f"# mesh distances (manifold3d min_gap); 'at' is approximate. `cad.py check` fails on UNDER MINIMUM."]
+              f"# mesh distances (manifold3d min_gap) on float32 meshes, so a gap within {GAP_EPS} of its minimum",
+              f"# meets it; 'at' is approximate. `cad.py check` fails on UNDER MINIMUM."]
     L.append("")
     L.append(f"CLASH {len(clashes)}" + ("" if clashes else " - none"))
     for v, a, b, where in sorted(clashes, reverse=True):
