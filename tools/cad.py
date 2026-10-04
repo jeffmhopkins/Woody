@@ -800,7 +800,7 @@ def clash_step(o, out_abs, inputs):
                     under.append(row)
                 else:
                     near_used.add(n)
-                    accepted.append(row + (near_rules[n]["why"],))
+                    accepted.append(row + (n,))
             else:
                 near.append(row)
     dead = [r for n, r in enumerate(rules) if n not in used]
@@ -825,8 +825,10 @@ def clash_step(o, out_abs, inputs):
         for g, mn, cid, a, b, at in sorted(under, key=lambda r: r[0] - r[1]):
             L.append(f"  {g:5.2f}  {mn:5.2f}  {g - mn:+6.2f}  {cid:20} {a}  x  {b}   [{at}]")
         L += ["", f"ACCEPTED NEAR-MISSES {len(accepted)} (by `near:` rule in {o['allow']})"]
-        for g, mn, cid, a, b, at, why in sorted(accepted, key=lambda r: r[0] - r[1]):
-            L.append(f"  {g:5.2f}  {mn:5.2f}  {g - mn:+6.2f}  {cid:20} {a}  x  {b}   [{at}] - {why}")
+        for n in sorted({r[6] for r in accepted}):
+            L.append(f"  near: {near_rules[n]['a']}  x  {near_rules[n]['b']} - {near_rules[n]['why']}")
+            for g, mn, cid, a, b, at, _ in sorted((r for r in accepted if r[6] == n), key=lambda r: r[0] - r[1]):
+                L.append(f"    {g:5.2f}  {mn:5.2f}  {g - mn:+6.2f}  {cid:20} {a}  x  {b}   [{at}]")
         L += ["", f"NEAR {len(near)} (at or over the minimum, under {report:g} mm)"]
         for g, mn, cid, a, b, at in sorted(near):
             L.append(f"  {g:5.2f}  {mn:5.2f}  {g - mn:+6.2f}  {cid:20} {a}  x  {b}   [{at}]")
@@ -1029,8 +1031,12 @@ def cmd_check():
     if probs:
         for p in probs:
             print("  " + p)
+        near = sum(1 for p in probs if ": UNDER MINIMUM " in p or ": CLASH " in p)
         print(f"FAIL {len(probs)} CAD output problem(s) of {n} outputs - "
-              f"run `python3 tools/cad.py build`")
+              + (f"run `python3 tools/cad.py build`" if len(probs) > near else "")
+              + ("; " if near and len(probs) > near else "")
+              + (f"{near} clash/clearance finding(s): fix the design, or excuse each in its "
+                 f"clash-allow file (`allow:` / `near:`) with its reason" if near else ""))
         return 1
     print(f"PASS {n} CAD outputs match their sources")
     return 0
