@@ -3,9 +3,7 @@
 # Excuses: mechanical/clash-allow.yaml. Every solid is a modelled envelope - many sizes are tbd
 # (config/body.yaml), so a clean result is only as good as those envelopes.
 
-CLASH 2
-       232.8 mm3  Matrix carrier  x  Matrix underside parts   [X 279.4-293.9  Y 19.0-38.0  Z 28.1-29.0]
-         0.3 mm3  Matrix carrier  x  board right_hand   [X 251.0-251.3  Y 8.0-19.6  Z 28.9-29.0]
+CLASH 0 - none
 
 ALLOWED 142 (by rule in mechanical/clash-allow.yaml)
        207.5 mm3  IDC plug Matrix main board  x  J-MCU   - the socket sits in its header's shroud
