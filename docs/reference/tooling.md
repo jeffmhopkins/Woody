@@ -339,7 +339,7 @@ assemble and bring it up, what is open.
 ```
 python3 tools/pcb.py layout hardware/boards/key-board-lh   # FIRST layout: place, route, pour, fill (refuses if the board exists; --force)
 python3 tools/pcb.py check  hardware/boards/key-board-lh   # DRC + parity + fab limits + the body CAD's outline, thickness and positions
-python3 tools/pcb.py render hardware/boards/key-board-lh   # 3D both sides, 2D copper, and fab/ (Gerbers, PTH and NPTH drills, placement, and the JLCPCB BOM, CPL and hand-assembly list)
+python3 tools/pcb.py render hardware/boards/key-board-lh   # 3D both sides, 2D copper, and fab/ (Gerbers, PTH and NPTH drills, placement, and the JLCPCB BOM, CPL and hand-assembly list, with its Fit column)
 ```
 
 **The hand-assembly list's Fit column.** A board whose `layout.yaml` has
@@ -348,7 +348,10 @@ python3 tools/pcb.py render hardware/boards/key-board-lh   # 3D both sides, 2D c
 part's tails, with their solder, cut to at most that length below the board,
 the arithmetic in the cell. The layout and `config/body.yaml` then become
 inputs of that board's renders, so the length goes stale with its figures. The
-main board's is #8-11 (ADR 0017, *Amendment, 2026-10-04*).
+main board's is #8-11 (ADR 0017, *Amendment, 2026-10-04*). A symbol's own `Fit` field (how to fit
+the part by hand - solder order, tip, what to mask; the main board's `U10`,
+#34) goes in the same column; a part with both gets them joined by "; ", and a
+board where no hand part has either keeps four columns.
 
 **3D models for `woody` footprints** whose maker's STEP could not be had are
 drawn from the banked drawings by `python3 tools/lib-models.py` into
@@ -383,6 +386,22 @@ prints which, exits 1, and leaves any existing board as it was.
   which KiCad's DRC has no test for (`check_tracks`). Joins at a shared end
   and a track ending in the middle of another are both tested; a wedge whose
   apex a via or pad of the net fills is not a trap and is exempt;
+- a board with a `layout.yaml` `silk:` block whose title block (title,
+  revision, date - the Gerber job's "Revision") differs from it, or whose
+  silkscreen lacks the title or its `rev <rev>  <date>` line (`check_title`;
+  #33: the main board lost all three in a hand-drawn pass and every check
+  passed);
+- a hand-soldered part with no iron room (`check_iron`, #34): layout.yaml
+  `iron_room:` `rules:` - each `{rows, min}` - holds every such part's pads on
+  the face it is soldered on (a through-hole part's far face), grown 0.25 as a
+  courtyard is, `min` mm from every other part's courtyard on that face;
+  `except:` names a pair that cannot have it, with its reason, and an
+  exception no longer needed fails as well;
+- a `layout.yaml` `pairs:` entry with a `guard:` whose legs (the pair's
+  locked tracks and arcs of its width, on its layer) have any other net's
+  track or via - the pair's own nets and its guard net aside - nearer than the
+  clearance plus the guard, edge to edge (`check_pair_guard`, #8-4: the router
+  keeps it, and until #33 nothing held the board to it after a hand edit);
 - a `layout.yaml` `connect_first:` connection with no path in the net's own
   tracks and vias, or a longer one than its `max_mm`; the pour does not count
   (`check_connect_first`);
@@ -590,7 +609,9 @@ this order (step 4 is Freerouting's only):
 changes). **`pcb.py finish <board>`** runs the tidy, `complete` and `rescue`
 again on the board as it stands, in place, and prints what is still missing:
 for after a hand edit, or to try again without a whole layout. It never adds
-or moves a part. A whole layout of the main board takes one to two hours under
+or moves a part. On a `kind: main` or `module` board it then writes the
+silkscreen again (`add_silk_generic`, `silk_off_vias`): every label clear of
+the vias as they now stand, and the title block and silk title from `silk:`. A whole layout of the main board takes one to two hours under
 `route: astar`, most of it `complete`'s rip-up; a `finish` twenty minutes to an
 hour. **`pcb.py update-footprints <board> <ref or footprint>...`** replaces placed
 footprints with the library's current ones in the same place, side and turn,

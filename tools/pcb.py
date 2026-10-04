@@ -1152,6 +1152,18 @@ def cmd_finish(bdir):
         _fill(tmp)
         if not lay.get("rip_up"):
             print(f"route: rescue - {rescue(tmp, bdir)} kept")
+        if lay.get("kind") in ("main", "module"):
+            # the silkscreen again, clear of the vias as they now stand - and the title
+            # block and the silk title/revision with it (#33: a hand-drawn pass once left
+            # the main board with none, and nothing said so; check_title now does)
+            board = pcbnew.LoadBoard(tmp)
+            for d in list(board.GetDrawings()):
+                if isinstance(d, pcbnew.PCB_TEXT) and d.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS):
+                    board.Delete(d)
+            comps, _ = sheet_netlist(os.path.join(bdir, name + ".kicad_sch"))
+            add_silk_generic(board, lay, comps)
+            silk_off_vias(board)
+            pcbnew.SaveBoard(tmp, board)
         left = sorted({"; ".join(i["description"] for i in v.get("items", [])) for v in drc(tmp).get("unconnected_items", [])})
         os.replace(tmp, path)
     finally:
@@ -1714,6 +1726,128 @@ def check_silk(board, fab):
     return bad
 
 
+def check_title(board, lay):
+    """A board with a layout.yaml `silk:` block carries it: the title block's title,
+    revision and date as `silk:` says (the Gerber job file's "Revision" is the title
+    block's), and the title and its `rev <rev>  <date>` line on a silkscreen. Issue #33:
+    a hand-drawn pass on the main board dropped all three and every check still passed."""
+    t = lay.get("silk")
+    if not t:
+        return []
+    bad = []
+    tb = board.GetTitleBlock()
+    for what, have, want in (("title", tb.GetTitle(), t["title"]), ("revision", tb.GetRevision(), t["rev"]),
+                             ("date", tb.GetDate(), t["date"])):
+        if have != want:
+            bad.append(f"error: [title] the title block's {what} is {have!r}, layout.yaml silk: says {want!r}")
+    texts = {d.GetText() for d in board.GetDrawings()
+             if isinstance(d, pcbnew.PCB_TEXT) and d.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS)}
+    for line in (t["title"], f"rev {t['rev']}  {t['date']}"):
+        if line not in texts:
+            bad.append(f"error: [title] no silkscreen text {line!r} (layout.yaml silk:) - the board does not say what it is")
+    return bad
+
+
+def check_iron(board, lay, comps):
+    """layout.yaml `iron_room:` - a hand-soldered part's pads need a soldering iron's room
+    (#34): every `rows:` part's pads on the face it is soldered on (an SMD part's own face, a
+    through-hole part's far face), each grown by 0.25 as a courtyard is, kept `min` mm from
+    every other part's courtyard on that face. `except:` names a pair that cannot have it,
+    with its reason; an exception no longer needed fails too, so the list stays true."""
+    spec = lay.get("iron_room")
+    if not spec:
+        return []
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+
+    def poly(sps):
+        out = []
+        for i in range(sps.OutlineCount()):
+            o = sps.Outline(i)
+            out.append(Polygon([(pcbnew.ToMM(o.CPoint(k).x), pcbnew.ToMM(o.CPoint(k).y)) for k in range(o.PointCount())]).buffer(0))
+        return unary_union(out)
+    ex = {(e["part"], e["near"]): e for e in spec.get("except") or []}
+    used, bad = set(), []
+    cys = {}
+    for fp in board.GetFootprints():
+        for L, cl in ((pcbnew.F_Cu, pcbnew.F_CrtYd), (pcbnew.B_Cu, pcbnew.B_CrtYd)):
+            c = fp.GetCourtyard(cl)
+            if c.OutlineCount():
+                cys[(fp.GetReference(), L)] = poly(c)
+    for rule in spec.get("rules") or []:
+        for fp in board.GetFootprints():
+            ref = fp.GetReference()
+            if comps.get(ref, {}).get("row") not in rule["rows"]:
+                continue
+            tht = any(p.HasHole() and p.GetAttribute() != pcbnew.PAD_ATTRIB_NPTH for p in fp.Pads())
+            face = (pcbnew.F_Cu if fp.IsFlipped() else pcbnew.B_Cu) if tht else (pcbnew.B_Cu if fp.IsFlipped() else pcbnew.F_Cu)
+            pads = unary_union([poly(p.GetEffectivePolygon(face)) for p in fp.Pads()
+                                if p.IsOnLayer(face) and p.GetAttribute() != pcbnew.PAD_ATTRIB_NPTH]).buffer(0.25)
+            for (r, L), g in cys.items():
+                if L != face or r == ref:
+                    continue
+                d = pads.distance(g)
+                if d >= rule["min"] - 1e-3:
+                    continue
+                if (ref, r) in ex:
+                    used.add((ref, r))
+                    continue
+                bad.append(f"error: [iron] {ref}'s hand-soldered pads are {d:.2f} mm from {r}'s courtyard on the "
+                           f"{'top' if face == pcbnew.F_Cu else 'bottom'} face, under layout.yaml iron_room {rule['min']} mm")
+    for k, e in ex.items():
+        if k not in used:
+            bad.append(f"error: [iron] layout.yaml iron_room except: {k[0]} / {k[1]} has its room now - take the exception out")
+    return bad
+
+
+def check_pair_guard(board, lay):
+    """layout.yaml pairs: `guard:` held on the board, not only by the router that laid it
+    (#8-4, #33): no track or via of any net but the pair's own within the clearance plus
+    the guard of a pair leg - the pair's locked tracks and arcs of the pair's width on its
+    layer - edge to edge. Pads are the placement's, not the routing's, and are left to
+    KiCad's own clearance."""
+    bad = []
+    r = (lay.get("rules") or {}).get("clearance", 0.2)
+    for pr in lay.get("pairs") or []:
+        if not pr.get("guard"):
+            continue
+        g, w = float(pr["guard"]), float(pr["width"])
+        own = set(pr["nets"]) | {(pr.get("guard_traces") or {}).get("net")}
+        L = board.GetLayerID(pr.get("layer", "F.Cu"))
+        import pcb_route
+        legs = [t for t in board.GetTracks() if type(t) in (pcbnew.PCB_TRACK, pcbnew.PCB_ARC) and t.IsLocked()
+                and t.GetNetname() in pr["nets"] and t.GetLayer() == L and abs(pcbnew.ToMM(t.GetWidth()) - w) < 1e-3
+                and t.GetStart() != t.GetEnd()]
+        if not legs:
+            bad.append(f"error: [guard] pair {'/'.join(pr['nets'])}: no locked leg of width {w} on {pr.get('layer')} to hold the guard against")
+            continue
+        from shapely.geometry import Point
+        from shapely.strtree import STRtree
+        lg = [pcb_route.track_line(t).buffer(w / 2) for t in legs]
+        tree = STRtree(lg)
+        need = r + g - 1e-3
+        worst = {}
+        for t in board.GetTracks():
+            if t.GetNetname() in own:
+                continue
+            if isinstance(t, pcbnew.PCB_VIA):
+                c = t.GetPosition()
+                geom = Point(pcbnew.ToMM(c.x), pcbnew.ToMM(c.y)).buffer(pcbnew.ToMM(t.GetWidth(pcbnew.F_Cu)) / 2)
+            elif t.GetLayer() == L:
+                geom = pcb_route.track_line(t).buffer(pcbnew.ToMM(t.GetWidth()) / 2)
+            else:
+                continue
+            for i in tree.query(geom.buffer(need)):
+                d = lg[i].distance(geom)
+                if d < need and d < worst.get(t.GetNetname(), (9e9,))[0]:
+                    p = lg[i].centroid
+                    worst[t.GetNetname()] = (d, p.x, p.y)
+        for n, (d, x, y) in sorted(worst.items()):
+            bad.append(f"error: [guard] {n} comes {d:.2f} mm from the breath pair's leg near ({x:.1f}, {y:.1f}); "
+                       f"layout.yaml pairs: guard keeps every other net {r + g:.2f} mm off it (#8-4)")
+    return bad
+
+
 def check_tracks(board):
     """Two tracks of one net meeting on one layer at under 90 degrees leave a wedge
     the etch pools in and the pour cannot fill (an acid trap). KiCad's DRC has no
@@ -2052,9 +2186,12 @@ def cmd_check(bdir):
     if lay.get("fab"):
         bad += check_silk(board, lay["fab"])
     bad += check_tracks(board)
+    bad += check_title(board, lay)
+    bad += check_pair_guard(board, lay)
     bad += check_holes(board, lay)
     bad += check_connect_first(board, lay)
     comps, _ = sheet_netlist(os.path.join(bdir, name + ".kicad_sch"))
+    bad += check_iron(board, lay, comps)
     if lay.get("kind") == "main":
         import pcb_main
         bad += pcb_main.check_cad(board, lay, comps)
@@ -2177,7 +2314,8 @@ def assembly_files(bdir, name, fab):
             m["refs"].append(ref)
             m["comment"].add(f.get("MPN") or comps[ref]["value"])
         elif how == "hand":
-            hand.append((ref, comps[ref]["value"], f.get("Manufacturer", ""), f.get("MPN", "")))
+            # a symbol's Fit field: how to fit it by hand (solder order, tip, what to mask) - #34
+            hand.append((ref, comps[ref]["value"], f.get("Manufacturer", ""), f.get("MPN", ""), f.get("Fit", "")))
         elif how != "none" and not ref.startswith("#"):
             sys.exit(f"pcb: {ref} has no Assembly field (machine, hand or none) on its sheet")
     with open(os.path.join(fab, name + "-bom-jlc.csv"), "w", newline="") as fh:
@@ -2232,8 +2370,13 @@ def assembly_files(bdir, name, fab):
             sys.exit(f"pcb: layout.yaml hand_trim: names {', '.join(missing)}, not a hand part on this board")
     with open(os.path.join(fab, name + "-hand-assembly.csv"), "w", newline="") as fh:
         w = csv.writer(fh)
-        w.writerow(["Designator", "Value", "Manufacturer", "MPN"] + (["Fit"] if fit else []))
-        w.writerows([list(h) + ([fit.get(h[0], "")] if fit else []) for h in hand])
+        # ONE Fit column: the symbol's own Fit field (how to fit it by hand - order, tip, what
+        # to mask, #34) and layout.yaml hand_trim:'s cut length (#8-11), joined by "; " where a
+        # part has both. Only a board where some hand part has either gets the column.
+        fits = {h[0]: "; ".join(x for x in (h[4], fit.get(h[0], "")) if x) for h in hand}
+        col = any(fits.values())
+        w.writerow(["Designator", "Value", "Manufacturer", "MPN"] + (["Fit"] if col else []))
+        w.writerows([list(h[:4]) + ([fits[h[0]]] if col else []) for h in hand])
     if none:
         print(f"pcb: not in any order (Assembly = none: excluded from the BOM, or a net tie drawn in copper): {', '.join(none)}")
     subs = re.findall(r'\(property "Sheetfile" "([^"]+)"', open(root).read())

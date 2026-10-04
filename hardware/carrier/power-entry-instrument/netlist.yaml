@@ -59,6 +59,30 @@ components:
     note: 'Gate to source, AT LEAST 45x C-INRUSH-GD: when the plug makes contact the source jumps 12 V in microseconds,
       and the gate must follow it or the Miller capacitor turns the FET on hard. 1 uF against 22 nF holds the jump
       in V_GS to -0.26 V, under the 0.5 V minimum threshold'
+  C-STITCH-12V-1:
+    of: C-STITCH-12V
+    value: 100nF 50V X7R
+    pins:
+    - 1
+    - 2
+    note: 'Stitching INST_POS12 to PWR_GND at J-MCU, where the SPI and IO lines change layers between the two planes''
+      references: their return current crosses here, not 20 mm away at a C-LED (#8-8)'
+  C-STITCH-12V-2:
+    of: C-STITCH-12V
+    value: 100nF 50V X7R
+    pins:
+    - 1
+    - 2
+    note: Stitching INST_POS12 to PWR_GND at J-UMB, where the umbilical's lines change layers between the two planes'
+      references (#8-8)
+  C-STITCH-12V-3:
+    of: C-STITCH-12V
+    value: 100nF 50V X7R
+    pins:
+    - 1
+    - 2
+    note: Stitching INST_POS12 to PWR_GND at the analog end, where the ADC's digital lines and the chain change
+      layers between the two planes' references (#8-8)
   C-STRIP-BULK-1:
     of: C-STRIP-BULK
     value: 220uF 25V
@@ -185,6 +209,9 @@ nets:
   - D-USBOR-A.K
   INST_POS12:
   - port: INST_POS12
+  - C-STITCH-12V-1.1
+  - C-STITCH-12V-2.1
+  - C-STITCH-12V-3.1
   - C-STRIP-BULK-1.1
   - C-STRIP-BULK-2.1
   - L-BUCK-IN.1
@@ -194,6 +221,9 @@ nets:
   - port: PWR_GND
   - C-BUCK-IN.2
   - C-BUCK-OUT.2
+  - C-STITCH-12V-1.2
+  - C-STITCH-12V-2.2
+  - C-STITCH-12V-3.2
   - C-STRIP-BULK-1.2
   - C-STRIP-BULK-2.2
   - D-INRUSH-RST.A

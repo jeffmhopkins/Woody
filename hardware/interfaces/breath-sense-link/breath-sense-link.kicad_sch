@@ -715,6 +715,7 @@
     (property "MPN" "MPXV4006DP" (at 76.2 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "C5190605" (at 76.2 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (property "Assembly" "hand" (at 76.2 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Fit" "First of the hand-fitted parts. Fine conical tip, 0.8-1.0 mm. Pins 1-4 (NC, VS, GND, Vout: the far-edge row) have open room. Pins 5-8 (no-connect, the mechanical joints) face the machine-fitted R7 (0.80 mm pad to pad, from pin 5) and U3 (1.59 mm, from pins 5-8): mask R7 and U3 with polyimide tape, land the tip on each pin's outer end coming from down the board (pin 5 from the mouth end), one pin at a time - no drag soldering - and check R7 and U3 for bridges after" (at 76.2 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (pin "1" (uuid 6ffde1b8-bb4d-5e6f-a8a1-9b512f04852b))
     (pin "2" (uuid e302911c-ddb3-58aa-b144-af9c6e6f918d))
     (pin "3" (uuid e9289313-fa68-5274-8fad-125985f6d1f7))
