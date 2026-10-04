@@ -423,8 +423,8 @@ iron_room:
     - {part: SW2, near: H2, reason: "both placed by the body CAD: the far column mount's nut 1.32 mm off the switch's leg pin. Owner 2026-10-04: key layout final for rev A - accepted for rev A, check on the boards in hand"}
     - {part: SW6, near: H6, reason: "as SW2 / H2 (1.32 mm). Accepted for rev A, check on the boards in hand"}
     - {part: SW8, near: J5, reason: "both placed by the body CAD (J5 the right-hand chain header): 0.01 mm. Accepted for rev A, check on the boards in hand"}
-    - {part: U10, near: R7, reason: "owner 2026-10-04: accepted; hand-solder U10 first with a fine tip (its Fit field). Pad to pad 0.80 mm, U10 pin 5 (no-connect) to R7 pad 2; courtyards 0.28 mm"}
-    - {part: U10, near: U3, reason: "owner 2026-10-04: accepted; hand-solder U10 first with a fine tip (its Fit field). Pad to pad 1.59 mm, U10 pins 5-8 (no-connect) to U3's pin-1 row; courtyards 0.86 mm"}
+    - {part: U10, near: R7, reason: "owner 2026-10-04, after the pad gaps were measured: Keep it, solder carefully - hand-solder U10 first with a fine tip (its Fit field). Pad to pad 0.80 mm, U10 pin 5 (no-connect) to R7 pad 2; courtyards 0.28 mm"}
+    - {part: U10, near: U3, reason: "owner 2026-10-04, after the pad gaps were measured: Keep it, solder carefully - hand-solder U10 first with a fine tip (its Fit field). Pad to pad 1.59 mm, U10 pins 5-8 (no-connect) to U3's pin-1 row; courtyards 0.86 mm"}
 
 # Placement: TOP face, body coordinates, [x, y, rot] (rot CCW seen from above).
 parts:

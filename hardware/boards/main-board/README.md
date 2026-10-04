@@ -237,12 +237,16 @@ What the first layout settled, and where it is held:
   in the working chat:** the networks stay where they moved (*"Keep moved"*); `SW2` and `SW6`
   beside their far mounts' nuts (`H2`, `H6`, 1.32 mm) and `SW8` beside `J5` (0.01 mm), all placed
   by the body CAD, are **accepted for rev A** (the key layout is final for it) and checked on the
-  boards in hand; `U10` beside `R7` and `U3` is **accepted, `U10` hand-soldered first with a fine
-  tip** (*"Accept, solder sensor first"*). Measured pad to pad: `U10` pin 5 to `R7` 0.80 mm, pins
-  5-8 to `U3` 1.59 mm (courtyards 0.28 and 0.86 mm). The near pins are `U10`'s own no-connect
-  row 5-8, its mechanical joints, which **do face** `R7` and `U3`; pins 1-4 are at the far edge.
-  `R7` and `U3` are machine-fitted, so they are on the board before `U10`: the hand-assembly
-  sheet's Fit column (`U-BREATH`'s `Fit` field) says how - tip size, tape, pin by pin.
+  boards in hand. **`U10` beside `R7` and `U3`: the owner, 2026-10-04, accepted the sensor's
+  iron room after the correction below - *"Keep it, solder carefully"*.** Measured pad to pad:
+  `U10` pin 5 to `R7` pad 2 0.80 mm; pins 5-8 to `U3`'s pin-1 row 1.59 mm (courtyards 0.28 and
+  0.86 mm). The near pins are `U10`'s own no-connect row 5-8, its mechanical joints, and they
+  face `R7` and `U3`; pins 1-4 (NC, VS, GND, Vout) are the far-edge row with open room. `R7` and
+  `U3` are machine-fitted, so they are on the board before `U10`. A fine tip's straight line
+  (0.4 mm wide, from each pin's outer end, 0.3 mm off every other pad) is clear for pin 8 from
+  straight down the board, for pins 6 and 7 within about 15 degrees of that, and for pin 5 from
+  the mouth end or about 30 degrees to it. The hand-assembly sheet's Fit column (`U-BREATH`'s
+  `Fit` field) says how: tip size, tape, pin by pin.
   `layout.yaml` `networks:` still records the first layout's pattern between the pins.
 - **The planes stitched** (#8-8; owner, 2026-10-04, in the working chat: *"add 2-3 now"*):
   `C-STITCH-12V` from `INST_POS12` to `PWR_GND` at `J-MCU` (`C45`), `J-UMB` (`C46`) and the
