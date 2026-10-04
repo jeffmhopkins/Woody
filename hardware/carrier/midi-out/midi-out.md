@@ -77,8 +77,8 @@ supply `[ds logic/SN74AHCT125.pdf p.4]`, which is about 87.5 Ω sourcing and
 55 Ω sinking `[calc: (4.5 − 3.8) / 8 mA; 0.44 / 8 mA]`.
 
 ```
-worst  VCC 4.5 V (CA-033's -10 % floor), opto 1.9 V, both resistors +5 % (231 ohm):
-       (4.5 - 1.9) / (87.5 + 231 + 220 + 231 + 55) = 3.11 mA              [calc]
+worst  VCC 4.5 V (CA-033's -10 % floor), opto 1.9 V, all three 220 ohm at +5 % (231 ohm):
+       (4.5 - 1.9) / (87.5 + 231 + 231 + 231 + 55) = 3.11 mA              [calc]
        CA-033's own 5 V row with an ideal driver: (4.5 - 1.9) / 693 = 3.75 mA   [calc]
 typ    VCC 4.6 V, opto 1.4 V, resistors 220 ohm, driver ~115 ohm in all:
        (4.6 - 1.4) / (660 + 115) = 4.1 mA; 3.7 mA with a 1.7 V opto          [calc]
@@ -90,6 +90,17 @@ power-entry-instrument.md]`. **This sits at the low edge of the 5 V row**, and
 CA-033 itself admits its 3.3 V row's 4.47 mA is marginal `[ds p.5]`.
 **What decides it:** an E-test with two real receivers, a 6N138 DIN interface
 through an RP-054 adapter and a TRS-input synth.
+
+**Simulated** ([`sim/`](sim/sims.yaml), `type-a` and `type-b`, every corner of
+VCC 4.5–5.25 V, both gate resistances, R-MIDI and the receiver's 220 Ω at
+±5 %, the opto at 1.4–1.9 V and 1–3 m of cable): the worst corner is this
+arithmetic's to within 1 %, the loop current's edges stay well under CA-033's
+2 µs, and Type B is Type A to the last digit, as the symmetric loop says it
+must. **Recorded, not asserted, because it does not pass:** the worst corner
+is below CA-033's own 5 V transmitter at *its* worst corner (3.75 mA, above)
+and below the PC900V's 4 mA worst-case need `[ds p.4]`. The nominal is above
+both. CA-033 states no minimum for a transmitter, only that a receiver must
+turn on with under 5 mA `[ds p.2]`; the E-test above decides it.
 
 **Why not lower resistors.** At 150 Ω each the worst case is 3.78 mA, but a
 line shorted to the sleeve then draws 5.0 / 142.5 = 35 mA `[calc]`, past the
@@ -127,18 +138,36 @@ gates' enables are tied low, so a floating input would put noise into the
 loop. **`R-MIDI-PU-T` and `R-MIDI-PU-R` (10 kΩ to `DEV_3V3`, on
 [`led-strip-drive`](../led-strip-drive/led-strip-drive.md)) hold both inputs
 high.** Both outputs then sit at 5 V, tip and ring are at one voltage, and no
-loop current flows. **No garbage byte goes out**, in either setting, before
-firmware has chosen one. They pull to 3.3 V, not 5 V, because the ESP32-S3's
+loop current flows, in either setting, before firmware has chosen one
+(`sim/`, `power-on`: both inputs above VIH at every corner, against a 45 kΩ
+pull-down on the pad as the bound).
+
+**The pads' power-up glitch.** GPIO2 and GPIO6 are both on Espressif's list of
+pins driven low for about 60 µs at power-up `[ds ESP32-S3-datasheet-v2.2.pdf
+p.18, Table 2-2: "a low level output status"]`, and a 10 kΩ pull-up cannot
+hold against a driven pin. Both gates' outputs then go low **together**, so
+the loop stays dark: only the two glitches' *mismatch* conducts. At ±10 % on
+each `[assumption: the datasheet gives a typical only]` the longest pulse is
+about 12 µs `[sim: power-on]`, under half a bit, which a mid-bit-sampling UART
+rejects as a false start `[from memory]`. A glitch on IO6 alone would put
+60 µs of current on the loop in Type A: a start bit and D0 = 0, read as 0xFE,
+Active Sensing `[calc]`. **What decides it:** scope IO6, IO2 and the loop
+current at power-up, with a receiver attached (the E-test above). They pull to 3.3 V, not 5 V, because the ESP32-S3's
 pads are not 5 V tolerant. Neither GPIO is a strapping pin. The straps are
 GPIO0, 3, 45 and 46 `[ds ESP32-S3-datasheet-v2.2.pdf p.32]`.
 
 ## Protection
 
-- **A short of either line to the sleeve:** 23.9 mA, inside the gate's
-  rating (above). A mono plug does exactly this to the ring for as long as it
+- **A short of either line to the sleeve:** 23.9 mA with an ideal driver,
+  inside the gate's rating (above); 21.5 mA at 5.25 V with the gate's own
+  resistance at its assumed minimum `[sim: shorts]`, and both lines shorted
+  at once stay inside the package's 50 mA through VCC `[ds SN74AHCT125.pdf p.3]`. A mono plug does exactly this to the ring for as long as it
   is in.
 - **Shorted to each other:** one gate high and one low, 5.0 / (2 × 209) =
   12 mA `[calc]`.
+- **The wrong A/B setting:** the start bit reverse-biases the receiver's LED,
+  and its D1 clamps it to about 0.68 V; the loop runs through D1 at under
+  7 mA `[sim: wrong-ab]`. No damage, no data.
 - **A DC-coupled headphone driver on the jack**, RP-054's named case
   `[ds RP-054 p.1]`: the 220 Ω limits it the same way.
 - **ESD:** `U-TVS-MIDI` at `J-MIDI`, CH1 the tip and CH2 the ring.

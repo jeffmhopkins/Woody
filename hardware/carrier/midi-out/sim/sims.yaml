@@ -1,0 +1,159 @@
+# The MIDI out's current loop (midi-out.md): U-LVLSHIFT's gates B and C, R-MIDI, FB-MIDI and
+# U-TVS-MIDI on the main board, a TRS cable, and CA-033's receiver at the far end (220 ohm,
+# an opto's LED, a 1N914 across it). Type A and Type B, the bit edges through the cable,
+# shorts at the jack, the power-on default, and the wrong A/B setting. Values from the
+# netlists (R-MIDI's tolerance from its BOM row). Run:
+#   python3 tools/sim.py run hardware/carrier/midi-out/sim
+#
+# THE GATE IS BEHAVIOURAL: two switches whose resistances are the datasheet's VOH/VOL rows,
+# because what the loop sees is the output's resistance at a few mA, and the datasheet
+# bounds that (TI's macromodel, banked, gives one typical part). The receiver's LED is a
+# diode fitted to CA-033's forward voltages; its 1N914 is the common 1N4148 model.
+#
+# RECORDED, NOT ASSERTED (no assertion can honestly pass on them; midi-out.md, The loop
+# current): the worst corner's loop current against CA-033's own 5 V transmitter at its own
+# worst corner (i_ca033_worst) and against the PC900V's worst-case need (i_pc900). Read
+# results.yaml's i_on min against both.
+title: MIDI out - the current loop, Type A and B, edges, shorts, power-on and the wrong setting
+values:
+  netlist: [hardware/carrier/midi-out/netlist.yaml, hardware/carrier/led-strip-drive/netlist.yaml]
+  bom: [R-MIDI]
+include: [midi.lib, datasheets/discrete-and-power/BLM21SP601SN1-murata-spice.lib]
+
+params:
+  vcc:      {value: 5.0, source: "U-LVLSHIFT's rail, INST_5V_A. Carried 4.5-5.25 V: CA-033's VTX floor, +5 V -10 % [ds connectors/MIDI-CA-033-ELECTRICAL-SPEC-UPDATE-2014.pdf p.2], to the buck's ceiling. The rail is 4.5-4.65 V in fact, through D-USBOR (midi-out.md) (vary)"}
+  r_src:    {value: 70.0, source: "the 74AHCT125's output resistance sourcing: (4.5 - 3.94) V / 8 mA = 70 ohm at 25 C; (4.5 - 3.8) / 8 mA = 87.5 ohm over temperature [calc, ds logic/SN74AHCT125.pdf p.4, VOH at IOH -8 mA]; down to 35 ohm [assumption: half the 25 C figure, a strong part; the datasheet gives no minimum] (vary)"}
+  r_snk:    {value: 45.0, source: "its output resistance sinking: 0.36 V / 8 mA = 45 ohm at 25 C, 0.44 / 8 mA = 55 ohm over temperature [calc, same p.4, VOL at IOL 8 mA]; down to 22.5 ohm [assumption, as r_src] (vary)"}
+  tr_out:   {value: 5.0e-9, source: "the drive's edge [assumption: the gate's tPLH is 3.8-5.5 ns into 15 pF, ds SN74AHCT125.pdf p.4; at 31.25 kbaud it is nothing]"}
+  r_rx:     {value: 220.0, source: "CA-033's receiver resistor RB, 220 ohm [ds CA-033 p.3, Figure 2], +/-5 % [assumption: as RA and RC, ds p.2] (vary)"}
+  vf:       {value: 1.4, source: "the receiver opto's LED forward voltage: 1.4 V typical (6N138, 25 C) [ds CA-033 p.5] to 1.9 V maximum [ds p.4], each taken at i_vf (vary)"}
+  i_vf:     {value: 5.0e-3, source: "the current CA-033 states the 1.9 V at (VRXDROP = 0.005 x 220 + 1.9) [ds p.4]: the LED model is fitted to vf here"}
+  n_led:    {value: 2.0, source: "the LED's emission coefficient [from memory: 1.5-2 for an IR GaAs/AlGaAs LED]; it sets how vf moves between i_vf and the loop's 3-6 mA, ~25 mV"}
+  cj_led:   {value: 60.0e-12, source: "the opto LED's capacitance [from memory: tens of pF for a 6N138-class LED]"}
+  c_tvs:    {value: 30.0e-12, source: "U-TVS-MIDI's capacitance per channel, 30 pF typical at 2.5 V, 1 MHz [ds discrete-and-power/SP0504BAHT.pdf p.2]"}
+  len:      {value: 2.0, source: "the TRS cable's length, carried 1-3 m [the brief: a realistic cable] (vary)"}
+  c_per_m:  {value: 100.0e-12, source: "each conductor's capacitance to the shield, 100 pF/m [from memory, per the brief: a typical shielded twisted pair]"}
+  r_per_m:  {value: 0.1, source: "each conductor's resistance, 0.1 ohm/m [from memory: ~0.085 ohm/m for 24 AWG, ~0.13 for 26 AWG]; nothing beside 660 ohm"}
+  t_bit:    {value: 32.0e-6, source: "one bit at 31.25 kbaud [ds CA-033 p.2]"}
+  t_d:      {value: 10.0e-6, source: "the start bit's start, in the run"}
+  i_abs:    {value: 25.0e-3, source: "the 74AHCT125's continuous output current, IO, +/-25 mA absolute maximum [ds SN74AHCT125.pdf p.3]"}
+  i_vcc_abs: {value: 50.0e-3, source: "its continuous current through VCC or GND, +/-50 mA absolute maximum [same p.3]"}
+  p_r_max:  {value: 0.25, source: "R-MIDI's rating, 0.25 W (its BOM row; CA-033's 5 V row [ds p.2])"}
+  i_pc900:  {value: 4.0e-3, source: "the PC900V's worst-case forward current need, 4 mA (with RD 280 ohm at VRX 5 V) [ds CA-033 p.4]: RECORDED, not asserted"}
+  dev_3v3:  {value: 3.3, source: "DEV_3V3, the pull-ups' rail (the Matrix's 3.3 V), +/-5 % [assumption: the Matrix's regulator is not characterised in the corpus] (vary)"}
+  r_pd:     {value: 45.0e3, source: "a worst-case weak pull-down on the pad, 45 kohm [ds logic/ESP32-S3-datasheet-v2.2.pdf p.65, RPD]. At reset GPIO2 has input enable only and GPIO6 nothing [ds p.17, Table 2-1]: no pull, so this is the bound if a bootloader enabled one"}
+  r_pad:    {value: 17.7, source: "the pad driving low during its glitch: 0.495 V at 28 mA, PAD_DRIVER 3 [calc, ds ESP32-S3 p.65, IOL]"}
+  c_in:     {value: 15.0e-12, source: "each gate input's node: Ci 10 pF maximum [ds SN74AHCT125.pdf p.4] and ~5 pF of ribbon and trace [from memory]"}
+  vth:      {value: 1.4, source: "the gate's input threshold [assumption: midway; the datasheet bounds it between VIL 0.8 V and VIH 2.0 V, ds SN74AHCT125.pdf p.3]"}
+  vih:      {value: 2.0, source: "the gate's VIH, 2.0 V [ds SN74AHCT125.pdf p.3]"}
+  g_t:      {value: 60.0e-6, source: "IO6's power-up glitch, low for 60 us typical [ds ESP32-S3-datasheet-v2.2.pdf p.18, Table 2-2: 'the pin is at a low level output status']; +/-10 % [assumption: the datasheet gives a typical only] (vary)"}
+  g_r:      {value: 60.0e-6, source: "IO2's, the same 60 us typical [same Table 2-2]; +/-10 % [assumption] (vary)"}
+  i_det:    {value: 0.5e-3, source: "a loop current a sensitive receiver could read as current on [assumption: below the 6N138's 1.6 mA test current, from memory, and the PC900V's 4 mA]"}
+  t_end_pon: {value: 150.0e-6, source: "the power-on run's length: the glitch and four bits after it"}
+
+derived:
+  t_end: "v['t_d'] + 2 * v['t_bit']"
+  c_half: "v['len'] * v['c_per_m'] / 2"
+  r_wire: "v['len'] * v['r_per_m']"
+  is_led: "v['i_vf'] / (math.exp(v['vf'] / (v['n_led'] * 0.025852)) - 1)"
+  # midi-out.md's worst case, the arithmetic it shows: VCC at its floor, the opto at 1.9 V,
+  # all three 220 ohm at +5 %, the gate at its over-temperature resistances
+  i_worst_calc: "(4.5 - 1.9) / (87.5 + 3 * 1.05 * 220.0 + 55.0)"
+  # CA-033's own 5 V transmitter at its own worst corner: -10 % VTX, +5 % resistors, 1.9 V,
+  # an ideal driver [calc, ds p.2, p.4]. RECORDED, not asserted.
+  i_ca033_worst: "(4.5 - 1.9) / (3 * 1.05 * 220.0)"
+
+vary:
+  vcc:       {tol: [-0.1, 0.05]}
+  r_src:     {tol: [-0.5, 0.25]}
+  r_snk:     {tol: [-0.5, 0.2222]}
+  R-MIDI:    {tol: from-value}
+  r_rx:      {tol: [-0.05, 0.05]}
+  vf:        {tol: [0.0, 0.3572]}
+  len:       {tol: [-0.5, 0.5]}
+  dev_3v3:   {tol: [-0.05, 0.05]}
+  R-MIDI-PU: {tol: from-value}
+  g_t:       {tol: [-0.1, 0.1]}
+  g_r:       {tol: [-0.1, 0.1]}
+
+sims:
+  - name: type-a
+    deck: loop-a.cir
+    vary: [vcc, r_src, r_snk, R-MIDI, r_rx, vf, len]
+    measures: [i_on, i_idle, t_rise, t_fall, width_err]
+    post: &loop_post
+      # the loop current late in the start bit, settled; and at idle, before and after it
+      i_on: "at(w['i'], p['t_d'] + 0.9 * p['t_bit'])"
+      i_idle: "max(abs(at(w['i'], 0.5 * p['t_d'])), abs(at(w['i'], p['t_d'] + 1.9 * p['t_bit'])))"
+      # 10-90 % of the loop current, which is the receiver LED's current: its edges
+      t_rise: "cross(w['i'], 0.9 * at(w['i'], p['t_d'] + 0.9 * p['t_bit']), p['t_d']) - cross(w['i'], 0.1 * at(w['i'], p['t_d'] + 0.9 * p['t_bit']), p['t_d'])"
+      t_fall: "cross(w['i'], 0.1 * at(w['i'], p['t_d'] + 0.9 * p['t_bit']), p['t_d'] + p['t_bit']) - cross(w['i'], 0.9 * at(w['i'], p['t_d'] + 0.9 * p['t_bit']), p['t_d'] + p['t_bit'])"
+      # the bit as the receiver's LED carries it, at half current, less the bit sent
+      width_err: "cross(w['i'], 0.5 * at(w['i'], p['t_d'] + 0.9 * p['t_bit']), p['t_d'] + p['t_bit']) - cross(w['i'], 0.5 * at(w['i'], p['t_d'] + 0.9 * p['t_bit']), p['t_d']) - p['t_bit']"
+    asserts: &loop_asserts
+      - expr: "abs(min['i_on'] / p['i_worst_calc'] - 1) < 0.03"
+        why: "the simulated worst corner is midi-out.md's worst-case arithmetic, (4.5 - 1.9) / (87.5 + 3 x 231 + 55) = 3.11 mA, to within 3 % (the LED's forward voltage falls ~25 mV below 1.9 V at 3 mA, the bead adds its DC resistance). The page's figure is the circuit's. It is BELOW CA-033's own 5 V transmitter at its own worst corner (i_ca033_worst, 3.75 mA) and the PC900V's 4 mA (i_pc900): recorded in midi-out.md, not asserted, because it does not pass"
+      - expr: "max['i_on'] < p['i_abs']"
+        why: "the source gate's current at the strongest corner (5.25 V, the strong part, -5 % resistors, a 1.4 V LED) stays inside the 74AHCT125's 25 mA continuous rating [ds p.3]"
+      - expr: "max['i_idle'] < 1.0e-6"
+        why: "at idle both lines sit at one voltage, so no loop current: logical 1 is current off [ds CA-033 p.2]"
+      - expr: "max['t_rise'] < 2.0e-6 and max['t_fall'] < 2.0e-6"
+        why: "the loop current's edges, through 1-3 m of cable at 100 pF/m and the receiver's LED, stay under CA-033's 2 us [ds p.2] at every corner"
+      - expr: "abs(min['width_err']) < 1.0e-6 and abs(max['width_err']) < 1.0e-6"
+        why: "the bit arrives at the receiver's LED within 1 us of the 32 us sent, ~3 % of a bit [assumption: the circuit's share of a receiver's timing budget; CA-033 allows the baud rate +/-1 %, ds p.2, but states no edge-distortion figure]. The opto's own response is the receiver's"
+
+  - name: type-b
+    deck: loop-b.cir
+    vary: [vcc, r_src, r_snk, R-MIDI, r_rx, vf, len]
+    measures: [i_on, i_idle, t_rise, t_fall, width_err]
+    post: *loop_post
+    asserts: *loop_asserts
+
+  - name: shorts
+    deck: short.cir
+    vary: [vcc, r_src, r_snk, R-MIDI]
+    measures: [i_short, i_tr]
+    asserts:
+      - expr: "max['i_short'] < p['i_abs']"
+        why: "a line held high and shorted to the sleeve (a mono plug on the ring in Type A, for as long as it is in) stays inside the 74AHCT125's 25 mA continuous output rating [ds p.3] at the strongest corner: 5.25 V, R-MIDI at -5 %, the gate's resistance at its assumed minimum"
+      - expr: "max['i_tr'] < p['i_abs']"
+        why: "the tip shorted to the ring during a start bit, one gate high and one low through both R-MIDI: half a short to the sleeve"
+      - expr: "2 * max['i_short'] < p['i_vcc_abs']"
+        why: "both lines high into a dead short at idle: the package's VCC pin carries both, inside its 50 mA [ds p.3]. Gate A drives LED_DI's CMOS inputs and gate D is unused (led-strip-drive's netlist): no DC beside them"
+      - expr: "max['i_short'] ** 2 * 1.05 * p['R-MIDI'] < p['p_r_max']"
+        why: "R-MIDI's dissipation in that short, the largest current into the largest resistance (conservative), inside its 0.25 W"
+
+  - name: wrong-ab
+    deck: wrong-ab.cir
+    vary: [vcc, r_src, r_snk, R-MIDI, r_rx, len]
+    measures: [v_led_fwd, v_led_rev, i_rev]
+    post:
+      v_led_fwd: "peak(w['vled'], 0, p['t_end'])"
+      v_led_rev: "trough(w['vled'], 0, p['t_end'])"
+      i_rev: "-trough(w['i'], 0, p['t_end'])"
+    asserts:
+      - expr: "max['v_led_fwd'] < 0.5"
+        why: "Type A into a Type B receiver: the LED is never forward-biased, so no data arrives (and nothing is misread)"
+      - expr: "min['v_led_rev'] > -1.0"
+        why: "the start bit reverse-biases the LED, and the receiver's D1 (1N914) clamps it to a diode drop [ds CA-033 p.3: 'reverse voltage protection for opto-isolator'], far inside an opto LED's reverse rating [from memory: 5 V for the 6N138]: no damage"
+      - expr: "max['i_rev'] < p['i_abs']"
+        why: "the loop then runs through D1 instead of the LED, a little more current than the right setting's, inside the gate's 25 mA [ds SN74AHCT125.pdf p.3]"
+
+  - name: power-on
+    deck: power-on.cir
+    vary: [dev_3v3, R-MIDI-PU, g_t, g_r]
+    measures: [v_in_min, i_hold, w_fwd]
+    post:
+      # both gates' inputs once the pads let go, against a worst-case pull-down
+      v_in_min: "min(at(w['int'], p['t_end_pon'] - 1.0e-6), at(w['inr'], p['t_end_pon'] - 1.0e-6))"
+      i_hold: "abs(at(w['i'], p['t_end_pon'] - 1.0e-6))"
+      # the longest forward loop current above i_det: the glitches' mismatch, if the ring's
+      # (the source in Type A) ends first. 0 if the loop never conducts forward
+      w_fwd: "(cross(w['i'], p['i_det'], cross(w['i'], p['i_det'], 0) + 1.0e-9) - cross(w['i'], p['i_det'], 0)) if cross(w['i'], p['i_det'], 0) < 1 else 0.0"
+    asserts:
+      - expr: "min['v_in_min'] > p['vih']"
+        why: "R-MIDI-PU holds both gate inputs above the 74AHCT125's VIH, 2.0 V [ds p.3], with the pads high-impedance, DEV_3V3 at -5 % and a 45 kohm pull-down on the pad as the bound: both outputs high"
+      - expr: "max['i_hold'] < 1.0e-6"
+        why: "both outputs high, tip and ring at one voltage: no loop current, so no garbage byte in either setting before firmware chooses one"
+      - expr: "max['w_fwd'] < 0.5 * p['t_bit']"
+        why: "THE PADS' POWER-UP GLITCH. IO6 and IO2 are both driven low for ~60 us at power-up [ds ESP32-S3 p.18, Table 2-2], which the pull-ups cannot hold against. Both gates' outputs then go low together and the loop stays dark; only the glitches' MISMATCH conducts. At +/-10 % on each (an assumption: the datasheet gives a typical only) the longest pulse is under half a bit, which a mid-bit-sampling UART rejects as a false start [from memory]. A glitch on IO6 alone would send 60 us of current: a start bit and D0 = 0, read as 0xFE, Active Sensing [calc]. What decides it: scope IO6, IO2 and the loop at power-up (midi-out.md, The power-on default)"

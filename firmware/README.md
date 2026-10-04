@@ -205,7 +205,9 @@ Pins: `SCK` IO38, `SH/LD` IO7, chain-end `SER` IO33, `QH` IO40.
   byte time, then re-route.
 - **Both lines are pulled high through boot** (`R-MIDI-PU-T`, `R-MIDI-PU-R`),
   so nothing goes out before firmware chooses a setting. Leave them high until
-  it has.
+  it has. The one exception is the pads' own ~60 µs power-up glitch, which
+  drives both low together; only its mismatch reaches the loop
+  (`hardware/carrier/midi-out/midi-out.md`, *The power-on default*).
 - **Write MIDI from the loop without blocking it**: into the UART's FIFO, with
   running status. The line carries 3,125 bytes a second `[calc: 31,250 / 10]`,
   so breath as a controller is rate-limited, sent on change with a periodic
