@@ -1,0 +1,145 @@
+# The commit gate, outside Claude Code (issue #31; parent #9 G1).
+#
+# tools/commit-gate.py is a Claude Code PreToolUse hook: it guards only the commits
+# Claude Code makes. This runs the same checks on every push and pull request, to any
+# branch, so a human's `git commit` - or any other client's - is checked too. It does
+# not replace the hook: the hook refuses a red commit before it exists, this reports one
+# after it is pushed. docs/reference/tooling.md, *The commit gate*, says what each runs.
+#
+# NOTHING HERE IS ALLOW-LISTED. A red tree shows red. There is no continue-on-error, no
+# per-check exemption, and no Gate-Red equivalent: a Gate-Red trailer explains a red
+# commit in the log, it does not make it green here. Every check step runs even when an
+# earlier one failed (`!cancelled()`), so one red check does not hide the others.
+name: gate
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # Everything that needs no KiCad. check-staleness.py runs all of it itself (it shells out
+  # to every tool below); the steps after it run each tool on its own as well, so the
+  # run's page names WHICH check is red instead of one aggregate FAIL.
+  corpus:
+    name: corpus (no KiCad)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Read off the tools' imports: every one of these is stdlib plus PyYAML. cad.py
+      # imports Pillow, gmsh, manifold3d and trimesh only to BUILD; `check` needs none.
+      - name: Install Python dependencies (PyYAML only)
+        id: deps
+        run: python3 -m pip install --disable-pip-version-check -q 'PyYAML==6.0.3'
+
+      - name: check-staleness.py - the whole corpus (what the commit gate runs)
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: python3 tools/check-staleness.py
+
+      - name: merge-bom.py --check - hardware/bom.csv matches its fragments
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: python3 tools/merge-bom.py --check
+
+      - name: merge-manifests.py --check - datasheets/MANIFEST.csv matches its fragments
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: python3 tools/merge-manifests.py --check
+
+      - name: verify-datasheets.py - every banked datasheet against its SHA-256
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: python3 tools/verify-datasheets.py
+
+      - name: check-netlist.py --strict - netlists, master nets, BOM, drawing labels
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: python3 tools/check-netlist.py --strict
+
+      - name: adr-index.py --check - the generated ADR index
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: python3 tools/adr-index.py --check
+
+      - name: cad.py check - body CAD renders and cut files against their sources
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: python3 tools/cad.py check
+
+      - name: sim.py check - every results.yaml against its inputs
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: python3 tools/sim.py check
+
+      - name: sim_coverage.py - every circuit and board with parts is simulated or says why not
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: python3 tools/sim_coverage.py
+
+      - name: sim_recheck.py - every results.yaml against its own numbers
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: python3 tools/sim_recheck.py
+
+      - name: commit-gate.py --self-test - the hook's command matcher
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: python3 tools/commit-gate.py --self-test
+
+  # tools/kicad.py check: every sheet re-exported and compared, every render's inputs,
+  # ERC, and tools/pcb.py check (DRC with schematic parity) on every board with a layout.
+  # Its own job, so a slow or broken KiCad install never hides the corpus verdict. It runs
+  # on every push, not only when a KiCad input changed: the commit gate already skips it
+  # when nothing staged is one, and a push is where a skipped run gets caught.
+  kicad:
+    name: kicad (kicad.py check, KiCad 9)
+    runs-on: ubuntu-24.04      # the KiCad PPA is built per Ubuntu release; tools/toolchain.yaml
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # The archive tools/setup-env.sh adds - the KiCad project's own PPA, because
+      # Ubuntu's kicad is 7.0. Only the KiCad part of setup-env.sh: OpenSCAD, ngspice,
+      # gmsh, bpy and the 3D models are for building outputs, and `check` builds none.
+      # pcbnew's Python module is in the `kicad` package, for the SYSTEM python3, so
+      # this job uses /usr/bin/python3 and no setup-python.
+      - name: Install KiCad 9 (ppa:kicad/kicad-9.0-releases, as tools/setup-env.sh)
+        id: kicad
+        run: |
+          sudo add-apt-repository -y ppa:kicad/kicad-9.0-releases
+          sudo apt-get update -q
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q --no-install-recommends \
+            kicad kicad-symbols kicad-footprints python3-yaml python3-pip
+          # KiCad's library tables, as setup-env.sh writes them: without them ERC and DRC
+          # warn on every part that its library is "not in the current configuration".
+          mkdir -p "$HOME/.config/kicad/9.0"
+          for t in sym-lib-table fp-lib-table; do
+            cp "/usr/share/kicad/template/$t" "$HOME/.config/kicad/9.0/$t"
+          done
+          # pcb.py check's geometry, pinned in tools/requirements.txt
+          /usr/bin/python3 -m pip install --break-system-packages --disable-pip-version-check -q \
+            "$(awk '/^shapely==/ {print $1}' tools/requirements.txt)"
+          /usr/bin/python3 -c 'import pcbnew, shapely, yaml; print("pcbnew", pcbnew.GetBuildVersion(), "| shapely", shapely.__version__)'
+
+      # A version other than the one the outputs were made with is a warning, not a
+      # failure - the same rule as commit-gate.py's toolchain() and setup-env.sh.
+      - name: Toolchain against tools/toolchain.yaml
+        if: ${{ !cancelled() && steps.kicad.outcome == 'success' }}
+        run: |
+          now=$(kicad-cli version)
+          min=$(awk '$1 == "kicad_min:" {print $2}' tools/toolchain.yaml)
+          echo "KiCad $now; tools/toolchain.yaml kicad_min $min"
+          if [ "$(printf '%s\n%s\n' "$min" "$now" | sort -V | head -1)" != "$min" ]; then
+            echo "::warning::KiCad $now is below tools/toolchain.yaml kicad_min $min, which made the fab outputs"
+          elif [ "$now" != "$min" ]; then
+            echo "::warning::KiCad $now, not the $min the committed outputs were made with - a difference below may be the tool's, not the tree's"
+          fi
+
+      - name: kicad.py check
+        if: ${{ !cancelled() && steps.kicad.outcome == 'success' }}
+        run: /usr/bin/python3 tools/kicad.py check
