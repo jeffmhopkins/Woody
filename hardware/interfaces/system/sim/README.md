@@ -159,11 +159,13 @@ them, and each is `[sim]`. "Worst" is the worst corner.
 
 | Scenario | Pitch jack | Breath jack | Other |
 |---|---|---|---|
-| `led-pwm` | 0.0034 cents p-p nominal, 0.011 at the worst corner (`led-pwm-pitch`) | 0.06 mV p-p, 0.20 worst | header ±12 V 1.0 mV p-p, 3.4 worst; the instrument's ground against the module's 3.7 mV, 13 worst |
-| `led-pattern`, 200 Hz | 0.033 cents p-p, 0.067 worst | 5.8 mV p-p, 12.5 worst | header ±12 V 15 mV p-p, 32 worst |
+| `led-pwm` | 0.0034 cents p-p nominal, 0.011 at the worst corner (`led-pwm-pitch`) | 0.26 mV p-p, 0.81 worst (the 500 Hz mode, #32) | header ±12 V 1.0 mV p-p, 3.4 worst; the instrument's ground against the module's 3.7 mV, 13 worst |
+| `led-pattern`, 200 Hz | 0.033 cents p-p, 0.067 worst | 6.2 mV p-p, 13.2 worst | header ±12 V 15 mV p-p, 32 worst |
 | `led-off` | 1 × 10⁻⁸ cents | 0.6 µV | the deck's floor |
-| `burst` | 0.025 cents | 0.22 mV | the in-amp's output 0.22 mV; mod 1 swings 3.5 V |
-| `burst-spi` | 0.011 cents | 0.18 mV | the SPI edges alone |
+| `burst` | 0.025 cents | 0.68 mV | the in-amp's output 0.48 mV; mod 1 swings 3.5 V (500 Hz mode) |
+| `burst-spi` | 0.011 cents | 0.56 mV | the SPI edges alone |
+| `led-pwm-wide` | as `led-pwm` | 0.22 mV p-p, 0.80 worst | WIDE (#32), recorded |
+| `burst-wide` | 0.025 cents | **1.25 mV** | WIDE, recorded: the in-amp's output 1.35 mV. Over the 500 Hz mode's bar (1.08 mV, half that mode's noise p-p), under WIDE's own (half of 1.45 mV rms × 6.6 = 4.8 mV) |
 | `hot-plug` | 0.008 cents | −1.32 V absent, −0.10 V at rest, a 76 mV transient | `U-ISO` 0.33 A peak; no latch; the instrument up in 0.125 s; SCLK/MOSI at the receiver 1.2–1.3 V at contact |
 
 ## Findings
@@ -181,9 +183,11 @@ them, and each is `[sim]`. "Worst" is the worst corner.
   `R-BREATH-FB / R-BREATH-OFFNEG` of the −12 V ripple, asserted within 20 %.
   No other path of that size shows up.
 - **A burst of DAC frames at the link's full rate leaves the breath jack
-  quiet.** It moves 0.2 mV, under half the jack's own noise peak to peak (`breath-jack-noise`). The SPI
-  edges put 0.2 mV spikes on the in-amp's output, and the breath chain's
-  filters take them down to that.
+  quiet.** It moves 0.68 mV in the 500 Hz mode, under half the jack's own
+  noise peak to peak (`breath-jack-noise`); it was 0.2 mV behind the old
+  459 Hz pole and 480 Hz jack RC. In WIDE (#32) it is 1.25 mV, recorded:
+  under half WIDE's own noise, over the 500 Hz mode's bar. The SPI edges'
+  spikes at the in-amp's output are what the toggle's filter lets through.
 - **A hot-plug is clean at the jacks.** The LT1641 does not latch, and
   `U-ISO` peaks at about 0.34 A. That is under `hotplug-iso-ocp`,
   because this deck's `U-ISO` has its datasheet's transient
