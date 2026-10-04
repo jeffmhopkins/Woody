@@ -4,21 +4,14 @@
 # known-false list and what IS guaranteed for every edge are stated once, in
 # hardware/README.md, "circuit.yaml and its depends_on edges". Read that
 # before adding or trusting an edge here.
-
-id: carrier/led-strip-drive
-title: LED drive and the LED row — schematic
-last_reviewed: '2026-09-30'
+id: carrier/midi-out
+title: MIDI out — schematic
+last_reviewed: '2026-10-04'
 depends_on:
-- adr:0014
-- adr:0028
-- refdes:C-DECOUPLE-CARRIER
-- refdes:C-STRIP-BULK
-- refdes:D-LED
-- refdes:C-LED
-- refdes:J-MCU
-- refdes:R-LED-SER
-- refdes:R-SPI-PULL
+- adr:0015
+- adr:0027
+- fig:dig-gnd-topology
 - refdes:U-LVLSHIFT
-- circuit:carrier/power-entry-instrument
-- circuit:carrier/midi-out
+- refdes:J-MCU
 - refdes:R-MIDI-PU
+- circuit:carrier/led-strip-drive

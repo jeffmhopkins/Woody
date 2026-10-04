@@ -69,6 +69,12 @@ ports:
     dir: ref
     from: module/power-entry
     figure: dig-gnd-topology
+  IO6:
+    dir: out
+    to: carrier/led-strip-drive
+  IO2:
+    dir: out
+    to: carrier/led-strip-drive
 components:
   J-MCU:
     value: 2x12 1.27mm shrouded box header
@@ -158,14 +164,17 @@ components:
     - P3V3
     - P5V
     - GND
+    - IO6
     note: 'On its own carrier board, hung from the oak top (hardware/boards/matrix-carrier; ADR 0021 amendment 2026-10-03),
       reached from J-MCU by CBL-MCU-RIBBON and the carrier''s J-MCU-C; this sheet holds it for its pad-to-pin map,
       and tools/kicad.py check holds the carrier''s HDR-MATRIX pins to these pins. Its own LDO is the instrument''s
       only 3V3. Pins are its two pad rows only: it is programmed and recovered over its own USB-C, with its BOOT
       and RESET buttons (owner, 2026-10-03), so EN and IO0 are not wired out, and its pad-row 5V and GND carry its
-      supply (TP2 and TP3 are not used) [datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf]. IO2 to
-      IO6 are SPARE (IO5 and IO6 since ADR 0015, IO2 since ADR 0016; IO3 and IO4 have no assignment); IO2 and IO3
-      reach J-MCU, IO4 to IO6 do not'
+      supply (TP2 and TP3 are not used) [datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf]. IO6 and
+      IO2 are the MIDI out pair since issue #37 (ADR 0015 amendment 2026-10-04): IO6 (the tip) reaches J-MCU pin
+      23 (J-MCU-C pin 2), IO2 (the ring) its own pin 5, and firmware routes UART1 TX to whichever is the current
+      sink (TRS Type A or B, carrier/midi-out). J-MCU pin 24 stays on no net: on the carrier J-MCU-C pin 1 is boxed
+      in by the bus (carrier_routes.py). IO3 reaches J-MCU as a shield; IO4 and IO5 are spare and reach nothing'
   U-TVS-SPI:
     value: SP0504BAHT or equivalent 4-channel 5V array
     pins:
@@ -201,11 +210,16 @@ nets:
   - J-MCU.4
   - U-MCU-RT.IO1
   IO2:
+  - port: IO2
   - J-MCU.5
   - U-MCU-RT.IO2
   IO3:
   - J-MCU.7
   - U-MCU-RT.IO3
+  IO6:
+  - port: IO6
+  - J-MCU.23
+  - U-MCU-RT.IO6
   IO7:
   - port: IO7
   - J-MCU.6
@@ -271,13 +285,10 @@ nets:
   - port: U0TXD
   - J-MCU.22
   - U-MCU-RT.IO43
-  '23':
-  - J-MCU.23
   '24':
   - J-MCU.24
   CH4:
   - U-TVS-SPI.CH4
 external_endpoints:
-- '23'
 - '24'
 - CH4
