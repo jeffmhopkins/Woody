@@ -53,7 +53,7 @@ R4 inpos 0 {{R4}}
 R5 inneg 0 {{R5}}
 CCMP inpos 0 {{C-CM-IN+}}
 CCMN inneg 0 {{C-CM-IN-}}
-CDIFF inpos inneg {{C-DIFF-BREATH}}
+CDIFF inpos inneg {{c_diff_mode}}
 XAMP inpos inneg pos neg in refdrv rg1 rg2 INA828
 RG rg1 rg2 {{R-GAIN-INAMP}}
 * -- DAC_AVDD: dac-rail, plus the SET pin's current noise and R-SET-DAC's own, through C-SET-DAC
@@ -97,7 +97,10 @@ RIN bufo2 sum {{R-BREATH-IN}}
 ROCW 0 ow {{r_off_cw}}
 ROCCW ow avdd {{r_off_ccw}}
 ROFF ow sum {{R-BREATH-OFF}}
-ROFFN neg sum {{R-BREATH-OFFNEG}}
+* R-BREATH-OFFNEG as two halves with C-BREATH-OFFNEG at the split (#32): 6.7 Hz on the -12 V leg
+ROFFN1 neg offnm {{R-BREATH-OFFNEG}}
+COFFN offnm 0 {{C-BREATH-OFFNEG}}
+ROFFN2 offnm sum {{R-BREATH-OFFNEG}}
 RFB sum out {{R-BREATH-FB}}
 XB 0 sum pos neg out OPAx197
 ROUT out jack {{R-OUT-PROT}}
@@ -252,7 +255,7 @@ foreach bi 1 2
     let s_shaper = s_shaper + onoise_{$d} * onoise_{$d}
   end
   let s_out = o_xa + o_xb
-  foreach d rgcw rgccw rfloor rin rocw roccw roff roffn rfb rout rload
+  foreach d rgcw rgccw rfloor rin rocw roccw roff roffn1 roffn2 rfb rout rload
     let s_out = s_out + onoise_{$d} * onoise_{$d}
   end
   * the DAC rail: both paths of each of its two sources, coherently (worst case)

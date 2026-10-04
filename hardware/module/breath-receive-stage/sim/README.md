@@ -20,30 +20,52 @@ the differential gain over the common-mode gain, both at the INA828's output.
 
 **The claim is a worst case over tolerance**, so every part that sets the
 balance is a corner: `R1`, `R1b`, `R2`, `R3`, `R4`, `R5` at their netlisted
-tolerance and both `C_cm` at ±0.5 % — `C-CM-BREATH` is a matched pair, each
+tolerance, both `C_cm` at ±0.5 % — `C-CM-BREATH` is a matched pair, each
 within 0.5 % of the pair's mean (owner, 2026-10-03, "Tighten cap matching";
-its row says how it is matched). 257 runs per sim.
+its row says how it is matched) — and `U-BW-SW`'s pin capacitance on each leg
+at ±10 % (its datasheet gives no channel match; an assumption, with a what-if
+at the typ-to-max spread). 1025 runs per mode.
+
+**Since #32 the filter has three modes** (owner, 2026-10-04, "Panel 3-way
+toggle", "500 Hz / 1.5 kHz / wide"), and each is held to the page's 58.5 dB
+requirement over **its own band**, DC to its corner: a common-mode
+disturbance anywhere in the band the player has chosen reaches the jack.
+`U-BW-SW` is its datasheet: `R_ON` at its 210 Ω maximum, each pin's
+capacitance off and on at its maximum, an open channel's 0.2 pF across it.
 
 | Sim | What | Holds |
 |---|---|---|
-| `cmrr-as-netlisted` | CMRR at DC, 50 Hz, 60 Hz, 500 Hz, 1 kHz, and where it first falls to 58.5 dB | the page's 58.5 dB requirement over its whole band, DC to 500 Hz, at the worst corner (62.8 dB least; it first falls to 58.5 dB near 830 Hz); the page's 73 dB bias-pair floor within 3 dB |
-| `cmrr-without-r1b` | the same with `R1b` shorted | the page's 60.2 dB, at the nominal only |
-| `cmrr-ccm-5pct` | `C_cm` at ±5 % | the page's "~46 dB", at 500 Hz |
+| `cmrr-500` | 500 Hz mode: the corner; CMRR at DC, 50, 60 and 500 Hz; the least in DC–500 Hz | corner **493 Hz**; least in the band **71.0 dB** at the worst corner; mains **71.7 dB**; the page's 73 dB bias-pair floor within 3 dB |
+| `cmrr-1k5` | 1.5 kHz mode: the same to 1.5 kHz | corner **1555 Hz**; least in the band **68.3 dB** at the worst corner (68.1 dB at 1.5 kHz) |
+| `cmrr-wide` | WIDE: the corner, and the requirement over **DC to 7 kHz**, WIDE's band as the owner set it | corner **10.09 kHz**; least in DC–7 kHz above 58.5 dB at every corner (it first reaches 58.5 dB at **7.40 kHz**); 69.1 dB at 1.5 kHz. **Recorded, not passed:** 56.0 dB at 10 kHz at the worst corner |
+| `cmrr-sw-spread` | WIDE, the switch's pins at its typ-to-max spread, one leg each way | what-if: 68.8 dB at 1.5 kHz, 55.4 dB at 10 kHz |
+| `cmrr-without-r1b` | the 500 Hz mode with `R1b` shorted | the page's 60.2 dB at the nominal (60.1), 58.2 dB worst: below the requirement |
+| `cmrr-ccm-5pct` | the 1.5 kHz mode with `C_cm` at ±5 % | 62.1 dB at 1.5 kHz against a 71.7 dB floor: the pair's mismatch is what sets the top |
+| `cmrr-supply-low`, `-high` | WIDE, the rails at 10.8 and 12.6 V, nominal parts | 114.8 dB at 60 Hz, 82.8 dB at 10 kHz: the INA828's supply is not what limits it |
 
 **The result is `breath-link-cmrr`**, the worst corner at the mains
-fundamental: **71.3 dB worst case at 60 Hz**.
+fundamental, the same in every mode: **71.7 dB worst case at 60 Hz**.
 
-Three things the run says that the page did not:
+What the runs say:
 
-- **The band's top is set by `C_cm`'s match.** Their mismatch converts
-  common mode to differential in proportion to frequency. The band is DC to
-  500 Hz, the breath channel's (`breath-sense-link.md`, defined 2026-10-03 for
-  #5 finding 5), and `cmrr-as-netlisted` asserts the least CMRR in it
-  (`cmrr_band`). With two independent ±1 % parts the worst corner fell through
-  58.5 dB near 480 Hz and failed by under 0.5 dB at the edge; the owner chose
-  **"Tighten cap matching"** (2026-10-03), so the pair is matched to ±0.5 %
-  about its mean and the worst corner holds **62.8 dB** across the band,
-  first reaching 58.5 dB near 830 Hz (`f_req`).
+- **At any one frequency the CMRR is the same in every mode**: `C_cm` and the
+  switch's capacitance are fixed, and below each corner `C_diff` does not
+  enter the conversion. What the toggle changes is how far the band reaches,
+  so what each mode is held to is its own top.
+- **WIDE does not hold the requirement to 10 kHz, and its band is now
+  DC to 7 kHz by the owner's decision.** The common-mode capacitance on each
+  leg — `C_cm` and the switch's pins — converts common mode in proportion to
+  frequency; at 10 kHz the worst corner's 1 % pair mismatch and 20 %
+  switch-pin mismatch together leave 56.0 dB. Offered *"Keep wide at ~10 kHz
+  and only require the target up to ~7 kHz. No parts change."*, the owner
+  chose **"Keep 10 kHz, accept"** (2026-10-04, ADR 0003 *The owner's three
+  answers*, ADR 0004's amendment). 7 kHz is where the worst corner first
+  crosses 58.5 dB (7.40 kHz), rounded down. **This is a requirement the owner
+  changed, not a bar moved to make a result pass**: `cmrr-wide` holds 58.5 dB
+  over DC–7 kHz and records `cmrr_top`, 56.0 dB at 10 kHz, as a figure.
+  The options that were not taken: WIDE at ~7 kHz (fixed `C_diff` 1.0 nF), or
+  a tighter match (`C_cm` to ±0.25 % alone reaches about 57.5 dB; the switch's
+  match is the larger term and no datasheet states it).
 - **Without `R1b` the margin was negative, not 1.7 dB.** 60.2 dB is the
   nominal. At the worst tolerance corner the unmatched link is 58.2 dB at DC,
   below the requirement. `R1b` is fitted, so this argues for the part, not

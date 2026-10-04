@@ -195,7 +195,7 @@ what each found is in the register, not here:
 | **Mod channels** | `module/mod-channels/sim` | Law to 0.1 mV, no clip, no overshoot into any mult (`C-FILT-MOD` is outside the loop); the jack reads 1 % low into 100 kΩ |
 | **Breath output stage** | `module/breath-output-stage/sim` | The offset table to 1 mV; 95.6° at every load; the −12 V rail reaches the jack at the page's 4.1 mV |
 | **Response shaper** | `module/breath-response-shaper/sim` | `shaper-exp-gain`: the curve is weaker than its table, because the pot loads the `V_in/2` divider |
-| **Breath ADC** | `carrier/breath-adc/sim` | 564 Hz, 55 dB, τ 282 µs as the page says; `adc-sample-kickback` is more than its "about 2 LSB" |
+| **Breath ADC** | `carrier/breath-adc/sim` | 1.47 kHz, 47 dB, τ 108 µs as the page says (since #32); `adc-sample-kickback`, a gain term; 8 and 16 kHz sampling as what-ifs |
 | **Instrument power entry** | `carrier/power-entry-instrument/sim` | `instrument-input-z-margin`; starts cold, hot and re-plugged. **A hot-plug keeps `U-ISO` under its over-current threshold** (`hotplug-iso-ocp`) behind `Q-INRUSH`; a replug within tens of milliseconds does not: E6 |
 | **LED data** | `carrier/led-strip-drive/sim` | A third slower edge than the page's, still a small fraction of `T0H` |
 

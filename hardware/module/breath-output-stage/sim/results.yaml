@@ -4,26 +4,27 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/breath-output-stage/sim/sims.yaml: ea524974e4623456
-  hardware/module/breath-output-stage/netlist.yaml: 63517b01fa4c02a2
-  hardware/module/breath-response-shaper/netlist.yaml: 3f6549b620f9e912
+  hardware/module/breath-output-stage/sim/sims.yaml: e5483d8285264109
+  hardware/module/breath-output-stage/netlist.yaml: e28cccf37c29f7b1
+  hardware/module/breath-response-shaper/netlist.yaml: 86e851a6e5280c53
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/mod-channels/netlist.yaml: 00739b63d111a848
-  hardware/module/breath-receive-stage/netlist.yaml: 9093fa5acc898eb4
-  hardware/interfaces/breath-sense-link/netlist.yaml: 430f1e37ec9c97fa
+  hardware/module/breath-receive-stage/netlist.yaml: dab496982d183718
+  hardware/interfaces/breath-sense-link/netlist.yaml: 3174b77569cdaf62
   hardware/carrier/breath-excitation-reference/netlist.yaml: 2d5ee10b223dc95d
-  hardware/carrier/breath-adc/netlist.yaml: f742c4d67eea80fb
+  hardware/carrier/breath-adc/netlist.yaml: 60647f404552f147
   hardware/module/power-entry/netlist.yaml: 14fd898035959809
-  hardware/module/breath-output-stage/sim/bos.cir: e1b8c860686a0315
-  hardware/module/breath-output-stage/sim/bos-ac.cir: fbdf6f423bb51ac3
-  hardware/module/breath-output-stage/sim/chain.cir: 4d0415708dd3e5f3
-  hardware/module/breath-output-stage/sim/noise.cir: 810f551741beea33
+  hardware/module/breath-output-stage/sim/bos.cir: e297daeb2283a454
+  hardware/module/breath-output-stage/sim/bos-ac.cir: 7b123bcb1e263136
+  hardware/module/breath-output-stage/sim/chain.cir: 0a71af2eaad355dd
+  hardware/module/breath-output-stage/sim/led.cir: 28843f7bfad9d678
+  hardware/module/breath-output-stage/sim/noise.cir: dd0e11e8c04f946d
   hardware/module/breath-output-stage/sim/noise-amps.cir: 21a815982953fb56
   hardware/module/breath-output-stage/sim/noise-ref.cir: d0abe4b8978e5e03
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
   datasheets/analog/INA828-ti-pspice-sbomag5c.lib: 6ae6e0285c98dc1e
   datasheets/analog/REF5050-ti-pspice-slim175a.lib: ed2d2602cfee90ae
-  hardware/module/breath-response-shaper/sim/sims.yaml: befba7f85cb5cd25
+  hardware/module/breath-response-shaper/sim/sims.yaml: cc575034f8557f82
   figure:inamp-full-scale: -9.94 V
   figure:dac-rail: 5.23 V
 ngspice: '42'
@@ -32,22 +33,22 @@ sims:
     corners: 17
     measures:
       out:
-        nominal: -4.94972
-        min: -5.74122
+        nominal: -4.93375
+        min: -5.72525
         min_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
-        max: -4.37404
+        max: -4.35807
         max_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
       jack:
-        nominal: -4.90071
-        min: -5.68438
+        nominal: -4.8849
+        min: -5.66856
         min_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
-        max: -4.33073
+        max: -4.31492
         max_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
       page_err:
-        nominal: 8.26171e-05
-        min: 7.96885e-05
+        nominal: 7.05689e-05
+        min: 6.77545e-05
         min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
-        max: 9.15581e-05
+        max: 7.9391e-05
         max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
     asserts:
     - expr: max['page_err'] < 0.01 and min['page_err'] > -0.01
@@ -59,22 +60,22 @@ sims:
     corners: 17
     measures:
       out:
-        nominal: 0.588661
-        min: 0.235438
+        nominal: 0.604634
+        min: 0.251094
         min_at: R-BREATH-FB- R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
-        max: 0.858434
+        max: 0.87473
         max_at: R-BREATH-FB+ R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
       jack:
-        nominal: 0.582833
-        min: 0.233107
+        nominal: 0.598648
+        min: 0.248608
         min_at: R-BREATH-FB- R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
-        max: 0.849935
+        max: 0.866069
         max_at: R-BREATH-FB+ R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
       page_err:
-        nominal: 7.07943e-05
-        min: 6.91502e-05
+        nominal: 5.87441e-05
+        min: 5.72302e-05
         min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
-        max: 7.51208e-05
+        max: 6.29497e-05
         max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
     asserts:
     - expr: max['page_err'] < 0.01 and min['page_err'] > -0.01
@@ -86,22 +87,22 @@ sims:
     corners: 17
     measures:
       out:
-        nominal: -0.0297278
-        min: -0.426465
+        nominal: -0.0137549
+        min: -0.410493
         min_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
-        max: 0.263287
+        max: 0.279583
         max_at: R-BREATH-FB+ R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
       jack:
-        nominal: -0.0294335
-        min: -0.422243
+        nominal: -0.0136187
+        min: -0.406428
         min_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG+ v_avdd+
-        max: 0.260681
+        max: 0.276815
         max_at: R-BREATH-FB+ R-BREATH-OFF+ R-BREATH-OFFNEG- v_avdd-
       page_err:
-        nominal: 7.17194e-05
-        min: 6.99559e-05
+        nominal: 5.96803e-05
+        min: 5.8038e-05
         min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
-        max: 7.65438e-05
+        max: 6.43838e-05
         max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
     asserts:
     - expr: max['page_err'] < 0.01 and min['page_err'] > -0.01
@@ -113,22 +114,22 @@ sims:
     corners: 17
     measures:
       out:
-        nominal: 5.06198
-        min: 4.96174
+        nominal: 5.07795
+        min: 4.9774
         min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
-        max: 5.16424
+        max: 5.18053
         max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
       jack:
-        nominal: 5.01186
-        min: 4.91261
+        nominal: 5.02767
+        min: 4.92812
         min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
-        max: 5.11311
+        max: 5.12924
         max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
       page_err:
-        nominal: 6.78113e-05
-        min: 6.69281e-05
+        nominal: 5.57632e-05
+        min: 5.50042e-05
         min_at: R-BREATH-FB- R-BREATH-OFF+ R-BREATH-OFFNEG+ v_avdd+
-        max: 6.86981e-05
+        max: 5.65211e-05
         max_at: R-BREATH-FB+ R-BREATH-OFF- R-BREATH-OFFNEG- v_avdd-
     asserts:
     - expr: max['page_err'] < 0.01 and min['page_err'] > -0.01
@@ -140,10 +141,10 @@ sims:
     corners: 5
     measures:
       gain:
-        nominal: 0.502953
-        min: 0.492994
+        nominal: 0.502936
+        min: 0.492977
         min_at: R-BREATH-FB- R-BREATH-IN+
-        max: 0.513114
+        max: 0.513097
         max_at: R-BREATH-FB+ R-BREATH-IN-
     asserts:
     - expr: min['gain'] > 0.49 and max['gain'] < 4.11
@@ -154,10 +155,10 @@ sims:
     corners: 5
     measures:
       gain:
-        nominal: 2.15601
-        min: 2.11331
+        nominal: 2.15593
+        min: 2.11324
         min_at: R-BREATH-FB- R-BREATH-IN+
-        max: 2.19956
+        max: 2.19949
         max_at: R-BREATH-FB+ R-BREATH-IN-
     asserts:
     - expr: min['gain'] > 0.49 and max['gain'] < 4.11
@@ -168,10 +169,10 @@ sims:
     corners: 5
     measures:
       gain:
-        nominal: 4.02013
-        min: 3.94052
+        nominal: 4.01999
+        min: 3.94039
         min_at: R-BREATH-FB- R-BREATH-IN+
-        max: 4.10135
+        max: 4.10121
         max_at: R-BREATH-FB+ R-BREATH-IN-
     asserts:
     - expr: min['gain'] > 0.49 and max['gain'] < 4.11
@@ -182,16 +183,16 @@ sims:
     corners: 1
     measures:
       out_max:
-        nominal: 11.8944
-        min: 11.8944
+        nominal: 11.9702
+        min: 11.9702
         min_at: nominal
-        max: 11.8944
+        max: 11.9702
         max_at: nominal
       out_min_neg:
-        nominal: 5.06198
-        min: 5.06198
+        nominal: 5.07795
+        min: 5.07795
         min_at: nominal
-        max: 5.06198
+        max: 5.07795
         max_at: nominal
     asserts:
     - expr: nom['out_max'] > 11.3 and nom['out_max'] < 12.0
@@ -201,26 +202,26 @@ sims:
     corners: 1
     measures:
       out:
-        nominal: -4.94972
-        min: -4.94972
+        nominal: -4.93375
+        min: -4.93375
         min_at: nominal
-        max: -4.94972
+        max: -4.93375
         max_at: nominal
     asserts: []
   step-mult[mult=0]:
     corners: 1
     measures:
       overshoot_pct:
-        nominal: 0.00506831
-        min: 0.00506831
+        nominal: 1.695e-06
+        min: 1.695e-06
         min_at: nominal
-        max: 0.00506831
+        max: 1.695e-06
         max_at: nominal
       t_settle:
-        nominal: 0.00218368
-        min: 0.00218368
+        nominal: 6.8115e-05
+        min: 6.8115e-05
         min_at: nominal
-        max: 0.00218368
+        max: 6.8115e-05
         max_at: nominal
     asserts:
     - expr: max['overshoot_pct'] < 1
@@ -230,16 +231,16 @@ sims:
     corners: 1
     measures:
       overshoot_pct:
-        nominal: 0.00629859
-        min: 0.00629859
+        nominal: 1.56461e-06
+        min: 1.56461e-06
         min_at: nominal
-        max: 0.00629859
+        max: 1.56461e-06
         max_at: nominal
       t_settle:
-        nominal: 0.00223269
-        min: 0.00223269
+        nominal: 0.000136135
+        min: 0.000136135
         min_at: nominal
-        max: 0.00223269
+        max: 0.000136135
         max_at: nominal
     asserts:
     - expr: max['overshoot_pct'] < 1
@@ -249,16 +250,16 @@ sims:
     corners: 1
     measures:
       overshoot_pct:
-        nominal: 0.0216395
-        min: 0.0216395
+        nominal: 4.43307e-07
+        min: 4.43307e-07
         min_at: nominal
-        max: 0.0216395
+        max: 4.43307e-07
         max_at: nominal
       t_settle:
-        nominal: 0.00248272
-        min: 0.00248272
+        nominal: 0.000628625
+        min: 0.000628625
         min_at: nominal
-        max: 0.00248272
+        max: 0.000628625
         max_at: nominal
     asserts:
     - expr: max['overshoot_pct'] < 1
@@ -268,16 +269,16 @@ sims:
     corners: 1
     measures:
       pm:
-        nominal: 95.563
-        min: 95.563
+        nominal: 95.3547
+        min: 95.3547
         min_at: nominal
-        max: 95.563
+        max: 95.3547
         max_at: nominal
       fc:
-        nominal: 1171360.0
-        min: 1171360.0
+        nominal: 1093900.0
+        min: 1093900.0
         min_at: nominal
-        max: 1171360.0
+        max: 1093900.0
         max_at: nominal
     asserts:
     - expr: min['pm'] - 10 > 45
@@ -287,16 +288,16 @@ sims:
     corners: 1
     measures:
       pm:
-        nominal: 95.5631
-        min: 95.5631
+        nominal: 95.442
+        min: 95.442
         min_at: nominal
-        max: 95.5631
+        max: 95.442
         max_at: nominal
       fc:
-        nominal: 1171360.0
-        min: 1171360.0
+        nominal: 1094850.0
+        min: 1094850.0
         min_at: nominal
-        max: 1171360.0
+        max: 1094850.0
         max_at: nominal
     asserts:
     - expr: min['pm'] - 10 > 45
@@ -306,16 +307,16 @@ sims:
     corners: 1
     measures:
       pm:
-        nominal: 95.5639
-        min: 95.5639
+        nominal: 95.5099
+        min: 95.5099
         min_at: nominal
-        max: 95.5639
+        max: 95.5099
         max_at: nominal
       fc:
-        nominal: 1171370.0
-        min: 1171370.0
+        nominal: 1095620.0
+        min: 1095620.0
         min_at: nominal
-        max: 1171370.0
+        max: 1095620.0
         max_at: nominal
     asserts:
     - expr: min['pm'] - 10 > 45
@@ -325,36 +326,38 @@ sims:
     corners: 5
     measures:
       rail_gain:
-        nominal: 0.417562
-        min: 0.409293
+        nominal: 0.233233
+        min: 0.227045
         min_at: R-BREATH-FB- R-BREATH-OFFNEG+
-        max: 0.425998
+        max: 0.239596
         max_at: R-BREATH-FB+ R-BREATH-OFFNEG-
       jack_mv:
-        nominal: 4.05035
-        min: 3.97015
+        nominal: 2.26236
+        min: 2.20234
         min_at: R-BREATH-FB- R-BREATH-OFFNEG+
-        max: 4.13218
+        max: 2.32408
         max_at: R-BREATH-FB+ R-BREATH-OFFNEG-
     asserts:
-    - expr: max['jack_mv'] < 4.5 and min['jack_mv'] > 3.7
-      why: 'the page''s 4.1 mV at the jack for 9.7 mV on the rail: R-BREATH-FB/R-BREATH-OFFNEG, less the 1 % R-OUT-PROT drop
-        into the load'
+    - expr: abs(nom['rail_gain'] / (0.99 * p['R-BREATH-FB'] / math.hypot(2 * p['R-BREATH-OFFNEG'], 2 * math.pi * 10.0 * p['R-BREATH-OFFNEG']
+        ** 2 * p['C-BREATH-OFFNEG'])) - 1) < 0.05 and max['jack_mv'] < 2.6
+      why: 'since #32 the -12 V leg is two halves with C-BREATH-OFFNEG at the split (owner, 2026-10-04: ''Add RC filter (Recommended)''):
+        at 10 Hz the rail reaches the jack by R-BREATH-FB / |2R + j w R^2 C| [calc: 0.236 V/V, 2.3 mV for ADR 0027''s 9.7
+        mV], less the 1 % R-OUT-PROT drop, within 5 %. It was 0.42 V/V and 4.1 mV with the one 95.3k'
       pass: true
   chain-centre:
     corners: 1
     measures:
       out_hard:
-        nominal: 9.95817
-        min: 9.95817
+        nominal: 9.97413
+        min: 9.97413
         min_at: nominal
-        max: 9.95817
+        max: 9.97413
         max_at: nominal
       clip_in:
-        nominal: -5.55712
-        min: -5.55712
+        nominal: -5.54975
+        min: -5.54975
         min_at: nominal
-        max: -5.55712
+        max: -5.54975
         max_at: nominal
     asserts:
     - expr: nom['out_hard'] > 9.8 and nom['out_hard'] < 10.2
@@ -365,10 +368,10 @@ sims:
     corners: 1
     measures:
       out_hard:
-        nominal: 4.87073
-        min: 4.87073
+        nominal: 4.8867
+        min: 4.8867
         min_at: nominal
-        max: 4.87073
+        max: 4.8867
         max_at: nominal
       ratio_hard:
         nominal: 0.48989
@@ -387,10 +390,10 @@ sims:
     corners: 1
     measures:
       out_hard:
-        nominal: 8.3981
-        min: 8.3981
+        nominal: 8.41406
+        min: 8.41406
         min_at: nominal
-        max: 8.3981
+        max: 8.41406
         max_at: nominal
       ratio_hard:
         nominal: 0.842522
@@ -399,20 +402,20 @@ sims:
         max: 0.842522
         max_at: nominal
       clip_in:
-        nominal: -6.75719
-        min: -6.75719
+        nominal: -6.74764
+        min: -6.74764
         min_at: nominal
-        max: -6.75719
+        max: -6.74764
         max_at: nominal
     asserts: []
   chain[p_resp=0.5]:
     corners: 1
     measures:
       out_hard:
-        nominal: 9.95817
-        min: 9.95817
+        nominal: 9.97413
+        min: 9.97413
         min_at: nominal
-        max: 9.95817
+        max: 9.97413
         max_at: nominal
       ratio_hard:
         nominal: 0.998485
@@ -421,20 +424,20 @@ sims:
         max: 0.998485
         max_at: nominal
       clip_in:
-        nominal: -5.55712
-        min: -5.55712
+        nominal: -5.54975
+        min: -5.54975
         min_at: nominal
-        max: -5.55712
+        max: -5.54975
         max_at: nominal
     asserts: []
   chain[p_resp=0.75]:
     corners: 1
     measures:
       out_hard:
-        nominal: 10.894
-        min: 10.894
+        nominal: 10.91
+        min: 10.91
         min_at: nominal
-        max: 10.894
+        max: 10.91
         max_at: nominal
       ratio_hard:
         nominal: 1.09205
@@ -443,20 +446,20 @@ sims:
         max: 1.09205
         max_at: nominal
       clip_in:
-        nominal: -5.05052
-        min: -5.05052
+        nominal: -5.04426
+        min: -5.04426
         min_at: nominal
-        max: -5.05052
+        max: -5.04426
         max_at: nominal
     asserts: []
   chain[p_resp=1.0]:
     corners: 1
     measures:
       out_hard:
-        nominal: 11.9691
-        min: 11.9691
+        nominal: 11.9709
+        min: 11.9709
         min_at: nominal
-        max: 11.9691
+        max: 11.9709
         max_at: nominal
       ratio_hard:
         nominal: 1.55422
@@ -465,20 +468,20 @@ sims:
         max: 1.55422
         max_at: nominal
       clip_in:
-        nominal: -3.66935
-        min: -3.66935
+        nominal: -3.66517
+        min: -3.66517
         min_at: nominal
-        max: -3.66935
+        max: -3.66517
         max_at: nominal
     asserts: []
   chain-trim[p_trim=0.0]:
     corners: 1
     measures:
       out_hard:
-        nominal: 11.9633
-        min: 11.9633
+        nominal: 11.9701
+        min: 11.9701
         min_at: nominal
-        max: 11.9633
+        max: 11.9701
         max_at: nominal
       ratio_hard:
         nominal: 1.33965
@@ -487,20 +490,20 @@ sims:
         max: 1.33965
         max_at: nominal
       clip_in:
-        nominal: -4.16815
-        min: -4.16815
+        nominal: -4.16312
+        min: -4.16312
         min_at: nominal
-        max: -4.16815
+        max: -4.16312
         max_at: nominal
     asserts: []
   chain-trim[p_trim=1.0]:
     corners: 1
     measures:
       out_hard:
-        nominal: 11.9699
-        min: 11.9699
+        nominal: 11.9707
+        min: 11.9707
         min_at: nominal
-        max: 11.9699
+        max: 11.9707
         max_at: nominal
       ratio_hard:
         nominal: 1.72756
@@ -509,13 +512,145 @@ sims:
         max: 1.72756
         max_at: nominal
       clip_in:
-        nominal: -3.37587
-        min: -3.37587
+        nominal: -3.36608
+        min: -3.36608
         min_at: nominal
-        max: -3.37587
+        max: -3.36608
         max_at: nominal
     asserts: []
-  noise[p_resp=0.0,level=0]:
+  led[led_is=7e-28]:
+    corners: 5
+    measures:
+      dj_max:
+        nominal: 8.36837e-08
+        min: 8.07528e-08
+        min_at: R-BREATH-FB- R-BREATH-IN+
+        max: 8.39521e-08
+        max_at: R-BREATH-FB+ R-BREATH-IN-
+      dj_min:
+        nominal: -8.17322e-07
+        min: -8.36135e-07
+        min_at: R-BREATH-FB+ R-BREATH-IN-
+        max: -7.99101e-07
+        max_at: R-BREATH-FB- R-BREATH-IN+
+      i_off:
+        nominal: 4.43266e-09
+        min: 4.39192e-09
+        min_at: R-BREATH-FB+ R-BREATH-IN-
+        max: 4.43327e-09
+        max_at: R-BREATH-FB- R-BREATH-IN+
+      i_5:
+        nominal: 0.00250201
+        min: 0.00250201
+        min_at: R-BREATH-FB+ R-BREATH-IN-
+        max: 0.00250201
+        max_at: R-BREATH-FB- R-BREATH-IN+
+      i_10:
+        nominal: 0.00500209
+        min: 0.00500209
+        min_at: R-BREATH-FB+ R-BREATH-IN-
+        max: 0.00500209
+        max_at: R-BREATH-FB- R-BREATH-IN+
+      i_max:
+        nominal: 0.00598517
+        min: 0.00598501
+        min_at: R-BREATH-FB- R-BREATH-IN+
+        max: 0.00598532
+        max_at: R-BREATH-FB+ R-BREATH-IN-
+      i_ovs_pct:
+        nominal: 2.51477
+        min: 2.4266
+        min_at: R-BREATH-FB+ R-BREATH-IN-
+        max: 2.6038
+        max_at: R-BREATH-FB- R-BREATH-IN+
+    asserts:
+    - expr: abs(max['dj_max']) < 153e-6 and abs(min['dj_min']) < 153e-6
+      why: 'THE CV''S BUDGET: the driver moves the jack by under 1 LSB of 10 V at 16 bits (153 uV, the yardstick breath-link-cmrr
+        is held to) anywhere in the unclipped range, at every corner: it loads BREATH_OUT, inside the summer''s loop, with
+        110 kohm and a pA input'
+      pass: true
+    - expr: max['i_off'] < 1e-6
+      why: 'dark at rest and below: under 1 uA wherever BREATH_OUT is at or under 0 V'
+      pass: true
+    - expr: min['i_10'] > 4.5e-3 and max['i_10'] < 5.6e-3
+      why: 'about the power LED''s current at a 10 V jack: 10/11/180 ohm = 5.05 mA, within 10 % across beta and both LEDs
+        (the emitter current is set; the collector loses I_B)'
+      pass: true
+    - expr: max['i_max'] < 6.3e-3
+      why: 'THE CAP: at the positive clip (BREATH_OUT at the OPA2197''s swing) the LED takes no more than 6.3 mA, inside both
+        catalogues'' ratings (15 and 20 mA)'
+      pass: true
+    - expr: max['i_ovs_pct'] < 10
+      why: 'the driver''s own loop (U-REF-BUF B through D-LEDB and Q-LEDB''s emitter follower) settles a 2 us edge with under
+        10 % overshoot: it does not ring'
+      pass: true
+  led[led_is=7e-20]:
+    corners: 5
+    measures:
+      dj_max:
+        nominal: 8.36837e-08
+        min: 8.07528e-08
+        min_at: R-BREATH-FB- R-BREATH-IN+
+        max: 8.39521e-08
+        max_at: R-BREATH-FB+ R-BREATH-IN-
+      dj_min:
+        nominal: -8.17334e-07
+        min: -8.36082e-07
+        min_at: R-BREATH-FB+ R-BREATH-IN-
+        max: -7.9912e-07
+        max_at: R-BREATH-FB- R-BREATH-IN+
+      i_off:
+        nominal: 4.62609e-09
+        min: 4.58345e-09
+        min_at: R-BREATH-FB+ R-BREATH-IN-
+        max: 4.6267e-09
+        max_at: R-BREATH-FB- R-BREATH-IN+
+      i_5:
+        nominal: 0.00250229
+        min: 0.00250229
+        min_at: R-BREATH-FB+ R-BREATH-IN-
+        max: 0.00250229
+        max_at: R-BREATH-FB- R-BREATH-IN+
+      i_10:
+        nominal: 0.00500269
+        min: 0.00500268
+        min_at: R-BREATH-FB+ R-BREATH-IN-
+        max: 0.00500269
+        max_at: R-BREATH-FB- R-BREATH-IN+
+      i_max:
+        nominal: 0.0059859
+        min: 0.00598574
+        min_at: R-BREATH-FB- R-BREATH-IN+
+        max: 0.00598605
+        max_at: R-BREATH-FB+ R-BREATH-IN-
+      i_ovs_pct:
+        nominal: 2.50772
+        min: 2.42786
+        min_at: R-BREATH-FB+ R-BREATH-IN-
+        max: 2.60389
+        max_at: R-BREATH-FB- R-BREATH-IN+
+    asserts:
+    - expr: abs(max['dj_max']) < 153e-6 and abs(min['dj_min']) < 153e-6
+      why: 'THE CV''S BUDGET: the driver moves the jack by under 1 LSB of 10 V at 16 bits (153 uV, the yardstick breath-link-cmrr
+        is held to) anywhere in the unclipped range, at every corner: it loads BREATH_OUT, inside the summer''s loop, with
+        110 kohm and a pA input'
+      pass: true
+    - expr: max['i_off'] < 1e-6
+      why: 'dark at rest and below: under 1 uA wherever BREATH_OUT is at or under 0 V'
+      pass: true
+    - expr: min['i_10'] > 4.5e-3 and max['i_10'] < 5.6e-3
+      why: 'about the power LED''s current at a 10 V jack: 10/11/180 ohm = 5.05 mA, within 10 % across beta and both LEDs
+        (the emitter current is set; the collector loses I_B)'
+      pass: true
+    - expr: max['i_max'] < 6.3e-3
+      why: 'THE CAP: at the positive clip (BREATH_OUT at the OPA2197''s swing) the LED takes no more than 6.3 mA, inside both
+        catalogues'' ratings (15 and 20 mA)'
+      pass: true
+    - expr: max['i_ovs_pct'] < 10
+      why: 'the driver''s own loop (U-REF-BUF B through D-LEDB and Q-LEDB''s emitter follower) settles a 2 us edge with under
+        10 % overshoot: it does not ring'
+      pass: true
+  noise[bw=2,p_resp=0.0,level=0]:
     corners: 1
     measures:
       g_set:
@@ -525,10 +660,10 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.14272
-        min: -2.14272
+        nominal: -2.14321
+        min: -2.14321
         min_at: nominal
-        max: -2.14272
+        max: -2.14321
         max_at: nominal
       g_inc_hard:
         nominal: -0.79989
@@ -549,214 +684,214 @@ sims:
         max: 8.011e-05
         max_at: nominal
       jack_op:
-        nominal: -0.0294336
-        min: -0.0294336
+        nominal: -0.0136189
+        min: -0.0136189
         min_at: nominal
-        max: -0.0294336
+        max: -0.0136189
         max_at: nominal
       n_au_total:
-        nominal: 0.000320644
-        min: 0.000320644
+        nominal: 0.00046464
+        min: 0.00046464
         min_at: nominal
-        max: 0.000320644
+        max: 0.00046464
         max_at: nominal
       n_au_sensor:
-        nominal: 0.000320512
-        min: 0.000320512
+        nominal: 0.000463851
+        min: 0.000463851
         min_at: nominal
-        max: 0.000320512
+        max: 0.000463851
         max_at: nominal
       n_au_elec:
-        nominal: 9.18615e-06
-        min: 9.18615e-06
+        nominal: 2.70683e-05
+        min: 2.70683e-05
         min_at: nominal
-        max: 9.18615e-06
+        max: 2.70683e-05
         max_at: nominal
       n_au_ref:
-        nominal: 6.56615e-07
-        min: 6.56615e-07
+        nominal: 9.50265e-07
+        min: 9.50265e-07
         min_at: nominal
-        max: 6.56615e-07
+        max: 9.50265e-07
         max_at: nominal
       n_au_sbuf:
-        nominal: 8.13396e-07
-        min: 8.13396e-07
+        nominal: 9.97526e-07
+        min: 9.97526e-07
         min_at: nominal
-        max: 8.13396e-07
+        max: 9.97526e-07
         max_at: nominal
       n_au_link:
-        nominal: 4.98764e-07
-        min: 4.98764e-07
+        nominal: 7.21804e-07
+        min: 7.21804e-07
         min_at: nominal
-        max: 4.98764e-07
+        max: 7.21804e-07
         max_at: nominal
       n_au_recv:
-        nominal: 4.90969e-06
-        min: 4.90969e-06
+        nominal: 1.87485e-05
+        min: 1.87485e-05
         min_at: nominal
-        max: 4.90969e-06
+        max: 1.87485e-05
         max_at: nominal
       n_au_zero:
-        nominal: 7.01855e-07
-        min: 7.01855e-07
+        nominal: 2.76845e-06
+        min: 2.76845e-06
         min_at: nominal
-        max: 7.01855e-07
+        max: 2.76845e-06
         max_at: nominal
       n_au_dac:
-        nominal: 6.222e-06
-        min: 6.222e-06
+        nominal: 6.52237e-06
+        min: 6.52237e-06
         min_at: nominal
-        max: 6.222e-06
+        max: 6.52237e-06
         max_at: nominal
       n_au_shaper:
-        nominal: 3.23497e-06
-        min: 3.23497e-06
+        nominal: 1.3003e-05
+        min: 1.3003e-05
         min_at: nominal
-        max: 3.23497e-06
+        max: 1.3003e-05
         max_at: nominal
       n_au_out:
-        nominal: 3.0443e-06
-        min: 3.0443e-06
+        nominal: 1.26286e-05
+        min: 1.26286e-05
         min_at: nominal
-        max: 3.0443e-06
+        max: 1.26286e-05
         max_at: nominal
       n_au_rest:
-        nominal: 2.37708e-11
-        min: 2.37708e-11
+        nominal: 4.27207e-10
+        min: 4.27207e-10
         min_at: nominal
-        max: 2.37708e-11
+        max: 4.27207e-10
         max_at: nominal
       db_au:
-        nominal: -89.8795
-        min: -89.8795
+        nominal: -86.6577
+        min: -86.6577
         min_at: nominal
-        max: -89.8795
+        max: -86.6577
         max_at: nominal
       ppm_au:
-        nominal: 32.0644
-        min: 32.0644
+        nominal: 46.464
+        min: 46.464
         min_at: nominal
-        max: 32.0644
+        max: 46.464
         max_at: nominal
       n_cb_total:
-        nominal: 0.000292589
-        min: 0.000292589
+        nominal: 0.000324861
+        min: 0.000324861
         min_at: nominal
-        max: 0.000292589
+        max: 0.000324861
         max_at: nominal
       n_cb_sensor:
-        nominal: 0.000292424
-        min: 0.000292424
+        nominal: 0.0003247
+        min: 0.0003247
         min_at: nominal
-        max: 0.000292424
+        max: 0.0003247
         max_at: nominal
       n_cb_elec:
-        nominal: 9.81924e-06
-        min: 9.81924e-06
+        nominal: 1.02003e-05
+        min: 1.02003e-05
         min_at: nominal
-        max: 9.81924e-06
+        max: 1.02003e-05
         max_at: nominal
       n_cb_ref:
-        nominal: 5.99073e-07
-        min: 5.99073e-07
+        nominal: 6.65195e-07
+        min: 6.65195e-07
         min_at: nominal
-        max: 5.99073e-07
+        max: 6.65195e-07
         max_at: nominal
       n_cb_sbuf:
-        nominal: 1.04674e-06
-        min: 1.04674e-06
+        nominal: 1.08737e-06
+        min: 1.08737e-06
         min_at: nominal
-        max: 1.04674e-06
+        max: 1.08737e-06
         max_at: nominal
       n_cb_link:
-        nominal: 4.55056e-07
-        min: 4.55056e-07
+        nominal: 5.05282e-07
+        min: 5.05282e-07
         min_at: nominal
-        max: 4.55056e-07
+        max: 5.05282e-07
         max_at: nominal
       n_cb_recv:
-        nominal: 4.27552e-06
-        min: 4.27552e-06
+        nominal: 4.61184e-06
+        min: 4.61184e-06
         min_at: nominal
-        max: 4.27552e-06
+        max: 4.61184e-06
         max_at: nominal
       n_cb_zero:
-        nominal: 6.2317e-07
-        min: 6.2317e-07
+        nominal: 6.67084e-07
+        min: 6.67084e-07
         min_at: nominal
-        max: 6.2317e-07
+        max: 6.67084e-07
         max_at: nominal
       n_cb_dac:
-        nominal: 7.84573e-06
-        min: 7.84573e-06
+        nominal: 7.95698e-06
+        min: 7.95698e-06
         min_at: nominal
-        max: 7.84573e-06
+        max: 7.95698e-06
         max_at: nominal
       n_cb_shaper:
-        nominal: 2.79653e-06
-        min: 2.79653e-06
+        nominal: 2.99823e-06
+        min: 2.99823e-06
         min_at: nominal
-        max: 2.79653e-06
+        max: 2.99823e-06
         max_at: nominal
       n_cb_out:
-        nominal: 2.59064e-06
-        min: 2.59064e-06
+        nominal: 2.85471e-06
+        min: 2.85471e-06
         min_at: nominal
-        max: 2.59064e-06
+        max: 2.85471e-06
         max_at: nominal
       n_cb_rest:
-        nominal: 1.10454e-12
-        min: 1.10454e-12
+        nominal: 2.10208e-12
+        min: 2.10208e-12
         min_at: nominal
-        max: 1.10454e-12
+        max: 2.10208e-12
         max_at: nominal
       db_cb:
-        nominal: -90.6748
-        min: -90.6748
+        nominal: -89.7661
+        min: -89.7661
         min_at: nominal
-        max: -90.6748
+        max: -89.7661
         max_at: nominal
       ppm_cb:
-        nominal: 29.2589
-        min: 29.2589
+        nominal: 32.486
+        min: 32.486
         min_at: nominal
-        max: 29.2589
+        max: 32.486
         max_at: nominal
       e_100:
-        nominal: 1.63133e-05
-        min: 1.63133e-05
+        nominal: 1.67048e-05
+        min: 1.67048e-05
         min_at: nominal
-        max: 1.63133e-05
+        max: 1.67048e-05
         max_at: nominal
       e_1k:
-        nominal: 3.14347e-06
-        min: 3.14347e-06
+        nominal: 7.60913e-06
+        min: 7.60913e-06
         min_at: nominal
-        max: 3.14347e-06
+        max: 7.60913e-06
         max_at: nominal
       e_1k_elec:
-        nominal: 9.93484e-08
-        min: 9.93484e-08
+        nominal: 2.27982e-07
+        min: 2.27982e-07
         min_at: nominal
-        max: 9.93484e-08
+        max: 2.27982e-07
         max_at: nominal
       n_adc_total:
-        nominal: 6.60335e-05
-        min: 6.60335e-05
+        nominal: 0.000106709
+        min: 0.000106709
         min_at: nominal
-        max: 6.60335e-05
+        max: 0.000106709
         max_at: nominal
       n_adc_sensor:
-        nominal: 6.60325e-05
-        min: 6.60325e-05
+        nominal: 0.000106708
+        min: 0.000106708
         min_at: nominal
-        max: 6.60325e-05
+        max: 0.000106708
         max_at: nominal
       n_adc_lsb:
-        nominal: 0.0819616
-        min: 0.0819616
+        nominal: 0.132449
+        min: 0.132449
         min_at: nominal
-        max: 0.0819616
+        max: 0.132449
         max_at: nominal
       e_sens_chk:
         nominal: 3.70003e-06
@@ -771,18 +906,21 @@ sims:
     - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
       why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
       pass: true
-    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.1 * nom['n_au_sensor'])
+    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.15 * nom['n_au_sensor'])
       why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
-        is under a tenth of the sensor''s, in both bands, at every curve setting and level - on AN1646''s figure, an assumption
-        (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b, the curve''s slope there over its slope at
-        rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow (breath-chain-curve-clip), and a jack on
-        its rail passes no breath noise at all'
+        is under a tenth of the sensor''s in the control band, and under 0.15 of it in the audio band, at every bandwidth
+        mode, curve setting and level. The audio band''s bound was a tenth until #32: with the jack''s RC at 15.9 kHz this
+        stage''s own noise reaches 20 kHz unfiltered (about 12 uV rms, -118 dB of 10 V), and at POT-RESP fully counter-clockwise
+        on a hard blow in the 500 Hz mode, where the curve is flattest and the sensor''s share smallest, it is 0.12 of the
+        sensor''s - on AN1646''s figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b,
+        the curve''s slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow
+        (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all'
       pass: true
     - expr: nom['n_adc_lsb'] < 1
       why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
         and the electronics together
       pass: true
-  noise[p_resp=0.0,level=1]:
+  noise[bw=2,p_resp=0.0,level=1]:
     corners: 1
     measures:
       g_set:
@@ -792,10 +930,10 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.14272
-        min: -2.14272
+        nominal: -2.14321
+        min: -2.14321
         min_at: nominal
-        max: -2.14272
+        max: -2.14321
         max_at: nominal
       g_inc_hard:
         nominal: -0.79989
@@ -804,10 +942,10 @@ sims:
         max: -0.79989
         max_at: nominal
       r_b:
-        nominal: 0.373305
-        min: 0.373305
+        nominal: 0.373221
+        min: 0.373221
         min_at: nominal
-        max: 0.373305
+        max: 0.373221
         max_at: nominal
       ina_op:
         nominal: -4.63989
@@ -816,481 +954,4264 @@ sims:
         max: -4.63989
         max_at: nominal
       jack_op:
-        nominal: -0.0294336
-        min: -0.0294336
+        nominal: -0.0136189
+        min: -0.0136189
         min_at: nominal
-        max: -0.0294336
+        max: -0.0136189
         max_at: nominal
       n_au_total:
-        nominal: 0.000119891
-        min: 0.000119891
+        nominal: 0.000174334
+        min: 0.000174334
         min_at: nominal
-        max: 0.000119891
+        max: 0.000174334
         max_at: nominal
       n_au_sensor:
-        nominal: 0.000119649
-        min: 0.000119649
+        nominal: 0.000173119
+        min: 0.000173119
         min_at: nominal
-        max: 0.000119649
+        max: 0.000173119
         max_at: nominal
       n_au_elec:
-        nominal: 7.62255e-06
-        min: 7.62255e-06
+        nominal: 2.05429e-05
+        min: 2.05429e-05
         min_at: nominal
-        max: 7.62255e-06
+        max: 2.05429e-05
         max_at: nominal
       n_au_ref:
+        nominal: 3.22819e-06
+        min: 3.22819e-06
+        min_at: nominal
+        max: 3.22819e-06
+        max_at: nominal
+      n_au_sbuf:
+        nominal: 3.72298e-07
+        min: 3.72298e-07
+        min_at: nominal
+        max: 3.72298e-07
+        max_at: nominal
+      n_au_link:
+        nominal: 2.69393e-07
+        min: 2.69393e-07
+        min_at: nominal
+        max: 2.69393e-07
+        max_at: nominal
+      n_au_recv:
+        nominal: 6.99736e-06
+        min: 6.99736e-06
+        min_at: nominal
+        max: 6.99736e-06
+        max_at: nominal
+      n_au_zero:
+        nominal: 1.03324e-06
+        min: 1.03324e-06
+        min_at: nominal
+        max: 1.03324e-06
+        max_at: nominal
+      n_au_dac:
+        nominal: 5.726e-06
+        min: 5.726e-06
+        min_at: nominal
+        max: 5.726e-06
+        max_at: nominal
+      n_au_shaper:
+        nominal: 1.3003e-05
+        min: 1.3003e-05
+        min_at: nominal
+        max: 1.3003e-05
+        max_at: nominal
+      n_au_out:
+        nominal: 1.26286e-05
+        min: 1.26286e-05
+        min_at: nominal
+        max: 1.26286e-05
+        max_at: nominal
+      n_au_rest:
+        nominal: 1.59443e-10
+        min: 1.59443e-10
+        min_at: nominal
+        max: 1.59443e-10
+        max_at: nominal
+      db_au:
+        nominal: -95.1724
+        min: -95.1724
+        min_at: nominal
+        max: -95.1724
+        max_at: nominal
+      ppm_au:
+        nominal: 17.4334
+        min: 17.4334
+        min_at: nominal
+        max: 17.4334
+        max_at: nominal
+      n_cb_total:
+        nominal: 0.000121491
+        min: 0.000121491
+        min_at: nominal
+        max: 0.000121491
+        max_at: nominal
+      n_cb_sensor:
+        nominal: 0.000121185
+        min: 0.000121185
+        min_at: nominal
+        max: 0.000121185
+        max_at: nominal
+      n_cb_elec:
+        nominal: 8.61781e-06
+        min: 8.61781e-06
+        min_at: nominal
+        max: 8.61781e-06
+        max_at: nominal
+      n_cb_ref:
+        nominal: 2.25977e-06
+        min: 2.25977e-06
+        min_at: nominal
+        max: 2.25977e-06
+        max_at: nominal
+      n_cb_sbuf:
+        nominal: 4.05829e-07
+        min: 4.05829e-07
+        min_at: nominal
+        max: 4.05829e-07
+        max_at: nominal
+      n_cb_link:
+        nominal: 1.88582e-07
+        min: 1.88582e-07
+        min_at: nominal
+        max: 1.88582e-07
+        max_at: nominal
+      n_cb_recv:
+        nominal: 1.72124e-06
+        min: 1.72124e-06
+        min_at: nominal
+        max: 1.72124e-06
+        max_at: nominal
+      n_cb_zero:
+        nominal: 2.4897e-07
+        min: 2.4897e-07
+        min_at: nominal
+        max: 2.4897e-07
+        max_at: nominal
+      n_cb_dac:
+        nominal: 6.98544e-06
+        min: 6.98544e-06
+        min_at: nominal
+        max: 6.98544e-06
+        max_at: nominal
+      n_cb_shaper:
+        nominal: 2.99823e-06
+        min: 2.99823e-06
+        min_at: nominal
+        max: 2.99823e-06
+        max_at: nominal
+      n_cb_out:
+        nominal: 2.85471e-06
+        min: 2.85471e-06
+        min_at: nominal
+        max: 2.85471e-06
+        max_at: nominal
+      n_cb_rest:
+        nominal: 7.56096e-13
+        min: 7.56096e-13
+        min_at: nominal
+        max: 7.56096e-13
+        max_at: nominal
+      db_cb:
+        nominal: -98.3091
+        min: -98.3091
+        min_at: nominal
+        max: -98.3091
+        max_at: nominal
+      ppm_cb:
+        nominal: 12.1491
+        min: 12.1491
+        min_at: nominal
+        max: 12.1491
+        max_at: nominal
+      e_100:
+        nominal: 6.24408e-06
+        min: 6.24408e-06
+        min_at: nominal
+        max: 6.24408e-06
+        max_at: nominal
+      e_1k:
+        nominal: 2.84407e-06
+        min: 2.84407e-06
+        min_at: nominal
+        max: 2.84407e-06
+        max_at: nominal
+      e_1k_elec:
+        nominal: 1.76035e-07
+        min: 1.76035e-07
+        min_at: nominal
+        max: 1.76035e-07
+        max_at: nominal
+      n_adc_total:
+        nominal: 0.000106728
+        min: 0.000106728
+        min_at: nominal
+        max: 0.000106728
+        max_at: nominal
+      n_adc_sensor:
+        nominal: 0.000106708
+        min: 0.000106708
+        min_at: nominal
+        max: 0.000106708
+        max_at: nominal
+      n_adc_lsb:
+        nominal: 0.132472
+        min: 0.132472
+        min_at: nominal
+        max: 0.132472
+        max_at: nominal
+      e_sens_chk:
+        nominal: 3.70067e-06
+        min: 3.70067e-06
+        min_at: nominal
+        max: 3.70067e-06
+        max_at: nominal
+    asserts:
+    - expr: nom['n_au_rest'] < 0.01 * nom['n_au_total'] and nom['n_cb_rest'] < 0.01 * nom['n_cb_total']
+      why: 'the bookkeeping closes: every noise source in the deck is in a named stage (under 1 % of the total is unclaimed)'
+      pass: true
+    - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
+      why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
+      pass: true
+    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.15 * nom['n_au_sensor'])
+      why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
+        is under a tenth of the sensor''s in the control band, and under 0.15 of it in the audio band, at every bandwidth
+        mode, curve setting and level. The audio band''s bound was a tenth until #32: with the jack''s RC at 15.9 kHz this
+        stage''s own noise reaches 20 kHz unfiltered (about 12 uV rms, -118 dB of 10 V), and at POT-RESP fully counter-clockwise
+        on a hard blow in the 500 Hz mode, where the curve is flattest and the sensor''s share smallest, it is 0.12 of the
+        sensor''s - on AN1646''s figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b,
+        the curve''s slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow
+        (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all'
+      pass: true
+    - expr: nom['n_adc_lsb'] < 1
+      why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
+        and the electronics together
+      pass: true
+  noise[bw=2,p_resp=0.5,level=0]:
+    corners: 1
+    measures:
+      g_set:
+        nominal: 1.55
+        min: 1.55
+        min_at: nominal
+        max: 1.55
+        max_at: nominal
+      g_inc_rest:
+        nominal: -2.14907
+        min: -2.14907
+        min_at: nominal
+        max: -2.14907
+        max_at: nominal
+      g_inc_hard:
+        nominal: -2.14402
+        min: -2.14402
+        min_at: nominal
+        max: -2.14402
+        max_at: nominal
+      r_b:
+        nominal: 1.0
+        min: 1.0
+        min_at: nominal
+        max: 1.0
+        max_at: nominal
+      ina_op:
+        nominal: 8.011e-05
+        min: 8.011e-05
+        min_at: nominal
+        max: 8.011e-05
+        max_at: nominal
+      jack_op:
+        nominal: -0.0136188
+        min: -0.0136188
+        min_at: nominal
+        max: -0.0136188
+        max_at: nominal
+      n_au_total:
+        nominal: 0.000465595
+        min: 0.000465595
+        min_at: nominal
+        max: 0.000465595
+        max_at: nominal
+      n_au_sensor:
+        nominal: 0.000464806
+        min: 0.000464806
+        min_at: nominal
+        max: 0.000464806
+        max_at: nominal
+      n_au_elec:
+        nominal: 2.70997e-05
+        min: 2.70997e-05
+        min_at: nominal
+        max: 2.70997e-05
+        max_at: nominal
+      n_au_ref:
+        nominal: 9.52222e-07
+        min: 9.52222e-07
+        min_at: nominal
+        max: 9.52222e-07
+        max_at: nominal
+      n_au_sbuf:
+        nominal: 9.99579e-07
+        min: 9.99579e-07
+        min_at: nominal
+        max: 9.99579e-07
+        max_at: nominal
+      n_au_link:
+        nominal: 7.2329e-07
+        min: 7.2329e-07
+        min_at: nominal
+        max: 7.2329e-07
+        max_at: nominal
+      n_au_recv:
+        nominal: 1.87872e-05
+        min: 1.87872e-05
+        min_at: nominal
+        max: 1.87872e-05
+        max_at: nominal
+      n_au_zero:
+        nominal: 2.77416e-06
+        min: 2.77416e-06
+        min_at: nominal
+        max: 2.77416e-06
+        max_at: nominal
+      n_au_dac:
+        nominal: 6.52499e-06
+        min: 6.52499e-06
+        min_at: nominal
+        max: 6.52499e-06
+        max_at: nominal
+      n_au_shaper:
+        nominal: 1.30097e-05
+        min: 1.30097e-05
+        min_at: nominal
+        max: 1.30097e-05
+        max_at: nominal
+      n_au_out:
+        nominal: 1.26286e-05
+        min: 1.26286e-05
+        min_at: nominal
+        max: 1.26286e-05
+        max_at: nominal
+      n_au_rest:
+        nominal: 4.28085e-10
+        min: 4.28085e-10
+        min_at: nominal
+        max: 4.28085e-10
+        max_at: nominal
+      db_au:
+        nominal: -86.6398
+        min: -86.6398
+        min_at: nominal
+        max: -86.6398
+        max_at: nominal
+      ppm_au:
+        nominal: 46.5595
+        min: 46.5595
+        min_at: nominal
+        max: 46.5595
+        max_at: nominal
+      n_cb_total:
+        nominal: 0.000325529
+        min: 0.000325529
+        min_at: nominal
+        max: 0.000325529
+        max_at: nominal
+      n_cb_sensor:
+        nominal: 0.000325369
+        min: 0.000325369
+        min_at: nominal
+        max: 0.000325369
+        max_at: nominal
+      n_cb_elec:
+        nominal: 1.0208e-05
+        min: 1.0208e-05
+        min_at: nominal
+        max: 1.0208e-05
+        max_at: nominal
+      n_cb_ref:
+        nominal: 6.66565e-07
+        min: 6.66565e-07
+        min_at: nominal
+        max: 6.66565e-07
+        max_at: nominal
+      n_cb_sbuf:
+        nominal: 1.08961e-06
+        min: 1.08961e-06
+        min_at: nominal
+        max: 1.08961e-06
+        max_at: nominal
+      n_cb_link:
+        nominal: 5.06323e-07
+        min: 5.06323e-07
+        min_at: nominal
+        max: 5.06323e-07
+        max_at: nominal
+      n_cb_recv:
+        nominal: 4.62133e-06
+        min: 4.62133e-06
+        min_at: nominal
+        max: 4.62133e-06
+        max_at: nominal
+      n_cb_zero:
+        nominal: 6.68457e-07
+        min: 6.68457e-07
+        min_at: nominal
+        max: 6.68457e-07
+        max_at: nominal
+      n_cb_dac:
+        nominal: 7.96017e-06
+        min: 7.96017e-06
+        min_at: nominal
+        max: 7.96017e-06
+        max_at: nominal
+      n_cb_shaper:
+        nominal: 2.99977e-06
+        min: 2.99977e-06
+        min_at: nominal
+        max: 2.99977e-06
+        max_at: nominal
+      n_cb_out:
+        nominal: 2.85471e-06
+        min: 2.85471e-06
+        min_at: nominal
+        max: 2.85471e-06
+        max_at: nominal
+      n_cb_rest:
+        nominal: 1.83449e-12
+        min: 1.83449e-12
+        min_at: nominal
+        max: 1.83449e-12
+        max_at: nominal
+      db_cb:
+        nominal: -89.7482
+        min: -89.7482
+        min_at: nominal
+        max: -89.7482
+        max_at: nominal
+      ppm_cb:
+        nominal: 32.5529
+        min: 32.5529
+        min_at: nominal
+        max: 32.5529
+        max_at: nominal
+      e_100:
+        nominal: 1.67392e-05
+        min: 1.67392e-05
+        min_at: nominal
+        max: 1.67392e-05
+        max_at: nominal
+      e_1k:
+        nominal: 7.62478e-06
+        min: 7.62478e-06
+        min_at: nominal
+        max: 7.62478e-06
+        max_at: nominal
+      e_1k_elec:
+        nominal: 2.28257e-07
+        min: 2.28257e-07
+        min_at: nominal
+        max: 2.28257e-07
+        max_at: nominal
+      n_adc_total:
+        nominal: 0.000106709
+        min: 0.000106709
+        min_at: nominal
+        max: 0.000106709
+        max_at: nominal
+      n_adc_sensor:
+        nominal: 0.000106708
+        min: 0.000106708
+        min_at: nominal
+        max: 0.000106708
+        max_at: nominal
+      n_adc_lsb:
+        nominal: 0.132449
+        min: 0.132449
+        min_at: nominal
+        max: 0.132449
+        max_at: nominal
+      e_sens_chk:
+        nominal: 3.70003e-06
+        min: 3.70003e-06
+        min_at: nominal
+        max: 3.70003e-06
+        max_at: nominal
+    asserts:
+    - expr: nom['n_au_rest'] < 0.01 * nom['n_au_total'] and nom['n_cb_rest'] < 0.01 * nom['n_cb_total']
+      why: 'the bookkeeping closes: every noise source in the deck is in a named stage (under 1 % of the total is unclaimed)'
+      pass: true
+    - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
+      why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
+      pass: true
+    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.15 * nom['n_au_sensor'])
+      why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
+        is under a tenth of the sensor''s in the control band, and under 0.15 of it in the audio band, at every bandwidth
+        mode, curve setting and level. The audio band''s bound was a tenth until #32: with the jack''s RC at 15.9 kHz this
+        stage''s own noise reaches 20 kHz unfiltered (about 12 uV rms, -118 dB of 10 V), and at POT-RESP fully counter-clockwise
+        on a hard blow in the 500 Hz mode, where the curve is flattest and the sensor''s share smallest, it is 0.12 of the
+        sensor''s - on AN1646''s figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b,
+        the curve''s slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow
+        (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all'
+      pass: true
+    - expr: nom['n_adc_lsb'] < 1
+      why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
+        and the electronics together
+      pass: true
+  noise[bw=2,p_resp=0.5,level=1]:
+    corners: 1
+    measures:
+      g_set:
+        nominal: 1.55
+        min: 1.55
+        min_at: nominal
+        max: 1.55
+        max_at: nominal
+      g_inc_rest:
+        nominal: -2.14907
+        min: -2.14907
+        min_at: nominal
+        max: -2.14907
+        max_at: nominal
+      g_inc_hard:
+        nominal: -2.14402
+        min: -2.14402
+        min_at: nominal
+        max: -2.14402
+        max_at: nominal
+      r_b:
+        nominal: 0.997648
+        min: 0.997648
+        min_at: nominal
+        max: 0.997648
+        max_at: nominal
+      ina_op:
+        nominal: -4.63989
+        min: -4.63989
+        min_at: nominal
+        max: -4.63989
+        max_at: nominal
+      jack_op:
+        nominal: -0.0136188
+        min: -0.0136188
+        min_at: nominal
+        max: -0.0136188
+        max_at: nominal
+      n_au_total:
+        nominal: 0.000464582
+        min: 0.000464582
+        min_at: nominal
+        max: 0.000464582
+        max_at: nominal
+      n_au_sensor:
+        nominal: 0.000463713
+        min: 0.000463713
+        min_at: nominal
+        max: 0.000463713
+        max_at: nominal
+      n_au_elec:
+        nominal: 2.83992e-05
+        min: 2.83992e-05
+        min_at: nominal
+        max: 2.83992e-05
+        max_at: nominal
+      n_au_ref:
+        nominal: 8.64696e-06
+        min: 8.64696e-06
+        min_at: nominal
+        max: 8.64696e-06
+        max_at: nominal
+      n_au_sbuf:
+        nominal: 9.97229e-07
+        min: 9.97229e-07
+        min_at: nominal
+        max: 9.97229e-07
+        max_at: nominal
+      n_au_link:
+        nominal: 7.21589e-07
+        min: 7.21589e-07
+        min_at: nominal
+        max: 7.21589e-07
+        max_at: nominal
+      n_au_recv:
+        nominal: 1.8743e-05
+        min: 1.8743e-05
+        min_at: nominal
+        max: 1.8743e-05
+        max_at: nominal
+      n_au_zero:
+        nominal: 2.76763e-06
+        min: 2.76763e-06
+        min_at: nominal
+        max: 2.76763e-06
+        max_at: nominal
+      n_au_dac:
+        nominal: 6.52199e-06
+        min: 6.52199e-06
+        min_at: nominal
+        max: 6.52199e-06
+        max_at: nominal
+      n_au_shaper:
+        nominal: 1.30097e-05
+        min: 1.30097e-05
+        min_at: nominal
+        max: 1.30097e-05
+        max_at: nominal
+      n_au_out:
+        nominal: 1.26286e-05
+        min: 1.26286e-05
+        min_at: nominal
+        max: 1.26286e-05
+        max_at: nominal
+      n_au_rest:
+        nominal: 4.27093e-10
+        min: 4.27093e-10
+        min_at: nominal
+        max: 4.27093e-10
+        max_at: nominal
+      db_au:
+        nominal: -86.6588
+        min: -86.6588
+        min_at: nominal
+        max: -86.6588
+        max_at: nominal
+      ppm_au:
+        nominal: 46.4582
+        min: 46.4582
+        min_at: nominal
+        max: 46.4582
+        max_at: nominal
+      n_cb_total:
+        nominal: 0.00032482
+        min: 0.00032482
+        min_at: nominal
+        max: 0.00032482
+        max_at: nominal
+      n_cb_sensor:
+        nominal: 0.000324603
+        min: 0.000324603
+        min_at: nominal
+        max: 0.000324603
+        max_at: nominal
+      n_cb_elec:
+        nominal: 1.18419e-05
+        min: 1.18419e-05
+        min_at: nominal
+        max: 1.18419e-05
+        max_at: nominal
+      n_cb_ref:
+        nominal: 6.05295e-06
+        min: 6.05295e-06
+        min_at: nominal
+        max: 6.05295e-06
+        max_at: nominal
+      n_cb_sbuf:
+        nominal: 1.08704e-06
+        min: 1.08704e-06
+        min_at: nominal
+        max: 1.08704e-06
+        max_at: nominal
+      n_cb_link:
+        nominal: 5.05132e-07
+        min: 5.05132e-07
+        min_at: nominal
+        max: 5.05132e-07
+        max_at: nominal
+      n_cb_recv:
+        nominal: 4.61047e-06
+        min: 4.61047e-06
+        min_at: nominal
+        max: 4.61047e-06
+        max_at: nominal
+      n_cb_zero:
+        nominal: 6.66885e-07
+        min: 6.66885e-07
+        min_at: nominal
+        max: 6.66885e-07
+        max_at: nominal
+      n_cb_dac:
+        nominal: 7.95652e-06
+        min: 7.95652e-06
+        min_at: nominal
+        max: 7.95652e-06
+        max_at: nominal
+      n_cb_shaper:
+        nominal: 2.99977e-06
+        min: 2.99977e-06
+        min_at: nominal
+        max: 2.99977e-06
+        max_at: nominal
+      n_cb_out:
+        nominal: 2.85471e-06
+        min: 2.85471e-06
+        min_at: nominal
+        max: 2.85471e-06
+        max_at: nominal
+      n_cb_rest:
+        nominal: 3.35863e-12
+        min: 3.35863e-12
+        min_at: nominal
+        max: 3.35863e-12
+        max_at: nominal
+      db_cb:
+        nominal: -89.7672
+        min: -89.7672
+        min_at: nominal
+        max: -89.7672
+        max_at: nominal
+      ppm_cb:
+        nominal: 32.4819
+        min: 32.4819
+        min_at: nominal
+        max: 32.4819
+        max_at: nominal
+      e_100:
+        nominal: 1.67027e-05
+        min: 1.67027e-05
+        min_at: nominal
+        max: 1.67027e-05
+        max_at: nominal
+      e_1k:
+        nominal: 7.60817e-06
+        min: 7.60817e-06
+        min_at: nominal
+        max: 7.60817e-06
+        max_at: nominal
+      e_1k_elec:
+        nominal: 2.68018e-07
+        min: 2.68018e-07
+        min_at: nominal
+        max: 2.68018e-07
+        max_at: nominal
+      n_adc_total:
+        nominal: 0.000106728
+        min: 0.000106728
+        min_at: nominal
+        max: 0.000106728
+        max_at: nominal
+      n_adc_sensor:
+        nominal: 0.000106708
+        min: 0.000106708
+        min_at: nominal
+        max: 0.000106708
+        max_at: nominal
+      n_adc_lsb:
+        nominal: 0.132472
+        min: 0.132472
+        min_at: nominal
+        max: 0.132472
+        max_at: nominal
+      e_sens_chk:
+        nominal: 3.70067e-06
+        min: 3.70067e-06
+        min_at: nominal
+        max: 3.70067e-06
+        max_at: nominal
+    asserts:
+    - expr: nom['n_au_rest'] < 0.01 * nom['n_au_total'] and nom['n_cb_rest'] < 0.01 * nom['n_cb_total']
+      why: 'the bookkeeping closes: every noise source in the deck is in a named stage (under 1 % of the total is unclaimed)'
+      pass: true
+    - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
+      why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
+      pass: true
+    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.15 * nom['n_au_sensor'])
+      why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
+        is under a tenth of the sensor''s in the control band, and under 0.15 of it in the audio band, at every bandwidth
+        mode, curve setting and level. The audio band''s bound was a tenth until #32: with the jack''s RC at 15.9 kHz this
+        stage''s own noise reaches 20 kHz unfiltered (about 12 uV rms, -118 dB of 10 V), and at POT-RESP fully counter-clockwise
+        on a hard blow in the 500 Hz mode, where the curve is flattest and the sensor''s share smallest, it is 0.12 of the
+        sensor''s - on AN1646''s figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b,
+        the curve''s slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow
+        (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all'
+      pass: true
+    - expr: nom['n_adc_lsb'] < 1
+      why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
+        and the electronics together
+      pass: true
+  noise[bw=2,p_resp=1.0,level=0]:
+    corners: 1
+    measures:
+      g_set:
+        nominal: 1.55
+        min: 1.55
+        min_at: nominal
+        max: 1.55
+        max_at: nominal
+      g_inc_rest:
+        nominal: -2.15455
+        min: -2.15455
+        min_at: nominal
+        max: -2.15455
+        max_at: nominal
+      g_inc_hard:
+        nominal: 0.0003
+        min: 0.0003
+        min_at: nominal
+        max: 0.0003
+        max_at: nominal
+      r_b:
+        nominal: 1.0
+        min: 1.0
+        min_at: nominal
+        max: 1.0
+        max_at: nominal
+      ina_op:
+        nominal: 8.011e-05
+        min: 8.011e-05
+        min_at: nominal
+        max: 8.011e-05
+        max_at: nominal
+      jack_op:
+        nominal: -0.0136186
+        min: -0.0136186
+        min_at: nominal
+        max: -0.0136186
+        max_at: nominal
+      n_au_total:
+        nominal: 0.000466551
+        min: 0.000466551
+        min_at: nominal
+        max: 0.000466551
+        max_at: nominal
+      n_au_sensor:
+        nominal: 0.000465761
+        min: 0.000465761
+        min_at: nominal
+        max: 0.000465761
+        max_at: nominal
+      n_au_elec:
+        nominal: 2.71312e-05
+        min: 2.71312e-05
+        min_at: nominal
+        max: 2.71312e-05
+        max_at: nominal
+      n_au_ref:
+        nominal: 9.54179e-07
+        min: 9.54179e-07
+        min_at: nominal
+        max: 9.54179e-07
+        max_at: nominal
+      n_au_sbuf:
+        nominal: 1.00163e-06
+        min: 1.00163e-06
+        min_at: nominal
+        max: 1.00163e-06
+        max_at: nominal
+      n_au_link:
+        nominal: 7.24777e-07
+        min: 7.24777e-07
+        min_at: nominal
+        max: 7.24777e-07
+        max_at: nominal
+      n_au_recv:
+        nominal: 1.88259e-05
+        min: 1.88259e-05
+        min_at: nominal
+        max: 1.88259e-05
+        max_at: nominal
+      n_au_zero:
+        nominal: 2.77988e-06
+        min: 2.77988e-06
+        min_at: nominal
+        max: 2.77988e-06
+        max_at: nominal
+      n_au_dac:
+        nominal: 6.5276e-06
+        min: 6.5276e-06
+        min_at: nominal
+        max: 6.5276e-06
+        max_at: nominal
+      n_au_shaper:
+        nominal: 1.30164e-05
+        min: 1.30164e-05
+        min_at: nominal
+        max: 1.30164e-05
+        max_at: nominal
+      n_au_out:
+        nominal: 1.26286e-05
+        min: 1.26286e-05
+        min_at: nominal
+        max: 1.26286e-05
+        max_at: nominal
+      n_au_rest:
+        nominal: 4.2899e-10
+        min: 4.2899e-10
+        min_at: nominal
+        max: 4.2899e-10
+        max_at: nominal
+      db_au:
+        nominal: -86.622
+        min: -86.622
+        min_at: nominal
+        max: -86.622
+        max_at: nominal
+      ppm_au:
+        nominal: 46.6551
+        min: 46.6551
+        min_at: nominal
+        max: 46.6551
+        max_at: nominal
+      n_cb_total:
+        nominal: 0.000326197
+        min: 0.000326197
+        min_at: nominal
+        max: 0.000326197
+        max_at: nominal
+      n_cb_sensor:
+        nominal: 0.000326037
+        min: 0.000326037
+        min_at: nominal
+        max: 0.000326037
+        max_at: nominal
+      n_cb_elec:
+        nominal: 1.02157e-05
+        min: 1.02157e-05
+        min_at: nominal
+        max: 1.02157e-05
+        max_at: nominal
+      n_cb_ref:
+        nominal: 6.67934e-07
+        min: 6.67934e-07
+        min_at: nominal
+        max: 6.67934e-07
+        max_at: nominal
+      n_cb_sbuf:
+        nominal: 1.09185e-06
+        min: 1.09185e-06
+        min_at: nominal
+        max: 1.09185e-06
+        max_at: nominal
+      n_cb_link:
+        nominal: 5.07363e-07
+        min: 5.07363e-07
+        min_at: nominal
+        max: 5.07363e-07
+        max_at: nominal
+      n_cb_recv:
+        nominal: 4.63083e-06
+        min: 4.63083e-06
+        min_at: nominal
+        max: 4.63083e-06
+        max_at: nominal
+      n_cb_zero:
+        nominal: 6.69831e-07
+        min: 6.69831e-07
+        min_at: nominal
+        max: 6.69831e-07
+        max_at: nominal
+      n_cb_dac:
+        nominal: 7.96336e-06
+        min: 7.96336e-06
+        min_at: nominal
+        max: 7.96336e-06
+        max_at: nominal
+      n_cb_shaper:
+        nominal: 3.00131e-06
+        min: 3.00131e-06
+        min_at: nominal
+        max: 3.00131e-06
+        max_at: nominal
+      n_cb_out:
+        nominal: 2.85471e-06
+        min: 2.85471e-06
+        min_at: nominal
+        max: 2.85471e-06
+        max_at: nominal
+      n_cb_rest:
+        nominal: 1.86086e-12
+        min: 1.86086e-12
+        min_at: nominal
+        max: 1.86086e-12
+        max_at: nominal
+      db_cb:
+        nominal: -89.7304
+        min: -89.7304
+        min_at: nominal
+        max: -89.7304
+        max_at: nominal
+      ppm_cb:
+        nominal: 32.6197
+        min: 32.6197
+        min_at: nominal
+        max: 32.6197
+        max_at: nominal
+      e_100:
+        nominal: 1.67735e-05
+        min: 1.67735e-05
+        min_at: nominal
+        max: 1.67735e-05
+        max_at: nominal
+      e_1k:
+        nominal: 7.64045e-06
+        min: 7.64045e-06
+        min_at: nominal
+        max: 7.64045e-06
+        max_at: nominal
+      e_1k_elec:
+        nominal: 2.28533e-07
+        min: 2.28533e-07
+        min_at: nominal
+        max: 2.28533e-07
+        max_at: nominal
+      n_adc_total:
+        nominal: 0.000106709
+        min: 0.000106709
+        min_at: nominal
+        max: 0.000106709
+        max_at: nominal
+      n_adc_sensor:
+        nominal: 0.000106708
+        min: 0.000106708
+        min_at: nominal
+        max: 0.000106708
+        max_at: nominal
+      n_adc_lsb:
+        nominal: 0.132449
+        min: 0.132449
+        min_at: nominal
+        max: 0.132449
+        max_at: nominal
+      e_sens_chk:
+        nominal: 3.70003e-06
+        min: 3.70003e-06
+        min_at: nominal
+        max: 3.70003e-06
+        max_at: nominal
+    asserts:
+    - expr: nom['n_au_rest'] < 0.01 * nom['n_au_total'] and nom['n_cb_rest'] < 0.01 * nom['n_cb_total']
+      why: 'the bookkeeping closes: every noise source in the deck is in a named stage (under 1 % of the total is unclaimed)'
+      pass: true
+    - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
+      why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
+      pass: true
+    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.15 * nom['n_au_sensor'])
+      why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
+        is under a tenth of the sensor''s in the control band, and under 0.15 of it in the audio band, at every bandwidth
+        mode, curve setting and level. The audio band''s bound was a tenth until #32: with the jack''s RC at 15.9 kHz this
+        stage''s own noise reaches 20 kHz unfiltered (about 12 uV rms, -118 dB of 10 V), and at POT-RESP fully counter-clockwise
+        on a hard blow in the 500 Hz mode, where the curve is flattest and the sensor''s share smallest, it is 0.12 of the
+        sensor''s - on AN1646''s figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b,
+        the curve''s slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow
+        (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all'
+      pass: true
+    - expr: nom['n_adc_lsb'] < 1
+      why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
+        and the electronics together
+      pass: true
+  noise[bw=2,p_resp=1.0,level=1]:
+    corners: 1
+    measures:
+      g_set:
+        nominal: 1.55
+        min: 1.55
+        min_at: nominal
+        max: 1.55
+        max_at: nominal
+      g_inc_rest:
+        nominal: -2.15455
+        min: -2.15455
+        min_at: nominal
+        max: -2.15455
+        max_at: nominal
+      g_inc_hard:
+        nominal: 0.0003
+        min: 0.0003
+        min_at: nominal
+        max: 0.0003
+        max_at: nominal
+      r_b:
+        nominal: -0.00013924
+        min: -0.00013924
+        min_at: nominal
+        max: -0.00013924
+        max_at: nominal
+      ina_op:
+        nominal: -4.63989
+        min: -4.63989
+        min_at: nominal
+        max: -4.63989
+        max_at: nominal
+      jack_op:
+        nominal: -0.0136186
+        min: -0.0136186
+        min_at: nominal
+        max: -0.0136186
+        max_at: nominal
+      n_au_total:
+        nominal: 1.88811e-05
+        min: 1.88811e-05
+        min_at: nominal
+        max: 1.88811e-05
+        max_at: nominal
+      n_au_sensor:
+        nominal: 6.48528e-08
+        min: 6.48528e-08
+        min_at: nominal
+        max: 6.48528e-08
+        max_at: nominal
+      n_au_elec:
+        nominal: 1.8881e-05
+        min: 1.8881e-05
+        min_at: nominal
+        max: 1.8881e-05
+        max_at: nominal
+      n_au_ref:
+        nominal: 1.20933e-09
+        min: 1.20933e-09
+        min_at: nominal
+        max: 1.20933e-09
+        max_at: nominal
+      n_au_sbuf:
+        nominal: 1.39468e-10
+        min: 1.39468e-10
+        min_at: nominal
+        max: 1.39468e-10
+        max_at: nominal
+      n_au_link:
+        nominal: 1.00918e-10
+        min: 1.00918e-10
+        min_at: nominal
+        max: 1.00918e-10
+        max_at: nominal
+      n_au_recv:
+        nominal: 2.62133e-09
+        min: 2.62133e-09
+        min_at: nominal
+        max: 2.62133e-09
+        max_at: nominal
+      n_au_zero:
+        nominal: 3.87071e-10
+        min: 3.87071e-10
+        min_at: nominal
+        max: 3.87071e-10
+        max_at: nominal
+      n_au_dac:
+        nominal: 5.25197e-06
+        min: 5.25197e-06
+        min_at: nominal
+        max: 5.25197e-06
+        max_at: nominal
+      n_au_shaper:
+        nominal: 1.30164e-05
+        min: 1.30164e-05
+        min_at: nominal
+        max: 1.30164e-05
+        max_at: nominal
+      n_au_out:
+        nominal: 1.26286e-05
+        min: 1.26286e-05
+        min_at: nominal
+        max: 1.26286e-05
+        max_at: nominal
+      n_au_rest:
+        nominal: 1.13903e-12
+        min: 1.13903e-12
+        min_at: nominal
+        max: 1.13903e-12
+        max_at: nominal
+      db_au:
+        nominal: -114.479
+        min: -114.479
+        min_at: nominal
+        max: -114.479
+        max_at: nominal
+      ppm_au:
+        nominal: 1.88811
+        min: 1.88811
+        min_at: nominal
+        max: 1.88811
+        max_at: nominal
+      n_cb_total:
+        nominal: 7.62961e-06
+        min: 7.62961e-06
+        min_at: nominal
+        max: 7.62961e-06
+        max_at: nominal
+      n_cb_sensor:
+        nominal: 4.53976e-08
+        min: 4.53976e-08
+        min_at: nominal
+        max: 4.53976e-08
+        max_at: nominal
+      n_cb_elec:
+        nominal: 7.62947e-06
+        min: 7.62947e-06
+        min_at: nominal
+        max: 7.62947e-06
+        max_at: nominal
+      n_cb_ref:
+        nominal: 8.46539e-10
+        min: 8.46539e-10
+        min_at: nominal
+        max: 8.46539e-10
+        max_at: nominal
+      n_cb_sbuf:
+        nominal: 1.52029e-10
+        min: 1.52029e-10
+        min_at: nominal
+        max: 1.52029e-10
+        max_at: nominal
+      n_cb_link:
+        nominal: 7.06455e-11
+        min: 7.06455e-11
+        min_at: nominal
+        max: 7.06455e-11
+        max_at: nominal
+      n_cb_recv:
+        nominal: 6.44799e-10
+        min: 6.44799e-10
+        min_at: nominal
+        max: 6.44799e-10
+        max_at: nominal
+      n_cb_zero:
+        nominal: 9.32675e-11
+        min: 9.32675e-11
+        min_at: nominal
+        max: 9.32675e-11
+        max_at: nominal
+      n_cb_dac:
+        nominal: 6.40715e-06
+        min: 6.40715e-06
+        min_at: nominal
+        max: 6.40715e-06
+        max_at: nominal
+      n_cb_shaper:
+        nominal: 3.00131e-06
+        min: 3.00131e-06
+        min_at: nominal
+        max: 3.00131e-06
+        max_at: nominal
+      n_cb_out:
+        nominal: 2.85471e-06
+        min: 2.85471e-06
+        min_at: nominal
+        max: 2.85471e-06
+        max_at: nominal
+      n_cb_rest:
+        nominal: 1.9764e-13
+        min: 1.9764e-13
+        min_at: nominal
+        max: 1.9764e-13
+        max_at: nominal
+      db_cb:
+        nominal: -122.35
+        min: -122.35
+        min_at: nominal
+        max: -122.35
+        max_at: nominal
+      ppm_cb:
+        nominal: 0.762961
+        min: 0.762961
+        min_at: nominal
+        max: 0.762961
+        max_at: nominal
+      e_100:
+        nominal: 3.34575e-07
+        min: 3.34575e-07
+        min_at: nominal
+        max: 3.34575e-07
+        max_at: nominal
+      e_1k:
+        nominal: 1.55853e-07
+        min: 1.55853e-07
+        min_at: nominal
+        max: 1.55853e-07
+        max_at: nominal
+      e_1k_elec:
+        nominal: 1.5585e-07
+        min: 1.5585e-07
+        min_at: nominal
+        max: 1.5585e-07
+        max_at: nominal
+      n_adc_total:
+        nominal: 0.000106728
+        min: 0.000106728
+        min_at: nominal
+        max: 0.000106728
+        max_at: nominal
+      n_adc_sensor:
+        nominal: 0.000106708
+        min: 0.000106708
+        min_at: nominal
+        max: 0.000106708
+        max_at: nominal
+      n_adc_lsb:
+        nominal: 0.132472
+        min: 0.132472
+        min_at: nominal
+        max: 0.132472
+        max_at: nominal
+      e_sens_chk:
+        nominal: 3.70067e-06
+        min: 3.70067e-06
+        min_at: nominal
+        max: 3.70067e-06
+        max_at: nominal
+    asserts:
+    - expr: nom['n_au_rest'] < 0.01 * nom['n_au_total'] and nom['n_cb_rest'] < 0.01 * nom['n_cb_total']
+      why: 'the bookkeeping closes: every noise source in the deck is in a named stage (under 1 % of the total is unclaimed)'
+      pass: true
+    - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
+      why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
+      pass: true
+    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.15 * nom['n_au_sensor'])
+      why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
+        is under a tenth of the sensor''s in the control band, and under 0.15 of it in the audio band, at every bandwidth
+        mode, curve setting and level. The audio band''s bound was a tenth until #32: with the jack''s RC at 15.9 kHz this
+        stage''s own noise reaches 20 kHz unfiltered (about 12 uV rms, -118 dB of 10 V), and at POT-RESP fully counter-clockwise
+        on a hard blow in the 500 Hz mode, where the curve is flattest and the sensor''s share smallest, it is 0.12 of the
+        sensor''s - on AN1646''s figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b,
+        the curve''s slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow
+        (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all'
+      pass: true
+    - expr: nom['n_adc_lsb'] < 1
+      why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
+        and the electronics together
+      pass: true
+  noise[bw=1,p_resp=0.0,level=0]:
+    corners: 1
+    measures:
+      g_set:
+        nominal: 1.55
+        min: 1.55
+        min_at: nominal
+        max: 1.55
+        max_at: nominal
+      g_inc_rest:
+        nominal: -2.14321
+        min: -2.14321
+        min_at: nominal
+        max: -2.14321
+        max_at: nominal
+      g_inc_hard:
+        nominal: -0.79989
+        min: -0.79989
+        min_at: nominal
+        max: -0.79989
+        max_at: nominal
+      r_b:
+        nominal: 1.0
+        min: 1.0
+        min_at: nominal
+        max: 1.0
+        max_at: nominal
+      ina_op:
+        nominal: 8.011e-05
+        min: 8.011e-05
+        min_at: nominal
+        max: 8.011e-05
+        max_at: nominal
+      jack_op:
+        nominal: -0.0136189
+        min: -0.0136189
+        min_at: nominal
+        max: -0.0136189
+        max_at: nominal
+      n_au_total:
+        nominal: 0.000804578
+        min: 0.000804578
+        min_at: nominal
+        max: 0.000804578
+        max_at: nominal
+      n_au_sensor:
+        nominal: 0.000804114
+        min: 0.000804114
+        min_at: nominal
+        max: 0.000804114
+        max_at: nominal
+      n_au_elec:
+        nominal: 2.73399e-05
+        min: 2.73399e-05
+        min_at: nominal
+        max: 2.73399e-05
+        max_at: nominal
+      n_au_ref:
+        nominal: 1.64734e-06
+        min: 1.64734e-06
+        min_at: nominal
+        max: 1.64734e-06
+        max_at: nominal
+      n_au_sbuf:
+        nominal: 1.45463e-06
+        min: 1.45463e-06
+        min_at: nominal
+        max: 1.45463e-06
+        max_at: nominal
+      n_au_link:
+        nominal: 1.25129e-06
+        min: 1.25129e-06
+        min_at: nominal
+        max: 1.25129e-06
+        max_at: nominal
+      n_au_recv:
+        nominal: 1.90345e-05
+        min: 1.90345e-05
+        min_at: nominal
+        max: 1.90345e-05
+        max_at: nominal
+      n_au_zero:
+        nominal: 2.76845e-06
+        min: 2.76845e-06
+        min_at: nominal
+        max: 2.76845e-06
+        max_at: nominal
+      n_au_dac:
+        nominal: 6.52237e-06
+        min: 6.52237e-06
+        min_at: nominal
+        max: 6.52237e-06
+        max_at: nominal
+      n_au_shaper:
+        nominal: 1.3003e-05
+        min: 1.3003e-05
+        min_at: nominal
+        max: 1.3003e-05
+        max_at: nominal
+      n_au_out:
+        nominal: 1.26286e-05
+        min: 1.26286e-05
+        min_at: nominal
+        max: 1.26286e-05
+        max_at: nominal
+      n_au_rest:
+        nominal: 4.28453e-10
+        min: 4.28453e-10
+        min_at: nominal
+        max: 4.28453e-10
+        max_at: nominal
+      db_au:
+        nominal: -81.8886
+        min: -81.8886
+        min_at: nominal
+        max: -81.8886
+        max_at: nominal
+      ppm_au:
+        nominal: 80.4578
+        min: 80.4578
+        min_at: nominal
+        max: 80.4578
+        max_at: nominal
+      n_cb_total:
+        nominal: 0.000577473
+        min: 0.000577473
+        min_at: nominal
+        max: 0.000577473
+        max_at: nominal
+      n_cb_sensor:
+        nominal: 0.000577333
+        min: 0.000577333
+        min_at: nominal
+        max: 0.000577333
+        max_at: nominal
+      n_cb_elec:
+        nominal: 1.2706e-05
+        min: 1.2706e-05
+        min_at: nominal
+        max: 1.2706e-05
+        max_at: nominal
+      n_cb_ref:
+        nominal: 1.18275e-06
+        min: 1.18275e-06
+        min_at: nominal
+        max: 1.18275e-06
+        max_at: nominal
+      n_cb_sbuf:
+        nominal: 1.3656e-06
+        min: 1.3656e-06
+        min_at: nominal
+        max: 1.3656e-06
+        max_at: nominal
+      n_cb_link:
+        nominal: 8.98416e-07
+        min: 8.98416e-07
+        min_at: nominal
+        max: 8.98416e-07
+        max_at: nominal
+      n_cb_recv:
+        nominal: 7.14717e-06
+        min: 7.14717e-06
+        min_at: nominal
+        max: 7.14717e-06
+        max_at: nominal
+      n_cb_zero:
+        nominal: 9.91341e-07
+        min: 9.91341e-07
+        min_at: nominal
+        max: 9.91341e-07
+        max_at: nominal
+      n_cb_dac:
+        nominal: 8.08206e-06
+        min: 8.08206e-06
+        min_at: nominal
+        max: 8.08206e-06
+        max_at: nominal
+      n_cb_shaper:
+        nominal: 4.55652e-06
+        min: 4.55652e-06
+        min_at: nominal
+        max: 4.55652e-06
+        max_at: nominal
+      n_cb_out:
+        nominal: 4.38468e-06
+        min: 4.38468e-06
+        min_at: nominal
+        max: 4.38468e-06
+        max_at: nominal
+      n_cb_rest:
+        nominal: 1.10422e-11
+        min: 1.10422e-11
+        min_at: nominal
+        max: 1.10422e-11
+        max_at: nominal
+      db_cb:
+        nominal: -84.7694
+        min: -84.7694
+        min_at: nominal
+        max: -84.7694
+        max_at: nominal
+      ppm_cb:
+        nominal: 57.7473
+        min: 57.7473
+        min_at: nominal
+        max: 57.7473
+        max_at: nominal
+      e_100:
+        nominal: 1.70012e-05
+        min: 1.70012e-05
+        min_at: nominal
+        max: 1.70012e-05
+        max_at: nominal
+      e_1k:
+        nominal: 1.4372e-05
+        min: 1.4372e-05
+        min_at: nominal
+        max: 1.4372e-05
+        max_at: nominal
+      e_1k_elec:
+        nominal: 2.38931e-07
+        min: 2.38931e-07
+        min_at: nominal
+        max: 2.38931e-07
+        max_at: nominal
+      n_adc_total:
+        nominal: 0.000106709
+        min: 0.000106709
+        min_at: nominal
+        max: 0.000106709
+        max_at: nominal
+      n_adc_sensor:
+        nominal: 0.000106708
+        min: 0.000106708
+        min_at: nominal
+        max: 0.000106708
+        max_at: nominal
+      n_adc_lsb:
+        nominal: 0.132449
+        min: 0.132449
+        min_at: nominal
+        max: 0.132449
+        max_at: nominal
+      e_sens_chk:
+        nominal: 3.70003e-06
+        min: 3.70003e-06
+        min_at: nominal
+        max: 3.70003e-06
+        max_at: nominal
+    asserts:
+    - expr: nom['n_au_rest'] < 0.01 * nom['n_au_total'] and nom['n_cb_rest'] < 0.01 * nom['n_cb_total']
+      why: 'the bookkeeping closes: every noise source in the deck is in a named stage (under 1 % of the total is unclaimed)'
+      pass: true
+    - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
+      why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
+      pass: true
+    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.15 * nom['n_au_sensor'])
+      why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
+        is under a tenth of the sensor''s in the control band, and under 0.15 of it in the audio band, at every bandwidth
+        mode, curve setting and level. The audio band''s bound was a tenth until #32: with the jack''s RC at 15.9 kHz this
+        stage''s own noise reaches 20 kHz unfiltered (about 12 uV rms, -118 dB of 10 V), and at POT-RESP fully counter-clockwise
+        on a hard blow in the 500 Hz mode, where the curve is flattest and the sensor''s share smallest, it is 0.12 of the
+        sensor''s - on AN1646''s figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b,
+        the curve''s slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow
+        (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all'
+      pass: true
+    - expr: nom['n_adc_lsb'] < 1
+      why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
+        and the electronics together
+      pass: true
+  noise[bw=1,p_resp=0.0,level=1]:
+    corners: 1
+    measures:
+      g_set:
+        nominal: 1.55
+        min: 1.55
+        min_at: nominal
+        max: 1.55
+        max_at: nominal
+      g_inc_rest:
+        nominal: -2.14321
+        min: -2.14321
+        min_at: nominal
+        max: -2.14321
+        max_at: nominal
+      g_inc_hard:
+        nominal: -0.79989
+        min: -0.79989
+        min_at: nominal
+        max: -0.79989
+        max_at: nominal
+      r_b:
+        nominal: 0.373221
+        min: 0.373221
+        min_at: nominal
+        max: 0.373221
+        max_at: nominal
+      ina_op:
+        nominal: -4.63989
+        min: -4.63989
+        min_at: nominal
+        max: -4.63989
+        max_at: nominal
+      jack_op:
+        nominal: -0.0136189
+        min: -0.0136189
+        min_at: nominal
+        max: -0.0136189
+        max_at: nominal
+      n_au_total:
+        nominal: 0.000300852
+        min: 0.000300852
+        min_at: nominal
+        max: 0.000300852
+        max_at: nominal
+      n_au_sensor:
+        nominal: 0.000300112
+        min: 0.000300112
+        min_at: nominal
+        max: 0.000300112
+        max_at: nominal
+      n_au_elec:
+        nominal: 2.10882e-05
+        min: 2.10882e-05
+        min_at: nominal
+        max: 2.10882e-05
+        max_at: nominal
+      n_au_ref:
+        nominal: 5.59626e-06
+        min: 5.59626e-06
+        min_at: nominal
+        max: 5.59626e-06
+        max_at: nominal
+      n_au_sbuf:
+        nominal: 5.42897e-07
+        min: 5.42897e-07
+        min_at: nominal
+        max: 5.42897e-07
+        max_at: nominal
+      n_au_link:
+        nominal: 4.67009e-07
+        min: 4.67009e-07
+        min_at: nominal
+        max: 4.67009e-07
+        max_at: nominal
+      n_au_recv:
+        nominal: 7.10407e-06
+        min: 7.10407e-06
+        min_at: nominal
+        max: 7.10407e-06
+        max_at: nominal
+      n_au_zero:
+        nominal: 1.03324e-06
+        min: 1.03324e-06
+        min_at: nominal
+        max: 1.03324e-06
+        max_at: nominal
+      n_au_dac:
+        nominal: 5.726e-06
+        min: 5.726e-06
+        min_at: nominal
+        max: 5.726e-06
+        max_at: nominal
+      n_au_shaper:
+        nominal: 1.3003e-05
+        min: 1.3003e-05
+        min_at: nominal
+        max: 1.3003e-05
+        max_at: nominal
+      n_au_out:
+        nominal: 1.26286e-05
+        min: 1.26286e-05
+        min_at: nominal
+        max: 1.26286e-05
+        max_at: nominal
+      n_au_rest:
+        nominal: 1.59926e-10
+        min: 1.59926e-10
+        min_at: nominal
+        max: 1.59926e-10
+        max_at: nominal
+      db_au:
+        nominal: -90.4329
+        min: -90.4329
+        min_at: nominal
+        max: -90.4329
+        max_at: nominal
+      ppm_au:
+        nominal: 30.0852
+        min: 30.0852
+        min_at: nominal
+        max: 30.0852
+        max_at: nominal
+      n_cb_total:
+        nominal: 0.000215738
+        min: 0.000215738
+        min_at: nominal
+        max: 0.000215738
+        max_at: nominal
+      n_cb_sensor:
+        nominal: 0.000215473
+        min: 0.000215473
+        min_at: nominal
+        max: 0.000215473
+        max_at: nominal
+      n_cb_elec:
+        nominal: 1.06817e-05
+        min: 1.06817e-05
+        min_at: nominal
+        max: 1.06817e-05
+        max_at: nominal
+      n_cb_ref:
+        nominal: 4.01798e-06
+        min: 4.01798e-06
+        min_at: nominal
+        max: 4.01798e-06
+        max_at: nominal
+      n_cb_sbuf:
+        nominal: 5.09672e-07
+        min: 5.09672e-07
+        min_at: nominal
+        max: 5.09672e-07
+        max_at: nominal
+      n_cb_link:
+        nominal: 3.35308e-07
+        min: 3.35308e-07
+        min_at: nominal
+        max: 3.35308e-07
+        max_at: nominal
+      n_cb_recv:
+        nominal: 2.66748e-06
+        min: 2.66748e-06
+        min_at: nominal
+        max: 2.66748e-06
+        max_at: nominal
+      n_cb_zero:
+        nominal: 3.6999e-07
+        min: 3.6999e-07
+        min_at: nominal
+        max: 3.6999e-07
+        max_at: nominal
+      n_cb_dac:
+        nominal: 7.09526e-06
+        min: 7.09526e-06
+        min_at: nominal
+        max: 7.09526e-06
+        max_at: nominal
+      n_cb_shaper:
+        nominal: 4.55652e-06
+        min: 4.55652e-06
+        min_at: nominal
+        max: 4.55652e-06
+        max_at: nominal
+      n_cb_out:
+        nominal: 4.38468e-06
+        min: 4.38468e-06
+        min_at: nominal
+        max: 4.38468e-06
+        max_at: nominal
+      n_cb_rest:
+        nominal: 4.44171e-12
+        min: 4.44171e-12
+        min_at: nominal
+        max: 4.44171e-12
+        max_at: nominal
+      db_cb:
+        nominal: -93.3215
+        min: -93.3215
+        min_at: nominal
+        max: -93.3215
+        max_at: nominal
+      ppm_cb:
+        nominal: 21.5738
+        min: 21.5738
+        min_at: nominal
+        max: 21.5738
+        max_at: nominal
+      e_100:
+        nominal: 6.35459e-06
+        min: 6.35459e-06
+        min_at: nominal
+        max: 6.35459e-06
+        max_at: nominal
+      e_1k:
+        nominal: 5.36682e-06
+        min: 5.36682e-06
+        min_at: nominal
+        max: 5.36682e-06
+        max_at: nominal
+      e_1k_elec:
+        nominal: 1.97011e-07
+        min: 1.97011e-07
+        min_at: nominal
+        max: 1.97011e-07
+        max_at: nominal
+      n_adc_total:
+        nominal: 0.000106728
+        min: 0.000106728
+        min_at: nominal
+        max: 0.000106728
+        max_at: nominal
+      n_adc_sensor:
+        nominal: 0.000106708
+        min: 0.000106708
+        min_at: nominal
+        max: 0.000106708
+        max_at: nominal
+      n_adc_lsb:
+        nominal: 0.132472
+        min: 0.132472
+        min_at: nominal
+        max: 0.132472
+        max_at: nominal
+      e_sens_chk:
+        nominal: 3.70067e-06
+        min: 3.70067e-06
+        min_at: nominal
+        max: 3.70067e-06
+        max_at: nominal
+    asserts:
+    - expr: nom['n_au_rest'] < 0.01 * nom['n_au_total'] and nom['n_cb_rest'] < 0.01 * nom['n_cb_total']
+      why: 'the bookkeeping closes: every noise source in the deck is in a named stage (under 1 % of the total is unclaimed)'
+      pass: true
+    - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
+      why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
+      pass: true
+    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.15 * nom['n_au_sensor'])
+      why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
+        is under a tenth of the sensor''s in the control band, and under 0.15 of it in the audio band, at every bandwidth
+        mode, curve setting and level. The audio band''s bound was a tenth until #32: with the jack''s RC at 15.9 kHz this
+        stage''s own noise reaches 20 kHz unfiltered (about 12 uV rms, -118 dB of 10 V), and at POT-RESP fully counter-clockwise
+        on a hard blow in the 500 Hz mode, where the curve is flattest and the sensor''s share smallest, it is 0.12 of the
+        sensor''s - on AN1646''s figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b,
+        the curve''s slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow
+        (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all'
+      pass: true
+    - expr: nom['n_adc_lsb'] < 1
+      why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
+        and the electronics together
+      pass: true
+  noise[bw=1,p_resp=0.5,level=0]:
+    corners: 1
+    measures:
+      g_set:
+        nominal: 1.55
+        min: 1.55
+        min_at: nominal
+        max: 1.55
+        max_at: nominal
+      g_inc_rest:
+        nominal: -2.14907
+        min: -2.14907
+        min_at: nominal
+        max: -2.14907
+        max_at: nominal
+      g_inc_hard:
+        nominal: -2.14402
+        min: -2.14402
+        min_at: nominal
+        max: -2.14402
+        max_at: nominal
+      r_b:
+        nominal: 1.0
+        min: 1.0
+        min_at: nominal
+        max: 1.0
+        max_at: nominal
+      ina_op:
+        nominal: 8.011e-05
+        min: 8.011e-05
+        min_at: nominal
+        max: 8.011e-05
+        max_at: nominal
+      jack_op:
+        nominal: -0.0136188
+        min: -0.0136188
+        min_at: nominal
+        max: -0.0136188
+        max_at: nominal
+      n_au_total:
+        nominal: 0.000806234
+        min: 0.000806234
+        min_at: nominal
+        max: 0.000806234
+        max_at: nominal
+      n_au_sensor:
+        nominal: 0.000805769
+        min: 0.000805769
+        min_at: nominal
+        max: 0.000805769
+        max_at: nominal
+      n_au_elec:
+        nominal: 2.73721e-05
+        min: 2.73721e-05
+        min_at: nominal
+        max: 2.73721e-05
+        max_at: nominal
+      n_au_ref:
+        nominal: 1.65073e-06
+        min: 1.65073e-06
+        min_at: nominal
+        max: 1.65073e-06
+        max_at: nominal
+      n_au_sbuf:
+        nominal: 1.45762e-06
+        min: 1.45762e-06
+        min_at: nominal
+        max: 1.45762e-06
+        max_at: nominal
+      n_au_link:
+        nominal: 1.25387e-06
+        min: 1.25387e-06
+        min_at: nominal
+        max: 1.25387e-06
+        max_at: nominal
+      n_au_recv:
+        nominal: 1.90737e-05
+        min: 1.90737e-05
+        min_at: nominal
+        max: 1.90737e-05
+        max_at: nominal
+      n_au_zero:
+        nominal: 2.77416e-06
+        min: 2.77416e-06
+        min_at: nominal
+        max: 2.77416e-06
+        max_at: nominal
+      n_au_dac:
+        nominal: 6.52499e-06
+        min: 6.52499e-06
+        min_at: nominal
+        max: 6.52499e-06
+        max_at: nominal
+      n_au_shaper:
+        nominal: 1.30097e-05
+        min: 1.30097e-05
+        min_at: nominal
+        max: 1.30097e-05
+        max_at: nominal
+      n_au_out:
+        nominal: 1.26286e-05
+        min: 1.26286e-05
+        min_at: nominal
+        max: 1.26286e-05
+        max_at: nominal
+      n_au_rest:
+        nominal: 4.2935e-10
+        min: 4.2935e-10
+        min_at: nominal
+        max: 4.2935e-10
+        max_at: nominal
+      db_au:
+        nominal: -81.8708
+        min: -81.8708
+        min_at: nominal
+        max: -81.8708
+        max_at: nominal
+      ppm_au:
+        nominal: 80.6234
+        min: 80.6234
+        min_at: nominal
+        max: 80.6234
+        max_at: nominal
+      n_cb_total:
+        nominal: 0.000578662
+        min: 0.000578662
+        min_at: nominal
+        max: 0.000578662
+        max_at: nominal
+      n_cb_sensor:
+        nominal: 0.000578522
+        min: 0.000578522
+        min_at: nominal
+        max: 0.000578522
+        max_at: nominal
+      n_cb_elec:
+        nominal: 1.2718e-05
+        min: 1.2718e-05
+        min_at: nominal
+        max: 1.2718e-05
+        max_at: nominal
+      n_cb_ref:
+        nominal: 1.18518e-06
+        min: 1.18518e-06
+        min_at: nominal
+        max: 1.18518e-06
+        max_at: nominal
+      n_cb_sbuf:
+        nominal: 1.36841e-06
+        min: 1.36841e-06
+        min_at: nominal
+        max: 1.36841e-06
+        max_at: nominal
+      n_cb_link:
+        nominal: 9.00266e-07
+        min: 9.00266e-07
+        min_at: nominal
+        max: 9.00266e-07
+        max_at: nominal
+      n_cb_recv:
+        nominal: 7.16188e-06
+        min: 7.16188e-06
+        min_at: nominal
+        max: 7.16188e-06
+        max_at: nominal
+      n_cb_zero:
+        nominal: 9.93382e-07
+        min: 9.93382e-07
+        min_at: nominal
+        max: 9.93382e-07
+        max_at: nominal
+      n_cb_dac:
+        nominal: 8.0853e-06
+        min: 8.0853e-06
+        min_at: nominal
+        max: 8.0853e-06
+        max_at: nominal
+      n_cb_shaper:
+        nominal: 4.55886e-06
+        min: 4.55886e-06
+        min_at: nominal
+        max: 4.55886e-06
+        max_at: nominal
+      n_cb_out:
+        nominal: 4.38468e-06
+        min: 4.38468e-06
+        min_at: nominal
+        max: 4.38468e-06
+        max_at: nominal
+      n_cb_rest:
+        nominal: 1.08665e-11
+        min: 1.08665e-11
+        min_at: nominal
+        max: 1.08665e-11
+        max_at: nominal
+      db_cb:
+        nominal: -84.7515
+        min: -84.7515
+        min_at: nominal
+        max: -84.7515
+        max_at: nominal
+      ppm_cb:
+        nominal: 57.8661
+        min: 57.8661
+        min_at: nominal
+        max: 57.8661
+        max_at: nominal
+      e_100:
+        nominal: 1.70362e-05
+        min: 1.70362e-05
+        min_at: nominal
+        max: 1.70362e-05
+        max_at: nominal
+      e_1k:
+        nominal: 1.44016e-05
+        min: 1.44016e-05
+        min_at: nominal
+        max: 1.44016e-05
+        max_at: nominal
+      e_1k_elec:
+        nominal: 2.39238e-07
+        min: 2.39238e-07
+        min_at: nominal
+        max: 2.39238e-07
+        max_at: nominal
+      n_adc_total:
+        nominal: 0.000106709
+        min: 0.000106709
+        min_at: nominal
+        max: 0.000106709
+        max_at: nominal
+      n_adc_sensor:
+        nominal: 0.000106708
+        min: 0.000106708
+        min_at: nominal
+        max: 0.000106708
+        max_at: nominal
+      n_adc_lsb:
+        nominal: 0.132449
+        min: 0.132449
+        min_at: nominal
+        max: 0.132449
+        max_at: nominal
+      e_sens_chk:
+        nominal: 3.70003e-06
+        min: 3.70003e-06
+        min_at: nominal
+        max: 3.70003e-06
+        max_at: nominal
+    asserts:
+    - expr: nom['n_au_rest'] < 0.01 * nom['n_au_total'] and nom['n_cb_rest'] < 0.01 * nom['n_cb_total']
+      why: 'the bookkeeping closes: every noise source in the deck is in a named stage (under 1 % of the total is unclaimed)'
+      pass: true
+    - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
+      why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
+      pass: true
+    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.15 * nom['n_au_sensor'])
+      why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
+        is under a tenth of the sensor''s in the control band, and under 0.15 of it in the audio band, at every bandwidth
+        mode, curve setting and level. The audio band''s bound was a tenth until #32: with the jack''s RC at 15.9 kHz this
+        stage''s own noise reaches 20 kHz unfiltered (about 12 uV rms, -118 dB of 10 V), and at POT-RESP fully counter-clockwise
+        on a hard blow in the 500 Hz mode, where the curve is flattest and the sensor''s share smallest, it is 0.12 of the
+        sensor''s - on AN1646''s figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b,
+        the curve''s slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow
+        (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all'
+      pass: true
+    - expr: nom['n_adc_lsb'] < 1
+      why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
+        and the electronics together
+      pass: true
+  noise[bw=1,p_resp=0.5,level=1]:
+    corners: 1
+    measures:
+      g_set:
+        nominal: 1.55
+        min: 1.55
+        min_at: nominal
+        max: 1.55
+        max_at: nominal
+      g_inc_rest:
+        nominal: -2.14907
+        min: -2.14907
+        min_at: nominal
+        max: -2.14907
+        max_at: nominal
+      g_inc_hard:
+        nominal: -2.14402
+        min: -2.14402
+        min_at: nominal
+        max: -2.14402
+        max_at: nominal
+      r_b:
+        nominal: 0.997648
+        min: 0.997648
+        min_at: nominal
+        max: 0.997648
+        max_at: nominal
+      ina_op:
+        nominal: -4.63989
+        min: -4.63989
+        min_at: nominal
+        max: -4.63989
+        max_at: nominal
+      jack_op:
+        nominal: -0.0136188
+        min: -0.0136188
+        min_at: nominal
+        max: -0.0136188
+        max_at: nominal
+      n_au_total:
+        nominal: 0.000804477
+        min: 0.000804477
+        min_at: nominal
+        max: 0.000804477
+        max_at: nominal
+      n_au_sensor:
+        nominal: 0.000803874
+        min: 0.000803874
+        min_at: nominal
+        max: 0.000803874
+        max_at: nominal
+      n_au_elec:
+        nominal: 3.11353e-05
+        min: 3.11353e-05
+        min_at: nominal
+        max: 3.11353e-05
+        max_at: nominal
+      n_au_ref:
+        nominal: 1.499e-05
+        min: 1.499e-05
+        min_at: nominal
+        max: 1.499e-05
+        max_at: nominal
+      n_au_sbuf:
+        nominal: 1.45419e-06
+        min: 1.45419e-06
+        min_at: nominal
+        max: 1.45419e-06
+        max_at: nominal
+      n_au_link:
+        nominal: 1.25092e-06
+        min: 1.25092e-06
+        min_at: nominal
+        max: 1.25092e-06
+        max_at: nominal
+      n_au_recv:
+        nominal: 1.90289e-05
+        min: 1.90289e-05
+        min_at: nominal
+        max: 1.90289e-05
+        max_at: nominal
+      n_au_zero:
+        nominal: 2.76763e-06
+        min: 2.76763e-06
+        min_at: nominal
+        max: 2.76763e-06
+        max_at: nominal
+      n_au_dac:
+        nominal: 6.52199e-06
+        min: 6.52199e-06
+        min_at: nominal
+        max: 6.52199e-06
+        max_at: nominal
+      n_au_shaper:
+        nominal: 1.30097e-05
+        min: 1.30097e-05
+        min_at: nominal
+        max: 1.30097e-05
+        max_at: nominal
+      n_au_out:
+        nominal: 1.26286e-05
+        min: 1.26286e-05
+        min_at: nominal
+        max: 1.26286e-05
+        max_at: nominal
+      n_au_rest:
+        nominal: 4.28361e-10
+        min: 4.28361e-10
+        min_at: nominal
+        max: 4.28361e-10
+        max_at: nominal
+      db_au:
+        nominal: -81.8897
+        min: -81.8897
+        min_at: nominal
+        max: -81.8897
+        max_at: nominal
+      ppm_au:
+        nominal: 80.4477
+        min: 80.4477
+        min_at: nominal
+        max: 80.4477
+        max_at: nominal
+      n_cb_total:
+        nominal: 0.0005774
+        min: 0.0005774
+        min_at: nominal
+        max: 0.0005774
+        max_at: nominal
+      n_cb_sensor:
+        nominal: 0.000577161
+        min: 0.000577161
+        min_at: nominal
+        max: 0.000577161
+        max_at: nominal
+      n_cb_elec:
+        nominal: 1.66089e-05
+        min: 1.66089e-05
+        min_at: nominal
+        max: 1.66089e-05
+        max_at: nominal
+      n_cb_ref:
+        nominal: 1.07625e-05
+        min: 1.07625e-05
+        min_at: nominal
+        max: 1.07625e-05
+        max_at: nominal
+      n_cb_sbuf:
+        nominal: 1.36519e-06
+        min: 1.36519e-06
+        min_at: nominal
+        max: 1.36519e-06
+        max_at: nominal
+      n_cb_link:
+        nominal: 8.98149e-07
+        min: 8.98149e-07
+        min_at: nominal
+        max: 8.98149e-07
+        max_at: nominal
+      n_cb_recv:
+        nominal: 7.14504e-06
+        min: 7.14504e-06
+        min_at: nominal
+        max: 7.14504e-06
+        max_at: nominal
+      n_cb_zero:
+        nominal: 9.91046e-07
+        min: 9.91046e-07
+        min_at: nominal
+        max: 9.91046e-07
+        max_at: nominal
+      n_cb_dac:
+        nominal: 8.08159e-06
+        min: 8.08159e-06
+        min_at: nominal
+        max: 8.08159e-06
+        max_at: nominal
+      n_cb_shaper:
+        nominal: 4.55886e-06
+        min: 4.55886e-06
+        min_at: nominal
+        max: 4.55886e-06
+        max_at: nominal
+      n_cb_out:
+        nominal: 4.38468e-06
+        min: 4.38468e-06
+        min_at: nominal
+        max: 4.38468e-06
+        max_at: nominal
+      n_cb_rest:
+        nominal: 1.12868e-11
+        min: 1.12868e-11
+        min_at: nominal
+        max: 1.12868e-11
+        max_at: nominal
+      db_cb:
+        nominal: -84.7705
+        min: -84.7705
+        min_at: nominal
+        max: -84.7705
+        max_at: nominal
+      ppm_cb:
+        nominal: 57.74
+        min: 57.74
+        min_at: nominal
+        max: 57.74
+        max_at: nominal
+      e_100:
+        nominal: 1.69991e-05
+        min: 1.69991e-05
+        min_at: nominal
+        max: 1.69991e-05
+        max_at: nominal
+      e_1k:
+        nominal: 1.43702e-05
+        min: 1.43702e-05
+        min_at: nominal
+        max: 1.43702e-05
+        max_at: nominal
+      e_1k_elec:
+        nominal: 3.57736e-07
+        min: 3.57736e-07
+        min_at: nominal
+        max: 3.57736e-07
+        max_at: nominal
+      n_adc_total:
+        nominal: 0.000106728
+        min: 0.000106728
+        min_at: nominal
+        max: 0.000106728
+        max_at: nominal
+      n_adc_sensor:
+        nominal: 0.000106708
+        min: 0.000106708
+        min_at: nominal
+        max: 0.000106708
+        max_at: nominal
+      n_adc_lsb:
+        nominal: 0.132472
+        min: 0.132472
+        min_at: nominal
+        max: 0.132472
+        max_at: nominal
+      e_sens_chk:
+        nominal: 3.70067e-06
+        min: 3.70067e-06
+        min_at: nominal
+        max: 3.70067e-06
+        max_at: nominal
+    asserts:
+    - expr: nom['n_au_rest'] < 0.01 * nom['n_au_total'] and nom['n_cb_rest'] < 0.01 * nom['n_cb_total']
+      why: 'the bookkeeping closes: every noise source in the deck is in a named stage (under 1 % of the total is unclaimed)'
+      pass: true
+    - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
+      why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
+      pass: true
+    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.15 * nom['n_au_sensor'])
+      why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
+        is under a tenth of the sensor''s in the control band, and under 0.15 of it in the audio band, at every bandwidth
+        mode, curve setting and level. The audio band''s bound was a tenth until #32: with the jack''s RC at 15.9 kHz this
+        stage''s own noise reaches 20 kHz unfiltered (about 12 uV rms, -118 dB of 10 V), and at POT-RESP fully counter-clockwise
+        on a hard blow in the 500 Hz mode, where the curve is flattest and the sensor''s share smallest, it is 0.12 of the
+        sensor''s - on AN1646''s figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b,
+        the curve''s slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow
+        (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all'
+      pass: true
+    - expr: nom['n_adc_lsb'] < 1
+      why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
+        and the electronics together
+      pass: true
+  noise[bw=1,p_resp=1.0,level=0]:
+    corners: 1
+    measures:
+      g_set:
+        nominal: 1.55
+        min: 1.55
+        min_at: nominal
+        max: 1.55
+        max_at: nominal
+      g_inc_rest:
+        nominal: -2.15455
+        min: -2.15455
+        min_at: nominal
+        max: -2.15455
+        max_at: nominal
+      g_inc_hard:
+        nominal: 0.0003
+        min: 0.0003
+        min_at: nominal
+        max: 0.0003
+        max_at: nominal
+      r_b:
+        nominal: 1.0
+        min: 1.0
+        min_at: nominal
+        max: 1.0
+        max_at: nominal
+      ina_op:
+        nominal: 8.011e-05
+        min: 8.011e-05
+        min_at: nominal
+        max: 8.011e-05
+        max_at: nominal
+      jack_op:
+        nominal: -0.0136186
+        min: -0.0136186
+        min_at: nominal
+        max: -0.0136186
+        max_at: nominal
+      n_au_total:
+        nominal: 0.000807891
+        min: 0.000807891
+        min_at: nominal
+        max: 0.000807891
+        max_at: nominal
+      n_au_sensor:
+        nominal: 0.000807426
+        min: 0.000807426
+        min_at: nominal
+        max: 0.000807426
+        max_at: nominal
+      n_au_elec:
+        nominal: 2.74044e-05
+        min: 2.74044e-05
+        min_at: nominal
+        max: 2.74044e-05
+        max_at: nominal
+      n_au_ref:
+        nominal: 1.65413e-06
+        min: 1.65413e-06
+        min_at: nominal
+        max: 1.65413e-06
+        max_at: nominal
+      n_au_sbuf:
+        nominal: 1.46062e-06
+        min: 1.46062e-06
+        min_at: nominal
+        max: 1.46062e-06
+        max_at: nominal
+      n_au_link:
+        nominal: 1.25645e-06
+        min: 1.25645e-06
+        min_at: nominal
+        max: 1.25645e-06
+        max_at: nominal
+      n_au_recv:
+        nominal: 1.9113e-05
+        min: 1.9113e-05
+        min_at: nominal
+        max: 1.9113e-05
+        max_at: nominal
+      n_au_zero:
+        nominal: 2.77988e-06
+        min: 2.77988e-06
+        min_at: nominal
+        max: 2.77988e-06
+        max_at: nominal
+      n_au_dac:
+        nominal: 6.5276e-06
+        min: 6.5276e-06
+        min_at: nominal
+        max: 6.5276e-06
+        max_at: nominal
+      n_au_shaper:
+        nominal: 1.30164e-05
+        min: 1.30164e-05
+        min_at: nominal
+        max: 1.30164e-05
+        max_at: nominal
+      n_au_out:
+        nominal: 1.26286e-05
+        min: 1.26286e-05
+        min_at: nominal
+        max: 1.26286e-05
+        max_at: nominal
+      n_au_rest:
+        nominal: 4.30222e-10
+        min: 4.30222e-10
+        min_at: nominal
+        max: 4.30222e-10
+        max_at: nominal
+      db_au:
+        nominal: -81.8529
+        min: -81.8529
+        min_at: nominal
+        max: -81.8529
+        max_at: nominal
+      ppm_au:
+        nominal: 80.7891
+        min: 80.7891
+        min_at: nominal
+        max: 80.7891
+        max_at: nominal
+      n_cb_total:
+        nominal: 0.00057985
+        min: 0.00057985
+        min_at: nominal
+        max: 0.00057985
+        max_at: nominal
+      n_cb_sensor:
+        nominal: 0.000579711
+        min: 0.000579711
+        min_at: nominal
+        max: 0.000579711
+        max_at: nominal
+      n_cb_elec:
+        nominal: 1.273e-05
+        min: 1.273e-05
+        min_at: nominal
+        max: 1.273e-05
+        max_at: nominal
+      n_cb_ref:
+        nominal: 1.18762e-06
+        min: 1.18762e-06
+        min_at: nominal
+        max: 1.18762e-06
+        max_at: nominal
+      n_cb_sbuf:
+        nominal: 1.37122e-06
+        min: 1.37122e-06
+        min_at: nominal
+        max: 1.37122e-06
+        max_at: nominal
+      n_cb_link:
+        nominal: 9.02116e-07
+        min: 9.02116e-07
+        min_at: nominal
+        max: 9.02116e-07
+        max_at: nominal
+      n_cb_recv:
+        nominal: 7.1766e-06
+        min: 7.1766e-06
+        min_at: nominal
+        max: 7.1766e-06
+        max_at: nominal
+      n_cb_zero:
+        nominal: 9.95424e-07
+        min: 9.95424e-07
+        min_at: nominal
+        max: 9.95424e-07
+        max_at: nominal
+      n_cb_dac:
+        nominal: 8.08854e-06
+        min: 8.08854e-06
+        min_at: nominal
+        max: 8.08854e-06
+        max_at: nominal
+      n_cb_shaper:
+        nominal: 4.5612e-06
+        min: 4.5612e-06
+        min_at: nominal
+        max: 4.5612e-06
+        max_at: nominal
+      n_cb_out:
+        nominal: 4.38468e-06
+        min: 4.38468e-06
+        min_at: nominal
+        max: 4.38468e-06
+        max_at: nominal
+      n_cb_rest:
+        nominal: 1.11457e-11
+        min: 1.11457e-11
+        min_at: nominal
+        max: 1.11457e-11
+        max_at: nominal
+      db_cb:
+        nominal: -84.7337
+        min: -84.7337
+        min_at: nominal
+        max: -84.7337
+        max_at: nominal
+      ppm_cb:
+        nominal: 57.9851
+        min: 57.9851
+        min_at: nominal
+        max: 57.9851
+        max_at: nominal
+      e_100:
+        nominal: 1.70712e-05
+        min: 1.70712e-05
+        min_at: nominal
+        max: 1.70712e-05
+        max_at: nominal
+      e_1k:
+        nominal: 1.44312e-05
+        min: 1.44312e-05
+        min_at: nominal
+        max: 1.44312e-05
+        max_at: nominal
+      e_1k_elec:
+        nominal: 2.39545e-07
+        min: 2.39545e-07
+        min_at: nominal
+        max: 2.39545e-07
+        max_at: nominal
+      n_adc_total:
+        nominal: 0.000106709
+        min: 0.000106709
+        min_at: nominal
+        max: 0.000106709
+        max_at: nominal
+      n_adc_sensor:
+        nominal: 0.000106708
+        min: 0.000106708
+        min_at: nominal
+        max: 0.000106708
+        max_at: nominal
+      n_adc_lsb:
+        nominal: 0.132449
+        min: 0.132449
+        min_at: nominal
+        max: 0.132449
+        max_at: nominal
+      e_sens_chk:
+        nominal: 3.70003e-06
+        min: 3.70003e-06
+        min_at: nominal
+        max: 3.70003e-06
+        max_at: nominal
+    asserts:
+    - expr: nom['n_au_rest'] < 0.01 * nom['n_au_total'] and nom['n_cb_rest'] < 0.01 * nom['n_cb_total']
+      why: 'the bookkeeping closes: every noise source in the deck is in a named stage (under 1 % of the total is unclaimed)'
+      pass: true
+    - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
+      why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
+      pass: true
+    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.15 * nom['n_au_sensor'])
+      why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
+        is under a tenth of the sensor''s in the control band, and under 0.15 of it in the audio band, at every bandwidth
+        mode, curve setting and level. The audio band''s bound was a tenth until #32: with the jack''s RC at 15.9 kHz this
+        stage''s own noise reaches 20 kHz unfiltered (about 12 uV rms, -118 dB of 10 V), and at POT-RESP fully counter-clockwise
+        on a hard blow in the 500 Hz mode, where the curve is flattest and the sensor''s share smallest, it is 0.12 of the
+        sensor''s - on AN1646''s figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b,
+        the curve''s slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow
+        (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all'
+      pass: true
+    - expr: nom['n_adc_lsb'] < 1
+      why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
+        and the electronics together
+      pass: true
+  noise[bw=1,p_resp=1.0,level=1]:
+    corners: 1
+    measures:
+      g_set:
+        nominal: 1.55
+        min: 1.55
+        min_at: nominal
+        max: 1.55
+        max_at: nominal
+      g_inc_rest:
+        nominal: -2.15455
+        min: -2.15455
+        min_at: nominal
+        max: -2.15455
+        max_at: nominal
+      g_inc_hard:
+        nominal: 0.0003
+        min: 0.0003
+        min_at: nominal
+        max: 0.0003
+        max_at: nominal
+      r_b:
+        nominal: -0.00013924
+        min: -0.00013924
+        min_at: nominal
+        max: -0.00013924
+        max_at: nominal
+      ina_op:
+        nominal: -4.63989
+        min: -4.63989
+        min_at: nominal
+        max: -4.63989
+        max_at: nominal
+      jack_op:
+        nominal: -0.0136186
+        min: -0.0136186
+        min_at: nominal
+        max: -0.0136186
+        max_at: nominal
+      n_au_total:
+        nominal: 1.88813e-05
+        min: 1.88813e-05
+        min_at: nominal
+        max: 1.88813e-05
+        max_at: nominal
+      n_au_sensor:
+        nominal: 1.12426e-07
+        min: 1.12426e-07
+        min_at: nominal
+        max: 1.12426e-07
+        max_at: nominal
+      n_au_elec:
+        nominal: 1.8881e-05
+        min: 1.8881e-05
+        min_at: nominal
+        max: 1.8881e-05
+        max_at: nominal
+      n_au_ref:
+        nominal: 2.09644e-09
+        min: 2.09644e-09
+        min_at: nominal
+        max: 2.09644e-09
+        max_at: nominal
+      n_au_sbuf:
+        nominal: 2.03377e-10
+        min: 2.03377e-10
+        min_at: nominal
+        max: 2.03377e-10
+        max_at: nominal
+      n_au_link:
+        nominal: 1.74948e-10
+        min: 1.74948e-10
+        min_at: nominal
+        max: 1.74948e-10
+        max_at: nominal
+      n_au_recv:
+        nominal: 2.66131e-09
+        min: 2.66131e-09
+        min_at: nominal
+        max: 2.66131e-09
+        max_at: nominal
+      n_au_zero:
+        nominal: 3.87071e-10
+        min: 3.87071e-10
+        min_at: nominal
+        max: 3.87071e-10
+        max_at: nominal
+      n_au_dac:
+        nominal: 5.25197e-06
+        min: 5.25197e-06
+        min_at: nominal
+        max: 5.25197e-06
+        max_at: nominal
+      n_au_shaper:
+        nominal: 1.30164e-05
+        min: 1.30164e-05
+        min_at: nominal
+        max: 1.30164e-05
+        max_at: nominal
+      n_au_out:
+        nominal: 1.26286e-05
+        min: 1.26286e-05
+        min_at: nominal
+        max: 1.26286e-05
+        max_at: nominal
+      n_au_rest:
+        nominal: 1.13667e-12
+        min: 1.13667e-12
+        min_at: nominal
+        max: 1.13667e-12
+        max_at: nominal
+      db_au:
+        nominal: -114.479
+        min: -114.479
+        min_at: nominal
+        max: -114.479
+        max_at: nominal
+      ppm_au:
+        nominal: 1.88813
+        min: 1.88813
+        min_at: nominal
+        max: 1.88813
+        max_at: nominal
+      n_cb_total:
+        nominal: 9.07684e-06
+        min: 9.07684e-06
+        min_at: nominal
+        max: 9.07684e-06
+        max_at: nominal
+      n_cb_sensor:
+        nominal: 8.07192e-08
+        min: 8.07192e-08
+        min_at: nominal
+        max: 8.07192e-08
+        max_at: nominal
+      n_cb_elec:
+        nominal: 9.07648e-06
+        min: 9.07648e-06
+        min_at: nominal
+        max: 9.07648e-06
+        max_at: nominal
+      n_cb_ref:
+        nominal: 1.50519e-09
+        min: 1.50519e-09
+        min_at: nominal
+        max: 1.50519e-09
+        max_at: nominal
+      n_cb_sbuf:
+        nominal: 1.9093e-10
+        min: 1.9093e-10
+        min_at: nominal
+        max: 1.9093e-10
+        max_at: nominal
+      n_cb_link:
+        nominal: 1.25611e-10
+        min: 1.25611e-10
+        min_at: nominal
+        max: 1.25611e-10
+        max_at: nominal
+      n_cb_recv:
+        nominal: 9.99274e-10
+        min: 9.99274e-10
+        min_at: nominal
+        max: 9.99274e-10
+        max_at: nominal
+      n_cb_zero:
+        nominal: 1.38603e-10
+        min: 1.38603e-10
+        min_at: nominal
+        max: 1.38603e-10
+        max_at: nominal
+      n_cb_dac:
+        nominal: 6.50788e-06
+        min: 6.50788e-06
+        min_at: nominal
+        max: 6.50788e-06
+        max_at: nominal
+      n_cb_shaper:
+        nominal: 4.5612e-06
+        min: 4.5612e-06
+        min_at: nominal
+        max: 4.5612e-06
+        max_at: nominal
+      n_cb_out:
+        nominal: 4.38468e-06
+        min: 4.38468e-06
+        min_at: nominal
+        max: 4.38468e-06
+        max_at: nominal
+      n_cb_rest:
+        nominal: 3.59468e-13
+        min: 3.59468e-13
+        min_at: nominal
+        max: 3.59468e-13
+        max_at: nominal
+      db_cb:
+        nominal: -120.841
+        min: -120.841
+        min_at: nominal
+        max: -120.841
+        max_at: nominal
+      ppm_cb:
+        nominal: 0.907684
+        min: 0.907684
+        min_at: nominal
+        max: 0.907684
+        max_at: nominal
+      e_100:
+        nominal: 3.34576e-07
+        min: 3.34576e-07
+        min_at: nominal
+        max: 3.34576e-07
+        max_at: nominal
+      e_1k:
+        nominal: 1.55863e-07
+        min: 1.55863e-07
+        min_at: nominal
+        max: 1.55863e-07
+        max_at: nominal
+      e_1k_elec:
+        nominal: 1.5585e-07
+        min: 1.5585e-07
+        min_at: nominal
+        max: 1.5585e-07
+        max_at: nominal
+      n_adc_total:
+        nominal: 0.000106728
+        min: 0.000106728
+        min_at: nominal
+        max: 0.000106728
+        max_at: nominal
+      n_adc_sensor:
+        nominal: 0.000106708
+        min: 0.000106708
+        min_at: nominal
+        max: 0.000106708
+        max_at: nominal
+      n_adc_lsb:
+        nominal: 0.132472
+        min: 0.132472
+        min_at: nominal
+        max: 0.132472
+        max_at: nominal
+      e_sens_chk:
+        nominal: 3.70067e-06
+        min: 3.70067e-06
+        min_at: nominal
+        max: 3.70067e-06
+        max_at: nominal
+    asserts:
+    - expr: nom['n_au_rest'] < 0.01 * nom['n_au_total'] and nom['n_cb_rest'] < 0.01 * nom['n_cb_total']
+      why: 'the bookkeeping closes: every noise source in the deck is in a named stage (under 1 % of the total is unclaimed)'
+      pass: true
+    - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
+      why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
+      pass: true
+    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.15 * nom['n_au_sensor'])
+      why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
+        is under a tenth of the sensor''s in the control band, and under 0.15 of it in the audio band, at every bandwidth
+        mode, curve setting and level. The audio band''s bound was a tenth until #32: with the jack''s RC at 15.9 kHz this
+        stage''s own noise reaches 20 kHz unfiltered (about 12 uV rms, -118 dB of 10 V), and at POT-RESP fully counter-clockwise
+        on a hard blow in the 500 Hz mode, where the curve is flattest and the sensor''s share smallest, it is 0.12 of the
+        sensor''s - on AN1646''s figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b,
+        the curve''s slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow
+        (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all'
+      pass: true
+    - expr: nom['n_adc_lsb'] < 1
+      why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
+        and the electronics together
+      pass: true
+  noise[bw=0,p_resp=0.0,level=0]:
+    corners: 1
+    measures:
+      g_set:
+        nominal: 1.55
+        min: 1.55
+        min_at: nominal
+        max: 1.55
+        max_at: nominal
+      g_inc_rest:
+        nominal: -2.14321
+        min: -2.14321
+        min_at: nominal
+        max: -2.14321
+        max_at: nominal
+      g_inc_hard:
+        nominal: -0.79989
+        min: -0.79989
+        min_at: nominal
+        max: -0.79989
+        max_at: nominal
+      r_b:
+        nominal: 1.0
+        min: 1.0
+        min_at: nominal
+        max: 1.0
+        max_at: nominal
+      ina_op:
+        nominal: 8.011e-05
+        min: 8.011e-05
+        min_at: nominal
+        max: 8.011e-05
+        max_at: nominal
+      jack_op:
+        nominal: -0.0136189
+        min: -0.0136189
+        min_at: nominal
+        max: -0.0136189
+        max_at: nominal
+      n_au_total:
+        nominal: 0.00162196
+        min: 0.00162196
+        min_at: nominal
+        max: 0.00162196
+        max_at: nominal
+      n_au_sensor:
+        nominal: 0.00162171
+        min: 0.00162171
+        min_at: nominal
+        max: 0.00162171
+        max_at: nominal
+      n_au_elec:
+        nominal: 2.8545e-05
+        min: 2.8545e-05
+        min_at: nominal
+        max: 2.8545e-05
+        max_at: nominal
+      n_au_ref:
+        nominal: 3.3223e-06
+        min: 3.3223e-06
+        min_at: nominal
+        max: 3.3223e-06
+        max_at: nominal
+      n_au_sbuf:
+        nominal: 2.58254e-06
+        min: 2.58254e-06
+        min_at: nominal
+        max: 2.58254e-06
+        max_at: nominal
+      n_au_link:
+        nominal: 2.52358e-06
+        min: 2.52358e-06
+        min_at: nominal
+        max: 2.52358e-06
+        max_at: nominal
+      n_au_recv:
+        nominal: 2.02971e-05
+        min: 2.02971e-05
+        min_at: nominal
+        max: 2.02971e-05
+        max_at: nominal
+      n_au_zero:
+        nominal: 2.76845e-06
+        min: 2.76845e-06
+        min_at: nominal
+        max: 2.76845e-06
+        max_at: nominal
+      n_au_dac:
+        nominal: 6.52237e-06
+        min: 6.52237e-06
+        min_at: nominal
+        max: 6.52237e-06
+        max_at: nominal
+      n_au_shaper:
+        nominal: 1.3003e-05
+        min: 1.3003e-05
+        min_at: nominal
+        max: 1.3003e-05
+        max_at: nominal
+      n_au_out:
+        nominal: 1.26286e-05
+        min: 1.26286e-05
+        min_at: nominal
+        max: 1.26286e-05
+        max_at: nominal
+      n_au_rest:
+        nominal: 4.5286e-10
+        min: 4.5286e-10
+        min_at: nominal
+        max: 4.5286e-10
+        max_at: nominal
+      db_au:
+        nominal: -75.7992
+        min: -75.7992
+        min_at: nominal
+        max: -75.7992
+        max_at: nominal
+      ppm_au:
+        nominal: 162.196
+        min: 162.196
+        min_at: nominal
+        max: 162.196
+        max_at: nominal
+      n_cb_total:
+        nominal: 0.00144454
+        min: 0.00144454
+        min_at: nominal
+        max: 0.00144454
+        max_at: nominal
+      n_cb_sensor:
+        nominal: 0.00144434
+        min: 0.00144434
+        min_at: nominal
+        max: 0.00144434
+        max_at: nominal
+      n_cb_elec:
+        nominal: 2.39835e-05
+        min: 2.39835e-05
+        min_at: nominal
+        max: 2.39835e-05
+        max_at: nominal
+      n_cb_ref:
+        nominal: 2.95894e-06
+        min: 2.95894e-06
+        min_at: nominal
+        max: 2.95894e-06
+        max_at: nominal
+      n_cb_sbuf:
+        nominal: 2.4411e-06
+        min: 2.4411e-06
+        min_at: nominal
+        max: 2.4411e-06
+        max_at: nominal
+      n_cb_link:
+        nominal: 2.24759e-06
+        min: 2.24759e-06
+        min_at: nominal
+        max: 2.24759e-06
+        max_at: nominal
+      n_cb_recv:
+        nominal: 1.65512e-05
+        min: 1.65512e-05
+        min_at: nominal
+        max: 1.65512e-05
+        max_at: nominal
+      n_cb_zero:
+        nominal: 2.22196e-06
+        min: 2.22196e-06
+        min_at: nominal
+        max: 2.22196e-06
+        max_at: nominal
+      n_cb_dac:
+        nominal: 8.1291e-06
+        min: 8.1291e-06
+        min_at: nominal
+        max: 8.1291e-06
+        max_at: nominal
+      n_cb_shaper:
+        nominal: 1.04146e-05
+        min: 1.04146e-05
+        min_at: nominal
+        max: 1.04146e-05
+        max_at: nominal
+      n_cb_out:
+        nominal: 1.01003e-05
+        min: 1.01003e-05
+        min_at: nominal
+        max: 1.01003e-05
+        max_at: nominal
+      n_cb_rest:
+        nominal: 2.02116e-10
+        min: 2.02116e-10
+        min_at: nominal
+        max: 2.02116e-10
+        max_at: nominal
+      db_cb:
+        nominal: -76.8054
+        min: -76.8054
+        min_at: nominal
+        max: -76.8054
+        max_at: nominal
+      ppm_cb:
+        nominal: 144.454
+        min: 144.454
+        min_at: nominal
+        max: 144.454
+        max_at: nominal
+      e_100:
+        nominal: 1.70343e-05
+        min: 1.70343e-05
+        min_at: nominal
+        max: 1.70343e-05
+        max_at: nominal
+      e_1k:
+        nominal: 1.69169e-05
+        min: 1.69169e-05
+        min_at: nominal
+        max: 1.69169e-05
+        max_at: nominal
+      e_1k_elec:
+        nominal: 2.44594e-07
+        min: 2.44594e-07
+        min_at: nominal
+        max: 2.44594e-07
+        max_at: nominal
+      n_adc_total:
+        nominal: 0.00010671
+        min: 0.00010671
+        min_at: nominal
+        max: 0.00010671
+        max_at: nominal
+      n_adc_sensor:
+        nominal: 0.000106708
+        min: 0.000106708
+        min_at: nominal
+        max: 0.000106708
+        max_at: nominal
+      n_adc_lsb:
+        nominal: 0.132449
+        min: 0.132449
+        min_at: nominal
+        max: 0.132449
+        max_at: nominal
+      e_sens_chk:
+        nominal: 3.70003e-06
+        min: 3.70003e-06
+        min_at: nominal
+        max: 3.70003e-06
+        max_at: nominal
+    asserts:
+    - expr: nom['n_au_rest'] < 0.01 * nom['n_au_total'] and nom['n_cb_rest'] < 0.01 * nom['n_cb_total']
+      why: 'the bookkeeping closes: every noise source in the deck is in a named stage (under 1 % of the total is unclaimed)'
+      pass: true
+    - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
+      why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
+      pass: true
+    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.15 * nom['n_au_sensor'])
+      why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
+        is under a tenth of the sensor''s in the control band, and under 0.15 of it in the audio band, at every bandwidth
+        mode, curve setting and level. The audio band''s bound was a tenth until #32: with the jack''s RC at 15.9 kHz this
+        stage''s own noise reaches 20 kHz unfiltered (about 12 uV rms, -118 dB of 10 V), and at POT-RESP fully counter-clockwise
+        on a hard blow in the 500 Hz mode, where the curve is flattest and the sensor''s share smallest, it is 0.12 of the
+        sensor''s - on AN1646''s figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b,
+        the curve''s slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow
+        (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all'
+      pass: true
+    - expr: nom['n_adc_lsb'] < 1
+      why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
+        and the electronics together
+      pass: true
+  noise[bw=0,p_resp=0.0,level=1]:
+    corners: 1
+    measures:
+      g_set:
+        nominal: 1.55
+        min: 1.55
+        min_at: nominal
+        max: 1.55
+        max_at: nominal
+      g_inc_rest:
+        nominal: -2.14321
+        min: -2.14321
+        min_at: nominal
+        max: -2.14321
+        max_at: nominal
+      g_inc_hard:
+        nominal: -0.79989
+        min: -0.79989
+        min_at: nominal
+        max: -0.79989
+        max_at: nominal
+      r_b:
+        nominal: 0.373221
+        min: 0.373221
+        min_at: nominal
+        max: 0.373221
+        max_at: nominal
+      ina_op:
+        nominal: -4.63989
+        min: -4.63989
+        min_at: nominal
+        max: -4.63989
+        max_at: nominal
+      jack_op:
+        nominal: -0.0136189
+        min: -0.0136189
+        min_at: nominal
+        max: -0.0136189
+        max_at: nominal
+      n_au_total:
+        nominal: 0.00060571
+        min: 0.00060571
+        min_at: nominal
+        max: 0.00060571
+        max_at: nominal
+      n_au_sensor:
+        nominal: 0.000605257
+        min: 0.000605257
+        min_at: nominal
+        max: 0.000605257
+        max_at: nominal
+      n_au_elec:
+        nominal: 2.34307e-05
+        min: 2.34307e-05
+        min_at: nominal
+        max: 2.34307e-05
+        max_at: nominal
+      n_au_ref:
+        nominal: 1.12864e-05
+        min: 1.12864e-05
+        min_at: nominal
+        max: 1.12864e-05
+        max_at: nominal
+      n_au_sbuf:
+        nominal: 9.6386e-07
+        min: 9.6386e-07
+        min_at: nominal
+        max: 9.6386e-07
+        max_at: nominal
+      n_au_link:
+        nominal: 9.41854e-07
+        min: 9.41854e-07
+        min_at: nominal
+        max: 9.41854e-07
+        max_at: nominal
+      n_au_recv:
+        nominal: 7.57532e-06
+        min: 7.57532e-06
+        min_at: nominal
+        max: 7.57532e-06
+        max_at: nominal
+      n_au_zero:
+        nominal: 1.03324e-06
+        min: 1.03324e-06
+        min_at: nominal
+        max: 1.03324e-06
+        max_at: nominal
+      n_au_dac:
+        nominal: 5.726e-06
+        min: 5.726e-06
+        min_at: nominal
+        max: 5.726e-06
+        max_at: nominal
+      n_au_shaper:
+        nominal: 1.3003e-05
+        min: 1.3003e-05
+        min_at: nominal
+        max: 1.3003e-05
+        max_at: nominal
+      n_au_out:
+        nominal: 1.26286e-05
+        min: 1.26286e-05
+        min_at: nominal
+        max: 1.26286e-05
+        max_at: nominal
+      n_au_rest:
+        nominal: 1.69014e-10
+        min: 1.69014e-10
+        min_at: nominal
+        max: 1.69014e-10
+        max_at: nominal
+      db_au:
+        nominal: -84.3547
+        min: -84.3547
+        min_at: nominal
+        max: -84.3547
+        max_at: nominal
+      ppm_au:
+        nominal: 60.571
+        min: 60.571
+        min_at: nominal
+        max: 60.571
+        max_at: nominal
+      n_cb_total:
+        nominal: 0.000539432
+        min: 0.000539432
+        min_at: nominal
+        max: 0.000539432
+        max_at: nominal
+      n_cb_sensor:
+        nominal: 0.000539059
+        min: 0.000539059
+        min_at: nominal
+        max: 0.000539059
+        max_at: nominal
+      n_cb_elec:
+        nominal: 2.00707e-05
+        min: 2.00707e-05
+        min_at: nominal
+        max: 2.00707e-05
+        max_at: nominal
+      n_cb_ref:
+        nominal: 1.00519e-05
+        min: 1.00519e-05
+        min_at: nominal
+        max: 1.00519e-05
+        max_at: nominal
+      n_cb_sbuf:
+        nominal: 9.1107e-07
+        min: 9.1107e-07
+        min_at: nominal
+        max: 9.1107e-07
+        max_at: nominal
+      n_cb_link:
+        nominal: 8.38849e-07
+        min: 8.38849e-07
+        min_at: nominal
+        max: 8.38849e-07
+        max_at: nominal
+      n_cb_recv:
+        nominal: 6.17724e-06
+        min: 6.17724e-06
+        min_at: nominal
+        max: 6.17724e-06
+        max_at: nominal
+      n_cb_zero:
+        nominal: 8.29284e-07
+        min: 8.29284e-07
+        min_at: nominal
+        max: 8.29284e-07
+        max_at: nominal
+      n_cb_dac:
+        nominal: 7.13656e-06
+        min: 7.13656e-06
+        min_at: nominal
+        max: 7.13656e-06
+        max_at: nominal
+      n_cb_shaper:
+        nominal: 1.04146e-05
+        min: 1.04146e-05
+        min_at: nominal
+        max: 1.04146e-05
+        max_at: nominal
+      n_cb_out:
+        nominal: 1.01003e-05
+        min: 1.01003e-05
+        min_at: nominal
+        max: 1.01003e-05
+        max_at: nominal
+      n_cb_rest:
+        nominal: 7.52499e-11
+        min: 7.52499e-11
+        min_at: nominal
+        max: 7.52499e-11
+        max_at: nominal
+      db_cb:
+        nominal: -85.3613
+        min: -85.3613
+        min_at: nominal
+        max: -85.3613
+        max_at: nominal
+      ppm_cb:
+        nominal: 53.9432
+        min: 53.9432
+        min_at: nominal
+        max: 53.9432
+        max_at: nominal
+      e_100:
+        nominal: 6.36691e-06
+        min: 6.36691e-06
+        min_at: nominal
+        max: 6.36691e-06
+        max_at: nominal
+      e_1k:
+        nominal: 6.31649e-06
+        min: 6.31649e-06
+        min_at: nominal
+        max: 6.31649e-06
+        max_at: nominal
+      e_1k_elec:
+        nominal: 2.07375e-07
+        min: 2.07375e-07
+        min_at: nominal
+        max: 2.07375e-07
+        max_at: nominal
+      n_adc_total:
+        nominal: 0.000106728
+        min: 0.000106728
+        min_at: nominal
+        max: 0.000106728
+        max_at: nominal
+      n_adc_sensor:
+        nominal: 0.000106708
+        min: 0.000106708
+        min_at: nominal
+        max: 0.000106708
+        max_at: nominal
+      n_adc_lsb:
+        nominal: 0.132472
+        min: 0.132472
+        min_at: nominal
+        max: 0.132472
+        max_at: nominal
+      e_sens_chk:
+        nominal: 3.70067e-06
+        min: 3.70067e-06
+        min_at: nominal
+        max: 3.70067e-06
+        max_at: nominal
+    asserts:
+    - expr: nom['n_au_rest'] < 0.01 * nom['n_au_total'] and nom['n_cb_rest'] < 0.01 * nom['n_cb_total']
+      why: 'the bookkeeping closes: every noise source in the deck is in a named stage (under 1 % of the total is unclaimed)'
+      pass: true
+    - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
+      why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
+      pass: true
+    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.15 * nom['n_au_sensor'])
+      why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
+        is under a tenth of the sensor''s in the control band, and under 0.15 of it in the audio band, at every bandwidth
+        mode, curve setting and level. The audio band''s bound was a tenth until #32: with the jack''s RC at 15.9 kHz this
+        stage''s own noise reaches 20 kHz unfiltered (about 12 uV rms, -118 dB of 10 V), and at POT-RESP fully counter-clockwise
+        on a hard blow in the 500 Hz mode, where the curve is flattest and the sensor''s share smallest, it is 0.12 of the
+        sensor''s - on AN1646''s figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b,
+        the curve''s slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow
+        (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all'
+      pass: true
+    - expr: nom['n_adc_lsb'] < 1
+      why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
+        and the electronics together
+      pass: true
+  noise[bw=0,p_resp=0.5,level=0]:
+    corners: 1
+    measures:
+      g_set:
+        nominal: 1.55
+        min: 1.55
+        min_at: nominal
+        max: 1.55
+        max_at: nominal
+      g_inc_rest:
+        nominal: -2.14907
+        min: -2.14907
+        min_at: nominal
+        max: -2.14907
+        max_at: nominal
+      g_inc_hard:
+        nominal: -2.14402
+        min: -2.14402
+        min_at: nominal
+        max: -2.14402
+        max_at: nominal
+      r_b:
+        nominal: 1.0
+        min: 1.0
+        min_at: nominal
+        max: 1.0
+        max_at: nominal
+      ina_op:
+        nominal: 8.011e-05
+        min: 8.011e-05
+        min_at: nominal
+        max: 8.011e-05
+        max_at: nominal
+      jack_op:
+        nominal: -0.0136188
+        min: -0.0136188
+        min_at: nominal
+        max: -0.0136188
+        max_at: nominal
+      n_au_total:
+        nominal: 0.0016253
+        min: 0.0016253
+        min_at: nominal
+        max: 0.0016253
+        max_at: nominal
+      n_au_sensor:
+        nominal: 0.00162505
+        min: 0.00162505
+        min_at: nominal
+        max: 0.00162505
+        max_at: nominal
+      n_au_elec:
+        nominal: 2.85807e-05
+        min: 2.85807e-05
+        min_at: nominal
+        max: 2.85807e-05
+        max_at: nominal
+      n_au_ref:
+        nominal: 3.32915e-06
+        min: 3.32915e-06
+        min_at: nominal
+        max: 3.32915e-06
+        max_at: nominal
+      n_au_sbuf:
+        nominal: 2.58786e-06
+        min: 2.58786e-06
+        min_at: nominal
+        max: 2.58786e-06
+        max_at: nominal
+      n_au_link:
+        nominal: 2.52878e-06
+        min: 2.52878e-06
+        min_at: nominal
+        max: 2.52878e-06
+        max_at: nominal
+      n_au_recv:
+        nominal: 2.0339e-05
+        min: 2.0339e-05
+        min_at: nominal
+        max: 2.0339e-05
+        max_at: nominal
+      n_au_zero:
+        nominal: 2.77416e-06
+        min: 2.77416e-06
+        min_at: nominal
+        max: 2.77416e-06
+        max_at: nominal
+      n_au_dac:
+        nominal: 6.52499e-06
+        min: 6.52499e-06
+        min_at: nominal
+        max: 6.52499e-06
+        max_at: nominal
+      n_au_shaper:
+        nominal: 1.30097e-05
+        min: 1.30097e-05
+        min_at: nominal
+        max: 1.30097e-05
+        max_at: nominal
+      n_au_out:
+        nominal: 1.26286e-05
+        min: 1.26286e-05
+        min_at: nominal
+        max: 1.26286e-05
+        max_at: nominal
+      n_au_rest:
+        nominal: 4.53756e-10
+        min: 4.53756e-10
+        min_at: nominal
+        max: 4.53756e-10
+        max_at: nominal
+      db_au:
+        nominal: -75.7813
+        min: -75.7813
+        min_at: nominal
+        max: -75.7813
+        max_at: nominal
+      ppm_au:
+        nominal: 162.53
+        min: 162.53
+        min_at: nominal
+        max: 162.53
+        max_at: nominal
+      n_cb_total:
+        nominal: 0.00144751
+        min: 0.00144751
+        min_at: nominal
+        max: 0.00144751
+        max_at: nominal
+      n_cb_sensor:
+        nominal: 0.00144732
+        min: 0.00144732
+        min_at: nominal
+        max: 0.00144732
+        max_at: nominal
+      n_cb_elec:
+        nominal: 2.40125e-05
+        min: 2.40125e-05
+        min_at: nominal
+        max: 2.40125e-05
+        max_at: nominal
+      n_cb_ref:
+        nominal: 2.96503e-06
+        min: 2.96503e-06
+        min_at: nominal
+        max: 2.96503e-06
+        max_at: nominal
+      n_cb_sbuf:
+        nominal: 2.44613e-06
+        min: 2.44613e-06
+        min_at: nominal
+        max: 2.44613e-06
+        max_at: nominal
+      n_cb_link:
+        nominal: 2.25222e-06
+        min: 2.25222e-06
+        min_at: nominal
+        max: 2.25222e-06
+        max_at: nominal
+      n_cb_recv:
+        nominal: 1.65852e-05
+        min: 1.65852e-05
+        min_at: nominal
+        max: 1.65852e-05
+        max_at: nominal
+      n_cb_zero:
+        nominal: 2.22654e-06
+        min: 2.22654e-06
+        min_at: nominal
+        max: 2.22654e-06
+        max_at: nominal
+      n_cb_dac:
+        nominal: 8.13236e-06
+        min: 8.13236e-06
+        min_at: nominal
+        max: 8.13236e-06
+        max_at: nominal
+      n_cb_shaper:
+        nominal: 1.042e-05
+        min: 1.042e-05
+        min_at: nominal
+        max: 1.042e-05
+        max_at: nominal
+      n_cb_out:
+        nominal: 1.01003e-05
+        min: 1.01003e-05
+        min_at: nominal
+        max: 1.01003e-05
+        max_at: nominal
+      n_cb_rest:
+        nominal: 2.02444e-10
+        min: 2.02444e-10
+        min_at: nominal
+        max: 2.02444e-10
+        max_at: nominal
+      db_cb:
+        nominal: -76.7875
+        min: -76.7875
+        min_at: nominal
+        max: -76.7875
+        max_at: nominal
+      ppm_cb:
+        nominal: 144.751
+        min: 144.751
+        min_at: nominal
+        max: 144.751
+        max_at: nominal
+      e_100:
+        nominal: 1.70693e-05
+        min: 1.70693e-05
+        min_at: nominal
+        max: 1.70693e-05
+        max_at: nominal
+      e_1k:
+        nominal: 1.69517e-05
+        min: 1.69517e-05
+        min_at: nominal
+        max: 1.69517e-05
+        max_at: nominal
+      e_1k_elec:
+        nominal: 2.44917e-07
+        min: 2.44917e-07
+        min_at: nominal
+        max: 2.44917e-07
+        max_at: nominal
+      n_adc_total:
+        nominal: 0.00010671
+        min: 0.00010671
+        min_at: nominal
+        max: 0.00010671
+        max_at: nominal
+      n_adc_sensor:
+        nominal: 0.000106708
+        min: 0.000106708
+        min_at: nominal
+        max: 0.000106708
+        max_at: nominal
+      n_adc_lsb:
+        nominal: 0.132449
+        min: 0.132449
+        min_at: nominal
+        max: 0.132449
+        max_at: nominal
+      e_sens_chk:
+        nominal: 3.70003e-06
+        min: 3.70003e-06
+        min_at: nominal
+        max: 3.70003e-06
+        max_at: nominal
+    asserts:
+    - expr: nom['n_au_rest'] < 0.01 * nom['n_au_total'] and nom['n_cb_rest'] < 0.01 * nom['n_cb_total']
+      why: 'the bookkeeping closes: every noise source in the deck is in a named stage (under 1 % of the total is unclaimed)'
+      pass: true
+    - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
+      why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
+      pass: true
+    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.15 * nom['n_au_sensor'])
+      why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
+        is under a tenth of the sensor''s in the control band, and under 0.15 of it in the audio band, at every bandwidth
+        mode, curve setting and level. The audio band''s bound was a tenth until #32: with the jack''s RC at 15.9 kHz this
+        stage''s own noise reaches 20 kHz unfiltered (about 12 uV rms, -118 dB of 10 V), and at POT-RESP fully counter-clockwise
+        on a hard blow in the 500 Hz mode, where the curve is flattest and the sensor''s share smallest, it is 0.12 of the
+        sensor''s - on AN1646''s figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b,
+        the curve''s slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow
+        (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all'
+      pass: true
+    - expr: nom['n_adc_lsb'] < 1
+      why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
+        and the electronics together
+      pass: true
+  noise[bw=0,p_resp=0.5,level=1]:
+    corners: 1
+    measures:
+      g_set:
+        nominal: 1.55
+        min: 1.55
+        min_at: nominal
+        max: 1.55
+        max_at: nominal
+      g_inc_rest:
+        nominal: -2.14907
+        min: -2.14907
+        min_at: nominal
+        max: -2.14907
+        max_at: nominal
+      g_inc_hard:
+        nominal: -2.14402
+        min: -2.14402
+        min_at: nominal
+        max: -2.14402
+        max_at: nominal
+      r_b:
+        nominal: 0.997648
+        min: 0.997648
+        min_at: nominal
+        max: 0.997648
+        max_at: nominal
+      ina_op:
+        nominal: -4.63989
+        min: -4.63989
+        min_at: nominal
+        max: -4.63989
+        max_at: nominal
+      jack_op:
+        nominal: -0.0136188
+        min: -0.0136188
+        min_at: nominal
+        max: -0.0136188
+        max_at: nominal
+      n_au_total:
+        nominal: 0.00162176
+        min: 0.00162176
+        min_at: nominal
+        max: 0.00162176
+        max_at: nominal
+      n_au_sensor:
+        nominal: 0.00162123
+        min: 0.00162123
+        min_at: nominal
+        max: 0.00162123
+        max_at: nominal
+      n_au_elec:
+        nominal: 4.14443e-05
+        min: 4.14443e-05
+        min_at: nominal
+        max: 4.14443e-05
+        max_at: nominal
+      n_au_ref:
+        nominal: 3.02314e-05
+        min: 3.02314e-05
+        min_at: nominal
+        max: 3.02314e-05
+        max_at: nominal
+      n_au_sbuf:
+        nominal: 2.58178e-06
+        min: 2.58178e-06
+        min_at: nominal
+        max: 2.58178e-06
+        max_at: nominal
+      n_au_link:
+        nominal: 2.52283e-06
+        min: 2.52283e-06
+        min_at: nominal
+        max: 2.52283e-06
+        max_at: nominal
+      n_au_recv:
+        nominal: 2.02912e-05
+        min: 2.02912e-05
+        min_at: nominal
+        max: 2.02912e-05
+        max_at: nominal
+      n_au_zero:
+        nominal: 2.76763e-06
+        min: 2.76763e-06
+        min_at: nominal
+        max: 2.76763e-06
+        max_at: nominal
+      n_au_dac:
+        nominal: 6.52199e-06
+        min: 6.52199e-06
+        min_at: nominal
+        max: 6.52199e-06
+        max_at: nominal
+      n_au_shaper:
+        nominal: 1.30097e-05
+        min: 1.30097e-05
+        min_at: nominal
+        max: 1.30097e-05
+        max_at: nominal
+      n_au_out:
+        nominal: 1.26286e-05
+        min: 1.26286e-05
+        min_at: nominal
+        max: 1.26286e-05
+        max_at: nominal
+      n_au_rest:
+        nominal: 4.52714e-10
+        min: 4.52714e-10
+        min_at: nominal
+        max: 4.52714e-10
+        max_at: nominal
+      db_au:
+        nominal: -75.8003
+        min: -75.8003
+        min_at: nominal
+        max: -75.8003
+        max_at: nominal
+      ppm_au:
+        nominal: 162.176
+        min: 162.176
+        min_at: nominal
+        max: 162.176
+        max_at: nominal
+      n_cb_total:
+        nominal: 0.00144436
+        min: 0.00144436
+        min_at: nominal
+        max: 0.00144436
+        max_at: nominal
+      n_cb_sensor:
+        nominal: 0.00144391
+        min: 0.00144391
+        min_at: nominal
+        max: 0.00144391
+        max_at: nominal
+      n_cb_elec:
+        nominal: 3.59351e-05
+        min: 3.59351e-05
+        min_at: nominal
+        max: 3.59351e-05
+        max_at: nominal
+      n_cb_ref:
+        nominal: 2.69249e-05
+        min: 2.69249e-05
+        min_at: nominal
+        max: 2.69249e-05
+        max_at: nominal
+      n_cb_sbuf:
+        nominal: 2.44037e-06
+        min: 2.44037e-06
+        min_at: nominal
+        max: 2.44037e-06
+        max_at: nominal
+      n_cb_link:
+        nominal: 2.24692e-06
+        min: 2.24692e-06
+        min_at: nominal
+        max: 2.24692e-06
+        max_at: nominal
+      n_cb_recv:
+        nominal: 1.65462e-05
+        min: 1.65462e-05
+        min_at: nominal
+        max: 1.65462e-05
+        max_at: nominal
+      n_cb_zero:
+        nominal: 2.2213e-06
+        min: 2.2213e-06
+        min_at: nominal
+        max: 2.2213e-06
+        max_at: nominal
+      n_cb_dac:
+        nominal: 8.12863e-06
+        min: 8.12863e-06
+        min_at: nominal
+        max: 8.12863e-06
+        max_at: nominal
+      n_cb_shaper:
+        nominal: 1.042e-05
+        min: 1.042e-05
+        min_at: nominal
+        max: 1.042e-05
+        max_at: nominal
+      n_cb_out:
+        nominal: 1.01003e-05
+        min: 1.01003e-05
+        min_at: nominal
+        max: 1.01003e-05
+        max_at: nominal
+      n_cb_rest:
+        nominal: 2.01713e-10
+        min: 2.01713e-10
+        min_at: nominal
+        max: 2.01713e-10
+        max_at: nominal
+      db_cb:
+        nominal: -76.8065
+        min: -76.8065
+        min_at: nominal
+        max: -76.8065
+        max_at: nominal
+      ppm_cb:
+        nominal: 144.436
+        min: 144.436
+        min_at: nominal
+        max: 144.436
+        max_at: nominal
+      e_100:
+        nominal: 1.70321e-05
+        min: 1.70321e-05
+        min_at: nominal
+        max: 1.70321e-05
+        max_at: nominal
+      e_1k:
+        nominal: 1.69148e-05
+        min: 1.69148e-05
+        min_at: nominal
+        max: 1.69148e-05
+        max_at: nominal
+      e_1k_elec:
+        nominal: 3.97552e-07
+        min: 3.97552e-07
+        min_at: nominal
+        max: 3.97552e-07
+        max_at: nominal
+      n_adc_total:
+        nominal: 0.000106728
+        min: 0.000106728
+        min_at: nominal
+        max: 0.000106728
+        max_at: nominal
+      n_adc_sensor:
+        nominal: 0.000106708
+        min: 0.000106708
+        min_at: nominal
+        max: 0.000106708
+        max_at: nominal
+      n_adc_lsb:
+        nominal: 0.132472
+        min: 0.132472
+        min_at: nominal
+        max: 0.132472
+        max_at: nominal
+      e_sens_chk:
+        nominal: 3.70067e-06
+        min: 3.70067e-06
+        min_at: nominal
+        max: 3.70067e-06
+        max_at: nominal
+    asserts:
+    - expr: nom['n_au_rest'] < 0.01 * nom['n_au_total'] and nom['n_cb_rest'] < 0.01 * nom['n_cb_total']
+      why: 'the bookkeeping closes: every noise source in the deck is in a named stage (under 1 % of the total is unclaimed)'
+      pass: true
+    - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
+      why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
+      pass: true
+    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.15 * nom['n_au_sensor'])
+      why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
+        is under a tenth of the sensor''s in the control band, and under 0.15 of it in the audio band, at every bandwidth
+        mode, curve setting and level. The audio band''s bound was a tenth until #32: with the jack''s RC at 15.9 kHz this
+        stage''s own noise reaches 20 kHz unfiltered (about 12 uV rms, -118 dB of 10 V), and at POT-RESP fully counter-clockwise
+        on a hard blow in the 500 Hz mode, where the curve is flattest and the sensor''s share smallest, it is 0.12 of the
+        sensor''s - on AN1646''s figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b,
+        the curve''s slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow
+        (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all'
+      pass: true
+    - expr: nom['n_adc_lsb'] < 1
+      why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
+        and the electronics together
+      pass: true
+  noise[bw=0,p_resp=1.0,level=0]:
+    corners: 1
+    measures:
+      g_set:
+        nominal: 1.55
+        min: 1.55
+        min_at: nominal
+        max: 1.55
+        max_at: nominal
+      g_inc_rest:
+        nominal: -2.15455
+        min: -2.15455
+        min_at: nominal
+        max: -2.15455
+        max_at: nominal
+      g_inc_hard:
+        nominal: 0.0003
+        min: 0.0003
+        min_at: nominal
+        max: 0.0003
+        max_at: nominal
+      r_b:
+        nominal: 1.0
+        min: 1.0
+        min_at: nominal
+        max: 1.0
+        max_at: nominal
+      ina_op:
+        nominal: 8.011e-05
+        min: 8.011e-05
+        min_at: nominal
+        max: 8.011e-05
+        max_at: nominal
+      jack_op:
+        nominal: -0.0136186
+        min: -0.0136186
+        min_at: nominal
+        max: -0.0136186
+        max_at: nominal
+      n_au_total:
+        nominal: 0.00162865
+        min: 0.00162865
+        min_at: nominal
+        max: 0.00162865
+        max_at: nominal
+      n_au_sensor:
+        nominal: 0.0016284
+        min: 0.0016284
+        min_at: nominal
+        max: 0.0016284
+        max_at: nominal
+      n_au_elec:
+        nominal: 2.86165e-05
+        min: 2.86165e-05
+        min_at: nominal
+        max: 2.86165e-05
+        max_at: nominal
+      n_au_ref:
+        nominal: 3.33601e-06
+        min: 3.33601e-06
+        min_at: nominal
+        max: 3.33601e-06
+        max_at: nominal
+      n_au_sbuf:
+        nominal: 2.59319e-06
+        min: 2.59319e-06
+        min_at: nominal
+        max: 2.59319e-06
+        max_at: nominal
+      n_au_link:
+        nominal: 2.53399e-06
+        min: 2.53399e-06
+        min_at: nominal
+        max: 2.53399e-06
+        max_at: nominal
+      n_au_recv:
+        nominal: 2.03809e-05
+        min: 2.03809e-05
+        min_at: nominal
+        max: 2.03809e-05
+        max_at: nominal
+      n_au_zero:
+        nominal: 2.77988e-06
+        min: 2.77988e-06
+        min_at: nominal
+        max: 2.77988e-06
+        max_at: nominal
+      n_au_dac:
+        nominal: 6.5276e-06
+        min: 6.5276e-06
+        min_at: nominal
+        max: 6.5276e-06
+        max_at: nominal
+      n_au_shaper:
+        nominal: 1.30164e-05
+        min: 1.30164e-05
+        min_at: nominal
+        max: 1.30164e-05
+        max_at: nominal
+      n_au_out:
+        nominal: 1.26286e-05
+        min: 1.26286e-05
+        min_at: nominal
+        max: 1.26286e-05
+        max_at: nominal
+      n_au_rest:
+        nominal: 4.54707e-10
+        min: 4.54707e-10
+        min_at: nominal
+        max: 4.54707e-10
+        max_at: nominal
+      db_au:
+        nominal: -75.7635
+        min: -75.7635
+        min_at: nominal
+        max: -75.7635
+        max_at: nominal
+      ppm_au:
+        nominal: 162.865
+        min: 162.865
+        min_at: nominal
+        max: 162.865
+        max_at: nominal
+      n_cb_total:
+        nominal: 0.00145049
+        min: 0.00145049
+        min_at: nominal
+        max: 0.00145049
+        max_at: nominal
+      n_cb_sensor:
+        nominal: 0.00145029
+        min: 0.00145029
+        min_at: nominal
+        max: 0.00145029
+        max_at: nominal
+      n_cb_elec:
+        nominal: 2.40417e-05
+        min: 2.40417e-05
+        min_at: nominal
+        max: 2.40417e-05
+        max_at: nominal
+      n_cb_ref:
+        nominal: 2.97113e-06
+        min: 2.97113e-06
+        min_at: nominal
+        max: 2.97113e-06
+        max_at: nominal
+      n_cb_sbuf:
+        nominal: 2.45116e-06
+        min: 2.45116e-06
+        min_at: nominal
+        max: 2.45116e-06
+        max_at: nominal
+      n_cb_link:
+        nominal: 2.25685e-06
+        min: 2.25685e-06
+        min_at: nominal
+        max: 2.25685e-06
+        max_at: nominal
+      n_cb_recv:
+        nominal: 1.66194e-05
+        min: 1.66194e-05
+        min_at: nominal
+        max: 1.66194e-05
+        max_at: nominal
+      n_cb_zero:
         nominal: 2.23112e-06
         min: 2.23112e-06
         min_at: nominal
         max: 2.23112e-06
         max_at: nominal
-      n_au_sbuf:
-        nominal: 3.03645e-07
-        min: 3.03645e-07
-        min_at: nominal
-        max: 3.03645e-07
-        max_at: nominal
-      n_au_link:
-        nominal: 1.86191e-07
-        min: 1.86191e-07
-        min_at: nominal
-        max: 1.86191e-07
-        max_at: nominal
-      n_au_recv:
-        nominal: 1.83281e-06
-        min: 1.83281e-06
-        min_at: nominal
-        max: 1.83281e-06
-        max_at: nominal
-      n_au_zero:
-        nominal: 2.62006e-07
-        min: 2.62006e-07
-        min_at: nominal
-        max: 2.62006e-07
-        max_at: nominal
-      n_au_dac:
-        nominal: 5.4624e-06
-        min: 5.4624e-06
-        min_at: nominal
-        max: 5.4624e-06
-        max_at: nominal
-      n_au_shaper:
-        nominal: 3.23497e-06
-        min: 3.23497e-06
-        min_at: nominal
-        max: 3.23497e-06
-        max_at: nominal
-      n_au_out:
-        nominal: 3.0443e-06
-        min: 3.0443e-06
-        min_at: nominal
-        max: 3.0443e-06
-        max_at: nominal
-      n_au_rest:
-        nominal: 8.91519e-12
-        min: 8.91519e-12
-        min_at: nominal
-        max: 8.91519e-12
-        max_at: nominal
-      db_au:
-        nominal: -98.4242
-        min: -98.4242
-        min_at: nominal
-        max: -98.4242
-        max_at: nominal
-      ppm_au:
-        nominal: 11.9891
-        min: 11.9891
-        min_at: nominal
-        max: 11.9891
-        max_at: nominal
-      n_cb_total:
-        nominal: 0.000109479
-        min: 0.000109479
-        min_at: nominal
-        max: 0.000109479
-        max_at: nominal
-      n_cb_sensor:
-        nominal: 0.000109164
-        min: 0.000109164
-        min_at: nominal
-        max: 0.000109164
-        max_at: nominal
-      n_cb_elec:
-        nominal: 8.30108e-06
-        min: 8.30108e-06
-        min_at: nominal
-        max: 8.30108e-06
-        max_at: nominal
-      n_cb_ref:
-        nominal: 2.0356e-06
-        min: 2.0356e-06
-        min_at: nominal
-        max: 2.0356e-06
-        max_at: nominal
-      n_cb_sbuf:
-        nominal: 3.90753e-07
-        min: 3.90753e-07
-        min_at: nominal
-        max: 3.90753e-07
-        max_at: nominal
-      n_cb_link:
-        nominal: 1.69875e-07
-        min: 1.69875e-07
-        min_at: nominal
-        max: 1.69875e-07
-        max_at: nominal
-      n_cb_recv:
-        nominal: 1.59607e-06
-        min: 1.59607e-06
-        min_at: nominal
-        max: 1.59607e-06
-        max_at: nominal
-      n_cb_zero:
-        nominal: 2.32632e-07
-        min: 2.32632e-07
-        min_at: nominal
-        max: 2.32632e-07
-        max_at: nominal
       n_cb_dac:
-        nominal: 6.88833e-06
-        min: 6.88833e-06
+        nominal: 8.13562e-06
+        min: 8.13562e-06
         min_at: nominal
-        max: 6.88833e-06
+        max: 8.13562e-06
         max_at: nominal
       n_cb_shaper:
-        nominal: 2.79653e-06
-        min: 2.79653e-06
+        nominal: 1.04253e-05
+        min: 1.04253e-05
         min_at: nominal
-        max: 2.79653e-06
+        max: 1.04253e-05
         max_at: nominal
       n_cb_out:
-        nominal: 2.59064e-06
-        min: 2.59064e-06
+        nominal: 1.01003e-05
+        min: 1.01003e-05
         min_at: nominal
-        max: 2.59064e-06
+        max: 1.01003e-05
         max_at: nominal
       n_cb_rest:
-        nominal: 1.10919e-12
-        min: 1.10919e-12
+        nominal: 2.02709e-10
+        min: 2.02709e-10
         min_at: nominal
-        max: 1.10919e-12
+        max: 2.02709e-10
         max_at: nominal
       db_cb:
-        nominal: -99.2134
-        min: -99.2134
+        nominal: -76.7697
+        min: -76.7697
         min_at: nominal
-        max: -99.2134
+        max: -76.7697
         max_at: nominal
       ppm_cb:
-        nominal: 10.9479
-        min: 10.9479
+        nominal: 145.049
+        min: 145.049
         min_at: nominal
-        max: 10.9479
+        max: 145.049
         max_at: nominal
       e_100:
-        nominal: 6.09911e-06
-        min: 6.09911e-06
+        nominal: 1.71044e-05
+        min: 1.71044e-05
         min_at: nominal
-        max: 6.09911e-06
+        max: 1.71044e-05
         max_at: nominal
       e_1k:
-        nominal: 1.17536e-06
-        min: 1.17536e-06
+        nominal: 1.69865e-05
+        min: 1.69865e-05
         min_at: nominal
-        max: 1.17536e-06
+        max: 1.69865e-05
         max_at: nominal
       e_1k_elec:
-        nominal: 7.61915e-08
-        min: 7.61915e-08
+        nominal: 2.4524e-07
+        min: 2.4524e-07
         min_at: nominal
-        max: 7.61915e-08
+        max: 2.4524e-07
         max_at: nominal
       n_adc_total:
-        nominal: 6.60449e-05
-        min: 6.60449e-05
+        nominal: 0.00010671
+        min: 0.00010671
         min_at: nominal
-        max: 6.60449e-05
+        max: 0.00010671
         max_at: nominal
       n_adc_sensor:
-        nominal: 6.60325e-05
-        min: 6.60325e-05
+        nominal: 0.000106708
+        min: 0.000106708
         min_at: nominal
-        max: 6.60325e-05
+        max: 0.000106708
         max_at: nominal
       n_adc_lsb:
-        nominal: 0.0819757
-        min: 0.0819757
+        nominal: 0.132449
+        min: 0.132449
         min_at: nominal
-        max: 0.0819757
-        max_at: nominal
-      e_sens_chk:
-        nominal: 3.70067e-06
-        min: 3.70067e-06
-        min_at: nominal
-        max: 3.70067e-06
-        max_at: nominal
-    asserts:
-    - expr: nom['n_au_rest'] < 0.01 * nom['n_au_total'] and nom['n_cb_rest'] < 0.01 * nom['n_cb_total']
-      why: 'the bookkeeping closes: every noise source in the deck is in a named stage (under 1 % of the total is unclaimed)'
-      pass: true
-    - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
-      why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
-      pass: true
-    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.1 * nom['n_au_sensor'])
-      why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
-        is under a tenth of the sensor''s, in both bands, at every curve setting and level - on AN1646''s figure, an assumption
-        (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b, the curve''s slope there over its slope at
-        rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow (breath-chain-curve-clip), and a jack on
-        its rail passes no breath noise at all'
-      pass: true
-    - expr: nom['n_adc_lsb'] < 1
-      why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
-        and the electronics together
-      pass: true
-  noise[p_resp=0.5,level=0]:
-    corners: 1
-    measures:
-      g_set:
-        nominal: 1.55
-        min: 1.55
-        min_at: nominal
-        max: 1.55
-        max_at: nominal
-      g_inc_rest:
-        nominal: -2.14859
-        min: -2.14859
-        min_at: nominal
-        max: -2.14859
-        max_at: nominal
-      g_inc_hard:
-        nominal: -2.14396
-        min: -2.14396
-        min_at: nominal
-        max: -2.14396
-        max_at: nominal
-      r_b:
-        nominal: 1.0
-        min: 1.0
-        min_at: nominal
-        max: 1.0
-        max_at: nominal
-      ina_op:
-        nominal: 8.011e-05
-        min: 8.011e-05
-        min_at: nominal
-        max: 8.011e-05
-        max_at: nominal
-      jack_op:
-        nominal: -0.0294334
-        min: -0.0294334
-        min_at: nominal
-        max: -0.0294334
-        max_at: nominal
-      n_au_total:
-        nominal: 0.000321303
-        min: 0.000321303
-        min_at: nominal
-        max: 0.000321303
-        max_at: nominal
-      n_au_sensor:
-        nominal: 0.000321172
-        min: 0.000321172
-        min_at: nominal
-        max: 0.000321172
-        max_at: nominal
-      n_au_elec:
-        nominal: 9.19424e-06
-        min: 9.19424e-06
-        min_at: nominal
-        max: 9.19424e-06
-        max_at: nominal
-      n_au_ref:
-        nominal: 6.57967e-07
-        min: 6.57967e-07
-        min_at: nominal
-        max: 6.57967e-07
-        max_at: nominal
-      n_au_sbuf:
-        nominal: 8.1507e-07
-        min: 8.1507e-07
-        min_at: nominal
-        max: 8.1507e-07
-        max_at: nominal
-      n_au_link:
-        nominal: 4.99791e-07
-        min: 4.99791e-07
-        min_at: nominal
-        max: 4.99791e-07
-        max_at: nominal
-      n_au_recv:
-        nominal: 4.9198e-06
-        min: 4.9198e-06
-        min_at: nominal
-        max: 4.9198e-06
-        max_at: nominal
-      n_au_zero:
-        nominal: 7.033e-07
-        min: 7.033e-07
-        min_at: nominal
-        max: 7.033e-07
-        max_at: nominal
-      n_au_dac:
-        nominal: 6.22449e-06
-        min: 6.22449e-06
-        min_at: nominal
-        max: 6.22449e-06
-        max_at: nominal
-      n_au_shaper:
-        nominal: 3.23664e-06
-        min: 3.23664e-06
-        min_at: nominal
-        max: 3.23664e-06
-        max_at: nominal
-      n_au_out:
-        nominal: 3.0443e-06
-        min: 3.0443e-06
-        min_at: nominal
-        max: 3.0443e-06
-        max_at: nominal
-      n_au_rest:
-        nominal: 2.38519e-11
-        min: 2.38519e-11
-        min_at: nominal
-        max: 2.38519e-11
-        max_at: nominal
-      db_au:
-        nominal: -89.8617
-        min: -89.8617
-        min_at: nominal
-        max: -89.8617
-        max_at: nominal
-      ppm_au:
-        nominal: 32.1303
-        min: 32.1303
-        min_at: nominal
-        max: 32.1303
-        max_at: nominal
-      n_cb_total:
-        nominal: 0.000293191
-        min: 0.000293191
-        min_at: nominal
-        max: 0.000293191
-        max_at: nominal
-      n_cb_sensor:
-        nominal: 0.000293026
-        min: 0.000293026
-        min_at: nominal
-        max: 0.000293026
-        max_at: nominal
-      n_cb_elec:
-        nominal: 9.82643e-06
-        min: 9.82643e-06
-        min_at: nominal
-        max: 9.82643e-06
-        max_at: nominal
-      n_cb_ref:
-        nominal: 6.00306e-07
-        min: 6.00306e-07
-        min_at: nominal
-        max: 6.00306e-07
-        max_at: nominal
-      n_cb_sbuf:
-        nominal: 1.04889e-06
-        min: 1.04889e-06
-        min_at: nominal
-        max: 1.04889e-06
-        max_at: nominal
-      n_cb_link:
-        nominal: 4.55993e-07
-        min: 4.55993e-07
-        min_at: nominal
-        max: 4.55993e-07
-        max_at: nominal
-      n_cb_recv:
-        nominal: 4.28432e-06
-        min: 4.28432e-06
-        min_at: nominal
-        max: 4.28432e-06
-        max_at: nominal
-      n_cb_zero:
-        nominal: 6.24452e-07
-        min: 6.24452e-07
-        min_at: nominal
-        max: 6.24452e-07
-        max_at: nominal
-      n_cb_dac:
-        nominal: 7.84887e-06
-        min: 7.84887e-06
-        min_at: nominal
-        max: 7.84887e-06
-        max_at: nominal
-      n_cb_shaper:
-        nominal: 2.79797e-06
-        min: 2.79797e-06
-        min_at: nominal
-        max: 2.79797e-06
-        max_at: nominal
-      n_cb_out:
-        nominal: 2.59064e-06
-        min: 2.59064e-06
-        min_at: nominal
-        max: 2.59064e-06
-        max_at: nominal
-      n_cb_rest:
-        nominal: 2.47803e-12
-        min: 2.47803e-12
-        min_at: nominal
-        max: 2.47803e-12
-        max_at: nominal
-      db_cb:
-        nominal: -90.657
-        min: -90.657
-        min_at: nominal
-        max: -90.657
-        max_at: nominal
-      ppm_cb:
-        nominal: 29.3191
-        min: 29.3191
-        min_at: nominal
-        max: 29.3191
-        max_at: nominal
-      e_100:
-        nominal: 1.63469e-05
-        min: 1.63469e-05
-        min_at: nominal
-        max: 1.63469e-05
-        max_at: nominal
-      e_1k:
-        nominal: 3.14994e-06
-        min: 3.14994e-06
-        min_at: nominal
-        max: 3.14994e-06
-        max_at: nominal
-      e_1k_elec:
-        nominal: 9.94694e-08
-        min: 9.94694e-08
-        min_at: nominal
-        max: 9.94694e-08
-        max_at: nominal
-      n_adc_total:
-        nominal: 6.60335e-05
-        min: 6.60335e-05
-        min_at: nominal
-        max: 6.60335e-05
-        max_at: nominal
-      n_adc_sensor:
-        nominal: 6.60325e-05
-        min: 6.60325e-05
-        min_at: nominal
-        max: 6.60325e-05
-        max_at: nominal
-      n_adc_lsb:
-        nominal: 0.0819616
-        min: 0.0819616
-        min_at: nominal
-        max: 0.0819616
+        max: 0.132449
         max_at: nominal
       e_sens_chk:
         nominal: 3.70003e-06
@@ -1305,18 +5226,21 @@ sims:
     - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
       why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
       pass: true
-    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.1 * nom['n_au_sensor'])
+    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.15 * nom['n_au_sensor'])
       why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
-        is under a tenth of the sensor''s, in both bands, at every curve setting and level - on AN1646''s figure, an assumption
-        (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b, the curve''s slope there over its slope at
-        rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow (breath-chain-curve-clip), and a jack on
-        its rail passes no breath noise at all'
+        is under a tenth of the sensor''s in the control band, and under 0.15 of it in the audio band, at every bandwidth
+        mode, curve setting and level. The audio band''s bound was a tenth until #32: with the jack''s RC at 15.9 kHz this
+        stage''s own noise reaches 20 kHz unfiltered (about 12 uV rms, -118 dB of 10 V), and at POT-RESP fully counter-clockwise
+        on a hard blow in the 500 Hz mode, where the curve is flattest and the sensor''s share smallest, it is 0.12 of the
+        sensor''s - on AN1646''s figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b,
+        the curve''s slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow
+        (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all'
       pass: true
     - expr: nom['n_adc_lsb'] < 1
       why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
         and the electronics together
       pass: true
-  noise[p_resp=0.5,level=1]:
+  noise[bw=0,p_resp=1.0,level=1]:
     corners: 1
     measures:
       g_set:
@@ -1326,22 +5250,22 @@ sims:
         max: 1.55
         max_at: nominal
       g_inc_rest:
-        nominal: -2.14859
-        min: -2.14859
+        nominal: -2.15455
+        min: -2.15455
         min_at: nominal
-        max: -2.14859
+        max: -2.15455
         max_at: nominal
       g_inc_hard:
-        nominal: -2.14396
-        min: -2.14396
+        nominal: 0.0003
+        min: 0.0003
         min_at: nominal
-        max: -2.14396
+        max: 0.0003
         max_at: nominal
       r_b:
-        nominal: 0.997845
-        min: 0.997845
+        nominal: -0.00013924
+        min: -0.00013924
         min_at: nominal
-        max: 0.997845
+        max: -0.00013924
         max_at: nominal
       ina_op:
         nominal: -4.63989
@@ -1350,214 +5274,214 @@ sims:
         max: -4.63989
         max_at: nominal
       jack_op:
-        nominal: -0.0294334
-        min: -0.0294334
+        nominal: -0.0136186
+        min: -0.0136186
         min_at: nominal
-        max: -0.0294334
+        max: -0.0136186
         max_at: nominal
       n_au_total:
-        nominal: 0.000320666
-        min: 0.000320666
+        nominal: 1.88824e-05
+        min: 1.88824e-05
         min_at: nominal
-        max: 0.000320666
+        max: 1.88824e-05
         max_at: nominal
       n_au_sensor:
-        nominal: 0.000320479
-        min: 0.000320479
+        nominal: 2.26739e-07
+        min: 2.26739e-07
         min_at: nominal
-        max: 0.000320479
+        max: 2.26739e-07
         max_at: nominal
       n_au_elec:
-        nominal: 1.09394e-05
-        min: 1.09394e-05
+        nominal: 1.8881e-05
+        min: 1.8881e-05
         min_at: nominal
-        max: 1.09394e-05
+        max: 1.8881e-05
         max_at: nominal
       n_au_ref:
-        nominal: 5.97605e-06
-        min: 5.97605e-06
+        nominal: 4.22805e-09
+        min: 4.22805e-09
         min_at: nominal
-        max: 5.97605e-06
+        max: 4.22805e-09
         max_at: nominal
       n_au_sbuf:
-        nominal: 8.13313e-07
-        min: 8.13313e-07
+        nominal: 3.61077e-10
+        min: 3.61077e-10
         min_at: nominal
-        max: 8.13313e-07
+        max: 3.61077e-10
         max_at: nominal
       n_au_link:
-        nominal: 4.98714e-07
-        min: 4.98714e-07
+        nominal: 3.52834e-10
+        min: 3.52834e-10
         min_at: nominal
-        max: 4.98714e-07
+        max: 3.52834e-10
         max_at: nominal
       n_au_recv:
-        nominal: 4.90919e-06
-        min: 4.90919e-06
+        nominal: 2.83785e-09
+        min: 2.83785e-09
         min_at: nominal
-        max: 4.90919e-06
+        max: 2.83785e-09
         max_at: nominal
       n_au_zero:
-        nominal: 7.01784e-07
-        min: 7.01784e-07
+        nominal: 3.87071e-10
+        min: 3.87071e-10
         min_at: nominal
-        max: 7.01784e-07
+        max: 3.87071e-10
         max_at: nominal
       n_au_dac:
-        nominal: 6.22188e-06
-        min: 6.22188e-06
+        nominal: 5.25197e-06
+        min: 5.25197e-06
         min_at: nominal
-        max: 6.22188e-06
+        max: 5.25197e-06
         max_at: nominal
       n_au_shaper:
-        nominal: 3.23664e-06
-        min: 3.23664e-06
+        nominal: 1.30164e-05
+        min: 1.30164e-05
         min_at: nominal
-        max: 3.23664e-06
+        max: 1.30164e-05
         max_at: nominal
       n_au_out:
-        nominal: 3.0443e-06
-        min: 3.0443e-06
+        nominal: 1.26286e-05
+        min: 1.26286e-05
         min_at: nominal
-        max: 3.0443e-06
+        max: 1.26286e-05
         max_at: nominal
       n_au_rest:
-        nominal: 2.3806e-11
-        min: 2.3806e-11
+        nominal: 1.14196e-12
+        min: 1.14196e-12
         min_at: nominal
-        max: 2.3806e-11
+        max: 1.14196e-12
         max_at: nominal
       db_au:
-        nominal: -89.8789
-        min: -89.8789
+        nominal: -114.479
+        min: -114.479
         min_at: nominal
-        max: -89.8789
+        max: -114.479
         max_at: nominal
       ppm_au:
-        nominal: 32.0666
-        min: 32.0666
+        nominal: 1.88824
+        min: 1.88824
         min_at: nominal
-        max: 32.0666
+        max: 1.88824
         max_at: nominal
       n_cb_total:
-        nominal: 0.00029261
-        min: 0.00029261
+        nominal: 1.59245e-05
+        min: 1.59245e-05
         min_at: nominal
-        max: 0.00029261
+        max: 1.59245e-05
         max_at: nominal
       n_cb_sensor:
-        nominal: 0.000292395
-        min: 0.000292395
+        nominal: 2.01939e-07
+        min: 2.01939e-07
         min_at: nominal
-        max: 0.000292395
+        max: 2.01939e-07
         max_at: nominal
       n_cb_elec:
-        nominal: 1.12155e-05
-        min: 1.12155e-05
+        nominal: 1.59233e-05
+        min: 1.59233e-05
         min_at: nominal
-        max: 1.12155e-05
+        max: 1.59233e-05
         max_at: nominal
       n_cb_ref:
-        nominal: 5.45235e-06
-        min: 5.45235e-06
+        nominal: 3.76561e-09
+        min: 3.76561e-09
         min_at: nominal
-        max: 5.45235e-06
+        max: 3.76561e-09
         max_at: nominal
       n_cb_sbuf:
-        nominal: 1.04663e-06
-        min: 1.04663e-06
+        nominal: 3.413e-10
+        min: 3.413e-10
         min_at: nominal
-        max: 1.04663e-06
+        max: 3.413e-10
         max_at: nominal
       n_cb_link:
-        nominal: 4.5501e-07
-        min: 4.5501e-07
+        nominal: 3.14245e-10
+        min: 3.14245e-10
         min_at: nominal
-        max: 4.5501e-07
+        max: 3.14245e-10
         max_at: nominal
       n_cb_recv:
-        nominal: 4.27509e-06
-        min: 4.27509e-06
+        nominal: 2.31409e-09
+        min: 2.31409e-09
         min_at: nominal
-        max: 4.27509e-06
+        max: 2.31409e-09
         max_at: nominal
       n_cb_zero:
-        nominal: 6.23106e-07
-        min: 6.23106e-07
+        nominal: 3.10662e-10
+        min: 3.10662e-10
         min_at: nominal
-        max: 6.23106e-07
+        max: 3.10662e-10
         max_at: nominal
       n_cb_dac:
-        nominal: 7.84557e-06
-        min: 7.84557e-06
+        nominal: 6.54576e-06
+        min: 6.54576e-06
         min_at: nominal
-        max: 7.84557e-06
+        max: 6.54576e-06
         max_at: nominal
       n_cb_shaper:
-        nominal: 2.79797e-06
-        min: 2.79797e-06
+        nominal: 1.04253e-05
+        min: 1.04253e-05
         min_at: nominal
-        max: 2.79797e-06
+        max: 1.04253e-05
         max_at: nominal
       n_cb_out:
-        nominal: 2.59064e-06
-        min: 2.59064e-06
+        nominal: 1.01003e-05
+        min: 1.01003e-05
         min_at: nominal
-        max: 2.59064e-06
+        max: 1.01003e-05
         max_at: nominal
       n_cb_rest:
-        nominal: 2.28997e-12
-        min: 2.28997e-12
+        nominal: 9.00662e-13
+        min: 9.00662e-13
         min_at: nominal
-        max: 2.28997e-12
+        max: 9.00662e-13
         max_at: nominal
       db_cb:
-        nominal: -90.6742
-        min: -90.6742
+        nominal: -115.959
+        min: -115.959
         min_at: nominal
-        max: -90.6742
+        max: -115.959
         max_at: nominal
       ppm_cb:
-        nominal: 29.261
-        min: 29.261
+        nominal: 1.59245
+        min: 1.59245
         min_at: nominal
-        max: 29.261
+        max: 1.59245
         max_at: nominal
       e_100:
-        nominal: 1.63145e-05
-        min: 1.63145e-05
+        nominal: 3.34576e-07
+        min: 3.34576e-07
         min_at: nominal
-        max: 1.63145e-05
+        max: 3.34576e-07
         max_at: nominal
       e_1k:
-        nominal: 3.1437e-06
-        min: 3.1437e-06
+        nominal: 1.55868e-07
+        min: 1.55868e-07
         min_at: nominal
-        max: 3.1437e-06
+        max: 1.55868e-07
         max_at: nominal
       e_1k_elec:
-        nominal: 1.15162e-07
-        min: 1.15162e-07
+        nominal: 1.5585e-07
+        min: 1.5585e-07
         min_at: nominal
-        max: 1.15162e-07
+        max: 1.5585e-07
         max_at: nominal
       n_adc_total:
-        nominal: 6.60449e-05
-        min: 6.60449e-05
+        nominal: 0.000106728
+        min: 0.000106728
         min_at: nominal
-        max: 6.60449e-05
+        max: 0.000106728
         max_at: nominal
       n_adc_sensor:
-        nominal: 6.60325e-05
-        min: 6.60325e-05
+        nominal: 0.000106708
+        min: 0.000106708
         min_at: nominal
-        max: 6.60325e-05
+        max: 0.000106708
         max_at: nominal
       n_adc_lsb:
-        nominal: 0.0819757
-        min: 0.0819757
+        nominal: 0.132472
+        min: 0.132472
         min_at: nominal
-        max: 0.0819757
+        max: 0.132472
         max_at: nominal
       e_sens_chk:
         nominal: 3.70067e-06
@@ -1572,546 +5496,15 @@ sims:
     - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
       why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
       pass: true
-    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.1 * nom['n_au_sensor'])
+    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.15 * nom['n_au_sensor'])
       why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
-        is under a tenth of the sensor''s, in both bands, at every curve setting and level - on AN1646''s figure, an assumption
-        (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b, the curve''s slope there over its slope at
-        rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow (breath-chain-curve-clip), and a jack on
-        its rail passes no breath noise at all'
-      pass: true
-    - expr: nom['n_adc_lsb'] < 1
-      why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
-        and the electronics together
-      pass: true
-  noise[p_resp=1.0,level=0]:
-    corners: 1
-    measures:
-      g_set:
-        nominal: 1.55
-        min: 1.55
-        min_at: nominal
-        max: 1.55
-        max_at: nominal
-      g_inc_rest:
-        nominal: -2.15406
-        min: -2.15406
-        min_at: nominal
-        max: -2.15406
-        max_at: nominal
-      g_inc_hard:
-        nominal: -0.0051
-        min: -0.0051
-        min_at: nominal
-        max: -0.0051
-        max_at: nominal
-      r_b:
-        nominal: 1.0
-        min: 1.0
-        min_at: nominal
-        max: 1.0
-        max_at: nominal
-      ina_op:
-        nominal: 8.011e-05
-        min: 8.011e-05
-        min_at: nominal
-        max: 8.011e-05
-        max_at: nominal
-      jack_op:
-        nominal: -0.0294333
-        min: -0.0294333
-        min_at: nominal
-        max: -0.0294333
-        max_at: nominal
-      n_au_total:
-        nominal: 0.000321963
-        min: 0.000321963
-        min_at: nominal
-        max: 0.000321963
-        max_at: nominal
-      n_au_sensor:
-        nominal: 0.000321832
-        min: 0.000321832
-        min_at: nominal
-        max: 0.000321832
-        max_at: nominal
-      n_au_elec:
-        nominal: 9.20234e-06
-        min: 9.20234e-06
-        min_at: nominal
-        max: 9.20234e-06
-        max_at: nominal
-      n_au_ref:
-        nominal: 6.59319e-07
-        min: 6.59319e-07
-        min_at: nominal
-        max: 6.59319e-07
-        max_at: nominal
-      n_au_sbuf:
-        nominal: 8.16745e-07
-        min: 8.16745e-07
-        min_at: nominal
-        max: 8.16745e-07
-        max_at: nominal
-      n_au_link:
-        nominal: 5.00818e-07
-        min: 5.00818e-07
-        min_at: nominal
-        max: 5.00818e-07
-        max_at: nominal
-      n_au_recv:
-        nominal: 4.92991e-06
-        min: 4.92991e-06
-        min_at: nominal
-        max: 4.92991e-06
-        max_at: nominal
-      n_au_zero:
-        nominal: 7.04746e-07
-        min: 7.04746e-07
-        min_at: nominal
-        max: 7.04746e-07
-        max_at: nominal
-      n_au_dac:
-        nominal: 6.22699e-06
-        min: 6.22699e-06
-        min_at: nominal
-        max: 6.22699e-06
-        max_at: nominal
-      n_au_shaper:
-        nominal: 3.2383e-06
-        min: 3.2383e-06
-        min_at: nominal
-        max: 3.2383e-06
-        max_at: nominal
-      n_au_out:
-        nominal: 3.0443e-06
-        min: 3.0443e-06
-        min_at: nominal
-        max: 3.0443e-06
-        max_at: nominal
-      n_au_rest:
-        nominal: 2.38136e-11
-        min: 2.38136e-11
-        min_at: nominal
-        max: 2.38136e-11
-        max_at: nominal
-      db_au:
-        nominal: -89.8439
-        min: -89.8439
-        min_at: nominal
-        max: -89.8439
-        max_at: nominal
-      ppm_au:
-        nominal: 32.1963
-        min: 32.1963
-        min_at: nominal
-        max: 32.1963
-        max_at: nominal
-      n_cb_total:
-        nominal: 0.000293793
-        min: 0.000293793
-        min_at: nominal
-        max: 0.000293793
-        max_at: nominal
-      n_cb_sensor:
-        nominal: 0.000293628
-        min: 0.000293628
-        min_at: nominal
-        max: 0.000293628
-        max_at: nominal
-      n_cb_elec:
-        nominal: 9.83362e-06
-        min: 9.83362e-06
-        min_at: nominal
-        max: 9.83362e-06
-        max_at: nominal
-      n_cb_ref:
-        nominal: 6.0154e-07
-        min: 6.0154e-07
-        min_at: nominal
-        max: 6.0154e-07
-        max_at: nominal
-      n_cb_sbuf:
-        nominal: 1.05105e-06
-        min: 1.05105e-06
-        min_at: nominal
-        max: 1.05105e-06
-        max_at: nominal
-      n_cb_link:
-        nominal: 4.5693e-07
-        min: 4.5693e-07
-        min_at: nominal
-        max: 4.5693e-07
-        max_at: nominal
-      n_cb_recv:
-        nominal: 4.29313e-06
-        min: 4.29313e-06
-        min_at: nominal
-        max: 4.29313e-06
-        max_at: nominal
-      n_cb_zero:
-        nominal: 6.25736e-07
-        min: 6.25736e-07
-        min_at: nominal
-        max: 6.25736e-07
-        max_at: nominal
-      n_cb_dac:
-        nominal: 7.85202e-06
-        min: 7.85202e-06
-        min_at: nominal
-        max: 7.85202e-06
-        max_at: nominal
-      n_cb_shaper:
-        nominal: 2.7994e-06
-        min: 2.7994e-06
-        min_at: nominal
-        max: 2.7994e-06
-        max_at: nominal
-      n_cb_out:
-        nominal: 2.59064e-06
-        min: 2.59064e-06
-        min_at: nominal
-        max: 2.59064e-06
-        max_at: nominal
-      n_cb_rest:
-        nominal: 1.58749e-12
-        min: 1.58749e-12
-        min_at: nominal
-        max: 1.58749e-12
-        max_at: nominal
-      db_cb:
-        nominal: -90.6392
-        min: -90.6392
-        min_at: nominal
-        max: -90.6392
-        max_at: nominal
-      ppm_cb:
-        nominal: 29.3793
-        min: 29.3793
-        min_at: nominal
-        max: 29.3793
-        max_at: nominal
-      e_100:
-        nominal: 1.63805e-05
-        min: 1.63805e-05
-        min_at: nominal
-        max: 1.63805e-05
-        max_at: nominal
-      e_1k:
-        nominal: 3.15641e-06
-        min: 3.15641e-06
-        min_at: nominal
-        max: 3.15641e-06
-        max_at: nominal
-      e_1k_elec:
-        nominal: 9.95904e-08
-        min: 9.95904e-08
-        min_at: nominal
-        max: 9.95904e-08
-        max_at: nominal
-      n_adc_total:
-        nominal: 6.60335e-05
-        min: 6.60335e-05
-        min_at: nominal
-        max: 6.60335e-05
-        max_at: nominal
-      n_adc_sensor:
-        nominal: 6.60325e-05
-        min: 6.60325e-05
-        min_at: nominal
-        max: 6.60325e-05
-        max_at: nominal
-      n_adc_lsb:
-        nominal: 0.0819616
-        min: 0.0819616
-        min_at: nominal
-        max: 0.0819616
-        max_at: nominal
-      e_sens_chk:
-        nominal: 3.70003e-06
-        min: 3.70003e-06
-        min_at: nominal
-        max: 3.70003e-06
-        max_at: nominal
-    asserts:
-    - expr: nom['n_au_rest'] < 0.01 * nom['n_au_total'] and nom['n_cb_rest'] < 0.01 * nom['n_cb_total']
-      why: 'the bookkeeping closes: every noise source in the deck is in a named stage (under 1 % of the total is unclaimed)'
-      pass: true
-    - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
-      why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
-      pass: true
-    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.1 * nom['n_au_sensor'])
-      why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
-        is under a tenth of the sensor''s, in both bands, at every curve setting and level - on AN1646''s figure, an assumption
-        (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b, the curve''s slope there over its slope at
-        rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow (breath-chain-curve-clip), and a jack on
-        its rail passes no breath noise at all'
-      pass: true
-    - expr: nom['n_adc_lsb'] < 1
-      why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
-        and the electronics together
-      pass: true
-  noise[p_resp=1.0,level=1]:
-    corners: 1
-    measures:
-      g_set:
-        nominal: 1.55
-        min: 1.55
-        min_at: nominal
-        max: 1.55
-        max_at: nominal
-      g_inc_rest:
-        nominal: -2.15406
-        min: -2.15406
-        min_at: nominal
-        max: -2.15406
-        max_at: nominal
-      g_inc_hard:
-        nominal: -0.0051
-        min: -0.0051
-        min_at: nominal
-        max: -0.0051
-        max_at: nominal
-      r_b:
-        nominal: 0.00236762
-        min: 0.00236762
-        min_at: nominal
-        max: 0.00236762
-        max_at: nominal
-      ina_op:
-        nominal: -4.63989
-        min: -4.63989
-        min_at: nominal
-        max: -4.63989
-        max_at: nominal
-      jack_op:
-        nominal: -0.0294333
-        min: -0.0294333
-        min_at: nominal
-        max: -0.0294333
-        max_at: nominal
-      n_au_total:
-        nominal: 6.74267e-06
-        min: 6.74267e-06
-        min_at: nominal
-        max: 6.74267e-06
-        max_at: nominal
-      n_au_sensor:
-        nominal: 7.61975e-07
-        min: 7.61975e-07
-        min_at: nominal
-        max: 7.61975e-07
-        max_at: nominal
-      n_au_elec:
-        nominal: 6.69948e-06
-        min: 6.69948e-06
-        min_at: nominal
-        max: 6.69948e-06
-        max_at: nominal
-      n_au_ref:
-        nominal: 1.42087e-08
-        min: 1.42087e-08
-        min_at: nominal
-        max: 1.42087e-08
-        max_at: nominal
-      n_au_sbuf:
-        nominal: 1.93374e-09
-        min: 1.93374e-09
-        min_at: nominal
-        max: 1.93374e-09
-        max_at: nominal
-      n_au_link:
-        nominal: 1.18575e-09
-        min: 1.18575e-09
-        min_at: nominal
-        max: 1.18575e-09
-        max_at: nominal
-      n_au_recv:
-        nominal: 1.16722e-08
-        min: 1.16722e-08
-        min_at: nominal
-        max: 1.16722e-08
-        max_at: nominal
-      n_au_zero:
-        nominal: 1.66857e-09
-        min: 1.66857e-09
-        min_at: nominal
-        max: 1.66857e-09
-        max_at: nominal
-      n_au_dac:
-        nominal: 5.01282e-06
-        min: 5.01282e-06
-        min_at: nominal
-        max: 5.01282e-06
-        max_at: nominal
-      n_au_shaper:
-        nominal: 3.2383e-06
-        min: 3.2383e-06
-        min_at: nominal
-        max: 3.2383e-06
-        max_at: nominal
-      n_au_out:
-        nominal: 3.0443e-06
-        min: 3.0443e-06
-        min_at: nominal
-        max: 3.0443e-06
-        max_at: nominal
-      n_au_rest:
-        nominal: 2.61175e-13
-        min: 2.61175e-13
-        min_at: nominal
-        max: 2.61175e-13
-        max_at: nominal
-      db_au:
-        nominal: -123.423
-        min: -123.423
-        min_at: nominal
-        max: -123.423
-        max_at: nominal
-      ppm_au:
-        nominal: 0.674267
-        min: 0.674267
-        min_at: nominal
-        max: 0.674267
-        max_at: nominal
-      n_cb_total:
-        nominal: 7.41587e-06
-        min: 7.41587e-06
-        min_at: nominal
-        max: 7.41587e-06
-        max_at: nominal
-      n_cb_sensor:
-        nominal: 6.95201e-07
-        min: 6.95201e-07
-        min_at: nominal
-        max: 6.95201e-07
-        max_at: nominal
-      n_cb_elec:
-        nominal: 7.38321e-06
-        min: 7.38321e-06
-        min_at: nominal
-        max: 7.38321e-06
-        max_at: nominal
-      n_cb_ref:
-        nominal: 1.29636e-08
-        min: 1.29636e-08
-        min_at: nominal
-        max: 1.29636e-08
-        max_at: nominal
-      n_cb_sbuf:
-        nominal: 2.48849e-09
-        min: 2.48849e-09
-        min_at: nominal
-        max: 2.48849e-09
-        max_at: nominal
-      n_cb_link:
-        nominal: 1.08184e-09
-        min: 1.08184e-09
-        min_at: nominal
-        max: 1.08184e-09
-        max_at: nominal
-      n_cb_recv:
-        nominal: 1.01645e-08
-        min: 1.01645e-08
-        min_at: nominal
-        max: 1.01645e-08
-        max_at: nominal
-      n_cb_zero:
-        nominal: 1.4815e-09
-        min: 1.4815e-09
-        min_at: nominal
-        max: 1.4815e-09
-        max_at: nominal
-      n_cb_dac:
-        nominal: 6.32167e-06
-        min: 6.32167e-06
-        min_at: nominal
-        max: 6.32167e-06
-        max_at: nominal
-      n_cb_shaper:
-        nominal: 2.7994e-06
-        min: 2.7994e-06
-        min_at: nominal
-        max: 2.7994e-06
-        max_at: nominal
-      n_cb_out:
-        nominal: 2.59064e-06
-        min: 2.59064e-06
-        min_at: nominal
-        max: 2.59064e-06
-        max_at: nominal
-      n_cb_rest:
-        nominal: 1.77456e-13
-        min: 1.77456e-13
-        min_at: nominal
-        max: 1.77456e-13
-        max_at: nominal
-      db_cb:
-        nominal: -122.597
-        min: -122.597
-        min_at: nominal
-        max: -122.597
-        max_at: nominal
-      ppm_cb:
-        nominal: 0.741587
-        min: 0.741587
-        min_at: nominal
-        max: 0.741587
-        max_at: nominal
-      e_100:
-        nominal: 3.28796e-07
-        min: 3.28796e-07
-        min_at: nominal
-        max: 3.28796e-07
-        max_at: nominal
-      e_1k:
-        nominal: 6.80967e-08
-        min: 6.80967e-08
-        min_at: nominal
-        max: 6.80967e-08
-        max_at: nominal
-      e_1k_elec:
-        nominal: 6.76857e-08
-        min: 6.76857e-08
-        min_at: nominal
-        max: 6.76857e-08
-        max_at: nominal
-      n_adc_total:
-        nominal: 6.60449e-05
-        min: 6.60449e-05
-        min_at: nominal
-        max: 6.60449e-05
-        max_at: nominal
-      n_adc_sensor:
-        nominal: 6.60325e-05
-        min: 6.60325e-05
-        min_at: nominal
-        max: 6.60325e-05
-        max_at: nominal
-      n_adc_lsb:
-        nominal: 0.0819757
-        min: 0.0819757
-        min_at: nominal
-        max: 0.0819757
-        max_at: nominal
-      e_sens_chk:
-        nominal: 3.70067e-06
-        min: 3.70067e-06
-        min_at: nominal
-        max: 3.70067e-06
-        max_at: nominal
-    asserts:
-    - expr: nom['n_au_rest'] < 0.01 * nom['n_au_total'] and nom['n_cb_rest'] < 0.01 * nom['n_cb_total']
-      why: 'the bookkeeping closes: every noise source in the deck is in a named stage (under 1 % of the total is unclaimed)'
-      pass: true
-    - expr: abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01
-      why: the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %
-      pass: true
-    - expr: nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.1 * nom['n_au_sensor'])
-      why: 'THE JACK''S NOISE IS THE SENSOR''S (breath-receive-stage.md, Noise at the jack): every electronic term together
-        is under a tenth of the sensor''s, in both bands, at every curve setting and level - on AN1646''s figure, an assumption
-        (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b, the curve''s slope there over its slope at
-        rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow (breath-chain-curve-clip), and a jack on
-        its rail passes no breath noise at all'
+        is under a tenth of the sensor''s in the control band, and under 0.15 of it in the audio band, at every bandwidth
+        mode, curve setting and level. The audio band''s bound was a tenth until #32: with the jack''s RC at 15.9 kHz this
+        stage''s own noise reaches 20 kHz unfiltered (about 12 uV rms, -118 dB of 10 V), and at POT-RESP fully counter-clockwise
+        on a hard blow in the 500 Hz mode, where the curve is flattest and the sensor''s share smallest, it is 0.12 of the
+        sensor''s - on AN1646''s figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b,
+        the curve''s slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow
+        (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all'
       pass: true
     - expr: nom['n_adc_lsb'] < 1
       why: the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor
@@ -2204,22 +5597,22 @@ sims:
     corners: 5
     measures:
       out:
-        nominal: -0.0297278
-        min: -0.535925
+        nominal: -0.0137549
+        min: -0.521549
         min_at: v_neg- v_pos+
-        max: 0.223373
+        max: 0.240145
         max_at: v_neg+ v_pos-
       jack:
-        nominal: -0.0294335
-        min: -0.530618
+        nominal: -0.0136187
+        min: -0.516385
         min_at: v_neg- v_pos+
-        max: 0.221161
+        max: 0.237767
         max_at: v_neg+ v_pos-
       page_err:
-        nominal: 7.17194e-05
-        min: 6.5929e-05
+        nominal: 5.96803e-05
+        min: 5.50766e-05
         min_at: v_neg- v_pos+
-        max: 7.70122e-05
+        max: 6.43671e-05
         max_at: v_neg+ v_pos-
     asserts:
     - expr: max['page_err'] < 0.01 and min['page_err'] > -0.01
@@ -2234,28 +5627,28 @@ sims:
     corners: 5
     measures:
       out_hard:
-        nominal: 9.95817
-        min: 9.45197
+        nominal: 9.97413
+        min: 9.46634
         min_at: v_neg- v_pos+
-        max: 10.2113
+        max: 10.228
         max_at: v_neg+ v_pos-
       out_rest:
-        nominal: 0.0124163
-        min: -0.493853
+        nominal: 0.028442
+        min: -0.479352
         min_at: v_neg- v_pos+
-        max: 0.265517
+        max: 0.282342
         max_at: v_neg+ v_pos-
       span_hard:
-        nominal: 9.94575
-        min: 9.94575
-        min_at: v_neg- v_pos-
-        max: 9.94583
-        max_at: v_neg- v_pos+
+        nominal: 9.94569
+        min: 9.94569
+        min_at: v_neg+ v_pos-
+        max: 9.94569
+        max_at: nominal
       clip_in:
-        nominal: -5.55712
-        min: -6.07556
+        nominal: -5.54975
+        min: -6.06891
         min_at: v_neg- v_pos+
-        max: -4.87825
+        max: -4.87052
         max_at: v_neg+ v_pos-
     asserts:
     - expr: min['span_hard'] > 9.8 and max['span_hard'] < 10.2

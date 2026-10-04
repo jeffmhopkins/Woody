@@ -96,7 +96,7 @@ whose place is the module CAD's (`foreign_ok:`).
 | `C-FILT-PITCH` and `C-FILT-MOD` at `J-B2B-MOD`'s pins, not at the op-amp | `pitch-stage.md`, this README | placed against `J-B2B-MOD` pins 14, 15, 16, 17, 20 |
 | LT5400's exposed pad to `AGND_MOD` | `pitch-stage.md` | netlisted; fanned out to layer 2 |
 | The LT1641's `SENSE` and `VCC` Kelvin to `R-ILIM`'s pads, the tab short to `R-ILIM` | `umbilical-load-switch.md` | `connect_first: [U2.7, R3.2]`, `[U2.8, R3.1]`; `Q-LOADSW` beside `R-ILIM` |
-| `TRIM-RESP` and every trimmer on the rear, adjustable from behind | `breath-response-shaper.md`, `mechanical/module/drc.echo` | all four at the module CAD's envelopes on the rear |
+| Every trimmer side-adjust at a side edge of the board, its screw facing out, set with the module out of the rack (owner, 2026-10-04) | ADR 0024, *The calibration trimmers are side-adjust* | **not yet**: the four are still placed as top-adjust parts on the rear; their footprint is now `Potentiometer_Bourns_3296X_Horizontal` and the layout moves them |
 | `L-CM-ISO` between `L-ISO-IN` and the converter's input pins | ADR 0027, `power-entry.md` | in the circuit, yes. On the board the module CAD fixes it on the rear above `J-PWR-EURO`, so `ISO_VIN_POS`/`NEG` run back to `U-ISO`'s pins |
 | `C-ISO-Y` beside the converter | `power-entry.md` | at `U-ISO`'s pin 1, across the barrier |
 | `U-ISO`'s isolation: input side apart from output side | ADR 0027 | `layout.yaml` `isolation:` - a 2.0 mm functional gap on every layer, held by `check` (`check_isolation`); the `PWR_GND` pour drawn to keep it |

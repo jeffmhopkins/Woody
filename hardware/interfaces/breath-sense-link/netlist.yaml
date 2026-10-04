@@ -58,21 +58,25 @@ components:
       p.5, Figure 3]
   D-TVS-BREATH-RET:
     of: D-TVS-BREATH
-    value: PESD12VS1UA or equivalent 12V-standoff ESD diode
+    value: PESD12VL1BA
     pins:
     - A
     - K
-    note: The second of the pair, on the AGND_SENSE conductor. Anode to the PWR_GND plane at J-UMB, never to the
-      analog island
+    note: 'AT THE CONNECTOR, 12 V standoff - above the sensor''s full scale so it never conducts in play. Bidirectional
+      (#32): the pin drawn as the anode goes to the PWR_GND plane at J-UMB, never to the analog island. 19 pF typ,
+      not the PESD12VS1UA''s 160 pF: their mismatch converts PWR_GND noise into the breath signal in proportion
+      to frequency (interfaces/breath-sense-link/sim)'
   D-TVS-BREATH-SIG:
     of: D-TVS-BREATH
-    value: PESD12VS1UA or equivalent 12V-standoff ESD diode
+    value: PESD12VL1BA
     drawn_as: D-TVS-BREATH
     pins:
     - A
     - K
-    note: AT THE CONNECTOR, 12 V standoff - above the sensor's full scale so it never conducts in play. Anode to
-      the PWR_GND plane at J-UMB, never to the analog island
+    note: 'AT THE CONNECTOR, 12 V standoff - above the sensor''s full scale so it never conducts in play. Bidirectional
+      (#32): the pin drawn as the anode goes to the PWR_GND plane at J-UMB, never to the analog island. 19 pF typ,
+      not the PESD12VS1UA''s 160 pF: their mismatch converts PWR_GND noise into the breath signal in proportion
+      to frequency (interfaces/breath-sense-link/sim)'
   R1:
     of: R-SER-BREATH-INST
     value: 1k 1%

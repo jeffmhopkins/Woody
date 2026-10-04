@@ -502,8 +502,8 @@ there, and **neither appeared on this page** — the page that says of itself
 directions.
 
 **`R1b` — the twin 1 kΩ in the `AGND` leg.** `bom.csv` carries
-`R-SER-BREATH-INST` at **qty 2**, and the ~459 Hz
-differential pole (*Component values*) is derived with 1 kΩ in *both* legs. Only one was drawn.
+`R-SER-BREATH-INST` at **qty 2**, and the differential pole
+(*Component values*, each of the toggle's three corners) is derived with 1 kΩ in *both* legs. Only one was drawn.
 
 Its real job is **source-impedance balance on the twisted pair** — 1 kΩ
 against ~0 Ω is what a difference amplifier's CMRR actually responds to —
@@ -512,13 +512,14 @@ CMRR falls from **70.2 dB to 60.2 dB** `[calc, A2]` against an independently
 derived requirement of 58.5 dB — and 60.2 dB is the nominal: at the worst
 tolerance corner the unmatched link is **below** the requirement
 (`breath-link-cmrr`, simulated). With `R1b` fitted the worst case clears it
-at mains, and with `C_cm` a matched pair (below) to the 500 Hz edge of the
-breath channel as well (same figure).
+at mains, and with `C_cm` a matched pair (below) across the 500 Hz and 1.5 kHz
+modes' bands as well; WIDE's is the exception below.
 
-**The requirement's band is DC to 500 Hz** — the breath channel's band
-(ADR 0004: `BREATH` is "band-limited ~500 Hz"), because a common-mode
-disturbance anywhere inside it reaches `BREATH_OUT` as breath, and nothing
-after the in-amp removes it. It was stated with no band until 2026-10-03
+**The requirement's band is the breath channel's, and since 2026-10-04 there
+are three** (#32: the owner's panel toggle, 500 Hz / 1.5 kHz / ~10 kHz; ADR 0003
+and ADR 0004, amendments of that date): in each mode it runs from DC to that
+mode's corner, because a common-mode disturbance anywhere inside the band
+reaches `BREATH_OUT` as breath, and nothing after the in-amp removes it. It was stated with no band until 2026-10-03
 (#5 finding 5). Its derivation is not in the corpus; the 2026-09-21
 pre-merge review reconstructs it to 0.1 dB as the `PWR_GND` drop at ADR
 0003's 350 mA (58.9 mV) held to 1 LSB of 10 V at 16 bits at the in-amp output,
@@ -527,9 +528,14 @@ referred to its input `[calc, docs/review/2026-09-21-pre-merge-review/A1-breath-
 about 480 Hz to its edge, by under half a decibel. **The owner's choice,
 2026-10-03 (#5-5): "Tighten cap matching"** — `C-CM-BREATH` is bought as a
 matched pair, each within 0.5 % of the pair's mean (*And `C_cm` needs a
-tolerance*, below), and the worst corner then holds 58.5 dB across the whole
-band (`module/breath-receive-stage/sim`, `cmrr-as-netlisted`;
-`breath-link-cmrr`). The band was not moved to make it pass. Both parts are inside a
+tolerance*, below), and the worst corner then held 58.5 dB across the whole
+of that band. **Since #32 the pair is 68 pF** and the requirement is held per
+mode (`module/breath-receive-stage/sim`, `cmrr-500`, `cmrr-1k5`, `cmrr-wide`;
+`breath-link-cmrr`): **it holds to 500 Hz and to 1.5 kHz with margin.** In
+WIDE the worst corner first falls through 58.5 dB at about 7.4 kHz and is about
+56 dB at 10 kHz, and **the owner set WIDE's band at DC to 7 kHz** (2026-10-04,
+*"Keep 10 kHz, accept"*; ADR 0003 and ADR 0004 amendments) — a requirement the
+owner changed, not a bar moved to pass: above 7 kHz the figure is recorded. Both parts are inside a
 body that is expensive to reopen (ADR 0009).
 
 > One correction to the receive page's own case for `R1b`: it claims the
@@ -565,7 +571,7 @@ it is free and it keeps the rule true instead of approximately true.
 
 **2. There is no band-limit capacitor at the instrument end of `BREATH`.**
 ADR 0003 says "band-limit at both ends, around 500 Hz" `[repo] 0003`;
-`breath-receive-stage.md` puts the whole 500 Hz filter at the receive end, ahead
+`breath-receive-stage.md` puts the whole filter (since #32 the panel toggle's) at the receive end, ahead
 of the in-amp, "because that is the only place it can stop RF rectification", and
 `R-SER-BREATH-INST`'s note says the ADR is superseded `[repo] bom.csv`. **Drawn
 that way here. Do not add a cap at `R-SER-BREATH-INST`.**
@@ -589,11 +595,14 @@ section, commissioning and the `CLR` section.*
 | **R1b** | 1 kΩ 1 %, 1206, anti-surge (ERJ-P08) | **Its twin in the `AGND` leg.** Free, and it is what keeps CMRR from collapsing — see below |
 | **R2, R3** | 10 kΩ 0.1 % | Module-side series protection. **Matched** — but see below |
 | **R4, R5** | 1 MΩ | **Common-mode bias return.** Without these the in-amp's inputs float when the cable is unplugged and it saturates to a rail |
-| **C_diff** | 15 nF C0G | **~459 Hz** differential pole, **ahead of the in-amp**: 2 × 11 kΩ against 15 nF plus the two `C_cm` in series across the pair, 0.75 nF `[calc: 1/(2π × 22 kΩ × 15.75 nF)]`. Not 482 Hz, which left `C_cm` out; not 531, which had no `R1b` |
-| **C_cm** | 1.5 nF C0G ×2, a matched pair (±0.5 % about its mean) | Common-mode poles, deliberately 1/10 of C_diff |
+| **C_diff** (`C-DIFF-BREATH`) | 680 pF C0G | **Fixed, always in**: the WIDE corner, **~10.1 kHz**, **ahead of the in-amp**: 2 × 11 kΩ against 680 pF plus the two `C_cm` in series across the pair, 34 pF `[calc: 1/(2π × 22 kΩ × 714 pF)]`. The RF filter in every mode, so never behind the switch |
+| **C_diff 1k5** (`C-DIFF-BW-1K5`) | 3.9 nF C0G, switched by `U-BW-SW` on BW1 | Added for 1.5 kHz and 500 Hz: **~1.57 kHz** `[calc: 22 kΩ against 4.61 nF]` |
+| **C_diff 500** (`C-DIFF-BW-500`) | 10 nF C0G, switched by `U-BW-SW` on BW0 | Added for 500 Hz only: **~495 Hz** `[calc: 22 kΩ against 14.61 nF]` |
+| **U-BW-SW** | TMUX6112, quad SPST | Switches each added `C_diff` at **both** ends, one channel per leg; set by `SW-BREATH-BW` on the panel (`module/breath-receive-stage`, *The bandwidth toggle*) |
+| **C_cm** | 68 pF C0G ×2, a matched pair (±0.5 % about its mean) | Common-mode poles at ~213 kHz, **fixed in every mode**, 1/10 of the fixed `C_diff` and smaller against the others |
 | **R_G** | 42.2 kΩ 0.1 % | INA828, `G = 1 + 50k/R_G` = **2.185** |
 | **REF** | buffered trimmer, **0 → +1.0 V** | Nulls the pedestal *ahead* of the gain pot, which is what makes the panel knobs independent. Range covers the sensor's whole 0.152–0.378 V spec band, not just its typical. From the DAC rail (`dac-rail`), never `VREFOUT`, and never a bare divider — see above |
-| **Output RC** | 1 kΩ + 330 nF film | ~480 Hz reconstruction at the jack |
+| **Output RC** | 1 kΩ + 10 nF C0G | 15.9 kHz at the jack, above every mode: it isolates the cable and does not band-limit |
 
 ### The gain, derived
 
@@ -659,14 +668,14 @@ gain not at all and restores the balance the 1 MΩ pair is measured against.
 One resistor, instrument-side, and therefore **unretrofittable**.
 
 **And `C_cm` needs a match, which a tolerance alone does not give.** At ±5 %
-the common-mode capacitor mismatch alone gives ~46 dB; at ±1 % each the link
-clears mains but not the band's 500 Hz top at the worst corner (above). No
-1.5 nF C0G is catalogued tighter than ±1 % `[web jlcpcb.com parts search,
-2026-10-03]`, so **the two are a matched pair**: the ±1 % C0G (Yageo
-CC0805FRNPO9BN152) from one reel, measured on one LCR meter at 1 kHz, and
-fitted by hand only as a pair whose readings are each within 0.5 % of their
-mean — the `C-CM-BREATH` row and both parts' `Note` say how. Owner,
-2026-10-03: "Tighten cap matching".
+the 1.5 kHz mode falls to about 62 dB at its top (`cmrr-ccm-5pct`), and every
+mode's top is set by this pair's mismatch together with the switch's pins. The
+±1 % C0G is the tightest catalogued, so **the two are a matched pair**: the
+±1 % C0G (Yageo CC0805FRNPO9BN680) from one reel, measured on one LCR meter,
+open-circuit compensated and at 100 kHz if the meter has it (68 pF is 2.3 MΩ at
+1 kHz), and fitted by hand only as a pair whose readings are each within 0.5 %
+of their mean — the `C-CM-BREATH` row and both parts' `Note` say how. Owner,
+2026-10-03: "Tighten cap matching"; the value is #32's.
 
 ### Why the bias resistors do not break the sense return
 
@@ -683,7 +692,11 @@ converter, and the review found a proposal to do exactly that — it would cap
 effective CMRR at about 15 dB at 100 Hz, which is worse than every other term in
 the design combined. Making the differential capacitor dominant means a
 mismatch between the two common-mode capacitors is divided by the ratio before
-it reaches the difference signal.
+it reaches the difference signal — **above the differential corner**. Below
+it, inside the band, the conversion is the mismatch's alone, rising with
+frequency, which is why each mode's CMRR is set at its top. The fixed 680 pF is
+ten times `C_cm`, the textbook in-amp RFI filter, and the switched capacitors
+only raise the ratio.
 
 ### Why the filter is ahead of the in-amp, not after it
 

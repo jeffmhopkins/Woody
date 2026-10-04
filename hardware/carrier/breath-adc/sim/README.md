@@ -20,9 +20,10 @@ case, the sample capacitor discharged by each conversion.
 
 | Sim | Page's claim | Result |
 |---|---|---|
-| `filter` | 564 Hz; 55 dB at the buck's ~330 kHz | **564 Hz** (532–600 Hz at the 1 %/5 % corners); **55.3 dB** (54.8 dB worst) |
-| `step` | τ = 282 µs, the latency term | **283 µs** (266–300 µs at the corners); the sampling does not move it |
-| `kickback` | 480 µV/V, "a pure gain term" | **2.6 LSB** at the nominal, **3.3 LSB** at the worst corner, proportional to the input: a gain term, as the page says, and larger. The sample capacitor charges fully inside its window at every corner (R_SS × C_SAMPLE = 20 ns against 1.67 µs) |
+| `filter` | 1.47 kHz; 47 dB at the buck's ~330 kHz; what it leaves at 2 kHz and 4 kHz (*The sample rate*) | **1474 Hz** (1390–1567 Hz at the 1 %/5 % corners); **47.0 dB** (46.5 dB worst); 4.5 dB at 2 kHz, 9.2 dB at 4 kHz |
+| `step` | τ = 108 µs, the latency term | **108 µs** (102–115 µs at the corners); the sampling does not move it |
+| `kickback` | 480 µV/V, "a pure gain term" | **4.4 LSB** at the nominal, **5.7 LSB** at the worst corner, proportional to the input: a gain term, as the page says, and larger. The sample capacitor charges fully inside its window at every corner (R_SS × C_SAMPLE = 20 ns against 1.67 µs) |
+| `kickback-8k`, `kickback-16k` | what-ifs (#32): two and four conversions per pass | **5.8 / 7.4 LSB** at 8 kHz, **9.0 / 11.5 LSB** at 16 kHz (nominal / worst): still gain terms; the loop budget, not this, is what keeps the rate at 4 kHz (breath-adc.md, *The sample rate*) |
 | `powerup-rest` | "At rest the divider sits at 0.16 V … inside the −0.6 V … +0.6 V window even with 3V3 at zero" | **Holds**: ADC_IN 0.16 V over VDD at most through the whole power-up; the clamp carries under 1 nA |
 | `powerup-blow` | 416 µA into the clamp while 3V3 is down, at full scale | **0.39 mA** nominal, **0.40 mA** worst, for 56–158 ms of the ramp (until the dev board's 3V3 is up); nothing once it is |
 | `powerup-blow-no3v3` | — (no 3V3 ever: no Matrix, or its LDO dead) | 0.39–0.40 mA, held for as long as the sensor reads full scale |
@@ -35,8 +36,8 @@ case, the sample capacitor discharged by each conversion.
 
 The page's 480 µV/V is the *average* current, 20 pF × 4 kHz per volt, through
 6 kΩ. Each sample also takes an instantaneous share of `C-AA-ADC`'s charge,
-20 pF/47 nF = 0.043 % `[calc]`, which the 282 µs time constant has only
-partly restored by the next sample 250 µs later. The two together are what
+20 pF/18 nF = 0.11 % `[calc]`, which the 108 µs time constant has 90 %
+restored by the next sample 250 µs later. The two together are what
 the run measures. It stays invisible for the page's reason — the zero is
 tracked in firmware and the span is a panel knob — so nothing changes but the
 number.
@@ -97,7 +98,7 @@ is part of the decision, not an extra.
 
 This README owns, in `config/figures.yaml`:
 
-- `adc-sample-kickback`: 2.6 LSB nominal, 3.3 LSB worst corner
+- `adc-sample-kickback`: 4.4 LSB nominal, 5.7 LSB worst corner
 
 ## What a result is worth
 

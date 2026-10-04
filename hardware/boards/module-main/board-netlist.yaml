@@ -34,21 +34,21 @@ components:
     sheet: digital-and-supervision
   C13:
     of: C-CM-BREATH
-    value: 1.5nF
+    value: 68pF
     pins:
     - 1
     - 2
     sheet: breath-receive-stage
   C14:
     of: C-CM-BREATH
-    value: 1.5nF
+    value: 68pF
     pins:
     - 1
     - 2
     sheet: breath-receive-stage
   C15:
     of: C-DIFF-BREATH
-    value: 15nF
+    value: 680pF
     pins:
     - 1
     - 2
@@ -97,7 +97,7 @@ components:
     sheet: breath-output-stage
   C22:
     of: C-OUT-BREATH
-    value: 330nF film
+    value: 10nF C0G
     pins:
     - 1
     - 2
@@ -298,6 +298,55 @@ components:
     - 1
     - 2
     sheet: power-entry
+  C52:
+    of: C-DIFF-BW-1K5
+    value: 3.9nF
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  C53:
+    of: C-DIFF-BW-500
+    value: 10nF
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  C54:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  C55:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  C56:
+    of: C-BW-FILT
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  C57:
+    of: C-BW-FILT
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  C58:
+    of: C-BREATH-OFFNEG
+    value: 1uF X7R 50V
+    pins:
+    - 1
+    - 2
+    sheet: breath-output-stage
   C6:
     of: C-REG-DAC
     value: 10uF
@@ -386,6 +435,20 @@ components:
     - A
     - K
     sheet: panel-led
+  D17:
+    of: D-LEDB
+    value: 1N4448W
+    pins:
+    - A
+    - K
+    sheet: breath-receive-stage
+  D18:
+    of: LED-BREATH
+    value: 605-2211-110F
+    pins:
+    - A
+    - K
+    sheet: breath-receive-stage
   D2:
     of: D-REVPOL
     value: 1N5817
@@ -573,6 +636,13 @@ components:
     - 8
     - 9
     - 10
+  J6:
+    of: J-LED-BREATH
+    value: JST B2B-XH-A
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
   JP1:
     of: LK-CLR
     value: 2-pad solder link
@@ -611,6 +681,14 @@ components:
     - S2
     - S3
     sheet: umbilical-load-switch
+  Q2:
+    of: Q-LEDB
+    value: MMBT3904
+    pins:
+    - B
+    - E
+    - C
+    sheet: breath-receive-stage
   R1:
     of: R-SET-DAC
     value: 52.3k 0.1%
@@ -718,7 +796,7 @@ components:
     sheet: breath-output-stage
   R24:
     of: R-BREATH-OFFNEG
-    value: 95.3k 1%
+    value: 47.5k 1%
     pins:
     - 1
     - 2
@@ -1080,6 +1158,62 @@ components:
     - 1
     - 2
     sheet: panel-led
+  R72:
+    of: R-BW-COM
+    value: 4.7k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  R73:
+    of: R-BW-PD
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  R74:
+    of: R-BW-PD
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  R75:
+    of: R-BW-FILT
+    value: 100k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  R76:
+    of: R-BW-FILT
+    value: 100k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  R77:
+    of: R-LEDB-TOP
+    value: 100k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  R78:
+    of: R-LEDB-BOT
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  R79:
+    of: R-LEDB-BASE
+    value: 1k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
   R8:
     of: R-CLR-PU
     value: 10k 1%
@@ -1087,6 +1221,27 @@ components:
     - 1
     - 2
     sheet: dac8568
+  R80:
+    of: R-LEDB-SENSE
+    value: 180R 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  R81:
+    of: R-LEDB-A
+    value: 1k 1% 1206
+    pins:
+    - 1
+    - 2
+    sheet: breath-receive-stage
+  R82:
+    of: R-BREATH-OFFNEG
+    value: 47.5k 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-output-stage
   R9:
     of: R-LDAC
     value: 0R strap
@@ -1134,7 +1289,7 @@ components:
     sheet: pitch-stage
   RV4:
     of: TRIM-RESP
-    value: 10k 10% sealed SMD cermet
+    value: 10k 10% sealed cermet
     pins:
     - CW
     - W
@@ -1147,6 +1302,14 @@ components:
     - COM
     - 'NO'
     sheet: umbilical-load-switch
+  SW2:
+    of: SW-BREATH-BW
+    value: NKK M2024SD4G01
+    pins:
+    - COM
+    - L4
+    - L1
+    sheet: breath-receive-stage
   U1:
     of: U-REG-DAC
     value: LT3042EMSE
@@ -1231,6 +1394,26 @@ components:
     - VCC
     - GND
     sheet: digital-and-supervision
+  U16:
+    of: U-BW-SW
+    value: TMUX6112PWR
+    pins:
+    - SEL1
+    - D1
+    - S1
+    - VSS
+    - GND
+    - S4
+    - D4
+    - SEL4
+    - SEL3
+    - D3
+    - S3
+    - VDD
+    - S2
+    - D2
+    - SEL2
+    sheet: breath-receive-stage
   U2:
     of: U-LOADSW
     value: LT1641-1IS8
@@ -1362,6 +1545,12 @@ nets:
   - C22.1
   - J2.11
   - R26.2
+  /BREATH_OUT:
+  - D6.C
+  - R25.2
+  - R26.1
+  - R77.1
+  - U7.OUTB
   /BREATH_SENSE:
   - D5.C
   - J3.1
@@ -1493,21 +1682,53 @@ nets:
   - R62.1
   - RV2.CW
   - U3.VREFIN/VREFOUT
-  /breath-output-stage/BREATH_OUT:
-  - D6.C
-  - R25.2
-  - R26.1
-  - U7.OUTB
   /breath-output-stage/BUF_OUT:
   - R22.1
   - U7.OUTA
   - U7.INA-
+  /breath-output-stage/OFFNEG_MID:
+  - C58.1
+  - R24.2
+  - R82.1
   /breath-output-stage/SUM_NODE:
   - R22.2
   - R23.2
-  - R24.2
   - R25.1
+  - R82.2
   - U7.INB-
+  /breath-receive-stage/BW0:
+  - C57.1
+  - R76.2
+  - U16.SEL4
+  - U16.SEL3
+  /breath-receive-stage/BW0_SW:
+  - R74.1
+  - R76.1
+  - SW2.L1
+  /breath-receive-stage/BW1:
+  - C56.1
+  - R75.2
+  - U16.SEL1
+  - U16.SEL2
+  /breath-receive-stage/BW1_SW:
+  - R73.1
+  - R75.1
+  - SW2.L4
+  /breath-receive-stage/BW_COM:
+  - R72.2
+  - SW2.COM
+  /breath-receive-stage/CBW1K5_N:
+  - C52.2
+  - U16.S2
+  /breath-receive-stage/CBW1K5_P:
+  - C52.1
+  - U16.S1
+  /breath-receive-stage/CBW500_N:
+  - C53.2
+  - U16.S4
+  /breath-receive-stage/CBW500_P:
+  - C53.1
+  - U16.S3
   /breath-receive-stage/GAIN_SET:
   - R20.1
   - U6.RG1
@@ -1519,20 +1740,46 @@ nets:
   - C15.2
   - R17.2
   - R19.1
+  - U16.D2
+  - U16.D4
   - U6.IN-
   /breath-receive-stage/IN_POS:
   - C13.1
   - C15.1
   - R16.2
   - R18.1
+  - U16.D3
+  - U16.D1
   - U6.IN+
+  /breath-receive-stage/LEDB_A:
+  - D18.A
+  - J6.1
+  - R81.2
+  /breath-receive-stage/LEDB_B:
+  - D17.K
+  - Q2.B
+  /breath-receive-stage/LEDB_D:
+  - D17.A
+  - R79.2
+  /breath-receive-stage/LEDB_DRV:
+  - R79.1
+  - U5.OUTB
+  /breath-receive-stage/LEDB_IN:
+  - R77.2
+  - R78.1
+  - U5.INB+
+  /breath-receive-stage/LEDB_K:
+  - D18.K
+  - J6.2
+  - Q2.C
+  /breath-receive-stage/LEDB_SENSE:
+  - Q2.E
+  - R80.1
+  - U5.INB-
   /breath-receive-stage/REF_DRIVE:
   - U5.OUTA
   - U5.INA-
   - U6.REF
-  /breath-receive-stage/SPARE_B_OUT:
-  - U5.INB-
-  - U5.OUTB
   /breath-receive-stage/TRIM_WIPER:
   - RV1.W
   - U5.INA+
@@ -1801,6 +2048,11 @@ nets:
   - C43.2
   - C5.2
   - C51.2
+  - C54.2
+  - C55.2
+  - C56.2
+  - C57.2
+  - C58.2
   - C6.2
   - C7.2
   - D16.K
@@ -1824,6 +2076,10 @@ nets:
   - R48.2
   - R53.2
   - R65.2
+  - R73.2
+  - R74.2
+  - R78.2
+  - R80.2
   - R9.2
   - RN1.R3A
   - RN1.R4A
@@ -1836,8 +2092,8 @@ nets:
   - U1.ILIM
   - U1.GND
   - U12.INB+
+  - U16.GND
   - U3.GND
-  - U5.INB+
   - U7.INB+
   - U8.INA+
   - U8.INB+
@@ -1906,6 +2162,7 @@ nets:
   - C31.1
   - C33.1
   - C35.1
+  - C55.1
   - D10.A
   - D11.A
   - D12.A
@@ -1919,6 +2176,7 @@ nets:
   - U10.V-
   - U11.V-
   - U12.V-
+  - U16.VSS
   - U5.V-
   - U6.V-
   - U7.V-
@@ -1936,6 +2194,7 @@ nets:
   - C34.1
   - C41.1
   - C51.1
+  - C54.1
   - C7.1
   - D10.K
   - D11.K
@@ -1946,6 +2205,8 @@ nets:
   - D6.K
   - D9.K
   - FB1.2
+  - R72.1
+  - R81.1
   - U1.IN
   - U1.IN_2
   - U1.EN
@@ -1955,6 +2216,7 @@ nets:
   - U12.V+
   - U13.VIN
   - U13.EN
+  - U16.VDD
   - U5.V+
   - U6.V+
   - U7.V+
@@ -1974,6 +2236,8 @@ nets:
   - U2.GND
   U1.PG:
   - U1.PG
+  U16.12:
+  - U16.12
   U2.PWRGD:
   - U2.PWRGD
   U3.VOUTF:
@@ -1993,6 +2257,7 @@ external_endpoints:
 - J5.5
 - J5.6
 - U1.PG
+- U16.12
 - U2.PWRGD
 - U3.VOUTF
 - U3.VOUTH

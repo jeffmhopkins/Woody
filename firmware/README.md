@@ -34,8 +34,11 @@ negotiable without revisiting those:
   changed is that it now confirms or moves a documented figure instead of
   supplying the only one. Either way, not the conventional 20 ms the 2021
   firmware used.
-- **Per-channel smoothing in software**, not in the analog filter. The analog
-  filter is fixed; firmware knows what each channel carries.
+- **Per-channel smoothing in software**, not in the analog filter. The
+  instrument's analog filter (`C-AA-ADC`, the 1.5 kHz setting) is fixed;
+  firmware knows what each channel carries. The module's breath band-limit is
+  a panel toggle (500 Hz / 1.5 kHz / wide, ADR 0003, *Amendment, 2026-10-04*)
+  that firmware neither sees nor sets: it acts on the jack, not on the ADC.
 - **Nothing expressive touches the ESP32's internal ADC.** It is noisy and
   nonlinear, and breath drives a 0–10V output where that shows.
 - **There is no radio.** WiFi and BLE are never started, so no transmit burst
@@ -127,6 +130,14 @@ hosts*). Pins: `SCLK` IO35, `MOSI` IO36, `CS_MOD` IO34, `MISO` IO37 (the ADC's
   1,1** `[ds MCP3202-CI-SN.pdf p.1]`, a 24-clock (three-byte) transaction
   `[ds p.17, Figure 6-1]`, `CS` low at least 100 ns before the first rising
   clock and high at least 500 ns between conversions `[ds p.3, tSUCS, tCSH]`.
+- **One MCP3202 conversion per pass: 4 kHz, not faster** (#32,
+  `breath-adc.md`, *The sample rate stays 4 kHz*). The anti-alias pole is at
+  1.5 kHz, so the converter does alias; that page bounds what folds and shows
+  why a second read per pass does not fit `loop-budget` at its serialised end.
+  Do not add reads to the pass to decimate. If E9 finds a 4 kHz tone (the LED
+  row's refresh) in the breath reading, the fix is two conversions per pass
+  averaged as a pair, and only once the loop's measured pass time shows it
+  closes.
 - **Polling transactions on an acquired bus.** With interrupt-driven
   transactions the loop does not close at 4 kHz (`loop-budget`, owned by
   `docs/reference/latency-budget.md`).

@@ -19,7 +19,10 @@ RIN bufo sum {{R-BREATH-IN}}
 ROCW 0 ow {{r_off_cw}}
 ROCCW ow avdd {{r_off_ccw}}
 ROFF ow sum {{R-BREATH-OFF}}
-ROFFN neg sum {{R-BREATH-OFFNEG}}
+* R-BREATH-OFFNEG as two halves with C-BREATH-OFFNEG at the split (#32): 6.7 Hz on the -12 V leg
+ROFFN1 neg offnm {{R-BREATH-OFFNEG}}
+COFFN offnm 0 {{C-BREATH-OFFNEG}}
+ROFFN2 offnm sum {{R-BREATH-OFFNEG}}
 RFB sum out {{R-BREATH-FB}}
 XB 0 sum pos neg out OPAx197
 ROUT out jack {{R-OUT-PROT}}

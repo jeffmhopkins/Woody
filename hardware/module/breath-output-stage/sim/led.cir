@@ -1,0 +1,70 @@
+* The breath LED's driver on this stage's output (#32, owner 2026-10-04), and what it
+* costs the CV. TWO COPIES of the stage as bos.cir draws it - the summer (U-BREATH-OPA B,
+* TI's OPA2197 model) with R-BREATH-IN, R-BREATH-OFF/-OFFNEG from POT-OFFSET, R-BREATH-FB,
+* R-OUT-PROT, C-OUT-BREATH and the load - driven from one source: copy A carries the LED
+* driver on BREATH_OUT (its op-amp output, inside the loop), copy B carries nothing. The
+* difference between their jacks is the driver's whole effect on the CV.
+* The driver, as netlisted on module/breath-receive-stage: R-LEDB-TOP/R-LEDB-BOT (1/11)
+* into U-REF-BUF B (TI's OPA2197 model), R-LEDB-BASE, D-LEDB, Q-LEDB with R-LEDB-SENSE in its
+* emitter, the LED (LED-BREATH) and R-LEDB-A from the analog +12 V in its collector.
+* The input is BREATH_SHAPED's gain-buffered copy taken as an ideal source (XA in bos.cir is
+* a follower; its output impedance is milliohms): a slow ramp drives the jack from
+* v_led_lo to past the positive clip, then a step for the driver's own loop.
+VPOS pos 0 {{v_pos}}
+VNEG neg 0 {{v_neg}}
+VAVDD avdd 0 {{v_avdd}}
+VIN bufo 0 PWL(0 {{v_led_in0}} {{t_led_ramp}} {{v_led_in1}} {{t_led_hold}} {{v_led_in1}} {{t_led_step}} {{v_led_in2}} {{t_led_end}} {{v_led_in2}})
+* -- the offset network, shared (POT-OFFSET's wiper is a divider; both copies see the same)
+ROCW 0 ow {{r_off_cw}}
+ROCCW ow avdd {{r_off_ccw}}
+* -- copy A, with the LED driver
+RINA bufo suma {{R-BREATH-IN}}
+ROFFA ow suma {{R-BREATH-OFF}}
+* R-BREATH-OFFNEG as two halves with C-BREATH-OFFNEG at the split (#32): 6.7 Hz on the -12 V leg
+ROFFNA1 neg offnma {{R-BREATH-OFFNEG}}
+COFFNA offnma 0 {{C-BREATH-OFFNEG}}
+ROFFNA2 offnma suma {{R-BREATH-OFFNEG}}
+RFBA suma outa {{R-BREATH-FB}}
+XBA 0 suma pos neg outa OPAx197
+ROUTA outa jacka {{R-OUT-PROT}}
+COUTA jacka 0 {{C-OUT-BREATH}}
+RLOADA jacka 0 {{r_load}}
+* -- copy B, the same stage with nothing on BREATH_OUT
+RINB bufo sumb {{R-BREATH-IN}}
+ROFFB ow sumb {{R-BREATH-OFF}}
+* R-BREATH-OFFNEG as two halves with C-BREATH-OFFNEG at the split (#32): 6.7 Hz on the -12 V leg
+ROFFNB1 neg offnmb {{R-BREATH-OFFNEG}}
+COFFNB offnmb 0 {{C-BREATH-OFFNEG}}
+ROFFNB2 offnmb sumb {{R-BREATH-OFFNEG}}
+RFBB sumb outb {{R-BREATH-FB}}
+XBB 0 sumb pos neg outb OPAx197
+ROUTB outb jackb {{R-OUT-PROT}}
+COUTB jackb 0 {{C-OUT-BREATH}}
+RLOADB jackb 0 {{r_load}}
+* -- the LED driver on copy A's BREATH_OUT
+RLTOP outa ledin {{R-LEDB-TOP}}
+RLBOT ledin 0 {{R-LEDB-BOT}}
+XLED ledin lsense pos neg ldrv OPAx197
+RLBASE ldrv ld {{R-LEDB-BASE}}
+DLEDB ld lb D4448
+QLEDB lk lb lsense QNPN
+RLSENSE lsense 0 {{R-LEDB-SENSE}}
+RLA pos la {{R-LEDB-A}}
+DLED la lk DLED
+.model D4448 D(Is=2.5n N=1.8 Rs=0.5 BV=75 Cjo=4p)
+.model QNPN NPN(Is=6.7f Bf={{q_bf}} Vaf=74 Br=0.7 Rb=10 Rc=1 Cje=4.5p Cjc=3.6p Tf=0.3n)
+.model DLED D(Is={{led_is}} N={{led_n}} Rs=10)
+* abstol 1 nA (ngspice default 1 pA): at the positive clip U-REF-BUF B's macromodel stopped on
+* "timestep too small" at one corner without it (2026-10-04); the measures move under 1 %.
+.options method=gear rshunt=1e10 abstol=1e-9
+.control
+tran {{t_led_stepsize}} {{t_led_end}} 0 {{t_led_stepsize}}
+let dj = v(jacka) - v(jackb)
+let iled = (v(pos) - v(la)) / {{R-LEDB-A}}
+wrdata outa.dat v(outa)
+wrdata jacka.dat v(jacka)
+wrdata dj.dat dj
+wrdata iled.dat iled
+quit
+.endc
+.end

@@ -30,3 +30,4 @@ C148216,D_SMA,0,"datasheets/discrete-and-power/EASYEDA-C148216-SMAJ15A-FOOTPRINT
 C47460,D_SMA,0,"datasheets/discrete-and-power/EASYEDA-C47460-SS14-E3-61T-FOOTPRINT.json: pad 1 (K, by its symbol) at -x, as KiCad's D_SMA cathode pad; within 0.20 mm at 0, 3.0 mm or more apart otherwise"
 C131084,D_SOD-323,0,"datasheets/discrete-and-power/EASYEDA-C131084-PESD12VS1UA-FOOTPRINT.json: unidirectional: the silk cathode bar on pad 1, at -x, as KiCad's D_SOD-323 cathode pad 1; within 0.12 mm at 0, 1.6 mm or more apart otherwise"
 C81598,D_SOD-123,0,"datasheets/discrete-and-power/EASYEDA-C81598-1N4148W-FOOTPRINT.json: pad 1 (K, by its symbol) at -x, as KiCad's D_SOD-123 cathode pad; within 0.08 mm at 0, 2.4 mm or more apart otherwise"
+C38558,D_SOD-323,0,"datasheets/discrete-and-power/EASYEDA-C38558-PESD12VL1BA-115-FOOTPRINT.json: bidirectional (no polarity); pads within 0.07 mm at 0, 1.5 mm or more apart otherwise"

@@ -100,7 +100,8 @@ requirement.
 +12V      / PWR_GND     power. NOT presence - see below
 SCLK      / MOSI        SPI to the DAC, 2 MHz (was ~1 MHz here)
 CS        / DIG_GND     CS needs the ground partner - see the pin map below
-BREATH    / AGND        analog, band-limited ~500 Hz, sense return
+BREATH    / AGND        analog, band-limited at the module by a panel toggle
+                        (500 Hz / 1.5 kHz / ~10 kHz), sense return
 ```
 
 > **This block said `power, and the presence signal` until 2026-09-21.** There
@@ -1071,6 +1072,47 @@ Confirm at E11 with a logic analyser and a scope on the real cable at length —
 that milestone exists precisely to catch what this reasoning gets wrong, and
 this time it has something specific to look for: threshold dwell and runt
 pulses on `CS`.
+
+## Amendment, 2026-10-04 — breath's band-limit is a panel toggle (#32)
+
+**The owner, 2026-10-04, in the working chat:** *"Let's go ahead and just put
+the filter to 1.5 khz"* — and then, asked where the filter is and whether it
+could be switchable, chose the selector *"Panel 3-way toggle"* and the modes
+*"500 Hz / 1.5 kHz / wide"*, with wide at about 10 kHz and the RF and
+switching-hash filtering kept ahead of the in-amp. Their reasons, as they gave
+them (paraphrased, not quoted): the instrument must track fast breath gestures
+— growl and flutter-tongue; they already play this sensor (MPXV4006DP) on a
+previous instrument and it responds well; and they read the datasheet's
+1.0 ms response as a full-scale figure, where their gestures are 20–30 %
+modulations. What the datasheet actually says about that last point is in ADR
+0003's amendment of the same date.
+
+What this ADR's conductor budget said — `BREATH` "band-limited ~500 Hz" — is
+now the panel's to set. What changes in this ADR's scope:
+
+- **The module gains a panel toggle and a second panel LED.** `SW-BREATH-BW`,
+  the same NKK series and hole as `SW-POWER`, sets two DC control lines; an
+  analog switch beside the in-amp, `U-BW-SW`, switches the differential
+  filter's capacitors. The analog pair never leaves the main board.
+  `LED-BREATH` (the owner: a second LED, on the other side of the power toggle
+  from the power LED, whose brightness follows the breath CV) is driven from
+  the module's one spare op-amp half. Where both go on the panel is the module
+  re-layout's (`hardware/module/panel/panel.md`, *Two parts waiting for the
+  layout*); ADR 0024's layout is not amended here.
+- **The breath link's CMRR requirement now has three bands**, one per mode,
+  each from DC to that mode's corner: a common-mode disturbance anywhere in the
+  band the player has chosen reaches the jack. What each mode achieves, and
+  what it cost, is `hardware/interfaces/breath-sense-link/breath-sense-link.md`
+  and `hardware/module/breath-receive-stage/breath-receive-stage.md`,
+  *The bandwidth toggle*.
+- **The breath jack's own RC no longer band-limits.** `C-OUT-BREATH` moved to
+  15.9 kHz with `R-OUT-PROT` (ADR 0006's output table).
+- **WIDE's requirement band is DC to 7 kHz, by the owner's choice.** Offered
+  *"Keep wide at ~10 kHz and only require the target up to ~7 kHz. No parts
+  change."*, the owner answered **"Keep 10 kHz, accept"** (2026-10-04, #32).
+  The 58.5 dB is held over 500 Hz, 1.5 kHz and DC–7 kHz in the three modes;
+  WIDE above 7 kHz is recorded, not passed (ADR 0003, *The owner's three
+  answers*).
 
 ## Open
 

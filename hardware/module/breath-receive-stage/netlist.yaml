@@ -32,6 +32,12 @@ ports:
     dir: in
     from: module/power-entry
     figure: dac-rail
+  BREATH_OUT:
+    dir: in
+    from: module/breath-output-stage
+    note: 'The breath summer''s output, U-BREATH-OPA OUTB, inside its feedback loop and ahead of R-OUT-PROT: what
+      the jack carries, from a node whose closed-loop impedance is milliohms, so the LED driver''s divider takes
+      nothing from the CV'
 foreign:
   R1:
     owner: interfaces/breath-sense-link
@@ -43,30 +49,60 @@ foreign:
     owner: module/breath-output-stage
     row: C-OUT-BREATH
 components:
+  C-BW-FILT0:
+    of: C-BW-FILT
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: The BW0 line's filter capacitor, at U-BW-SW's SEL pins
+  C-BW-FILT1:
+    of: C-BW-FILT
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: The BW1 line's filter capacitor, at U-BW-SW's SEL pins
   C-CM-IN+:
     of: C-CM-BREATH
-    value: 1.5nF
+    value: 68pF
     drawn_as: C_cm
     pins:
     - 1
     - 2
-    note: 'A MATCHED PAIR with its twin (owner, 2026-10-03: ''Tighten cap matching''): C-CM-IN+ and C-CM-IN- from
-      one reel of the 1 % C0G part, measured on one LCR meter at 1 kHz and fitted together only when each is within
-      0.5 % of the pair''s mean. Their mismatch converts the umbilical''s common mode in proportion to frequency,
-      and at 1 % each the link misses its CMRR at the breath band''s top (module/breath-receive-stage/sim cmrr-as-netlisted).
-      No catalogue C0G at 1.5 nF is sold tighter than 1 %, so the match is made by hand: fitted by hand, after measuring'
+    note: 'A MATCHED PAIR with its twin (owner, 2026-10-03: ''Tighten cap matching''; 68 pF since #32): C-CM-IN+
+      and C-CM-IN- from one reel of the 1 % C0G part, measured on one LCR meter (open-circuit compensated, at 100
+      kHz if it has it) and fitted together only when each is within 0.5 % of the pair''s mean. Their mismatch converts
+      the umbilical''s common mode in proportion to frequency, so it sets each bandwidth mode''s CMRR at its top
+      (module/breath-receive-stage/sim cmrr-*). The 1 % C0G is the tightest catalogued, so the match is made by
+      hand: fitted by hand, after measuring. Fixed in every mode of the bandwidth toggle'
   C-CM-IN-:
     of: C-CM-BREATH
-    value: 1.5nF
+    value: 68pF
     drawn_as: C_cm
     pins:
     - 1
     - 2
-    note: 'A MATCHED PAIR with its twin (owner, 2026-10-03: ''Tighten cap matching''): C-CM-IN+ and C-CM-IN- from
-      one reel of the 1 % C0G part, measured on one LCR meter at 1 kHz and fitted together only when each is within
-      0.5 % of the pair''s mean. Their mismatch converts the umbilical''s common mode in proportion to frequency,
-      and at 1 % each the link misses its CMRR at the breath band''s top (module/breath-receive-stage/sim cmrr-as-netlisted).
-      No catalogue C0G at 1.5 nF is sold tighter than 1 %, so the match is made by hand: fitted by hand, after measuring'
+    note: 'A MATCHED PAIR with its twin (owner, 2026-10-03: ''Tighten cap matching''; 68 pF since #32): C-CM-IN+
+      and C-CM-IN- from one reel of the 1 % C0G part, measured on one LCR meter (open-circuit compensated, at 100
+      kHz if it has it) and fitted together only when each is within 0.5 % of the pair''s mean. Their mismatch converts
+      the umbilical''s common mode in proportion to frequency, so it sets each bandwidth mode''s CMRR at its top
+      (module/breath-receive-stage/sim cmrr-*). The 1 % C0G is the tightest catalogued, so the match is made by
+      hand: fitted by hand, after measuring. Fixed in every mode of the bandwidth toggle'
+  C-DEC-BWSW-NEG:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: U-BW-SW VSS to the star, at the pin
+  C-DEC-BWSW-POS:
+    of: C-DECOUPLE
+    value: 100nF
+    pins:
+    - 1
+    - 2
+    note: U-BW-SW VDD to the star, at the pin
   C-DEC-INAMP-NEG:
     of: C-DECOUPLE
     value: 100nF
@@ -96,11 +132,26 @@ components:
     - 2
     note: OPA2197 V+ to the star, at the pin
   C-DIFF-BREATH:
-    value: 15nF
+    value: 680pF
     drawn_as: C_diff
     pins:
     - 1
     - 2
+  C-DIFF-BW-1K5:
+    value: 3.9nF
+    pins:
+    - 1
+    - 2
+    note: 'Switched across the pair by U-BW-SW channels 1 and 2 (BW1): in with the toggle at 500 Hz and at 1.5 kHz,
+      out at WIDE. With C-DIFF-BREATH and the two C_cm in series it sets the 1.5 kHz corner (breath-sense-link.md,
+      Component values)'
+  C-DIFF-BW-500:
+    value: 10nF
+    pins:
+    - 1
+    - 2
+    note: 'Switched across the pair by U-BW-SW channels 3 and 4 (BW0): in only with the toggle at 500 Hz, beside
+      C-DIFF-BW-1K5 and C-DIFF-BREATH'
   D-CLAMP-IN+:
     of: D-CLAMP-BREATH
     value: BAV99
@@ -116,6 +167,76 @@ components:
     - A
     - K
     - C
+  D-LEDB:
+    value: 1N4448W
+    pins:
+    - A
+    - K
+    note: 'Blocks the base when BREATH_OUT is negative (OFFSET below zero): U-REF-BUF B then rails at -12 V, which
+      would otherwise break Q-LEDB''s base-emitter junction down (VEBO 6 V). Inside the loop, so its drop costs
+      nothing'
+  J-LED-BREATH:
+    value: JST B2B-XH-A
+    pins:
+    - 1
+    - 2
+    note: 'LED-BREATH''s lead plugs in here, as LED-PANEL''s does into J-LED-PANEL: pin 1 = LEDB_A (the anode, the
+      red wire), pin 2 = LEDB_K (the cathode, Q-LEDB''s collector). On the main board''s FRONT face below the LED;
+      mark pin 1 and A on the silk'
+  LED-BREATH:
+    value: 605-2211-110F
+    pins:
+    - A
+    - K
+    note: 'THE BREATH LED (owner, 2026-10-04): brightness follows the breath CV at the jack, dark at 0 V and below.
+      The same part as LED-PANEL, in the toggle row on the far side of SW-POWER from it. PANEL-MOUNTED: no footprint
+      on the board - its leads are cut short and soldered to CBL-LED-BREATH, the lead that plugs into J-LED-BREATH,
+      anode to pin 1'
+  Q-LEDB:
+    value: MMBT3904
+    pins:
+    - B
+    - E
+    - C
+    note: 'The LED''s current sink: U-REF-BUF B holds its emitter at BREATH_OUT/11, so the LED current is BREATH_OUT/11/180
+      ohm whatever the lead or the LED''s own drop'
+  R-BW-COM:
+    value: 4.7k 1%
+    pins:
+    - 1
+    - 2
+    note: Feeds the toggle's commons from the analog +12 V and limits a lug shorted to the panel to 2.6 mA. With
+      R-BW-PD it puts 8.2 V on a closed line (6.2 V with both closed), above U-BW-SW's 2 V VIH and never above its
+      VDD
+  R-BW-FILT0:
+    of: R-BW-FILT
+    value: 100k 1%
+    pins:
+    - 1
+    - 2
+    note: As R-BW-FILT1, for SEL3/SEL4
+  R-BW-FILT1:
+    of: R-BW-FILT
+    value: 100k 1%
+    pins:
+    - 1
+    - 2
+    note: 'With C-BW-FILT1, 10 ms: the line from the panel arrives at SEL1/SEL2 as a slow DC level, and the contacts''
+      bounce never reaches the switch'
+  R-BW-PD0:
+    of: R-BW-PD
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    note: Holds BW0 low with the toggle at 1.5 kHz or WIDE
+  R-BW-PD1:
+    of: R-BW-PD
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    note: Holds BW1 low with the toggle at WIDE, and draws the gold contacts' wetting current
   R-GAIN-INAMP:
     value: 42.2k 0.1%
     drawn_as: R_G
@@ -123,6 +244,40 @@ components:
     - 1
     - 2
     note: Sets the raw G = 1 + 50k/42.2k = 2.185
+  R-LEDB-A:
+    value: 1k 1% 1206
+    pins:
+    - 1
+    - 2
+    note: Feeds the LED's anode from the analog +12 V and limits the lead shorted to the panel to 12 mA (144 mW,
+      a 1206). At the 6 mA cap it leaves Q-LEDB about 2 V with a 3 V LED
+  R-LEDB-BASE:
+    value: 1k 1%
+    pins:
+    - 1
+    - 2
+    note: 'U-REF-BUF B''s output into D-LEDB and Q-LEDB''s base: isolates the op-amp from the transistor''s input
+      capacitance and limits base current'
+  R-LEDB-BOT:
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    note: Bottom of the 1/11 divider
+  R-LEDB-SENSE:
+    value: 180R 1%
+    pins:
+    - 1
+    - 2
+    note: 'Sets the LED current: 1/(11 x 180) = 0.505 mA per volt at the jack, 5.05 mA at 10 V, 6.0 mA at the OPA2197''s
+      11.9 V swing - the cap. Return it to the star on its own trace'
+  R-LEDB-TOP:
+    value: 100k 1%
+    pins:
+    - 1
+    - 2
+    note: 'Top of the LED driver''s 1/11 divider from BREATH_OUT, the output stage''s op-amp output inside its loop:
+      110 kohm there moves the jack by nothing measurable (breath-output-stage/sim led-load)'
   R-ZERO-TOP:
     value: 42.2k 1%
     pins:
@@ -163,6 +318,21 @@ components:
     - 1
     - 2
     note: Common-mode bias return on IN-
+  SW-BREATH-BW:
+    value: NKK M2024SD4G01
+    pins:
+    - COM
+    - L4
+    - L1
+    note: 'THE BREATH BANDWIDTH TOGGLE (owner, 2026-10-04: ''Panel 3-way toggle'', ''500 Hz / 1.5 kHz / wide'';
+      thrown left-right like SW-POWER: ''full left being 500 full right being wide is the intuitive placement because
+      it matches the on off of the power switch''). MOUNTED AS SW-POWER IS, D-flat on the LEFT, so lever RIGHT =
+      NKK Down, lever LEFT = NKK Up (SW-POWER''s own row and NKK p.5). Lug 1 is made only at Up (lever LEFT) and
+      lug 4 at Up and Center, so: LEFT = 500 Hz (BW0 and BW1), CENTRE = 1.5 kHz (BW1), RIGHT = WIDE (neither: Down
+      makes 2-3 and 5-6, and lugs 3 and 6 are not wired). A thermometer code from one ON-ON-ON part; it carries
+      DC only, the analog pair never leaves this board. Panel-mounted like SW-POWER, its lugs wired to this board
+      beside U-BW-SW. CONTACT MATERIAL G, GOLD: about 0.8 mA per line, above the gold contacts'' 0.1 mA minimum.
+      Buzz it on arrival: lever left, pad 1 to pads 2 and 3'
   TRIM-BREATH-ZERO:
     value: 10k multiturn cermet
     pins:
@@ -170,6 +340,28 @@ components:
     - W
     - CCW
     note: Nulls the sensor pedestal. Range and derivation are the tracked figure breath-zero-ref
+  U-BW-SW:
+    value: TMUX6112PWR
+    pins:
+    - SEL1
+    - D1
+    - S1
+    - VSS
+    - GND
+    - S4
+    - D4
+    - SEL4
+    - SEL3
+    - D3
+    - S3
+    - VDD
+    - S2
+    - D2
+    - SEL2
+    note: 'Switches C-DIFF-BW-1K5 (channels 1 and 2, SEL1 = SEL2 = BW1) and C-DIFF-BW-500 (channels 3 and 4, SEL3
+      = SEL4 = BW0) across the in-amp''s input pair, EACH CAPACITOR AT BOTH ENDS: every D pin is on IN_POS or IN_NEG,
+      one of each pair per leg, so the switch''s own pin capacitance is the same common-mode load on both legs.
+      Lay the two legs out as mirror images. Closes on logic 1'
   U-DIFFRX:
     value: INA828IDR
     pins:
@@ -196,20 +388,29 @@ components:
     - V+
     - V-
     note: 'Half A buffers the trimmer wiper into the in-amp REF pin: a bare divider there degrades CMRR one-for-one.
-      Half B is spare, a follower with its input on the star'
+      Half B drives the breath LED (since 2026-10-04, #32): its (+) input takes BREATH_OUT/11 from R-LEDB-TOP/R-LEDB-BOT
+      and its loop holds Q-LEDB''s emitter there, so the LED current follows the jack'
 nets:
   AGND_MOD:
   - port: AGND_MOD
+  - C-BW-FILT0.2
+  - C-BW-FILT1.2
   - C-CM-IN+.2
   - C-CM-IN-.2
+  - C-DEC-BWSW-NEG.2
+  - C-DEC-BWSW-POS.2
   - C-DEC-INAMP-NEG.2
   - C-DEC-INAMP-POS.2
   - C-DEC-REFBUF-NEG.2
   - C-DEC-REFBUF-POS.2
+  - R-BW-PD0.2
+  - R-BW-PD1.2
+  - R-LEDB-BOT.2
+  - R-LEDB-SENSE.2
   - R4.2
   - R5.2
   - TRIM-BREATH-ZERO.CCW
-  - U-REF-BUF.INB+
+  - U-BW-SW.GND
   AGND_SENSE:
   - port: AGND_SENSE
   - D-CLAMP-IN+.C
@@ -217,10 +418,46 @@ nets:
   BREATH_INAMP_OUT:
   - port: BREATH_INAMP_OUT
   - U-DIFFRX.OUT
+  BREATH_OUT:
+  - port: BREATH_OUT
+  - R-LEDB-TOP.1
   BREATH_SENSE:
   - port: BREATH_SENSE
   - D-CLAMP-IN-.C
   - R3.1
+  BW0:
+  - C-BW-FILT0.1
+  - R-BW-FILT0.2
+  - U-BW-SW.SEL4
+  - U-BW-SW.SEL3
+  BW0_SW:
+  - R-BW-FILT0.1
+  - R-BW-PD0.1
+  - SW-BREATH-BW.L1
+  BW1:
+  - C-BW-FILT1.1
+  - R-BW-FILT1.2
+  - U-BW-SW.SEL1
+  - U-BW-SW.SEL2
+  BW1_SW:
+  - R-BW-FILT1.1
+  - R-BW-PD1.1
+  - SW-BREATH-BW.L4
+  BW_COM:
+  - R-BW-COM.2
+  - SW-BREATH-BW.COM
+  CBW1K5_N:
+  - C-DIFF-BW-1K5.2
+  - U-BW-SW.S2
+  CBW1K5_P:
+  - C-DIFF-BW-1K5.1
+  - U-BW-SW.S1
+  CBW500_N:
+  - C-DIFF-BW-500.2
+  - U-BW-SW.S4
+  CBW500_P:
+  - C-DIFF-BW-500.1
+  - U-BW-SW.S3
   DAC_AVDD:
   - port: DAC_AVDD
   - R-ZERO-TOP.1
@@ -235,36 +472,68 @@ nets:
   - C-DIFF-BREATH.2
   - R3.2
   - R5.1
+  - U-BW-SW.D2
+  - U-BW-SW.D4
   - U-DIFFRX.IN-
   IN_POS:
   - C-CM-IN+.1
   - C-DIFF-BREATH.1
   - R2.2
   - R4.1
+  - U-BW-SW.D3
+  - U-BW-SW.D1
   - U-DIFFRX.IN+
+  LEDB_A:
+  - J-LED-BREATH.1
+  - LED-BREATH.A
+  - R-LEDB-A.2
+  LEDB_B:
+  - D-LEDB.K
+  - Q-LEDB.B
+  LEDB_D:
+  - D-LEDB.A
+  - R-LEDB-BASE.2
+  LEDB_DRV:
+  - R-LEDB-BASE.1
+  - U-REF-BUF.OUTB
+  LEDB_IN:
+  - R-LEDB-BOT.1
+  - R-LEDB-TOP.2
+  - U-REF-BUF.INB+
+  LEDB_K:
+  - J-LED-BREATH.2
+  - LED-BREATH.K
+  - Q-LEDB.C
+  LEDB_SENSE:
+  - Q-LEDB.E
+  - R-LEDB-SENSE.1
+  - U-REF-BUF.INB-
   MODULE_ANALOG_NEG12:
   - port: MODULE_ANALOG_NEG12
+  - C-DEC-BWSW-NEG.1
   - C-DEC-INAMP-NEG.1
   - C-DEC-REFBUF-NEG.1
   - D-CLAMP-IN+.A
   - D-CLAMP-IN-.A
+  - U-BW-SW.VSS
   - U-DIFFRX.V-
   - U-REF-BUF.V-
   MODULE_ANALOG_POS12:
   - port: MODULE_ANALOG_POS12
+  - C-DEC-BWSW-POS.1
   - C-DEC-INAMP-POS.1
   - C-DEC-REFBUF-POS.1
   - D-CLAMP-IN+.K
   - D-CLAMP-IN-.K
+  - R-BW-COM.1
+  - R-LEDB-A.1
+  - U-BW-SW.VDD
   - U-DIFFRX.V+
   - U-REF-BUF.V+
   REF_DRIVE:
   - U-DIFFRX.REF
   - U-REF-BUF.OUTA
   - U-REF-BUF.INA-
-  SPARE_B_OUT:
-  - U-REF-BUF.INB-
-  - U-REF-BUF.OUTB
   TRIM_WIPER:
   - TRIM-BREATH-ZERO.W
   - U-REF-BUF.INA+

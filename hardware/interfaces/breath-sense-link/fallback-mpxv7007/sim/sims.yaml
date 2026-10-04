@@ -40,7 +40,7 @@ params:
   v_dd:       {value: 3.3,   source: "the MCP3202's VDD, which is its reference: the Matrix's 3V3 (breath-adc.md, Interfaces)"}
   p_step:     {value: 2.8,   source: "2.8 kPa: breath-working-point's candidate hard blow (disputed, E2)"}
   p_full:     {value: 6.0,   source: "the MPXV4006DP's full rated pressure, the range sensor-full-scale is taken at and the in-amp is sized for (ADR 0003, 0-6 kPa)"}
-  t_rest:     {value: 14.0e-3, source: "rest reading: the supplies are up by 1 ms and the slowest pole in the chain, C-AA-ADC's 282 us, has had ~45 time constants"}
+  t_rest:     {value: 14.0e-3, source: "rest reading: the supplies are up by 1 ms and the slowest pole in the chain, C-AA-ADC's 108 us (#32), has had over 100 time constants"}
   t_p1:       {value: 15.0e-3, source: "the step to p_step starts"}
   t_p1e:      {value: 15.01e-3, source: "a 10 us ramp: faster than the sensor's own 1.0 ms response [ds p.2], so it is the stage's step, not the sensor's"}
   t_r1:       {value: 24.0e-3, source: "p_step reading"}

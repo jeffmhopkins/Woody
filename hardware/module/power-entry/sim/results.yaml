@@ -4,11 +4,11 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/power-entry/sim/sims.yaml: 582583c807777927
+  hardware/module/power-entry/sim/sims.yaml: 0d5221ddf1068795
   hardware/module/power-entry/netlist.yaml: 14fd898035959809
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/mod-channels/netlist.yaml: 00739b63d111a848
-  hardware/module/breath-output-stage/netlist.yaml: 63517b01fa4c02a2
+  hardware/module/breath-output-stage/netlist.yaml: e28cccf37c29f7b1
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
   hardware/carrier/power-entry-instrument/netlist.yaml: e9a49796fdb69d0d
   hardware/carrier/led-strip-drive/netlist.yaml: ec7ec56762e982ee
@@ -18,7 +18,7 @@ inputs:
   hardware/module/power-entry/sim/cm.cir: bf15e91728c95a53
   hardware/module/power-entry/sim/isoin.cir: d95d1859fd117b2b
   hardware/module/power-entry/sim/dacrail.cir: 00875ad3e9b9af2c
-  hardware/module/power-entry/sim/ledpwm.cir: cd05b59c0bc84a23
+  hardware/module/power-entry/sim/ledpwm.cir: 2a09be3bce91ca1c
   hardware/module/pitch-stage/sim/pitch-stage.lib: b3934228b80633ec
   hardware/module/power-entry/sim/lt3042.lib: 2664843cbe66f3e8
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
@@ -1147,10 +1147,10 @@ sims:
         max: 0.18
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000407284
-        min: 0.000295964
+        nominal: 0.000407239
+        min: 0.000295885
         min_at: esr_c2- r_psu-
-        max: 0.000878243
+        max: 0.000878214
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.21
@@ -1159,10 +1159,10 @@ sims:
         max: 0.47
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.12086
-        min: 0.09325
-        min_at: esr_c2- r_psu-
-        max: 0.25901
+        nominal: 0.03131
+        min: 0.01233
+        min_at: esr_c2- r_psu+
+        max: 0.0865
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 48.0208
@@ -1191,8 +1191,9 @@ sims:
       why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
       pass: true
     - expr: max['breath_mv'] < p['breath_bar_mv']
-      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
-        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      why: 'under 0.01 % of the breath jack''s 10 V span, through R-BREATH-OFFNEG from -12 V and POT-OFFSET from DAC_AVDD.
+        Since #32 C-OUT-BREATH is 10 nF and no longer filters it, and the -12 V leg is filtered where it enters instead (owner,
+        2026-10-04: ''Add RC filter (Recommended)'': R-BREATH-OFFNEG as two 47.5k halves with C-BREATH-OFFNEG, 6.7 Hz)'
       pass: true
   led-pwm[f_pwm=2500.0]:
     corners: 5
@@ -1240,10 +1241,10 @@ sims:
         max: 0.12
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000308821
-        min: 0.000218119
+        nominal: 0.000308804
+        min: 0.000218237
         min_at: esr_c2- r_psu-
-        max: 0.000707053
+        max: 0.000707014
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.13
@@ -1252,10 +1253,10 @@ sims:
         max: 0.34
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.05853
-        min: 0.04406
-        min_at: esr_c2- r_psu-
-        max: 0.13855
+        nominal: 0.02257
+        min: 0.00734
+        min_at: esr_c2- r_psu+
+        max: 0.05874
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 38.3622
@@ -1284,8 +1285,9 @@ sims:
       why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
       pass: true
     - expr: max['breath_mv'] < p['breath_bar_mv']
-      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
-        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      why: 'under 0.01 % of the breath jack''s 10 V span, through R-BREATH-OFFNEG from -12 V and POT-OFFSET from DAC_AVDD.
+        Since #32 C-OUT-BREATH is 10 nF and no longer filters it, and the -12 V leg is filtered where it enters instead (owner,
+        2026-10-04: ''Add RC filter (Recommended)'': R-BREATH-OFFNEG as two 47.5k halves with C-BREATH-OFFNEG, 6.7 Hz)'
       pass: true
   led-pwm[f_pwm=3100.0]:
     corners: 5
@@ -1333,10 +1335,10 @@ sims:
         max: 0.08
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000246709
-        min: 0.000170994
+        nominal: 0.000246704
+        min: 0.000170964
         min_at: esr_c2- r_psu-
-        max: 0.000581604
+        max: 0.000581621
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.09
@@ -1345,10 +1347,10 @@ sims:
         max: 0.25
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.03066
-        min: 0.02213
-        min_at: esr_c2- r_psu-
-        max: 0.0805
+        nominal: 0.0205
+        min: 0.01046
+        min_at: esr_c2- r_psu+
+        max: 0.04717
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 31.5481
@@ -1377,8 +1379,9 @@ sims:
       why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
       pass: true
     - expr: max['breath_mv'] < p['breath_bar_mv']
-      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
-        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      why: 'under 0.01 % of the breath jack''s 10 V span, through R-BREATH-OFFNEG from -12 V and POT-OFFSET from DAC_AVDD.
+        Since #32 C-OUT-BREATH is 10 nF and no longer filters it, and the -12 V leg is filtered where it enters instead (owner,
+        2026-10-04: ''Add RC filter (Recommended)'': R-BREATH-OFFNEG as two 47.5k halves with C-BREATH-OFFNEG, 6.7 Hz)'
       pass: true
   led-pwm[f_pwm=3500.0]:
     corners: 5
@@ -1426,10 +1429,10 @@ sims:
         max: 0.08
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.00023031
-        min: 0.00015782
+        nominal: 0.000230316
+        min: 0.000157819
         min_at: esr_c2- r_psu-
-        max: 0.000553271
+        max: 0.000553243
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.08
@@ -1438,10 +1441,10 @@ sims:
         max: 0.23
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.02284
-        min: 0.01596
-        min_at: esr_c2- r_psu-
-        max: 0.06359
+        nominal: 0.01983
+        min: 0.01154
+        min_at: esr_c2- r_psu+
+        max: 0.04352
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 29.8432
@@ -1470,8 +1473,9 @@ sims:
       why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
       pass: true
     - expr: max['breath_mv'] < p['breath_bar_mv']
-      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
-        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      why: 'under 0.01 % of the breath jack''s 10 V span, through R-BREATH-OFFNEG from -12 V and POT-OFFSET from DAC_AVDD.
+        Since #32 C-OUT-BREATH is 10 nF and no longer filters it, and the -12 V leg is filtered where it enters instead (owner,
+        2026-10-04: ''Add RC filter (Recommended)'': R-BREATH-OFFNEG as two 47.5k halves with C-BREATH-OFFNEG, 6.7 Hz)'
       pass: true
   led-pwm[f_pwm=4000.0]:
     corners: 5
@@ -1490,7 +1494,7 @@ sims:
         max_at: esr_c2+ r_psu+
       tap_pos_mv:
         nominal: 0.5499
-        min: 0.2586
+        min: 0.2585
         min_at: esr_c2- r_psu-
         max: 2.2285
         max_at: esr_c2+ r_psu+
@@ -1502,13 +1506,13 @@ sims:
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
         nominal: 0.2144
-        min: 0.1432
+        min: 0.1431
         min_at: esr_c2- r_psu-
         max: 0.6662
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
         nominal: 0.3255
-        min: 0.2157
+        min: 0.2156
         min_at: esr_c2- r_psu-
         max: 1.0265
         max_at: esr_c2+ r_psu+
@@ -1519,10 +1523,10 @@ sims:
         max: 0.06
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.00022156
-        min: 0.000146984
+        nominal: 0.00022155
+        min: 0.000146891
         min_at: esr_c2- r_psu-
-        max: 0.000560462
+        max: 0.000560458
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.07
@@ -1531,10 +1535,10 @@ sims:
         max: 0.21
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.01684
-        min: 0.01122
-        min_at: esr_c2- r_psu-
-        max: 0.04982
+        nominal: 0.01849
+        min: 0.01142
+        min_at: esr_c2- r_psu+
+        max: 0.03769
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 29.3211
@@ -1563,8 +1567,9 @@ sims:
       why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
       pass: true
     - expr: max['breath_mv'] < p['breath_bar_mv']
-      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
-        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      why: 'under 0.01 % of the breath jack''s 10 V span, through R-BREATH-OFFNEG from -12 V and POT-OFFSET from DAC_AVDD.
+        Since #32 C-OUT-BREATH is 10 nF and no longer filters it, and the -12 V leg is filtered where it enters instead (owner,
+        2026-10-04: ''Add RC filter (Recommended)'': R-BREATH-OFFNEG as two 47.5k halves with C-BREATH-OFFNEG, 6.7 Hz)'
       pass: true
   led-pwm-duty[d_led=0.0039]:
     corners: 5
@@ -1576,7 +1581,7 @@ sims:
         max: 0.0804
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 0.0312
+        nominal: 0.0311
         min: 0.0227
         min_at: esr_c2- r_psu-
         max: 0.0836
@@ -1594,7 +1599,7 @@ sims:
         max: 0.0672
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
-        nominal: 0.0113
+        nominal: 0.0114
         min: 0.0081
         min_at: esr_c2- r_psu-
         max: 0.025
@@ -1612,10 +1617,10 @@ sims:
         max: 0.0
         max_at: nominal
       pitch_cents:
-        nominal: 1.971e-05
-        min: 1.68228e-05
+        nominal: 1.9644e-05
+        min: 1.68036e-05
         min_at: esr_c2- r_psu-
-        max: 3.50172e-05
+        max: 3.4944e-05
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.01
@@ -1624,22 +1629,22 @@ sims:
         max: 0.01
         max_at: nominal
       breath_mv:
-        nominal: 0.00146
-        min: 0.00112
+        nominal: 0.01775
+        min: 0.01667
         min_at: esr_c2- r_psu-
-        max: 0.00338
+        max: 0.02259
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 1.27417
+        nominal: 1.27434
         min: 1.27024
         min_at: esr_c2+ r_psu-
-        max: 1.27417
+        max: 1.27434
         max_at: nominal
       iuout_ma:
-        nominal: 2.04995
-        min: 2.04307
+        nominal: 2.05026
+        min: 2.043
         min_at: esr_c2+ r_psu+
-        max: 2.04995
+        max: 2.05026
         max_at: nominal
     asserts:
     - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
@@ -1656,8 +1661,9 @@ sims:
       why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
       pass: true
     - expr: max['breath_mv'] < p['breath_bar_mv']
-      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
-        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      why: 'under 0.01 % of the breath jack''s 10 V span, through R-BREATH-OFFNEG from -12 V and POT-OFFSET from DAC_AVDD.
+        Since #32 C-OUT-BREATH is 10 nF and no longer filters it, and the -12 V leg is filtered where it enters instead (owner,
+        2026-10-04: ''Add RC filter (Recommended)'': R-BREATH-OFFNEG as two 47.5k halves with C-BREATH-OFFNEG, 6.7 Hz)'
       pass: true
   led-pwm-duty[d_led=0.1]:
     corners: 5
@@ -1705,10 +1711,10 @@ sims:
         max: 0.06
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000163159
-        min: 0.000106507
+        nominal: 0.000163172
+        min: 0.000106429
         min_at: esr_c2- r_psu-
-        max: 0.000461335
+        max: 0.000461356
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.06
@@ -1717,10 +1723,10 @@ sims:
         max: 0.16
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.03587
-        min: 0.0271
+        nominal: 0.03497
+        min: 0.02827
         min_at: esr_c2- r_psu-
-        max: 0.08338
+        max: 0.064
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 21.5978
@@ -1749,8 +1755,9 @@ sims:
       why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
       pass: true
     - expr: max['breath_mv'] < p['breath_bar_mv']
-      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
-        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      why: 'under 0.01 % of the breath jack''s 10 V span, through R-BREATH-OFFNEG from -12 V and POT-OFFSET from DAC_AVDD.
+        Since #32 C-OUT-BREATH is 10 nF and no longer filters it, and the -12 V leg is filtered where it enters instead (owner,
+        2026-10-04: ''Add RC filter (Recommended)'': R-BREATH-OFFNEG as two 47.5k halves with C-BREATH-OFFNEG, 6.7 Hz)'
       pass: true
   led-pwm-duty[d_led=0.25]:
     corners: 5
@@ -1765,7 +1772,7 @@ sims:
         nominal: 1.6573
         min: 1.2277
         min_at: esr_c2- r_psu-
-        max: 4.2071
+        max: 4.2072
         max_at: esr_c2+ r_psu+
       tap_pos_mv:
         nominal: 0.9955
@@ -1798,10 +1805,10 @@ sims:
         max: 0.13
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000304844
-        min: 0.000216626
+        nominal: 0.000304858
+        min: 0.000216581
         min_at: esr_c2- r_psu-
-        max: 0.00070288
+        max: 0.000702851
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.15
@@ -1810,10 +1817,10 @@ sims:
         max: 0.34
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.08361
-        min: 0.06369
+        nominal: 0.04694
+        min: 0.0351
         min_at: esr_c2- r_psu-
-        max: 0.18575
+        max: 0.10061
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 38.5933
@@ -1842,8 +1849,9 @@ sims:
       why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
       pass: true
     - expr: max['breath_mv'] < p['breath_bar_mv']
-      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
-        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      why: 'under 0.01 % of the breath jack''s 10 V span, through R-BREATH-OFFNEG from -12 V and POT-OFFSET from DAC_AVDD.
+        Since #32 C-OUT-BREATH is 10 nF and no longer filters it, and the -12 V leg is filtered where it enters instead (owner,
+        2026-10-04: ''Add RC filter (Recommended)'': R-BREATH-OFFNEG as two 47.5k halves with C-BREATH-OFFNEG, 6.7 Hz)'
       pass: true
   led-pwm-duty[d_led=0.75]:
     corners: 5
@@ -1891,10 +1899,10 @@ sims:
         max: 0.13
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000325265
-        min: 0.000233693
+        nominal: 0.000325284
+        min: 0.000233719
         min_at: esr_c2- r_psu-
-        max: 0.000736409
+        max: 0.000736374
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.15
@@ -1903,11 +1911,11 @@ sims:
         max: 0.36
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.08943
-        min: 0.06883
-        min_at: esr_c2- r_psu-
-        max: 0.19436
-        max_at: esr_c2+ r_psu+
+        nominal: 0.00157
+        min: 0.00157
+        min_at: nominal
+        max: 0.03454
+        max_at: esr_c2- r_psu+
       iuin_ma:
         nominal: 38.7651
         min: 38.7105
@@ -1935,8 +1943,9 @@ sims:
       why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
       pass: true
     - expr: max['breath_mv'] < p['breath_bar_mv']
-      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
-        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      why: 'under 0.01 % of the breath jack''s 10 V span, through R-BREATH-OFFNEG from -12 V and POT-OFFSET from DAC_AVDD.
+        Since #32 C-OUT-BREATH is 10 nF and no longer filters it, and the -12 V leg is filtered where it enters instead (owner,
+        2026-10-04: ''Add RC filter (Recommended)'': R-BREATH-OFFNEG as two 47.5k halves with C-BREATH-OFFNEG, 6.7 Hz)'
       pass: true
   led-pwm-duty[d_led=0.9]:
     corners: 5
@@ -1984,23 +1993,23 @@ sims:
         max: 0.06
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000178895
-        min: 0.00011898
+        nominal: 0.000178951
+        min: 0.000118963
         min_at: esr_c2- r_psu-
-        max: 0.000498576
+        max: 0.000498635
         max_at: esr_c2+ r_psu+
       mod_uv:
-        nominal: 0.08
+        nominal: 0.07
         min: 0.06
         min_at: esr_c2- r_psu-
         max: 0.17
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.04007
-        min: 0.03078
+        nominal: 0.00165
+        min: 0.00089
         min_at: esr_c2- r_psu-
-        max: 0.08984
-        max_at: esr_c2+ r_psu+
+        max: 0.0173
+        max_at: esr_c2- r_psu+
       iuin_ma:
         nominal: 21.7382
         min: 21.6985
@@ -2028,8 +2037,9 @@ sims:
       why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
       pass: true
     - expr: max['breath_mv'] < p['breath_bar_mv']
-      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
-        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      why: 'under 0.01 % of the breath jack''s 10 V span, through R-BREATH-OFFNEG from -12 V and POT-OFFSET from DAC_AVDD.
+        Since #32 C-OUT-BREATH is 10 nF and no longer filters it, and the -12 V leg is filtered where it enters instead (owner,
+        2026-10-04: ''Add RC filter (Recommended)'': R-BREATH-OFFNEG as two 47.5k halves with C-BREATH-OFFNEG, 6.7 Hz)'
       pass: true
   led-pwm-duty[d_led=0.9961]:
     corners: 5
@@ -2077,10 +2087,10 @@ sims:
         max: 0.0
         max_at: nominal
       pitch_cents:
-        nominal: 2.076e-05
-        min: 1.78236e-05
+        nominal: 2.07192e-05
+        min: 1.7814e-05
         min_at: esr_c2- r_psu-
-        max: 3.738e-05
+        max: 3.7356e-05
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.01
@@ -2089,19 +2099,19 @@ sims:
         max: 0.01
         max_at: nominal
       breath_mv:
-        nominal: 0.00168
-        min: 0.0013
-        min_at: esr_c2- r_psu-
-        max: 0.0037
+        nominal: 0.01584
+        min: 0.01527
+        min_at: esr_c2+ r_psu-
+        max: 0.01829
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 1.28192
+        nominal: 1.28197
         min: 1.27928
         min_at: esr_c2- r_psu-
         max: 1.28592
         max_at: esr_c2+ r_psu+
       iuout_ma:
-        nominal: 2.04806
+        nominal: 2.04813
         min: 2.04638
         min_at: esr_c2- r_psu-
         max: 2.04949
@@ -2121,8 +2131,9 @@ sims:
       why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
       pass: true
     - expr: max['breath_mv'] < p['breath_bar_mv']
-      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
-        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      why: 'under 0.01 % of the breath jack''s 10 V span, through R-BREATH-OFFNEG from -12 V and POT-OFFSET from DAC_AVDD.
+        Since #32 C-OUT-BREATH is 10 nF and no longer filters it, and the -12 V leg is filtered where it enters instead (owner,
+        2026-10-04: ''Add RC filter (Recommended)'': R-BREATH-OFFNEG as two 47.5k halves with C-BREATH-OFFNEG, 6.7 Hz)'
       pass: true
   led-pwm-pattern[n_lit=7,spread=0.0]:
     corners: 5
@@ -2170,10 +2181,10 @@ sims:
         max: 0.1
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000218932
-        min: 0.000159941
+        nominal: 0.000218938
+        min: 0.000159965
         min_at: esr_c2- r_psu-
-        max: 0.000469597
+        max: 0.000469656
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.11
@@ -2182,10 +2193,10 @@ sims:
         max: 0.25
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.06297
-        min: 0.04834
-        min_at: esr_c2- r_psu-
-        max: 0.13645
+        nominal: 0.02422
+        min: 0.0153
+        min_at: esr_c2- r_psu+
+        max: 0.05505
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 25.8025
@@ -2214,8 +2225,9 @@ sims:
       why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
       pass: true
     - expr: max['breath_mv'] < p['breath_bar_mv']
-      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
-        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      why: 'under 0.01 % of the breath jack''s 10 V span, through R-BREATH-OFFNEG from -12 V and POT-OFFSET from DAC_AVDD.
+        Since #32 C-OUT-BREATH is 10 nF and no longer filters it, and the -12 V leg is filtered where it enters instead (owner,
+        2026-10-04: ''Add RC filter (Recommended)'': R-BREATH-OFFNEG as two 47.5k halves with C-BREATH-OFFNEG, 6.7 Hz)'
       pass: true
   led-pwm-pattern[n_lit=7,spread=1.0]:
     corners: 5
@@ -2263,10 +2275,10 @@ sims:
         max: 0.06
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000107647
-        min: 8.66664e-05
+        nominal: 0.000107711
+        min: 8.67408e-05
         min_at: esr_c2- r_psu-
-        max: 0.000223004
+        max: 0.000223006
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.07
@@ -2275,11 +2287,11 @@ sims:
         max: 0.13
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.03746
-        min: 0.0287
-        min_at: esr_c2- r_psu-
-        max: 0.08288
-        max_at: esr_c2+ r_psu+
+        nominal: 0.00236
+        min: 0.00236
+        min_at: nominal
+        max: 0.00843
+        max_at: esr_c2- r_psu+
       iuin_ma:
         nominal: 12.1086
         min: 12.0951
@@ -2307,8 +2319,9 @@ sims:
       why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
       pass: true
     - expr: max['breath_mv'] < p['breath_bar_mv']
-      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
-        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      why: 'under 0.01 % of the breath jack''s 10 V span, through R-BREATH-OFFNEG from -12 V and POT-OFFSET from DAC_AVDD.
+        Since #32 C-OUT-BREATH is 10 nF and no longer filters it, and the -12 V leg is filtered where it enters instead (owner,
+        2026-10-04: ''Add RC filter (Recommended)'': R-BREATH-OFFNEG as two 47.5k halves with C-BREATH-OFFNEG, 6.7 Hz)'
       pass: true
   led-pwm-pattern[n_lit=13,spread=0.0]:
     corners: 5
@@ -2356,10 +2369,10 @@ sims:
         max: 0.18
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000407284
-        min: 0.000295964
+        nominal: 0.000407239
+        min: 0.000295885
         min_at: esr_c2- r_psu-
-        max: 0.000878243
+        max: 0.000878214
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.21
@@ -2368,10 +2381,10 @@ sims:
         max: 0.47
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.12086
-        min: 0.09325
-        min_at: esr_c2- r_psu-
-        max: 0.25901
+        nominal: 0.03131
+        min: 0.01233
+        min_at: esr_c2- r_psu+
+        max: 0.0865
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 48.0208
@@ -2400,8 +2413,9 @@ sims:
       why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
       pass: true
     - expr: max['breath_mv'] < p['breath_bar_mv']
-      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
-        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      why: 'under 0.01 % of the breath jack''s 10 V span, through R-BREATH-OFFNEG from -12 V and POT-OFFSET from DAC_AVDD.
+        Since #32 C-OUT-BREATH is 10 nF and no longer filters it, and the -12 V leg is filtered where it enters instead (owner,
+        2026-10-04: ''Add RC filter (Recommended)'': R-BREATH-OFFNEG as two 47.5k halves with C-BREATH-OFFNEG, 6.7 Hz)'
       pass: true
   led-pwm-pattern[n_lit=13,spread=1.0]:
     corners: 5
@@ -2413,7 +2427,7 @@ sims:
         max: 0.0063
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 0.0024
+        nominal: 0.0025
         min: 0.0008
         min_at: esr_c2- r_psu-
         max: 0.0065
@@ -2449,10 +2463,10 @@ sims:
         max: 0.0
         max_at: nominal
       pitch_cents:
-        nominal: 1.50108e-05
-        min: 1.41456e-05
+        nominal: 1.4886e-05
+        min: 1.39524e-05
         min_at: esr_c2- r_psu-
-        max: 1.68936e-05
+        max: 1.69476e-05
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.01
@@ -2461,21 +2475,21 @@ sims:
         max: 0.01
         max_at: nominal
       breath_mv:
-        nominal: 8.0e-05
-        min: 8.0e-05
-        min_at: nominal
-        max: 9.0e-05
-        max_at: esr_c2+ r_psu-
+        nominal: 0.01683
+        min: 0.01604
+        min_at: esr_c2- r_psu-
+        max: 0.02047
+        max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 0.425631
+        nominal: 0.425656
         min: 0.424942
         min_at: esr_c2- r_psu-
         max: 0.42705
         max_at: esr_c2+ r_psu+
       iuout_ma:
-        nominal: 0.681766
-        min: 0.681766
-        min_at: nominal
+        nominal: 0.681806
+        min: 0.681769
+        min_at: esr_c2- r_psu-
         max: 0.681841
         max_at: esr_c2+ r_psu-
     asserts:
@@ -2493,8 +2507,9 @@ sims:
       why: under one LSB of a mod channel (20 V / 2^16) on mod 1's jack
       pass: true
     - expr: max['breath_mv'] < p['breath_bar_mv']
-      why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
-        DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
+      why: 'under 0.01 % of the breath jack''s 10 V span, through R-BREATH-OFFNEG from -12 V and POT-OFFSET from DAC_AVDD.
+        Since #32 C-OUT-BREATH is 10 nF and no longer filters it, and the -12 V leg is filtered where it enters instead (owner,
+        2026-10-04: ''Add RC filter (Recommended)'': R-BREATH-OFFNEG as two 47.5k halves with C-BREATH-OFFNEG, 6.7 Hz)'
       pass: true
   led-pwm-at-iso[f_pwm=2000.0]:
     corners: 5
@@ -2507,7 +2522,7 @@ sims:
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
         nominal: 8.8682
-        min: 6.5977
+        min: 6.5981
         min_at: esr_c2- r_psu-
         max: 17.5416
         max_at: esr_c2+ r_psu+
@@ -2524,14 +2539,14 @@ sims:
         max: 14.3017
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
-        nominal: 3.2481
-        min: 2.3432
+        nominal: 3.248
+        min: 2.3433
         min_at: esr_c2- r_psu-
-        max: 7.4612
+        max: 7.4611
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
         nominal: 4.963
-        min: 3.5263
+        min: 3.5262
         min_at: esr_c2- r_psu-
         max: 11.1866
         max_at: esr_c2+ r_psu+
@@ -2542,10 +2557,10 @@ sims:
         max: 0.74
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.00107744
+        nominal: 0.00107745
         min: 0.000824275
         min_at: esr_c2- r_psu-
-        max: 0.00343107
+        max: 0.00343089
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.76
@@ -2554,10 +2569,10 @@ sims:
         max: 1.5
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.4128
-        min: 0.31915
+        nominal: 0.2091
+        min: 0.15168
         min_at: esr_c2- r_psu-
-        max: 0.91476
+        max: 0.45365
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 105.178
@@ -2617,7 +2632,7 @@ sims:
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
         nominal: 2.7908
-        min: 1.7682
+        min: 1.7681
         min_at: esr_c2- r_psu-
         max: 7.589
         max_at: esr_c2+ r_psu+
@@ -2628,10 +2643,10 @@ sims:
         max: 0.48
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000964134
-        min: 0.000736018
+        nominal: 0.000964135
+        min: 0.000736019
         min_at: esr_c2- r_psu-
-        max: 0.00350086
+        max: 0.00350147
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.53
@@ -2640,10 +2655,10 @@ sims:
         max: 1.25
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.14971
-        min: 0.10849
+        nominal: 0.11793
+        min: 0.07592
         min_at: esr_c2- r_psu-
-        max: 0.40666
+        max: 0.30608
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 104.774
@@ -2705,7 +2720,7 @@ sims:
         nominal: 2.0296
         min: 1.1579
         min_at: esr_c2- r_psu-
-        max: 6.0517
+        max: 6.0518
         max_at: esr_c2+ r_psu+
       avdd_uv:
         nominal: 0.14
@@ -2714,10 +2729,10 @@ sims:
         max: 0.38
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000890576
-        min: 0.000669857
+        nominal: 0.000890581
+        min: 0.000669858
         min_at: esr_c2- r_psu-
-        max: 0.00352634
+        max: 0.00352782
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.41
@@ -2726,10 +2741,10 @@ sims:
         max: 1.09
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.08396
-        min: 0.05641
+        nominal: 0.08743
+        min: 0.0522
         min_at: esr_c2- r_psu-
-        max: 0.25696
+        max: 0.24179
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 104.666

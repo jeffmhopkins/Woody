@@ -1,13 +1,19 @@
 * The breath link's CMRR across the umbilical, as netlisted on both sides: the sensor
 * buffer's output (an ideal source - an OPA2197 follower's closed-loop impedance is
 * milliohms) through R1 onto BREATH, the instrument's analog ground through R1b onto
-* AGND, then the module's R2/R3, R4/R5, C_cm, C_diff and the INA828 (TI's macromodel)
-* with its REF driven by U-REF-BUF (TI's OPA2197 model) from the trimmer's wiper.
+* AGND, then the module's R2/R3, R4/R5, C_cm, the fixed C_diff, the two switched C_diff
+* through U-BW-SW (TMUX6112, below) and the INA828 (TI's macromodel) with its REF driven by
+* U-REF-BUF (TI's OPA2197 model) from the trimmer's wiper.
 * VCM moves the instrument's ground against the module's: that is the common-mode
 * excitation, applied to BOTH legs through their own source impedances, as the cable
 * applies it. D-CLAMP-IN+/- are left out: reverse-biased at these voltages, and the
 * same part on both legs. The Cat5 pair's own resistance (~0.2 ohm per 2 m conductor
 * [from memory, TIA-568 9.38 ohm/100 m]) is balanced and left out.
+* THE SWITCH (#32) is its datasheet, not a model: each channel is r_sw between its D and S
+* pins when closed and an open with c_ds across it when open, with its D and S pins'
+* own capacitance to ground (CD/CS, ON or OFF) [ds TMUX6112-ti-scds383f.pdf p.6-7]. Each
+* switched capacitor has a channel at BOTH ends, one D pin on each leg; k_sw_p and k_sw_n
+* scale the two legs' switch capacitance, because the datasheet states no channel match.
 * CMRR = |Vout/Vsig| / |Vout/Vcm|, both at the INA828 output: referred to the link's
 * input, so the bias divider's loss is inside it.
 VPOS pos 0 {{v_pos}}
@@ -23,6 +29,26 @@ R5 inneg 0 {{R5}}
 CCMP inpos 0 {{C-CM-IN+}}
 CCMN inneg 0 {{C-CM-IN-}}
 CDIFF inpos inneg {{C-DIFF-BREATH}}
+* channels 1 (D inpos) and 2 (D inneg): C-DIFF-BW-1K5, closed on BW1
+RSW1 inpos s1 {{r_sw_1k5}}
+CDS1 inpos s1 {{c_ds_1k5}}
+CD1 inpos 0 {{c_d_p_1k5}}
+CS1 s1 0 {{c_s_1k5}}
+C1K5 s1 s2 {{C-DIFF-BW-1K5}}
+CS2 s2 0 {{c_s_1k5}}
+CD2 inneg 0 {{c_d_n_1k5}}
+CDS2 inneg s2 {{c_ds_1k5}}
+RSW2 inneg s2 {{r_sw_1k5}}
+* channels 3 (D inpos) and 4 (D inneg): C-DIFF-BW-500, closed on BW0
+RSW3 inpos s3 {{r_sw_500}}
+CDS3 inpos s3 {{c_ds_500}}
+CD3 inpos 0 {{c_d_p_500}}
+CS3 s3 0 {{c_s_500}}
+C500 s3 s4 {{C-DIFF-BW-500}}
+CS4 s4 0 {{c_s_500}}
+CD4 inneg 0 {{c_d_n_500}}
+CDS4 inneg s4 {{c_ds_500}}
+RSW4 inneg s4 {{r_sw_500}}
 XAMP inpos inneg pos neg out refdrv rg1 rg2 INA828
 RG rg1 rg2 {{R-GAIN-INAMP}}
 VWIP wiper 0 {{v_ref_trim}}
@@ -38,7 +64,9 @@ alter @vsig[acmag] = 1
 ac dec 50 1 100k
 let gdm = mag(v(out))
 let cmrr = db(gdm) - db(ac1.gcm)
+let gdmn = db(gdm) - db(gdm[0])
 wrdata cmrr.dat cmrr
+wrdata gdmn.dat gdmn
 quit
 .endc
 .end

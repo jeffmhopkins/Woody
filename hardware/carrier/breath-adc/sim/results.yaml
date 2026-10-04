@@ -4,8 +4,8 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/carrier/breath-adc/sim/sims.yaml: d7558234d030657c
-  hardware/carrier/breath-adc/netlist.yaml: f742c4d67eea80fb
+  hardware/carrier/breath-adc/sim/sims.yaml: b5ef2758ee719038
+  hardware/carrier/breath-adc/netlist.yaml: 60647f404552f147
   hardware/carrier/breath-adc/sim/adc-ac.cir: 92db36d52ceba839
   hardware/carrier/breath-adc/sim/adc.cir: 3d5f71307efa775a
   hardware/carrier/breath-adc/sim/adc-powerup.cir: 66ddee5fef5a915c
@@ -19,67 +19,123 @@ sims:
     corners: 9
     measures:
       f_3db:
-        nominal: 564.373
-        min: 532.178
+        nominal: 1473.64
+        min: 1389.57
         min_at: C-AA-ADC+ R-ADCDIV-L+ R-ADCDIV-U+
-        max: 600.077
+        max: 1566.89
         max_at: C-AA-ADC- R-ADCDIV-L- R-ADCDIV-U-
-      atten_buck_db:
-        nominal: 55.3387
-        min: 54.8059
+      atten_nyq_db:
+        nominal: 4.53608
+        min: 4.19829
         min_at: C-AA-ADC- R-ADCDIV-L- R-ADCDIV-U-
-        max: 55.8489
+        max: 4.87351
+        max_at: C-AA-ADC+ R-ADCDIV-L+ R-ADCDIV-U+
+      atten_4k_db:
+        nominal: 9.22592
+        min: 8.76033
+        min_at: C-AA-ADC- R-ADCDIV-L- R-ADCDIV-U-
+        max: 9.67822
+        max_at: C-AA-ADC+ R-ADCDIV-L+ R-ADCDIV-U+
+      atten_buck_db:
+        nominal: 47.0023
+        min: 46.4695
+        min_at: C-AA-ADC- R-ADCDIV-L- R-ADCDIV-U-
+        max: 47.5125
         max_at: C-AA-ADC+ R-ADCDIV-L+ R-ADCDIV-U+
     asserts:
-    - expr: abs(nom['f_3db'] - 564) < 6
-      why: the page's 564 Hz corner, 1/(2 pi x 6.0 kohm x 47 nF)
+    - expr: abs(nom['f_3db'] - 1474) < 15
+      why: 'the page''s 1.47 kHz corner, 1/(2 pi x 6.0 kohm x 18 nF): the module''s 1.5 kHz mode (#32, owner 2026-10-04),
+        not switched here'
       pass: true
-    - expr: min['atten_buck_db'] > 54
-      why: 'the page''s 55 dB at the buck''s ~330 kHz: one pole, nothing else to it'
+    - expr: min['atten_buck_db'] > 46
+      why: 'the page''s 47 dB at the buck''s ~330 kHz: one pole, nothing else to it'
       pass: true
   step:
     corners: 9
     measures:
       tau:
-        nominal: 0.000282567
-        min: 0.000265793
+        nominal: 0.0001085
+        min: 0.000102074
         min_at: C-AA-ADC- R-ADCDIV-L- R-ADCDIV-U-
-        max: 0.000299624
+        max: 0.000115034
         max_at: C-AA-ADC+ R-ADCDIV-L+ R-ADCDIV-U+
     asserts:
-    - expr: abs(nom['tau'] - 282e-6) < 5e-6
-      why: the page's tau = 6 kohm x 47 nF = 282 us, the term latency-budget.md books (the sample kickback does not move it)
+    - expr: abs(nom['tau'] - 108e-6) < 3e-6
+      why: the page's tau = 6 kohm x 18 nF = 108 us, the term latency-budget.md books (the sample kickback does not move it)
       pass: true
   kickback:
     corners: 33
     measures:
       err_lsb:
-        nominal: -2.60286
-        min: -3.34013
+        nominal: -4.39114
+        min: -5.74542
         min_at: C-AA-ADC- R-ADCDIV-L+ R-ADCDIV-U- c_sample+ r_ss+
-        max: -1.90475
+        max: -3.15598
         max_at: C-AA-ADC+ R-ADCDIV-L- R-ADCDIV-U+ c_sample- r_ss-
       droop_lsb:
-        nominal: 2.62786
-        min: 1.91504
+        nominal: 4.48192
+        min: 3.19941
         min_at: C-AA-ADC+ R-ADCDIV-L- R-ADCDIV-U+ c_sample- r_ss+
-        max: 3.37923
+        max: 5.88287
         max_at: C-AA-ADC- R-ADCDIV-L+ R-ADCDIV-U- c_sample+ r_ss-
       settle_frac:
         nominal: 1.0
-        min: 1.0
+        min: 0.999999
         min_at: C-AA-ADC- R-ADCDIV-L- R-ADCDIV-U- c_sample+ r_ss+
         max: 1.0
-        max_at: C-AA-ADC+ R-ADCDIV-L+ R-ADCDIV-U- c_sample- r_ss-
+        max_at: C-AA-ADC+ R-ADCDIV-L- R-ADCDIV-U- c_sample- r_ss-
     asserts:
-    - expr: min['err_lsb'] > -4 and max['err_lsb'] < 0
-      why: 'a pure gain term, under 4 LSB at every corner (adc-sample-kickback; C_SAMPLE and R_SS are typicals only). The
-        average-current model (80 nA/V through 6 kohm) leaves out the instantaneous share each sample takes from C-AA-ADC,
-        20 pF/47 nF of it [calc: 0.043 %, 1.5 LSB at full scale], which the next sample finds only partly restored'
+    - expr: min['err_lsb'] > -8 and max['err_lsb'] < 0
+      why: 'a pure gain term, under 8 LSB at every corner (adc-sample-kickback; C_SAMPLE and R_SS are typicals only). The
+        bound was 4 LSB against 47 nF; 18 nF (#32) holds a third of the charge, so each sample takes 20 pF/18 nF of it at
+        once [calc: 0.11 %, 4.0 LSB at full scale] on top of the average current (80 nA/V through 6 kohm, 1.7 LSB), and the
+        108 us time constant has it 90 % back by the next sample. A GAIN term (proportional to the reading): 0.16 % of the
+        span at the worst corner, inside what the firmware''s span and the panel''s GAIN absorb (breath-adc.md, ''Sample-cap
+        charge sharing'')'
       pass: true
     - expr: min['settle_frac'] > 0.9999
       why: 'C_SAMPLE charges fully inside t_SAMPLE (1.5 clocks at 900 kHz, 1.67 us against R_SS x C_SAMPLE = 20 ns): what
         it holds is C-AA-ADC''s voltage, not a partial charge'
+      pass: true
+  kickback-8k:
+    corners: 33
+    measures:
+      err_lsb:
+        nominal: -5.76907
+        min: -7.43668
+        min_at: C-AA-ADC- R-ADCDIV-L+ R-ADCDIV-U- c_sample+ r_ss+
+        max: -4.20505
+        max_at: C-AA-ADC+ R-ADCDIV-L- R-ADCDIV-U+ c_sample- r_ss-
+      droop_lsb:
+        nominal: 5.87935
+        min: 4.26229
+        min_at: C-AA-ADC+ R-ADCDIV-L- R-ADCDIV-U+ c_sample- r_ss+
+        max: 7.59886
+        max_at: C-AA-ADC- R-ADCDIV-L+ R-ADCDIV-U- c_sample+ r_ss-
+    asserts:
+    - expr: min['err_lsb'] > -8 and max['err_lsb'] < 0
+      why: 'WHAT-IF: at 8 kHz the kickback is still a pure gain term, under 8 LSB at every corner - the span knob and the
+        firmware''s span absorb it'
+      pass: true
+  kickback-16k:
+    corners: 33
+    measures:
+      err_lsb:
+        nominal: -8.9834
+        min: -11.4625
+        min_at: C-AA-ADC- R-ADCDIV-L+ R-ADCDIV-U+ c_sample+ r_ss+
+        max: -6.60814
+        max_at: C-AA-ADC+ R-ADCDIV-L- R-ADCDIV-U- c_sample- r_ss-
+      droop_lsb:
+        nominal: 9.14286
+        min: 6.69859
+        min_at: C-AA-ADC+ R-ADCDIV-L- R-ADCDIV-U- c_sample- r_ss+
+        max: 11.6795
+        max_at: C-AA-ADC- R-ADCDIV-L+ R-ADCDIV-U+ c_sample+ r_ss-
+    asserts:
+    - expr: min['err_lsb'] > -16 and max['err_lsb'] < 0
+      why: 'WHAT-IF: at 16 kHz the kickback is still a gain term, under 16 LSB: the sample capacitor''s average current doubles
+        with each doubling of the rate'
       pass: true
   powerup-rest:
     corners: 65
@@ -118,10 +174,10 @@ sims:
     corners: 65
     measures:
       i_clamp_peak:
-        nominal: 0.000390001
-        min: 0.000375662
+        nominal: 0.00039
+        min: 0.000375673
         min_at: R-ADCDIV-L- R-ADCDIV-U+ is_clamp- t_r12+ t_ss- v12+
-        max: 0.000404654
+        max: 0.000404683
         max_at: R-ADCDIV-L+ R-ADCDIV-U- is_clamp+ t_r12- t_ss- v12-
       i_clamp_end:
         nominal: -3.30467e-10
@@ -130,16 +186,16 @@ sims:
         max: -3.30369e-10
         max_at: R-ADCDIV-L+ R-ADCDIV-U- is_clamp- t_r12- t_ss- v12-
       v_over_peak:
-        nominal: 0.576027
+        nominal: 0.576026
         min: 0.516817
         min_at: R-ADCDIV-L- R-ADCDIV-U+ is_clamp+ t_r12+ t_ss- v12+
-        max: 0.635247
+        max: 0.635249
         max_at: R-ADCDIV-L+ R-ADCDIV-U- is_clamp- t_r12- t_ss- v12-
       t_window:
-        nominal: 0.0998614
-        min: 0.0555194
+        nominal: 0.10012
+        min: 0.0558192
         min_at: R-ADCDIV-L- R-ADCDIV-U+ is_clamp+ t_r12- t_ss- v12+
-        max: 0.157919
+        max: 0.158117
         max_at: R-ADCDIV-L+ R-ADCDIV-U- is_clamp- t_r12+ t_ss+ v12-
     asserts:
     - expr: max['i_clamp_peak'] < p['i_clamp_max']
@@ -154,10 +210,10 @@ sims:
     corners: 17
     measures:
       i_clamp_peak:
-        nominal: 0.000390001
-        min: 0.000375629
+        nominal: 0.00039
+        min: 0.000375635
         min_at: R-ADCDIV-L- R-ADCDIV-U+ is_clamp- v12-
-        max: 0.000404614
+        max: 0.00040463
         max_at: R-ADCDIV-L+ R-ADCDIV-U- is_clamp+ v12+
       i_clamp_end:
         nominal: 0.000389996
@@ -166,10 +222,10 @@ sims:
         max: 0.000404492
         max_at: R-ADCDIV-L+ R-ADCDIV-U- is_clamp+ v12-
       v_over_peak:
-        nominal: 0.576027
+        nominal: 0.576026
         min: 0.516815
         min_at: R-ADCDIV-L- R-ADCDIV-U+ is_clamp+ v12-
-        max: 0.635245
+        max: 0.635246
         max_at: R-ADCDIV-L+ R-ADCDIV-U- is_clamp- v12+
     asserts:
     - expr: max['i_clamp_peak'] < p['i_clamp_max']
@@ -179,10 +235,10 @@ sims:
     corners: 65
     measures:
       i_clamp_peak:
-        nominal: 0.000701819
-        min: 0.000683991
-        min_at: R-ADCDIV-L- R-ADCDIV-U+ is_clamp- t_r12+ t_ss- v12+
-        max: 0.00072166
+        nominal: 0.000701827
+        min: 0.000683996
+        min_at: R-ADCDIV-L- R-ADCDIV-U+ is_clamp- t_r12+ t_ss- v12-
+        max: 0.000721674
         max_at: R-ADCDIV-L+ R-ADCDIV-U- is_clamp+ t_r12- t_ss+ v12+
       i_clamp_end:
         nominal: 0.000534635
@@ -192,15 +248,15 @@ sims:
         max_at: R-ADCDIV-L+ R-ADCDIV-U- is_clamp+ t_r12- t_ss- v12+
       v_over_peak:
         nominal: 0.591223
-        min: 0.531735
-        min_at: R-ADCDIV-L- R-ADCDIV-U+ is_clamp+ t_r12+ t_ss- v12+
+        min: 0.531736
+        min_at: R-ADCDIV-L- R-ADCDIV-U+ is_clamp+ t_r12+ t_ss- v12-
         max: 0.650782
         max_at: R-ADCDIV-L+ R-ADCDIV-U- is_clamp- t_r12- t_ss+ v12+
       t_window:
-        nominal: 0.292949
-        min: 0.289141
+        nominal: 0.293123
+        min: 0.289313
         min_at: R-ADCDIV-L- R-ADCDIV-U+ is_clamp+ t_r12+ t_ss- v12-
-        max: 0.295941
+        max: 0.296115
         max_at: R-ADCDIV-L+ R-ADCDIV-U- is_clamp- t_r12- t_ss- v12+
     asserts:
     - expr: max['i_clamp_peak'] < p['i_clamp_max']

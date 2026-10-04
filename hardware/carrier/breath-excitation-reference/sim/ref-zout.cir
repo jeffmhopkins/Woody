@@ -1,5 +1,5 @@
 * |Z_out| at VS, closed loop, as netlisted: a 1 A AC test current into VS, so |V(VS)| is
-* the impedance. The page's claim is about 500 Hz, the breath channel's edge.
+* the impedance. The page's claim is about 500 Hz, the 500 Hz mode's edge; the 1.5 kHz and WIDE edges are recorded (#32).
 VPOS pos 0 {{v_pos}}
 * the REF5050 is outside this loop: its VOUT feeds only U-BUF's (+) input, which draws pA,
 * and C-REF-OUT holds it. It is a 5.000 V source here, on its netlisted capacitors; its own

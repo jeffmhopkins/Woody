@@ -4,93 +4,235 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/breath-receive-stage/sim/sims.yaml: aa4585e431375ae5
-  hardware/interfaces/breath-sense-link/netlist.yaml: 430f1e37ec9c97fa
-  hardware/module/breath-receive-stage/netlist.yaml: 9093fa5acc898eb4
-  hardware/module/breath-receive-stage/sim/cmrr.cir: 0c582bd5096fd228
+  hardware/module/breath-receive-stage/sim/sims.yaml: d68adc654e1b1090
+  hardware/interfaces/breath-sense-link/netlist.yaml: 3174b77569cdaf62
+  hardware/module/breath-receive-stage/netlist.yaml: dab496982d183718
+  hardware/module/breath-receive-stage/sim/cmrr.cir: ac004dd0c5b58b85
   datasheets/analog/INA828-ti-pspice-sbomag5c.lib: 6ae6e0285c98dc1e
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
 ngspice: '42'
 sims:
-  cmrr-as-netlisted:
-    corners: 257
+  cmrr-500:
+    corners: 1025
     measures:
+      f_3db:
+        nominal: 493.492
+        min: 492.53
+        min_at: C-CM-IN++ C-CM-IN-+ R1+ R1b+ R2+ R3+ R4+ R5+ k_sw_n+ k_sw_p+
+        max: 494.459
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5- k_sw_n- k_sw_p-
       cmrr_dc:
-        nominal: 114.952
-        min: 71.7326
-        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5-
-        max: 114.963
-        max_at: C-CM-IN+- C-CM-IN-- R1- R1b+ R2- R3+ R4- R5-
+        nominal: 114.953
+        min: 71.7325
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5- k_sw_n+ k_sw_p-
+        max: 114.964
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b+ R2- R3+ R4- R5- k_sw_n- k_sw_p-
       cmrr_50:
-        nominal: 114.809
-        min: 71.4233
-        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5-
-        max: 114.818
-        max_at: C-CM-IN+- C-CM-IN-- R1- R1b+ R2- R3+ R4- R5-
+        nominal: 114.813
+        min: 71.7236
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5- k_sw_n+ k_sw_p-
+        max: 114.824
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b+ R2- R3+ R4- R5- k_sw_n- k_sw_p-
       cmrr_60:
-        nominal: 114.747
-        min: 71.2938
-        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5-
-        max: 114.757
-        max_at: C-CM-IN+- C-CM-IN-- R1- R1b+ R2- R3+ R4- R5-
-      cmrr_500:
-        nominal: 106.702
-        min: 62.5089
-        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5-
-        max: 106.712
-        max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5-
-      cmrr_1k:
-        nominal: 97.751
-        min: 56.9288
-        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5-
-        max: 97.7658
-        max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5-
-      f_req:
-        nominal: 13505.7
-        min: 826.91
-        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5-
-        max: 14564.5
-        max_at: C-CM-IN++ C-CM-IN-+ R1- R1b- R2- R3- R4+ R5-
+        nominal: 114.756
+        min: 71.7197
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5- k_sw_n+ k_sw_p-
+        max: 114.765
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b+ R2- R3+ R4- R5- k_sw_n- k_sw_p-
+      cmrr_top:
+        nominal: 106.98
+        min: 70.9284
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5- k_sw_n+ k_sw_p-
+        max: 106.988
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5- k_sw_n- k_sw_p-
       cmrr_band:
-        nominal: 107.154
-        min: 62.84
-        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5-
-        max: 107.164
-        max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5-
+        nominal: 107.421
+        min: 70.9903
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5- k_sw_n+ k_sw_p-
+        max: 107.429
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5- k_sw_n- k_sw_p-
+      f_req:
+        nominal: 10832.3
+        min: 4522.31
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4- R5+ k_sw_n+ k_sw_p-
+        max: 12221.3
+        max_at: C-CM-IN++ C-CM-IN-- R1+ R1b- R2- R3+ R4+ R5- k_sw_n- k_sw_p-
     asserts:
+    - expr: abs(nom['f_3db'] - 495) < 25
+      why: the 500 Hz mode's corner, 1/(2 pi x 22 kohm x (0.68 + 3.9 + 10 nF + 34 pF)) = 495 Hz (breath-sense-link.md), within
+        5 % with the switch's R_ON and capacitance in it
+      pass: true
     - expr: min['cmrr_50'] > 58.5 and min['cmrr_60'] > 58.5
-      why: the link clears the page's requirement (breath-sense-link.md, 58.5 dB) at the mains fundamental, worst corner
+      why: the link clears the requirement (breath-sense-link.md, 58.5 dB) at the mains fundamental, worst corner
       pass: true
     - expr: abs(min['cmrr_dc'] - 73) < 3
       why: the worst-case floor is the page's 73 dB, set by the 1 Mohm bias pair's 1 % (breath-sense-link.md, 'One correction'),
         within 3 dB
       pass: true
     - expr: min['cmrr_band'] > 58.5
-      why: 'THE REQUIREMENT OVER ITS BAND (#5 finding 5): 58.5 dB from DC to 500 Hz, the breath channel''s band (breath-sense-link.md,
-        ''From the instrument end''), at every corner. C_cm''s mismatch converts common mode in proportion to frequency, so
-        the band''s top is the worst: with two independent 1 % parts it failed from ~480 Hz, and the owner chose a matched
-        pair (2026-10-03, ''Tighten cap matching''), each within 0.5 % of the pair''s mean'
+      why: THE REQUIREMENT OVER THIS MODE'S BAND, DC to 500 Hz, at every corner
+      pass: true
+  cmrr-1k5:
+    corners: 1025
+    measures:
+      f_3db:
+        nominal: 1555.34
+        min: 1552.2
+        min_at: C-CM-IN++ C-CM-IN-+ R1+ R1b+ R2+ R3+ R4+ R5+ k_sw_n+ k_sw_p+
+        max: 1558.49
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5- k_sw_n- k_sw_p-
+      cmrr_dc:
+        nominal: 114.952
+        min: 71.7326
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5- k_sw_n+ k_sw_p-
+        max: 114.963
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b+ R2- R3+ R4+ R5+ k_sw_n- k_sw_p-
+      cmrr_60:
+        nominal: 114.814
+        min: 71.7236
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5- k_sw_n+ k_sw_p-
+        max: 114.823
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b+ R2- R3+ R4- R5- k_sw_n- k_sw_p-
+      cmrr_top:
+        nominal: 99.1178
+        min: 68.1313
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5- k_sw_n+ k_sw_p-
+        max: 99.1262
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5- k_sw_n- k_sw_p-
+      cmrr_band:
+        nominal: 99.5732
+        min: 68.3098
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5- k_sw_n+ k_sw_p-
+        max: 99.5814
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5- k_sw_n- k_sw_p-
+      f_req:
+        nominal: 19113.5
+        min: 5739.27
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4- R5+ k_sw_n+ k_sw_p-
+        max: 21444.9
+        max_at: C-CM-IN++ C-CM-IN-- R1+ R1b- R2- R3+ R4+ R5- k_sw_n+ k_sw_p+
+    asserts:
+    - expr: abs(nom['f_3db'] - 1566) < 80
+      why: 'the 1.5 kHz mode''s corner, 1/(2 pi x 22 kohm x (0.68 + 3.9 nF + 34 pF)) = 1566 Hz (breath-sense-link.md), within
+        5 %: the owner''s 1.5 kHz (2026-10-04) on E12 values'
+      pass: true
+    - expr: min['cmrr_band'] > 58.5
+      why: THE REQUIREMENT OVER THIS MODE'S BAND, DC to 1.5 kHz, at every corner
+      pass: true
+  cmrr-wide:
+    corners: 1025
+    measures:
+      f_3db:
+        nominal: 10087.6
+        min: 10062.1
+        min_at: C-CM-IN++ C-CM-IN-+ R1+ R1b+ R2+ R3+ R4+ R5+ k_sw_n+ k_sw_p+
+        max: 10113.2
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5- k_sw_n- k_sw_p-
+      cmrr_dc:
+        nominal: 114.952
+        min: 71.7327
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5- k_sw_n+ k_sw_p-
+        max: 114.962
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b+ R2- R3+ R4- R5- k_sw_n- k_sw_p-
+      cmrr_60:
+        nominal: 114.819
+        min: 71.727
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5- k_sw_n+ k_sw_p-
+        max: 114.828
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b+ R2- R3+ R4- R5- k_sw_n- k_sw_p-
+      cmrr_1k5:
+        nominal: 101.868
+        min: 69.1214
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5- k_sw_n+ k_sw_p-
+        max: 101.869
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5- k_sw_n- k_sw_p-
+      cmrr_7k:
+        nominal: 87.1015
+        min: 58.9625
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5- k_sw_n+ k_sw_p-
+        max: 87.1086
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5- k_sw_n- k_sw_p-
+      cmrr_band:
+        nominal: 87.2343
+        min: 59.0574
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5- k_sw_n+ k_sw_p-
+        max: 87.2413
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5- k_sw_n- k_sw_p-
+      cmrr_top:
+        nominal: 82.7514
+        min: 55.9739
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4- R5+ k_sw_n+ k_sw_p-
+        max: 82.7621
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5- k_sw_n- k_sw_p-
+      f_req:
+        nominal: 48378.2
+        min: 7402.68
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5- k_sw_n+ k_sw_p-
+        max: 52655.7
+        max_at: C-CM-IN++ C-CM-IN-+ R1- R1b- R2- R3- R4+ R5- k_sw_n+ k_sw_p+
+    asserts:
+    - expr: nom['f_3db'] > 9000 and nom['f_3db'] < 11000
+      why: 'the wide mode''s corner, about 10 kHz (owner, 2026-10-04: ''wide'' is about 10 kHz): 1/(2 pi x 22 kohm x (680
+        + 34 pF)) = 10.1 kHz, less the open switches'' few pF'
+      pass: true
+    - expr: min['cmrr_1k5'] > 58.5
+      why: C_cm and the switch are fixed in every mode, so wide mode holds the requirement wherever the other modes' bands
+        reach
+      pass: true
+    - expr: min['cmrr_band'] > 58.5 and min['f_req'] > 7000
+      why: 'THE REQUIREMENT OVER WIDE''S BAND, DC TO 7 kHz, at every corner. The band is the OWNER''S, not a bar moved to
+        pass: offered ''Keep wide at ~10 kHz and only require the target up to ~7 kHz. No parts change.'', the owner chose
+        ''Keep 10 kHz, accept'' (2026-10-04, ADR 0003 and ADR 0004 amendments). 7 kHz is where the worst corner first crosses
+        58.5 dB (f_req, 7.40 kHz), rounded down. Above it, to the corner, cmrr_top is RECORDED: 56.0 dB at 10 kHz at the worst
+        corner, not a pass'
+      pass: true
+  cmrr-sw-spread:
+    corners: 1025
+    measures:
+      cmrr_1k5:
+        nominal: 101.868
+        min: 68.8478
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5- k_sw_n+ k_sw_p-
+        max: 101.869
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5- k_sw_n- k_sw_p-
+      cmrr_top:
+        nominal: 82.7514
+        min: 55.4067
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4- R5+ k_sw_n+ k_sw_p-
+        max: 82.7642
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5- k_sw_n- k_sw_p-
+      cmrr_band:
+        nominal: 82.7514
+        min: 55.4067
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4- R5+ k_sw_n+ k_sw_p-
+        max: 82.7642
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5- k_sw_n- k_sw_p-
+    asserts:
+    - expr: min['cmrr_1k5'] > 58.5
+      why: 'a what-if, not the design case: one leg''s switch pins at the datasheet''s typical CD(OFF) (2.4 pF) and the other''s
+        at its maximum (3.1 pF) - a 23 % mismatch inside one die. Even then the link holds the requirement to 1.5 kHz; what
+        it does at 10 kHz is recorded'
       pass: true
   cmrr-without-r1b:
     corners: 129
     measures:
       cmrr_dc:
-        nominal: 60.0652
-        min: 58.1983
+        nominal: 60.0639
+        min: 58.1972
         min_at: C-CM-IN+- C-CM-IN-+ R1+ R2- R3+ R4+ R5-
-        max: 62.4414
+        max: 62.4397
         max_at: C-CM-IN++ C-CM-IN-- R1- R2+ R3- R4- R5+
       cmrr_50:
-        nominal: 59.1867
-        min: 57.4512
+        nominal: 60.0595
+        min: 58.1937
         min_at: C-CM-IN+- C-CM-IN-+ R1+ R2- R3+ R4+ R5-
-        max: 61.3339
+        max: 62.4336
         max_at: C-CM-IN++ C-CM-IN-- R1- R2+ R3- R4- R5+
       cmrr_500:
-        nominal: 46.3773
-        min: 45.2463
+        nominal: 59.6499
+        min: 57.8692
         min_at: C-CM-IN+- C-CM-IN-+ R1+ R2- R3+ R4+ R5-
-        max: 47.6718
+        max: 61.8675
         max_at: C-CM-IN++ C-CM-IN-- R1- R2+ R3- R4- R5+
     asserts:
     - expr: abs(nom['cmrr_dc'] - 60.2) < 1 and min['cmrr_dc'] < 58.5
@@ -102,31 +244,26 @@ sims:
     measures:
       cmrr_dc:
         nominal: 114.952
-        min: 71.7254
+        min: 71.7326
         min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5-
         max: 114.963
-        max_at: C-CM-IN+- C-CM-IN-- R1- R1b+ R2- R3+ R4- R5-
-      cmrr_50:
-        nominal: 114.809
-        min: 64.5582
-        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5-
-        max: 114.818
-        max_at: C-CM-IN+- C-CM-IN-- R1- R1b+ R2- R3+ R4- R5-
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b+ R2- R3+ R4+ R5+
       cmrr_500:
-        nominal: 106.702
-        min: 45.4824
+        nominal: 109.611
+        min: 68.9348
         min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5-
-        max: 106.721
-        max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5-
-      cmrr_1k:
-        nominal: 97.751
-        min: 39.5002
+        max: 109.613
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b+ R2- R3+ R4- R5-
+      cmrr_top:
+        nominal: 99.1178
+        min: 62.1231
         min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5-
-        max: 97.7771
+        max: 99.1271
         max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5-
     asserts:
-    - expr: abs(min['cmrr_500'] - 46) < 3
-      why: the page's '~46 dB' for C_cm at +-5 % reproduces at 500 Hz, the breath channel's edge (the page names no frequency)
+    - expr: min['cmrr_top'] < min['cmrr_dc'] - 3
+      why: 'unmatched (+-5 % each), C_cm''s mismatch is what sets the 1.5 kHz mode''s top: CMRR at 1.5 kHz falls more than
+        3 dB below the DC floor, which is why C-CM-BREATH is bought as a matched pair'
       pass: true
   cmrr-supply-low:
     corners: 1
@@ -137,28 +274,28 @@ sims:
         min_at: nominal
         max: 114.952
         max_at: nominal
-      cmrr_50:
-        nominal: 114.809
-        min: 114.809
-        min_at: nominal
-        max: 114.809
-        max_at: nominal
       cmrr_60:
-        nominal: 114.747
-        min: 114.747
+        nominal: 114.819
+        min: 114.819
         min_at: nominal
-        max: 114.747
+        max: 114.819
         max_at: nominal
-      cmrr_500:
-        nominal: 106.702
-        min: 106.702
+      cmrr_1k5:
+        nominal: 101.868
+        min: 101.868
         min_at: nominal
-        max: 106.702
+        max: 101.868
+        max_at: nominal
+      cmrr_10k:
+        nominal: 82.7514
+        min: 82.7514
+        min_at: nominal
+        max: 82.7514
         max_at: nominal
     asserts:
-    - expr: nom['cmrr_60'] > 58.5 and nom['cmrr_500'] > 58.5
-      why: 'with both rails at 10.8 V the link still clears 58.5 dB at mains and at the band''s 500 Hz edge, at the parts''
-        nominal: the INA828''s supply is not what limits it (the tolerances are, cmrr-as-netlisted)'
+    - expr: nom['cmrr_60'] > 58.5 and nom['cmrr_10k'] > 58.5
+      why: 'with both rails at 10.8 V the link still clears 58.5 dB at mains and at the wide band''s 10 kHz top, at the parts''
+        nominal: the INA828''s supply is not what limits it (the tolerances are, cmrr-wide)'
       pass: true
   cmrr-supply-high:
     corners: 1
@@ -169,25 +306,25 @@ sims:
         min_at: nominal
         max: 114.952
         max_at: nominal
-      cmrr_50:
-        nominal: 114.809
-        min: 114.809
-        min_at: nominal
-        max: 114.809
-        max_at: nominal
       cmrr_60:
-        nominal: 114.747
-        min: 114.747
+        nominal: 114.819
+        min: 114.819
         min_at: nominal
-        max: 114.747
+        max: 114.819
         max_at: nominal
-      cmrr_500:
-        nominal: 106.702
-        min: 106.702
+      cmrr_1k5:
+        nominal: 101.868
+        min: 101.868
         min_at: nominal
-        max: 106.702
+        max: 101.868
+        max_at: nominal
+      cmrr_10k:
+        nominal: 82.7514
+        min: 82.7514
+        min_at: nominal
+        max: 82.7514
         max_at: nominal
     asserts:
-    - expr: nom['cmrr_60'] > 58.5 and nom['cmrr_500'] > 58.5
+    - expr: nom['cmrr_60'] > 58.5 and nom['cmrr_10k'] > 58.5
       why: and with both at 12.6 V
       pass: true
