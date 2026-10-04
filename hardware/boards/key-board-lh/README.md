@@ -467,7 +467,7 @@ the row.
 
 | Open | Decided by |
 |---|---|
-| **The switch positions** (`layout.lh_gaps`, `layout.lh_offsets` `tbd`; `config/key-layout.yaml` `x`/`y` replace them) | M2 on the mule, locked at M3 |
+| **The switch positions: check on the boards in hand (rev A).** Final for rev A (owner, 2026-10-04; ADR 0010, *Amendment, 2026-10-04*): `config/body.yaml` `layout.lh_gaps`, `layout.lh_offsets` and the rest are `settled` | the rev A boards in hand; a change is rev B |
 | The FFSD socket's stand-out from the header's mouth, `boards.chain_plug_proud`. The print does not dimension it, and it decides whether the cable clears the shroud's mouth at all, not only the ribbon's fold | M4, the first mated pair |
 | The mount's spacers, faced to `hardware.kb_spacer_l` (no stocked M2.5 spacer has that length), and the column's standoff and screw (`MECH-COL-STANDOFF`, `MECH-COL-SCREW`) | the first fit; M4, with the parts bought |
 | The board depth at the hardware's tolerance limits: the worst case reaches the window's shoulder end (`drc.echo` "key-board depth at the hardware's tolerance limits") | the first board, fitted |

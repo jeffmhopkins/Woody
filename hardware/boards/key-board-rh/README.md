@@ -99,5 +99,6 @@ with the latest layout's date until a board is fabricated
 
 ## Open, and what decides each
 
-The left-hand page's *Open* table holds for this board too. This board adds
-nothing to it.
+The left-hand page's *Open* table holds for this board too, the switch
+positions included: final for rev A, checked on the boards in hand
+(`layout.rh_gaps`, `layout.rh_offsets`). This board adds nothing to it.

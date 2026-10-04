@@ -190,6 +190,8 @@ def render_params():
     L.append("keys = [\n" + ",\n".join(rows) + "\n];")
     placed = sum(1 for k in kl["keys"] if k["x"] is not None and k["y"] is not None)
     L.append(f"keys_placed = {placed};  // of {len(kl['keys'])}")
+    final = placed == len(kl["keys"]) or layout_settled()
+    L.append(f"layout_final = {scad_value(final)};  // every key at x/y, or every {BODY} layout figure placing the rest settled")
     L.append(f"spare_switch_cutouts = {scad_value(kl.get('spare_bits_switches', 0))};")
     L.append("")
 
@@ -295,9 +297,23 @@ PARAM_SETS = [(PARAMS, render_params, f"{KEY_LAYOUT} + {BODY} + {BRANDING_SPEC} 
               (MODULE_PARAMS, render_module_params, MODULE)]
 
 
+# The config/body.yaml `layout:` figures that place a key whose x/y is null in
+# config/key-layout.yaml. When every one is `settled`, the layout they give is
+# final (the owner, 2026-10-04: final for rev A; ADR 0010, Amendment
+# 2026-10-04) and the renders carry no PROVISIONAL band, though the keys are
+# still placed from these figures rather than from x/y.
+LAYOUT_FIGURES = ["lh_gaps", "lh_offsets", "rh_gaps", "rh_offsets",
+                  "lt_rest_under", "lt_rest", "rt_rest_under", "rt_rest"]
+
+
+def layout_settled():
+    body = yaml.safe_load(open(os.path.join(ROOT, BODY), encoding="utf-8"))
+    return all(body["layout"][n].get("status") == "settled" for n in LAYOUT_FIGURES)
+
+
 def is_provisional():
     kl = yaml.safe_load(open(os.path.join(ROOT, KEY_LAYOUT), encoding="utf-8"))
-    return any(k["x"] is None or k["y"] is None for k in kl["keys"])
+    return any(k["x"] is None or k["y"] is None for k in kl["keys"]) and not layout_settled()
 
 
 def params_problems():
@@ -529,8 +545,8 @@ def stamp(png, o, fp, provisional):
     d.text((8, y0 + 4), text, fill=(60, 60, 60), font=f)
     if provisional:
         d.text((8, y0 + 19), "PROVISIONAL LAYOUT - key positions are null in "
-               "config/key-layout.yaml; keys sit on the provisional layout in "
-               "config/body.yaml until M2/M3", fill=(170, 40, 20), font=fb)
+               "config/key-layout.yaml and the config/body.yaml layout that "
+               "places them is not settled", fill=(170, 40, 20), font=fb)
     if note:
         d.text((8, y0 + band - 15), note, fill=(40, 70, 140), font=fb)
     # Deterministic PNG: no timestamps, no text chunks.

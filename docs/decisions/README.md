@@ -61,7 +61,7 @@ fourteen on 2026-09-21, eleven rows missing amendments on 2026-10-02.)
 | [0007](0007-imu-selection.md) | IMU selection | Accepted. Board selected: Waveshare ESP32-S3-Matrix. |
 | [0008](0008-display-selection.md) | Display selection | Superseded by [ADR 0015](0015-one-mcu-no-display.md) (2026-09-26): there is no display board; the 8×8 LED matrix is the only display. |
 | [0009](0009-enclosure-construction.md) | Enclosure construction | Accepted. **How the body closes is amended 2026-09-29 by [ADR 0025](0025-the-cassette.md)**: the six body fasteners are gone. The internals are one bonded unit, the cassette, glued into the shell with RTV and opened by cutting it. Each passage that ADR 0025 changes is marked in place. **Amended 2026-10-01** (owner): the maker's mark goes on the oak top. |
-| [0010](0010-key-layout-as-data.md) | Key layout as data | Accepted |
+| [0010](0010-key-layout-as-data.md) | Key layout as data | Accepted. **Amended 2026-10-04** (the provisional layout is final for rev A: *Amendment* below). |
 | [0011](0011-licensing.md) | Licensing | Accepted |
 | [0012](0012-configuration-interface.md) | Configuration interface | Superseded by [ADR 0015](0015-one-mcu-no-display.md) (2026-09-26): configuration is over USB only and the instrument has no radio. The need this ADR argues — too much to configure through buttons — still stands; the phone and WiFi do not. |
 | [0013](0013-two-mcu-split.md) | Two-MCU split | Superseded by [ADR 0015](0015-one-mcu-no-display.md) (2026-09-26): one MCU, the real-time board. Its build approach — dev board as a module, a passive board for the rest — still holds. |
