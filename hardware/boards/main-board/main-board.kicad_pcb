@@ -4171,7 +4171,7 @@
 				)
 			)
 		)
-		(property "Value" "47nF C0G/NP0"
+		(property "Value" "18nF C0G/NP0"
 			(at 0 1.68 90)
 			(layer "F.Fab")
 			(uuid "4243ed47-dfd7-470b-84d9-1004c7060478")
@@ -6665,7 +6665,7 @@
 				)
 			)
 		)
-		(property "Value" "PESD12VS1UA or equivalent 12V-standoff ESD diode"
+		(property "Value" "PESD12VL1BA"
 			(at 0.1 1.9 90)
 			(layer "F.Fab")
 			(uuid "9fefe489-812e-4839-ac0c-0dc098158b9b")
@@ -24156,7 +24156,7 @@
 				)
 			)
 		)
-		(property "Value" "PESD12VS1UA or equivalent 12V-standoff ESD diode"
+		(property "Value" "PESD12VL1BA"
 			(at 0.1 1.9 90)
 			(layer "F.Fab")
 			(uuid "68244e2e-4271-44f8-9155-649be4b86dc0")
