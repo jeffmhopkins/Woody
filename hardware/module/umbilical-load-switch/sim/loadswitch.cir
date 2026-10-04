@@ -27,7 +27,7 @@ CISS gnode out {{c_iss}}
 RFBH out fb {{R-FB-HI}}
 RFBL fb 0 {{r_fb_lo}}
 * the instrument: C-STRIP-BULK at the input node, L-BUCK-IN to C-BUCK-IN
-CSTRIP out 0 {{C-STRIP-BULK}}
+CSTRIP out 0 {{c_strip}}
 CXTRA out 0 {{c_extra}}
 LBIN out buckin {{L-BUCK-IN}}
 RLBIN buckin cbuck {{r_lbin}}

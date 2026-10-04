@@ -349,19 +349,19 @@ boards:
     status: nominal
     source: "the key boards' tallest underside part: the register's SOIC-16 (U-KEYS, SN74HCS165D), max 1.75 - the JEDEC MS-012 outline as drawn for SOT109-1 [datasheets/logic/74HCS165-nexperia.pdf Fig. 18]; TI's SCLS828A as banked has no D-package outline (pp.25-34 are BQB, DYY and PW only) and its D is MS-012 [from memory] - and 0805 passives"
   tall_l:
-    value: 15.0
-    status: tbd
-    source: "ONE regulator block, the long side across the body - an R-78E5.0 SIP-3 (11.6 x 8.5 x 10.4 [ds R-78E5.0-1.0 p.4]), its C-BUCK-IN 6.3 x 11 and a C-STRIP-BULK 8-10 x 12.5-20 [from memory]; one block, on the main board (ADR 0017)"
-    decided_by: "M4 main board layout"
-  tall_w:
     value: 10.0
     status: tbd
-    source: "the regulator block's other side: an R-78E5.0 SIP-3 (11.6 x 8.5 on the board), capacitors beside it [ds R-78E5.0-1.0 p.4; caps from memory]"
+    source: "the regulator block across the body, against an edge (boards.tall_side): U-BUCK, an R-78E5.0 SIP-3 (11.6 x 8.5 x 10.4 [ds R-78E5.0-1.0 p.4]) standing with its pins ALONG the body, and C-BUCK-OUT at its output. Turned along the body 2026-10-03 (the owner, of the tall parts shading the LED row: 'Move where it makes sense still away from leds'): its short side across puts it as far from the row as the board allows, against its edge (drc.echo 'tall parts in the LEDs' cone')"
+    decided_by: "M4 main board layout"
+  tall_w:
+    value: 15.0
+    status: tbd
+    source: "the regulator block along the body: U-BUCK's 11.6 x 8.5 footprint [ds R-78E5.0-1.0 p.4] with its pins along the body, and room beside its pins for its output capacitor; the bulk capacitors (C-STRIP-BULK, C-BUCK-IN) are no longer in it, the layout places them"
     decided_by: "M4 main board layout"
   tall_h:
-    value: 12.5
+    value: 10.5
     status: tbd
-    source: "the shortest the bulk electrolytics come, upright [from memory]; lay them down or use SMD polymer where drc.echo says they do not fit"
+    source: "the tallest part in the block, U-BUCK upright: 10.4 [ds R-78E5.0-1.0 p.4], its STEP 10.49 [issue #19, measured]. It was 12.5, the bulk electrolytics', while they stood in it"
     decided_by: "part selection and layout at M4"
   sensor_body:
     value: 12.3
@@ -553,9 +553,13 @@ boards:
     source: "J-MCU's place, ONE figure: its insulator's centre along and across the body, and the way its mouth faces (0 the tail, 90 the far side, 270 the near side). Off the LED row (the owner, 2026-10-03: 'This connector needs moved to the side so that it doesn't cause coverage of the led'): turned along the body at the near edge, its tails at the edge and its mouth toward the row, in the tail strip between column mount H8 and the tail's end mount. Along the body, the least x that keeps its insulator out of the near tail column's nut keep-out (drc.echo 'columns vertical: the main board's mounts under the key boards''); drc.echo 'J-MCU, its plug and the Matrix ribbon off the LED row' holds it across. Across the body, 14.9 rather than hard against the edge (2026-10-03, coordinator's go): the 1.27 mm back row has 0.2 mm between its pads, so its lines must leave behind it, toward the edge, and both the main board and the carrier need five lanes a face there; at the edge-most place the back row stood 0.31 from the board edge and no line fitted"
     decided_by: "the main board's layout; the Matrix carrier's J-MCU-C stands straight above it"
   tall_at_x:
-    value: 222.19
+    value: 225.0
     status: nominal
-    source: "the regulator block's centre along the body (U-BUCK and its parts), on the far side: where it stood in front of J-MCU when J-MCU stood in the LED row, kept when J-MCU moved off it (2026-10-03). It stands beside LED4 and shades it (drc.echo 'tall parts in the LEDs' cone'); the diffusion test judges it"
+    source: "the regulator block's centre along the body, against the NEAR edge (boards.tall_side) since 2026-10-03: the owner, of the breath pair, 'the analog path should just be routed along the top' - the far edge, which the block stood against - so the block moved across the LED row, between the bulk capacitors (mouth side, from x 207.5) and C-BUCK-IN, short of column mount H7 (244.8) and J-MCU's 5 V pins; the breath pair runs along the far edge over 24 mm from it (main-board README, The breath corridor). drc.echo 'tall parts in the LEDs' cone' reports it"
+  tall_side:
+    value: near
+    status: nominal
+    source: "the edge the regulator block stands against: near (2026-10-03, the far edge carries the breath pair, owner: 'the analog path should just be routed along the top')"
   service_hdr_at:
     value: [284.0, 9.3]
     status: nominal
@@ -1276,16 +1280,23 @@ lighting:
   # face, LEDs up, lighting both acrylic sides through the cavity. ONE ROW down the
   # centreline at one pitch, with EQUAL MARGINS to the main board's two ends (the owner,
   # 2026-10-03: "all the 14 LEDs equidistant from board extents, and rework all components
-  # around them"). The pitch is DERIVED, not set here: woody_body.scad spreads led_count
-  # LEDs over the board with half a pitch at each end where it can, and the breath sensor
-  # holds the mouth-end LED further in, so both margins take that (drc.echo 'LED row on the
-  # main board' prints the pitch and the margins). Numbered along the data line: LED 1 at
-  # the tail end, where the data arrives; LED led_count at the mouth end.
+  # around them"). The pitch is DERIVED, not set here: woody_body.scad spreads led_slots
+  # places over the board with half a pitch at each end where it can, and the breath sensor
+  # holds the mouth-end place further in, so both margins take that (drc.echo 'LED row on
+  # the main board' prints the pitch and the margins). led_count LEDs fill the places from
+  # the mouth end; the tail-end place is empty (the owner, the same day: "Keep current
+  # layout, remove bottom one"). Numbered along the data line: LED 1 at the tail end, where
+  # the data arrives; LED led_count at the mouth end.
   led_count:
+    value: 13
+    status: settled
+    source: "owner: thirteen, 2026-09-30 (ADR 0028), the count the 60/m strip gave over the same run; a fourteenth, 2026-10-02 ('Add it', ADR 0028 amendment), in the row 2026-10-03; thirteen again later that day, the tail-end one removed: 'remove that bottom led again' / 'Keep current layout, remove bottom one' (ADR 0028 amendment, second of 2026-10-03)"
+    decided_by: "the side-light diffusion test (ROADMAP): the count, and through the board's length the pitch it gives"
+  led_slots:
     value: 14
     status: settled
-    source: "owner: thirteen, 2026-09-30 (ADR 0028), the count the 60/m strip gave over the same run; a fourteenth, 2026-10-02 ('Add it', ADR 0028 amendment), first in the tail corner and since 2026-10-03 in the row: 'it needs to be distance equalized and centered just like the other leds'"
-    decided_by: "the side-light diffusion test (ROADMAP): the count, and through the board's length the pitch it gives"
+    source: "the places the row's pitch and margins are set by (woody_body.scad led_pitch): fourteen, the row as laid out with equal margins on 2026-10-03, when the owner then removed its tail-end LED and kept the rest where they stood ('Keep current layout, remove bottom one', ADR 0028 amendment, second of 2026-10-03). led_count LEDs fill them from the mouth end"
+    decided_by: "the side-light diffusion test (ADR 0028): with led_count, the pitch and where the row ends at the tail"
   led_view_angle:
     value: 120
     status: tbd

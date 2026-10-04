@@ -209,11 +209,12 @@ Pins: `SCK` IO38, `SH/LD` IO7, chain-end `SER` IO33, `QH` IO40.
   touched. Lift it when the host goes away. The per-LED current behind the
   estimate is `matrix-led-current`, still blocked on E1's measurement, so the
   clamp is a setting E1 confirms, not a constant.
-- **Fourteen pixels, one row, tail end first.** The data line reaches the
-  row's tail end first (ADR 0028, amendment of 2026-10-03: fourteen in one row
-  at one pitch, equal margins to the main board's ends), so a frame is pixel 0
-  for the tail-end LED, then pixels 1–13 toward the mouth end. Anything drawn
-  *along* the body (the breath bar, a sweep) addresses pixels 0–13 in order;
+- **Thirteen pixels (`lighting.led_count`), one row, tail end first.** The
+  data line reaches the row's tail end first (ADR 0028, amendments of
+  2026-10-03: one row at one pitch, its tail-end LED then removed), so a frame
+  is pixel 0 for the tail-end LED, then pixels 1–12 toward the mouth end.
+  Anything drawn *along* the body (the breath bar, a sweep) addresses pixels
+  0–12 in order;
   every pixel is a step of it. Every pixel takes the same gain: no LED stands
   nearer its acrylic than the rest.
 

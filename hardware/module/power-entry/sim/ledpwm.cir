@@ -95,8 +95,8 @@ RCN ig cn1 {{r_cable}}
 LCN cn1 pg {{l_cable}}
 * ---- the instrument: Q-INRUSH on, C-STRIP-BULK at the row's feed, L-BUCK-IN, C-BUCK-IN, the buck
 RQ inp ins {{r_on_z}}
-CSTRIP ins cs1 {{C-STRIP-BULK}}
-RCSTRIP cs1 ig {{esr_strip}}
+CSTRIP ins cs1 {{c_strip}}
+RCSTRIP cs1 ig {{r_strip}}
 LBIN ins lb1 {{L-BUCK-IN}}
 RLBIN lb1 cbk {{r_lbin}}
 CBUCK cbk cb1 {{C-BUCK-IN}}

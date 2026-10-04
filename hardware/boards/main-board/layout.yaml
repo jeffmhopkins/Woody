@@ -74,7 +74,7 @@ planes:
 # U-ADC (U2) between its VSS (pin 4, the island side) and its digital pins (5-8,
 # the plane side): the moat runs along U2's centreline. The outline (body mm)
 # keeps off the mouth-end mount H9 and the column mount at x 40 (both PWR_GND,
-# ADR 0025), and out of the band of LED14 (D20) and LED13's corner (the LEDs
+# ADR 0025), and out of the band of LED13 (D20) and LED12's corner (the LEDs
 # return to PWR_GND). pcb.py check holds: every AGND_INST pad on the island but
 # the pair's far end, no other plane net's pad on it, one tie.
 islands:
@@ -93,7 +93,7 @@ islands:
     # slot: C8 on VS, and the room kept for the datasheet's supply and output
     # decoupling (MPXV4006DP Fig. 3: 1 uF + 10 nF on VS, 470 pF on Vout; README, Open)
     # WAVE 3 (issue #8-3, owner's filter 2026-10-03, breath-adc.md "The reference's filter"):
-    # the island now takes ALL of U-ADC and the pocket above it between LED14 and LED13,
+    # the island now takes ALL of U-ADC and the pocket above it between LED13 and LED12,
     # where ADC_VDD's three capacitors stand (C3 at pin 8, C42 and C2 beside it), so each
     # returns into AGND_INST under the ADC, a few mm from pin 4's own via. The moat runs down
     # U2's tail side, where NT2 ties it, and the digital pins (5-7) cross it there, inside
@@ -105,25 +105,111 @@ islands:
     # its one pad off the island: the breath pair's AGND leg ends at R-SER-BREATH-INST
     # beside J-UMB (breath-sense-link.md)
     off_island: [R39.1]
+  # THE BREATH CORRIDOR'S REFERENCE (pairs: below): an AGND_INST strip in layer 3 under the
+  # whole far-edge run, its two legs at the mouth and its hop into R38 / R39 - carved out
+  # of INST_POS12, the LEDs' supply, which keeps its copper inboard of it; its own zone
+  # with a moat, joined to the island through the pair's AGND leg and the guard traces'
+  # stitching (strip: true, no tie of its own)
+  - net: AGND_INST
+    layer: In2.Cu
+    strip: true
+    moat: 0.5
+    tie_window: 0.0
+    outline: [[287.8, 34.0], [287.79, 44.47], [287.67, 44.87], [287.42, 45.22], [287.0, 45.5], [286.58, 45.6],
+              [255.32, 45.58], [254.84, 45.39], [254.47, 45.03], [253.83, 43.2], [253.48, 42.52], [252.94, 41.73],
+              [252.01, 40.77], [251.24, 40.21], [250.04, 39.62], [249.12, 39.35], [247.8, 39.2], [246.84, 39.26],
+              [245.54, 39.56], [244.66, 39.93], [243.54, 40.65], [242.83, 41.3], [241.92, 42.52], [241.57, 43.2],
+              [241.07, 44.77], [240.89, 45.09], [240.43, 45.47], [239.94, 45.6], [159.4, 45.6], [159.03, 45.51],
+              [158.7, 45.33], [158.3, 44.81], [158.2, 44.35], [158.3, 43.17], [158.19, 42.2], [157.88, 41.27],
+              [157.28, 40.28], [156.35, 39.39], [155.5, 38.9], [154.57, 38.6], [153.59, 38.5], [152.93, 38.55],
+              [151.98, 38.79], [151.25, 39.13], [150.49, 39.68], [149.13, 39.3], [147.65, 39.21], [146.19, 39.45],
+              [144.82, 40.0], [143.7, 40.76], [142.91, 41.54], [142.33, 42.34], [141.92, 43.1], [141.23, 45.03],
+              [140.8, 45.43], [140.24, 45.6], [129.56, 45.6], [129.1, 45.52], [128.66, 45.26], [128.39, 44.91],
+              [127.83, 43.2], [127.38, 42.35], [126.94, 41.73], [126.01, 40.77], [125.24, 40.21], [124.04, 39.62],
+              [122.56, 39.26], [121.6, 39.2], [120.28, 39.35], [119.36, 39.62], [118.16, 40.21], [117.39, 40.77],
+              [116.46, 41.73], [115.92, 42.52], [115.57, 43.2], [114.93, 45.03], [114.5, 45.43], [114.01, 45.59],
+              [51.53, 45.6], [51.12, 45.54], [50.78, 45.38], [50.5, 45.13], [50.3, 44.81], [50.2, 44.35],
+              [50.3, 43.17], [50.19, 42.2], [49.81, 41.11], [49.28, 40.28], [48.6, 39.58], [47.78, 39.04],
+              [46.87, 38.68], [45.59, 38.5], [44.93, 38.55], [43.98, 38.79], [43.25, 39.13], [42.49, 39.68],
+              [41.13, 39.3], [39.65, 39.21], [38.19, 39.45], [36.82, 40.0], [35.61, 40.84], [34.68, 41.83],
+              [33.86, 43.21], [33.27, 44.97], [32.98, 45.31], [32.53, 45.55], [32.14, 45.6], [20.5, 45.6],
+              [20.5, 45.5], [19.8, 45.5], [19.8, 27.6], [17.8, 27.6], [17.8, 45.5], [11.5, 45.5],
+              [11.5, 49.5], [20.5, 49.5], [20.5, 49.0], [32.16, 49.0], [33.18, 48.89], [33.94, 48.65],
+              [34.51, 48.37], [35.17, 47.91], [35.68, 47.42], [36.41, 46.3], [36.9, 44.77], [37.22, 44.12],
+              [37.68, 43.55], [38.46, 42.98], [39.38, 42.66], [40.1, 42.6], [40.82, 42.71], [41.98, 43.06],
+              [42.98, 43.08], [43.86, 42.82], [44.93, 42.09], [45.57, 41.9], [46.22, 42.06], [46.54, 42.31],
+              [46.77, 42.64], [46.9, 43.17], [46.8, 44.4], [46.94, 45.42], [47.29, 46.39], [47.84, 47.25],
+              [48.57, 47.98], [49.45, 48.53], [50.41, 48.87], [51.44, 49.0], [114.35, 48.97], [114.97, 48.87],
+              [115.73, 48.61], [116.44, 48.23], [117.0, 47.8], [117.55, 47.21], [117.99, 46.54], [118.31, 45.8],
+              [118.7, 44.53], [119.34, 43.6], [119.92, 43.13], [120.59, 42.79], [121.7, 42.6], [122.81, 42.79],
+              [123.48, 43.13], [124.06, 43.6], [124.7, 44.53], [125.18, 46.06], [125.79, 47.13], [126.33, 47.73],
+              [126.82, 48.13], [128.01, 48.74], [128.79, 48.94], [129.49, 49.0], [140.48, 48.99], [141.44, 48.82],
+              [142.19, 48.54], [142.88, 48.13], [143.5, 47.61], [143.91, 47.13], [144.34, 46.45], [144.61, 45.8],
+              [144.9, 44.77], [145.22, 44.12], [145.86, 43.39], [146.46, 42.98], [147.14, 42.72], [148.1, 42.6],
+              [148.82, 42.71], [149.98, 43.06], [150.98, 43.08], [151.86, 42.82], [152.93, 42.09], [153.57, 41.9],
+              [154.22, 42.06], [154.54, 42.31], [154.77, 42.64], [154.9, 43.17], [154.8, 44.4], [154.94, 45.42],
+              [155.29, 46.39], [155.84, 47.25], [156.57, 47.98], [157.25, 48.43], [158.2, 48.82], [159.22, 48.99],
+              [240.18, 48.99], [240.97, 48.87], [241.64, 48.65], [242.21, 48.37], [242.87, 47.91], [243.44, 47.34],
+              [243.91, 46.69], [244.26, 45.97], [244.7, 44.53], [245.34, 43.6], [245.92, 43.13], [246.59, 42.79],
+              [247.7, 42.6], [248.81, 42.79], [249.79, 43.35], [250.52, 44.19], [250.83, 44.88], [251.29, 46.3],
+              [252.02, 47.42], [252.6, 47.97], [253.27, 48.42], [254.01, 48.74], [254.79, 48.94], [255.54, 49.0],
+              [286.75, 48.99], [287.47, 48.9], [288.25, 48.66], [288.9, 48.34], [289.56, 47.87], [290.07, 47.36],
+              [290.54, 46.7], [290.86, 46.05], [291.1, 45.27], [291.2, 44.3], [291.2, 34.0], [291.5, 34.0],
+              [291.5, 26.0], [286.0, 26.0], [286.0, 34.0]]
 
 # THE BREATH PAIR (same page: "crosses the moat as a pair"): BREATH_SENSE's
 # source SENSOR_BUFFERED_OUT and the AGND leg, taken at the sensor's own GND pin
 # (U-BREATH pin 3), side by side on layer 1 over the plane to their series
 # resistors at J-UMB. Routed before everything else (pcb_route.route_pair).
 pairs:
+  # THE BREATH CORRIDOR (owner, 2026-10-03: "the analog path should just be routed along
+  # the top" - the far edge, the top of the board's plots - "Not the bottom is crossing the
+  # board twice. Unneedingly"; README, The breath corridor). ONE pair, the sensor's output
+  # and its AGND leg, along the FAR EDGE on layer 4 from the mouth to J-UMB: a short hop up
+  # from the buffer (U3, mid-board) to the edge where the sensor stands, the run along the
+  # edge stepping inboard round the far column mounts H2, H4, H6 and H8, and one hop down
+  # into R38 / R39 at J-UMB. No crossing of the LED row. Layer 4, not 1: the far-row keys'
+  # T networks stand on layer 1 between the edge and their switch pins. Its reference is an
+  # AGND_INST strip cut out of layer 3 under it (islands: above). Its legs reach the
+  # layer-1 pads at each end through a via each (the autorouter's).
   - nets: [/SENSOR_BUFFERED_OUT, AGND_INST]
     from: [U3.7, U10.3]
     to: [R38.1, R39.1]
-    layer: F.Cu
+    layer: B.Cu
     width: 0.25
     gap: 0.25
     # #8-4: every other net's tracks and vias kept 0.55 + the 0.2 clearance = 0.75 mm (3W)
-    # off both legs as the router lays them - the clock lines (CHAIN_SCK, IO36) ran 0.5 mm
-    # beside one leg and not the other, a differential pick-up (pcb_route.Obstacles)
+    # off both legs as the router lays them (pcb_route.Obstacles)
     guard: 0.55
-    # out from between the sensor's pins and the buffer, over LED14's cap and along
-    # the board above the LED row's caps (body mm); the rest is the router's
-    through: [[23.0, 35.6]]
+    # ...and a ground track each side of the coupled run, one clearance off its legs,
+    # stitched into the AGND strip under it at least every 5 mm (pcb_route.guard_traces);
+    # left out only where another net's copper leaves no room - README lists the spans
+    guard_traces: {net: AGND_INST, every: 5.0}
+    # DRAWN, not searched (pcb_route.route_pair_smooth): straight along the far edge, and
+    # round each far column mount ONE concentric arc, r 5 mm about its centre, entered and
+    # left by 3 mm fillets (owner, 2026-10-04: "curve around standoffs much better and be
+    # mirrored around them", then "reduce all of them down to the same size ... unless
+    # they're asymmetric"). The legs and guards are the same path offset: concentric
+    # arcs, one spacing all the way. 5 mm clears the mount's bearing keep-out with the
+    # guards (its corner 3.8 mm from the centre). At H2 and H6 the far-row switch's leg
+    # pad (SW2, SW6 pin 1, 3.4 mm) stands 6.2 mm from the mount, on its tail side: the
+    # detour goes on round it, r 3 mm about the pad (`then:`), joined by a 1.5 mm fillet -
+    # the same arc at every mount, asymmetric only there
+    through: [[19.5, 47.3], [289.5, 47.3], [289.5, 33.0]]
+    fillet: 3.0
+    fillet_mid: 1.5
+    # each leg's end to its pad on layer 1, drawn (pcb_route: the autorouter could not
+    # reach them through the guards): along layer 4 to a via, then a short track to the pad
+    tails:
+      - {net: /SENSOR_BUFFERED_OUT, pad: U3.7, path: [[19.5, 47.05], [18.6, 46.15]], via: [18.6, 27.9]}
+      - {net: AGND_INST, pad: U10.3, path: [[19.5, 47.55], [12.88, 47.55]], via: [12.88, 45.6]}
+      - {net: /SENSOR_BUFFERED_OUT, pad: R38.1, path: [[289.25, 33.0]], via: [288.3, 32.5]}
+      - {net: AGND_INST, pad: R39.1, path: [[289.75, 33.0]], via: [289.75, 32.3]}
+    detours:
+      - {at: [40.0, 45.9], r: 5.0, then: [{at: [45.6, 43.2], r: 3.0}]}     # H2, then SW2 pin 1
+      - {at: [121.7, 45.9], r: 5.0}                                        # H4
+      - {at: [148.0, 45.9], r: 5.0, then: [{at: [153.6, 43.2], r: 3.0}]}   # H6, then SW6 pin 1
+      - {at: [247.7, 45.9], r: 5.0}                                        # H8
 
 # Net classes (the rest are the Default class, rules: track): the rails as
 # tracks. [calc] IPC-2221 outer layer, 1 oz, 10 C rise: I = 0.048 dT^0.44 A^0.725
@@ -138,19 +224,24 @@ pairs:
 # (the Matrix's regulator is on the Matrix), tens of mA: 0.3 mm.
 #
 # #8-6 (single 0.3 mm vias in series on the power paths): the rails that are tracks run
-# on LAYER 1 ONLY, so they carry no via at all (pcb_route.complete, a class's layers:) -
-# J-UMB's +12 V to the clamps and Q-INRUSH's source, the buck's input and output, and the
-# 5 V to J-MCU's pins; where a power part meets a plane it does so by more than one via
-# (fanout_count: below).
+# on LAYER 1 wherever they can - layer 4 costs them twenty times as much (layer_cost) -
+# and where one must change layers it does so through ONE via sized for it, 1.0 over a
+# 0.6 drill (a class's via:), not a signal's 0.3: J-UMB's +12 V to the clamps and
+# Q-INRUSH's source, the buck's input and output, and the 5 V to J-MCU's pins. Since
+# the regulator block went to the far edge (2026-10-03) the 5 V has to cross the breath
+# pair, which runs the board's length on layer 1 (pairs: below): layer 1 alone left it
+# open. Where a power part meets a plane it does so by more than one via (fanout_count:).
 net_classes:
   power5:
     nets: [INST_5V_A, BUCK_IN, /power-entry-instrument/BUCK_A_OUT]
     track: 0.5
-    layers: [F.Cu]
+    layer_cost: {B.Cu: 20.0}
+    via: [1.0, 0.6]
   power12_in:
     nets: [UMBILICAL_POS12]
     track: 0.5
-    layers: [F.Cu]
+    layer_cost: {B.Cu: 20.0}
+    via: [1.0, 0.6]
   rail3v3:
     nets: [DEV_3V3]
     track: 0.3
@@ -189,19 +280,21 @@ fanout_count:
   Q1.3: 3        # Q-INRUSH drain -> INST_POS12: the whole instrument
   D2.2: 2        # D-REVSHUNT's anode to PWR_GND: a reversed supply's fault current
   D3.2: 2        # D-TVS-PWR to PWR_GND: the clamp's surge
-  C10.1: 2       # C-STRIP-BULK + on INST_POS12: the LED row's pulse current
+  C10.1: 2       # C-STRIP-BULK (two cans) + on INST_POS12: the LED row's pulse current
   C10.2: 2
+  C44.1: 2
+  C44.2: 2
   L1.1: 2        # L-BUCK-IN from INST_POS12: the buck's input current
   C11.2: 2       # C-BUCK-IN's return
   C43.2: 2       # C-BUCK-OUT's return
 
-# Parts the sheets carry that this board does not: A1 is the Matrix, on the right-hand key board
+# Parts the sheets carry that this board does not: A1 is the Matrix, on its lid-hung carrier
 # (on the sheet for its pad-to-pin map, reached through J-MCU); SW9 and SW10 are
 # the spare positions' switches, not fitted (config/key-layout.yaml
 # spare_bits_switches) and given no place by the body CAD. check reports each
 # as a note, not an error; anything else missing from the board is an error.
 not_on_board:
-  A1: "the Matrix: on the right-hand key board (ADR 0021 amendment 2026-10-02), no footprint here; J-MCU is its connector"
+  A1: "the Matrix: on its carrier hung from the lid (#23), no footprint here; J-MCU is its connector"
   SW9: "sw+ spare switch: not fitted, no place in the body CAD"
   SW10: "sw- spare switch: not fitted, no place in the body CAD"
 
@@ -259,12 +352,12 @@ led_caps: {row: C-LED, offset: [0.0, 4.5], rot: 0}
 # turns with it. The spare positions (sw+, sw-) have no switch: their T's stand
 # beside REG-RT, the same shape.
 networks:
-  pattern: {offset: [0.0, 8.5], axis: x, leg: -1, c: -1}
+  pattern: {offset: [-0.1, 8.5], axis: x, leg: -1, c: -1}
   except:
-    LT1: {at: [50.0, 10.0], leg: 1, c: 1}     # switch at 180 deg: the pattern turned with it
-    LT3: {at: [90.0, 10.0], leg: 1, c: 1}
-    RT1: {at: [158.0, 10.0], leg: 1, c: 1}
-    RT3: {at: [198.0, 10.0], leg: 1, c: 1}
+    LT1: {at: [50.1, 10.0], leg: 1, c: 1}     # switch at 180 deg: the pattern turned with it
+    LT3: {at: [90.1, 10.0], leg: 1, c: 1}
+    RT1: {at: [158.1, 10.0], leg: 1, c: 1}
+    RT3: {at: [198.1, 10.0], leg: 1, c: 1}
   spare:
     sw+: {at: [168.4, 20.2], leg: 1, c: -1}
     sw-: {at: [168.4, 11.2], leg: 1, c: 1}
@@ -275,14 +368,14 @@ keepouts:
   "ribbon left_hand": {except_rows: [J-CHAIN]}
   "ribbon right_hand": {except_rows: [J-CHAIN]}
   "regulator block": {part: REGULATOR-BLOCK, except_rows: [U-BUCK, C-BUCK-OUT]}
-  # J-MCU's mated plug and the Matrix ribbon's rise over it (pcb-geometry.echo): no part there
-  "Matrix ribbon": {except_rows: []}
+  # J-MCU's mated plug and the Matrix ribbon's rise over it (pcb-geometry.echo): no part there but J-MCU itself
+  "Matrix ribbon": {except_rows: [J-MCU]}
 
 # How tall each footprint family stands on the top face, for the height rooms
 # (pcb_main.check_heights): under the key boards, elsewhere, and under the Matrix
 # ribbon. Each with where it comes from.
 heights:
-  CP_Elec_10x10: 10.2          # [ds UCW1E471MNL1GS, 10.2 max]
+  CP_Elec_6.3x7.7: 7.7         # [ds JIERR-MA-SERIES-MA25V220M6X8.pdf p.3, case 6.3 x 7.7]
   CP_Elec_6.3x5.8: 5.8         # [ds UCM1E101MCL1GS]
   SWPA6028: 2.8                # [ds SWPA6028S220MT]
   D_SMC: 2.62                  # [from memory: DO-214AB max]
@@ -300,7 +393,7 @@ heights:
   L_0805: 1.0                  # [from memory]
   NetTie: 0.05                 # copper only
   NXP_Case1351: 9.9            # [ds MPXV4006DP p.7, with its ports]
-  PinHeader_1x05_P2.54mm_Vertical: 8.5   # [from memory: the header's pins above the board; the service lead's plug goes on with the lid off]
+  PinHeader_1x03_P2.54mm_Vertical: 8.5   # [from memory: the header's pins above the board; the service lead's plug goes on with the lid off]
   # the two 1.27 mm IDC headers by name - the lookup takes the FIRST key a footprint's name
   # contains, so the specific ones come before anything they would also match (#19 F5: a bare
   # IDC-Header key gave both 4.9, under the Samtec's real height)
@@ -341,7 +434,7 @@ parts:
   R8:  [8.9, 17.65, 90]     # R-FB-REF, DC feedback: VS (foot) -> REF_MINUS (head)
   C5: [21.4, 20.3, 90]   # C-REF-OUT on REF_5V
   C7:  [21.2, 16.1, 90]   # 100 nF on REF_5V
-  C4:  [14.0, 22.5, 0]   # C-REF-OUT on REF_VIN, above U4 by pin 2 (#8-7), between U4 and U3
+  C4:  [15.0, 22.54, 0]   # C-REF-OUT on REF_VIN, above U4 by pin 2 (#8-7), between U4 and U3
   C6:  [11.65, 17.97, 270]   # 100 nF on REF_VIN across U4's pins 2 and 4 (REF_VIN up, AGND down)
   D1:  [22.5, 12.8, 0]      # D-REF-CLAMP on REF_VIN
   R6:  [27.5, 12.8, 0]      # R-REF-IN from +12 V
@@ -360,61 +453,63 @@ parts:
   # (config/body.yaml boards.umb_parts_d), D-TVS-PWR between them
   D5:  [292.6, 31.3, 90]   # D-TVS-BREATH on BREATH_SENSE (pin 1)
   D6:  [292.6, 27.55, 90]   # D-TVS-BREATH on AGND_SENSE (pin 2)
-  R38: [288.95, 30.39, 0]   # R-SER-BREATH-INST in BREATH
-  R39: [288.95, 27.85, 0]   # R-SER-BREATH-INST in AGND_SENSE
+  R38: [288.95, 30.39, 0]   # R-SER-BREATH-INST in BREATH, at J-UMB pin 1, where the pair comes down from the far edge
+  R39: [288.95, 27.85, 0]   # R-SER-BREATH-INST in AGND_SENSE, at pin 2
   NT1: [293.0, 13.4, 90]    # NT-DIG at J-UMB pin 8 (ADR 0018)
-  D2:  [286.4, 20.0, 90]    # D-REVSHUNT, across pins 3 / 6, ahead of L-BUCK-IN
-  D3:  [291.6, 22.4, 270]   # D-TVS-PWR at J-UMB's pins 3 (+12 V, its cathode) and 6 (PWR_GND), #8-9
+  D2:  [286.4, 18.7, 90]    # D-REVSHUNT, across pins 3 / 6, ahead of L-BUCK-IN
+  D3:  [291.6, 21.8, 270]   # D-TVS-PWR at J-UMB's pins 3 (+12 V, its cathode) and 6 (PWR_GND), #8-9
   # --- Q-INRUSH and its gate network (power-entry-instrument.md §1a) in the tail strip
   # above the LED row, between LED2 and LED1 (the full-width tail's corner, which the
   # corner LED held until 2026-10-03): its source from J-UMB pin 3 past D-REVSHUNT and
   # D-TVS-PWR, its drain into the INST_POS12 plane
-  Q1:  [271.0, 36.5, 0]   # Q-INRUSH AO3401A
-  C39: [266.5, 41.0, 90]   # C-INRUSH-GS, source to gate
-  R41: [268.8, 41.0, 90]   # R-INRUSH-GS, source to gate
-  R42: [271.1, 41.0, 90]   # R-INRUSH-G, gate to ground
-  C40: [273.4, 41.0, 90]   # C-INRUSH-GD, the Miller leg's capacitor
-  R43: [273.4, 45.5, 90]   # R-INRUSH-GD, the Miller leg's damping, to the drain
-  D21: [269.3, 45.5, 90]   # D-INRUSH-RST, gate reset after an unplug
+  Q1:  [279.0, 36.5, 0]   # Q-INRUSH AO3401A, by J-UMB under the breath pair's far run
+  C39: [282.5, 36.5, 90]   # C-INRUSH-GS, source to gate
+  R41: [284.8, 36.5, 90]   # R-INRUSH-GS, source to gate
+  R42: [287.0, 36.5, 90]   # R-INRUSH-G, gate to ground
+  C40: [278.0, 41.0, 90]   # C-INRUSH-GD, the Miller leg's capacitor
+  R43: [280.3, 41.0, 90]   # R-INRUSH-GD, the Miller leg's damping, to the drain
+  D21: [283.0, 41.0, 90]   # D-INRUSH-RST, gate reset after an unplug
   # --- the SPI and chain series resistors at their driving end, past J-MCU's mouth in
   # the LED row's gap between LED3 and LED2, under the Matrix ribbon (each under its
   # 2.15 mm room)
-  R1:  [249.0, 29.6, 90]   # R-SPI-SER SCLK
-  R2:  [251.6, 29.6, 90]   # R-SPI-SER MOSI
-  R3:  [254.2, 29.6, 90]   # R-SPI-SER CS_MOD
-  R40: [256.8, 29.6, 90]   # R-CS-PULL-INST, IO34 to 3V3 beside R-SPI-SER CS
-  # the service UART at J-MCU (service-uart.md): R46 in TXD at J-MCU pin 22, C41 on EN at pin 24
-  R46: [229.2, 16.45, 180]   # R-TXD-SER beside it, U0TXD pad up toward pin 22, TXD_HDR on to J2
-  C41: [232.9, 16.45, 0]   # C-EN, below J-MCU's pin 24 end, its EN pad up, its ground a short stub to its own via
+  R1:  [274.7, 18.8, 90]   # R-SPI-SER SCLK, between J-MCU and J-UMB, away from the breath pair
+  R2:  [277.0, 18.8, 90]   # R-SPI-SER MOSI
+  R3:  [279.3, 18.8, 90]   # R-SPI-SER CS_MOD
+  R40: [281.6, 18.8, 90]   # R-CS-PULL-INST, IO34 to 3V3 beside R-SPI-SER CS
+  # the service UART at J-MCU (service-uart.md): R46 in TXD between J-MCU pin 22 and J2
+  R46: [275.3, 8.9, 0]   # R-TXD-SER past J-MCU's plug box, U0TXD pad toward pin 22, TXD_HDR on to J2
   # U-TVS-SPI clamps the pad side of R-SPI-SER (IO35, IO36, IO34 - spi-link), so it
   # stands on the J-MCU side of the resistors, below the chain's, clear of the column mount
-  U1:  [258.0, 21.5, 0]
-  R34: [249.0, 23.8, 90]   # R-CHAIN-SER SCK
-  R35: [251.6, 23.8, 90]   # R-CHAIN-SER SH/LD
-  R36: [254.2, 23.8, 90]   # R-CHAIN-SER SER (the chain's end)
+  U1:  [278.5, 24.3, 0]
+  R34: [232.5, 36.5, 90]   # R-CHAIN-SER SCK, on the far side of the LED row where the block used to stand
+  R35: [235.1, 36.5, 90]   # R-CHAIN-SER SH/LD
+  R36: [237.7, 36.5, 90]   # R-CHAIN-SER SER (the chain's end)
   J2:  [284.0, 9.3, 90]   # HDR-SERVICE at config/body.yaml boards.service_hdr_at (pin 1), in the tail corner by J-UMB, off the LEDs' cone; reached with the lid off
   # --- the regulator block (the echo's REGULATOR-BLOCK) holds U-BUCK alone; the
   # buck's input LC and C-STRIP-BULK where their height fits (README, Open)
-  U5:  [219.94, 43.985, 270]   # U-BUCK, its courtyard centred in the block
+  U5:  [226.1, 14.75, 180]   # U-BUCK in the block against the near edge (boards.tall_side), its pins ALONG the body
   # #8-7: the module's own caps at the module - C11 beside pin 1 (VIN) between L1 and U5,
   # C43 (owner, 2026-10-03, RECOM's application) at pin 3 (OUT), returned to pin 2 (GND)
-  C11: [212.86, 45.4, 180]   # C-BUCK-IN 100 uF (5.8 mm tall), its + pad toward pin 1
-  L1:  [204.6, 40.2, 0]   # L-BUCK-IN 22 uH, ahead of C11
-  C43: [215.36, 38.9, 180]   # C-BUCK-OUT 10 uF at pin 3, in the block's edge (keepouts: except_rows)
-  D4:  [214.0, 35.6, 0]   # D-USBOR, buck -> INST_5V_A, beside C43 at U5's OUT; its cathode toward J-MCU's 5 V pins
-  C10: [221.2, 16.4, 0]     # C-STRIP-BULK 470 uF, the LED row's bulk, under LED 4 and J-MCU's 5 V end
-  U6:  [233.0, 11.7, 90]   # U-LVLSHIFT 74AHCT125
-  C12: [239.9, 12.4, 90]   # its 100 nF, at VCC (pin 14) and GND (pin 13)
-  R10: [240.3, 17.6, 90]   # R-LED-PD
-  R11: [242.5, 13.0, 90]   # R-LED-SER, into LED 1's DI at the row's tail end
+  C11: [237.0, 12.5, 90]   # C-BUCK-IN 100 uF (5.8 mm) at pin 1 (VIN), on the block's tail side
+  L1:  [247.8, 18.5, 0]   # L-BUCK-IN 22 uH, above H7, INST_POS12 into C11
+  C43: [220.0, 18.3, 0]   # C-BUCK-OUT 10 uF at pin 3 (OUT), returned to its own via
+  D4:  [237.0, 20.0, 0]   # D-USBOR, between C-BUCK-IN and the LED row, toward J-MCU's 5 V pins
+  C10: [212.2, 11.5, 0]   # C-STRIP-BULK-1 220 uF polymer (7.7 mm), against the near edge on the mouth side of the regulator block
+  C44: [212.2, 18.7, 0]   # C-STRIP-BULK-2, its pair, inboard of it
+  U6:  [270.9, 30.0, 0]   # U-LVLSHIFT 74AHCT125, on the LED row's tail side of the breath crossing, by LED 1
+  C12: [270.9, 36.6, 90]   # its 100 nF, at VCC (pin 14)
+  R10: [268.3, 37.0, 90]   # R-LED-PD
+  R11: [265.9, 23.9, 90]   # R-LED-SER, into LED 1's DI
   # --- the thumb registers, each in the near band between its hand's switches
   U7:  [70.0, 19.2, 90]     # REG-LT
   R44: [76.9, 21.7, 0]      # R-HOP-SER, at U7's QH (pin 9): its pad 1 to the pin, pad 2 on toward J5 pin 6
   C13: [65.6, 24.2, 0]      # REG-LT's 100 nF, at VCC (pin 16) and GND (pin 15)
+  C206: [69.3, 24.2, 0]     # REG-LT's second 100 nF (key-register C-DECOUPLE-165-VCC, #6-5), beside C13
   R32: [63.2, 21.2, 90]     # FREE1 pull-up
   R33: [63.2, 17.3, 90]     # FREE2 pull-up
   U8:  [186.0, 19.2, 90]    # REG-RT
   C14: [181.6, 24.2, 0]     # REG-RT's 100 nF, at VCC (pin 16) and GND (pin 15)
+  C205: [185.3, 24.2, 0]    # REG-RT's second 100 nF (key-register C-DECOUPLE-165-VCC, #6-5), beside C14
   # --- the key chain's parts beside their J-CHAIN
   U9:  [64.6, 44.2, 0]      # U-TVS-CHAIN on SCK, SH/LD, SER_LH
   FB1: [66.4, 39.8, 90]     # FB-CHAIN, the LH ribbon's 3V3
@@ -444,6 +539,11 @@ route: astar
 # first. A connection with no way through takes up the nets in its way and they are
 # routed again, each net at most this many times.
 rip_up: 10
+# The rails that are layer-1 tracks (#8-6, net_classes: layers) cannot hop a via, so
+# they route before the signals do: routed last, the 5 V from J-MCU to D-USBOR and
+# J-UMB's +12 V to Q-INRUSH's gate divider found layer 1 already crossed by the bus
+# running the board's length (the first wave-3 route left both open).
+route_first: [INST_5V_A, /power-entry-instrument/BUCK_A_OUT, BUCK_IN, UMBILICAL_POS12, DEV_3V3]
 directions:
   # each right-angle corner cut to two 45-degree bends, up to this far back (pcb_route.chamfer)
   chamfer: 0.6

@@ -372,8 +372,8 @@ DRST ig gq DRESET
 * row's current, blank to lit as ledctl, on smoothly above v_led_on so it is a load)
 * returning across the plane to J-UMB; L-BUCK-IN, C-BUCK-IN and the buck, a constant power
 * above its input minimum
-CSTRIP ins cs1 {{C-STRIP-BULK}}
-RCSTRIP cs1 ig {{esr_strip}}
+CSTRIP ins cs1 {{c_strip}}
+RCSTRIP cs1 ig {{r_strip}}
 CLEDS ins ledg {{c_led_row}}
 BLEDR ins ledg I = ({{i_row_blank}} + ({{i_row_full}} - {{i_row_blank}}) * V(ledctl)) * 0.5 * (1 + tanh((V(ins, ledg) - {{v_led_on}}) / 0.3))
 RLEDR ledg ig {{r_plane}}

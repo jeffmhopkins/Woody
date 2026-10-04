@@ -105,7 +105,7 @@ params:
   c_tvs_pwr: {value: 1.0e-9, source: "D-TVS-PWR's capacitance at 0 V (power-entry-instrument/sim's c_tvs, renamed here because spi-link/sim's c_tvs is U-TVS-SPI's)"}
   r_isl:    {value: 0.005, source: "AGND_INST island copper, sensor pin 3 to the reference, and on to NT-AGND [assumption: a few mm of plane]"}
   r_plane:  {value: 0.005, source: "the instrument's PWR_GND plane, from the LED row and from NT-AGND to J-UMB [assumption: 1 oz plane, tens of mm]"}
-  i_row_full: {value: 0.210, source: "the LED row lit: the top of led-row-current's range (a register range: sim.py cites only its first number, so the top is written here and moves with it by hand) [datasheets/led/WS2815B-V1.pdf p.2; the figure is blocked on E6]"}
+  i_row_full: {value: 0.195, source: "the LED row lit: the top of led-row-current's range (a register range: sim.py cites only its first number, so the top is written here and moves with it by hand) [datasheets/led/WS2815B-V1.pdf p.2; the figure is blocked on E6]"}
   i_led_blank: {value: 2.0e-3, source: "one WS2815B-V1 blanked, under 2 mA [ds WS2815B-V1.pdf p.3, as led-row-current's derivation reads it]"}
   v_led_on: {value: 9.0, source: "the LED row's current taken as on smoothly above 9 V of INST_POS12 [assumption: a load, not a source, while the rail comes up; the running rail is ~11.9 V, far above it]"}
   v_logic_on: {value: 6.0, source: "U-REG-LOGIC (ADP7118) taken as regulating once +12 V is past 6 V [assumption: 5 V out plus its dropout; the start is not what any scenario measures]"}
@@ -263,7 +263,7 @@ derived:
 vary:
   r_psu:   {tol: [-0.8, 3.0], source: "10 to 200 mohm about 50 (power-entry/sim)"}
   esr_c2:  {tol: [-0.6667, 2.9], source: "C2's ESR, 0.11 to 1.33 ohm (power-entry/sim): it damps U-ISO's input LC"}
-  esr_strip: {tol: [-0.5, 1.8], source: "C-STRIP-BULK's ESR (power-entry-instrument/sim)"}
+  esr_strip: {tol: [-0.5, 20.5], source: "one C-STRIP-BULK can's ESR, 14 mohm to its 120 Hz maximum (power-entry-instrument/sim)"}
   k_gauge: {tol: [0.0, 1.6], source: "24 to 28 AWG"}
   k_line:  {tol: [0.0, 9.0], source: "x1 to x10"}
 

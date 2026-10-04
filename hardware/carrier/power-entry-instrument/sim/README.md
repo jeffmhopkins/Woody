@@ -36,25 +36,25 @@ put `V_GS` at 16.5 V with the output at 12 V.)
 
 | Sim | What | Result |
 |---|---|---|
-| `input-z` | the impedance at `C-BUCK-IN`, looking back through `L-BUCK-IN`, `C-STRIP-BULK` and the cable | peak 0.57 Ω at 3.8 kHz at the nominal; **55× (35 dB) under the buck's −103 Ω at the worst corner**, 180× at the nominal. Swept 1 Hz–10 MHz since #5: at some corners the largest value is an END of the sweep (`z_edge` = 1) — the cable's DC resistance at 1 Hz, or `C-BUCK-IN`'s ESR plateau at 10 MHz (1.86 Ω at its 120 Hz maximum, the worst corner) — not a resonance |
-| `cold-start` | the rack powers up with the instrument plugged in | starts at every corner in 109–239 ms; `U-ISO` never above 0.54 A; the buck's input never falls back once it has started; nothing near `D-TVS-PWR`'s 15 V |
-| `hot-plug` | the instrument plugged into a running module, 129 corners (`R-ILIM`'s 1 % among them since #5) | starts at every corner in 94–183 ms, no fault latch. **`U-ISO` peaks at 0.50–0.56 A at every corner, 3.3× under its 1.84 A over-current threshold** (`hotplug-iso-ocp`); `VCC` at the load switch does not move (11.996 V); the ring at `J-UMB` peaks at 14.2 V, under `D-TVS-PWR`'s standoff; `Q-INRUSH` dissipates 1.8 W at most |
-| `replug-late` | running, pulled, and put back 200 ms later | starts again from off: `U-ISO` 0.51–0.53 A |
+| `input-z` | the impedance at `C-BUCK-IN`, looking back through `L-BUCK-IN`, `C-STRIP-BULK` and the cable | peak 0.65 Ω at 4.0 kHz at the nominal; **55× (35 dB) under the buck's −103 Ω at the worst corner**, 159× at the nominal. Swept 1 Hz–10 MHz since #5: at some corners the largest value is an END of the sweep (`z_edge` = 1) — the cable's DC resistance at 1 Hz, or `C-BUCK-IN`'s ESR plateau at 10 MHz (1.86 Ω at its 120 Hz maximum, the worst corner) — not a resonance |
+| `cold-start` | the rack powers up with the instrument plugged in | starts at every corner in 108–238 ms; `U-ISO` never above 0.52 A; the buck's input never falls back once it has started; nothing near `D-TVS-PWR`'s 15 V |
+| `hot-plug` | the instrument plugged into a running module, 129 corners (`R-ILIM`'s 1 % among them since #5) | starts at every corner in 93–181 ms, no fault latch. **`U-ISO` peaks at 0.49–0.54 A at every corner, 3.4× under its 1.84 A over-current threshold** (`hotplug-iso-ocp`); `VCC` at the load switch does not move (11.996 V); the ring at `J-UMB` peaks at 14.3 V, under `D-TVS-PWR`'s standoff; `Q-INRUSH` dissipates 1.75 W at most |
+| `replug-late` | running, pulled, and put back 200 ms later | starts again from off: `U-ISO` 0.49–0.51 A |
 | `replug-early` | running, pulled, and put back 30 ms later | **A recorded hazard:** the bulk still holds a few volts and `Q-INRUSH` is still enhanced, so the replug reaches `U-ISO`'s threshold, as every hot-plug did before `Q-INRUSH`; see `results.yaml` for how long, and `VCC`'s dip, at every corner including the LT1641's highest gate drive |
-| `supply-cold-start` | `cold-start` with U-ISO's output at ±3.1 % (#12), 65 corners | **`INST_POS12` peaks at 12.20 V**, under the WS2815B-V1's 13.5 V absolute maximum; `J-UMB` at most 12.37 V (the supply itself); U-ISO 0.50–0.56 A; the buck's input never falls back |
-| `supply-hot-plug` | `hot-plug` with U-ISO at ±3.1 %, 129 corners | **the ring at `J-UMB` peaks at 14.68 V** at U-ISO's +3.1 % — under `D-TVS-PWR`'s 15 V standoff by **0.32 V**, the thinnest margin in this suite; `INST_POS12` at most 12.19 V; U-ISO 0.49–0.57 A, no fault latch |
-| `supply-replug-late` | `replug-late` with U-ISO at ±3.1 % | `J-UMB` 14.43 V, `INST_POS12` 12.20 V at most; U-ISO under 0.55 A |
-| `led-pwm` | the LED row's PWM (in phase, half duty, 2/3/3.39/4 kHz, 0.210 A — every LED, fourteen — and 0.367 A swing) on the input LC, 136 runs | `BUCK_IN` ripple **27–156 mV p-p**, never below **11.23 V**; `INST_POS12` ripple 20–220 mV p-p, never above **12.37 V** |
-| `led-pwm-matrix` | the same with the buck's input power swinging 3.08 W in phase (the Matrix from typical play to the 5 V rail's clamp-legal worst), 68 runs | `BUCK_IN` ripple up to **0.94 V p-p** at `C-BUCK-IN`'s 120 Hz ESR maximum, never below **10.70 V** — 2.7 V over the R-78E5.0's 8 V minimum; `INST_POS12` at most 12.29 V |
+| `supply-cold-start` | `cold-start` with U-ISO's output at ±3.1 % (#12), 65 corners | **`INST_POS12` peaks at 12.20 V**, under the WS2815B-V1's 13.5 V absolute maximum; `J-UMB` at most 12.37 V (the supply itself); U-ISO 0.48–0.54 A; the buck's input never falls back |
+| `supply-hot-plug` | `hot-plug` with U-ISO at ±3.1 %, 129 corners | **the ring at `J-UMB` peaks at 14.69 V** at U-ISO's +3.1 % — under `D-TVS-PWR`'s 15 V standoff by **0.31 V**, the thinnest margin in this suite; `INST_POS12` at most 12.20 V; U-ISO 0.47–0.55 A, no fault latch |
+| `supply-replug-late` | `replug-late` with U-ISO at ±3.1 % | `J-UMB` 14.10 V, `INST_POS12` 12.21 V at most; U-ISO under 0.53 A |
+| `led-pwm` | the LED row's PWM (in phase, half duty, 2/3/3.39/4 kHz, 0.195 A — every LED, thirteen — and 0.367 A swing) on the input LC, 136 runs | `BUCK_IN` ripple **21–140 mV p-p**, never below **11.23 V**; `INST_POS12` ripple 17–145 mV p-p, never above **12.34 V** |
+| `led-pwm-matrix` | the same with the buck's input power swinging 3.08 W in phase (the Matrix from typical play to the 5 V rail's clamp-legal worst), 68 runs | `BUCK_IN` ripple up to **0.96 V p-p** at `C-BUCK-IN`'s 120 Hz ESR maximum, never below **10.70 V** — 2.7 V over the R-78E5.0's 8 V minimum; `INST_POS12` at most 12.29 V |
 
 **The LT1641's fault `TIMER` on the circuit as built** (`timer_peak`, since #5
 finding 3 moved `C-TIMER-LOADSW`'s sizing check here from
 `umbilical-load-switch/sim`, whose deck has no cable and no `Q-INRUSH`): it
 never leaves 0 V on a cold start, a hot-plug or a late replug at any corner —
 `Q-INRUSH`'s ramp keeps the load switch out of current limit — and reaches
-4.2 mV of its 1.233 V on the early replug. The page's 47.5 ms / 2× sizing is
+4.1 mV of its 1.233 V on the early replug. The page's 47.5 ms / 2× sizing is
 therefore the bound for `Q-INRUSH` failed short, which
-`umbilical-load-switch/sim` still runs (66 mV at its worst corner, at 2.2 mF).
+`umbilical-load-switch/sim` still runs (63 mV at its worst corner, at 2.2 mF).
 
 ## What it says that the page does not
 
@@ -62,14 +62,15 @@ therefore the bound for `Q-INRUSH` failed short, which
   The page puts `Q` between 0.25 and 1.8 by reading `C-BUCK-IN`'s ESR between
   its two datasheet *maxima*; a real part sits below its maximum, so that range
   is not a worst case. The run sweeps the ESR down to a third of the 100 kHz
-  maximum and finds the margin still 55×, because `C-STRIP-BULK` (470 µF, its
-  own ESR) sits at the input node ahead of the LC and the cable's resistance
+  maximum and finds the margin still 55×, because `C-STRIP-BULK` (two 220 µF
+  polymer cans since #19, their ESR swept from half the 100 kHz maximum to the
+  120 Hz figure) sits at the input node ahead of the LC and the cable's resistance
   behind it: they, not `C-BUCK-IN`'s ESR alone, set the peak. Keep the
   electrolytic — the conclusion survives, the arithmetic behind it does not.
 - **Without `Q-INRUSH` a hot-plug reached `U-ISO`'s current limit**, at
   every corner, for over 100 µs — longer at the LT1641's higher gate drives.
   The load switch's FET is enhanced whenever the module runs, so the plug put
-  the instrument's ~570 µF straight onto `C-ISO-OUT` through the cable; the
+  the instrument's ~540 µF straight onto `C-ISO-OUT` through the cable; the
   LT1641's limit then had to pull a gate that `C-GATE-LOADSW` was holding up
   through `R-GATE-COMP`, and the model's amplifier (its transconductance is an
   assumption, the datasheet gives none) let the current overshoot until it
@@ -96,7 +97,7 @@ therefore the bound for `Q-INRUSH` failed short, which
   `umbilical-load-switch/sim` varies it) and **`INST_POS12` is measured** —
   the LED row's VDD, whose 13.5 V absolute maximum nothing guarded before.
   It holds with 1.3 V to spare. The standoff margin at `J-UMB` is the one to
-  watch: 14.24 V at the nominal supply becomes **14.68 V** at +3.1 %.
+  watch: 14.29 V at the nominal supply becomes **14.69 V** at +3.1 %.
 - **The LED row's PWM is run on the input LC** (`led-pwm`, `led-pwm-matrix`).
   The LC's 3.39 kHz sits inside the row's 2–4 kHz, and `input-z` only checks its
   small-signal peak. Driven, the buck's input keeps at least 2.7 V over its
@@ -108,8 +109,8 @@ therefore the bound for `Q-INRUSH` failed short, which
 
 This README owns, in `config/figures.yaml`:
 
-- `instrument-input-z-margin`: 55x worst corner, 180x nominal (peak 0.57 ohm at 3.8 kHz)
-- `hotplug-iso-ocp`: 0.50-0.56 A at every corner, 3.3x under the threshold and never at it
+- `instrument-input-z-margin`: 55x worst corner, 159x nominal (peak 0.65 ohm at 4.0 kHz)
+- `hotplug-iso-ocp`: 0.49-0.54 A at every corner, 3.4x under the threshold and never at it
 
 ## What a result is worth
 

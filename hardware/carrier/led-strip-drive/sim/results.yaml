@@ -4,8 +4,8 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/carrier/led-strip-drive/sim/sims.yaml: 32566a38575369c6
-  hardware/carrier/led-strip-drive/netlist.yaml: 9042cc93a19e6824
+  hardware/carrier/led-strip-drive/sim/sims.yaml: 3f2ccd93b7a4beac
+  hardware/carrier/led-strip-drive/netlist.yaml: ec7ec56762e982ee
   hardware/carrier/led-strip-drive/sim/data.cir: 5eace363e6537ca4
 ngspice: '42'
 sims:

@@ -35,11 +35,11 @@ params:
   r_cable: {value: 0.18, source: "2 m at Belden 1752A's 90 ohm/km max, 24 AWG [datasheets/connectors/BELDEN-1752A-CAT5E-PATCH-24AWG-STRANDED.pdf p.1]; CABLE-UMB's gauge is open, 26-28 AWG is 1.6-2.6x (vary)"}
   l_cable: {value: 0.95e-6, source: "2 m of pair 3/6: the pair's loop inductance Z_diff/v = 100 ohm / (0.70 c) = 0.48 uH/m [calc, same datasheet], half in each leg"}
   # --- the instrument
-  esr_strip: {value: 0.16, source: "C-STRIP-BULK (UCW1E471MNL1GS): 0.16 ohm max impedance at 100 kHz; tan d 0.16 at 120 Hz is 0.45 ohm [datasheets/discrete-and-power/NICHICON-UCW-SERIES-UCW1E471MNL1GS.pdf]; maxima only (vary)"}
+  esr_strip: {value: 0.028, source: "ONE C-STRIP-BULK can (MA25V220M6X8, two in parallel: r_strip, c_strip): 28 mohm max at 100 kHz; tan d 0.10 at 120 Hz is 0.60 ohm [calc: 0.10 / (2 pi 120 Hz x 220 uF)] [datasheets/discrete-and-power/JIERR-MA-SERIES-MA25V220M6X8.pdf p.3]; maxima only (vary)"}
   esr_buck: {value: 0.26, source: "C-BUCK-IN (UCM1E101MCL1GS): 0.26 ohm max at 100 kHz, 1.86 ohm (tan d 0.14) at 120 Hz [datasheets/discrete-and-power/NICHICON-UCM-SERIES-UCM1E101MCL1GS.pdf p.2, as the page reads it]. MAXIMA ONLY: a real part sits below them, so the low end is swept to a third of the 100 kHz figure [assumption] (vary)"}
   r_lbin:  {value: 0.05, source: "L-BUCK-IN's DCR [assumption, as umbilical-load-switch/sim]"}
   p_buck:  {value: 1.256, source: "the buck's input power at typical play: 226 mA x 5 V / 0.90 [calc from umbilical-current's derivation, ADR 0005]"}
-  i_12:    {value: 0.263, source: "the 12 V loads at typical play, 263 mA (umbilical-current's derivation, ADR 0005, with the fourteenth LED's 15 mA): the LEDs' lit share and the analog block"}
+  i_12:    {value: 0.248, source: "the 12 V loads at typical play, 248 mA (umbilical-current's derivation, ADR 0005; thirteen LEDs since the second ADR 0028 amendment of 2026-10-03): the LEDs' lit share and the analog block"}
   v_on:    {value: 8.0, source: "the R-78E5.0-1.0's input minimum, 8 V [datasheets/discrete-and-power/R-78E5.0-1.0.pdf p.1]: the buck modelled as drawing its power from there up (no UVLO hysteresis is published)"}
   v_nom:   {value: 11.4, source: "the buck's input at typical play, the page's 11.4 V"}
   t_end:   {value: 0.6}
@@ -60,7 +60,7 @@ params:
   t_un:    {value: 10.0, source: "the plug pulled: after the run unless a sim sets it"}
   t_re:    {value: 11.0, source: "the plug put back: after the run unless a sim sets it"}
   # --- pei-pwm.cir: the LED row's PWM on the input LC, at the operating point (#12 item 4)
-  pw_i_swing: {value: 0.210, source: "the LEDs' swing, blanked to full white: 0.210 A, every WS2815B-V1 (n:D-LED, fourteen) at full white, the top of led-row-current (blocked on E6; a register range, so the top is written here and moves with it by hand); 0.367 A, ADR 0005's quiescent-to-clamp-legal-worst swing - the two module/power-entry/sim's led-pwm sweeps (sweep)"}
+  pw_i_swing: {value: 0.195, source: "the LEDs' swing, blanked to full white: 0.195 A, every WS2815B-V1 (n:D-LED, thirteen) at full white, the top of led-row-current (blocked on E6; a register range, so the top is written here and moves with it by hand); 0.367 A, ADR 0005's quiescent-to-clamp-legal-worst swing - the two module/power-entry/sim's led-pwm sweeps (sweep)"}
   pw_i_q_led: {value: 2.0e-3, source: "one WS2815B-V1 blanked, 'Quiescent Current < 2mA' [datasheets/led/WS2815B-V1.pdf p.3]: its maximum, as module/power-entry/sim takes it"}
   pw_f:   {value: 2000.0, source: "the WS2815B-V1's PWM: 'scan frequency is of 2KHz' and 'Refresh Frequency updates to 4KHz' [datasheets/led/WS2815B-V1.pdf p.1]; no tolerance is published, so the sims sweep 2-4 kHz and the input LC's 3.39 kHz inside it (sweep)"}
   pw_duty:   {value: 0.5, source: "the pulse's duty; 0.5 puts the most current in the fundamental, as module/power-entry/sim's led-pwm takes it"}
@@ -71,6 +71,9 @@ params:
   pw_t_win: {value: 5.0e-3}
 
 derived:
+  # C-STRIP-BULK is two cans of one row in parallel (#19): every deck takes the pair
+  c_strip: "v['C-STRIP-BULK'] * v['n:C-STRIP-BULK']"
+  r_strip: "v['esr_strip'] / v['n:C-STRIP-BULK']"
   v_set0: "0.0 if v['cold'] else v['v_bus']"
   plug0: "1.0 if v['cold'] else 0.0"
   t_plug1: "v['t_plug'] + 1e-9"
@@ -91,7 +94,7 @@ derived:
 vary:
   v_bus:  {tol: [-0.031, 0.031], source: "U-ISO's output: +/-3.1 %, as umbilical-load-switch/sim varies it (RECOM-RPA20-AW.pdf PD-5: accuracy 2.0 % + line 0.2 % + load 0.1 % + tempco 0.02 %/K x 40 K)"}
   esr_buck: {tol: [-0.667, 6.15], source: "0.087 ohm (a third of the 100 kHz maximum) to 1.86 ohm (the 120 Hz maximum)"}
-  esr_strip: {tol: [-0.5, 1.8]}
+  esr_strip: {tol: [-0.5, 20.5], source: "half the 100 kHz maximum [assumption, as for the part it replaced] to the 120 Hz maximum, 0.60 ohm"}
   r_cable: {tol: [0.0, 1.6]}
   t_iso:  {tol: [-0.333, 0.333], source: "8 and 16 ms about 12"}
   # the LT1641's datasheet spreads, as umbilical-load-switch/sim varies them (LT1641.pdf p.2)
@@ -243,7 +246,7 @@ sims:
   # duty, and read BUCK_IN (the buck's input) and INST_POS12 (the row's VDD).
   - name: led-pwm
     deck: pei-pwm.cir
-    sweep: {pw_f: [2000.0, 3000.0, 3390.0, 4000.0], pw_i_swing: [0.210, 0.367]}
+    sweep: {pw_f: [2000.0, 3000.0, 3390.0, 4000.0], pw_i_swing: [0.195, 0.367]}
     vary: [v_bus, esr_buck, esr_strip, r_cable]
     measures: &pwm_measures [buck_pp_mv, buck_min, pos12_pp_mv, pos12_max]
     post: &pwm_post

@@ -57,8 +57,8 @@ CIGD gq gdm {{C-INRUSH-GD}}
 RIGD gdm ins {{R-INRUSH-GD}}
 DRST ig gq DRESET
 * behind it (INST_POS12)
-CSTRIP ins cs1 {{C-STRIP-BULK}}
-RCSTRIP cs1 ig {{esr_strip}}
+CSTRIP ins cs1 {{c_strip}}
+RCSTRIP cs1 ig {{r_strip}}
 B12 ins ig I = {{i_12}} * max(0, min(1, V(ins,ig) / {{v_nom}}))
 LBIN ins lb1 {{L-BUCK-IN}}
 RLBIN lb1 cb {{r_lbin}}

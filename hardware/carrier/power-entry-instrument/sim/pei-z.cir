@@ -16,8 +16,8 @@ LCP cp1 inp {{l_cable}}
 RCN ig cn1 {{r_cable}}
 LCN cn1 0 {{l_cable}}
 RQ inp ins {{r_on_z}}
-CSTRIP ins cs1 {{C-STRIP-BULK}}
-RCSTRIP cs1 ig {{esr_strip}}
+CSTRIP ins cs1 {{c_strip}}
+RCSTRIP cs1 ig {{r_strip}}
 LBIN ins lb1 {{L-BUCK-IN}}
 RLBIN lb1 cb {{r_lbin}}
 CBUCK cb cb1 {{C-BUCK-IN}}

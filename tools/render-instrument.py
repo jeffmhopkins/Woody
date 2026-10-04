@@ -335,7 +335,10 @@ GROUPS = {
     "key-board spacers": ["key-board spacer *"],
     "keycaps": ["cap LH*", "cap RH*", "cap socket LH*", "cap socket RH*"],
     "column screws": ["column screw *"],
-    "Matrix": ["Matrix board", "Matrix LEDs", "Matrix underside parts", "Matrix harness *", "USB-C plug"],
+    # the carrier hung from the oak top (#23): its board, HDR-MATRIX, its mounts
+    "Matrix": ["Matrix board", "Matrix LEDs", "Matrix underside parts", "Matrix USB-C receptacle", "Matrix harness *",
+               "USB-C plug", "Matrix carrier", "Matrix carrier *", "Matrix header *", "J-MCU-C",
+               "IDC plug Matrix carrier"],
     "tail equipment": ["etherCON", "umbilical adapter"],
     # flexible runs between groups: drawn assembled, left out of an explode
     "ribbons": ["ribbon *", "Matrix ribbon", "USB-C lead"],
@@ -587,10 +590,12 @@ class Mats:
             (["main board stud *", "main board spacer *", "main board nut *", "key-board spacer *", "column screw *",
               "U-bolt nut *", "U-bolt washer *", "U-bolt spacer *"], M.zinc),
             (["cap *", "cap socket *"], M.keycap),
-            (["IDC plug *", "etherCON", "USB-C plug", "USB-C receptacle", "Matrix harness *"], M.black),
+            (["IDC plug *", "etherCON", "USB-C plug", "USB-C receptacle", "Matrix USB-C receptacle", "Matrix harness *",
+              "Matrix header *", "J-MCU-C"], M.black),
             (["ribbon *", "Matrix ribbon", "USB-C lead"], M.ribbon),
             (["breath *"], M.silicone),
-            (["Matrix board", "Matrix underside parts"], M.matrix_pcb), (["Matrix LEDs"], M.matrix_led),
+            (["Matrix board", "Matrix underside parts", "Matrix carrier"], M.matrix_pcb), (["Matrix LEDs"], M.matrix_led),
+            (["Matrix carrier *"], M.zinc),     # its spacers, washers, inserts and screws
             (["umbilical adapter"], M.adapter),
         ]
         for pats, m in table:

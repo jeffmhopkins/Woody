@@ -119,6 +119,7 @@ for m in Capacitor_SMD.3dshapes/C_0805_2012Metric.step \
          Connector_PinHeader_2.54mm.3dshapes/PinHeader_2x05_P2.54mm_Vertical.step \
          Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x10_P2.54mm_Vertical.step \
          Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x04_P2.54mm_Vertical.step \
+         Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x03_P2.54mm_Vertical.step \
          Converter_DCDC.3dshapes/Converter_DCDC_RECOM_R-78E-0.5_THT.step; do
   if [ ! -s "$models/$m" ]; then
     mkdir -p "$models/$(dirname "$m")"

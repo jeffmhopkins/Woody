@@ -17,7 +17,7 @@ next.
 
 | Sim | Page's claim | Result |
 |---|---|---|
-| `t0h` | 22 ns edge (330 Ω × 30 pF, × 2.2), a tenth of T0H | **33 ns** 10–90 % at the nominal, 29–42 ns over the corners: the gate's own resistance and the trace out to the row's tail-end LED and back (~65 mm, `c_trace` 8 pF −50/+100 %) add half again. Under a fifth of T0H; the bar is 45 ns |
+| `t0h` | 22 ns edge (330 Ω × 30 pF, × 2.2), a tenth of T0H | **33 ns** 10–90 % at the nominal, 29–42 ns over the corners: the gate's own resistance and the trace out to the row's tail-end LED and back (~41 mm since the second ADR 0028 amendment of 2026-10-03, carried at `c_trace` 8 pF −50/+100 %) add half again. Under a fifth of T0H; the bar is 45 ns |
 | | T0H arrives intact | a 220 ns high at the gate reads as **217–236 ns**, depending where in 1.5–2.7 V the LED's threshold sits: at the `V_IH` end 3 ns short of T0H's 220 ns minimum. The edge costs a few nanoseconds, not a fraction of the pulse |
 | | no overshoot past the 5.7 V input maximum | 5.00 V: an RC, nothing rings |
 

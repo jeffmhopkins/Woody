@@ -4,16 +4,16 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/panel-led/sim/sims.yaml: 382ff639596c07dc
+  hardware/module/panel-led/sim/sims.yaml: 652a64f857dfee0b
   hardware/module/panel-led/netlist.yaml: 90d3bf8e99aa8da8
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
   hardware/module/panel-led/sim/led.cir: 09f6c8f740ea5f9f
-  hardware/module/power-entry/sim/sims.yaml: ac7fce77bd35dc1e
+  hardware/module/power-entry/sim/sims.yaml: 582583c807777927
   figure:dac-rail: 5.23 V
   figure:mod-reference: 3.3333 V
 ngspice: '42'
 sims:
-  led[i_swing=0.21]:
+  led[i_swing=0.195]:
     corners: 9
     measures:
       i_led:
@@ -23,22 +23,22 @@ sims:
         max: 0.00484364
         max_at: R-LED-PANEL- v_set+ vf20-
       i_led_pp:
-        nominal: 4.90303e-06
-        min: 4.70181e-06
+        nominal: 4.55311e-06
+        min: 4.36625e-06
         min_at: R-LED-PANEL+ v_set- vf20+
-        max: 5.10954e-06
+        max: 4.74488e-06
         max_at: R-LED-PANEL- v_set+ vf20-
       v_on_100u:
-        nominal: 2.79341
-        min: 1.79044
+        nominal: 2.79324
+        min: 1.79033
         min_at: R-LED-PANEL- v_set- vf20-
-        max: 3.195
+        max: 3.19482
         max_at: R-LED-PANEL+ v_set- vf20+
       v_on_1m:
-        nominal: 4.9016
-        min: 3.87977
+        nominal: 4.90148
+        min: 3.87964
         min_at: R-LED-PANEL- v_set- vf20-
-        max: 5.32528
+        max: 5.325
         max_at: R-LED-PANEL+ v_set- vf20+
     asserts:
     - expr: min['i_led'] > 3.5e-3 and max['i_led'] < 5.0e-3

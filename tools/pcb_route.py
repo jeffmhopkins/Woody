@@ -891,12 +891,12 @@ class Obstacles:
         # locked too, but wider)
         guards = {n: (float(pr["guard"]), float(pr["width"])) for pr in lay.get("pairs") or [] if pr.get("guard") for n in pr["nets"]}
         for t in board.GetTracks():
-            if type(t) is pcbnew.PCB_TRACK and t.IsLocked() and t.GetNetname() in guards and t.GetLayer() in (pcbnew.F_Cu, pcbnew.B_Cu) \
-                    and abs(TO(t.GetWidth()) - guards[t.GetNetname()][1]) < 1e-3:
+            if type(t) in (pcbnew.PCB_TRACK, pcbnew.PCB_ARC) and t.IsLocked() and t.GetNetname() in guards \
+                    and t.GetLayer() in (pcbnew.F_Cu, pcbnew.B_Cu) and abs(TO(t.GetWidth()) - guards[t.GetNetname()][1]) < 1e-3:
                 a, b = t.GetStart(), t.GetEnd()
                 if (a.x, a.y) == (b.x, b.y):
                     continue
-                g = LineString([(TO(a.x), TO(a.y)), (TO(b.x), TO(b.y))]).buffer(TO(t.GetWidth()) / 2 + guards[t.GetNetname()][0], 8)
+                g = track_line(t).buffer(TO(t.GetWidth()) / 2 + guards[t.GetNetname()][0], 8)
                 self.items.append((g, t.GetNetname(), {"F" if t.GetLayer() == pcbnew.F_Cu else "B"}, "guard"))
         self.outline = board_outline_with_holes(board)
         from shapely.prepared import prep
@@ -915,10 +915,9 @@ class Obstacles:
             self.add(c.buffer(TO(t.GetWidth(pcbnew.F_Cu)) / 2, 16), t.GetNetname(), {"F", "B", "I"}, "via")
             self.add(c.buffer(TO(t.GetDrillValue()) / 2, 16), t.GetNetname(), {"F", "B", "I"}, "vhole")
         else:
-            # an inner layer's track (a board that routes layer 3) is an obstacle to vias only
-            a, b = t.GetStart(), t.GetEnd()
-            g = LineString([(TO(a.x), TO(a.y)), (TO(b.x), TO(b.y))]).buffer(TO(t.GetWidth()) / 2, 8) \
-                if (a.x, a.y) != (b.x, b.y) else Point(TO(a.x), TO(a.y)).buffer(TO(t.GetWidth()) / 2)
+            # an inner layer's track (a board that routes layer 3) is an obstacle to vias only;
+            # an arc by its own curve, not its chord
+            g = track_line(t).buffer(TO(t.GetWidth()) / 2, 8)
             self.add(g, t.GetNetname(), {{pcbnew.F_Cu: "F", pcbnew.B_Cu: "B"}.get(t.GetLayer(), "I")}, "track")
 
     def near(self, g, pad=1.0):
@@ -1211,6 +1210,8 @@ def route_pair(board, lay, obs, spec):
     leg really starts at the sensor's pin. Locked, so the autorouter keeps them.
     Returns what it could not do."""
     import pcb
+    if spec.get("detours") is not None:
+        return route_pair_smooth(board, lay, obs, spec)
     nets, w, gap, L = spec["nets"], spec["width"], spec["gap"], {"F.Cu": "F", "B.Cu": "B"}[spec["layer"]]
     lid = pcbnew.F_Cu if L == "F" else pcbnew.B_Cu
     pads = {}
@@ -1262,6 +1263,13 @@ def route_pair(board, lay, obs, spec):
         pts = list(leg.coords)
         for end, pname in ((pts[0], pf), (pts[-1], pt)):
             g = Grid(obs, L, w / 2, own={net})
+            pad_obj = board.FindFootprintByReference(pname.split(".")[0]).FindPadByNumber(pname.split(".")[1])
+            if not pad_obj.IsOnLayer(lid):
+                # a pad on the other face (an SMD part on layer 1 for a layer-4 pair): the
+                # autorouter joins the leg's end to it, by a via (a track under the pad would
+                # only dangle)
+                report.append(f"pair {net}: {pname} is on the other face - its via left to the autorouter")
+                continue
             pg = pads[pname].buffer(-0.05)
             bx0, by0, bx1, by1 = pads[pname].bounds
             goals = {(i, j) for i in range(g.cell(bx0, by0)[0], g.cell(bx1, by1)[0] + 1)
@@ -1276,7 +1284,452 @@ def route_pair(board, lay, obs, spec):
                 if math.dist(a, b) > 1e-3:
                     lay_track(board, obs, net, a, b, w, L)
     print(f"route: pair {' / '.join(nets)} - {centre.length:.1f} mm side by side on {spec['layer']}")
+    if spec.get("guard_traces"):
+        report += guard_traces(board, lay, obs, spec, centre, L, lid)
     return report
+
+
+def guard_traces(board, lay, obs, spec, centre, L, lid):
+    """layout.yaml pairs: `guard_traces: {net, every}` - a ground track each side of the
+    coupled run, one clearance off its legs, stitched by a via into its net's island or
+    strip at least every `every` mm. Laid where it fits: a piece that would come within the
+    clearance of another net's copper (a pad, a keep-out, the board's edge) is left out,
+    and a run with no room for a single stitching via is dropped, never left floating.
+    Locked, so the autorouter keeps them. Returns the spans left without a guard."""
+    gnet, every = spec["guard_traces"]["net"], float(spec["guard_traces"].get("every", 5.0))
+    w, gap = spec["width"], spec["gap"]
+    gw = w
+    off = (w + gap) / 2 + w / 2 + obs.clear + gw / 2
+    voff = (w + gap) / 2 + w / 2 + obs.clear + obs.via / 2 + 0.02
+    region = plane_regions(board, lay).get(gnet)
+    mine = {gnet}
+    step = 0.4
+    out, laid, vias = [], 0.0, 0
+
+    def clear_of_others(g):
+        for geom, n, ls, kind in obs.near(g, 0.5):
+            if L not in ls or kind in ("silk", "guard") or n in mine:
+                continue
+            if geom.distance(g) < obs.clear - 1e-3:
+                return False
+        return obs.inner.contains(g)
+    for side in (1, -1):
+        line = centre.offset_curve(side * off, join_style=2, mitre_limit=2.0)
+        vline = centre.offset_curve(side * voff, join_style=2, mitre_limit=2.0)
+        n = max(1, int(line.length / step))
+        keep = []
+        for i in range(n):
+            a, b = line.interpolate(i * line.length / n), line.interpolate((i + 1) * line.length / n)
+            keep.append(clear_of_others(LineString([a, b]).buffer(gw / 2, cap_style=1)))
+        runs, cur = [], None
+        for i, k in enumerate(keep):
+            if k and cur is None:
+                cur = i
+            if not k and cur is not None:
+                runs.append((cur, i))
+                cur = None
+        if cur is not None:
+            runs.append((cur, n))
+        for i0, i1 in runs:
+            d0, d1 = i0 * line.length / n, i1 * line.length / n
+            if d1 - d0 < 1.0:
+                continue
+            got, d = [], d0 + 0.5
+            while d <= d1 - 0.5:
+                q = vline.interpolate(d / line.length * vline.length)
+                if (region is None or region.contains(q)) and obs.via_ok(q.x, q.y, gnet):
+                    got.append((d, q))
+                    d += every
+                else:
+                    d += 0.4
+            if len(got) < 2:
+                a_, b_ = line.interpolate(d0), line.interpolate(d1)
+                out.append(f"guard {gnet}: {d1 - d0:.1f} mm beside the pair, ({a_.x:.1f}, {a_.y:.1f}) to ({b_.x:.1f}, {b_.y:.1f}), "
+                           f"with no room for two stitching vias - left out")
+                continue
+            # the run from its first via to its last: no end of it left hanging
+            d0, d1 = got[0][0], got[-1][0]
+            ds = [d0] + [x for x in (line.project(Point(c)) for c in line.coords) if d0 < x < d1] + [d1]
+            pts = [line.interpolate(x) for x in sorted(ds)]
+            for a, b in zip(pts, pts[1:]):
+                if a.distance(b) > 1e-3:
+                    lay_track(board, obs, gnet, (a.x, a.y), (b.x, b.y), gw, L)
+            for d_, q in got:
+                lay_via(board, obs, gnet, q.x, q.y)
+                g_ = line.interpolate(d_)
+                lay_track(board, obs, gnet, (g_.x, g_.y), (q.x, q.y), gw, L)
+                vias += 1
+            laid += d1 - d0
+    print(f"route: pair {' / '.join(spec['nets'])} - guard {gnet} {laid:.1f} mm, {vias} stitching via(s)")
+    return out
+
+
+# ------------------------------------------------------------------ smooth paths (arcs)
+# A pair laid along a drawn centreline (layout.yaml pairs: `detours:`), not the grid:
+# straight runs between its `through:` points, every corner a fillet arc of `fillet:` mm,
+# and round each detour's mount a concentric arc of radius r, entered and left by two
+# fillets mirrored about the mount's centre line - so every leg and guard is the same
+# shape offset: lines and concentric arcs, one spacing all the way (owner, 2026-10-04:
+# "curve around standoffs much better and be mirrored around them").
+
+class Prim:
+    """A line (kind 'L': p0 -> p1) or an arc (kind 'A': centre, radius, start angle a0,
+    signed sweep), both in PCB mm; point(t) for t in [0, 1]."""
+    def __init__(self, kind, **k):
+        self.kind = kind
+        self.__dict__.update(k)
+
+    def point(self, t):
+        if self.kind == "L":
+            return (self.p0[0] + (self.p1[0] - self.p0[0]) * t, self.p0[1] + (self.p1[1] - self.p0[1]) * t)
+        a = self.a0 + self.sweep * t
+        return (self.c[0] + self.r * math.cos(a), self.c[1] + self.r * math.sin(a))
+
+    def tangent(self, t):
+        if self.kind == "L":
+            dx, dy = self.p1[0] - self.p0[0], self.p1[1] - self.p0[1]
+        else:
+            a = self.a0 + self.sweep * t
+            s = 1 if self.sweep > 0 else -1
+            dx, dy = -math.sin(a) * s, math.cos(a) * s
+        n = math.hypot(dx, dy)
+        return (dx / n, dy / n)
+
+    def length(self):
+        if self.kind == "L":
+            return math.dist(self.p0, self.p1)
+        return abs(self.sweep) * self.r
+
+    def offset(self, d):
+        """The same primitive d mm to the left of travel (a concentric arc, a parallel line)."""
+        if self.kind == "L":
+            tx, ty = self.tangent(0)
+            nx, ny = -ty, tx
+            return Prim("L", p0=(self.p0[0] + d * nx, self.p0[1] + d * ny), p1=(self.p1[0] + d * nx, self.p1[1] + d * ny))
+        # left of travel is toward the centre on a left turn (sweep > 0)
+        r = self.r - d if self.sweep > 0 else self.r + d
+        return Prim("A", c=self.c, r=r, a0=self.a0, sweep=self.sweep)
+
+    def piece(self, t0, t1):
+        if self.kind == "L":
+            return Prim("L", p0=self.point(t0), p1=self.point(t1))
+        return Prim("A", c=self.c, r=self.r, a0=self.a0 + self.sweep * t0, sweep=self.sweep * (t1 - t0))
+
+    def line(self, n=24):
+        return LineString([self.point(i / n) for i in range(n + 1)] if self.kind == "A" else [self.p0, self.p1])
+
+
+def _unit(v):
+    n = math.hypot(*v)
+    return (v[0] / n, v[1] / n)
+
+
+def _arc_between(c, r, p, q, sign, through=None):
+    """The arc round c from p to q turning `sign` (+1 left, -1 right); the short way unless
+    `through` (a direction) says which way round."""
+    a0 = math.atan2(p[1] - c[1], p[0] - c[0])
+    a1 = math.atan2(q[1] - c[1], q[0] - c[0])
+    sw = a1 - a0
+    if sign > 0:
+        while sw <= 0:
+            sw += 2 * math.pi
+    else:
+        while sw >= 0:
+            sw -= 2 * math.pi
+    return Prim("A", c=c, r=r, a0=a0, sweep=sw)
+
+
+def smooth_path(points, detours, fillet, fillet_mid=1.5):
+    """The centreline through `points` (PCB mm), every corner filleted, and round each
+    detour (centre, r) where a straight run passes it: [Prim]."""
+    segs, prims = [], []
+    pts = [tuple(p) for p in points]
+    # corners: each vertex's fillet, and how far it eats into the runs either side
+    cut_in, cut_out, fil = [0.0] * len(pts), [0.0] * len(pts), [None] * len(pts)
+    for i in range(1, len(pts) - 1):
+        u1, u2 = _unit((pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1])), _unit((pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]))
+        th = math.atan2(u1[0] * u2[1] - u1[1] * u2[0], u1[0] * u2[0] + u1[1] * u2[1])
+        if abs(th) < 1e-6:
+            continue
+        L = fillet * math.tan(abs(th) / 2)
+        s = (pts[i][0] - u1[0] * L, pts[i][1] - u1[1] * L)
+        e = (pts[i][0] + u2[0] * L, pts[i][1] + u2[1] * L)
+        sg = 1 if th > 0 else -1
+        c = (s[0] - u1[1] * fillet * sg, s[1] + u1[0] * fillet * sg)
+        fil[i] = _arc_between(c, fillet, s, e, sg)
+        cut_in[i], cut_out[i] = L, L
+    for i in range(len(pts) - 1):
+        a, b = pts[i], pts[i + 1]
+        u = _unit((b[0] - a[0], b[1] - a[1]))
+        a2 = (a[0] + u[0] * cut_out[i], a[1] + u[1] * cut_out[i])
+        b2 = (b[0] - u[0] * cut_in[i + 1], b[1] - u[1] * cut_in[i + 1])
+        nl = (-u[1], u[0])
+        here = []
+        for chain in detours:
+            c, rc = chain[0]
+            s_ = (c[0] - a2[0]) * u[0] + (c[1] - a2[1]) * u[1]
+            h = (c[0] - a2[0]) * nl[0] + (c[1] - a2[1]) * nl[1]
+            if abs(h) < rc and 0 < s_ < math.dist(a2, b2):
+                here.append((s_, chain, h))
+        cur = a2
+        for s_, chain, h in sorted(here, key=lambda e: e[0]):
+            sg = 1 if h > 0 else -1               # the mount's side; the path passes beyond it
+            nb = (nl[0] * sg, nl[1] * sg)
+            loc = lambda q: ((q[0] - a2[0]) * u[0] + (q[1] - a2[1]) * u[1], abs((q[0] - a2[0]) * nl[0] + (q[1] - a2[1]) * nl[1]))
+            # in: a fillet from the run onto the first circle
+            (c0, r0), (cl, rl) = chain[0], chain[-1]
+            s0, hd0 = loc(c0)
+            sl, hdl = loc(cl)
+            dx0 = math.sqrt((fillet + r0) ** 2 - (fillet - hd0) ** 2)
+            dxl = math.sqrt((fillet + rl) ** 2 - (fillet - hdl) ** 2)
+            p1 = (a2[0] + u[0] * (s0 - dx0), a2[1] + u[1] * (s0 - dx0))
+            p2 = (a2[0] + u[0] * (sl + dxl), a2[1] + u[1] * (sl + dxl))
+            f1 = (p1[0] + nb[0] * fillet, p1[1] + nb[1] * fillet)
+            f2 = (p2[0] + nb[0] * fillet, p2[1] + nb[1] * fillet)
+            v1, v2 = _unit((c0[0] - f1[0], c0[1] - f1[1])), _unit((cl[0] - f2[0], cl[1] - f2[1]))
+            t1 = (f1[0] + v1[0] * fillet, f1[1] + v1[1] * fillet)
+            t2 = (f2[0] + v2[0] * fillet, f2[1] + v2[1] * fillet)
+            prims.append(Prim("L", p0=cur, p1=p1))
+            prims.append(_arc_between(f1, fillet, p1, t1, sg))
+            at = t1
+            # round each circle in turn, from one to the next along their common tangent on
+            # the far side of both - one smooth sweep, never back up between them
+            for k in range(len(chain) - 1):
+                (ca, ra), (cb, rb) = chain[k], chain[k + 1]
+                d = math.dist(ca, cb)
+                e = _unit((cb[0] - ca[0], cb[1] - ca[1]))
+                pp = (e[1], -e[0]) if e[1] * nb[0] - e[0] * nb[1] > 0 else (-e[1], e[0])
+                if pp[0] * nb[0] + pp[1] * nb[1] < 0:
+                    pp = (-pp[0], -pp[1])
+                k_ = (ra - rb) / d
+                q_ = math.sqrt(max(1 - k_ * k_, 0.0))
+                m = (e[0] * k_ + pp[0] * q_, e[1] * k_ + pp[1] * q_)
+                ta = (ca[0] + m[0] * ra, ca[1] + m[1] * ra)
+                tb = (cb[0] + m[0] * rb, cb[1] + m[1] * rb)
+                prims.append(_arc_between(ca, ra, at, ta, -sg))
+                prims.append(Prim("L", p0=ta, p1=tb))
+                at = tb
+            prims.append(_arc_between(cl, rl, at, t2, -sg))
+            prims.append(_arc_between(f2, fillet, t2, p2, sg))
+            cur = p2
+        prims.append(Prim("L", p0=cur, p1=b2))
+        if i + 1 < len(pts) - 1 and fil[i + 1] is not None:
+            prims.append(fil[i + 1])
+    return [p for p in prims if p.length() > 1e-4]
+
+
+def lay_prim(board, obs, net, p, width, layer, locked=True):
+    """A Prim as copper: a track, or a KiCad arc (start, mid, end)."""
+    if p.kind == "L":
+        return lay_track(board, obs, net, p.p0, p.p1, width, layer, locked)
+    a = pcbnew.PCB_ARC(board)
+    a.SetStart(pcbnew.VECTOR2I(MM(p.point(0)[0]), MM(p.point(0)[1])))
+    a.SetMid(pcbnew.VECTOR2I(MM(p.point(0.5)[0]), MM(p.point(0.5)[1])))
+    a.SetEnd(pcbnew.VECTOR2I(MM(p.point(1)[0]), MM(p.point(1)[1])))
+    a.SetWidth(MM(width))
+    a.SetLayer({"F": pcbnew.F_Cu, "B": pcbnew.B_Cu, "I": pcbnew.In2_Cu}[layer])
+    a.SetNet(board.FindNet(net))
+    a.SetLocked(locked)
+    board.Add(a)
+    obs.add_item(a)
+    return a
+
+
+def route_pair_smooth(board, lay, obs, spec):
+    """route_pair for a pair with `detours:` - its centreline drawn, not searched."""
+    import pcb
+    nets, w, gap, L = spec["nets"], spec["width"], spec["gap"], {"F.Cu": "F", "B.Cu": "B"}[spec["layer"]]
+    pts = [pcb.to_pcb(*p) for p in spec["through"]]
+    # each detour a chain: its mount, then any circle it must also pass round (`then:`)
+    dets = [[(pcb.to_pcb(*d["at"]), float(d["r"]))] + [(pcb.to_pcb(*t["at"]), float(t["r"])) for t in d.get("then") or []]
+            for d in spec["detours"]]
+    prims = smooth_path(pts, dets, float(spec.get("fillet", 3.0)), float(spec.get("fillet_mid", 1.5)))
+    half = (w + gap) / 2
+    # which side is which net: the leg whose start lies nearer that net's `from` pad
+    pf = {}
+    for p_ in spec["from"]:
+        ref, num = p_.split(".")
+        q = board.FindFootprintByReference(ref).FindPadByNumber(num).GetPosition()
+        pf[p_] = (TO(q.x), TO(q.y))
+    st = prims[0].point(0)
+    t = prims[0].tangent(0)
+    left = (st[0] - t[1] * half, st[1] + t[0] * half)
+    d_left = math.dist(left, pf[spec["from"][0]]) + 0.0
+    right = (st[0] + t[1] * half, st[1] - t[0] * half)
+    sides = (half, -half) if d_left <= math.dist(right, pf[spec["from"][0]]) else (-half, half)
+    # a drawn path is not searched, so it is checked before it is laid: every leg clear of
+    # every hole (plated or not - a switch's centre hole, a mount's) by the hole clearance,
+    # of every keep-out, and of every other net's copper on its layer by the clearance;
+    # one that is not stops the run, by where (owner, 2026-10-04: a leg through KS-33's
+    # centre hole went unseen because nothing checked the drawn path)
+    allowed = set(nets) | ({spec["guard_traces"]["net"]} if spec.get("guard_traces") else set())
+    bad = []
+    for net, d in zip(nets, sides):
+        for p in prims:
+            g = p.offset(d).line(24).buffer(w / 2, cap_style=1)
+            for geom, n, ls, kind in obs.near(g, 1.0):
+                if kind in ("hole", "vhole", "npth"):
+                    if geom.distance(g) < obs.hclear - 1e-3:
+                        bad.append((net, kind, geom.centroid))
+                elif L not in ls or kind in ("silk", "guard") or n in allowed:
+                    continue
+                elif kind == "keepout":
+                    if geom.intersects(g):
+                        bad.append((net, kind, geom.centroid))
+                elif geom.distance(g) < obs.clear - 1e-3:
+                    bad.append((net, f"{n} {kind}", geom.centroid))
+    if bad:
+        seen = sorted({(n, k, round(c.x, 1), round(c.y, 1)) for n, k, c in bad})
+        sys.exit("pcb: pair " + " / ".join(nets) + ": its drawn path is not clear - "
+                 + "; ".join(f"{n} against {k} at ({x}, {y})" for n, k, x, y in seen[:8])
+                 + (" ..." if len(seen) > 8 else "") + " (layout.yaml pairs: through:, detours:)")
+    for net, d in zip(nets, sides):
+        for p in prims:
+            lay_prim(board, obs, net, p.offset(d), w, L)
+    # `tails:` - each leg's end to its pad on the other face, drawn: a track on the pair's
+    # layer along `path` (body mm, from the leg's end), a via, and a track to the pad
+    other = "F" if L == "B" else "B"
+    for tl in spec.get("tails") or []:
+        net = tl["net"]
+        pts = [pcb.to_pcb(*q) for q in tl["path"]]
+        vx, vy = pcb.to_pcb(*tl["via"])
+        ref, num = tl["pad"].split(".")
+        q = board.FindFootprintByReference(ref).FindPadByNumber(num).GetPosition()
+        pad_at = (TO(q.x), TO(q.y))
+        segs = [(a, b, L) for a, b in zip(pts + [(vx, vy)], pts[1:] + [(vx, vy)]) if math.dist(a, b) > 1e-3] + [((vx, vy), pad_at, other)]
+        for a, b, lyr in segs:
+            g = LineString([a, b]).buffer(w / 2, cap_style=1)
+            for geom, n, ls, kind in obs.near(g, 1.0):
+                if kind in ("hole", "vhole", "npth") and n != net:
+                    hit = geom.distance(g) < obs.hclear - 1e-3
+                elif lyr not in ls or kind in ("silk", "guard") or n == net:
+                    continue
+                else:
+                    hit = geom.intersects(g) if kind == "keepout" else geom.distance(g) < obs.clear - 1e-3
+                if hit:
+                    sys.exit(f"pcb: pair tail {net} to {tl['pad']}: {n or kind} {kind} in the way near "
+                             f"({geom.centroid.x:.1f}, {geom.centroid.y:.1f}) (layout.yaml pairs: tails:)")
+        if not obs.via_ok(vx, vy, net):
+            sys.exit(f"pcb: pair tail {net} to {tl['pad']}: no room for its via at {tl['via']}")
+        for a, b, lyr in segs:
+            lay_track(board, obs, net, a, b, w, lyr)
+        lay_via(board, obs, net, vx, vy)
+    total = sum(p.length() for p in prims)
+    print(f"route: pair {' / '.join(nets)} - {total:.1f} mm side by side on {spec['layer']}, "
+          f"{sum(1 for p in prims if p.kind == 'A')} arc(s), round {len(dets)} mount(s)")
+    drawn = {t["pad"] for t in spec.get("tails") or []}
+    report = [f"pair {n}: its end to {pd} left to the autorouter" for i, n in enumerate(nets)
+              for pd in (spec["from"][i], spec["to"][i]) if pd not in drawn]
+    if spec.get("guard_traces"):
+        report += guard_prims(board, lay, obs, spec, prims, L)
+    return report
+
+
+def guard_prims(board, lay, obs, spec, prims, L):
+    """guard_traces along a drawn centreline: each guard is the centreline offset, cut into
+    ~1 mm pieces; a piece clear of every other net's copper is laid (a track or an arc),
+    and each run of laid pieces is stitched into the guard net's island or strip at
+    least every `every` mm, by a via beside a piece's end and a stub square to it; a run
+    with room for fewer than two vias is not laid. Returns the spans left out."""
+    gnet, every = spec["guard_traces"]["net"], float(spec["guard_traces"].get("every", 5.0))
+    w, gap = spec["width"], spec["gap"]
+    off = (w + gap) / 2 + w / 2 + obs.clear + w / 2
+    voff = off + w / 2 + obs.clear + obs.via / 2 - 0.1
+    region = plane_regions(board, lay).get(gnet)
+    out, laid, vias = [], 0.0, 0
+
+    def clear(g):
+        for geom, n, ls, kind in obs.near(g, 0.5):
+            if kind in ("hole", "vhole", "npth") and n != gnet:
+                if geom.distance(g) < obs.hclear - 1e-3:
+                    return False
+                continue
+            if L not in ls or kind in ("silk", "guard") or n == gnet:
+                continue
+            if kind == "keepout":
+                if geom.intersects(g):
+                    return False
+            elif geom.distance(g) < obs.clear - 1e-3:
+                return False
+        return obs.inner.contains(g)
+    for side in (1, -1):
+        pieces = []
+        for p in prims:
+            o = p.offset(side * off)
+            n = max(1, int(math.ceil(o.length() / 1.0)))
+            for i in range(n):
+                pieces.append((o.piece(i / n, (i + 1) / n), p, i / n, (i + 1) / n))
+        ok = [clear(pc.line(8).buffer(w / 2, cap_style=1)) for pc, _, _, _ in pieces]
+        runs, cur = [], None
+        for i, k in enumerate(ok + [False]):
+            if k and cur is None:
+                cur = i
+            if not k and cur is not None:
+                runs.append((cur, i))
+                cur = None
+        for i0, i1 in runs:
+            got, since = [], every
+            for i in range(i0, i1 + 1):
+                if i < i1:
+                    since += pieces[i][0].length()
+                j = min(i, i1 - 1)
+                pc, base, t0, t1 = pieces[j]
+                tt = t0 if i < i1 else t1
+                e = pc.point(0) if i < i1 else pc.point(1)
+                tg = base.tangent(tt)
+                q = (e[0] - tg[1] * (voff - off) * side, e[1] + tg[0] * (voff - off) * side)
+                if since >= every and (region is None or region.contains(Point(q))) and obs.via_ok(q[0], q[1], gnet):
+                    got.append((e, q))
+                    since = 0.0
+            if len(got) < 2:
+                a_, b_ = pieces[i0][0].point(0), pieces[i1 - 1][0].point(1)
+                out.append(f"guard {gnet}: {sum(pieces[k][0].length() for k in range(i0, i1)):.1f} mm beside the pair, "
+                           f"({a_[0]:.1f}, {a_[1]:.1f}) to ({b_[0]:.1f}, {b_[1]:.1f}), with no room for two stitching vias - left out")
+                continue
+            # the run from its first stitching via to its last
+            first = next(k for k in range(i0, i1 + 1) if math.dist(pieces[min(k, i1 - 1)][0].point(0 if k < i1 else 1), got[0][0]) < 1e-6)
+            last = next(k for k in range(i1, i0 - 1, -1) if math.dist(pieces[min(k, i1 - 1)][0].point(0 if k < i1 else 1), got[-1][0]) < 1e-6)
+            for k in range(first, last):
+                lay_prim(board, obs, gnet, pieces[k][0], w, L)
+                laid += pieces[k][0].length()
+            for e, q in got:
+                lay_via(board, obs, gnet, q[0], q[1])
+                lay_track(board, obs, gnet, e, q, w, L)
+                vias += 1
+    print(f"route: pair {' / '.join(spec['nets'])} - guard {gnet} {laid:.1f} mm, {vias} stitching via(s)")
+    return out
+
+
+def track_line(t):
+    """A track's or arc's centreline as shapely, in PCB mm."""
+    a, b = t.GetStart(), t.GetEnd()
+    if isinstance(t, pcbnew.PCB_ARC):
+        m = t.GetMid()
+        p = Prim("A", **_arc_from3((TO(a.x), TO(a.y)), (TO(m.x), TO(m.y)), (TO(b.x), TO(b.y))))
+        return p.line(24)
+    if (a.x, a.y) == (b.x, b.y):
+        return Point(TO(a.x), TO(a.y))
+    return LineString([(TO(a.x), TO(a.y)), (TO(b.x), TO(b.y))])
+
+
+def _arc_from3(p, m, q):
+    ax, ay = p; bx, by = m; cx, cy = q
+    d = 2 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by))
+    ux = ((ax * ax + ay * ay) * (by - cy) + (bx * bx + by * by) * (cy - ay) + (cx * cx + cy * cy) * (ay - by)) / d
+    uy = ((ax * ax + ay * ay) * (cx - bx) + (bx * bx + by * by) * (ax - cx) + (cx * cx + cy * cy) * (bx - ax)) / d
+    r = math.hypot(ax - ux, ay - uy)
+    a0 = math.atan2(ay - uy, ax - ux)
+    am = math.atan2(by - uy, bx - ux)
+    a1 = math.atan2(cy - uy, cx - ux)
+    def ccw_between(s, mid, e):
+        tm = (mid - s) % (2 * math.pi)
+        te = (e - s) % (2 * math.pi)
+        return tm < te
+    if ccw_between(a0, am, a1):
+        sw = (a1 - a0) % (2 * math.pi)
+    else:
+        sw = -((a0 - a1) % (2 * math.pi))
+    return dict(c=(ux, uy), r=r, a0=a0, sweep=sw)
 
 
 def one_sided(board, v, lay):
@@ -1357,13 +1810,14 @@ def tidy(board, lay):
     while True:
         for v in [v for v in board.GetTracks() if isinstance(v, pcbnew.PCB_VIA) and v.GetNetname() not in planes]:
             c, net = v.GetPosition(), v.GetNetname()
-            on = {t.GetLayer() for t in board.GetTracks() if type(t) is pcbnew.PCB_TRACK and t.GetNetname() == net
+            on = {t.GetLayer() for t in board.GetTracks() if type(t) in (pcbnew.PCB_TRACK, pcbnew.PCB_ARC) and t.GetNetname() == net
                   and (t.GetStart() == c or t.GetEnd() == c or t.HitTest(c, 1000))}
             on |= {L for p, n in pads if n == net and p.HitTest(c) for L in (pcbnew.F_Cu, pcbnew.B_Cu) if p.IsOnLayer(L)}
             if len(on) < 2:
                 board.Delete(v)
                 n1 += 1
         tracks = [t for t in board.GetTracks() if type(t) is pcbnew.PCB_TRACK]
+        arcs = [t for t in board.GetTracks() if type(t) is pcbnew.PCB_ARC]
         vias = [v for v in board.GetTracks() if isinstance(v, pcbnew.PCB_VIA)]
         gone = []
         for t in tracks:
@@ -1371,7 +1825,7 @@ def tidy(board, lay):
                 continue
             for e in (t.GetStart(), t.GetEnd()):
                 net, L = t.GetNetname(), t.GetLayer()
-                ok = any(u is not t and u.GetNetname() == net and u.GetLayer() == L and u.HitTest(e, 1000) for u in tracks) \
+                ok = any(u is not t and u.GetNetname() == net and u.GetLayer() == L and u.HitTest(e, 1000) for u in tracks + arcs) \
                     or any(v.GetNetname() == net and v.HitTest(e, 1000) for v in vias) \
                     or any(n == net and p.IsOnLayer(L) and p.HitTest(e) for p, n in pads)
                 if not ok:
@@ -1400,8 +1854,7 @@ def tidy(board, lay):
             c = Point(TO(t.GetPosition().x), TO(t.GetPosition().y))
             r.copper.append((t.GetNetname(), {TOP, BOT}, c.buffer(TO(t.GetWidth(pcbnew.F_Cu)) / 2), "track"))
         elif t.GetLayer() in LAYERS:
-            a, b = t.GetStart(), t.GetEnd()
-            g = LineString([(TO(a.x), TO(a.y)), (TO(b.x), TO(b.y))]).buffer(TO(t.GetWidth()) / 2)
+            g = track_line(t).buffer(TO(t.GetWidth()) / 2)
             r.copper.append((t.GetNetname(), {LAYERS.index(t.GetLayer())}, g, "track"))
     n2 = r.square_joins()
     n3 = merge_tracks(board, delete=True)
@@ -1493,8 +1946,16 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
     # ...or a class's `layer_cost:` - each step on that layer costs this many times more, so
     # its nets take it only for the hops they cannot make on the others
     lcost = {n: {LK_[L]: float(v) for L, v in c["layer_cost"].items()} for c in classes.values() if c.get("layer_cost") for n in c["nets"]}
+    # ...or a class's `via: [diameter, drill]` - its nets' vias at that size, not the
+    # board's (a power rail that must change layers does it through one via sized for
+    # its current, not a signal's 0.3 mm drill: #8-6)
+    via_of = {n: tuple(float(v) for v in c["via"]) for c in classes.values() if c.get("via") for n in c["nets"]}
+    via_default = (obs.via, obs.drill)
     while queue:
         net, pa, pb = queue.pop(0)
+        if (obs.via, obs.drill) != via_of.get(net, via_default):
+            obs.via, obs.drill = via_of.get(net, via_default)
+            obs._via_inner = None
         routed = [L for L in routed_all if L in only.get(net, routed_all)]
         lc_ = lcost.get(net, {})
         w = width_of(net)
@@ -1689,6 +2150,9 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
             if m + 1 < len(path):
                 lay_via(board, obs, net, *grids["F"].xy(path[m][1:]), locked=False)
             k = m + 1
+    if (obs.via, obs.drill) != via_default:
+        obs.via, obs.drill = via_default
+        obs._via_inner = None
     return failed
 
 

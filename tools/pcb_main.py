@@ -279,7 +279,9 @@ def ties_of(spec):
     """An island's net ties: `tie:` (one, the controller's) or `ties:` (a list - an island
     that meets two other grounds, each at its own tie: the module's DIG_GND, at the star
     and at the etherCON)."""
-    return spec.get("ties") or [spec["tie"]]
+    if "ties" in spec:
+        return list(spec["ties"] or [])
+    return [spec["tie"]] if spec.get("tie") else []
 
 
 def island_polys(lay):
@@ -432,6 +434,17 @@ def build(bdir, lay):
         for spec, p, moat in isl:
             if spec["layer"] == pl["layer"]:
                 region = region.difference(moat)
+        # a strip that loops round a standoff (the breath corridor's detours) cuts the
+        # plane off between the loop and the board's edge: a pocket no pin or via of the
+        # plane's net reaches, which KiCad reports as isolated copper. The plane keeps its
+        # main piece; the pockets carry no copper on that layer
+        if region.geom_type == "MultiPolygon" and any(s["layer"] == pl["layer"] and s.get("strip") for s, _, _ in isl):
+            main = max(region.geoms, key=lambda g: g.area)
+            for g in region.geoms:
+                if g is not main:
+                    print(f"pcb: {pl['net']} plane on {pl['layer']}: a {g.area:.0f} mm2 pocket cut off by a strip "
+                          f"at x {g.bounds[0]:.0f}-{g.bounds[2]:.0f} left unfilled")
+            region = main
         copper_zone(board, pl["net"], pl["layer"], region, 0, pl.get("name", pl["net"]))
     for spec, p, moat in isl:
         copper_zone(board, spec["net"], spec["layer"], p.intersection(outline), 1, spec["net"] + " island")
@@ -621,6 +634,7 @@ def check_heights(board, lay, geo, comps=None):
     else_room = k["elsewhere"][4]
     heights = lay.get("heights") or {}
     under_ok = set(lay.get("underside_rows") or [])
+    tall = []
     checked = 0
     for fp in board.GetFootprints():
         if fp.GetReference().startswith("H"):
@@ -656,6 +670,30 @@ def check_heights(board, lay, geo, comps=None):
                 room, where = r, nm
         if h > room + 1e-6:
             bad.append(f"error: [height] {fp.GetReference()} stands {h:g} mm; its room ({where}) is {room:g}")
+        tall.append((fp.GetReference(), h, cy))
+    # THE LEDS' CONE (ADR 0028 amendment 2026-10-03; the owner on the tall parts beside the
+    # row: "Move where it makes sense still away from leds"): every top part taller than the
+    # LEDs, against their emission cone (config/body.yaml lighting.led_view_angle). A part h
+    # tall rises into an LED's cone where it is nearer that LED's courtyard than (h - the
+    # LED's height) x tan(half the angle). A NOTE, worst first - no place on a 42 mm board
+    # keeps a 10 mm part out of a 120-degree cone; the side-light diffusion test judges it.
+    if geo.get("leds"):
+        body = yaml.safe_load(open(os.path.join(ROOT, "config", "body.yaml")))
+        t = math.tan(math.radians(float(body["lighting"]["led_view_angle"]["value"]) / 2))
+        leds = [box(x - a / 2, y - c / 2, x + a / 2, y + c / 2) for (x, y, r, a, c, lh) in geo["leds"].values()]
+        led_h = max(v[5] for v in geo["leds"].values())
+        led_set = unary_union(leds)
+        rows = []
+        for ref, h, cy in tall:
+            if h <= led_h or cy.intersects(led_set):
+                continue
+            d = cy.distance(led_set)
+            rows.append((max(0.0, (h - led_h) - d / t), ref, h, d))
+        rows.sort(reverse=True)
+        if rows:
+            bad.append("note: [cone] the top parts' tops inside the LEDs' cone, worst first (mm into it; height; mm to the "
+                       "nearest LED courtyard): " + "; ".join(f"{r} {i:.1f} ({h:g}; {d:.1f})" for i, r, h, d in rows if i > 0)
+                       + (" - none" if not any(i > 0 for i, *_ in rows) else ""))
     if not checked:
         bad.append("error: [height] no top-side part had a courtyard, so no height was checked - "
                    "the courtyard caches were not built (KiCad version?)")
@@ -678,9 +716,16 @@ def check_planes(board, lay):
     pair_nets = {n for pr in lay.get("pairs") or [] for n in pr["nets"]}
     plane_nets = {pl["net"] for pl in lay.get("planes") or []} | {s["net"] for s in lay.get("islands") or []}
     isl = island_polys(lay)
+    # a net's islands together: its pads and vias may stand on any of them (the controller's
+    # breath corridor: the analog island and the AGND strips under the pair, `strip: true`)
+    union_of = {}
+    for spec, p, moat in isl:
+        union_of[spec["net"]] = unary_union([union_of[spec["net"]], p]) if spec["net"] in union_of else p
     for spec, p, moat in isl:
         P = Polygon([to_pcb(x, y) for x, y in p.exterior.coords])
         M = Polygon([to_pcb(x, y) for x, y in moat.exterior.coords])
+        U = unary_union([Polygon([to_pcb(x, y) for x, y in g.exterior.coords])
+                         for g in getattr(union_of[spec["net"]], "geoms", [union_of[spec["net"]]])])
         if not any(board.GetLayerName(z.GetLayer()) == spec["layer"] and z.GetNetname() == spec["net"] for z in zones):
             bad.append(f"error: [island] no {spec['net']} island on {spec['layer']}")
         # a plane on another layer than the island's passes over it: its pads and vias may stand there
@@ -691,7 +736,8 @@ def check_planes(board, lay):
                 # by the pad's copper, not its centre (#9 G9): an island pad wholly on the island,
                 # another plane net's pad standing on it when the larger part of its copper does
                 g = pad_copper(pad)
-                if pad.GetNetname() == spec["net"] and name not in spec.get("off_island", []) and not P.buffer(0.05).contains(g):
+                if not spec.get("strip") and pad.GetNetname() == spec["net"] and name not in spec.get("off_island", []) \
+                        and not U.buffer(0.05).contains(g):
                     bad.append(f"error: [island] {name} is {spec['net']} but off its island - it would return through the plane")
                 if pad.GetNetname() in plane_nets - {spec["net"]} - other and g.intersection(P).area > g.area / 2 \
                         and f.GetReference() not in ties_of(spec) and name not in spec.get("foreign_ok", {}):
@@ -700,14 +746,14 @@ def check_planes(board, lay):
             if not isinstance(v, pcbnew.PCB_VIA):
                 continue
             c = Point(*xy_mm(v.GetPosition()))
-            if v.GetNetname() == spec["net"] and not P.contains(c):
+            if not spec.get("strip") and v.GetNetname() == spec["net"] and not U.contains(c):
                 bad.append(f"error: [island] a {spec['net']} via at ({c.x:.2f}, {c.y:.2f}) is off the island")
             if v.GetNetname() in plane_nets - {spec["net"]} - other and M.contains(c):
                 bad.append(f"error: [island] a {v.GetNetname()} via at ({c.x:.2f}, {c.y:.2f}) is on the island or its moat")
         # the ties: every net-tie footprint joining the island's net to another
         ties = [f.GetReference() for f in board.GetFootprints() if f.IsNetTie()
                 and spec["net"] in {pd.GetNetname() for pd in f.Pads()} and len({pd.GetNetname() for pd in f.Pads()}) > 1]
-        if sorted(ties) != sorted(ties_of(spec)):
+        if not spec.get("strip") and sorted(ties) != sorted(ties_of(spec)):
             bad.append(f"error: [island] {spec['net']} is tied by {ties or 'nothing'}; layout.yaml says {', '.join(ties_of(spec))}")
     # splits. A SPLIT is a gap the design puts in a reference plane, that a return
     # current would have to go round: a moat round an island, the plane's own edge, a
@@ -763,7 +809,9 @@ def check_planes(board, lay):
         moat = unary_union(moats[L])
         allowed = moat if t.GetNetname() in pair_nets else moat.intersection(unary_union(windows))
         on_moat = g.intersection(moat)
-        if g.within(solid[L].union(allowed).buffer(1e-3)) and (on_moat.is_empty or on_moat.within(allowed.buffer(1e-3))):
+        # a zero-area result is GEOS's overlay noise, not a crossing: a VS track 2 mm from
+        # the controller's moat came back as a 0.04 mm line on it (2026-10-04)
+        if g.within(solid[L].union(allowed).buffer(1e-3)) and (on_moat.area < 1e-4 or on_moat.within(allowed.buffer(1e-3))):
             continue
         c = g.centroid
         crossings.setdefault((t.GetNetname(), board.GetLayerName(t.GetLayer())), []).append(f"({c.x:.1f}, {c.y:.1f})")

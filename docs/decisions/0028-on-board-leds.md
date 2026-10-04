@@ -5,7 +5,7 @@
 prototype's timing) and [ADR 0016](0016-one-strip-on-the-centre-board.md)
 (one strip on the centre board, whose "LEDs populated directly on the centre
 board ... not decided here" this decides). Each carries a dated note pointing
-here. Numbering: 0025–0027 are taken. **Amended 2026-09-30** (the layout goes ahead of the diffusion test, *Amendment* below).
+here. Numbering: 0025–0027 are taken. **Amended 2026-09-30** (the layout goes ahead of the diffusion test, *Amendment* below), 2026-10-02 (a fourteenth LED) and twice 2026-10-03 (one row at equal margins; then thirteen again, the tail-end LED removed: *Amendments* below).
 
 ## Context
 
@@ -121,7 +121,7 @@ the cavity as the diffuser (ADR 0014, ADR 0016). Two things move:
   table rows for the strips are upper bounds that no longer describe the
   lights; E6 measures the row.
 - **Quiescent draw is always on.** Under 2 mA per LED blanked `[ds p.3]`,
-  ~0.3 W for all of them `[calc: 14 × 2 mA × 12 V = 0.34 W]`, part of the
+  ~0.3 W for all of them `[calc: 13 × 2 mA × 12 V = 0.31 W]`, part of the
   interior's heat.
 - **MSL 5a.** The LEDs must be baked before reflow `[ds p.6]`; the board
   house does this for moisture-sensitive LEDs `[web, via the study; not a
@@ -232,6 +232,9 @@ fails until it places `LED1` where the body CAD does.
 
 ## Amendment, 2026-10-03 — fourteen in one row, equal margins to the board's ends
 
+*The row it lays out stands; its tail-end LED was removed the same day (the
+second amendment of 2026-10-03, below), so the count is thirteen again.*
+
 **The owner, 2026-10-03**, on the main board's routed preview, circling the
 corner LED: *"If this is the led, we need to change location, it needs to be
 distance equalized and centered just like the other leds. I understand this is
@@ -256,9 +259,11 @@ This supersedes the corner position of 2026-10-02.
    same margin from the board's tail edge, past where the corner LED and the
    row's old tail end stood.
 3. **Everything else moves round the row** (the owner: *"rework all components
-   around them"*). `J-MCU` stands in a gap of the row,
-   `boards.mcu_conn_led_gap` in `config/body.yaml`, which drags the regulator
-   block with it (it is placed in front of `J-MCU`); the tail's end mount
+   around them"*). `J-MCU` stood in a gap of the row that day; since the
+   owner's *"This connector needs moved to the side so that it doesn't cause
+   coverage of the led"* it is off the row, at `boards.mcu_conn_at` in
+   `config/body.yaml` (*"J-MCU, its plug and the Matrix ribbon off the LED
+   row"*), and the regulator block stands against the far edge; the tail's end mount
    steps clear of the LEDs by the body CAD's own rule (`cb_ends`); the main
    board's layout moves its parts round the row
    (`hardware/boards/main-board/README.md`). The Matrix's ribbon is longer by
@@ -278,3 +283,35 @@ This supersedes the corner position of 2026-10-02.
    were; the side-light diffusion test (ROADMAP) judges it, with the count and
    the pitch.
 
+## Amendment, 2026-10-03 (second) — thirteen: the row's tail-end LED removed
+
+**The owner, 2026-10-03**, on the re-laid-out main board: *"Needs to switch
+orientation 90 degrees, remove that bottom led again"*, then *"Keep current
+layout, remove bottom one (and we need to rotate connector)"*. The bottom LED
+is the tail end's (in playing position the tail is the low end), LED 1 of the
+fourteen.
+
+1. **`lighting.led_count` is thirteen again**, and **the other thirteen stay
+   exactly where the first amendment of this date put them.** The row's pitch
+   and margins are now set by `lighting.led_slots` (fourteen places, laid out
+   as that amendment's point 1 says), and the thirteen LEDs fill the places
+   from the mouth end: the tail-end place is empty. `mechanical/drc.echo`
+   *"LED row on the main board"* prints the count, the places, the pitch and
+   both end LEDs' centres.
+2. **The chain is renumbered from the tail, keeping each part's identity**:
+   the removed LED was `D-LED-1` / `C-LED-1` (`D7` / `C25` on the main board);
+   the old `D-LED-2` is now `D-LED-1`, first on the data line, with its `DIN2`
+   grounded as point 5 says, and so on to `D-LED-13` at the mouth end. The
+   main board's references stay with the parts (the sheet's UUIDs are kept).
+3. **"Rotate connector"**: `J-MCU` turned to face along the row, set jointly
+   with the Matrix's connector on the right-hand key board
+   (`boards.mcu_conn_at`; the Matrix's `J-MCU-KB` on its own board).
+4. **Power: 15 mA less at full white** `[calc: 0.18 W / 12 V]`.
+   `led-row-current` and `umbilical-current` are back at their thirteen-LED
+   values (`config/figures.yaml`; ADR 0005's amendment of this date), and every
+   sim that reads the count from the LED drive's netlist was re-run on it, not
+   scaled.
+5. **Firmware**: thirteen pixels (`firmware/README.md`, *The lights*).
+
+The side-light diffusion test (ROADMAP) still decides the count and the
+pitch.
