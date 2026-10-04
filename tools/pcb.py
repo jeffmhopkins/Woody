@@ -1152,6 +1152,18 @@ def cmd_finish(bdir):
         _fill(tmp)
         if not lay.get("rip_up"):
             print(f"route: rescue - {rescue(tmp, bdir)} kept")
+        if lay.get("kind") in ("main", "module"):
+            # the silkscreen again, clear of the vias as they now stand - and the title
+            # block and the silk title/revision with it (#33: a hand-drawn pass once left
+            # the main board with none, and nothing said so; check_title now does)
+            board = pcbnew.LoadBoard(tmp)
+            for d in list(board.GetDrawings()):
+                if isinstance(d, pcbnew.PCB_TEXT) and d.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS):
+                    board.Delete(d)
+            comps, _ = sheet_netlist(os.path.join(bdir, name + ".kicad_sch"))
+            add_silk_generic(board, lay, comps)
+            silk_off_vias(board)
+            pcbnew.SaveBoard(tmp, board)
         left = sorted({"; ".join(i["description"] for i in v.get("items", [])) for v in drc(tmp).get("unconnected_items", [])})
         os.replace(tmp, path)
     finally:
@@ -1714,6 +1726,76 @@ def check_silk(board, fab):
     return bad
 
 
+def check_title(board, lay):
+    """A board with a layout.yaml `silk:` block carries it: the title block's title,
+    revision and date as `silk:` says (the Gerber job file's "Revision" is the title
+    block's), and the title and its `rev <rev>  <date>` line on a silkscreen. Issue #33:
+    a hand-drawn pass on the main board dropped all three and every check still passed."""
+    t = lay.get("silk")
+    if not t:
+        return []
+    bad = []
+    tb = board.GetTitleBlock()
+    for what, have, want in (("title", tb.GetTitle(), t["title"]), ("revision", tb.GetRevision(), t["rev"]),
+                             ("date", tb.GetDate(), t["date"])):
+        if have != want:
+            bad.append(f"error: [title] the title block's {what} is {have!r}, layout.yaml silk: says {want!r}")
+    texts = {d.GetText() for d in board.GetDrawings()
+             if isinstance(d, pcbnew.PCB_TEXT) and d.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS)}
+    for line in (t["title"], f"rev {t['rev']}  {t['date']}"):
+        if line not in texts:
+            bad.append(f"error: [title] no silkscreen text {line!r} (layout.yaml silk:) - the board does not say what it is")
+    return bad
+
+
+def check_pair_guard(board, lay):
+    """layout.yaml pairs: `guard:` held on the board, not only by the router that laid it
+    (#8-4, #33): no track or via of any net but the pair's own within the clearance plus
+    the guard of a pair leg - the pair's locked tracks and arcs of the pair's width on its
+    layer - edge to edge. Pads are the placement's, not the routing's, and are left to
+    KiCad's own clearance."""
+    bad = []
+    r = (lay.get("rules") or {}).get("clearance", 0.2)
+    for pr in lay.get("pairs") or []:
+        if not pr.get("guard"):
+            continue
+        g, w = float(pr["guard"]), float(pr["width"])
+        own = set(pr["nets"]) | {(pr.get("guard_traces") or {}).get("net")}
+        L = board.GetLayerID(pr.get("layer", "F.Cu"))
+        import pcb_route
+        legs = [t for t in board.GetTracks() if type(t) in (pcbnew.PCB_TRACK, pcbnew.PCB_ARC) and t.IsLocked()
+                and t.GetNetname() in pr["nets"] and t.GetLayer() == L and abs(pcbnew.ToMM(t.GetWidth()) - w) < 1e-3
+                and t.GetStart() != t.GetEnd()]
+        if not legs:
+            bad.append(f"error: [guard] pair {'/'.join(pr['nets'])}: no locked leg of width {w} on {pr.get('layer')} to hold the guard against")
+            continue
+        from shapely.geometry import Point
+        from shapely.strtree import STRtree
+        lg = [pcb_route.track_line(t).buffer(w / 2) for t in legs]
+        tree = STRtree(lg)
+        need = r + g - 1e-3
+        worst = {}
+        for t in board.GetTracks():
+            if t.GetNetname() in own:
+                continue
+            if isinstance(t, pcbnew.PCB_VIA):
+                c = t.GetPosition()
+                geom = Point(pcbnew.ToMM(c.x), pcbnew.ToMM(c.y)).buffer(pcbnew.ToMM(t.GetWidth(pcbnew.F_Cu)) / 2)
+            elif t.GetLayer() == L:
+                geom = pcb_route.track_line(t).buffer(pcbnew.ToMM(t.GetWidth()) / 2)
+            else:
+                continue
+            for i in tree.query(geom.buffer(need)):
+                d = lg[i].distance(geom)
+                if d < need and d < worst.get(t.GetNetname(), (9e9,))[0]:
+                    p = lg[i].centroid
+                    worst[t.GetNetname()] = (d, p.x, p.y)
+        for n, (d, x, y) in sorted(worst.items()):
+            bad.append(f"error: [guard] {n} comes {d:.2f} mm from the breath pair's leg near ({x:.1f}, {y:.1f}); "
+                       f"layout.yaml pairs: guard keeps every other net {r + g:.2f} mm off it (#8-4)")
+    return bad
+
+
 def check_tracks(board):
     """Two tracks of one net meeting on one layer at under 90 degrees leave a wedge
     the etch pools in and the pour cannot fill (an acid trap). KiCad's DRC has no
@@ -2052,6 +2134,8 @@ def cmd_check(bdir):
     if lay.get("fab"):
         bad += check_silk(board, lay["fab"])
     bad += check_tracks(board)
+    bad += check_title(board, lay)
+    bad += check_pair_guard(board, lay)
     bad += check_holes(board, lay)
     bad += check_connect_first(board, lay)
     comps, _ = sheet_netlist(os.path.join(bdir, name + ".kicad_sch"))

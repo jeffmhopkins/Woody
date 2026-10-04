@@ -252,7 +252,9 @@ net_classes:
   # block's density leaves no other way for: VS across the feedback ring stacked down the
   # mouth edge (laid out to: "VS from R8's foot to R7's head down layer 4"), REF_5V round
   # U4. Layer 1 only was tried first and left SENSOR_RAW, REF_MINUS, REF_5V and VS
-  # unroutable. ADC_VDD is U-ADC's supply AND its reference (breath-adc.md); the supplies
+  # unroutable. (That was the first layout; the board as it now stands routes all but VS
+  # wholly on layer 1, by hand - README.md, The analog block, #33.)
+  # ADC_VDD is U-ADC's supply AND its reference (breath-adc.md); the supplies
   # and references as wide as DEV_3V3
   analog_supply:
     nets: [/breath-adc/ADC_VDD, REF_VIN, /breath-excitation-reference/REF_5V, VS]
@@ -518,7 +520,7 @@ parts:
   U11: [175.6, 44.2, 0]     # U-TVS-CHAIN at J5 (key-chain-loom.md): SCK, SH/LD, HOP_LT_RH, HOP_RH_RT; pin 2 its own via
 
 silk:
-  at: [100.0, 45.5]
+  at: [105.5, 37.0]         # mid-board between the switch pairs; the old place, [100.0, 45.5], is the breath pair's since #8 (#33)
   title: "WOODY main board"
   rev: "A"                  # owner, 2026-10-03: rev A on the first board fabricated (README, Revisions)
   date: "2026-10-03"

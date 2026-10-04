@@ -367,6 +367,16 @@ prints which, exits 1, and leaves any existing board as it was.
   which KiCad's DRC has no test for (`check_tracks`). Joins at a shared end
   and a track ending in the middle of another are both tested; a wedge whose
   apex a via or pad of the net fills is not a trap and is exempt;
+- a board with a `layout.yaml` `silk:` block whose title block (title,
+  revision, date - the Gerber job's "Revision") differs from it, or whose
+  silkscreen lacks the title or its `rev <rev>  <date>` line (`check_title`;
+  #33: the main board lost all three in a hand-drawn pass and every check
+  passed);
+- a `layout.yaml` `pairs:` entry with a `guard:` whose legs (the pair's
+  locked tracks and arcs of its width, on its layer) have any other net's
+  track or via - the pair's own nets and its guard net aside - nearer than the
+  clearance plus the guard, edge to edge (`check_pair_guard`, #8-4: the router
+  keeps it, and until #33 nothing held the board to it after a hand edit);
 - a `layout.yaml` `connect_first:` connection with no path in the net's own
   tracks and vias, or a longer one than its `max_mm`; the pour does not count
   (`check_connect_first`);
@@ -574,7 +584,9 @@ this order (step 4 is Freerouting's only):
 changes). **`pcb.py finish <board>`** runs the tidy, `complete` and `rescue`
 again on the board as it stands, in place, and prints what is still missing:
 for after a hand edit, or to try again without a whole layout. It never adds
-or moves a part. A whole layout of the main board takes one to two hours under
+or moves a part. On a `kind: main` or `module` board it then writes the
+silkscreen again (`add_silk_generic`, `silk_off_vias`): every label clear of
+the vias as they now stand, and the title block and silk title from `silk:`. A whole layout of the main board takes one to two hours under
 `route: astar`, most of it `complete`'s rip-up; a `finish` twenty minutes to an
 hour. **`pcb.py update-footprints <board> <ref or footprint>...`** replaces placed
 footprints with the library's current ones in the same place, side and turn,
