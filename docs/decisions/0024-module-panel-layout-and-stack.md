@@ -308,6 +308,37 @@ checked rather than asserted.
     head's edge (DRC: *legend zone: LED-PANEL legend*); `off` still fits it
     (`art/panel-art-check.txt`).
 
+**The calibration trimmers are side-adjust, at the main board's edge** —
+amended 2026-10-04 (#32). The owner, offered *"Swap to side-adjust trimmers
+at the main board's edge, set from the side with the module out of the rack.
+No cut-outs, no stack change, but you can't touch them with the module
+mounted."*, chose **"Side-adjust trimmers"**, and gave the reason: *"I don't
+have rear access to the rack anyway so I'm taking it out of the rack to do.
+The calibration is exactly the right call"*. So:
+
+- **No rear-access windows.** Nothing is cut in a case, the panel or either
+  board to reach a trimmer, and the stack does not change.
+- **Calibration is done with the module out of the rack**, powered on the
+  bench, each screw turned from the board's side. Nothing is adjustable with
+  the module mounted, and that is the point: every trimmer is set once, at
+  commissioning (ROADMAP E10).
+- **All four are one family**, the Bourns 3296X (side adjust), the same
+  values and electrical specification as before: `TRIM-BREATH-ZERO`,
+  `TRIM-OFFSET`, `TRIM-RESP` (10 k) and `TRIM-GAIN` (200 Ω); their BOM rows
+  name the parts. `TRIM-RESP` joins the family from a 4 mm SMD top-adjust
+  part, so the module has one trimmer footprint,
+  `Potentiometer_THT:Potentiometer_Bourns_3296X_Horizontal`.
+- **Each stands at a side edge of the main board with its screw facing out.**
+  The footprint's body is 9.53 × 4.83 mm, its three pins in line along the
+  long side, and the screw's head leaves the end beyond pin 3 (the CW end),
+  1.52 mm proud of the body; the body is 10.03 mm tall
+  [ds `BOURNS-3296-TRIMPOT.pdf` p.1, *Common Dimensions* and 3296X; the
+  screw's end read off the KiCad footprint's fabrication layer]. Placed so,
+  pin 3 is the pin nearest the edge. Where on the edges they sit, and which
+  face, is the module layout's; the module CAD's rule *trimmers adjustable
+  from behind* is replaced by that layout with one that measures each screw
+  to the board's edge.
+
 ## Consequences
 
 - **The module has its own model, config, outputs and ledger**

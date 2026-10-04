@@ -103,3 +103,14 @@ the number this page multiplies:
 
 **What this page keeps:** the buffer is instrument-side and unretrofittable,
 and so are all four compensation parts.
+
+## Until 2026-10-04 — one fixed filter, and U-REF-BUF B tied off (#32)
+
+The drawing on this page showed `[C_cm 1.5nF]` on each leg and
+`[C_diff 15nF]` across the pair, one pole near 459 Hz, and `[C 330nF]` at the
+jack. `U-REF-BUF` B was a spare follower with its input on the star
+(`SPARE_B_OUT`). Both changed on 2026-10-04 for #32: the filter became the
+panel toggle's (`breath-receive-stage.md`, *The bandwidth toggle*) and the
+spare half became the breath LED's driver (*The breath LED*). Why the
+common-mode capacitors had to change with it is in
+[`../../interfaces/breath-sense-link/notes.md`](../../interfaces/breath-sense-link/notes.md).

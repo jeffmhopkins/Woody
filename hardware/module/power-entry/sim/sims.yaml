@@ -137,12 +137,13 @@ params:
   w_boff:     {value: 0.0, source: "POT-OFFSET's wiper from its DAC_AVDD (CCW) end: 0, the wiper on DAC_AVDD, couples DAC_AVDD's ripple fully [breath-output-stage.md]"}
   t_ramp_pwm: {value: 1.0e-3, source: "every supply's ramp from 0 V in ledpwm.cir; U-ISO's output follows over the next t_ramp_pwm, and the instrument's loads and the row start once it is up [a solver's start, not a claim about the power-on: poweron.cir has that]"}
   t_end_pwm:  {value: 35.0e-3, source: "long enough for the instrument's bulk, the input LC and the module's rails to settle after the ramp (a few ms) before the window"}
+  t_pre_off:  {value: 12.0e-3, source: "ledpwm.cir holds C-BREATH-OFFNEG's split at its DC value until this, after the rails have settled, then lets go (#32): a solver aid so its 24 ms time constant is not settling in the window"}
   t_win_pwm:  {value: 10.0e-3, source: "the window the ripple is read over: 20 periods at 2 kHz"}
   t_step_pwm: {value: 2.0e-6, source: "the step: 125 points per period at 4 kHz"}
   rail_bound_mv: {value: 13.0, source: "the review's bound on the case's +-12 V, '~13 mV p-p of 2-4 kHz on the case's rails' (docs/review/2026-10-01-pre-layout-review/A4-instrument-power-lighting-grounds.md, A4-13), carried into ADR 0027's residual table"}
   pitch_bar_cents: {value: 0.01, source: "ADR 0027's residual section: 'Residual breath-correlated pitch error: under 0.01 cents', which the LED PWM's share must keep (it reaches ~0.001 cents at the worst corner, led-pwm-rail-ripple)"}
   bench_bar_cents: {value: 0.01, source: "ADR 0027, What the bench checks: the pitch jack with the lights sweeping full scale, 'under a hundredth of a cent'"}
-  breath_bar_mv: {value: 1.0, source: "0.01 % of the breath jack's 10 V span [assumption: a tenth of the breath-frequency rail term breath-output-stage.md accepts under Offset]"}
+  breath_bar_mv: {value: 1.0, source: "0.01 % of the breath jack's 10 V span [requirement: a plain limit set here for the LED row's PWM at the breath jack, not derived from another figure]"}
   mod_lsb_uv: {value: 305.0, source: "one LSB of a mod channel: the op-amp output's 20 V span (mod-jack-range's derivation) over 2^16 codes [calc: 20 / 65536 = 305 uV]"}
 
 derived:
@@ -181,6 +182,7 @@ derived:
   i_other: "max(v.get('i_12', 0.0) - v['i_swing'], 0.0)"
   r_sel_row: "1.0e-3 if v['k_row'] else 1.0e7"
   r_sel_iso: "1.0e7 if v['k_row'] else 1.0e-3"
+  t_pre_off_e: "v['t_pre_off'] + 1.0e-6"
   t_ramp2_pwm: "2.0 * v['t_ramp_pwm']"
   k_ldo: "10.0 ** (-v['psrr_ldo'] / 20.0)"
   r_boff_cw: "max(v.get('POT-OFFSET', 0.0) * (1.0 - v['w_boff']), 1e-3)"
@@ -501,7 +503,7 @@ sims:
       - expr: "max['mod_uv'] < p['mod_lsb_uv']"
         why: "under one LSB of a mod channel (20 V / 2^16) on mod 1's jack"
       - expr: "max['breath_mv'] < p['breath_bar_mv']"
-        why: "under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH"
+        why: "under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V and POT-OFFSET from DAC_AVDD. Since #32 C-OUT-BREATH is 10 nF and no longer filters it, and the -12 V leg is filtered where it enters instead (owner, 2026-10-04: 'Add RC filter (Recommended)': R-BREATH-OFFNEG as two 47.5k halves with C-BREATH-OFFNEG, 6.7 Hz)"
   - name: led-pwm-duty
     # the brightness: every duty from one level of 256 to all but one, every LED in phase,
     # at the band's bottom, where the instrument's bulk keeps the least of the row's current

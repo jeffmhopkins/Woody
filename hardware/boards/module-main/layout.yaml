@@ -362,6 +362,7 @@ heights:
   CP_Radial_D6.3mm: 11.0                  # [repo config/module.yaml tall.cap_h, tbd]
   CP_Radial_D5.0mm: 11.0                  # [from memory: 5 x 11 can]
   Potentiometer_Bourns_3296W: 10.03       # [repo config/module.yaml tall.trim]
+  Potentiometer_Bourns_3296X: 10.03       # [ds BOURNS-3296-TRIMPOT.pdf p.1 common dimensions: the four side-adjust trimmers, #32]
   Potentiometer_Bourns_3224W: 5.3         # [repo config/module.yaml tall.trim_smd]
   D_DO-41: 2.7                            # [from memory: DO-41 body diameter, lying flat]
   Fuse_1812: 1.6                          # [from memory]

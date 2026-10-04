@@ -228,7 +228,7 @@ RR4 inpos agnd {{R4}}
 RR5 inneg agnd {{R5}}
 CCMP inpos agnd {{C-CM-IN+}}
 CCMN inneg agnd {{C-CM-IN-}}
-CDIF inpos inneg {{C-DIFF-BREATH}}
+CDIF inpos inneg {{c_diff_mode}}
 DCL1 m2 p12 DCLAMP
 DCL2 n12 m2 DCLAMP
 DCL3 m1 p12 DCLAMP
@@ -265,7 +265,18 @@ RBIN bufo bsum {{R-BREATH-IN}}
 ROCW agnd ow {{r_off_cw}}
 ROCCW ow avdd {{r_off_ccw}}
 ROFF ow bsum {{R-BREATH-OFF}}
-ROFFN n12 bsum {{R-BREATH-OFFNEG}}
+* R-BREATH-OFFNEG as two halves with C-BREATH-OFFNEG at the split (#32): 6.7 Hz on the -12 V leg
+ROFFN1 n12 offnm {{R-BREATH-OFFNEG}}
+COFFN offnm agnd {{C-BREATH-OFFNEG}}
+ROFFN2 offnm bsum {{R-BREATH-OFFNEG}}
+* A SOLVER AID, not a part: the run starts from zero (uic), and C-BREATH-OFFNEG's 24 ms time
+* constant would leave microvolts of power-on settling at t_settle. Until t_hold_off (before
+* every measuring window) a 10 ohm switch holds the split at its own DC value,
+* (V(n12) + V(bsum)) / 2 for the two equal halves, then opens; from then on the RC is as netlisted
+BHOLDOFF holdoff agnd V = (V(n12) + V(bsum)) / 2 - V(agnd)
+SHOLDOFF offnm holdoff ctlhold 0 SWHOLD
+VCTLHOLD ctlhold 0 PWL(0 1 {{t_hold_off}} 1 {{t_hold_off_e}} 0)
+.model SWHOLD SW(Ron=10 Roff=1e15 Vt=0.5 Vh=0.1)
 RBFB bsum bout {{R-BREATH-FB}}
 XBB agnd bsum p12 n12 bout BOPA
 RBOUT bout jb {{R-OUT-PROT}}

@@ -318,7 +318,7 @@ against the real patch because the 1 kΩ divided against it. That error is gone.
   a destination with its own input capacitor, or a long run, is where this
   bites. The phase margin stays at 69° throughout, so the loop analysis
   cannot see it; this bound is the step's. (It said "safe to about 10 nF"
-  until #5 finding 1 ran it.) Joining PITCH to the MOD (82 nF) or BREATH (330 nF) jacks
+  until #5 finding 1 ran it.) Joining PITCH to the MOD (82 nF) or BREATH (10 nF) jacks
   through a passive mult gives the overshoot in `pitch-mult-overshoot`
   (simulated, `sim/`) — several semitones of transient on every note. That failure mode did not exist with op-amp-side
   feedback.

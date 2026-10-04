@@ -46,17 +46,18 @@ its leakage at the 15 V standoff as 300 MΩ `[ds NEXPERIA-PESD15VL1BA.pdf p.4]`.
 | `dc-transfer-supply`, `step-vco-supply`, `loop-supply` | the transfer, the step into 800 pF and the loop with the rails at 10.8–12.6 V each way | gain 2.000 and intercept −2.500 V within 1 mV, under 5 % overshoot, 69.4° — the rails' level does not reach the jack |
 | `patch[v_ext=…,r_ext=…]` | another module's output at either rail, stiff or through 220 Ω, patched onto the jack | **Recorded, accepted by the owner** (2026-10-03, "Accept as is", #5-6): against a stiff output `R-OUT-PROT` carries 0.53 W (0.59 W at the worst corner), over the ≥500 mW its row specifies; 0.36–0.40 W through 220 Ω. Asserted only under the fitted ERJ-P08F1001V's 0.66 W. The op-amp holds the opposite rail at 24 mA; `D-JACK-CLAMP` never conducts (`pitch-stage.md`) |
 | `short[v_dac=…]` | the jack shorted for 5 ms and released, the DAC at either end of its window | back within a cent in under 0.2 ms; a swing of several volts past the note on release; 0.15 W in `R-OUT-PROT` while shorted |
-| `step-mult[mult=1]`, `[mult=2]` | a passive mult to a MOD jack (its 82 nF) or the BREATH jack (its 330 nF) — the page's own model, the capacitor alone | **a recorded hazard**: over 25 % |
+| `step-mult[mult=1]`, `[mult=2]` | a passive mult to a MOD jack (its 82 nF) or the BREATH jack (its 10 nF since #32) — the page's own model, the capacitor alone | **a recorded hazard**: over 8 % |
 | `step-real-mult[…]` | the same, with that output's own `R-OUT-PROT` to its driver as well | recorded only |
 | `loop[mult=…]`, `loop-cable[c_cable=…]` | the loop gain at all three loads and into the cable, broken at the stage's (−) input | phase margin over 45° after the ±10° screen; **`D-ESD-PITCH` moves it by under 0.1°** |
 
 The step is an ideal DAC edge, harder than the DAC8568's own settling, from
 jack 0 V to +1 V, one octave.
 
-**The result is `pitch-mult-overshoot`: 41.6 % at 82 nF, 64.0 % at 330 nF**,
+**The result is `pitch-mult-overshoot`: 41.6 % at 82 nF, 11.4 % at 10 nF**,
 at the nominal; the corners move it
-by about a point either way. An octave step overshooting by 64 % is 7.7
-semitones `[calc: 0.64 × 12]`.
+by about a point either way. An octave step overshooting by 41.6 % is 5.0
+semitones `[calc: 0.416 × 12]`; into the BREATH jack, since its capacitor
+went to 10 nF for #32, about 1.4.
 
 **The AC sweep is blind to it, and the run shows why.** The phase margin at
 crossover is the same at every load to a tenth of a degree, because
@@ -66,7 +67,7 @@ where the loop gain is still large — no crossover, so no margin to read.
 
 With the other output's driver on the jack as well — which is what a patch
 cable actually connects — its `R-OUT-PROT` damps the ring: about 15 % at 82 nF
-and 42 % at 330 nF. The capacitor-only figure is the page's model and the
+and none at 10 nF. The capacitor-only figure is the page's model and the
 worse case.
 
 **`D-ESD-PITCH` is invisible to all of it**: under 0.04 point of overshoot,

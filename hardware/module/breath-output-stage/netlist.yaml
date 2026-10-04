@@ -25,7 +25,19 @@ ports:
     dir: in
     from: module/power-entry
     figure: dac-rail
+  BREATH_OUT:
+    dir: out
+    to: module/breath-receive-stage
+    note: 'The summer''s output inside its loop, ahead of R-OUT-PROT: the breath LED''s driver reads it (#32)'
 components:
+  C-BREATH-OFFNEG:
+    value: 1uF X7R 50V
+    pins:
+    - 1
+    - 2
+    note: 'Filters the -12 V rail out of the breath offset (#32): 1/(2 pi x 23.75 kohm x 1 uF) = 6.7 Hz, so the
+      LED row''s 2-4 kHz PWM and the rail''s breath-rate movement are taken down before the summer. Returns to the
+      star. X7R 50 V in 1206 so 6 V of DC bias costs little; a 1206 C0G at 1 uF is not stocked'
   C-DEC-BREATH-NEG:
     of: C-DECOUPLE
     value: 100nF
@@ -41,7 +53,7 @@ components:
     - 2
     note: V+ to the star, at the pin
   C-OUT-BREATH:
-    value: 330nF film
+    value: 10nF C0G
     pins:
     - 1
     - 2
@@ -94,12 +106,23 @@ components:
     pins:
     - 1
     - 2
-  R-BREATH-OFFNEG:
-    value: 95.3k 1%
+  R-BREATH-OFFNEG-A:
+    of: R-BREATH-OFFNEG
+    value: 47.5k 1%
     drawn_as: R-OFFNEG
     pins:
     - 1
     - 2
+  R-BREATH-OFFNEG-B:
+    of: R-BREATH-OFFNEG
+    value: 47.5k 1%
+    drawn_as: R-OFFNEG
+    pins:
+    - 1
+    - 2
+    note: 'The second half of the offset''s -12 V leg (#32, owner 2026-10-04: ''Add RC filter (Recommended)''):
+      R-BREATH-OFFNEG-A from -12 V to OFFNEG_MID, this from OFFNEG_MID to the summing node, C-BREATH-OFFNEG from
+      OFFNEG_MID to the star. 2 x 47.5k for the 95.3k it replaces'
   R-GAIN-FLOOR:
     value: 7.15k 1%
     pins:
@@ -129,6 +152,7 @@ components:
 nets:
   AGND_MOD:
   - port: AGND_MOD
+  - C-BREATH-OFFNEG.2
   - C-DEC-BREATH-NEG.2
   - C-DEC-BREATH-POS.2
   - C-OUT-BREATH.2
@@ -156,7 +180,7 @@ nets:
   - port: MODULE_ANALOG_NEG12
   - C-DEC-BREATH-NEG.1
   - D-JACK-CLAMP.A
-  - R-BREATH-OFFNEG.1
+  - R-BREATH-OFFNEG-A.1
   - U-BREATH-OPA.V-
   MODULE_ANALOG_POS12:
   - port: MODULE_ANALOG_POS12
@@ -167,6 +191,7 @@ nets:
   - POT-OFFSET.W
   - R-BREATH-OFF.1
   BREATH_OUT:
+  - port: BREATH_OUT
   - D-JACK-CLAMP.C
   - R-BREATH-FB.2
   - R-OUT-PROT.1
@@ -175,9 +200,13 @@ nets:
   - R-BREATH-IN.1
   - U-BREATH-OPA.OUTA
   - U-BREATH-OPA.INA-
+  OFFNEG_MID:
+  - C-BREATH-OFFNEG.1
+  - R-BREATH-OFFNEG-A.2
+  - R-BREATH-OFFNEG-B.1
   SUM_NODE:
   - R-BREATH-FB.1
   - R-BREATH-IN.2
   - R-BREATH-OFF.2
-  - R-BREATH-OFFNEG.2
+  - R-BREATH-OFFNEG-B.2
   - U-BREATH-OPA.INB-

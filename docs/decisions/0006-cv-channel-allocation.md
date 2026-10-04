@@ -843,12 +843,15 @@ the easy half:
 |---|---|---|---|
 | Pitch | `R-OPAMP-IN` 1 kΩ, **ahead of the stage** | 10 nF C0G | 15.9 kHz |
 | Mod 1–4 | 1 kΩ | 82 nF C0G | 1.94 kHz |
-| Breath | 1 kΩ | 330 nF film | ~480 Hz |
+| Breath | 1 kΩ | 10 nF C0G | 15.9 kHz |
 
 Breath is the odd one because it never passes through the DAC: it has no
-zero-order-hold image to attenuate, and it is already a ~460 Hz channel by the
-time it reaches the module (`hardware/interfaces/breath-sense-link/breath-sense-link.md`, *Component values*; 482 Hz until 2026-10-01, which left the common-mode capacitors out). This
-ADR's earlier "~2 kHz for breath" is superseded by that page.
+zero-order-hold image to attenuate, and its band-limit is set ahead of the
+in-amp, by a panel toggle since 2026-10-04 (500 Hz / 1.5 kHz / ~10 kHz; ADR 0003,
+*Amendment, 2026-10-04*; `hardware/interfaces/breath-sense-link/breath-sense-link.md`,
+*Component values*). Its jack RC sits above the widest mode and does nothing
+but isolate the cable. This ADR's earlier "~2 kHz for breath", and the ~480 Hz
+that replaced it, are superseded by that page.
 
 ## Firmware defaults and bring-up rules
 

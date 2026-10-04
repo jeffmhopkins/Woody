@@ -50,8 +50,8 @@ What this directory adds is in its own `params:`, each with its source.
 
 | Sim | What happens | Asserted against |
 |---|---|---|
-| `led-pwm` | The LED row switches between blank and lit at the WS2815's 2 kHz PWM, every LED in phase. Breath is held at 2 kPa, pitch at 0 V and the mods at mid-scale. Corners: the rack PSU's resistance, `C2`'s ESR, `C-STRIP-BULK`'s ESR and the cable's gauge. This is ROADMAP M8's bench test, "pitch scoped while the LEDs sweep" (ADR 0006). | Pitch under ADR 0027's residual (`pitch_bound`). Breath under half the jack's own noise, peak to peak (`breath-jack-noise`). The header rails under `led-pwm-rail-ripple`, the worst `power-entry/sim` finds. The solver's floor under 1 % of every result. |
-| `led-pattern` | The same, at 200 Hz: a light pattern inside the breath and pitch bands. | Pitch under a tenth of `pitch-cents-budget`. Breath moves by the −12 V path `breath-output-stage.md` names, within 20 %. |
+| `led-pwm` | The LED row switches between blank and lit at the WS2815's 2 kHz PWM, every LED in phase. Breath is held at 2 kPa, pitch at 0 V and the mods at mid-scale. Corners: the rack PSU's resistance, `C2`'s ESR, `C-STRIP-BULK`'s ESR and the cable's gauge. This is ROADMAP M8's bench test, "pitch scoped while the LEDs sweep" (ADR 0006). | Pitch under ADR 0027's residual (`pitch_bound`). Breath's ripple (`breath_ripple_mv`, below) under half the jack's own noise, peak to peak (`breath-jack-noise`). The header rails under `led-pwm-rail-ripple`, the worst `power-entry/sim` finds. The solver's floor under 1 % of every result. |
+| `led-pattern` | The same, at 200 Hz: a light pattern inside the breath and pitch bands. | Pitch under a tenth of `pitch-cents-budget`. Breath's ripple under a tenth of what the −12 V path `breath-output-stage.md` names would carry unfiltered: since #32 that leg is filtered at 6.7 Hz. |
 | `led-off` | The row stays blank: the deck's own floor. | Both jacks still. |
 | `burst` | Eight back-to-back DAC frames at the link's 2 MHz, mode 1. MOSI toggles on every clock, and `CS_MOD` goes high between frames for one period. `U-LVL-MOD`'s copies go into the DAC's pins, and mod channel 1 steps 2 V at each frame's end. Breath is held. | Breath under half the jack's own noise. Pitch under a tenth of `pitch-cents-budget`. |
 | `burst-spi` | The same burst with no DAC output moving: the SPI edges alone. | The same. |
@@ -159,17 +159,40 @@ them, and each is `[sim]`. "Worst" is the worst corner.
 
 | Scenario | Pitch jack | Breath jack | Other |
 |---|---|---|---|
-| `led-pwm` | 0.0034 cents p-p nominal, 0.011 at the worst corner (`led-pwm-pitch`) | 0.06 mV p-p, 0.20 worst | header ±12 V 1.0 mV p-p, 3.4 worst; the instrument's ground against the module's 3.7 mV, 13 worst |
-| `led-pattern`, 200 Hz | 0.033 cents p-p, 0.067 worst | 5.8 mV p-p, 12.5 worst | header ±12 V 15 mV p-p, 32 worst |
-| `led-off` | 1 × 10⁻⁸ cents | 0.6 µV | the deck's floor |
-| `burst` | 0.025 cents | 0.22 mV | the in-amp's output 0.22 mV; mod 1 swings 3.5 V |
-| `burst-spi` | 0.011 cents | 0.18 mV | the SPI edges alone |
+| `led-pwm` | 0.0034 cents p-p nominal, 0.011 at the worst corner (`led-pwm-pitch`) | ripple 0.027 mV p-p, 0.058 worst (the 500 Hz mode); `breath_mv` 0.72, 1.58 worst, is the row's turn-on ramp (below) | header ±12 V 1.0 mV p-p, 3.4 worst; the instrument's ground against the module's 3.7 mV, 13 worst |
+| `led-pattern`, 200 Hz | 0.033 cents p-p, 0.067 worst | ripple 0.20 mV p-p, 0.44 worst; `breath_mv` 0.71, 1.50 worst | header ±12 V 15 mV p-p, 32 worst |
+| `led-off` | 1 × 10⁻⁸ cents | 0.3 µV | the deck's floor |
+| `burst` | 0.025 cents | 0.68 mV | the in-amp's output 0.48 mV; mod 1 swings 3.5 V (500 Hz mode) |
+| `burst-spi` | 0.011 cents | 0.56 mV | the SPI edges alone |
+| `led-pwm-wide` | as `led-pwm` | ripple 0.061 mV p-p, 0.32 worst; `breath_mv` 0.76, 1.76 worst | WIDE (#32), recorded |
+| `burst-wide` | 0.025 cents | **1.25 mV** | WIDE, recorded: the in-amp's output 1.35 mV. Over the 500 Hz mode's bar (1.08 mV, half that mode's noise p-p), under WIDE's own (half of 1.45 mV rms × 6.6 = 4.8 mV) |
 | `hot-plug` | 0.008 cents | −1.32 V absent, −0.10 V at rest, a 76 mV transient | `U-ISO` 0.33 A peak; no latch; the instrument up in 0.125 s; SCLK/MOSI at the receiver 1.2–1.3 V at contact |
 
 ## Findings
 
 **Confirmed.**
 
+- **Breath is measured as ripple since #32, and that is a change of measure,
+  not of bar.** `C-BREATH-OFFNEG` (owner, 2026-10-04: *"Add RC filter
+  (Recommended)"*) filters the −12 V leg at 6.7 Hz, so when the row lights,
+  the step in the −12 V rail's mean reaches the breath jack as a ramp over
+  ~0.1 s instead of settling inside `t_led_skip`. The 8 ms window then holds
+  part of that ramp: 0.72 mV of `breath_mv` at the nominal `led-pwm` corner,
+  against 0.05 mV p-p of ripple in each PWM period (checked on the waveform).
+  `breath_ripple_mv` is the last LED period's peak to peak less half its net
+  change, and the bars apply to it; `breath_mv` is recorded. The ramp's size
+  is the rail term `breath-output-stage.md` accepts (*Why −12 V is acceptable
+  here*). `system.lib` also holds the RC's split at its DC value until 6 ms
+  before `t_settle` (a solver aid, like `power-entry/sim`'s `ledpwm.cir`), or
+  its power-on settling reads as 4.7 µV in `led-off`.
+- **The drift is a recorded figure, by the owner's decision.** Offered *"1.6
+  mV slow step only when the LED pattern changes; far below anything audible
+  or musically meaningful. Record it as a known figure and keep the
+  ripple-only measure."*, the owner chose **"Accept, record it
+  (Recommended)"** (2026-10-04, ADR 0003, *The owner's three answers*, item
+  4). Recorded, not passed: `breath_mv` **0.72 mV nominal, 1.58 mV at the
+  worst corner** in `led-pwm` (0.71 and 1.50 in `led-pattern`), a ramp of
+  about 0.1 s each time the row's mean current steps. Asserted: `breath_ripple_mv`.
 - **The case's rails stay under `led-pwm-rail-ripple` for the LED row's
   PWM**, the worst `power-entry/sim` finds, at every corner. The breath jack moves by a fraction of a
   millivolt, as `power-entry/sim` found.
@@ -181,9 +204,11 @@ them, and each is `[sim]`. "Worst" is the worst corner.
   `R-BREATH-FB / R-BREATH-OFFNEG` of the −12 V ripple, asserted within 20 %.
   No other path of that size shows up.
 - **A burst of DAC frames at the link's full rate leaves the breath jack
-  quiet.** It moves 0.2 mV, under half the jack's own noise peak to peak (`breath-jack-noise`). The SPI
-  edges put 0.2 mV spikes on the in-amp's output, and the breath chain's
-  filters take them down to that.
+  quiet.** It moves 0.68 mV in the 500 Hz mode, under half the jack's own
+  noise peak to peak (`breath-jack-noise`); it was 0.2 mV behind the old
+  459 Hz pole and 480 Hz jack RC. In WIDE (#32) it is 1.25 mV, recorded:
+  under half WIDE's own noise, over the 500 Hz mode's bar. The SPI edges'
+  spikes at the in-amp's output are what the toggle's filter lets through.
 - **A hot-plug is clean at the jacks.** The LT1641 does not latch, and
   `U-ISO` peaks at about 0.34 A. That is under `hotplug-iso-ocp`,
   because this deck's `U-ISO` has its datasheet's transient

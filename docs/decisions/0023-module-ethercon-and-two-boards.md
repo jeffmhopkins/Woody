@@ -65,6 +65,13 @@ A Eurorack module's board sits parallel to its panel. That is what a
    10). The main board still carries the etherCON, every other IC, the
    trimmers and the power header. The paragraphs above are what this point
    said before the amendment.*
+
+   *Amended 2026-10-04 (#32): the trimmers are no longer adjusted from
+   behind. The owner chose side-adjust trimmers at the main board's edge, set
+   with the module out of the rack, and no rear-access windows (ADR 0024, "The
+   calibration trimmers are side-adjust"). "Below the rear trimmers, so each
+   stays adjustable from behind" no longer constrains the iso board's outline;
+   the module layout re-derives it.*
 3. **The power header is 2 × 8, while the module takes the bus's +5 V**:
    only the 16-pin bus carries it [ds `DOEPFER-A100-TECHNICAL-DETAILS-a100t_e.html`].
    Deriving +5 V locally instead is still open

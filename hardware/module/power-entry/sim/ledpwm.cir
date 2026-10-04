@@ -195,7 +195,18 @@ RBIN bbuf bsum {{R-BREATH-IN}}
 RBOCW 0 bow {{r_boff_cw}}
 RBOCCW bow avdd {{r_boff_ccw}}
 RBOFF bow bsum {{R-BREATH-OFF}}
-RBOFFN n12o bsum {{R-BREATH-OFFNEG}}
+* R-BREATH-OFFNEG as two halves with C-BREATH-OFFNEG at the split (#32): 6.7 Hz on the -12 V leg
+ROFFNB1 n12o offnmb {{R-BREATH-OFFNEG}}
+COFFNB offnmb 0 {{C-BREATH-OFFNEG}}
+ROFFNB2 offnmb bsum {{R-BREATH-OFFNEG}}
+* A SOLVER AID, not a part: the run starts from zero (uic) and C-BREATH-OFFNEG's 24 ms time
+* constant would still be settling in the window. Until t_pre_off a 10 ohm switch holds the
+* split at its own DC value, (V(n12o) + V(bsum)) / 2 for the two equal halves, then opens;
+* from then on the RC is as netlisted
+BPREOFF preoff 0 V = (V(n12o) + V(bsum)) / 2
+SPREOFF offnmb preoff ctlpre 0 SWPRE
+VCTLPRE ctlpre 0 PWL(0 1 {{t_pre_off}} 1 {{t_pre_off_e}} 0)
+.model SWPRE SW(Ron=10 Roff=1e15 Vt=0.5 Vh=0.1)
 RBFB bsum bout {{R-BREATH-FB}}
 XBB 0 bsum p12o n12o bout OPAx197
 RBOUT bout jackb {{R-OUT-PROT}}

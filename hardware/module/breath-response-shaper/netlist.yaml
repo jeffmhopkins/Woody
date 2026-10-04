@@ -111,7 +111,7 @@ components:
     - 2
     note: 'Input resistor of the restoring half: V_shaped into U-RESP B''s (-) input. With R-RESTORE-FB, x2 inverting'
   TRIM-RESP:
-    value: 10k 10% sealed SMD cermet
+    value: 10k 10% sealed cermet
     pins:
     - CW
     - W

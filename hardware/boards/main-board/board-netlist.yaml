@@ -28,7 +28,7 @@ components:
     sheet: carrier
   C1:
     of: C-AA-ADC
-    value: 47nF C0G/NP0
+    value: 18nF C0G/NP0
     pins:
     - 1
     - 2
@@ -530,14 +530,14 @@ components:
     sheet: power-entry-instrument
   D5:
     of: D-TVS-BREATH
-    value: PESD12VS1UA or equivalent 12V-standoff ESD diode
+    value: PESD12VL1BA
     pins:
     - A
     - K
     sheet: breath-sense-link
   D6:
     of: D-TVS-BREATH
-    value: PESD12VS1UA or equivalent 12V-standoff ESD diode
+    value: PESD12VL1BA
     pins:
     - A
     - K

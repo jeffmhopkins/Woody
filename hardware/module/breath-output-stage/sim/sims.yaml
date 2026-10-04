@@ -81,6 +81,21 @@ params:
   # the INA828 at G = 1001 for noise-amps: the datasheet's e_NI is specified at G = 100 and up
   r_g_1001: {value: 49.95, source: "50 kohm / 1001 [ds INA828 p.5, gain equation]"}
 
+  # --- led.cir: the breath LED's driver (#32)
+  v_led_in0: {value: 0.75, source: "the buffered gain input at the ramp's start: the summer (x -4.02) puts BREATH_OUT near -3 V, the LED dark"}
+  v_led_in1: {value: -3.2, source: "the ramp's end: BREATH_OUT past its positive clip (clip)"}
+  v_led_in2: {value: -1.24, source: "the step's end: BREATH_OUT near +5 V"}
+  t_led_ramp: {value: 20.0e-3, source: "a slow ramp: 15 V in 20 ms, quasi-static for the driver"}
+  t_led_hold: {value: 21.0e-3}
+  t_led_step: {value: 21.002e-3, source: "a 2 us edge from the clip to +5 V: the driver's own loop, out of saturation"}
+  t_led_end: {value: 23.0e-3}
+  t_led_stepsize: {value: 2.0e-6}
+  q_bf: {value: 100.0, source: "Q-LEDB's current gain: hFE 100 min, 300 max at 10 mA, 80 min at 1 mA [ds datasheets/discrete-and-power/NEXPERIA-MMBT3904.pdf Table 7] (vary to 300). The rest of the transistor model is the generic 2N3904 Gummel-Poon [from memory: Is 6.7 fA, Vaf 74 V]: in the loop only beta matters, as the emitter-to-collector ratio. D-LEDB likewise a generic switching diode [assumption: Is 2.5 nA, N 1.8], inside the loop"}
+  led_is: {value: 7.0e-28, source: "LED-BREATH as a diode, N 2: 7e-28 A puts 2.95 V at 5 mA, the 2026 catalogue's InGaN die (3 V at 20 mA) [calc; ds DIALIGHT-605-SERIES-PMI-CATALOG-2026-EXCERPT.pdf p.2]; the sweep's 7e-20 is the 2021 catalogue's 2 V part [ds DIALIGHT-605-SERIES-PMI-CATALOG-2021-EXCERPT.pdf]"}
+  led_n: {value: 2.0, source: "the same fit [assumption: a typical LED's ideality]"}
+  # --- noise.cir, the receive stage's bandwidth mode (#32): 0 wide, 1 1.5 kHz, 2 500 Hz
+  bw: {value: 2, source: "SW-BREATH-BW: 2 = Down, 500 Hz (BW1 and BW0); 1 = Center, 1.5 kHz (BW1); 0 = Up, WIDE"}
+
 derived:
   t_step_e: "v['t_step'] + v['t_edge']"
   r_gain_cw: "max(v['POT-GAIN'] * (1 - v['p_gain']), 1e-3)"
@@ -114,7 +129,10 @@ derived:
   g_n_ref: "v['e_vs'] / math.sqrt(v['kt4'] * 1e3)"
   g_n_set: "v['i_set_rms'] / math.sqrt(v['set_f_hi'] - v['set_f_lo']) * v['R-SET-DAC'] / math.sqrt(v['kt4'] * 1e3)"
   # the link's differential pole, the control band's top: 2 x 11 kohm against C_diff + C_cm/2
-  f_cb_hi: "1 / (2 * math.pi * (v['R1'] + v['R3'] + v['R1b'] + v['R2']) * (v['C-DIFF-BREATH'] + v['C-CM-IN+'] * v['C-CM-IN-'] / (v['C-CM-IN+'] + v['C-CM-IN-'])))"
+  # the switched C_diff in circuit for the mode (U-BW-SW's R_ON, 120-210 ohm, is left out: it moves no
+  # corner by 1 %, breath-receive-stage/sim)
+  c_diff_mode: "v['C-DIFF-BREATH'] + (v['C-DIFF-BW-1K5'] if v['bw'] >= 1 else 0.0) + (v['C-DIFF-BW-500'] if v['bw'] >= 2 else 0.0)"
+  f_cb_hi: "1 / (2 * math.pi * (v['R1'] + v['R3'] + v['R1b'] + v['R2']) * (v['c_diff_mode'] + v['C-CM-IN+'] * v['C-CM-IN-'] / (v['C-CM-IN+'] + v['C-CM-IN-'])))"
   v_adc_lsb: "v['v_adc_ref'] / 4096"
   # the ramp for piece B's slope: at rest (0 to -0.1 V) and +-0.05 V about a hard blow
   v_ramp_end: "-v['v_mag']"
@@ -150,8 +168,8 @@ sims:
       out: "at(w['out'], p['t_end'])"
       jack: "at(w['jack'], p['t_end'])"
       # the page's arithmetic at this corner, wiper source impedance R p (1 - p) included:
-      # -R-BREATH-FB x (V_wiper/(R-BREATH-OFF + R p (1-p)) - 12/R-BREATH-OFFNEG)
-      page_err: "at(w['out'], p['t_end']) + p['R-BREATH-FB'] * (p['v_avdd'] * (1 - p['p_off']) / (p['R-BREATH-OFF'] + p['POT-OFFSET'] * p['p_off'] * (1 - p['p_off'])) + p['v_neg'] / p['R-BREATH-OFFNEG'])"
+      # -R-BREATH-FB x (V_wiper/(R-BREATH-OFF + R p (1-p)) - 12/(2 R-BREATH-OFFNEG)), two halves since #32
+      page_err: "at(w['out'], p['t_end']) + p['R-BREATH-FB'] * (p['v_avdd'] * (1 - p['p_off']) / (p['R-BREATH-OFF'] + p['POT-OFFSET'] * p['p_off'] * (1 - p['p_off'])) + p['v_neg'] / (2 * p['R-BREATH-OFFNEG']))"
     asserts:
       - expr: "max['page_err'] < 0.01 and min['page_err'] > -0.01"
         why: "the op-amp output agrees with the page's offset table and its derivation (-4.89 V CCW, +0.61 V at centre, 0 at p = 0.432, +5.06 V CW) within 10 mV at every corner - the wiper's own source impedance is the whole of the centre's offset"
@@ -225,8 +243,8 @@ sims:
       rail_gain: "at(w['railg'], 10.0)"
       jack_mv: "at(w['railg'], 10.0) * p['rail_mv'] * 1e3"
     asserts:
-      - expr: "max['jack_mv'] < 4.5 and min['jack_mv'] > 3.7"
-        why: "the page's 4.1 mV at the jack for 9.7 mV on the rail: R-BREATH-FB/R-BREATH-OFFNEG, less the 1 % R-OUT-PROT drop into the load"
+      - expr: "abs(nom['rail_gain'] / (0.99 * p['R-BREATH-FB'] / math.hypot(2 * p['R-BREATH-OFFNEG'], 2 * math.pi * 10.0 * p['R-BREATH-OFFNEG'] ** 2 * p['C-BREATH-OFFNEG'])) - 1) < 0.05 and max['jack_mv'] < 2.6"
+        why: "since #32 the -12 V leg is two halves with C-BREATH-OFFNEG at the split (owner, 2026-10-04: 'Add RC filter (Recommended)'): at 10 Hz the rail reaches the jack by R-BREATH-FB / |2R + j w R^2 C| [calc: 0.236 V/V, 2.3 mV for ADR 0027's 9.7 mV], less the 1 % R-OUT-PROT drop, within 5 %. It was 0.42 V/V and 4.1 mV with the one 95.3k"
   - name: chain-centre
     # the shaper and this stage one after the other, POT-RESP at its centre click, GAIN at
     # noon and OFFSET at its zero: the commissioned setting (breath-output-stage.md,
@@ -272,6 +290,36 @@ sims:
       out_hard: "at(w['out'], (-p['v_hard']) * p['t_ramp'] / p['v_mag'])"
       ratio_hard: "at(w['shaped'], (-p['v_hard']) * p['t_ramp'] / p['v_mag']) / p['v_hard']"
       clip_in: "-min(cross(w['out'], peak(w['out'], 0, p['t_ramp']) - 0.05, 0), p['t_ramp']) * p['v_mag'] / p['t_ramp']"
+  # --- THE BREATH LED (#32, owner 2026-10-04): its driver reads BREATH_OUT inside this stage's loop
+  - name: led
+    # copy A of the stage carries the driver, copy B does not; one source drives both through a
+    # slow ramp from the LED dark to the positive clip, then a step back to +5 V. OFFSET at its
+    # zero; Q-LEDB's beta at the datasheet's ends; both catalogues' LEDs
+    deck: led.cir
+    set: {p_off: 0.432}
+    sweep: {led_is: [7.0e-28, 7.0e-20]}
+    vary: [q_bf, R-BREATH-FB, R-BREATH-IN]
+    measures: [dj_max, dj_min, i_off, i_5, i_10, i_max, i_ovs_pct]
+    post:
+      # the driver's effect on the jack, unclipped (BREATH_OUT under 11 V)
+      dj_max: "peak(w['dj'], 0, cross(w['outa'], 11.0))"
+      dj_min: "trough(w['dj'], 0, cross(w['outa'], 11.0))"
+      i_off: "peak(w['iled'], 0, cross(w['outa'], 0.0))"
+      i_5: "at(w['iled'], cross(w['outa'], 5.0))"
+      i_10: "at(w['iled'], cross(w['outa'], 10.0))"
+      i_max: "peak(w['iled'], 0, p['t_led_hold'])"
+      i_ovs_pct: "overshoot(w['iled'], p['t_led_step'], p['t_led_end'])"
+    asserts:
+      - expr: "abs(max['dj_max']) < 153e-6 and abs(min['dj_min']) < 153e-6"
+        why: "THE CV'S BUDGET: the driver moves the jack by under 1 LSB of 10 V at 16 bits (153 uV, the yardstick breath-link-cmrr is held to) anywhere in the unclipped range, at every corner: it loads BREATH_OUT, inside the summer's loop, with 110 kohm and a pA input"
+      - expr: "max['i_off'] < 1e-6"
+        why: "dark at rest and below: under 1 uA wherever BREATH_OUT is at or under 0 V"
+      - expr: "min['i_10'] > 4.5e-3 and max['i_10'] < 5.6e-3"
+        why: "about the power LED's current at a 10 V jack: 10/11/180 ohm = 5.05 mA, within 10 % across beta and both LEDs (the emitter current is set; the collector loses I_B)"
+      - expr: "max['i_max'] < 6.3e-3"
+        why: "THE CAP: at the positive clip (BREATH_OUT at the OPA2197's swing) the LED takes no more than 6.3 mA, inside both catalogues' ratings (15 and 20 mA)"
+      - expr: "max['i_ovs_pct'] < 10"
+        why: "the driver's own loop (U-REF-BUF B through D-LEDB and Q-LEDB's emitter follower) settles a 2 us edge with under 10 % overshoot: it does not ring"
   # --- NOISE (pre-layout review A1-16: the jack's noise was an estimate)
   - name: noise
     # the whole chain, sensor to jack, GAIN at noon and OFFSET at its zero, TRIM-RESP
@@ -286,7 +334,7 @@ sims:
     # n_adc_* is the instrument's ADC_IN, 1 Hz-1 MHz, total and in MCP3202 LSBs.
     deck: noise.cir
     set: {p_gain: 0.47, p_off: 0.432}
-    sweep: {p_resp: [0.0, 0.5, 1.0], level: [0, 1]}
+    sweep: {bw: [2, 1, 0], p_resp: [0.0, 0.5, 1.0], level: [0, 1]}
     vary: []
     measures: [g_set, g_inc_rest, g_inc_hard, r_b, ina_op, jack_op,
                n_au_total, n_au_sensor, n_au_elec, n_au_ref, n_au_sbuf, n_au_link, n_au_recv, n_au_zero, n_au_dac, n_au_shaper, n_au_out, n_au_rest, db_au, ppm_au,
@@ -301,8 +349,8 @@ sims:
         why: "the bookkeeping closes: every noise source in the deck is in a named stage (under 1 % of the total is unclaimed)"
       - expr: "abs(nom['e_sens_chk'] / p['e_sensor'] - 1) < 0.01"
         why: "the sensor's generator is the density sims.yaml derives, read back at the sensor's output within 1 %"
-      - expr: "nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.1 * nom['n_au_sensor'])"
-        why: "THE JACK'S NOISE IS THE SENSOR'S (breath-receive-stage.md, Noise at the jack): every electronic term together is under a tenth of the sensor's, in both bands, at every curve setting and level - on AN1646's figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b, the curve's slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all"
+      - expr: "nom['r_b'] < 0.2 or (nom['n_cb_elec'] < 0.1 * nom['n_cb_sensor'] and nom['n_au_elec'] < 0.15 * nom['n_au_sensor'])"
+        why: "THE JACK'S NOISE IS THE SENSOR'S (breath-receive-stage.md, Noise at the jack): every electronic term together is under a tenth of the sensor's in the control band, and under 0.15 of it in the audio band, at every bandwidth mode, curve setting and level. The audio band's bound was a tenth until #32: with the jack's RC at 15.9 kHz this stage's own noise reaches 20 kHz unfiltered (about 12 uV rms, -118 dB of 10 V), and at POT-RESP fully counter-clockwise on a hard blow in the 500 Hz mode, where the curve is flattest and the sensor's share smallest, it is 0.12 of the sensor's - on AN1646's figure, an assumption (sims.yaml); E11 measures it. Except where BREATH_OUT is clipped (r_b, the curve's slope there over its slope at rest, under 0.2): POT-RESP fully clockwise at noon gain clips a hard blow (breath-chain-curve-clip), and a jack on its rail passes no breath noise at all"
       - expr: "nom['n_adc_lsb'] < 1"
         why: "the instrument's own copy (ADC_IN behind C-AA-ADC) carries under 1 LSB rms of the MCP3202 at 3.3 V from the sensor and the electronics together"
   - name: noise-amps
@@ -343,7 +391,7 @@ sims:
     post:
       out: "at(w['out'], p['t_end'])"
       jack: "at(w['jack'], p['t_end'])"
-      page_err: "at(w['out'], p['t_end']) + p['R-BREATH-FB'] * (p['v_avdd'] * (1 - p['p_off']) / (p['R-BREATH-OFF'] + p['POT-OFFSET'] * p['p_off'] * (1 - p['p_off'])) + p['v_neg'] / p['R-BREATH-OFFNEG'])"
+      page_err: "at(w['out'], p['t_end']) + p['R-BREATH-FB'] * (p['v_avdd'] * (1 - p['p_off']) / (p['R-BREATH-OFF'] + p['POT-OFFSET'] * p['p_off'] * (1 - p['p_off'])) + p['v_neg'] / (2 * p['R-BREATH-OFFNEG']))"
     asserts:
       - expr: "max['page_err'] < 0.01 and min['page_err'] > -0.01"
         why: "the page's offset arithmetic, -12 V's term included, holds within 10 mV at every rail corner: the rest level moves by exactly R-BREATH-FB/R-BREATH-OFFNEG times the -12 V rail's error, and nothing else"

@@ -198,8 +198,10 @@ divider — two more parts per side, piecewise, and no thermal behaviour.
   panel knob's sense — and an open wiper leaves the whole track in series:
   the exp end then bends *less* (the trimmer's CCW end, `sim/`), never more. A
   track that opens altogether takes the branch out and leaves the stage
-  linear. It is a Bourns 3224W, sealed and 12-turn (`TRIM-RESP` row), on the
-  main board's rear face beside the other trimmers.
+  linear. It is a Bourns 3296X, sealed, 25-turn and side-adjust (`TRIM-RESP`
+  row), at the main board's side edge with the other trimmers, set with the
+  module out of the rack (ADR 0024, *The calibration trimmers are
+  side-adjust*).
 - **Where it inserts** is between the in-amp and `POT-GAIN`, for the reason
   given above: the scale there is fixed by the in-amp, so the knee sits at a
   known fraction of full breath and the gain knob cannot move it.

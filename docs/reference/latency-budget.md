@@ -44,15 +44,15 @@ copy — thresholds, note gating, mod routing, MIDI — is sampled, and pays for
 | **Pneumatic restrictor** | **? — sized at E2** | A deliberate low-pass, added to damp the tube's pipe mode (ADR 0003). **Not previously in this budget at all**, and the term most able to break it |
 | Pressure transducer | **~1 ms** | A property of the sensor, not the design |
 | Buffer and cable propagation | < 10 µs | |
-| Receive filter, **459 Hz** | **347 µs** | `1/(2πf)`: 2 × 11 kΩ against `C_diff` 15 nF and the two `C_cm` in series (`breath-sense-link.md`, *Component values*). **Not 531 Hz** — that assumed 20 kΩ of series resistance, and adding `R1b` to the return leg makes both legs 11 kΩ. One pole, not two |
-| Output RC at the jack, 480 Hz | **332 µs** | |
-| **Total** | **~2.86 ms + restrictor** | |
+| Receive filter, **a panel toggle**: 495 Hz / 1.57 kHz / ~10 kHz | **322 / 102 / 16 µs** | `1/(2πf)`: 2 × 11 kΩ against the `C_diff` the toggle switches in and the two `C_cm` in series (`breath-sense-link.md`, *Component values*; owner, 2026-10-04, ADR 0003 *Amendment, 2026-10-04*). One pole |
+| Output RC at the jack, 15.9 kHz | **10 µs** | `R-OUT-PROT` against `C-OUT-BREATH`, above every mode (#32) |
+| **Total** | **~2.51 / 2.29 / 2.21 ms + restrictor** | 500 Hz / 1.5 kHz / WIDE |
 
 **The filter line used to read "< 0.2 ms" and it was the design's own
 specified corners that broke it.** Three reviewers found the same thing: a
-500 Hz pole has 318 µs of group delay by definition, and this path has two of
-them. The real figure is 679 µs — three times what was written, though still
-inside the target.
+500 Hz pole has 318 µs of group delay by definition, and this path had two of
+them. Since 2026-10-04 (#32) it has one: the jack's RC moved above every mode,
+and the receive filter is the player's choice on the panel.
 
 ### Breath digital copy (sampled)
 
@@ -60,14 +60,14 @@ Everything above as far as the sensor output — **~2.17 ms** — then:
 
 | Stage | Time | Notes |
 |---|---|---|
-| **Anti-alias filter, 564 Hz** | **282 µs** | `C-AA-ADC` against the divider's 6 kΩ. **Omitted entirely before**, like the restrictor |
+| **Anti-alias filter, 1.47 kHz** | **108 µs** | `C-AA-ADC` against the divider's 6 kΩ: the module's 1.5 kHz setting, not switched (#32). **Omitted entirely before**, like the restrictor |
 | Sampling period | **0–250 µs** | At a 4 kHz loop, a change waits up to one period to be seen. Mean 125 µs |
 | SAR ADC read | **~27 µs** | One 24-clock (three-byte) transaction at the MCP3202's 0.9 MHz ceiling on 3.3 V, as `interfaces/spi-link` books it; the conversion itself is 18 of those clocks. **This row said 50–200 µs**, a generic SAR allowance and not this part, and then "~24 µs, 18 clocks", which costed the conversion and not the transaction the bus actually carries (2026-10-01, A5-13). See the warning below |
 | SPI to MCU + firmware | < 20 µs | |
 | SPI to DAC over umbilical | ~96 µs | Six 32-bit words at 2 MHz. The loop refreshes all of them every pass (`firmware/README.md`), so the whole burst is the latency, not one word |
 | DAC settling | ~10 µs | |
 | Reconstruction filter | ~82 µs | Mod channels, 1.94 kHz. Pitch is 15.9 kHz and costs ~10 µs |
-| **Total** | **~2.9–3.1 ms + restrictor** | |
+| **Total** | **~2.5–2.8 ms + restrictor** | |
 
 The sampling period was previously omitted from this table entirely, which
 understated the digital path by up to a quarter of a millisecond. It is not a
@@ -78,15 +78,15 @@ the converter is fast.
 
 Moving the sensor to the bottom of the instrument (ADR 0003) traded 0.09 ms of
 tube for 1.17 ms. That was a deliberate exchange for a short, quiet analog run
-instead of a 400 mm one, and the budget absorbs it: **2.80 ms against a 5 ms
-target**, with the two largest terms both physical rather than architectural.
+instead of a 400 mm one, and the budget absorbs it: **2.76 ms against a 5 ms
+target** (the digital copy's worst, since #32's 1.47 kHz anti-alias pole), with the two largest terms both physical rather than architectural.
 
 For scale: a hard tongue attack has a rise time of roughly 5–15 ms. Diaphragm
-dynamics are far slower. Even at 3.1 ms the chain has margin against the
+dynamics are far slower. Even at 2.8 ms the chain has margin against the
 fastest gesture physically available.
 
 **But "roughly 10× margin" was never true and is not true now.** ADR 0003 used
-that phrase; against a 5 ms target the real figure is about **1.6×**, and the
+that phrase; against a 5 ms target the real figure is about **1.8×**, and the
 restrictor has not been measured yet. Two terms are unbounded until E2 — the
 restrictor and the transducer's own response, which is a datasheet number — and
 between them they decide whether this budget holds. The honest statement is

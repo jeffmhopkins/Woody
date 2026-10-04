@@ -11,7 +11,7 @@ inputs:
   hardware/module/digital-and-supervision/sim/seq.cir: 9dbe123e85ed12a2
   hardware/module/power-entry/sim/lt3042.lib: 2664843cbe66f3e8
   datasheets/logic/SN74AHCT125-ti-pspice-sclm256.cir: d544311dc17d754b
-  hardware/module/power-entry/sim/sims.yaml: 582583c807777927
+  hardware/module/power-entry/sim/sims.yaml: 0d5221ddf1068795
   figure:dac-rail: 5.23 V
   figure:mod-reference: 3.3333 V
 ngspice: '42'

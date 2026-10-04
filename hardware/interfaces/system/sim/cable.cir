@@ -8,7 +8,7 @@
 * ground (the buffer's output and the sensor's pin, both near 0 ohm), R3 / R2, C_cm,
 * C-DIFF-BREATH and the 1 Mohm bias pair at the module. The measures are what reaches
 * the INA828's inputs, differentially: its peak and its integral (C-DIFF-BREATH and the
-* link's ~460 Hz pole make the in-amp see the charge, not the spike).
+* link's pole, ~10 kHz in WIDE (#32), make the in-amp see the charge, not the spike).
 .subckt TERMI i1 i2 i3 i4 i5 i6 i7 i8 drv
 VPWR i3 i6 0
 RD drv a {{r_drv}}
@@ -51,7 +51,7 @@ RR4 inp 0 {{R4}}
 RR5 inn 0 {{R5}}
 CCMP inp 0 {{C-CM-IN+}}
 CCMN inn 0 {{C-CM-IN-}}
-CDIF inp inn {{C-DIFF-BREATH}}
+CDIF inp inn {{c_diff_mode}}
 .ends
 * the instrument's ground floats, as the isolated instrument's does: 1 Gohm to node 0
 VCK ck 0 PULSE(0 {{vdd}} {{t_cc0}} {{tr_drv}} {{tr_drv}} {{t_hi}} {{t_per}})

@@ -660,6 +660,18 @@ nets:
       (2026-09-30): it sits between the in-amp and the gain attenuator, where
       the scale is fixed, so POT-GAIN cannot move its knee.
 
+  BREATH_OUT:
+    kind: signal
+    domain: analog
+    carries: "The breath summer's output (U-BREATH-OPA OUTB), inside its feedback loop and ahead of R-OUT-PROT - what the breath jack carries"
+    driver: module/breath-output-stage
+    receivers: [module/breath-receive-stage]
+    note: >
+      The breath LED's driver reads it (#32, 2026-10-04): R-LEDB-TOP/R-LEDB-BOT
+      into U-REF-BUF B. Both ends are on module-main; it never crosses
+      J-B2B-MOD. Not BREATH_SENSE (the umbilical conductor) and not the jack
+      (JACK_TIP, behind R-OUT-PROT).
+
   # ======================================================================
   # MODULE: panel
   # ======================================================================
