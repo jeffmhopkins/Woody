@@ -102,10 +102,20 @@ the way it is). This is the working summary.
      overlap that is meant (a nut on its bolt) goes in
      `mechanical/clash-allow.yaml` with its reason; a rule nothing matches any
      more is reported, so the list cannot rot.
+     **It also lists the near-misses** (issue #34): the minimum distance of
+     every pair that comes within reach, each pair sorted into a class in
+     `config/clearance.yaml` whose minimum gap carries its provenance (the
+     tolerances it adds up). A pair under its class's minimum is
+     `UNDER MINIMUM` unless a `near:` rule in the clash-allow file names it
+     with its reason; every pair under the file's `report` threshold is
+     listed with where it is. The per-solid meshes are cached under
+     `~/.cache/woody/clash-solids/`, keyed by what they are built from, so a
+     change to the clearance rules alone re-measures without re-rendering.
    - the renders in `mechanical/renders/`, listed in `mechanical/README.md`.
 4. **Check before committing**: `python3 tools/cad.py check` (also run by
    `tools/check-staleness.py`) fails on any output that is stale, hand-edited,
-   or built by nothing. `python3 tools/cad.py explain <output>` says which input
+   or built by nothing - and on an unexcused `CLASH` or `UNDER MINIMUM` line
+   in either model's `clash.txt`. `python3 tools/cad.py explain <output>` says which input
    moved since it was built.
 
 **The Eurorack module is a second model in the same pipeline**:

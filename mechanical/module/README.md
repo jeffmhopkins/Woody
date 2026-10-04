@@ -71,8 +71,8 @@ body never marks a module picture stale, nor the reverse.
 | `../cad/fig_module_*.scad` | The drawings: the panel, the three boards, the side section |
 | `../cad/generated/module-params.scad` | **Generated** from `config/module.yaml` |
 | [`drc.echo`](drc.echo) | **Generated.** Every design rule, `PASS`/`FAIL`/`NOTE`/`INFO` with its measured value. Pages cite rules by name |
-| [`clash.txt`](clash.txt) | **Generated.** Every named envelope against every other |
-| [`clash-allow.yaml`](clash-allow.yaml) | Interference the design intends, each with its reason (none yet) |
+| [`clash.txt`](clash.txt) | **Generated.** Every named envelope against every other: overlaps, and every pair under its class's minimum gap ([`config/clearance.yaml`](../../config/clearance.yaml)) |
+| [`clash-allow.yaml`](clash-allow.yaml) | Interference the design intends (`allow:`) and near-misses it accepts (`near:`), each with its reason |
 | `export/panel.dxf` | **Generated.** The panel as it goes to the cutter |
 | `export/jack-board.dxf`, `export/main-board.dxf` | **Generated.** The boards' outlines, with the standoff holes |
 | [`export/pcb-geometry.echo`](export/pcb-geometry.echo) | **Generated.** Where every board-mounted part is, each face's keep-outs and height limits - the board layout's input, in the body's `pcb-geometry.echo` format |
