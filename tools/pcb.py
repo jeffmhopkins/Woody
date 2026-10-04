@@ -2045,6 +2045,7 @@ def cmd_check(bdir):
     if lay.get("fab"):
         bad += check_silk(board, lay["fab"])
     bad += check_tracks(board)
+    bad += check_holes(board, lay)
     bad += check_connect_first(board, lay)
     comps, _ = sheet_netlist(os.path.join(bdir, name + ".kicad_sch"))
     if lay.get("kind") == "main":
@@ -2066,6 +2067,56 @@ def cmd_check(bdir):
     for b in notes + bad:
         print("  " + b)
     return 1 if bad else 0
+
+
+def check_holes(board, lay):
+    """No copper within the hole clearance of an unplated hole (a switch's centre hole, a
+    mount's clearance hole) or of an Edge.Cuts cut-out, on ANY copper layer - tracks,
+    arcs, vias, other parts' pads and filled zones alike. KiCad's DRC sees most of this as
+    hole_clearance, but a drawn path laid through KS-33's centre hole went unchecked
+    (2026-10-04), and this does not depend on which DRC tests a board leaves on."""
+    import pcb_route
+    from shapely.geometry import Point, Polygon
+    hc = float((lay.get("fab") or {}).get("hole_clearance", (lay.get("rules") or {}).get("clearance", 0.2)))
+    holes = []
+    for f in board.GetFootprints():
+        for p in f.Pads():
+            if p.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH and p.GetDrillSize().x > 0:
+                c = p.GetPosition()
+                holes.append((f"{f.GetReference()}'s unplated hole",
+                              Point(pcbnew.ToMM(c.x), pcbnew.ToMM(c.y)).buffer(pcbnew.ToMM(p.GetDrillSize().x) / 2, 32), f))
+    outline = pcb_route.board_outline_with_holes(board)
+    for g in getattr(outline, "geoms", [outline]):
+        for ring in g.interiors:
+            holes.append(("an Edge.Cuts cut-out", Polygon(ring), None))
+    if not holes:
+        return []
+    cu = [L for L in board.GetEnabledLayers().CuStack()]
+    bad = []
+    for name, h, owner in holes:
+        zone = h.buffer(hc - 1e-3)
+        hits = set()
+        for t in board.GetTracks():
+            for L in cu:
+                if t.IsOnLayer(L) and item_shape(t, L).intersects(zone):
+                    hits.add(f"{t.GetNetname()} {'via' if isinstance(t, pcbnew.PCB_VIA) else 'track'} on {board.GetLayerName(L)}")
+        for f in board.GetFootprints():
+            for p in f.Pads():
+                if p.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH or (owner is not None and f is owner):
+                    continue
+                for L in cu:
+                    if p.IsOnLayer(L) and item_shape(p, L).intersects(zone):
+                        hits.add(f"{f.GetReference()} pad {p.GetNumber()} on {board.GetLayerName(L)}")
+        for z in board.Zones():
+            if z.GetIsRuleArea():
+                continue
+            for L in cu:
+                if z.IsOnLayer(L) and z.GetFilledPolysList(L).OutlineCount() and shapely_of(z.GetFilledPolysList(L)).intersects(zone):
+                    hits.add(f"{z.GetNetname()} zone on {board.GetLayerName(L)}")
+        c = h.centroid
+        for w in sorted(hits):
+            bad.append(f"error: [hole] {w} within {hc} mm of {name} at ({c.x:.2f}, {c.y:.2f})")
+    return bad
 
 
 def assembly_files(bdir, name, fab):

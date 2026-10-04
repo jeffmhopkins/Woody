@@ -1557,6 +1557,32 @@ def route_pair_smooth(board, lay, obs, spec):
     d_left = math.dist(left, pf[spec["from"][0]]) + 0.0
     right = (st[0] + t[1] * half, st[1] - t[0] * half)
     sides = (half, -half) if d_left <= math.dist(right, pf[spec["from"][0]]) else (-half, half)
+    # a drawn path is not searched, so it is checked before it is laid: every leg clear of
+    # every hole (plated or not - a switch's centre hole, a mount's) by the hole clearance,
+    # of every keep-out, and of every other net's copper on its layer by the clearance;
+    # one that is not stops the run, by where (owner, 2026-10-04: a leg through KS-33's
+    # centre hole went unseen because nothing checked the drawn path)
+    allowed = set(nets) | ({spec["guard_traces"]["net"]} if spec.get("guard_traces") else set())
+    bad = []
+    for net, d in zip(nets, sides):
+        for p in prims:
+            g = p.offset(d).line(24).buffer(w / 2, cap_style=1)
+            for geom, n, ls, kind in obs.near(g, 1.0):
+                if kind in ("hole", "vhole", "npth"):
+                    if geom.distance(g) < obs.hclear - 1e-3:
+                        bad.append((net, kind, geom.centroid))
+                elif L not in ls or kind in ("silk", "guard") or n in allowed:
+                    continue
+                elif kind == "keepout":
+                    if geom.intersects(g):
+                        bad.append((net, kind, geom.centroid))
+                elif geom.distance(g) < obs.clear - 1e-3:
+                    bad.append((net, f"{n} {kind}", geom.centroid))
+    if bad:
+        seen = sorted({(n, k, round(c.x, 1), round(c.y, 1)) for n, k, c in bad})
+        sys.exit("pcb: pair " + " / ".join(nets) + ": its drawn path is not clear - "
+                 + "; ".join(f"{n} against {k} at ({x}, {y})" for n, k, x, y in seen[:8])
+                 + (" ..." if len(seen) > 8 else "") + " (layout.yaml pairs: through:, detours:)")
     for net, d in zip(nets, sides):
         for p in prims:
             lay_prim(board, obs, net, p.offset(d), w, L)
@@ -1584,6 +1610,10 @@ def guard_prims(board, lay, obs, spec, prims, L):
 
     def clear(g):
         for geom, n, ls, kind in obs.near(g, 0.5):
+            if kind in ("hole", "vhole", "npth") and n != gnet:
+                if geom.distance(g) < obs.hclear - 1e-3:
+                    return False
+                continue
             if L not in ls or kind in ("silk", "guard") or n == gnet:
                 continue
             if kind == "keepout":

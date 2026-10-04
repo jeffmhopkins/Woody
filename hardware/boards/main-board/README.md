@@ -248,11 +248,12 @@ What the first layout settled, and where it is held:
     fillets (owner, 2026-10-04: *"curve around standoffs much better and be mirrored
     around them"*, then *"reduce all of them down to the same size"*). At `H2` and `H6` the
     far-row switch's leg pad (`SW2` / `SW6` pin 1) stands 6.2 mm from the mount on its tail
-    side, so the detour carries on under both the switch's pins, r 3 mm about each,
-    joined by their common tangents - one smooth sweep - and a 3 mm fillet back up after
-    pin 2 (owner: *"go around both of these instead of going around the middle"*); it
-    passes under the switch's housing there, on layer 4, clear of its pads. The same arc
-    at every mount, asymmetric only there. The path is drawn, not searched
+    side, so the detour goes on round that pin, r 3 mm, joined by their common tangent,
+    and back up to the edge between the switch's two pins with a 3 mm fillet - clear of
+    the switch's 5.25 mm centre hole, which a sweep under both pins crossed (tried and
+    withdrawn, 2026-10-04: `pcb.py check` now fails any copper within the hole clearance
+    of an unplated hole or cut-out on any layer, and a drawn path is checked before it is
+    laid). The same arc at every mount, asymmetric only there. The path is drawn, not searched
     (`pcb_route.route_pair_smooth`): the legs and guards are the same path offset, KiCad
     arcs, one spacing all the way. Layer 4, not 1: the far-row keys' T networks stand on
     layer 1 between the edge and their switch pins.
@@ -270,7 +271,7 @@ What the first layout settled, and where it is held:
     track each side of the coupled run, one clearance off the legs, stitched into the
     strip at least every 5 mm - about 540 mm of guard and ~97 vias. **Left with the 3W
     keep-off only** (0.75 mm, `guard:`), where there is no room for a guard with two
-    stitching vias: two spans of 6.2 mm, on the exit fillets at `H4` and `H8`, and a short break in the outer guard under `SW2`'s pins; `route`
+    stitching vias: two spans of 2.0 mm, on the exit fillets at `H4` and `H8`; `route`
     prints each one.
   - Moved for it: `R-CHAIN-SER` to the far side of the row where the block stood,
     `U-LVLSHIFT` and the LED data by LED1, `Q-INRUSH`'s network by `J-UMB`, `R-SPI-SER`
