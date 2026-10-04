@@ -50,7 +50,8 @@ the ribbon to it (*The Matrix and the umbilical at the tail end*, below).
                               TAIL FACE
    ┌─────────────────────────────────────────────────────────────┐
    │  etherCON J-UMBILICAL-INST, on its adapter, behind the cap  │
-   │  USB-C receptacle ── CBL-USB-EXT to the Matrix's own port   │
+   │  (nothing else since issue #37: the MIDI jack is in the     │
+   │   oak bottom beside it, carrier/midi-out)                   │
    └──────────────┬──────────────────────────────────────────────┘
                   │ PCB-UMB-ADAPTER: 8 tracks, pin N to pin N (ADR 0021)
                   │
@@ -70,7 +71,7 @@ the ribbon to it (*The Matrix and the umbilical at the tail end*, below).
        ┌─────────────────────────▼─────────────────────▼──────────────┐
        │  J-MCU — CBL-MCU-RIBBON to the ESP32-S3-Matrix, its carrier  │
        │   5V×3 GND×4 3V3 | IO7 … IO1 | IO33 … IO40 | IO43 IO44       │
-       │   2 unused (were EN IO0) | IO2 IO3 spare — 24 conductors     │
+       │   IO6 (pin 23) + IO2 MIDI | pin 24 unused | IO3 — 24 cond.   │
        │   (onboard: IMU GPIO10-13, 8×8 matrix GPIO14, USB GPIO19/20) │
        └──┬──────┬──────────┬────────────┬───────────┬────────────────┘
           │      │          │            │           │
@@ -290,9 +291,9 @@ The section number is kept because other pages cite `carrier.md` §4.*
 > against the oak top under a window at the tail, wired to the main board
 > by a ribbon soldered to its pad rows and plugged into `J-MCU` (ADR 0017,
 > *The Matrix and the umbilical at the tail end* below), so there is no
-> cutout to argue about and the underside mounting below is not needed. Its
-> USB-C port reaches the tail face through `CBL-USB-EXT`, so no board edge
-> has to align with a slot either. `mechanical/renders/main-board.png` shows
+> cutout to argue about and the underside mounting below is not needed. No
+> board edge has to align with a slot either: its USB-C is reached with the
+> lid off since issue #37, and the tail-face extension is gone. `mechanical/renders/main-board.png` shows
 > where the circuits went. Kept as the record of the arithmetic that was.
 
 **Proposed: mount the ESP32-S3-Matrix on the carrier's *underside*, LED face
@@ -368,8 +369,9 @@ row.
 | 5V | 3 | the 5V pad, on `HDR-MATRIX` | current, below |
 | GND | 4 | the GND pad, on the carrier's pour | current, and the ADC's reference, below |
 | 3V3 | 1 | the 3V3 pad | the Matrix's LDO: the chain's rail and the ADC's reference |
-| none (were `EN`, `IO0`) | 2 | not wired out since 2026-10-03: the Matrix is programmed over USB only (ADR 0021, *Amendment, 2026-10-03*) | [`service-uart`](service-uart/service-uart.md) |
-| spare GPIO `IO2`, `IO3` | 2 | their pads | ADR 0009's spare conductors; `IO2`–`IO6` are spare (ADR 0007) |
+| `IO6`, the MIDI out's tip line (was `IO0`) | 1 | pin 23, its pad on `HDR-MATRIX`, since issue #37 | [`midi-out`](midi-out/midi-out.md) |
+| none (was `EN`) | 1 | pin 24: not wired out since 2026-10-03 (the Matrix is programmed over USB only, ADR 0021, *Amendment, 2026-10-03*); it cannot be routed on the carrier (`midi-out.md`, *The ribbon conductors*) | [`service-uart`](service-uart/service-uart.md) |
+| `IO2` (the MIDI out's ring line since issue #37) and spare `IO3` | 2 | their pads | ADR 0009's spare conductors; `IO3`–`IO5` are spare (ADR 0007) |
 
 The pad rows carry one ground pad and one 5 V pad
 `[repo] datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-pinout.png`. On the
@@ -423,7 +425,7 @@ one). [`netlist.yaml`](netlist.yaml) is authoritative:
   pin  1 5V     2 GND    3 5V     4 IO1    5 IO2    6 IO7
   pin  7 IO3    8 IO38   9 GND   10 IO35  11 GND   12 IO36
   pin 13 3V3   14 IO34  15 GND   16 IO39  17 5V    18 IO37
-  pin 19 IO33  20 IO40  21 IO44  22 IO43  23 —     24 —
+  pin 19 IO33  20 IO40  21 IO44  22 IO43  23 IO6   24 —
 ```
 
 The order is for the ribbon's length, where conductors sit side by side for
@@ -436,13 +438,17 @@ is **the ground between the SPI clock and the chain clock**; `IO36`
 the same way — `IO39` between ground and 5V, `IO37` between 5V and `IO33`,
 `IO1` (LED data) between 5V and `IO2` — using lines that are quiet in play:
 `IO33` moves only for the chain self-test, and `IO44` (`RX`) only with
-something on the service header. `IO43` (`TX`) sits between `RX` and the edge's two unused conductors,
-which were `IO0` and `EN` until 2026-10-03 (program over USB only; ADR 0021,
+something on the service header. `IO43` (`TX`) sits between `RX` and `IO6`, the MIDI out's tip line since issue
+#37: two slow UART lines side by side, with the unused pin 24 at the edge
+(`IO0` and `EN` until 2026-10-03; program over USB only, ADR 0021,
 *Amendment, 2026-10-03*). `EN` is no longer on the ribbon at all, so no
 ribbon conductor can glitch it; the Matrix has no capacitor on it - `R8` and
 `Key1` are all that is on its `RESET` net - which is #14 A2's accepted risk
 ([`service-uart`](service-uart/service-uart.md)). **The spares must be quiet to shield:** firmware
-drives `IO2` and `IO3` low (`firmware/README.md`).
+drives `IO3` low (`firmware/README.md`). `IO2` is the MIDI out's ring line
+since issue #37: held high, and so static, in Type A; in Type B it is the line
+that switches, between `IO1` and `IO7` (`midi-out.md`, *The ribbon
+conductors*).
 
 **`J-UMB` is where the umbilical reaches this board** (ADR 0021). The
 instrument's etherCON, `J-UMBILICAL-INST`, is soldered to its own small board,

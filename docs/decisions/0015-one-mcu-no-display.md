@@ -68,7 +68,8 @@ it is enough.
   `C-BULK-DISP`. One R-78E5.0 feeds the dev board, the matrix and the level
   shifter.
 - **WiFi, the SoftAP web app, and OTA update** (ADR 0012). There is no radio
-  to update over; firmware goes on over USB. The recovery ladder in
+  to update over; firmware goes on over USB. *(Reinstated for configuration
+  mode only by the amendment of 2026-10-04, below.)* The recovery ladder in
   `firmware/README.md` loses its first rung (OTA rollback) and starts at
   USB-Serial-JTAG.
 - **The display band** at the mouth end of the body. The CAD derives the

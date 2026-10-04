@@ -152,7 +152,7 @@ figure a bench reading replaces. #18 E2 also asked for a thermocouple on
 ROADMAP M8 has it.
 
 **Rack and USB together: the share is not controlled in hardware** (#18 E1). With the rack up and a USB host plugged in — the
-configuration and telemetry case, `firmware/README.md` — `VCC_5V` is fed from
+bench case since issue #37, the Matrix's own USB-C with the lid off (`firmware/README.md`) — `VCC_5V` is fed from
 both sides: the buck through `D-USBOR` (SS14, `V_F` 0.50 V max at 1 A
 `[ds SS14.pdf]`) and `VBUS` through the Matrix's own `D1` (B5819WS, 0.60 V
 max at 1 A `[ds B5819WS.pdf]`). The sources are 5.0 V ± 5 % (`[ds
@@ -314,7 +314,9 @@ is out of scope, and no clamp is added (ADR 0027, its 2026-10-01 amendment).
 
 ### On USB power alone
 
-ADR 0005 keeps the USB OR so the instrument runs on the bench without a rack.
+ADR 0005 keeps the USB OR so the instrument runs on the bench without a rack
+(through the Matrix's own USB-C, with the lid off since issue #37 removed the
+tail-face extension).
 **Since the analog block and the LED row moved to `INST_POS12`, USB alone runs
 the MCU, the matrix and the keys only**: no breath (the sensor, `U-REF-BREATH`
 and `U-BUF` are on `INST_POS12`) and no LED supply. The LED buffer

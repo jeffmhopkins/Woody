@@ -103,10 +103,12 @@ components:
     - 22
     - 23
     - 24
-    note: The Matrix's ribbon lands here, conductor n on pin n (ADR 0018); its other end is J-MCU-C on the Matrix
-      carrier, pin 25-n (ADR 0021 amendment 2026-10-03). Pins 23 and 24, IO0 and EN until the owner chose to program
-      the Matrix over its own USB-C only (2026-10-03), are on no net. Every fast line has a ground, a supply or
-      a static line on both sides, and pin 9 (GND) separates SCLK (pin 10) from the chain clock (pin 8)
+    note: 'The Matrix''s ribbon lands here, conductor n on pin n (ADR 0018); its other end is J-MCU-C on the Matrix
+      carrier, pin 25-n (ADR 0021 amendment 2026-10-03). Pin 23 carries IO6, the MIDI out''s tip line, since issue
+      #37 (carrier/midi-out), and pin 5 IO2, its ring line; pin 24 is on no net (it and pin 23 were IO0 and EN until
+      the owner chose to program the Matrix over its own USB-C only, 2026-10-03). IO2 stays between IO1 and IO7
+      as before: it is static (held high) except while it is the sink, in Type B Every fast line has a ground, a
+      supply or a static line on both sides, and pin 9 (GND) separates SCLK (pin 10) from the chain clock (pin 8)'
   NT-DIG:
     value: net tie
     pins:
