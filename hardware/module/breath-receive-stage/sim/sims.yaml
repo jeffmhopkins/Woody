@@ -4,8 +4,11 @@
 #   python3 tools/sim.py run hardware/module/breath-receive-stage/sim
 # docs/reference/pcb-pipeline.md, section 2, ranked sim 1. The claim is a WORST CASE
 # over tolerance, so every tolerance end of every part that sets the balance is a
-# corner (2^8 per sim).
-title: Breath link CMRR, sensor buffer to INA828 output
+# corner (2^10 per sim). Since #32 (owner, 2026-10-04: "Panel 3-way toggle",
+# "500 Hz / 1.5 kHz / wide") the differential filter has three modes, set by
+# SW-BREATH-BW through U-BW-SW; every mode is run, and each is held to the requirement
+# over ITS OWN band.
+title: Breath link CMRR, sensor buffer to INA828 output, in each bandwidth mode
 values:
   netlist:
     - hardware/interfaces/breath-sense-link/netlist.yaml
@@ -20,6 +23,29 @@ params:
   v_neg:      {value: -12.0, source: "MODULE_ANALOG_NEG12, the INA828's V- (netlist)"}
   v_sensor:   {value: 2.5,   source: "a mid-span operating point for the sensor buffer's output [assumption: CMRR is taken small-signal about it]"}
   v_ref_trim: {value: 0.265, source: "the trimmer wiper at the sensor's typical pedestal, MPXV4006DP Voff typ [the U-DIFFRX/TRIM-BREATH-ZERO rows, hardware/module/breath-receive-stage/bom.csv]"}
+  # U-BW-SW, TMUX6112 at +-15 V, 25 C [ds datasheets/analog/TMUX6112-ti-scds383f.pdf p.6-7]; the
+  # module runs it at +-12 V, where R_ON is a little higher: the max over +-10 V and 85 C is used
+  r_on:       {value: 210.0, source: "RON, 210 ohm max over VS +-10 V, -40 to +85 C [ds TMUX6112 p.6]; 120 typ at VS 0 V. The largest is taken: it is in series with a switched capacitor, and the larger it is the more it lifts that capacitor's corner"}
+  c_d_off:    {value: 3.1e-12, source: "CD(OFF), 3.1 pF max (2.4 typ) [ds TMUX6112 p.7]"}
+  c_s_off:    {value: 3.0e-12, source: "CS(OFF), 3.0 pF max (1.9 typ), PW package [ds TMUX6112 p.7]"}
+  c_on:       {value: 6.0e-12, source: "CD(ON) = CS(ON), 6.0 pF max (4.2 typ) [ds TMUX6112 p.7]"}
+  c_ds:       {value: 0.2e-12, source: "drain-to-source capacitance of an open channel [calc from OISO -85 dB at 1 MHz into 50 ohm, p.7: 10^(-85/20) / (2 pi x 1 MHz x 50 ohm) = 0.18 pF]"}
+  k_sw_p:     {value: 1.0, source: "scales the switch capacitance on the IN+ leg; the datasheet gives typ and max, never a channel-to-channel match, so the two legs' ratio is a corner [assumption, below]"}
+  k_sw_n:     {value: 1.0, source: "the same on the IN- leg"}
+  en_1k5:     {value: 0, source: "BW1: 1 closes channels 1 and 2 (C-DIFF-BW-1K5), toggle at 500 Hz or 1.5 kHz"}
+  en_500:     {value: 0, source: "BW0: 1 closes channels 3 and 4 (C-DIFF-BW-500), toggle at 500 Hz"}
+
+derived:
+  r_sw_1k5:  "v['r_on'] if v['en_1k5'] else 1e12"
+  r_sw_500:  "v['r_on'] if v['en_500'] else 1e12"
+  c_ds_1k5:  "1e-18 if v['en_1k5'] else v['c_ds']"
+  c_ds_500:  "1e-18 if v['en_500'] else v['c_ds']"
+  c_s_1k5:   "v['c_on'] if v['en_1k5'] else v['c_s_off']"
+  c_s_500:   "v['c_on'] if v['en_500'] else v['c_s_off']"
+  c_d_p_1k5: "v['k_sw_p'] * (v['c_on'] if v['en_1k5'] else v['c_d_off'])"
+  c_d_n_1k5: "v['k_sw_n'] * (v['c_on'] if v['en_1k5'] else v['c_d_off'])"
+  c_d_p_500: "v['k_sw_p'] * (v['c_on'] if v['en_500'] else v['c_d_off'])"
+  c_d_n_500: "v['k_sw_n'] * (v['c_on'] if v['en_500'] else v['c_d_off'])"
 
 vary:
   R1:  {tol: from-value}
@@ -30,32 +56,88 @@ vary:
   R5:  {tol: from-value}
   C-CM-IN+: {tol: [-0.005, 0.005], source: "C-CM-BREATH, a MATCHED PAIR: each within 0.5 % of the pair's mean (owner, 2026-10-03: 'Tighten cap matching'; the bom.csv row and the sheet's Note say how it is matched). Only the pair's mismatch converts common mode, so the corners hold the two 1 % apart at most"}
   C-CM-IN-: {tol: [-0.005, 0.005], source: "as C-CM-IN+"}
+  k_sw_p: {tol: [-0.1, 0.1], source: "[assumption] +-10 % on each leg's switch capacitance, i.e. the four channels of one die matched to 20 % worst case. The datasheet gives no match; cmrr-sw-spread runs the typ-to-max spread instead"}
+  k_sw_n: {tol: [-0.1, 0.1], source: "as k_sw_p"}
 
 sims:
-  - name: cmrr-as-netlisted
+  # ---- the three modes, each against the requirement over its own band (breath-sense-link.md)
+  - name: cmrr-500
     deck: cmrr.cir
-    vary: [R1, R1b, R2, R3, R4, R5, C-CM-IN+, C-CM-IN-]
-    measures: [cmrr_dc, cmrr_50, cmrr_60, cmrr_500, cmrr_1k, f_req, cmrr_band]
+    set: {en_1k5: 1, en_500: 1}
+    vary: [R1, R1b, R2, R3, R4, R5, C-CM-IN+, C-CM-IN-, k_sw_p, k_sw_n]
+    measures: [f_3db, cmrr_dc, cmrr_50, cmrr_60, cmrr_top, cmrr_band, f_req]
     post:
-      f_req: "cross(w['cmrr'], 58.5, 1)"
-      # the least CMRR anywhere in the requirement's band, DC to 500 Hz (breath-sense-link.md)
-      cmrr_band: "trough(w['cmrr'], 1, 500)"
+      f_3db: "cross(w['gdmn'], -3.0)"
       cmrr_dc: "at(w['cmrr'], 1)"
       cmrr_50: "at(w['cmrr'], 50)"
       cmrr_60: "at(w['cmrr'], 60)"
-      cmrr_500: "at(w['cmrr'], 500)"
-      cmrr_1k: "at(w['cmrr'], 1000)"
+      cmrr_top: "at(w['cmrr'], 500)"
+      cmrr_band: "trough(w['cmrr'], 1, 500)"
+      f_req: "cross(w['cmrr'], 58.5, 1)"
     asserts:
+      - expr: "abs(nom['f_3db'] - 495) < 25"
+        why: "the 500 Hz mode's corner, 1/(2 pi x 22 kohm x (0.68 + 3.9 + 10 nF + 34 pF)) = 495 Hz (breath-sense-link.md), within 5 % with the switch's R_ON and capacitance in it"
       - expr: "min['cmrr_50'] > 58.5 and min['cmrr_60'] > 58.5"
-        why: "the link clears the page's requirement (breath-sense-link.md, 58.5 dB) at the mains fundamental, worst corner"
+        why: "the link clears the requirement (breath-sense-link.md, 58.5 dB) at the mains fundamental, worst corner"
       - expr: "abs(min['cmrr_dc'] - 73) < 3"
         why: "the worst-case floor is the page's 73 dB, set by the 1 Mohm bias pair's 1 % (breath-sense-link.md, 'One correction'), within 3 dB"
       - expr: "min['cmrr_band'] > 58.5"
-        why: "THE REQUIREMENT OVER ITS BAND (#5 finding 5): 58.5 dB from DC to 500 Hz, the breath channel's band (breath-sense-link.md, 'From the instrument end'), at every corner. C_cm's mismatch converts common mode in proportion to frequency, so the band's top is the worst: with two independent 1 % parts it failed from ~480 Hz, and the owner chose a matched pair (2026-10-03, 'Tighten cap matching'), each within 0.5 % of the pair's mean"
+        why: "THE REQUIREMENT OVER THIS MODE'S BAND, DC to 500 Hz, at every corner"
+  - name: cmrr-1k5
+    deck: cmrr.cir
+    set: {en_1k5: 1, en_500: 0}
+    vary: [R1, R1b, R2, R3, R4, R5, C-CM-IN+, C-CM-IN-, k_sw_p, k_sw_n]
+    measures: [f_3db, cmrr_dc, cmrr_60, cmrr_top, cmrr_band, f_req]
+    post:
+      f_3db: "cross(w['gdmn'], -3.0)"
+      cmrr_dc: "at(w['cmrr'], 1)"
+      cmrr_60: "at(w['cmrr'], 60)"
+      cmrr_top: "at(w['cmrr'], 1500)"
+      cmrr_band: "trough(w['cmrr'], 1, 1500)"
+      f_req: "cross(w['cmrr'], 58.5, 1)"
+    asserts:
+      - expr: "abs(nom['f_3db'] - 1566) < 80"
+        why: "the 1.5 kHz mode's corner, 1/(2 pi x 22 kohm x (0.68 + 3.9 nF + 34 pF)) = 1566 Hz (breath-sense-link.md), within 5 %: the owner's 1.5 kHz (2026-10-04) on E12 values"
+      - expr: "min['cmrr_band'] > 58.5"
+        why: "THE REQUIREMENT OVER THIS MODE'S BAND, DC to 1.5 kHz, at every corner"
+  - name: cmrr-wide
+    deck: cmrr.cir
+    set: {en_1k5: 0, en_500: 0}
+    vary: [R1, R1b, R2, R3, R4, R5, C-CM-IN+, C-CM-IN-, k_sw_p, k_sw_n]
+    measures: [f_3db, cmrr_dc, cmrr_60, cmrr_1k5, cmrr_top, cmrr_band, f_req]
+    post:
+      f_3db: "cross(w['gdmn'], -3.0)"
+      cmrr_dc: "at(w['cmrr'], 1)"
+      cmrr_60: "at(w['cmrr'], 60)"
+      cmrr_1k5: "at(w['cmrr'], 1500)"
+      cmrr_top: "at(w['cmrr'], 10000)"
+      cmrr_band: "trough(w['cmrr'], 1, 10000)"
+      f_req: "cross(w['cmrr'], 58.5, 1)"
+    asserts:
+      - expr: "nom['f_3db'] > 9000 and nom['f_3db'] < 11000"
+        why: "the wide mode's corner, about 10 kHz (owner, 2026-10-04: 'wide' is about 10 kHz): 1/(2 pi x 22 kohm x (680 + 34 pF)) = 10.1 kHz, less the open switches' few pF"
+      - expr: "min['cmrr_1k5'] > 58.5"
+        why: "C_cm and the switch are fixed in every mode, so wide mode holds the requirement wherever the other modes' bands reach"
+      - expr: "min['cmrr_band'] > 58.5"
+        why: "THE REQUIREMENT OVER THIS MODE'S BAND, DC to 10 kHz, at every corner"
+  # ---- the switch's capacitance at its datasheet's typ-to-max spread, one leg each way
+  - name: cmrr-sw-spread
+    deck: cmrr.cir
+    set: {en_1k5: 0, en_500: 0}
+    tol: {k_sw_p: [-0.226, 0.0], k_sw_n: [-0.226, 0.0]}
+    vary: [R1, R1b, R2, R3, R4, R5, C-CM-IN+, C-CM-IN-, k_sw_p, k_sw_n]
+    measures: [cmrr_1k5, cmrr_top, cmrr_band]
+    post:
+      cmrr_1k5: "at(w['cmrr'], 1500)"
+      cmrr_top: "at(w['cmrr'], 10000)"
+      cmrr_band: "trough(w['cmrr'], 1, 10000)"
+    asserts:
+      - expr: "min['cmrr_1k5'] > 58.5"
+        why: "a what-if, not the design case: one leg's switch pins at the datasheet's typical CD(OFF) (2.4 pF) and the other's at its maximum (3.1 pF) - a 23 % mismatch inside one die. Even then the link holds the requirement to 1.5 kHz; what it does at 10 kHz is recorded"
   - name: cmrr-without-r1b
     # R1b shorted: the case the page says spends the whole budget (1 kohm unmatched)
     deck: cmrr.cir
-    set: {R1b: 1.0e-3}
+    set: {R1b: 1.0e-3, en_1k5: 1, en_500: 1}
     vary: [R1, R2, R3, R4, R5, C-CM-IN+, C-CM-IN-]
     measures: [cmrr_dc, cmrr_50, cmrr_500]
     asserts:
@@ -66,19 +148,19 @@ sims:
       cmrr_50: "at(w['cmrr'], 50)"
       cmrr_500: "at(w['cmrr'], 500)"
   - name: cmrr-ccm-5pct
-    # C_cm at +-5 %: the default tolerance the BOM row forbids
+    # C_cm at +-5 %: the default tolerance the BOM row forbids, in the 1.5 kHz mode
     deck: cmrr.cir
+    set: {en_1k5: 1, en_500: 0}
     tol: {C-CM-IN+: [-0.05, 0.05], C-CM-IN-: [-0.05, 0.05]}
     vary: [R1, R1b, R2, R3, R4, R5, C-CM-IN+, C-CM-IN-]
-    measures: [cmrr_dc, cmrr_50, cmrr_500, cmrr_1k]
+    measures: [cmrr_dc, cmrr_500, cmrr_top]
     asserts:
-      - expr: "abs(min['cmrr_500'] - 46) < 3"
-        why: "the page's '~46 dB' for C_cm at +-5 % reproduces at 500 Hz, the breath channel's edge (the page names no frequency)"
+      - expr: "min['cmrr_top'] < min['cmrr_dc'] - 3"
+        why: "unmatched (+-5 % each), C_cm's mismatch is what sets the 1.5 kHz mode's top: CMRR at 1.5 kHz falls more than 3 dB below the DC floor, which is why C-CM-BREATH is bought as a matched pair"
     post:
       cmrr_dc: "at(w['cmrr'], 1)"
-      cmrr_50: "at(w['cmrr'], 50)"
       cmrr_500: "at(w['cmrr'], 500)"
-      cmrr_1k: "at(w['cmrr'], 1000)"
+      cmrr_top: "at(w['cmrr'], 1500)"
   # --- #5 finding 6: the rails at their ends, 10.8 to 12.6 V each way, not +-12.000 V.
   # Each sim below is one above with only the rails varied, so what moves is the supply's
   # Both rails low, and both high, at the parts' nominal. NOT the mixed corners: at -10.8 V
@@ -87,26 +169,26 @@ sims:
   - name: cmrr-supply-low
     deck: cmrr.cir
     vary: []
-    set: {v_pos: 10.8, v_neg: -10.8}
-    measures: [cmrr_dc, cmrr_50, cmrr_60, cmrr_500]
+    set: {v_pos: 10.8, v_neg: -10.8, en_1k5: 0, en_500: 0}
+    measures: [cmrr_dc, cmrr_60, cmrr_1k5, cmrr_10k]
     post:
       cmrr_dc: "at(w['cmrr'], 1)"
-      cmrr_50: "at(w['cmrr'], 50)"
       cmrr_60: "at(w['cmrr'], 60)"
-      cmrr_500: "at(w['cmrr'], 500)"
+      cmrr_1k5: "at(w['cmrr'], 1500)"
+      cmrr_10k: "at(w['cmrr'], 10000)"
     asserts:
-      - expr: "nom['cmrr_60'] > 58.5 and nom['cmrr_500'] > 58.5"
-        why: "with both rails at 10.8 V the link still clears 58.5 dB at mains and at the band's 500 Hz edge, at the parts' nominal: the INA828's supply is not what limits it (the tolerances are, cmrr-as-netlisted)"
+      - expr: "nom['cmrr_60'] > 58.5 and nom['cmrr_10k'] > 58.5"
+        why: "with both rails at 10.8 V the link still clears 58.5 dB at mains and at the wide band's 10 kHz top, at the parts' nominal: the INA828's supply is not what limits it (the tolerances are, cmrr-wide)"
   - name: cmrr-supply-high
     deck: cmrr.cir
     vary: []
-    set: {v_pos: 12.6, v_neg: -12.6}
-    measures: [cmrr_dc, cmrr_50, cmrr_60, cmrr_500]
+    set: {v_pos: 12.6, v_neg: -12.6, en_1k5: 0, en_500: 0}
+    measures: [cmrr_dc, cmrr_60, cmrr_1k5, cmrr_10k]
     post:
       cmrr_dc: "at(w['cmrr'], 1)"
-      cmrr_50: "at(w['cmrr'], 50)"
       cmrr_60: "at(w['cmrr'], 60)"
-      cmrr_500: "at(w['cmrr'], 500)"
+      cmrr_1k5: "at(w['cmrr'], 1500)"
+      cmrr_10k: "at(w['cmrr'], 10000)"
     asserts:
-      - expr: "nom['cmrr_60'] > 58.5 and nom['cmrr_500'] > 58.5"
+      - expr: "nom['cmrr_60'] > 58.5 and nom['cmrr_10k'] > 58.5"
         why: "and with both at 12.6 V"

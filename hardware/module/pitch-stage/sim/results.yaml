@@ -7,7 +7,7 @@ inputs:
   hardware/module/pitch-stage/sim/sims.yaml: f771094d19f91696
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/mod-channels/netlist.yaml: 00739b63d111a848
-  hardware/module/breath-output-stage/netlist.yaml: 63517b01fa4c02a2
+  hardware/module/breath-output-stage/netlist.yaml: 8a1302cb7f7bd392
   hardware/module/pitch-stage/sim/pitch-dc.cir: 039c84f738bdb7d1
   hardware/module/pitch-stage/sim/pitch-step.cir: 950f8c3e07d1df85
   hardware/module/pitch-stage/sim/pitch-loop.cir: 7cfa2c609be15558
@@ -345,29 +345,29 @@ sims:
     corners: 17
     measures:
       overshoot_pct:
-        nominal: 63.9987
-        min: 63.1879
+        nominal: 11.3501
+        min: 10.0642
         min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd-
-        max: 64.827
+        max: 12.6995
         max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+ c_esd+
       t_settle:
-        nominal: 0.00421075
-        min: 0.00421075
-        min_at: nominal
-        max: 0.00436815
-        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+ c_esd+
+        nominal: 0.000262847
+        min: 0.000214747
+        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd-
+        max: 0.000272447
+        max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+ c_esd+
       d_overshoot:
-        nominal: 0.00059013
-        min: 0.000584044
-        min_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT- c_esd-
-        max: 0.00129431
-        max_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd+
+        nominal: 0.014284
+        min: 0.013784
+        min_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT- c_esd-
+        max: 0.029749
+        max_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT+ c_esd+
     asserts:
     - expr: min['overshoot_pct'] > 25
       why: 'RECORDED HAZARD, not a requirement (pitch-stage.md, ''It does not oscillate; it rings''): a passive mult to another
         output''s jack makes every note step overshoot by several semitones. If this starts failing the hazard is gone - re-read
         the page'
-      pass: true
+      pass: false
   step-real-mult[mult=1]:
     corners: 17
     measures:
@@ -388,17 +388,17 @@ sims:
     corners: 17
     measures:
       overshoot_pct:
-        nominal: 41.6375
-        min: 40.6652
-        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT+ c_esd-
-        max: 42.648
-        max_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT- c_esd+
+        nominal: 1.18689e-07
+        min: 1.10169e-07
+        min_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT+ c_esd-
+        max: 1.27139e-07
+        max_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd-
       t_settle:
-        nominal: 0.00229825
-        min: 0.00213365
-        min_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd-
-        max: 0.00229825
-        max_at: nominal
+        nominal: 0.000252347
+        min: 0.000229847
+        min_at: C-FB-PITCH- C-FILT-PITCH+ R-OUT-PROT- c_esd+
+        max: 0.000274047
+        max_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT+ c_esd-
     asserts: []
   loop[mult=0]:
     corners: 17
@@ -462,23 +462,23 @@ sims:
     corners: 17
     measures:
       pm:
-        nominal: 69.3706
-        min: 69.3232
+        nominal: 69.3713
+        min: 69.3239
         min_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+ c_esd+
-        max: 69.4202
+        max: 69.4209
         max_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT- c_esd-
       fc:
-        nominal: 9953960.0
-        min: 9952300.0
+        nominal: 9953500.0
+        min: 9951820.0
         min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT- c_esd-
-        max: 9955550.0
+        max: 9955110.0
         max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+ c_esd+
       d_pm:
-        nominal: -3.57231e-09
-        min: -8.02513e-09
-        min_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT- c_esd+
-        max: -3.56842e-09
-        max_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT+ c_esd-
+        nominal: -9.19388e-08
+        min: -1.91033e-06
+        min_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT- c_esd+
+        max: -1.91624e-08
+        max_at: C-FB-PITCH+ C-FILT-PITCH+ R-OUT-PROT+ c_esd-
     asserts:
     - expr: min['pm'] - 10 > 45
       why: 'the loop''s phase margin clears 45 degrees after the +-10 degree screen at every load - which is the point: the

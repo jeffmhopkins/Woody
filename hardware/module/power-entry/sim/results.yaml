@@ -8,7 +8,7 @@ inputs:
   hardware/module/power-entry/netlist.yaml: 14fd898035959809
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/mod-channels/netlist.yaml: 00739b63d111a848
-  hardware/module/breath-output-stage/netlist.yaml: 63517b01fa4c02a2
+  hardware/module/breath-output-stage/netlist.yaml: 8a1302cb7f7bd392
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
   hardware/carrier/power-entry-instrument/netlist.yaml: d20421ddf0209f51
   hardware/carrier/led-strip-drive/netlist.yaml: ec7ec56762e982ee
@@ -1147,10 +1147,10 @@ sims:
         max: 0.18
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000407284
-        min: 0.000295964
+        nominal: 0.00040726
+        min: 0.000295958
         min_at: esr_c2- r_psu-
-        max: 0.000878243
+        max: 0.000878216
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.21
@@ -1159,10 +1159,10 @@ sims:
         max: 0.47
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.12086
-        min: 0.09325
+        nominal: 0.50032
+        min: 0.38655
         min_at: esr_c2- r_psu-
-        max: 0.25901
+        max: 1.13696
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 48.0208
@@ -1193,7 +1193,7 @@ sims:
     - expr: max['breath_mv'] < p['breath_bar_mv']
       why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
         DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
-      pass: true
+      pass: false
   led-pwm[f_pwm=2500.0]:
     corners: 5
     measures:
@@ -1240,10 +1240,10 @@ sims:
         max: 0.12
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000308821
-        min: 0.000218119
+        nominal: 0.000308818
+        min: 0.000218178
         min_at: esr_c2- r_psu-
-        max: 0.000707053
+        max: 0.000707056
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.13
@@ -1252,10 +1252,10 @@ sims:
         max: 0.34
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.05853
-        min: 0.04406
+        nominal: 0.29601
+        min: 0.22272
         min_at: esr_c2- r_psu-
-        max: 0.13855
+        max: 0.74896
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 38.3622
@@ -1333,10 +1333,10 @@ sims:
         max: 0.08
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000246709
-        min: 0.000170994
+        nominal: 0.000246727
+        min: 0.000170956
         min_at: esr_c2- r_psu-
-        max: 0.000581604
+        max: 0.000581608
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.09
@@ -1345,10 +1345,10 @@ sims:
         max: 0.25
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.03066
-        min: 0.02213
+        nominal: 0.19063
+        min: 0.13665
         min_at: esr_c2- r_psu-
-        max: 0.0805
+        max: 0.53676
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 31.5481
@@ -1426,10 +1426,10 @@ sims:
         max: 0.08
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.00023031
-        min: 0.00015782
+        nominal: 0.000230304
+        min: 0.000157848
         min_at: esr_c2- r_psu-
-        max: 0.000553271
+        max: 0.000553259
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.08
@@ -1438,10 +1438,10 @@ sims:
         max: 0.23
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.02284
-        min: 0.01596
+        nominal: 0.15945
+        min: 0.11031
         min_at: esr_c2- r_psu-
-        max: 0.06359
+        max: 0.4731
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 29.8432
@@ -1519,10 +1519,10 @@ sims:
         max: 0.06
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.00022156
-        min: 0.000146984
+        nominal: 0.000221533
+        min: 0.000146926
         min_at: esr_c2- r_psu-
-        max: 0.000560462
+        max: 0.000560449
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.07
@@ -1531,10 +1531,10 @@ sims:
         max: 0.21
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.01684
-        min: 0.01122
+        nominal: 0.13243
+        min: 0.08765
         min_at: esr_c2- r_psu-
-        max: 0.04982
+        max: 0.41397
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 29.3211
@@ -1571,13 +1571,13 @@ sims:
     measures:
       hdr_pos_mv:
         nominal: 0.0304
-        min: 0.0223
+        min: 0.0232
         min_at: esr_c2- r_psu-
         max: 0.0804
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
-        nominal: 0.0312
-        min: 0.0227
+        nominal: 0.0311
+        min: 0.0302
         min_at: esr_c2- r_psu-
         max: 0.0836
         max_at: esr_c2+ r_psu+
@@ -1594,14 +1594,14 @@ sims:
         max: 0.0672
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
-        nominal: 0.0113
+        nominal: 0.0114
         min: 0.0081
         min_at: esr_c2- r_psu-
         max: 0.025
         max_at: esr_c2+ r_psu+
       rail_neg_mv:
         nominal: 0.0168
-        min: 0.0121
+        min: 0.0141
         min_at: esr_c2- r_psu-
         max: 0.038
         max_at: esr_c2+ r_psu+
@@ -1612,10 +1612,10 @@ sims:
         max: 0.0
         max_at: nominal
       pitch_cents:
-        nominal: 1.971e-05
-        min: 1.68228e-05
+        nominal: 1.96788e-05
+        min: 1.68468e-05
         min_at: esr_c2- r_psu-
-        max: 3.50172e-05
+        max: 3.50244e-05
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.01
@@ -1624,23 +1624,23 @@ sims:
         max: 0.01
         max_at: nominal
       breath_mv:
-        nominal: 0.00146
-        min: 0.00112
+        nominal: 0.00674
+        min: 0.00491
         min_at: esr_c2- r_psu-
-        max: 0.00338
+        max: 0.01533
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 1.27417
+        nominal: 1.27295
         min: 1.27024
         min_at: esr_c2+ r_psu-
-        max: 1.27417
+        max: 1.27295
         max_at: nominal
       iuout_ma:
-        nominal: 2.04995
-        min: 2.04307
+        nominal: 2.04799
+        min: 2.04301
         min_at: esr_c2+ r_psu+
-        max: 2.04995
-        max_at: nominal
+        max: 2.04811
+        max_at: esr_c2- r_psu-
     asserts:
     - expr: max['hdr_pos_mv'] < p['rail_bound_mv'] and max['hdr_neg_mv'] < p['rail_bound_mv'] and max['tap_pos_mv'] < p['rail_bound_mv']
         and max['tap_neg_mv'] < p['rail_bound_mv']
@@ -1705,10 +1705,10 @@ sims:
         max: 0.06
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000163159
-        min: 0.000106507
+        nominal: 0.000163206
+        min: 0.000106499
         min_at: esr_c2- r_psu-
-        max: 0.000461335
+        max: 0.000461363
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.06
@@ -1717,10 +1717,10 @@ sims:
         max: 0.16
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.03587
-        min: 0.0271
+        nominal: 0.16284
+        min: 0.12101
         min_at: esr_c2- r_psu-
-        max: 0.08338
+        max: 0.37316
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 21.5978
@@ -1798,10 +1798,10 @@ sims:
         max: 0.13
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000304844
-        min: 0.000216626
+        nominal: 0.000304877
+        min: 0.000216598
         min_at: esr_c2- r_psu-
-        max: 0.00070288
+        max: 0.000702931
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.15
@@ -1810,10 +1810,10 @@ sims:
         max: 0.34
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.08361
-        min: 0.06369
+        nominal: 0.35621
+        min: 0.27079
         min_at: esr_c2- r_psu-
-        max: 0.18575
+        max: 0.81579
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 38.5933
@@ -1891,10 +1891,10 @@ sims:
         max: 0.13
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000325265
-        min: 0.000233693
+        nominal: 0.000325258
+        min: 0.000233702
         min_at: esr_c2- r_psu-
-        max: 0.000736409
+        max: 0.000736387
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.15
@@ -1903,10 +1903,10 @@ sims:
         max: 0.36
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.08943
-        min: 0.06883
+        nominal: 0.3813
+        min: 0.29297
         min_at: esr_c2- r_psu-
-        max: 0.19436
+        max: 0.85527
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 38.7651
@@ -1984,22 +1984,22 @@ sims:
         max: 0.06
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000178895
-        min: 0.00011898
+        nominal: 0.000178918
+        min: 0.000118937
         min_at: esr_c2- r_psu-
-        max: 0.000498576
+        max: 0.000498628
         max_at: esr_c2+ r_psu+
       mod_uv:
-        nominal: 0.08
+        nominal: 0.07
         min: 0.06
         min_at: esr_c2- r_psu-
         max: 0.17
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.04007
-        min: 0.03078
+        nominal: 0.18102
+        min: 0.13696
         min_at: esr_c2- r_psu-
-        max: 0.08984
+        max: 0.40202
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 21.7382
@@ -2077,10 +2077,10 @@ sims:
         max: 0.0
         max_at: nominal
       pitch_cents:
-        nominal: 2.076e-05
-        min: 1.78236e-05
+        nominal: 2.07792e-05
+        min: 1.78356e-05
         min_at: esr_c2- r_psu-
-        max: 3.738e-05
+        max: 3.73068e-05
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.01
@@ -2089,19 +2089,19 @@ sims:
         max: 0.01
         max_at: nominal
       breath_mv:
-        nominal: 0.00168
-        min: 0.0013
+        nominal: 0.00766
+        min: 0.00571
         min_at: esr_c2- r_psu-
-        max: 0.0037
+        max: 0.0168
         max_at: esr_c2+ r_psu+
       iuin_ma:
-        nominal: 1.28192
+        nominal: 1.28196
         min: 1.27928
         min_at: esr_c2- r_psu-
         max: 1.28592
         max_at: esr_c2+ r_psu+
       iuout_ma:
-        nominal: 2.04806
+        nominal: 2.04811
         min: 2.04638
         min_at: esr_c2- r_psu-
         max: 2.04949
@@ -2170,10 +2170,10 @@ sims:
         max: 0.1
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000218932
-        min: 0.000159941
+        nominal: 0.000218942
+        min: 0.000159924
         min_at: esr_c2- r_psu-
-        max: 0.000469597
+        max: 0.000469598
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.11
@@ -2182,10 +2182,10 @@ sims:
         max: 0.25
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.06297
-        min: 0.04834
+        nominal: 0.26015
+        min: 0.19997
         min_at: esr_c2- r_psu-
-        max: 0.13645
+        max: 0.59801
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 25.8025
@@ -2263,8 +2263,8 @@ sims:
         max: 0.06
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000107647
-        min: 8.66664e-05
+        nominal: 0.000107584
+        min: 8.66868e-05
         min_at: esr_c2- r_psu-
         max: 0.000223004
         max_at: esr_c2+ r_psu+
@@ -2275,10 +2275,10 @@ sims:
         max: 0.13
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.03746
-        min: 0.0287
+        nominal: 0.1578
+        min: 0.12084
         min_at: esr_c2- r_psu-
-        max: 0.08288
+        max: 0.34223
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 12.1086
@@ -2356,10 +2356,10 @@ sims:
         max: 0.18
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000407284
-        min: 0.000295964
+        nominal: 0.00040726
+        min: 0.000295958
         min_at: esr_c2- r_psu-
-        max: 0.000878243
+        max: 0.000878216
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.21
@@ -2368,10 +2368,10 @@ sims:
         max: 0.47
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.12086
-        min: 0.09325
+        nominal: 0.50032
+        min: 0.38655
         min_at: esr_c2- r_psu-
-        max: 0.25901
+        max: 1.13696
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 48.0208
@@ -2402,7 +2402,7 @@ sims:
     - expr: max['breath_mv'] < p['breath_bar_mv']
       why: under 0.01 % of the breath jack's 10 V span, through R-BREATH-OFFNEG from -12 V (40.2k/95.3k) and POT-OFFSET from
         DAC_AVDD, behind R-OUT-PROT and C-OUT-BREATH
-      pass: true
+      pass: false
   led-pwm-pattern[n_lit=13,spread=1.0]:
     corners: 5
     measures:
@@ -2449,10 +2449,10 @@ sims:
         max: 0.0
         max_at: nominal
       pitch_cents:
-        nominal: 1.50108e-05
-        min: 1.41456e-05
+        nominal: 1.47492e-05
+        min: 1.40388e-05
         min_at: esr_c2- r_psu-
-        max: 1.68936e-05
+        max: 1.69068e-05
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.01
@@ -2461,11 +2461,11 @@ sims:
         max: 0.01
         max_at: nominal
       breath_mv:
-        nominal: 8.0e-05
-        min: 8.0e-05
-        min_at: nominal
-        max: 9.0e-05
-        max_at: esr_c2+ r_psu-
+        nominal: 0.00021
+        min: 0.00013
+        min_at: esr_c2- r_psu-
+        max: 0.00045
+        max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 0.425631
         min: 0.424942
@@ -2507,7 +2507,7 @@ sims:
         max_at: esr_c2+ r_psu+
       hdr_neg_mv:
         nominal: 8.8682
-        min: 6.5977
+        min: 6.5994
         min_at: esr_c2- r_psu-
         max: 17.5416
         max_at: esr_c2+ r_psu+
@@ -2525,7 +2525,7 @@ sims:
         max_at: esr_c2+ r_psu+
       rail_pos_mv:
         nominal: 3.2481
-        min: 2.3432
+        min: 2.3433
         min_at: esr_c2- r_psu-
         max: 7.4612
         max_at: esr_c2+ r_psu+
@@ -2542,10 +2542,10 @@ sims:
         max: 0.74
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.00107744
-        min: 0.000824275
+        nominal: 0.00107745
+        min: 0.000824272
         min_at: esr_c2- r_psu-
-        max: 0.00343107
+        max: 0.00342924
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.76
@@ -2554,10 +2554,10 @@ sims:
         max: 1.5
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.4128
-        min: 0.31915
+        nominal: 1.99009
+        min: 1.45427
         min_at: esr_c2- r_psu-
-        max: 0.91476
+        max: 4.42849
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 105.178
@@ -2628,10 +2628,10 @@ sims:
         max: 0.48
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000964134
-        min: 0.000736018
+        nominal: 0.000964138
+        min: 0.00073602
         min_at: esr_c2- r_psu-
-        max: 0.00350086
+        max: 0.00350192
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.53
@@ -2640,10 +2640,10 @@ sims:
         max: 1.25
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.14971
-        min: 0.10849
+        nominal: 1.08816
+        min: 0.72393
         min_at: esr_c2- r_psu-
-        max: 0.40666
+        max: 2.9775
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 104.774
@@ -2705,7 +2705,7 @@ sims:
         nominal: 2.0296
         min: 1.1579
         min_at: esr_c2- r_psu-
-        max: 6.0517
+        max: 6.0518
         max_at: esr_c2+ r_psu+
       avdd_uv:
         nominal: 0.14
@@ -2714,10 +2714,10 @@ sims:
         max: 0.38
         max_at: esr_c2+ r_psu+
       pitch_cents:
-        nominal: 0.000890576
-        min: 0.000669857
+        nominal: 0.000890588
+        min: 0.00066986
         min_at: esr_c2- r_psu-
-        max: 0.00352634
+        max: 0.00352742
         max_at: esr_c2+ r_psu+
       mod_uv:
         nominal: 0.41
@@ -2726,10 +2726,10 @@ sims:
         max: 1.09
         max_at: esr_c2+ r_psu+
       breath_mv:
-        nominal: 0.08396
-        min: 0.05641
+        nominal: 0.76942
+        min: 0.46812
         min_at: esr_c2- r_psu-
-        max: 0.25696
+        max: 2.34432
         max_at: esr_c2+ r_psu+
       iuin_ma:
         nominal: 104.666

@@ -6,7 +6,7 @@ inputs:
   tools/sim.py: 0312a1077b9afa80
   hardware/module/mod-channels/sim/sims.yaml: 1de68a89d4cc2f22
   hardware/module/mod-channels/netlist.yaml: 00739b63d111a848
-  hardware/module/breath-output-stage/netlist.yaml: 63517b01fa4c02a2
+  hardware/module/breath-output-stage/netlist.yaml: 8a1302cb7f7bd392
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/mod-channels/sim/mod.cir: d1e903a7be7d8369
   hardware/module/mod-channels/sim/mod-loop.cir: 4c5a784f94f8d974
@@ -136,16 +136,16 @@ sims:
     corners: 3
     measures:
       overshoot_pct:
-        nominal: 0.0150843
-        min: 0.0141854
-        min_at: C-FILT-MOD-1-
-        max: 0.0160194
-        max_at: C-FILT-MOD-1+
+        nominal: 1.98474e-12
+        min: 1.98474e-12
+        min_at: C-FILT-MOD-1+
+        max: 1.98474e-12
+        max_at: C-FILT-MOD-1-
       t_settle:
-        nominal: 0.00184058
-        min: 0.00182448
+        nominal: 0.000418479
+        min: 0.000399879
         min_at: C-FILT-MOD-1-
-        max: 0.00185658
+        max: 0.000437179
         max_at: C-FILT-MOD-1+
     asserts:
     - expr: max['overshoot_pct'] < 1
@@ -196,16 +196,16 @@ sims:
     corners: 3
     measures:
       overshoot_pct:
-        nominal: 2.65623e-05
-        min: 2.3347e-05
-        min_at: C-FILT-MOD-1-
-        max: 3.03496e-05
-        max_at: C-FILT-MOD-1+
+        nominal: 1.51745e-12
+        min: 1.51745e-12
+        min_at: C-FILT-MOD-1+
+        max: 1.51745e-12
+        max_at: C-FILT-MOD-1-
       t_settle:
-        nominal: 0.000800878
-        min: 0.000792878
+        nominal: 0.000178781
+        min: 0.000170881
         min_at: C-FILT-MOD-1-
-        max: 0.000808778
+        max: 0.000186782
         max_at: C-FILT-MOD-1+
     asserts:
     - expr: max['overshoot_pct'] < 1
@@ -272,16 +272,16 @@ sims:
     corners: 3
     measures:
       pm:
-        nominal: 91.6468
-        min: 91.6468
+        nominal: 91.6438
+        min: 91.6436
         min_at: C-FILT-MOD-1-
-        max: 91.6468
+        max: 91.6439
         max_at: C-FILT-MOD-1+
       fc:
-        nominal: 2323290.0
-        min: 2323290.0
+        nominal: 2323090.0
+        min: 2323070.0
         min_at: C-FILT-MOD-1-
-        max: 2323290.0
+        max: 2323100.0
         max_at: C-FILT-MOD-1+
     asserts:
     - expr: min['pm'] - 10 > 45

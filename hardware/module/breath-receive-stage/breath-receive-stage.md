@@ -49,6 +49,8 @@ The `Dir` and `Peer` columns are defined once in
 | `MODULE ANALOG +12V`, `MODULE ANALOG −12V` | in | `module/power-entry` | — | The INA828, both OPA2197 halves, and the BAV99 legs on the input pair and at the jack |
 | `AGND_MOD` | ref | `module/power-entry` | `dig-gnd-topology` | The module analog star, drawn `AGND(module)`. Where `R4`, `R5`, both `C_cm` and the output RC return |
 | `CLR` | — | — | — | **Reaches no part of this circuit**, which is the whole of what the `CLR` section below settles. It is `module/dac8568`'s |
+| `BREATH_OUT` | in | `module/breath-output-stage` | — | The breath summer's output, inside its loop and ahead of `R-OUT-PROT`: what the jack carries. Read by the breath LED's driver (*The breath LED*, below) through a 110 kΩ divider. **Not `BREATH_SENSE`** and not the jack itself |
+| `SW-BREATH-BW`, `LED-BREATH` | — | `module/panel` | `panel-toggle-hole`, `panel-height-budget` | Panel-mounted, this circuit's parts, each wired to the main board (`SW-BREATH-BW`'s three solder pads, `J-LED-BREATH`). Their holes and where they sit are `module/panel`'s, *Two parts waiting for the layout* |
 
 ## The circuit
 
@@ -76,11 +78,13 @@ the two agree, and where they do not the netlist wins.*
                                     │                                 │
                                     │       ┌───[R3 10k 0.1%]─────────┘
                                     │       │
-                                    ├──[C_cm 1.5nF]── AGND(module)
+                                    ├──[C_cm 68pF]── AGND(module)
                                     │       │
-                                    ├───────┼──[C_diff 15nF]───┐
+                                    ├───────┼──[C_diff 680pF]──┐  fixed: the WIDE corner, ~10 kHz
+                                    ├───────┼──[C-DIFF-BW-1K5 3.9nF]─┤  switched by U-BW-SW on BW1: 1.5 kHz and 500 Hz
+                                    ├───────┼──[C-DIFF-BW-500 10nF]─┤  switched by U-BW-SW on BW0: 500 Hz only
                                     │       │                  │
-                                    │       ├──[C_cm 1.5nF]── AGND(module)
+                                    │       ├──[C_cm 68pF]── AGND(module)
                                     │       │                  │
                     [R4 1M]─────────┤       ├──────[R5 1M]     │
                          │          │       │           │      │
@@ -118,12 +122,161 @@ the two agree, and where they do not the netlist wins.*
                                   │  independently             │
                                   └─────┬──────────────────────┘
                                         │
-                                   [1k]─┼─[C 330nF]── AGND(module)
+                                        ├──[R-LEDB-TOP 100k]──┬──[R-LEDB-BOT 10k]── AGND(module)
+                                        │   BREATH_OUT        └─► ½ OPA2197 (U-REF-BUF B) and Q-LEDB:
+                                        │                         LED-BREATH, 0.505 mA per volt
+                                        │
+                                   [1k]─┼─[C 10nF]── AGND(module)
                                         │
                                    [D-JACK-CLAMP BAV99]── ±12 V
                                         │
                                    BREATH jack
 ```
+
+## The bandwidth toggle — 500 Hz / 1.5 kHz / WIDE (#32)
+
+**The owner, 2026-10-04:** *"Let's go ahead and just put the filter to 1.5 khz"*
+— to track growl and flutter-tongue — and then, asked whether the filter could
+be switchable, *"Panel 3-way toggle"* with the modes *"500 Hz / 1.5 kHz /
+wide"*, wide at about 10 kHz and still filtering RF and switching hash ahead of
+the in-amp. ADR 0003 and ADR 0004 carry the amendments, with their reasons.
+
+**Only `C_diff` is switched, and the analog pair never leaves this board.**
+
+```
+   IN+ ──┬──────────────┬─────────────────┬────────────────────┬── INA828 IN+
+         │              │                 │                    │
+     [C_cm 68pF]   [C-DIFF-BREATH 680pF]  D1 ┐ U-BW-SW         D3 ┐ U-BW-SW
+         │              │                 S1 [C-DIFF-BW-1K5 3.9nF] S3 [C-DIFF-BW-500 10nF]
+     AGND(module)       │                 S2 ┘ (SEL1, SEL2 = BW1) S4 ┘ (SEL3, SEL4 = BW0)
+         │              │                 D2                   D4
+   IN− ──┴──────────────┴─────────────────┴────────────────────┴── INA828 IN−
+  [C_cm 68pF] to AGND(module) on this leg too
+
+   +12V ─[R-BW-COM 4.7k]─ SW-BREATH-BW commons (lugs 2+5)
+                            lug 4 ─┬─[R-BW-FILT1 100k]─┬─ BW1 → SEL1, SEL2
+                                [R-BW-PD1 10k]   [C-BW-FILT1 100nF]
+                            lug 1 ─┬─[R-BW-FILT0 100k]─┬─ BW0 → SEL3, SEL4
+                                [R-BW-PD0 10k]   [C-BW-FILT0 100nF]
+                            (lugs 3 and 6 not wired)
+```
+
+| Lever (NKK's position) | Lugs made | BW1 | BW0 | `C_diff` across the pair | Corner `[calc]` |
+|---|---|---|---|---|---|
+| **Left** (Up) — **500 Hz** | 2-1, 5-4 | on | on | 680 pF + 3.9 nF + 10 nF | 1/(2π × 22 kΩ × 14.61 nF) = **495 Hz** |
+| **Centre** (Center) — **1.5 kHz** | 2-3, 5-4 | on | off | 680 pF + 3.9 nF | 1/(2π × 22 kΩ × 4.61 nF) = **1.57 kHz** |
+| **Right** (Down) — **WIDE** | 2-3, 5-6 | off | off | 680 pF | 1/(2π × 22 kΩ × 714 pF) = **10.1 kHz** |
+
+(Each sum includes the two `C_cm` in series, 34 pF.) The simulated corners,
+with the switch's `R_ON` and capacitance in them, are the sim README's.
+
+**Why the common-mode capacitors had to shrink.** The corner is 2 × 11 kΩ
+against `C_diff + C_cm/2`. With `C_cm` at 1.5 nF on each leg — what this page
+had — WIDE could not pass 9.6 kHz even with no `C_diff`, and the 1.5 kHz mode
+missed the link's 58.5 dB at its own top (about 53.6 dB) `[calc]`, because the
+pair's mismatch converts common mode in proportion to frequency. At 68 pF,
+still a matched pair, WIDE is the textbook in-amp RFI filter: `C_diff` ten
+times `C_cm`, a ~10 kHz differential corner and a ~213 kHz common-mode one
+`[calc: 1/(2π × 11 kΩ × 68 pF)]`. The ratio only grows in the other modes.
+**`C_cm` and the switch are the same in every mode**, so at any one frequency
+the CMRR does not depend on the toggle; what changes is how far the band
+reaches. The cost is at high frequency: common-mode energy from ~70 kHz to
+1 MHz now reaches the in-amp less filtered (*Still open*, below).
+
+**What the link achieves in each mode**, the requirement held over each mode's
+own band at every tolerance corner, is the table in
+[`sim/README.md`](sim/README.md); the headline at mains is `breath-link-cmrr`.
+
+**`U-BW-SW` is a TMUX6112** `[ds datasheets/analog/TMUX6112-ti-scds383f.pdf]`,
+four normally-open channels, checked against this circuit:
+
+- **Supplies.** It runs on the module's ±12 V (VDD − VSS = 24 V of its
+  10–34 V), `GND` on `AGND_MOD`. The pair sits inside ±10 V and the
+  `D-CLAMP-BREATH` diodes hold it within a diode of the rails, the switch's
+  own analog range.
+- **Logic.** `SEL` reads 2 V high, 0.8 V low, and takes up to VDD `[ds p.6]`.
+  The toggle's lines come from +12 V through `R-BW-COM` and `R-BW-PD`: 8.2 V
+  with one line on, 6.2 V with both `[calc]` — never above VDD, and never
+  ahead of it at power-up, because they are made from the switch's own
+  supply. 0.8 mA through each closed contact, above the gold contacts' 0.1 mA
+  minimum `[ds NKK-SERIES-M-TOGGLE.pdf]`; `R-BW-FILT`/`C-BW-FILT` (10 ms) make
+  bounce and anything coupled onto the panel wiring a slow DC level.
+- **`R_ON`** (120 Ω typ, 210 Ω max over ±10 V and 85 °C `[ds p.6]`) is in series
+  with a switched capacitor: it puts a zero at 1/(2π × 2 × 210 Ω × 3.9 nF) =
+  97 kHz `[calc]`, far above the corner it belongs to, and the fixed 680 pF —
+  never behind the switch — carries the RF filtering in every mode.
+- **Capacitance.** Each channel's pins add 2.4–3.1 pF off and 4.2–6.0 pF on to
+  ground `[ds p.7]`. Each switched capacitor has a channel **at both ends**,
+  one D pin on each leg, so this is common-mode capacitance and loads the two
+  legs alike. Its channel-to-channel match is not in the datasheet: the sim
+  takes ±10 % per leg, and a what-if at the typ-to-max spread. **Lay the two
+  legs out as mirror images**, `U-BW-SW` beside the INA828 with the S-side
+  nets short.
+- **Leakage**: 0.02 nA max at 25 °C, 0.14 nA to 85 °C `[ds p.6]`, into 11 kΩ —
+  2 µV at the worst `[calc]`, inside what `TRIM-BREATH-ZERO` nulls.
+- **Charge injection**, 0.6 pC `[ds p.7]`, onto at least 0.7 nF across the
+  pair: under 1 mV for a moment at the in-amp's input, and only when the
+  toggle moves.
+
+**`SW-BREATH-BW`** is an NKK M2024, ON-ON-ON on a double-pole base: Down makes
+2-3 and 5-6, Center 2-3 and 5-4, Up 2-1 and 5-4 `[ds NKK-SERIES-M-TOGGLE.pdf
+p.5, the 3-throw table]`. **It throws left–right, like `SW-POWER`** (owner,
+2026-10-04: *"full left being 500 full right being wide is the intuitive
+placement because it matches the on off of the power switch"*; ADR 0024 point
+18, the module re-layout's). **Mounted as `SW-POWER` is, its D-flat on the
+left**, the lever thrown right is NKK's Down and thrown left is NKK's Up — the
+same reading `SW-POWER`'s row makes, where Down is its ON, to the right. So,
+with the commons (2, 5) jumpered and fed: **lug 1** is made only at Up (lever
+left) and is **BW0**; **lug 4** is made at Up and Center and is **BW1**; Down
+(lever right) makes only 2-3 and 5-6, which go nowhere, so right is WIDE. A
+thermometer code with no logic, and the order the table above reads left to
+right. The panel carries no position words, so this wiring is the mapping:
+**buzz it on arrival** — lever left, pad 1 to pads 2 and 3; centre, pad 1 to
+pad 2 only; right, neither. Same series, bushing and hole as `SW-POWER`, but a
+double-pole body: 12.7 mm across against `SW-POWER`'s 7.9, the same 9.4 mm
+behind the bushing, two rows of lugs 4.8 mm apart `[ds p.11, the solder-lug
+drawings]`; panel-mounted and wired to this board.
+
+## The breath LED (#32)
+
+**The owner, 2026-10-04:** a second panel LED, on the other side of the power
+toggle from the power LED, whose brightness follows the breath CV. Driven as a
+current from one of the module's two spare op-amp halves, `U-REF-BUF` B:
+
+```
+   BREATH_OUT ──[R-LEDB-TOP 100k]──┬──[R-LEDB-BOT 10k]── AGND(module)
+   (summer output,                 │
+    inside its loop)          ½ OPA2197 (+)        +12V ─[R-LEDB-A 1k]─ J-LED-BREATH 1 ─┐
+                              U-REF-BUF B ─[R-LEDB-BASE 1k]─[D-LEDB]─┐            LED-BREATH
+                                   (−)◄──────────────────┐            │                  │
+                                                         └── Q-LEDB E ┤ B   C ─ J-LED-BREATH 2
+                                                         [R-LEDB-SENSE 180R]
+                                                              AGND(module)
+```
+
+- **Brightness proportional to the jack**: the loop holds `Q-LEDB`'s emitter at
+  `BREATH_OUT`/11, so the LED current is `BREATH_OUT`/11/180 Ω = 0.505 mA per
+  volt — 5.05 mA at 10 V, about `LED-PANEL`'s 4.1–4.5 mA — whatever the LED's
+  own drop or the lead's.
+- **Off at rest.** At 0 V and below it is dark: the op-amp's output goes low,
+  and `D-LEDB` keeps −12 V off the transistor's base-emitter junction (VEBO
+  6 V `[ds NEXPERIA-MMBT3904.pdf]`). The LED follows the jack, so an OFFSET
+  that lifts the jack at rest lights it at rest.
+- **The cap is the summer's own swing**: 11.9 V gives 6.0 mA, inside both
+  catalogues' ratings (15 and 20 mA).
+- **No load or error on the CV.** The divider sits on the summer's output,
+  inside its feedback loop, where 110 kΩ moves nothing; the jack is behind
+  `R-OUT-PROT` either way.
+- **Its current returns on its own trace** from `R-LEDB-SENSE` to the star,
+  and its anode is fed from +12 V through `R-LEDB-A`, which limits a lead
+  shorted to the panel to 12 mA.
+
+Simulated with the output stage, a twin of the stage without the driver
+beside it (`../breath-output-stage/sim`, `led`): the driver moves the jack by
+under 1 µV anywhere in its unclipped range, against the 153 µV of 1 LSB of
+10 V at 16 bits; 5.0 mA at 10 V, 6.0 mA at the clip, dark (under 5 nA) at and
+below 0 V, and its own loop settles a fast edge with under 3 % overshoot, at
+both ends of `Q-LEDB`'s beta and with either catalogue's LED.
 
 ## `REF` carries a trimmer, and the polarity question dissolved twice
 
@@ -286,3 +439,32 @@ page's in-amp and that stage's `POT-GAIN`
 
 *(The instrument-side reference buffer, which is not this page's circuit but
 sets the number this page multiplies, settled 2026-09-21 — [`notes.md`](notes.md).)*
+
+## Still open (#32)
+
+Each of these is the owner's to decide (#32); none was settled by moving a
+number.
+
+- **WIDE misses the CMRR requirement at its top.** The worst corner holds
+  58.5 dB to about 7.4 kHz and reaches about 56 dB at 10 kHz
+  (`sim/README.md`, `cmrr-wide`, with the three ways out: WIDE at ~7 kHz, a
+  stated band for WIDE's requirement, or a tighter match). The 500 Hz and
+  1.5 kHz modes hold it with margin.
+- **High-frequency common mode is less filtered.** With `C_cm` at 68 pF the
+  common-mode pole is ~213 kHz rather than ~9.6 kHz, so `PWR_GND` noise from
+  ~70 kHz to 1 MHz reaches the in-amp's output at up to about −37 dB through
+  the TVS diodes' mismatch (`../../interfaces/breath-sense-link/sim`,
+  `with-tvs-*`: its "under −60 dB at every frequency to 1 MHz" now fails in
+  every mode). The shaper, the output stage and the jack's RC take it down
+  again; `interfaces/system/sim` holds the jack end to end.
+- **The noise grows with the band** and no page sets a limit
+  (`breath-jack-noise`): in WIDE the audio-band noise is above the −80 dB of
+  10 V that figure's note offers as an example.
+- **The LED row's PWM on −12 V reaches the jack** through `R-BREATH-OFFNEG`
+  now that the jack's RC is at 15.9 kHz: 1.14 mV p-p at the worst corner,
+  over `power-entry/sim`'s 1 mV bar (`../breath-output-stage/breath-output-stage.md`,
+  *Why −12 V is acceptable here*, which proposes an RC on that leg).
+- **The switch's channel match is unstated** by its datasheet; the sim
+  assumes 20 % between legs. E11's measurement of the pair in WIDE is the check.
+- **Where the toggle and the LED sit** is the module re-layout's
+  (`../panel/panel.md`, *Two parts waiting for the layout*).

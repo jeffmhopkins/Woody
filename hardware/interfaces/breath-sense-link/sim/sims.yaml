@@ -42,39 +42,70 @@ vary:
   R1b:    {tol: from-value}
 
 sims:
-  - name: with-tvs
+  # Since #32 the differential filter has three modes (SW-BREATH-BW through U-BW-SW, the receive
+  # deck's switch block): each is run, and each is held to the requirement over its own band.
+  - name: with-tvs-500
     # as netlisted, across the sensor's span (breath-sense-link.md, 'The gain, derived':
     # 0.265 V to 4.86 V). Its bottom is not run: TI's INA828 model finds no operating point
     # there (ngspice falls back to a transient op, which tools/sim.py refuses). It is the
     # benign end - at 0.265 V the signal diode is ~140 pF against the return's 160 pF, a
     # smaller mismatch than at 1 V (~123 pF) [calc, the fit below]
-
     deck: tvs.cir
+    set: {en_1k5: 1, en_500: 1}
     sweep: {v_sensor: [1.0, 2.5, 4.86]}
-    measures: &meas [cmrr_50, cmrr_60, cmrr_500, pgrr_50, pgrr_500, pgrr_100k, pg_gain_max, pg_gain_f, dv_leak]
+    measures: &meas [cmrr_50, cmrr_60, cmrr_500, cmrr_1k5, cmrr_10k, pgrr_50, pgrr_500, pgrr_100k, pg_gain_max, pg_gain_f, pg_band_500, pg_band_1k5, pg_band_10k, dv_leak]
     post: &post
       # rejection, dB: the signal's gain over the excitation's, both to the INA828 output
       cmrr_50: "20 * math.log10(at(w['gdm'], 50) / at(w['gcm'], 50))"
       cmrr_60: "20 * math.log10(at(w['gdm'], 60) / at(w['gcm'], 60))"
       cmrr_500: "20 * math.log10(at(w['gdm'], 500) / at(w['gcm'], 500))"
+      cmrr_1k5: "20 * math.log10(at(w['gdm'], 1500) / at(w['gcm'], 1500))"
+      cmrr_10k: "20 * math.log10(at(w['gdm'], 1e4) / at(w['gcm'], 1e4))"
       pgrr_50: "20 * math.log10(at(w['gdm'], 50) / at(w['gpg'], 50))"
       pgrr_500: "20 * math.log10(at(w['gdm'], 500) / at(w['gpg'], 500))"
       pgrr_100k: "20 * math.log10(at(w['gdm'], 1e5) / at(w['gpg'], 1e5))"
       # PWR_GND to the in-amp output, V/V, at its worst frequency from 1 Hz to 1 MHz, and where
       pg_gain_max: "peak(w['gpg'], 1, 1e6)"
       pg_gain_f: "argpeak(w['gpg'], 1, 1e6)"
-    asserts:
+      # the same, inside each mode's band (#32), recorded: the diodes' mismatch converts PWR_GND
+      # noise in proportion to frequency, which no receive filter undoes inside its own band
+      pg_band_500: "peak(w['gpg'], 1, 500)"
+      pg_band_1k5: "peak(w['gpg'], 1, 1500)"
+      pg_band_10k: "peak(w['gpg'], 1, 1.0e4)"
+    asserts: &asserts
       - expr: "min['cmrr_50'] > 58.5 and min['cmrr_60'] > 58.5"
         why: "with both diodes fitted, mismatched by their bias, the link still clears breath-sense-link.md's 58.5 dB at the mains fundamental, at every corner here"
       - expr: "max['pg_gain_max'] < 1e-3"
         why: "noise on PWR_GND against the instrument's analog ground reaches the in-amp's output only through the diodes' mismatch, at under 1/1000 (-60 dB) at every frequency to 1 MHz and every corner: 10 mV on the plane is under 10 uV at the output, a ppm of the jack's span. Recorded with it, pgrr_*: the same against the signal, i.e. referred to the sensor"
       - expr: "abs(max['dv_leak']) < 1e-3 and abs(min['dv_leak']) < 1e-3"
         why: "the signal diode's worst 25 C leakage, 100 nA through R1, moves the in-amp output by under 1 mV - inside what TRIM-BREATH-ZERO nulls; it grows with temperature [ds Figure 6]"
+  - name: with-tvs-1k5
+    deck: tvs.cir
+    set: {en_1k5: 1, en_500: 0}
+    sweep: {v_sensor: [1.0, 2.5, 4.86]}
+    measures: *meas
+    post: *post
+    asserts:
+      - expr: "min['cmrr_50'] > 58.5 and min['cmrr_1k5'] > 58.5"
+        why: "in the 1.5 kHz mode the diodes leave the link above 58.5 dB at mains and at the mode's 1.5 kHz top, at every corner here"
+      - expr: "max['pg_gain_max'] < 1e-3"
+        why: "PWR_GND to the in-amp output under -60 dB at every frequency to 1 MHz, as at 500 Hz"
+  - name: with-tvs-wide
+    deck: tvs.cir
+    set: {en_1k5: 0, en_500: 0}
+    sweep: {v_sensor: [1.0, 2.5, 4.86]}
+    measures: *meas
+    post: *post
+    asserts:
+      - expr: "min['cmrr_50'] > 58.5 and min['cmrr_10k'] > 58.5"
+        why: "in the wide mode the diodes leave the link above 58.5 dB at mains and at the mode's 10 kHz top, at every corner here"
+      - expr: "max['pg_gain_max'] < 1e-3"
+        why: "PWR_GND to the in-amp output under -60 dB at every frequency to 1 MHz, with only the fixed 680 pF C_diff across the pair"
   - name: without-tvs
     # both diodes out: the receive deck's circuit, here for the difference
     deck: tvs.cir
-    set: {tvs: 0}
+    set: {tvs: 0, en_1k5: 0, en_500: 0}
     sweep: {v_sensor: [1.0, 2.5, 4.86]}
     vary: [R1, R1b]
-    measures: [cmrr_50, cmrr_60, cmrr_500]
+    measures: [cmrr_50, cmrr_60, cmrr_500, cmrr_1k5, cmrr_10k]
     post: *post

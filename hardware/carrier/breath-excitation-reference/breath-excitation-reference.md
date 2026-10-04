@@ -79,7 +79,7 @@ Two consequences to keep in mind at layout:
   board's values, not TI's scaled.** TI's Figure 56 prints `R_F` 1 kΩ,
   `R_Fx` 10 kΩ and `C_F` 39 nF (read with TIDU026's glyph key, `ti_rf` in
   `sim/sims.yaml`). What binds here is the handover `1/(2π·R_F·C_F)`, 15.9 kHz:
-  it must sit well *above* the 500 Hz breath channel, because our load draws
+  it must sit well *above* the breath channel, because our load draws
   10 mA and TI's does not, and above the handover a load-current change appears
   at `VS` across `R_ISO`. `VS` **is** the ratiometric scale factor.
 - **The network is robust, which is what makes it a design rather than a tuned
@@ -101,8 +101,18 @@ Two consequences to keep in mind at layout:
   `|Z_out|` at 500 Hz is unchanged; the same ~38 Ω peak moves down to about
   7.6 kHz, so a load step swings back by about 45 % and settles in under
   0.5 ms (`sim/`, `loop-as-built`, `zout-as-built`, `step-as-built`). The
-  sensor's draw is steady and the peak sits well above the 500 Hz breath
-  channel, so this is recorded, not a defect.
+  sensor's draw is steady, so this is recorded, not a defect.
+- **Since #32 the breath channel reaches ~10 kHz** (the receive stage's WIDE
+  mode, ADR 0003 *Amendment, 2026-10-04*), so the handover at 15.9 kHz is 1.6×
+  above the widest mode rather than thirty times above 500 Hz, and the as-built
+  peak now sits *inside* WIDE's band. As built, `|Z_out|` is about 3.7 Ω at the
+  1.5 kHz mode's edge and 26 Ω at 10 kHz (`sim/`, `zout-as-built`). It matters
+  only against a load current that moves at those rates: the sensor's supply
+  current is a bias, not a signal (its sheet gives a 10 mA maximum and no
+  dependence on pressure `[ds MPXV4006DP.pdf p.4]`), and its output drives
+  `U-BUF` B's high-impedance input. **So it is justified, not changed** — and
+  if E13 or E11 shows the sensor's draw carrying breath, this is where it
+  reaches the jack.
 
 *(The record of the two blockers that closed here on 2026-09-21, and of the two
 earlier notes they superseded, is in [`notes.md`](notes.md).)*

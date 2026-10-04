@@ -144,7 +144,7 @@ REF_VIN──┬─┤VIN VOUT├─┬── 5.000 V ─┤+IN                 
                      │                      │
                      │                      └──[R-ADCDIV-U 10k]──┬──[R-ADCDIV-L 15k]──┐
                      │                                           │                    │
-                     │                            [C-AA-ADC 47 nF C0G]              AGND
+                     │                            [C-AA-ADC 18 nF C0G]              AGND
                      │                                           │                  -local
                      │                                           │
                      │                                     ┌─────▼─────────┐

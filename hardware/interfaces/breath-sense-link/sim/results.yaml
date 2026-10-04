@@ -4,71 +4,101 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/interfaces/breath-sense-link/sim/sims.yaml: 24ea39bcf90faccc
+  hardware/interfaces/breath-sense-link/sim/sims.yaml: fb224c8f4abe0b18
   hardware/interfaces/breath-sense-link/netlist.yaml: 430f1e37ec9c97fa
-  hardware/module/breath-receive-stage/netlist.yaml: 9093fa5acc898eb4
-  hardware/interfaces/breath-sense-link/sim/tvs.cir: 76273b7b39e7abbb
+  hardware/module/breath-receive-stage/netlist.yaml: dab496982d183718
+  hardware/interfaces/breath-sense-link/sim/tvs.cir: 3e45431710db6c45
   datasheets/analog/INA828-ti-pspice-sbomag5c.lib: 6ae6e0285c98dc1e
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
-  hardware/module/breath-receive-stage/sim/sims.yaml: aa4585e431375ae5
+  hardware/module/breath-receive-stage/sim/sims.yaml: 094e5e14870e4390
 ngspice: '42'
 sims:
-  with-tvs[v_sensor=1.0]:
+  with-tvs-500[v_sensor=1.0]:
     corners: 17
     measures:
       cmrr_50:
-        nominal: 114.819
-        min: 92.5074
-        min_at: R1+ R1b- cj_ret- cj_sig+
-        max: 114.834
-        max_at: R1+ R1b+ cj_ret+ cj_sig-
-      cmrr_60:
-        nominal: 114.762
-        min: 92.1936
-        min_at: R1+ R1b- cj_ret- cj_sig+
-        max: 114.784
-        max_at: R1+ R1b+ cj_ret+ cj_sig-
-      cmrr_500:
-        nominal: 106.239
-        min: 79.997
+        nominal: 107.265
+        min: 92.3604
         min_at: R1+ R1b- cj_ret+ cj_sig-
-        max: 106.913
+        max: 107.269
+        max_at: R1+ R1b+ cj_ret- cj_sig+
+      cmrr_60:
+        nominal: 107.237
+        min: 92.3586
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 107.244
         max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_500:
+        nominal: 102.847
+        min: 91.9127
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 103.036
+        max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_1k5:
+        nominal: 90.9318
+        min: 87.7431
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 91.159
+        max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_10k:
+        nominal: 59.8602
+        min: 59.4656
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 60.1582
+        max_at: R1- R1b+ cj_ret- cj_sig+
       pgrr_50:
-        nominal: 98.8108
+        nominal: 98.8107
         min: 90.9626
         min_at: R1- R1b+ cj_ret+ cj_sig-
-        max: 105.787
+        max: 105.788
         max_at: R1- R1b+ cj_ret- cj_sig+
       pgrr_500:
-        nominal: 78.8115
-        min: 70.9633
+        nominal: 78.8113
+        min: 70.9632
         min_at: R1- R1b+ cj_ret+ cj_sig-
-        max: 85.7875
+        max: 85.788
         max_at: R1- R1b+ cj_ret- cj_sig+
       pgrr_100k:
-        nominal: 32.9226
-        min: 25.0682
+        nominal: 32.9841
+        min: 25.119
         min_at: R1- R1b+ cj_ret+ cj_sig-
-        max: 39.4872
+        max: 39.0801
         max_at: R1- R1b+ cj_ret- cj_sig+
       pg_gain_max:
-        nominal: 0.000229267
-        min: 0.000159498
-        min_at: R1+ R1b- cj_ret- cj_sig-
-        max: 0.000565812
+        nominal: 0.00272065
+        min: 0.00198431
+        min_at: R1- R1b+ cj_ret- cj_sig+
+        max: 0.00630739
         max_at: R1- R1b+ cj_ret+ cj_sig-
       pg_gain_f:
-        nominal: 9440.61
-        min: 6683.44
-        min_at: R1- R1b+ cj_ret- cj_sig-
+        nominal: 891251.0
+        min: 841395.0
+        min_at: R1- R1b- cj_ret+ cj_sig+
         max: 1000000.0
-        max_at: R1- R1b- cj_ret- cj_sig+
+        max_at: R1- R1b- cj_ret- cj_sig-
+      pg_band_500:
+        nominal: 0.000169482
+        min: 7.59095e-05
+        min_at: R1- R1b+ cj_ret- cj_sig+
+        max: 0.000418347
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_band_1k5:
+        nominal: 0.000232922
+        min: 0.000104348
+        min_at: R1- R1b+ cj_ret- cj_sig+
+        max: 0.000574968
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_band_10k:
+        nominal: 0.000250863
+        min: 0.000113605
+        min_at: R1- R1b+ cj_ret- cj_sig+
+        max: 0.000620585
+        max_at: R1- R1b+ cj_ret+ cj_sig-
       dv_leak:
-        nominal: 0.000216105
-        min: 0.000213946
+        nominal: 0.000216107
+        min: 0.000213948
         min_at: R1- R1b- cj_ret- cj_sig-
-        max: 0.000218264
+        max: 0.000218265
         max_at: R1+ R1b- cj_ret- cj_sig-
     asserts:
     - expr: min['cmrr_50'] > 58.5 and min['cmrr_60'] > 58.5
@@ -80,67 +110,97 @@ sims:
         mismatch, at under 1/1000 (-60 dB) at every frequency to 1 MHz and every corner: 10 mV on the plane is under 10 uV
         at the output, a ppm of the jack''s span. Recorded with it, pgrr_*: the same against the signal, i.e. referred to
         the sensor'
-      pass: true
+      pass: false
     - expr: abs(max['dv_leak']) < 1e-3 and abs(min['dv_leak']) < 1e-3
       why: the signal diode's worst 25 C leakage, 100 nA through R1, moves the in-amp output by under 1 mV - inside what TRIM-BREATH-ZERO
         nulls; it grows with temperature [ds Figure 6]
       pass: true
-  with-tvs[v_sensor=2.5]:
+  with-tvs-500[v_sensor=2.5]:
     corners: 17
     measures:
       cmrr_50:
-        nominal: 114.826
-        min: 92.5074
-        min_at: R1+ R1b- cj_ret- cj_sig+
-        max: 114.839
-        max_at: R1+ R1b+ cj_ret+ cj_sig-
-      cmrr_60:
-        nominal: 114.773
-        min: 92.1936
-        min_at: R1+ R1b- cj_ret- cj_sig+
-        max: 114.791
-        max_at: R1+ R1b+ cj_ret+ cj_sig-
-      cmrr_500:
-        nominal: 105.907
-        min: 79.9963
+        nominal: 107.263
+        min: 92.3603
         min_at: R1+ R1b- cj_ret+ cj_sig-
-        max: 106.616
+        max: 107.267
+        max_at: R1+ R1b+ cj_ret- cj_sig+
+      cmrr_60:
+        nominal: 107.234
+        min: 92.3585
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 107.241
         max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_500:
+        nominal: 102.768
+        min: 91.9077
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 102.948
+        max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_1k5:
+        nominal: 90.8386
+        min: 87.708
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 91.0537
+        max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_10k:
+        nominal: 59.7802
+        min: 59.4086
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 60.0658
+        max_at: R1- R1b+ cj_ret- cj_sig+
       pgrr_50:
-        nominal: 94.4621
+        nominal: 94.462
         min: 89.4118
         min_at: R1- R1b+ cj_ret+ cj_sig-
-        max: 115.365
+        max: 115.364
         max_at: R1+ R1b- cj_ret- cj_sig+
       pgrr_500:
-        nominal: 74.4628
-        min: 69.4126
+        nominal: 74.4626
+        min: 69.4124
         min_at: R1- R1b+ cj_ret+ cj_sig-
-        max: 95.3648
+        max: 95.3651
         max_at: R1+ R1b- cj_ret- cj_sig+
       pgrr_100k:
-        nominal: 28.5377
-        min: 23.5044
+        nominal: 28.6068
+        min: 23.5522
         min_at: R1- R1b+ cj_ret+ cj_sig-
-        max: 49.2589
+        max: 47.6332
         max_at: R1+ R1b- cj_ret- cj_sig+
       pg_gain_max:
-        nominal: 0.000378615
-        min: 6.92766e-05
-        min_at: R1- R1b+ cj_ret- cj_sig+
-        max: 0.000676742
+        nominal: 0.00447307
+        min: 0.00135681
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.00789058
         max_at: R1- R1b+ cj_ret+ cj_sig-
       pg_gain_f:
-        nominal: 11885.0
-        min: 7943.28
-        min_at: R1- R1b+ cj_ret+ cj_sig+
+        nominal: 944061.0
+        min: 891251.0
+        min_at: R1- R1b- cj_ret+ cj_sig+
         max: 1000000.0
-        max_at: R1- R1b- cj_ret- cj_sig+
+        max_at: R1- R1b- cj_ret- cj_sig-
+      pg_band_500:
+        nominal: 0.000279614
+        min: 2.52019e-05
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.000500121
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_band_1k5:
+        nominal: 0.000384292
+        min: 3.46235e-05
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.000687362
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_band_10k:
+        nominal: 0.00041455
+        min: 3.67056e-05
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.000742128
+        max_at: R1- R1b+ cj_ret+ cj_sig-
       dv_leak:
-        nominal: 0.000216105
-        min: 0.000213946
+        nominal: 0.000216107
+        min: 0.000213948
         min_at: R1- R1b- cj_ret- cj_sig-
-        max: 0.000218264
+        max: 0.000218265
         max_at: R1+ R1b- cj_ret- cj_sig-
     asserts:
     - expr: min['cmrr_50'] > 58.5 and min['cmrr_60'] > 58.5
@@ -152,67 +212,97 @@ sims:
         mismatch, at under 1/1000 (-60 dB) at every frequency to 1 MHz and every corner: 10 mV on the plane is under 10 uV
         at the output, a ppm of the jack''s span. Recorded with it, pgrr_*: the same against the signal, i.e. referred to
         the sensor'
-      pass: true
+      pass: false
     - expr: abs(max['dv_leak']) < 1e-3 and abs(min['dv_leak']) < 1e-3
       why: the signal diode's worst 25 C leakage, 100 nA through R1, moves the in-amp output by under 1 mV - inside what TRIM-BREATH-ZERO
         nulls; it grows with temperature [ds Figure 6]
       pass: true
-  with-tvs[v_sensor=4.86]:
+  with-tvs-500[v_sensor=4.86]:
     corners: 17
     measures:
       cmrr_50:
-        nominal: 114.831
-        min: 92.5074
-        min_at: R1+ R1b- cj_ret- cj_sig+
-        max: 114.843
-        max_at: R1+ R1b+ cj_ret+ cj_sig-
-      cmrr_60:
-        nominal: 114.78
-        min: 92.1936
-        min_at: R1+ R1b- cj_ret- cj_sig+
-        max: 114.797
-        max_at: R1+ R1b+ cj_ret+ cj_sig-
-      cmrr_500:
-        nominal: 105.645
-        min: 79.9956
+        nominal: 107.261
+        min: 92.3603
         min_at: R1+ R1b- cj_ret+ cj_sig-
-        max: 106.365
+        max: 107.265
+        max_at: R1+ R1b+ cj_ret- cj_sig+
+      cmrr_60:
+        nominal: 107.232
+        min: 92.3584
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 107.239
         max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_500:
+        nominal: 102.709
+        min: 91.9038
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 102.882
+        max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_1k5:
+        nominal: 90.7689
+        min: 87.6814
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 90.9748
+        max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_10k:
+        nominal: 59.7202
+        min: 59.3657
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 59.9965
+        max_at: R1- R1b+ cj_ret- cj_sig+
       pgrr_50:
-        nominal: 92.1964
-        min: 88.3987
+        nominal: 92.1963
+        min: 88.3986
         min_at: R1- R1b+ cj_ret+ cj_sig-
-        max: 101.818
+        max: 101.817
         max_at: R1+ R1b- cj_ret- cj_sig+
       pgrr_500:
-        nominal: 72.197
-        min: 68.3994
+        nominal: 72.1969
+        min: 68.3992
         min_at: R1- R1b+ cj_ret+ cj_sig-
         max: 81.8181
         max_at: R1+ R1b- cj_ret- cj_sig+
       pgrr_100k:
-        nominal: 26.2585
-        min: 22.4839
+        nominal: 26.3217
+        min: 22.5295
         min_at: R1- R1b+ cj_ret+ cj_sig-
-        max: 35.8357
+        max: 35.9072
         max_at: R1+ R1b- cj_ret- cj_sig+
       pg_gain_max:
-        nominal: 0.000491669
-        min: 0.000163081
+        nominal: 0.00603504
+        min: 0.00245411
         min_at: R1+ R1b- cj_ret- cj_sig+
-        max: 0.000760704
+        max: 0.00914695
         max_at: R1- R1b+ cj_ret+ cj_sig-
       pg_gain_f:
-        nominal: 14125.4
-        min: 6683.44
-        min_at: R1- R1b+ cj_ret- cj_sig+
-        max: 35481.3
-        max_at: R1+ R1b- cj_ret- cj_sig-
+        nominal: 1000000.0
+        min: 944061.0
+        min_at: R1- R1b- cj_ret+ cj_sig+
+        max: 1000000.0
+        max_at: nominal
+      pg_band_500:
+        nominal: 0.000362949
+        min: 0.00011989
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.000561998
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_band_1k5:
+        nominal: 0.000498831
+        min: 0.000164767
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.000772409
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_band_10k:
+        nominal: 0.000538412
+        min: 0.000177439
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.000834098
+        max_at: R1- R1b+ cj_ret+ cj_sig-
       dv_leak:
-        nominal: 0.000216105
-        min: 0.000213946
+        nominal: 0.000216107
+        min: 0.000213948
         min_at: R1- R1b- cj_ret- cj_sig-
-        max: 0.000218264
+        max: 0.000218265
         max_at: R1+ R1b- cj_ret- cj_sig-
     asserts:
     - expr: min['cmrr_50'] > 58.5 and min['cmrr_60'] > 58.5
@@ -224,74 +314,683 @@ sims:
         mismatch, at under 1/1000 (-60 dB) at every frequency to 1 MHz and every corner: 10 mV on the plane is under 10 uV
         at the output, a ppm of the jack''s span. Recorded with it, pgrr_*: the same against the signal, i.e. referred to
         the sensor'
-      pass: true
+      pass: false
     - expr: abs(max['dv_leak']) < 1e-3 and abs(min['dv_leak']) < 1e-3
       why: the signal diode's worst 25 C leakage, 100 nA through R1, moves the in-amp output by under 1 mV - inside what TRIM-BREATH-ZERO
         nulls; it grows with temperature [ds Figure 6]
       pass: true
+  with-tvs-1k5[v_sensor=1.0]:
+    corners: 17
+    measures:
+      cmrr_50:
+        nominal: 107.306
+        min: 92.3604
+        min_at: R1+ R1b- cj_ret+ cj_sig+
+        max: 107.308
+        max_at: R1+ R1b+ cj_ret- cj_sig+
+      cmrr_60:
+        nominal: 107.296
+        min: 92.3585
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 107.299
+        max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_500:
+        nominal: 105.496
+        min: 91.9518
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 105.654
+        max_at: R1+ R1b+ cj_ret- cj_sig+
+      cmrr_1k5:
+        nominal: 98.0246
+        min: 89.3534
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 98.4596
+        max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_10k:
+        nominal: 69.3121
+        min: 68.1177
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 69.846
+        max_at: R1- R1b- cj_ret- cj_sig+
+      pgrr_50:
+        nominal: 98.8107
+        min: 90.9625
+        min_at: R1- R1b+ cj_ret+ cj_sig-
+        max: 105.788
+        max_at: R1- R1b+ cj_ret- cj_sig+
+      pgrr_500:
+        nominal: 78.8108
+        min: 70.9627
+        min_at: R1- R1b+ cj_ret+ cj_sig-
+        max: 85.7876
+        max_at: R1- R1b+ cj_ret- cj_sig+
+      pgrr_100k:
+        nominal: 33.1946
+        min: 25.1949
+        min_at: R1- R1b+ cj_ret+ cj_sig-
+        max: 39.149
+        max_at: R1- R1b+ cj_ret- cj_sig+
+      pg_gain_max:
+        nominal: 0.00313905
+        min: 0.00261721
+        min_at: R1+ R1b- cj_ret- cj_sig-
+        max: 0.00786088
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_gain_f:
+        nominal: 707946.0
+        min: 630957.0
+        min_at: R1- R1b- cj_ret+ cj_sig+
+        max: 1000000.0
+        max_at: R1- R1b- cj_ret- cj_sig+
+      pg_band_500:
+        nominal: 0.000224404
+        min: 0.000100507
+        min_at: R1- R1b+ cj_ret- cj_sig+
+        max: 0.000553914
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_band_1k5:
+        nominal: 0.000535062
+        min: 0.000239664
+        min_at: R1- R1b+ cj_ret- cj_sig+
+        max: 0.00132075
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_band_10k:
+        nominal: 0.000766345
+        min: 0.000344518
+        min_at: R1- R1b+ cj_ret- cj_sig+
+        max: 0.001893
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      dv_leak:
+        nominal: 0.000216107
+        min: 0.000213948
+        min_at: R1- R1b- cj_ret- cj_sig-
+        max: 0.000218265
+        max_at: R1+ R1b- cj_ret- cj_sig-
+    asserts:
+    - expr: min['cmrr_50'] > 58.5 and min['cmrr_1k5'] > 58.5
+      why: in the 1.5 kHz mode the diodes leave the link above 58.5 dB at mains and at the mode's 1.5 kHz top, at every corner
+        here
+      pass: true
+    - expr: max['pg_gain_max'] < 1e-3
+      why: PWR_GND to the in-amp output under -60 dB at every frequency to 1 MHz, as at 500 Hz
+      pass: false
+  with-tvs-1k5[v_sensor=2.5]:
+    corners: 17
+    measures:
+      cmrr_50:
+        nominal: 107.305
+        min: 92.3604
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 107.307
+        max_at: R1+ R1b+ cj_ret- cj_sig+
+      cmrr_60:
+        nominal: 107.295
+        min: 92.3585
+        min_at: R1+ R1b- cj_ret+ cj_sig+
+        max: 107.298
+        max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_500:
+        nominal: 105.428
+        min: 91.9494
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 105.58
+        max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_1k5:
+        nominal: 97.8437
+        min: 89.3333
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 98.2528
+        max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_10k:
+        nominal: 69.095
+        min: 67.9841
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 69.5921
+        max_at: R1- R1b- cj_ret- cj_sig+
+      pgrr_50:
+        nominal: 94.462
+        min: 89.4118
+        min_at: R1- R1b+ cj_ret+ cj_sig-
+        max: 115.364
+        max_at: R1+ R1b- cj_ret- cj_sig+
+      pgrr_500:
+        nominal: 74.4621
+        min: 69.4119
+        min_at: R1- R1b+ cj_ret+ cj_sig-
+        max: 95.3643
+        max_at: R1+ R1b- cj_ret- cj_sig+
+      pgrr_100k:
+        nominal: 28.7158
+        min: 23.6157
+        min_at: R1- R1b+ cj_ret+ cj_sig-
+        max: 50.2348
+        max_at: R1+ R1b- cj_ret- cj_sig+
+      pg_gain_max:
+        nominal: 0.0054194
+        min: 0.00132293
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.0097877
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_gain_f:
+        nominal: 794328.0
+        min: 707946.0
+        min_at: R1- R1b- cj_ret+ cj_sig+
+        max: 1000000.0
+        max_at: R1- R1b- cj_ret- cj_sig+
+      pg_band_500:
+        nominal: 0.000370224
+        min: 3.33696e-05
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.000662187
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_band_1k5:
+        nominal: 0.000882763
+        min: 7.95575e-05
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.00157893
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_band_10k:
+        nominal: 0.00126503
+        min: 0.000113365
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.0022633
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      dv_leak:
+        nominal: 0.000216107
+        min: 0.000213948
+        min_at: R1- R1b- cj_ret- cj_sig-
+        max: 0.000218265
+        max_at: R1+ R1b- cj_ret- cj_sig-
+    asserts:
+    - expr: min['cmrr_50'] > 58.5 and min['cmrr_1k5'] > 58.5
+      why: in the 1.5 kHz mode the diodes leave the link above 58.5 dB at mains and at the mode's 1.5 kHz top, at every corner
+        here
+      pass: true
+    - expr: max['pg_gain_max'] < 1e-3
+      why: PWR_GND to the in-amp output under -60 dB at every frequency to 1 MHz, as at 500 Hz
+      pass: false
+  with-tvs-1k5[v_sensor=4.86]:
+    corners: 17
+    measures:
+      cmrr_50:
+        nominal: 107.304
+        min: 92.3603
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 107.306
+        max_at: R1+ R1b+ cj_ret- cj_sig+
+      cmrr_60:
+        nominal: 107.294
+        min: 92.3584
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 107.297
+        max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_500:
+        nominal: 105.375
+        min: 91.9474
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 105.523
+        max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_1k5:
+        nominal: 97.7087
+        min: 89.3179
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 98.0987
+        max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_10k:
+        nominal: 68.9342
+        min: 67.8842
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 69.4048
+        max_at: R1- R1b- cj_ret- cj_sig+
+      pgrr_50:
+        nominal: 92.1963
+        min: 88.3986
+        min_at: R1- R1b+ cj_ret+ cj_sig-
+        max: 101.817
+        max_at: R1+ R1b- cj_ret- cj_sig+
+      pgrr_500:
+        nominal: 72.1964
+        min: 68.3987
+        min_at: R1- R1b+ cj_ret+ cj_sig-
+        max: 81.8176
+        max_at: R1+ R1b- cj_ret- cj_sig+
+      pgrr_100k:
+        nominal: 26.4025
+        min: 22.5864
+        min_at: R1- R1b+ cj_ret+ cj_sig-
+        max: 36.1517
+        max_at: R1+ R1b- cj_ret- cj_sig+
+      pg_gain_max:
+        nominal: 0.00735783
+        min: 0.00267462
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.0113239
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_gain_f:
+        nominal: 841395.0
+        min: 749894.0
+        min_at: R1+ R1b+ cj_ret+ cj_sig+
+        max: 1000000.0
+        max_at: R1- R1b- cj_ret- cj_sig-
+      pg_band_500:
+        nominal: 0.000480563
+        min: 0.000158741
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.000744114
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_band_1k5:
+        nominal: 0.00114586
+        min: 0.000378502
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.00177429
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_band_10k:
+        nominal: 0.00164239
+        min: 0.000542125
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.0025435
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      dv_leak:
+        nominal: 0.000216107
+        min: 0.000213948
+        min_at: R1- R1b- cj_ret- cj_sig-
+        max: 0.000218265
+        max_at: R1+ R1b- cj_ret- cj_sig-
+    asserts:
+    - expr: min['cmrr_50'] > 58.5 and min['cmrr_1k5'] > 58.5
+      why: in the 1.5 kHz mode the diodes leave the link above 58.5 dB at mains and at the mode's 1.5 kHz top, at every corner
+        here
+      pass: true
+    - expr: max['pg_gain_max'] < 1e-3
+      why: PWR_GND to the in-amp output under -60 dB at every frequency to 1 MHz, as at 500 Hz
+      pass: false
+  with-tvs-wide[v_sensor=1.0]:
+    corners: 17
+    measures:
+      cmrr_50:
+        nominal: 107.31
+        min: 92.3603
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 107.312
+        max_at: R1+ R1b+ cj_ret- cj_sig+
+      cmrr_60:
+        nominal: 107.303
+        min: 92.3584
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 107.305
+        max_at: R1+ R1b+ cj_ret- cj_sig+
+      cmrr_500:
+        nominal: 105.948
+        min: 91.9439
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 106.049
+        max_at: R1+ R1b+ cj_ret- cj_sig+
+      cmrr_1k5:
+        nominal: 100.837
+        min: 89.5306
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 101.173
+        max_at: R1+ R1b+ cj_ret- cj_sig+
+      cmrr_10k:
+        nominal: 81.7579
+        min: 75.2066
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 83.5121
+        max_at: R1+ R1b+ cj_ret- cj_sig+
+      pgrr_50:
+        nominal: 98.8107
+        min: 90.9625
+        min_at: R1- R1b+ cj_ret+ cj_sig-
+        max: 105.788
+        max_at: R1- R1b+ cj_ret- cj_sig+
+      pgrr_500:
+        nominal: 78.8107
+        min: 70.9626
+        min_at: R1- R1b+ cj_ret+ cj_sig-
+        max: 85.7875
+        max_at: R1- R1b+ cj_ret- cj_sig+
+      pgrr_100k:
+        nominal: 33.0165
+        min: 25.1105
+        min_at: R1- R1b+ cj_ret+ cj_sig-
+        max: 39.5364
+        max_at: R1- R1b+ cj_ret- cj_sig+
+      pg_gain_max:
+        nominal: 0.00489754
+        min: 0.00334387
+        min_at: R1- R1b+ cj_ret- cj_sig+
+        max: 0.0121518
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_gain_f:
+        nominal: 66834.4
+        min: 66834.4
+        min_at: nominal
+        max: 1000000.0
+        max_at: R1- R1b- cj_ret- cj_sig+
+      pg_band_500:
+        nominal: 0.000234255
+        min: 0.000104918
+        min_at: R1- R1b+ cj_ret- cj_sig+
+        max: 0.000578228
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_band_1k5:
+        nominal: 0.000733586
+        min: 0.000328563
+        min_at: R1- R1b+ cj_ret- cj_sig+
+        max: 0.00181077
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_band_10k:
+        nominal: 0.00352176
+        min: 0.00157837
+        min_at: R1- R1b+ cj_ret- cj_sig+
+        max: 0.00869404
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      dv_leak:
+        nominal: 0.000216107
+        min: 0.000213948
+        min_at: R1- R1b- cj_ret- cj_sig-
+        max: 0.000218265
+        max_at: R1+ R1b- cj_ret- cj_sig-
+    asserts:
+    - expr: min['cmrr_50'] > 58.5 and min['cmrr_10k'] > 58.5
+      why: in the wide mode the diodes leave the link above 58.5 dB at mains and at the mode's 10 kHz top, at every corner
+        here
+      pass: true
+    - expr: max['pg_gain_max'] < 1e-3
+      why: PWR_GND to the in-amp output under -60 dB at every frequency to 1 MHz, with only the fixed 680 pF C_diff across
+        the pair
+      pass: false
+  with-tvs-wide[v_sensor=2.5]:
+    corners: 17
+    measures:
+      cmrr_50:
+        nominal: 107.31
+        min: 92.3603
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 107.311
+        max_at: R1+ R1b+ cj_ret- cj_sig+
+      cmrr_60:
+        nominal: 107.302
+        min: 92.3583
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 107.304
+        max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_500:
+        nominal: 105.903
+        min: 91.9423
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 106.001
+        max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_1k5:
+        nominal: 100.688
+        min: 89.5212
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 101.014
+        max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_10k:
+        nominal: 81.0655
+        min: 75.0555
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 82.6544
+        max_at: R1- R1b- cj_ret- cj_sig+
+      pgrr_50:
+        nominal: 94.462
+        min: 89.4118
+        min_at: R1- R1b+ cj_ret+ cj_sig-
+        max: 115.364
+        max_at: R1+ R1b- cj_ret- cj_sig+
+      pgrr_500:
+        nominal: 74.462
+        min: 69.4118
+        min_at: R1- R1b+ cj_ret+ cj_sig-
+        max: 95.3641
+        max_at: R1+ R1b- cj_ret- cj_sig+
+      pgrr_100k:
+        nominal: 28.6073
+        min: 23.5468
+        min_at: R1- R1b+ cj_ret+ cj_sig-
+        max: 50.0601
+        max_at: R1+ R1b- cj_ret- cj_sig+
+      pg_gain_max:
+        nominal: 0.00811859
+        min: 0.00104844
+        min_at: R1- R1b- cj_ret- cj_sig+
+        max: 0.01455
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_gain_f:
+        nominal: 79432.8
+        min: 53088.4
+        min_at: R1- R1b+ cj_ret- cj_sig+
+        max: 1000000.0
+        max_at: R1- R1b- cj_ret- cj_sig+
+      pg_band_500:
+        nominal: 0.000386475
+        min: 3.48347e-05
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.000691253
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_band_1k5:
+        nominal: 0.00121028
+        min: 0.000109086
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.00216472
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_band_10k:
+        nominal: 0.00581098
+        min: 0.00052339
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.010394
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      dv_leak:
+        nominal: 0.000216107
+        min: 0.000213948
+        min_at: R1- R1b- cj_ret- cj_sig-
+        max: 0.000218265
+        max_at: R1+ R1b- cj_ret- cj_sig-
+    asserts:
+    - expr: min['cmrr_50'] > 58.5 and min['cmrr_10k'] > 58.5
+      why: in the wide mode the diodes leave the link above 58.5 dB at mains and at the mode's 10 kHz top, at every corner
+        here
+      pass: true
+    - expr: max['pg_gain_max'] < 1e-3
+      why: PWR_GND to the in-amp output under -60 dB at every frequency to 1 MHz, with only the fixed 680 pF C_diff across
+        the pair
+      pass: false
+  with-tvs-wide[v_sensor=4.86]:
+    corners: 17
+    measures:
+      cmrr_50:
+        nominal: 107.309
+        min: 92.3602
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 107.311
+        max_at: R1+ R1b+ cj_ret- cj_sig+
+      cmrr_60:
+        nominal: 107.302
+        min: 92.3583
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 107.304
+        max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_500:
+        nominal: 105.867
+        min: 91.9412
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 105.965
+        max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_1k5:
+        nominal: 100.573
+        min: 89.5138
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 100.894
+        max_at: R1- R1b- cj_ret- cj_sig+
+      cmrr_10k:
+        nominal: 80.5652
+        min: 74.9383
+        min_at: R1+ R1b- cj_ret+ cj_sig-
+        max: 82.041
+        max_at: R1- R1b- cj_ret- cj_sig+
+      pgrr_50:
+        nominal: 92.1963
+        min: 88.3986
+        min_at: R1- R1b+ cj_ret+ cj_sig-
+        max: 101.817
+        max_at: R1+ R1b- cj_ret- cj_sig+
+      pgrr_500:
+        nominal: 72.1963
+        min: 68.3986
+        min_at: R1- R1b+ cj_ret+ cj_sig-
+        max: 81.8174
+        max_at: R1+ R1b- cj_ret- cj_sig+
+      pgrr_100k:
+        nominal: 26.3202
+        min: 22.5264
+        min_at: R1- R1b+ cj_ret+ cj_sig-
+        max: 35.9832
+        max_at: R1+ R1b- cj_ret- cj_sig+
+      pg_gain_max:
+        nominal: 0.0105624
+        min: 0.00347502
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.0163666
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_gain_f:
+        nominal: 84139.5
+        min: 70794.6
+        min_at: R1- R1b+ cj_ret- cj_sig+
+        max: 94406.1
+        max_at: R1- R1b- cj_ret- cj_sig-
+      pg_band_500:
+        nominal: 0.000501657
+        min: 0.000165709
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.000776776
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_band_1k5:
+        nominal: 0.00157098
+        min: 0.000518933
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.00243255
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      pg_band_10k:
+        nominal: 0.00754332
+        min: 0.00249166
+        min_at: R1+ R1b- cj_ret- cj_sig+
+        max: 0.0116803
+        max_at: R1- R1b+ cj_ret+ cj_sig-
+      dv_leak:
+        nominal: 0.000216107
+        min: 0.000213948
+        min_at: R1- R1b- cj_ret- cj_sig-
+        max: 0.000218265
+        max_at: R1+ R1b- cj_ret- cj_sig-
+    asserts:
+    - expr: min['cmrr_50'] > 58.5 and min['cmrr_10k'] > 58.5
+      why: in the wide mode the diodes leave the link above 58.5 dB at mains and at the mode's 10 kHz top, at every corner
+        here
+      pass: true
+    - expr: max['pg_gain_max'] < 1e-3
+      why: PWR_GND to the in-amp output under -60 dB at every frequency to 1 MHz, with only the fixed 680 pF C_diff across
+        the pair
+      pass: false
   without-tvs[v_sensor=1.0]:
     corners: 5
     measures:
       cmrr_50:
-        nominal: 114.809
-        min: 92.5074
+        nominal: 107.311
+        min: 92.3604
         min_at: R1+ R1b-
-        max: 114.809
-        max_at: nominal
+        max: 107.311
+        max_at: R1- R1b-
       cmrr_60:
-        nominal: 114.747
-        min: 92.1936
+        nominal: 107.305
+        min: 92.3585
         min_at: R1+ R1b-
-        max: 114.747
+        max: 107.305
         max_at: R1- R1b-
       cmrr_500:
-        nominal: 106.702
-        min: 79.9998
+        nominal: 106.015
+        min: 91.9501
         min_at: R1+ R1b-
-        max: 106.707
+        max: 106.015
+        max_at: R1- R1b-
+      cmrr_1k5:
+        nominal: 101.059
+        min: 89.5695
+        min_at: R1+ R1b-
+        max: 101.06
+        max_at: R1- R1b-
+      cmrr_10k:
+        nominal: 82.8943
+        min: 75.8194
+        min_at: R1+ R1b-
+        max: 82.8981
         max_at: R1- R1b-
     asserts: []
   without-tvs[v_sensor=2.5]:
     corners: 5
     measures:
       cmrr_50:
-        nominal: 114.809
-        min: 92.5074
+        nominal: 107.311
+        min: 92.3604
         min_at: R1+ R1b-
-        max: 114.809
-        max_at: nominal
+        max: 107.311
+        max_at: R1- R1b-
       cmrr_60:
-        nominal: 114.747
-        min: 92.1936
+        nominal: 107.305
+        min: 92.3585
         min_at: R1+ R1b-
-        max: 114.747
+        max: 107.305
         max_at: R1- R1b-
       cmrr_500:
-        nominal: 106.702
-        min: 79.9998
+        nominal: 106.015
+        min: 91.9501
         min_at: R1+ R1b-
-        max: 106.707
+        max: 106.015
+        max_at: R1- R1b-
+      cmrr_1k5:
+        nominal: 101.059
+        min: 89.5695
+        min_at: R1+ R1b-
+        max: 101.06
+        max_at: R1- R1b-
+      cmrr_10k:
+        nominal: 82.8943
+        min: 75.8194
+        min_at: R1+ R1b-
+        max: 82.8981
         max_at: R1- R1b-
     asserts: []
   without-tvs[v_sensor=4.86]:
     corners: 5
     measures:
       cmrr_50:
-        nominal: 114.809
-        min: 92.5074
+        nominal: 107.311
+        min: 92.3604
         min_at: R1+ R1b-
-        max: 114.809
-        max_at: nominal
+        max: 107.311
+        max_at: R1- R1b-
       cmrr_60:
-        nominal: 114.747
-        min: 92.1936
+        nominal: 107.305
+        min: 92.3585
         min_at: R1+ R1b-
-        max: 114.747
+        max: 107.305
         max_at: R1- R1b-
       cmrr_500:
-        nominal: 106.702
-        min: 79.9998
+        nominal: 106.015
+        min: 91.9501
         min_at: R1+ R1b-
-        max: 106.707
+        max: 106.015
+        max_at: R1- R1b-
+      cmrr_1k5:
+        nominal: 101.059
+        min: 89.5695
+        min_at: R1+ R1b-
+        max: 101.06
+        max_at: R1- R1b-
+      cmrr_10k:
+        nominal: 82.8943
+        min: 75.8194
+        min_at: R1+ R1b-
+        max: 82.8981
         max_at: R1- R1b-
     asserts: []

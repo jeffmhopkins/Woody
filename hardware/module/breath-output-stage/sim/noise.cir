@@ -53,7 +53,7 @@ R4 inpos 0 {{R4}}
 R5 inneg 0 {{R5}}
 CCMP inpos 0 {{C-CM-IN+}}
 CCMN inneg 0 {{C-CM-IN-}}
-CDIFF inpos inneg {{C-DIFF-BREATH}}
+CDIFF inpos inneg {{c_diff_mode}}
 XAMP inpos inneg pos neg in refdrv rg1 rg2 INA828
 RG rg1 rg2 {{R-GAIN-INAMP}}
 * -- DAC_AVDD: dac-rail, plus the SET pin's current noise and R-SET-DAC's own, through C-SET-DAC

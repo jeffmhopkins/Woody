@@ -688,4 +688,321 @@
 		)
 		(embedded_fonts no)
 	)
+  (symbol "TMUX6112xPW"
+      (exclude_from_sim no)
+      (in_bom yes)
+      (on_board yes)
+      (property "Reference" "U"
+        (at -7.62 13.969999999999999 0)
+        (effects
+          (font
+            (size 1.27 1.27))))
+      (property "Value" "TMUX6112xPW"
+        (at 7.62 13.969999999999999 0)
+        (effects
+          (font
+            (size 1.27 1.27))))
+      (property "Footprint" "Package_SO:TSSOP-16_4.4x5mm_P0.65mm"
+        (at 0 -13.969999999999999 0)
+        (effects
+          (font
+            (size 1.27 1.27))
+          (hide yes)))
+      (property "Datasheet" "datasheets/analog/TMUX6112-ti-scds383f.pdf"
+        (at 0 0 0)
+        (effects
+          (font
+            (size 1.27 1.27))
+          (hide yes)))
+      (property "Description" "TMUX6112: quad SPST analog switch, normally open (logic 1 closes), +-5 to +-17 V, TSSOP-16 (pin names from SCDS383F Table 5-1, the banked datasheet)"
+        (at 0 0 0)
+        (effects
+          (font
+            (size 1.27 1.27))
+          (hide yes)))
+      (property "ki_keywords" "analog switch SPST quad"
+        (at 0 0 0)
+        (effects
+          (font
+            (size 1.27 1.27))
+          (hide yes)))
+      (property "ki_fp_filters" "TSSOP*4.4x5mm*P0.65mm*"
+        (at 0 0 0)
+        (effects
+          (font
+            (size 1.27 1.27))
+          (hide yes)))
+      (symbol "TMUX6112xPW_0_1"
+        (rectangle
+          (start -7.62 12.7)
+          (end 7.62 -12.7)
+          (stroke
+            (width 0.254)
+            (type default))
+          (fill
+            (type background))))
+      (symbol "TMUX6112xPW_1_1"
+        (pin input line
+          (at -10.16 10.16 0)
+          (length 2.54)
+          (name "SEL1"
+            (effects
+              (font
+                (size 1.143 1.143))))
+          (number "1"
+            (effects
+              (font
+                (size 1.27 1.27)))))
+        (pin input line
+          (at -10.16 7.62 0)
+          (length 2.54)
+          (name "SEL2"
+            (effects
+              (font
+                (size 1.143 1.143))))
+          (number "16"
+            (effects
+              (font
+                (size 1.27 1.27)))))
+        (pin input line
+          (at -10.16 5.08 0)
+          (length 2.54)
+          (name "SEL3"
+            (effects
+              (font
+                (size 1.143 1.143))))
+          (number "9"
+            (effects
+              (font
+                (size 1.27 1.27)))))
+        (pin input line
+          (at -10.16 2.54 0)
+          (length 2.54)
+          (name "SEL4"
+            (effects
+              (font
+                (size 1.143 1.143))))
+          (number "8"
+            (effects
+              (font
+                (size 1.27 1.27)))))
+        (pin power_in line
+          (at -10.16 -5.08 0)
+          (length 2.54)
+          (name "VDD"
+            (effects
+              (font
+                (size 1.143 1.143))))
+          (number "13"
+            (effects
+              (font
+                (size 1.27 1.27)))))
+        (pin power_in line
+          (at -10.16 -7.62 0)
+          (length 2.54)
+          (name "GND"
+            (effects
+              (font
+                (size 1.143 1.143))))
+          (number "5"
+            (effects
+              (font
+                (size 1.27 1.27)))))
+        (pin power_in line
+          (at -10.16 -10.16 0)
+          (length 2.54)
+          (name "VSS"
+            (effects
+              (font
+                (size 1.143 1.143))))
+          (number "4"
+            (effects
+              (font
+                (size 1.27 1.27)))))
+        (pin passive line
+          (at 10.16 10.16 180)
+          (length 2.54)
+          (name "D1"
+            (effects
+              (font
+                (size 1.143 1.143))))
+          (number "2"
+            (effects
+              (font
+                (size 1.27 1.27)))))
+        (pin passive line
+          (at 10.16 7.62 180)
+          (length 2.54)
+          (name "S1"
+            (effects
+              (font
+                (size 1.143 1.143))))
+          (number "3"
+            (effects
+              (font
+                (size 1.27 1.27)))))
+        (pin passive line
+          (at 10.16 5.08 180)
+          (length 2.54)
+          (name "D2"
+            (effects
+              (font
+                (size 1.143 1.143))))
+          (number "15"
+            (effects
+              (font
+                (size 1.27 1.27)))))
+        (pin passive line
+          (at 10.16 2.54 180)
+          (length 2.54)
+          (name "S2"
+            (effects
+              (font
+                (size 1.143 1.143))))
+          (number "14"
+            (effects
+              (font
+                (size 1.27 1.27)))))
+        (pin passive line
+          (at 10.16 0 180)
+          (length 2.54)
+          (name "D3"
+            (effects
+              (font
+                (size 1.143 1.143))))
+          (number "10"
+            (effects
+              (font
+                (size 1.27 1.27)))))
+        (pin passive line
+          (at 10.16 -2.54 180)
+          (length 2.54)
+          (name "S3"
+            (effects
+              (font
+                (size 1.143 1.143))))
+          (number "11"
+            (effects
+              (font
+                (size 1.27 1.27)))))
+        (pin passive line
+          (at 10.16 -5.08 180)
+          (length 2.54)
+          (name "D4"
+            (effects
+              (font
+                (size 1.143 1.143))))
+          (number "7"
+            (effects
+              (font
+                (size 1.27 1.27)))))
+        (pin passive line
+          (at 10.16 -7.62 180)
+          (length 2.54)
+          (name "S4"
+            (effects
+              (font
+                (size 1.143 1.143))))
+          (number "6"
+            (effects
+              (font
+                (size 1.27 1.27)))))
+        (pin no_connect line
+          (at 10.16 -10.16 180)
+          (length 2.54)
+          (name "NC"
+            (effects
+              (font
+                (size 1.143 1.143))))
+          (number "12"
+            (effects
+              (font
+                (size 1.27 1.27)))))))
+  (symbol "SW_NKK_M2024_wired"
+      (exclude_from_sim no)
+      (in_bom yes)
+      (on_board yes)
+      (property "Reference" "U"
+        (at -5.08 6.35 0)
+        (effects
+          (font
+            (size 1.27 1.27))))
+      (property "Value" "NKK M2024"
+        (at 5.08 6.35 0)
+        (effects
+          (font
+            (size 1.27 1.27))))
+      (property "Footprint" "Connector_Wire:SolderWire-0.25sqmm_1x03_P4.2mm_D0.65mm_OD1.7mm"
+        (at 0 -6.35 0)
+        (effects
+          (font
+            (size 1.27 1.27))
+          (hide yes)))
+      (property "Datasheet" "datasheets/connectors/NKK-SERIES-M-TOGGLE.pdf"
+        (at 0 0 0)
+        (effects
+          (font
+            (size 1.27 1.27))
+          (hide yes)))
+      (property "Description" "NKK M2024 ON-ON-ON toggle on a double-pole base, panel-mounted and wired: pad 1 the two commons (lugs 2 and 5, jumpered at the switch), pad 2 lug 4, pad 3 lug 1"
+        (at 0 0 0)
+        (effects
+          (font
+            (size 1.27 1.27))
+          (hide yes)))
+      (property "ki_keywords" "switch toggle ON-ON-ON wired"
+        (at 0 0 0)
+        (effects
+          (font
+            (size 1.27 1.27))
+          (hide yes)))
+      (property "ki_fp_filters" "SolderWire*1x03*"
+        (at 0 0 0)
+        (effects
+          (font
+            (size 1.27 1.27))
+          (hide yes)))
+      (symbol "SW_NKK_M2024_wired_0_1"
+        (rectangle
+          (start -5.08 5.08)
+          (end 5.08 -5.08)
+          (stroke
+            (width 0.254)
+            (type default))
+          (fill
+            (type background))))
+      (symbol "SW_NKK_M2024_wired_1_1"
+        (pin passive line
+          (at -7.62 0 0)
+          (length 2.54)
+          (name "COM"
+            (effects
+              (font
+                (size 1.143 1.143))))
+          (number "1"
+            (effects
+              (font
+                (size 1.27 1.27)))))
+        (pin passive line
+          (at 7.62 2.54 180)
+          (length 2.54)
+          (name "L4"
+            (effects
+              (font
+                (size 1.143 1.143))))
+          (number "2"
+            (effects
+              (font
+                (size 1.27 1.27)))))
+        (pin passive line
+          (at 7.62 -2.54 180)
+          (length 2.54)
+          (name "L1"
+            (effects
+              (font
+                (size 1.143 1.143))))
+          (number "3"
+            (effects
+              (font
+                (size 1.27 1.27)))))))
 )

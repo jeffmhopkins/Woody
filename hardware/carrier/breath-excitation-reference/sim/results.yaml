@@ -4,11 +4,11 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/carrier/breath-excitation-reference/sim/sims.yaml: b1ed85b6f09facb0
+  hardware/carrier/breath-excitation-reference/sim/sims.yaml: 753190052498805c
   hardware/carrier/breath-excitation-reference/netlist.yaml: 2d5ee10b223dc95d
   hardware/interfaces/breath-sense-link/netlist.yaml: 430f1e37ec9c97fa
   hardware/carrier/breath-excitation-reference/sim/ref-loop.cir: 3b87404585d82f14
-  hardware/carrier/breath-excitation-reference/sim/ref-zout.cir: a1e3d0f0ca85e642
+  hardware/carrier/breath-excitation-reference/sim/ref-zout.cir: 49f8b6ee13de7653
   hardware/carrier/breath-excitation-reference/sim/ref-step.cir: 7be2e362873a4619
   hardware/carrier/breath-excitation-reference/sim/ref-startup.cir: 47aca5775655f26b
   hardware/carrier/breath-excitation-reference/sim/ti-fig56.cir: 9ef65d0dffd72c2c
@@ -245,6 +245,18 @@ sims:
         min_at: C-FB-REF- R-FB-REF- R-ISO-REF-
         max: 1.27745
         max_at: C-FB-REF+ R-FB-REF+ R-ISO-REF+
+      z_1k5:
+        nominal: 3.57805
+        min: 3.33639
+        min_at: C-FB-REF- R-FB-REF- R-ISO-REF-
+        max: 3.82717
+        max_at: C-FB-REF+ R-FB-REF+ R-ISO-REF+
+      z_10k:
+        nominal: 22.5052
+        min: 21.2561
+        min_at: C-FB-REF- R-FB-REF- R-ISO-REF-
+        max: 23.7398
+        max_at: C-FB-REF+ R-FB-REF+ R-ISO-REF+
       z_16k:
         nominal: 32.1032
         min: 30.8711
@@ -265,8 +277,8 @@ sims:
         max_at: C-FB-REF- R-FB-REF- R-ISO-REF-
     asserts:
     - expr: abs(nom['z_500'] - 1.20) < 0.12
-      why: '|Z_out| at VS at 500 Hz, the breath channel''s edge, is the 1.20 ohm riso-ref-topology derives for R_F 10 kohm
-        + C_F 1 nF, within 10 %'
+      why: '|Z_out| at VS at 500 Hz, the 500 Hz mode''s edge, is the 1.20 ohm riso-ref-topology derives for R_F 10 kohm +
+        C_F 1 nF, within 10 %'
       pass: true
   zout-as-netlisted[c_vs=10.1u]:
     corners: 9
@@ -277,6 +289,18 @@ sims:
         min_at: C-FB-REF- R-FB-REF- R-ISO-REF-
         max: 1.33085
         max_at: C-FB-REF+ R-FB-REF+ R-ISO-REF+
+      z_1k5:
+        nominal: 5.38403
+        min: 4.85699
+        min_at: C-FB-REF- R-FB-REF- R-ISO-REF-
+        max: 5.96504
+        max_at: C-FB-REF+ R-FB-REF+ R-ISO-REF+
+      z_10k:
+        nominal: 1.68566
+        min: 1.67794
+        min_at: C-FB-REF+ R-FB-REF+ R-ISO-REF+
+        max: 1.69433
+        max_at: C-FB-REF- R-FB-REF- R-ISO-REF-
       z_16k:
         nominal: 1.01758
         min: 1.0158
@@ -297,8 +321,8 @@ sims:
         max_at: C-FB-REF- R-FB-REF- R-ISO-REF-
     asserts:
     - expr: abs(nom['z_500'] - 1.20) < 0.12
-      why: '|Z_out| at VS at 500 Hz, the breath channel''s edge, is the 1.20 ohm riso-ref-topology derives for R_F 10 kohm
-        + C_F 1 nF, within 10 %'
+      why: '|Z_out| at VS at 500 Hz, the 500 Hz mode''s edge, is the 1.20 ohm riso-ref-topology derives for R_F 10 kohm +
+        C_F 1 nF, within 10 %'
       pass: true
   step-as-netlisted[c_vs=47n]:
     corners: 5
@@ -414,6 +438,18 @@ sims:
         min_at: C-FB-REF- R-FB-REF- R-ISO-REF-
         max: 1.28265
         max_at: C-FB-REF+ R-FB-REF+ R-ISO-REF+
+      z_1k5:
+        nominal: 3.70374
+        min: 3.44548
+        min_at: C-FB-REF- R-FB-REF- R-ISO-REF-
+        max: 3.97124
+        max_at: C-FB-REF+ R-FB-REF+ R-ISO-REF+
+      z_10k:
+        nominal: 26.1997
+        min: 24.9621
+        min_at: C-FB-REF+ R-FB-REF+ R-ISO-REF+
+        max: 27.6435
+        max_at: C-FB-REF- R-FB-REF- R-ISO-REF-
       z_peak:
         nominal: 37.8383
         min: 37.5655

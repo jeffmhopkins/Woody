@@ -15,6 +15,917 @@
     (comment 4 "Ports are hierarchical labels (Dir, From/To, Figure); the module main board places this sheet")
   )
   (lib_symbols
+    (symbol "Connector_Generic:Conn_01x02"
+		(pin_names
+			(offset 1.016)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "J"
+			(at 0 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_01x02"
+			(at 0 -5.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "connector"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "Connector*:*_1x??_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "Conn_01x02_1_1"
+			(rectangle
+				(start -1.27 1.27)
+				(end 1.27 -3.81)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(rectangle
+				(start -1.27 0.127)
+				(end 0 -0.127)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 -2.413)
+				(end 0 -2.667)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(pin passive line
+				(at -5.08 0 0)
+				(length 3.81)
+				(name "Pin_1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -2.54 0)
+				(length 3.81)
+				(name "Pin_2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Device:LED"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 1.016)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "D"
+			(at 0 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LED"
+			(at 0 -2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Sim.Pins" "1=K 2=A"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "LED diode"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "LED* LED_SMD:* LED_THT:*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "LED_0_1"
+			(polyline
+				(pts
+					(xy -3.048 -0.762) (xy -4.572 -2.286) (xy -3.81 -2.286) (xy -4.572 -2.286) (xy -4.572 -1.524)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -1.778 -0.762) (xy -3.302 -2.286) (xy -2.54 -2.286) (xy -3.302 -2.286) (xy -3.302 -1.524)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -1.27 0) (xy 1.27 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -1.27 -1.27) (xy -1.27 1.27)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.27 -1.27) (xy 1.27 1.27) (xy -1.27 0) (xy 1.27 -1.27)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "LED_1_1"
+			(pin passive line
+				(at -3.81 0 0)
+				(length 2.54)
+				(name "K"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 3.81 0 180)
+				(length 2.54)
+				(name "A"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Diode:1N4148W"
+        (pin_numbers
+          (hide yes))
+        (pin_names
+          (hide yes))
+        (exclude_from_sim no)
+        (in_bom yes)
+        (on_board yes)
+        (property "Reference" "D"
+          (at 0 2.54 0)
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (property "Value" "1N4148W"
+          (at 0 -2.54 0)
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (property "Footprint" "Diode_SMD:D_SOD-123"
+          (at 0 -4.445 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Datasheet" "https://www.vishay.com/docs/85748/1n4148w.pdf"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Description" "75V 0.15A Fast Switching Diode, SOD-123"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Sim.Device" "D"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Sim.Pins" "1=K 2=A"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_keywords" "diode"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_fp_filters" "D*SOD?123*"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (symbol "1N4148W_0_1"
+          (polyline
+            (pts
+              (xy -1.27 1.27)
+              (xy -1.27 -1.27))
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type none)))
+          (polyline
+            (pts
+              (xy 1.27 1.27)
+              (xy 1.27 -1.27)
+              (xy -1.27 0)
+              (xy 1.27 1.27))
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type none)))
+          (polyline
+            (pts
+              (xy 1.27 0)
+              (xy -1.27 0))
+            (stroke
+              (width 0)
+              (type default))
+            (fill
+              (type none))))
+        (symbol "1N4148W_1_1"
+          (pin passive line
+            (at -3.81 0 0)
+            (length 2.54)
+            (name "K"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "1"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin passive line
+            (at 3.81 0 180)
+            (length 2.54)
+            (name "A"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "2"
+              (effects
+                (font
+                  (size 1.27 1.27))))))
+        (embedded_fonts no))
+    (symbol "Transistor_BJT:MMBT3904"
+        (property "ki_fp_filters" "SOT?23*"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (pin_names
+          (offset 0)
+          (hide yes))
+        (exclude_from_sim no)
+        (in_bom yes)
+        (on_board yes)
+        (property "Reference" "Q"
+          (at 5.08 1.905 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (justify left)))
+        (property "Value" "MMBT3904"
+          (at 5.08 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (justify left)))
+        (property "Footprint" "Package_TO_SOT_SMD:SOT-23"
+          (at 5.08 -1.905 0)
+          (effects
+            (font
+              (size 1.27 1.27)
+              (italic yes))
+            (justify left)
+            (hide yes)))
+        (property "Datasheet" "https://www.onsemi.com/pdf/datasheet/pzt3904-d.pdf"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (justify left)
+            (hide yes)))
+        (property "Description" "0.2A Ic, 40V Vce, Small Signal NPN Transistor, SOT-23"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Sim.Device" "NPN"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Sim.Pins" "1=B 2=E 3=C"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_keywords" "NPN Transistor"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (symbol "MMBT3904_0_1"
+          (polyline
+            (pts
+              (xy -2.54 0)
+              (xy 0.635 0))
+            (stroke
+              (width 0)
+              (type default))
+            (fill
+              (type none)))
+          (polyline
+            (pts
+              (xy 0.635 1.905)
+              (xy 0.635 -1.905))
+            (stroke
+              (width 0.508)
+              (type default))
+            (fill
+              (type none)))
+          (circle
+            (center 1.27 0)
+            (radius 2.8194)
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type none))))
+        (symbol "MMBT3904_1_1"
+          (polyline
+            (pts
+              (xy 0.635 0.635)
+              (xy 2.54 2.54))
+            (stroke
+              (width 0)
+              (type default))
+            (fill
+              (type none)))
+          (polyline
+            (pts
+              (xy 0.635 -0.635)
+              (xy 2.54 -2.54))
+            (stroke
+              (width 0)
+              (type default))
+            (fill
+              (type none)))
+          (polyline
+            (pts
+              (xy 1.27 -1.778)
+              (xy 1.778 -1.27)
+              (xy 2.286 -2.286)
+              (xy 1.27 -1.778))
+            (stroke
+              (width 0)
+              (type default))
+            (fill
+              (type outline)))
+          (pin input line
+            (at -5.08 0 0)
+            (length 2.54)
+            (name "B"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "1"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin passive line
+            (at 2.54 5.08 270)
+            (length 2.54)
+            (name "C"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "3"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin passive line
+            (at 2.54 -5.08 90)
+            (length 2.54)
+            (name "E"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "2"
+              (effects
+                (font
+                  (size 1.27 1.27))))))
+        (embedded_fonts no))
+    (symbol "woody:SW_NKK_M2024_wired"
+        (exclude_from_sim no)
+        (in_bom yes)
+        (on_board yes)
+        (property "Reference" "U"
+          (at -5.08 6.35 0)
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (property "Value" "NKK M2024"
+          (at 5.08 6.35 0)
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (property "Footprint" "Connector_Wire:SolderWire-0.25sqmm_1x03_P4.2mm_D0.65mm_OD1.7mm"
+          (at 0 -6.35 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Datasheet" "datasheets/connectors/NKK-SERIES-M-TOGGLE.pdf"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Description" "NKK M2024 ON-ON-ON toggle on a double-pole base, panel-mounted and wired: pad 1 the two commons (lugs 2 and 5, jumpered at the switch), pad 2 lug 4, pad 3 lug 1"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_keywords" "switch toggle ON-ON-ON wired"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_fp_filters" "SolderWire*1x03*"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (symbol "SW_NKK_M2024_wired_0_1"
+          (rectangle
+            (start -5.08 5.08)
+            (end 5.08 -5.08)
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type background))))
+        (symbol "SW_NKK_M2024_wired_1_1"
+          (pin passive line
+            (at -7.62 0 0)
+            (length 2.54)
+            (name "COM"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "1"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin passive line
+            (at 7.62 2.54 180)
+            (length 2.54)
+            (name "L4"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "2"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin passive line
+            (at 7.62 -2.54 180)
+            (length 2.54)
+            (name "L1"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "3"
+              (effects
+                (font
+                  (size 1.27 1.27)))))))
+    (symbol "woody:TMUX6112xPW"
+        (exclude_from_sim no)
+        (in_bom yes)
+        (on_board yes)
+        (property "Reference" "U"
+          (at -7.62 13.969999999999999 0)
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (property "Value" "TMUX6112xPW"
+          (at 7.62 13.969999999999999 0)
+          (effects
+            (font
+              (size 1.27 1.27))))
+        (property "Footprint" "Package_SO:TSSOP-16_4.4x5mm_P0.65mm"
+          (at 0 -13.969999999999999 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Datasheet" "datasheets/analog/TMUX6112-ti-scds383f.pdf"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "Description" "TMUX6112: quad SPST analog switch, normally open (logic 1 closes), +-5 to +-17 V, TSSOP-16 (pin names from SCDS383F Table 5-1, the banked datasheet)"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_keywords" "analog switch SPST quad"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_fp_filters" "TSSOP*4.4x5mm*P0.65mm*"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (symbol "TMUX6112xPW_0_1"
+          (rectangle
+            (start -7.62 12.7)
+            (end 7.62 -12.7)
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type background))))
+        (symbol "TMUX6112xPW_1_1"
+          (pin input line
+            (at -10.16 10.16 0)
+            (length 2.54)
+            (name "SEL1"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "1"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -10.16 7.62 0)
+            (length 2.54)
+            (name "SEL2"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "16"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -10.16 5.08 0)
+            (length 2.54)
+            (name "SEL3"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "9"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin input line
+            (at -10.16 2.54 0)
+            (length 2.54)
+            (name "SEL4"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "8"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin power_in line
+            (at -10.16 -5.08 0)
+            (length 2.54)
+            (name "VDD"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "13"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin power_in line
+            (at -10.16 -7.62 0)
+            (length 2.54)
+            (name "GND"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "5"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin power_in line
+            (at -10.16 -10.16 0)
+            (length 2.54)
+            (name "VSS"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "4"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin passive line
+            (at 10.16 10.16 180)
+            (length 2.54)
+            (name "D1"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "2"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin passive line
+            (at 10.16 7.62 180)
+            (length 2.54)
+            (name "S1"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "3"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin passive line
+            (at 10.16 5.08 180)
+            (length 2.54)
+            (name "D2"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "15"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin passive line
+            (at 10.16 2.54 180)
+            (length 2.54)
+            (name "S2"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "14"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin passive line
+            (at 10.16 0 180)
+            (length 2.54)
+            (name "D3"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "10"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin passive line
+            (at 10.16 -2.54 180)
+            (length 2.54)
+            (name "S3"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "11"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin passive line
+            (at 10.16 -5.08 180)
+            (length 2.54)
+            (name "D4"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "7"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin passive line
+            (at 10.16 -7.62 180)
+            (length 2.54)
+            (name "S4"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "6"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin no_connect line
+            (at 10.16 -10.16 180)
+            (length 2.54)
+            (name "NC"
+              (effects
+                (font
+                  (size 1.143 1.143))))
+            (number "12"
+              (effects
+                (font
+                  (size 1.27 1.27)))))))
     (symbol "Amplifier_Instrumentation:INA128"
 		(pin_names
 			(offset 0.127)
@@ -1064,7 +1975,7 @@
     (property "Datasheet" "" (at 46.99 46.99 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "U-OPA-PITCH" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "INA+=3(+) INA-=2(-) OUTA=1(~) INB+=5(+) INB-=6(-) OUTB=7(~) V+=8(V+) V-=4(V-)" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "Half A buffers the trimmer wiper into the in-amp REF pin: a bare divider there degrades CMRR one-for-one. Half B is spare, a follower with its input on the star" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Half A buffers the trimmer wiper into the in-amp REF pin: a bare divider there degrades CMRR one-for-one. Half B drives the breath LED (since 2026-10-04, #32): its (+) input takes BREATH_OUT/11 from R-LEDB-TOP/R-LEDB-BOT and its loop holds Q-LEDB's emitter there, so the LED current follows the jack" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins_source" "datasheets/analog/OPA2197.pdf section 5, D package (SOIC-8), OPA2197: OUT A 1, -IN A 2, +IN A 3, V- 4, +IN B 5, -IN B 6, OUT B 7, V+ 8" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Texas Instruments" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "OPA2197IDR" (at 40.64 50.8 0) (effects (font (size 1.27 1.27)) hide))
@@ -1084,7 +1995,7 @@
     (property "Datasheet" "" (at 97.79 46.99 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "U-OPA-PITCH" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "INA+=3(+) INA-=2(-) OUTA=1(~) INB+=5(+) INB-=6(-) OUTB=7(~) V+=8(V+) V-=4(V-)" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "Half A buffers the trimmer wiper into the in-amp REF pin: a bare divider there degrades CMRR one-for-one. Half B is spare, a follower with its input on the star" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Half A buffers the trimmer wiper into the in-amp REF pin: a bare divider there degrades CMRR one-for-one. Half B drives the breath LED (since 2026-10-04, #32): its (+) input takes BREATH_OUT/11 from R-LEDB-TOP/R-LEDB-BOT and its loop holds Q-LEDB's emitter there, so the LED current follows the jack" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins_source" "datasheets/analog/OPA2197.pdf section 5, D package (SOIC-8), OPA2197: OUT A 1, -IN A 2, +IN A 3, V- 4, +IN B 5, -IN B 6, OUT B 7, V+ 8" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Texas Instruments" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "OPA2197IDR" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
@@ -1104,7 +2015,7 @@
     (property "Datasheet" "" (at 46.99 107.95 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "U-OPA-PITCH" (at 40.64 111.75999999999999 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "INA+=3(+) INA-=2(-) OUTA=1(~) INB+=5(+) INB-=6(-) OUTB=7(~) V+=8(V+) V-=4(V-)" (at 40.64 111.75999999999999 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "Half A buffers the trimmer wiper into the in-amp REF pin: a bare divider there degrades CMRR one-for-one. Half B is spare, a follower with its input on the star" (at 40.64 111.75999999999999 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Half A buffers the trimmer wiper into the in-amp REF pin: a bare divider there degrades CMRR one-for-one. Half B drives the breath LED (since 2026-10-04, #32): its (+) input takes BREATH_OUT/11 from R-LEDB-TOP/R-LEDB-BOT and its loop holds Q-LEDB's emitter there, so the LED current follows the jack" (at 40.64 111.75999999999999 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins_source" "datasheets/analog/OPA2197.pdf section 5, D package (SOIC-8), OPA2197: OUT A 1, -IN A 2, +IN A 3, V- 4, +IN B 5, -IN B 6, OUT B 7, V+ 8" (at 40.64 111.75999999999999 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Texas Instruments" (at 40.64 111.75999999999999 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "OPA2197IDR" (at 40.64 111.75999999999999 0) (effects (font (size 1.27 1.27)) hide))
@@ -1194,17 +2105,17 @@
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 01f9191c-b571-5a50-b0ba-41607933c6c0)
     (property "Reference" "C-CM-IN+" (at 246.38 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
-    (property "Value" "1.5nF" (at 246.38 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "68pF" (at 246.38 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
     (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 245.11 191.77 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "C-CM-BREATH" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Drawn_as" "C_cm" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "YAGEO" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
-    (property "MPN" "CC0805FRNPO9BN152" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
-    (property "LCSC" "C541572" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "CC0805FRNPO9BN680" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C541517" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Assembly" "hand" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "A MATCHED PAIR with its twin (owner, 2026-10-03: 'Tighten cap matching'): C-CM-IN+ and C-CM-IN- from one reel of the 1 % C0G part, measured on one LCR meter at 1 kHz and fitted together only when each is within 0.5 % of the pair's mean. Their mismatch converts the umbilical's common mode in proportion to frequency, and at 1 % each the link misses its CMRR at the breath band's top (module/breath-receive-stage/sim cmrr-as-netlisted). No catalogue C0G at 1.5 nF is sold tighter than 1 %, so the match is made by hand: fitted by hand, after measuring" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "A MATCHED PAIR with its twin (owner, 2026-10-03: 'Tighten cap matching'; 68 pF since #32): C-CM-IN+ and C-CM-IN- from one reel of the 1 % C0G part, measured on one LCR meter (open-circuit compensated, at 100 kHz if it has it) and fitted together only when each is within 0.5 % of the pair's mean. Their mismatch converts the umbilical's common mode in proportion to frequency, so it sets each bandwidth mode's CMRR at its top (module/breath-receive-stage/sim cmrr-*). The 1 % C0G is the tightest catalogued, so the match is made by hand: fitted by hand, after measuring. Fixed in every mode of the bandwidth toggle" (at 243.84 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (pin "1" (uuid 8d9825b9-0ceb-5a4a-ba81-a925bf311ff5))
     (pin "2" (uuid 679c8cf7-45f0-54f4-8956-5848aab55708))
     (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "C13") (unit 1))) (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "C-CM-IN+") (unit 1))))
@@ -1213,17 +2124,17 @@
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 30ab0ec9-e524-58fe-b7a4-c56374094623)
     (property "Reference" "C-CM-IN-" (at 297.18 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
-    (property "Value" "1.5nF" (at 297.18 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "68pF" (at 297.18 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
     (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 295.91 191.77 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "C-CM-BREATH" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Drawn_as" "C_cm" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "YAGEO" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
-    (property "MPN" "CC0805FRNPO9BN152" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
-    (property "LCSC" "C541572" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "CC0805FRNPO9BN680" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C541517" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Assembly" "hand" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "A MATCHED PAIR with its twin (owner, 2026-10-03: 'Tighten cap matching'): C-CM-IN+ and C-CM-IN- from one reel of the 1 % C0G part, measured on one LCR meter at 1 kHz and fitted together only when each is within 0.5 % of the pair's mean. Their mismatch converts the umbilical's common mode in proportion to frequency, and at 1 % each the link misses its CMRR at the breath band's top (module/breath-receive-stage/sim cmrr-as-netlisted). No catalogue C0G at 1.5 nF is sold tighter than 1 %, so the match is made by hand: fitted by hand, after measuring" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "A MATCHED PAIR with its twin (owner, 2026-10-03: 'Tighten cap matching'; 68 pF since #32): C-CM-IN+ and C-CM-IN- from one reel of the 1 % C0G part, measured on one LCR meter (open-circuit compensated, at 100 kHz if it has it) and fitted together only when each is within 0.5 % of the pair's mean. Their mismatch converts the umbilical's common mode in proportion to frequency, so it sets each bandwidth mode's CMRR at its top (module/breath-receive-stage/sim cmrr-*). The 1 % C0G is the tightest catalogued, so the match is made by hand: fitted by hand, after measuring. Fixed in every mode of the bandwidth toggle" (at 294.64 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (pin "1" (uuid fa984e09-0745-5126-9cac-9fa5646a09dd))
     (pin "2" (uuid eae23104-4541-5c57-a818-4e7e6f3f106e))
     (instances (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "C14") (unit 1))) (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "C-CM-IN-") (unit 1))))
@@ -1232,15 +2143,15 @@
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 7bdd8067-2962-5858-96ab-c29f7f7a904e)
     (property "Reference" "C-DIFF-BREATH" (at 347.98 186.69 0) (effects (font (size 1.27 1.27)) (justify left)))
-    (property "Value" "15nF" (at 347.98 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "680pF" (at 347.98 189.23 0) (effects (font (size 1.27 1.27)) (justify left)))
     (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 346.71 191.77 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "C-DIFF-BREATH" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Drawn_as" "C_diff" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Manufacturer" "TDK" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
-    (property "MPN" "C2012C0G1H153JT000N" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
-    (property "LCSC" "C445728" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "YAGEO" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "CC0805JRNPO9BN681" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C107121" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (property "Assembly" "machine" (at 345.44 187.96 0) (effects (font (size 1.27 1.27)) hide))
     (pin "1" (uuid 4ca3c061-8938-5dc5-8435-f30fbe4d2dfd))
     (pin "2" (uuid bfafe89a-44e3-56e8-992d-1b0b13cd5dd4))
@@ -1553,9 +2464,7 @@
     (property "Dir" "ref" (at 91.44 318.77 0) (effects (font (size 1.27 1.27)) hide))
     (property "From" "module/power-entry" (at 91.44 318.77 0) (effects (font (size 1.27 1.27)) hide)))
   (wire (pts (xy 83.82 48.26) (xy 81.28 48.26)) (stroke (width 0) (type default)) (uuid 2d73a1f4-7b36-5927-a7ea-9d8db17c96b0))
-  (hierarchical_label "AGND_MOD" (shape passive) (at 81.28 48.26 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid b00488e5-1e1d-5d69-83f6-0196cd5371f2)
-    (property "Dir" "ref" (at 81.28 48.26 0) (effects (font (size 1.27 1.27)) hide))
-    (property "From" "module/power-entry" (at 81.28 48.26 0) (effects (font (size 1.27 1.27)) hide)))
+  (label "LEDB_IN" (at 81.28 48.26 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 68972374-fb6d-56e8-96ea-4793f485f072))
   (wire (pts (xy 142.24 328.93) (xy 142.24 331.47)) (stroke (width 0) (type default)) (uuid 7dee2280-5447-5ac5-938b-21bccadf4e14))
   (hierarchical_label "AGND_MOD" (shape passive) (at 142.24 331.47 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 7043c3f1-7f53-5c7c-9008-395c2f2bd685)
     (property "Dir" "ref" (at 142.24 331.47 0) (effects (font (size 1.27 1.27)) hide))
@@ -1573,10 +2482,10 @@
     (property "Dir" "ref" (at 294.64 331.47 0) (effects (font (size 1.27 1.27)) hide))
     (property "From" "module/power-entry" (at 294.64 331.47 0) (effects (font (size 1.27 1.27)) hide)))
   (wire (pts (xy 99.06 50.8) (xy 101.6 50.8)) (stroke (width 0) (type default)) (uuid d1a87cee-126d-5bf3-97c4-049367232b79))
-  (label "SPARE_B_OUT" (at 101.6 50.8 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 75398d4e-6acb-537d-943d-b6301ffce1a6))
+  (label "LEDB_DRV" (at 101.6 50.8 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 75398d4e-6acb-537d-943d-b6301ffce1a6))
   (wire (pts (xy 83.82 53.34) (xy 81.28 53.34)) (stroke (width 0) (type default)) (uuid 9aecb024-5146-55ad-8e1a-c02d7c0544de))
-  (label "SPARE_B_OUT" (at 81.28 53.34 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 191882e1-86a7-5ebc-9ac8-9e6ea9228cac))
-  (text "FROM THE HAND-WRITTEN NETLIST THIS SHEET REPLACES (verbatim; the part notes are on each part's Note field):\n\nAUTHORITATIVE for connectivity. The ASCII drawing in breath-receive-stage.md is a REPRESENTATION of this file.\n\nSCOPE. That drawing spans two boards deliberately - it shows the sensor, its buffer and R1/R1b at the\ninstrument end so the differential pole and the CMRR budget can be derived in one place. THOSE PARTS ARE NOT\nTHIS CIRCUIT'S and are not components here; they arrive as ports. The same is true of the output stage block\nat the bottom, which is module/breath-output-stage.\n\nParts this page DRAWS for context and does not own. The drawing spans two boards on purpose, so R1/R1b and the\nsensor appear in it; they are interfaces/breath-sense-link's rows and must not be counted, netted or ordered\nhere. Declaring them keeps the drawing checkable without pretending they are ours.\n\n[of] qty 2: R2 and R3 are the two instances\n\n[of] qty 2: R4 and R5\n\n[of] qty 2, one per leg\n\n[drawn_as] the drawing spells a subscript with _\n\n[drawn_as] both legs carry the same label and value\n\n[of] qty 2, one per input leg\n\n[U-REF-BUF] ONE OPA2197 PACKAGE. Half A buffers the trimmer wiper into the in-amp's REF; half B is one of the\nmodule's two spare halves (breath-output-stage.md: \"ten of twelve halves used across the module, two spare\"),\ntied off as a follower on the star so it cannot oscillate or rail.\n\n[SPARE_B_OUT] The spare half's follower loop." (at 408.94 38.099999999999994 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 7b35c4b3-3b68-5da1-865e-b59291a28707))
+  (label "LEDB_SENSE" (at 81.28 53.34 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 191882e1-86a7-5ebc-9ac8-9e6ea9228cac))
+  (text "FROM THE HAND-WRITTEN NETLIST THIS SHEET REPLACES (verbatim; the part notes are on each part's Note field):\n\nAUTHORITATIVE for connectivity. The ASCII drawing in breath-receive-stage.md is a REPRESENTATION of this file.\n\nSCOPE. That drawing spans two boards deliberately - it shows the sensor, its buffer and R1/R1b at the\ninstrument end so the differential pole and the CMRR budget can be derived in one place. THOSE PARTS ARE NOT\nTHIS CIRCUIT'S and are not components here; they arrive as ports. The same is true of the output stage block\nat the bottom, which is module/breath-output-stage.\n\nParts this page DRAWS for context and does not own. The drawing spans two boards on purpose, so R1/R1b and the\nsensor appear in it; they are interfaces/breath-sense-link's rows and must not be counted, netted or ordered\nhere. Declaring them keeps the drawing checkable without pretending they are ours.\n\n[of] qty 2: R2 and R3 are the two instances\n\n[of] qty 2: R4 and R5\n\n[of] qty 2, one per leg\n\n[drawn_as] the drawing spells a subscript with _\n\n[drawn_as] both legs carry the same label and value\n\n[of] qty 2, one per input leg\n\n[U-REF-BUF] ONE OPA2197 PACKAGE. Half A buffers the trimmer wiper into the in-amp's REF. Half B was a spare\nfollower on the star until 2026-10-04; it now drives the breath LED (#32: Q-LEDB, R-LEDB-*, J-LED-BREATH).\n\n[U-BW-SW, SW-BREATH-BW] The breath bandwidth toggle (#32, owner 2026-10-04): the panel toggle sets BW1/BW0 as DC\nlevels and U-BW-SW switches C-DIFF-BW-1K5 and C-DIFF-BW-500 across the pair beside the in-amp. The analog pair\nnever leaves this board." (at 408.94 38.099999999999994 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 7b35c4b3-3b68-5da1-865e-b59291a28707))
   (text "PARTS THIS PAGE'S DRAWING SHOWS AND THIS CIRCUIT DOES NOT OWN - netlist.yaml `foreign:`, exported from the FOREIGN lines below.\nEach is counted, netted and ordered by its owner; declaring it keeps the drawing checkable (tools/check-netlist.py).\nFOREIGN R1: owner interfaces/breath-sense-link, row R-SER-BREATH-INST\nFOREIGN R1b: owner interfaces/breath-sense-link, row R-SER-BREATH-INST\nFOREIGN C: owner module/breath-output-stage, row C-OUT-BREATH" (at 40.64 17.78 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 679d87de-dcbd-5ae9-a6af-b3d340ee88bd))
   (symbol (lib_id "Device:R") (at 40.64 370.84 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
@@ -1603,5 +2512,591 @@
     (property "Figure" "dac-rail" (at 40.64 364.49 0) (effects (font (size 1.27 1.27)) hide)))
   (wire (pts (xy 40.64 374.65) (xy 40.64 377.19)) (stroke (width 0) (type default)) (uuid 923f7eab-52fc-411c-a8db-cedf5b564249))
   (label "ZERO_TOP" (at 40.64 377.19 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 2380eff7-d5d9-4921-b317-4a0250b1f684))
+  (symbol (lib_id "woody:TMUX6112xPW") (at 170.18 81.28 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 47990f83-0674-50ee-bc33-f282b6b22929)
+    (property "Reference" "U-BW-SW" (at 162.56 67.31 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "TMUX6112PWR" (at 177.8 67.31 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Package_SO:TSSOP-16_4.4x5mm_P0.65mm" (at 170.18 95.25 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 170.18 81.28 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-BW-SW" (at 170.18 81.28 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "SEL1=1 D1=2 S1=3 VSS=4 GND=5 S4=6 D4=7 SEL4=8 SEL3=9 D3=10 S3=11 VDD=13 S2=14 D2=15 SEL2=16" (at 170.18 81.28 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Switches C-DIFF-BW-1K5 (channels 1 and 2, SEL1 = SEL2 = BW1) and C-DIFF-BW-500 (channels 3 and 4, SEL3 = SEL4 = BW0) across the in-amp's input pair, EACH CAPACITOR AT BOTH ENDS: every D pin is on IN_POS or IN_NEG, one of each pair per leg, so the switch's own pin capacitance is the same common-mode load on both legs. Lay the two legs out as mirror images. Closes on logic 1" (at 170.18 81.28 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/analog/TMUX6112-ti-scds383f.pdf p.4, Table 5-1 (PW, TSSOP-16): SEL1 1, D1 2, S1 3, VSS 4, GND 5, S4 6, D4 7, SEL4 8, SEL3 9, D3 10, S3 11, NC 12, VDD 13, S2 14, D2 15, SEL2 16. Pin 12 is no internal connection and is on no net" (at 170.18 81.28 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Texas Instruments" (at 170.18 81.28 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "TMUX6112PWR" (at 170.18 81.28 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C2673384" (at 170.18 81.28 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 170.18 81.28 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid d0fb28d1-3f69-5c4b-8dbe-d4d63c80feeb))
+    (pin "10" (uuid e3d3f283-d8eb-546d-8cf9-243b0b1e1ade))
+    (pin "11" (uuid 7bd86a69-12b3-5eda-a99b-ad8032124ff1))
+    (pin "12" (uuid 4a441aa4-44e4-5d59-8571-6fac269fe613))
+    (pin "13" (uuid 7c2488f2-2e1d-53a0-830e-085ddea4a930))
+    (pin "14" (uuid 11046177-e623-54b3-a8af-622847d9a41b))
+    (pin "15" (uuid 460f17b1-44c6-5bf8-b057-26ad19a88ed5))
+    (pin "16" (uuid 67b9081f-5251-56bf-aea9-df6c7652a199))
+    (pin "2" (uuid 51db493b-b34c-540d-851e-f59c778af09b))
+    (pin "3" (uuid bd85f672-d2e1-5d07-8e82-b613c7ba268b))
+    (pin "4" (uuid 0a53262b-f54a-564c-b7df-dfc87b03db16))
+    (pin "5" (uuid 2e9a7659-765e-58c9-beae-1d96d2ecb356))
+    (pin "6" (uuid c15ff8ed-4870-5079-b6a1-e1043ea2c008))
+    (pin "7" (uuid 8f0d718d-47d2-573c-81a1-7f75b0377666))
+    (pin "8" (uuid e8f9b51e-f379-52d7-a159-98927851b29a))
+    (pin "9" (uuid 0ec614f8-880e-5acc-a5e0-738d2f72359f))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "U-BW-SW") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "U16") (unit 1))))
+  )
+  (wire (pts (xy 160.02 71.12) (xy 157.48 71.12)) (stroke (width 0) (type default)) (uuid 8e95653d-9e65-55a7-9a29-1661de512fb1))
+  (label "BW1" (at 157.48 71.12 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid fe99a8f1-1425-5690-aff2-129bd9e587c5))
+  (wire (pts (xy 160.02 73.66) (xy 157.48 73.66)) (stroke (width 0) (type default)) (uuid f2f17926-f00c-5e3e-b277-41b133abd335))
+  (label "BW1" (at 157.48 73.66 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 9b03bad1-d278-542b-9641-59bc961a655a))
+  (wire (pts (xy 160.02 76.2) (xy 157.48 76.2)) (stroke (width 0) (type default)) (uuid 1640cdcc-93a5-5197-8e15-4407201bf46b))
+  (label "BW0" (at 157.48 76.2 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 8790b9b6-922c-5298-95b4-99c3f6253326))
+  (wire (pts (xy 160.02 78.74) (xy 157.48 78.74)) (stroke (width 0) (type default)) (uuid eaf0ed6c-4964-532f-9ec9-be0e067de689))
+  (label "BW0" (at 157.48 78.74 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 196c3ae3-fa5e-59ea-bf4a-16e163013600))
+  (wire (pts (xy 160.02 86.36) (xy 157.48 86.36)) (stroke (width 0) (type default)) (uuid 88a498e0-40a2-5a68-823d-c4a822865059))
+  (hierarchical_label "MODULE_ANALOG_POS12" (shape input) (at 157.48 86.36 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 5810469a-032a-5ab4-854c-b2a4d3c39406)
+    (property "Dir" "in" (at 157.48 86.36 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 157.48 86.36 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 160.02 88.9) (xy 157.48 88.9)) (stroke (width 0) (type default)) (uuid f9890a36-8c8c-5298-9bcd-f084cd6de6ea))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 157.48 88.9 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 877b996a-021f-5f3c-aca8-2b5359d04947)
+    (property "Dir" "ref" (at 157.48 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 157.48 88.9 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 160.02 91.44) (xy 157.48 91.44)) (stroke (width 0) (type default)) (uuid 766a7d04-973f-545e-865f-a2546ed4a97a))
+  (hierarchical_label "MODULE_ANALOG_NEG12" (shape input) (at 157.48 91.44 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 5fd3c7c5-7919-5cce-96ce-66adc51075a2)
+    (property "Dir" "in" (at 157.48 91.44 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 157.48 91.44 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 180.34 71.12) (xy 182.88 71.12)) (stroke (width 0) (type default)) (uuid 3c0a8b10-0e80-5dbd-ba53-c6892f71d4e0))
+  (label "IN_POS" (at 182.88 71.12 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 46f5defc-1301-5424-9d5d-772b0d2b92c2))
+  (wire (pts (xy 180.34 73.66) (xy 182.88 73.66)) (stroke (width 0) (type default)) (uuid 43ac40fe-fc46-5e30-9f41-57996629dc05))
+  (label "CBW1K5_P" (at 182.88 73.66 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid df520330-eaa8-5f9e-b20c-2a82809b755e))
+  (wire (pts (xy 180.34 76.2) (xy 182.88 76.2)) (stroke (width 0) (type default)) (uuid 9d257d89-6bde-5f76-80ea-9d3eb3392284))
+  (label "IN_NEG" (at 182.88 76.2 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid f45f11f1-5aa3-5e56-8e48-9cfe18d83fd4))
+  (wire (pts (xy 180.34 78.74) (xy 182.88 78.74)) (stroke (width 0) (type default)) (uuid 33f94347-7f67-58d1-864f-573d04f507a0))
+  (label "CBW1K5_N" (at 182.88 78.74 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid a6e6c631-26cb-54a1-b3b1-ae09742ae1b7))
+  (wire (pts (xy 180.34 81.28) (xy 182.88 81.28)) (stroke (width 0) (type default)) (uuid e303b789-7ca9-55f5-b97d-ddb468995097))
+  (label "IN_POS" (at 182.88 81.28 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 28315a1c-b7cd-5c17-9694-27c28d7a92d4))
+  (wire (pts (xy 180.34 83.82) (xy 182.88 83.82)) (stroke (width 0) (type default)) (uuid d38a41e1-1b40-51db-bd1d-3ed5f9cfc175))
+  (label "CBW500_P" (at 182.88 83.82 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 6a54ab35-e2dc-5fbe-b9d8-06253ece27e3))
+  (wire (pts (xy 180.34 86.36) (xy 182.88 86.36)) (stroke (width 0) (type default)) (uuid 0318b07b-2def-555e-827f-be0099cfe6ff))
+  (label "IN_NEG" (at 182.88 86.36 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 3fcefba4-a06f-5f83-ae53-d4e364e245ae))
+  (wire (pts (xy 180.34 88.9) (xy 182.88 88.9)) (stroke (width 0) (type default)) (uuid b1b5d384-0975-563b-9378-ebbaed8f50dd))
+  (label "CBW500_N" (at 182.88 88.9 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid aa71e534-0726-5255-a0e4-8fc02e53f7ca))
+  (no_connect (at 180.34 91.44) (uuid b372b644-f1c2-5ac7-a2a0-ad6fffbbc600))
+  (symbol (lib_id "Device:C") (at 198.12 76.2 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid c4047878-02b1-5bb5-9961-ca55238a6fe5)
+    (property "Reference" "C-DIFF-BW-1K5" (at 200.66 74.93 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "3.9nF" (at 200.66 77.47 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 199.39 80.01 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 198.12 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-DIFF-BW-1K5" (at 198.12 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 198.12 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Switched across the pair by U-BW-SW channels 1 and 2 (BW1): in with the toggle at 500 Hz and at 1.5 kHz, out at WIDE. With C-DIFF-BREATH and the two C_cm in series it sets the 1.5 kHz corner (breath-sense-link.md, Component values)" (at 198.12 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "Device:C, two-terminal: pin 1 and pin 2 are interchangeable" (at 198.12 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Murata" (at 198.12 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "GRM2165C1H392JA01D" (at 198.12 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C97901" (at 198.12 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 198.12 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 029a58a7-fbf0-538f-82dc-bc3944058cb4))
+    (pin "2" (uuid 084b8293-6ce3-50b9-96ef-f844f741d4a2))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "C-DIFF-BW-1K5") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "C52") (unit 1))))
+  )
+  (wire (pts (xy 198.12 72.39) (xy 198.12 69.85)) (stroke (width 0) (type default)) (uuid a99f3d76-4992-5ff6-8810-4dce834e90e1))
+  (label "CBW1K5_P" (at 198.12 69.85 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid c9a04e2f-27fa-56cb-9f6e-00a90ca684ce))
+  (wire (pts (xy 198.12 80.01) (xy 198.12 82.55)) (stroke (width 0) (type default)) (uuid 5db7d36e-d188-5ea9-8341-954cd24bc384))
+  (label "CBW1K5_N" (at 198.12 82.55 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid ff9f5602-737c-5c2d-9009-0bfb992585ab))
+  (symbol (lib_id "Device:C") (at 215.9 76.2 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 239b77c7-e263-57e7-b862-83fc883102a7)
+    (property "Reference" "C-DIFF-BW-500" (at 218.44 74.93 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10nF" (at 218.44 77.47 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 217.17 80.01 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 215.9 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-DIFF-BW-500" (at 215.9 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 215.9 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Switched across the pair by U-BW-SW channels 3 and 4 (BW0): in only with the toggle at 500 Hz, beside C-DIFF-BW-1K5 and C-DIFF-BREATH" (at 215.9 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "Device:C, two-terminal: pin 1 and pin 2 are interchangeable" (at 215.9 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "TDK" (at 215.9 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "C2012C0G1H103JT000N" (at 215.9 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C76626" (at 215.9 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 215.9 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 9cc9c2c6-542a-5891-adfd-e1f4ad1e3f53))
+    (pin "2" (uuid d2328b92-01c3-5932-a90d-977ed9b7494b))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "C-DIFF-BW-500") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "C53") (unit 1))))
+  )
+  (wire (pts (xy 215.9 72.39) (xy 215.9 69.85)) (stroke (width 0) (type default)) (uuid ba586fbb-59f8-5b7d-bf67-63da90e95744))
+  (label "CBW500_P" (at 215.9 69.85 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 47ee6ed0-93b8-549a-80ec-8d572b2ff862))
+  (wire (pts (xy 215.9 80.01) (xy 215.9 82.55)) (stroke (width 0) (type default)) (uuid a0a398d6-00d8-5428-af52-6183b3065f70))
+  (label "CBW500_N" (at 215.9 82.55 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid d71b4b85-b35b-5f5a-bd81-ce7d8e72b3c1))
+  (symbol (lib_id "Device:C") (at 233.68 76.2 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 1e5edc0a-216c-5ef2-8312-311542c5cd28)
+    (property "Reference" "C-DEC-BWSW-POS" (at 236.22 74.93 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100nF" (at 236.22 77.47 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 234.95 80.01 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 233.68 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-DECOUPLE" (at 233.68 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 233.68 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "U-BW-SW VDD to the star, at the pin" (at 233.68 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "Device:C, two-terminal: pin 1 and pin 2 are interchangeable" (at 233.68 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "YAGEO" (at 233.68 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "CC0805KRX7R9BB104" (at 233.68 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C49678" (at 233.68 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 233.68 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid bc219aa5-7c7c-548a-b249-19081988a255))
+    (pin "2" (uuid 6c52b1ed-5dbc-5672-9231-d9fcd74965f2))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "C-DEC-BWSW-POS") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "C54") (unit 1))))
+  )
+  (wire (pts (xy 233.68 72.39) (xy 233.68 69.85)) (stroke (width 0) (type default)) (uuid 85d47cee-d832-5489-b5a6-6325def46e62))
+  (hierarchical_label "MODULE_ANALOG_POS12" (shape input) (at 233.68 69.85 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 870a2a58-5ce3-5410-9e66-d23b522ea50c)
+    (property "Dir" "in" (at 233.68 69.85 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 233.68 69.85 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 233.68 80.01) (xy 233.68 82.55)) (stroke (width 0) (type default)) (uuid 5c58416a-e3ee-521a-aab6-144abc9de1e9))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 233.68 82.55 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid f0d39fb1-2df7-5a27-8fa1-047db8bbafb2)
+    (property "Dir" "ref" (at 233.68 82.55 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 233.68 82.55 0) (effects (font (size 1.27 1.27)) hide)))
+  (symbol (lib_id "Device:C") (at 251.46 76.2 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 250dc387-dde9-57cc-a915-86b05c7eff55)
+    (property "Reference" "C-DEC-BWSW-NEG" (at 254.0 74.93 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100nF" (at 254.0 77.47 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 252.73 80.01 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 251.46 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-DECOUPLE" (at 251.46 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 251.46 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "U-BW-SW VSS to the star, at the pin" (at 251.46 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "Device:C, two-terminal: pin 1 and pin 2 are interchangeable" (at 251.46 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "YAGEO" (at 251.46 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "CC0805KRX7R9BB104" (at 251.46 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C49678" (at 251.46 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 251.46 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid ddfdf94a-7552-50aa-8468-6f94d05ad312))
+    (pin "2" (uuid 0e1307ab-7cd8-5adc-b9ab-0824f81c5cc0))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "C-DEC-BWSW-NEG") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "C55") (unit 1))))
+  )
+  (wire (pts (xy 251.46 72.39) (xy 251.46 69.85)) (stroke (width 0) (type default)) (uuid de436839-c8e0-5d04-8f66-3a2d4afc167f))
+  (hierarchical_label "MODULE_ANALOG_NEG12" (shape input) (at 251.46 69.85 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid f5f789e2-9d51-5630-8fa6-0d40e7f5a5f2)
+    (property "Dir" "in" (at 251.46 69.85 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 251.46 69.85 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 251.46 80.01) (xy 251.46 82.55)) (stroke (width 0) (type default)) (uuid 071f2d7c-54d3-5724-a40f-6cae2fd63838))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 251.46 82.55 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid bd400827-a160-5933-acb0-e6a0f1b30840)
+    (property "Dir" "ref" (at 251.46 82.55 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 251.46 82.55 0) (effects (font (size 1.27 1.27)) hide)))
+  (symbol (lib_id "woody:SW_NKK_M2024_wired") (at 279.4 76.2 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid c50af805-d255-5684-8101-f7bdd71d8f0f)
+    (property "Reference" "SW-BREATH-BW" (at 279.4 68.58 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "NKK M2024SD4G01" (at 279.4 71.12 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Connector_Wire:SolderWire-0.25sqmm_1x03_P4.2mm_D0.65mm_OD1.7mm" (at 279.4 82.55 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 279.4 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "SW-BREATH-BW" (at 279.4 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "COM=1 L4=2 L1=3" (at 279.4 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "THE BREATH BANDWIDTH TOGGLE (owner, 2026-10-04: 'Panel 3-way toggle', '500 Hz / 1.5 kHz / wide'; thrown left-right like SW-POWER: 'full left being 500 full right being wide is the intuitive placement because it matches the on off of the power switch'). MOUNTED AS SW-POWER IS, D-flat on the LEFT, so lever RIGHT = NKK Down, lever LEFT = NKK Up (SW-POWER's own row and NKK p.5). Lug 1 is made only at Up (lever LEFT) and lug 4 at Up and Center, so: LEFT = 500 Hz (BW0 and BW1), CENTRE = 1.5 kHz (BW1), RIGHT = WIDE (neither: Down makes 2-3 and 5-6, and lugs 3 and 6 are not wired). A thermometer code from one ON-ON-ON part; it carries DC only, the analog pair never leaves this board. Panel-mounted like SW-POWER, its lugs wired to this board beside U-BW-SW. CONTACT MATERIAL G, GOLD: about 0.8 mA per line, above the gold contacts' 0.1 mA minimum. Buzz it on arrival: lever left, pad 1 to pads 2 and 3" (at 279.4 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/connectors/NKK-SERIES-M-TOGGLE.pdf p.5, the 3-throw (3-on) table, M2024 on a double-pole base: Down makes 2-3 and 5-6, Center 2-3 and 5-4, Up 2-1 and 5-4. Panel-mounted and wired: pad 1 takes the commons (lugs 2 and 5, jumpered at the switch), pad 2 lug 4, pad 3 lug 1; lugs 3 and 6 are not wired" (at 279.4 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "NKK Switches" (at 279.4 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "M2024SD4G01" (at 279.4 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "" (at 279.4 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "hand" (at 279.4 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 6dd41eb4-e2c6-522e-8b7f-74068090d474))
+    (pin "2" (uuid 6f2d6c76-66b0-54b9-ac6c-b4423ae42965))
+    (pin "3" (uuid c1181a0a-6b46-55bf-b57c-60b8bd3f1609))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "SW-BREATH-BW") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "SW2") (unit 1))))
+  )
+  (wire (pts (xy 271.78 76.2) (xy 269.24 76.2)) (stroke (width 0) (type default)) (uuid d1dc52be-40e4-5d10-97ac-0f5975d3288d))
+  (label "BW_COM" (at 269.24 76.2 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 1e6ea935-9d99-507f-95bf-02ba09648a43))
+  (wire (pts (xy 287.02 73.66) (xy 289.56 73.66)) (stroke (width 0) (type default)) (uuid 1d2ef93d-440d-50d4-bc03-101cf4284c70))
+  (label "BW1_SW" (at 289.56 73.66 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid bd36fb4c-0708-551d-8c44-58830ba04c30))
+  (wire (pts (xy 287.02 78.74) (xy 289.56 78.74)) (stroke (width 0) (type default)) (uuid 66a7319c-135f-50b8-b830-9434584b19a1))
+  (label "BW0_SW" (at 289.56 78.74 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid db3f651a-df82-5c5d-ac5f-4b7e2aa9c6d3))
+  (symbol (lib_id "Device:R") (at 147.32 116.84 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid caa8428d-81a0-560e-82e6-0aeef5acba9d)
+    (property "Reference" "R-BW-COM" (at 149.86 115.57 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "4.7k 1%" (at 149.86 118.11 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 146.05 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 147.32 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-BW-COM" (at 147.32 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 147.32 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Feeds the toggle's commons from the analog +12 V and limits a lug shorted to the panel to 2.6 mA. With R-BW-PD it puts 8.2 V on a closed line (6.2 V with both closed), above U-BW-SW's 2 V VIH and never above its VDD" (at 147.32 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "Device:R, two-terminal: pin 1 and pin 2 are interchangeable" (at 147.32 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL" (at 147.32 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F4701T5E" (at 147.32 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17673" (at 147.32 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 147.32 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 0f53984b-2fe8-59a1-b78d-b572e699f983))
+    (pin "2" (uuid f175b1a4-c9d1-5356-97e2-b4a20b7a63da))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "R-BW-COM") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "R72") (unit 1))))
+  )
+  (wire (pts (xy 147.32 113.03) (xy 147.32 110.49)) (stroke (width 0) (type default)) (uuid 0bc9a36d-8350-5198-a2f8-7c2d8ac3fa5e))
+  (hierarchical_label "MODULE_ANALOG_POS12" (shape input) (at 147.32 110.49 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid b8fe8d0f-9cba-5193-a11b-84c7eec760a8)
+    (property "Dir" "in" (at 147.32 110.49 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 147.32 110.49 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 147.32 120.65) (xy 147.32 123.19)) (stroke (width 0) (type default)) (uuid 527217a6-b482-5da3-a873-a3c3d9b9a98b))
+  (label "BW_COM" (at 147.32 123.19 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 17e54d63-ef5c-5021-8e45-001c8d257079))
+  (symbol (lib_id "Device:R") (at 165.1 116.84 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 67eea039-23f6-51ff-9418-d28eedf4ff1a)
+    (property "Reference" "R-BW-PD1" (at 167.64 115.57 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10k 1%" (at 167.64 118.11 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 163.83 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 165.1 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-BW-PD" (at 165.1 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 165.1 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Holds BW1 low with the toggle at WIDE, and draws the gold contacts' wetting current" (at 165.1 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "Device:R, two-terminal: pin 1 and pin 2 are interchangeable" (at 165.1 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL" (at 165.1 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F1002T5E" (at 165.1 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17414" (at 165.1 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 165.1 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 1396cf98-f24c-55c1-ace5-efa2b494bcaa))
+    (pin "2" (uuid 60343adf-0e31-5c56-9c8a-5fbda6d5e4b3))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "R-BW-PD1") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "R73") (unit 1))))
+  )
+  (wire (pts (xy 165.1 113.03) (xy 165.1 110.49)) (stroke (width 0) (type default)) (uuid db5c7da7-8fe5-5361-82b4-1d602a90e039))
+  (label "BW1_SW" (at 165.1 110.49 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 55adc678-a2db-5194-8419-eec2da43d69f))
+  (wire (pts (xy 165.1 120.65) (xy 165.1 123.19)) (stroke (width 0) (type default)) (uuid 79e5c304-e40b-5527-aee3-b40a01b22656))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 165.1 123.19 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid ed5f0d15-6d0d-5af5-9775-60bbf6be3601)
+    (property "Dir" "ref" (at 165.1 123.19 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 165.1 123.19 0) (effects (font (size 1.27 1.27)) hide)))
+  (symbol (lib_id "Device:R") (at 182.88 116.84 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 374aafee-d8bc-59d2-8a10-d761c9673811)
+    (property "Reference" "R-BW-PD0" (at 185.42 115.57 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10k 1%" (at 185.42 118.11 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 181.61 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 182.88 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-BW-PD" (at 182.88 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 182.88 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Holds BW0 low with the toggle at 1.5 kHz or WIDE" (at 182.88 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "Device:R, two-terminal: pin 1 and pin 2 are interchangeable" (at 182.88 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL" (at 182.88 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F1002T5E" (at 182.88 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17414" (at 182.88 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 182.88 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid eb2e1364-19db-5a14-a73b-9d1a48d2be64))
+    (pin "2" (uuid 7722b0b5-184c-57cc-879b-25dc475b5f1f))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "R-BW-PD0") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "R74") (unit 1))))
+  )
+  (wire (pts (xy 182.88 113.03) (xy 182.88 110.49)) (stroke (width 0) (type default)) (uuid 4a9416e6-576b-583a-ae2f-60d7f7e7222e))
+  (label "BW0_SW" (at 182.88 110.49 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 44d7615d-669b-5c28-a0ba-6c236f6a565c))
+  (wire (pts (xy 182.88 120.65) (xy 182.88 123.19)) (stroke (width 0) (type default)) (uuid a6796282-3b4a-55c3-8700-80c4f7524aa1))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 182.88 123.19 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 284d9306-92d9-54da-8148-4679024517ad)
+    (property "Dir" "ref" (at 182.88 123.19 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 182.88 123.19 0) (effects (font (size 1.27 1.27)) hide)))
+  (symbol (lib_id "Device:R") (at 200.66 116.84 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 118a9d80-d25b-5190-8fde-760af94d7916)
+    (property "Reference" "R-BW-FILT1" (at 203.2 115.57 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100k 1%" (at 203.2 118.11 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 199.39 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 200.66 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-BW-FILT" (at 200.66 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 200.66 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "With C-BW-FILT1, 10 ms: the line from the panel arrives at SEL1/SEL2 as a slow DC level, and the contacts' bounce never reaches the switch" (at 200.66 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "Device:R, two-terminal: pin 1 and pin 2 are interchangeable" (at 200.66 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL" (at 200.66 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F1003T5E" (at 200.66 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C149504" (at 200.66 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 200.66 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 656587d9-933a-509f-9c5e-4afc419ba3fe))
+    (pin "2" (uuid d8e0f1ff-a490-5179-bd22-8c81607f22b7))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "R-BW-FILT1") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "R75") (unit 1))))
+  )
+  (wire (pts (xy 200.66 113.03) (xy 200.66 110.49)) (stroke (width 0) (type default)) (uuid d8c188c3-e664-5d53-b10b-db4d40ad1e1b))
+  (label "BW1_SW" (at 200.66 110.49 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 7bd5f60a-e3aa-582f-9c71-c27f5ecc644b))
+  (wire (pts (xy 200.66 120.65) (xy 200.66 123.19)) (stroke (width 0) (type default)) (uuid 373c7059-a0e0-5a36-a76f-8390789c14b7))
+  (label "BW1" (at 200.66 123.19 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 07dc87ce-c260-5326-8160-1c5469846936))
+  (symbol (lib_id "Device:R") (at 218.44 116.84 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid cefeafb4-4a67-512d-ba3e-5cb6fc0bbbaa)
+    (property "Reference" "R-BW-FILT0" (at 220.98 115.57 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100k 1%" (at 220.98 118.11 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 217.17 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 218.44 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-BW-FILT" (at 218.44 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 218.44 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "As R-BW-FILT1, for SEL3/SEL4" (at 218.44 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "Device:R, two-terminal: pin 1 and pin 2 are interchangeable" (at 218.44 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL" (at 218.44 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F1003T5E" (at 218.44 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C149504" (at 218.44 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 218.44 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 3dca8a9b-ae9d-5abd-983b-c53f027f7bd8))
+    (pin "2" (uuid 5b5ad638-2c40-5b04-a0a3-c7cda45a26ee))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "R-BW-FILT0") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "R76") (unit 1))))
+  )
+  (wire (pts (xy 218.44 113.03) (xy 218.44 110.49)) (stroke (width 0) (type default)) (uuid 5bbca803-0160-5879-8924-c9e38c07d7b0))
+  (label "BW0_SW" (at 218.44 110.49 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 7ab3c73a-5fa0-50df-9720-e379a07baad4))
+  (wire (pts (xy 218.44 120.65) (xy 218.44 123.19)) (stroke (width 0) (type default)) (uuid 9779019a-4c2d-574e-b6de-53ec7e9a02d0))
+  (label "BW0" (at 218.44 123.19 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 9d6e9070-9aa7-5392-b4ec-ccc6396083e2))
+  (symbol (lib_id "Device:C") (at 236.22 116.84 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid debf9d6e-f3b7-5031-a16f-11af9c5a7754)
+    (property "Reference" "C-BW-FILT1" (at 238.76 115.57 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100nF" (at 238.76 118.11 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 237.49 120.65 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 236.22 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-BW-FILT" (at 236.22 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 236.22 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "The BW1 line's filter capacitor, at U-BW-SW's SEL pins" (at 236.22 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "Device:C, two-terminal: pin 1 and pin 2 are interchangeable" (at 236.22 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "YAGEO" (at 236.22 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "CC0805KRX7R9BB104" (at 236.22 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C49678" (at 236.22 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 236.22 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid c9697adb-dfe4-5bd8-bbfa-e025b724b414))
+    (pin "2" (uuid 031b3cf1-c042-51a7-8892-fd3a7c23afa6))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "C-BW-FILT1") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "C56") (unit 1))))
+  )
+  (wire (pts (xy 236.22 113.03) (xy 236.22 110.49)) (stroke (width 0) (type default)) (uuid f6e551ee-5a3f-5ee9-8b34-c3cbe244a038))
+  (label "BW1" (at 236.22 110.49 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 085e5cc3-50e7-52a0-9a02-13b0d3573cd5))
+  (wire (pts (xy 236.22 120.65) (xy 236.22 123.19)) (stroke (width 0) (type default)) (uuid 10ffecf6-1951-507e-9009-0a11425407fc))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 236.22 123.19 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid a20db544-0a7e-5e24-bbd9-4570f00eaedc)
+    (property "Dir" "ref" (at 236.22 123.19 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 236.22 123.19 0) (effects (font (size 1.27 1.27)) hide)))
+  (symbol (lib_id "Device:C") (at 254.0 116.84 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 9b2f5269-501d-5bd8-a7bd-fd600fa8f20d)
+    (property "Reference" "C-BW-FILT0" (at 256.54 115.57 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100nF" (at 256.54 118.11 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 255.27 120.65 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 254.0 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-BW-FILT" (at 254.0 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 254.0 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "The BW0 line's filter capacitor, at U-BW-SW's SEL pins" (at 254.0 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "Device:C, two-terminal: pin 1 and pin 2 are interchangeable" (at 254.0 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "YAGEO" (at 254.0 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "CC0805KRX7R9BB104" (at 254.0 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C49678" (at 254.0 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 254.0 116.84 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid e590f77f-4b8f-5dd1-b4ae-7a8f7386c359))
+    (pin "2" (uuid f48d62fc-d6b1-50ce-b7ea-3b1183710d5b))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "C-BW-FILT0") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "C57") (unit 1))))
+  )
+  (wire (pts (xy 254.0 113.03) (xy 254.0 110.49)) (stroke (width 0) (type default)) (uuid 040a0128-49c4-5733-aee9-bfb7ad9a212c))
+  (label "BW0" (at 254.0 110.49 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 994abefd-0d60-5f5f-ad23-5e740ef28c4a))
+  (wire (pts (xy 254.0 120.65) (xy 254.0 123.19)) (stroke (width 0) (type default)) (uuid 8abef157-8a4f-5d24-bdcf-13980ba4e3d5))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 254.0 123.19 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid d57bcbaa-b2d8-525c-bbd0-50bda4ec2aa3)
+    (property "Dir" "ref" (at 254.0 123.19 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 254.0 123.19 0) (effects (font (size 1.27 1.27)) hide)))
+  (symbol (lib_id "Device:R") (at 147.32 152.4 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 747ab1e8-a676-5cb7-8095-916883d56d6d)
+    (property "Reference" "R-LEDB-TOP" (at 149.86 151.13 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100k 1%" (at 149.86 153.67 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 146.05 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 147.32 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-LEDB-TOP" (at 147.32 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 147.32 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Top of the LED driver's 1/11 divider from BREATH_OUT, the output stage's op-amp output inside its loop: 110 kohm there moves the jack by nothing measurable (breath-output-stage/sim led-load)" (at 147.32 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "Device:R, two-terminal: pin 1 and pin 2 are interchangeable" (at 147.32 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL" (at 147.32 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F1003T5E" (at 147.32 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C149504" (at 147.32 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 147.32 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 56c4004f-7242-5af7-886a-78d58a77eef0))
+    (pin "2" (uuid f52091bd-0eb5-51a8-ac9b-4e112bddb0a3))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "R-LEDB-TOP") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "R77") (unit 1))))
+  )
+  (wire (pts (xy 147.32 148.59) (xy 147.32 146.05)) (stroke (width 0) (type default)) (uuid f6235936-7426-5737-9947-c765617dfff1))
+  (hierarchical_label "BREATH_OUT" (shape input) (at 147.32 146.05 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid bed8232e-c99d-55a0-9e40-14e0919ad7b7)
+    (property "Dir" "in" (at 147.32 146.05 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/breath-output-stage" (at 147.32 146.05 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "The breath summer's output, U-BREATH-OPA OUTB, inside its feedback loop and ahead of R-OUT-PROT: what the jack carries, from a node whose closed-loop impedance is milliohms, so the LED driver's divider takes nothing from the CV" (at 147.32 146.05 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 147.32 156.21) (xy 147.32 158.75)) (stroke (width 0) (type default)) (uuid 02ff719b-56e6-5df0-a911-8c444e1a8fc1))
+  (label "LEDB_IN" (at 147.32 158.75 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 109fa3b1-2175-5652-99fe-40a9ba54ba1a))
+  (symbol (lib_id "Device:R") (at 165.1 152.4 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 7e8444f6-16ec-57e0-a9d4-5b68bd383b14)
+    (property "Reference" "R-LEDB-BOT" (at 167.64 151.13 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "10k 1%" (at 167.64 153.67 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 163.83 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 165.1 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-LEDB-BOT" (at 165.1 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 165.1 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Bottom of the 1/11 divider" (at 165.1 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "Device:R, two-terminal: pin 1 and pin 2 are interchangeable" (at 165.1 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL" (at 165.1 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F1002T5E" (at 165.1 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17414" (at 165.1 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 165.1 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 2b8672cc-8b8e-564e-b8bc-72c1164f3928))
+    (pin "2" (uuid de63bfb5-a3bc-5baf-8fea-dc61571df8b0))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "R-LEDB-BOT") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "R78") (unit 1))))
+  )
+  (wire (pts (xy 165.1 148.59) (xy 165.1 146.05)) (stroke (width 0) (type default)) (uuid c6f0e0c9-2968-5ba3-a6b2-cfa40fe97ed1))
+  (label "LEDB_IN" (at 165.1 146.05 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 6137e864-ff6b-536c-9d7e-9902412e7a47))
+  (wire (pts (xy 165.1 156.21) (xy 165.1 158.75)) (stroke (width 0) (type default)) (uuid d8212e6f-3ceb-5b4d-9341-4547f7902d56))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 165.1 158.75 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid eb202383-bb86-5385-ab1c-889b4cbcbaf6)
+    (property "Dir" "ref" (at 165.1 158.75 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 165.1 158.75 0) (effects (font (size 1.27 1.27)) hide)))
+  (symbol (lib_id "Device:R") (at 182.88 152.4 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 07452d93-2f35-5bdd-a8b0-1687a43343a4)
+    (property "Reference" "R-LEDB-BASE" (at 185.42 151.13 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "1k 1%" (at 185.42 153.67 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 181.61 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 182.88 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-LEDB-BASE" (at 182.88 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 182.88 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "U-REF-BUF B's output into D-LEDB and Q-LEDB's base: isolates the op-amp from the transistor's input capacitance and limits base current" (at 182.88 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "Device:R, two-terminal: pin 1 and pin 2 are interchangeable" (at 182.88 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL" (at 182.88 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F1001T5E" (at 182.88 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C17513" (at 182.88 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 182.88 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid c6709259-e0f0-51bf-a9be-561276c791ed))
+    (pin "2" (uuid d2483749-da1a-52ba-821e-bbe7fb606884))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "R-LEDB-BASE") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "R79") (unit 1))))
+  )
+  (wire (pts (xy 182.88 148.59) (xy 182.88 146.05)) (stroke (width 0) (type default)) (uuid a8bda3e7-5816-58df-8be8-180f31fa3db7))
+  (label "LEDB_DRV" (at 182.88 146.05 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid cf580bb9-a1e8-5c2f-8eed-8e61216cb84a))
+  (wire (pts (xy 182.88 156.21) (xy 182.88 158.75)) (stroke (width 0) (type default)) (uuid aeb22af2-29a6-5c03-90fd-f51547bfd2e1))
+  (label "LEDB_D" (at 182.88 158.75 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 95bd8a47-c23e-58f2-bb5c-a75779a063f4))
+  (symbol (lib_id "Diode:1N4148W") (at 200.66 152.4 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid fcf721e2-68bc-5968-bb17-45916378b5f2)
+    (property "Reference" "D-LEDB" (at 200.66 149.86 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "1N4448W" (at 200.66 154.94 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Diode_SMD:D_SOD-123" (at 200.66 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 200.66 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "D-LEDB" (at 200.66 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "A=2(A) K=1(K)" (at 200.66 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Blocks the base when BREATH_OUT is negative (OFFSET below zero): U-REF-BUF B then rails at -12 V, which would otherwise break Q-LEDB's base-emitter junction down (VEBO 6 V). Inside the loop, so its drop costs nothing" (at 200.66 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "SOD-123, cathode band; KiCad pin 1 cathode [ds datasheets/discrete-and-power/1N4448W.pdf p.1, Vishay 86362]" (at 200.66 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Vishay" (at 200.66 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "1N4448W-E3-08" (at 200.66 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C3313020" (at 200.66 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 200.66 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 531c6586-52de-581c-9b33-7180edfeb33f))
+    (pin "2" (uuid 635ebbf0-0f70-5634-a820-ad96c49a1839))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "D-LEDB") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "D17") (unit 1))))
+  )
+  (wire (pts (xy 196.85 152.4) (xy 194.31 152.4)) (stroke (width 0) (type default)) (uuid cf24a0a5-c7fe-5963-9b93-0891286fdcb2))
+  (label "LEDB_B" (at 194.31 152.4 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 61062fdd-9440-5714-ba71-d08f38ea481f))
+  (wire (pts (xy 204.47 152.4) (xy 207.01 152.4)) (stroke (width 0) (type default)) (uuid 586b6b33-fd40-5550-a310-da5a10d5caf3))
+  (label "LEDB_D" (at 207.01 152.4 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid b39296cd-9874-5c09-947e-66d1c264b762))
+  (symbol (lib_id "Transistor_BJT:MMBT3904") (at 218.44 152.4 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 45af951d-7454-5396-b31e-683f0f3a288a)
+    (property "Reference" "Q-LEDB" (at 218.44 143.51 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "MMBT3904" (at 218.44 146.05 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Package_TO_SOT_SMD:SOT-23" (at 223.52 154.94 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 218.44 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "Q-LEDB" (at 218.44 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "B=1 E=2 C=3" (at 218.44 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "The LED's current sink: U-REF-BUF B holds its emitter at BREATH_OUT/11, so the LED current is BREATH_OUT/11/180 ohm whatever the lead or the LED's own drop" (at 218.44 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/discrete-and-power/NEXPERIA-MMBT3904.pdf Table 2: 1 base, 2 emitter, 3 collector (SOT23); KiCad's Transistor_BJT:MMBT3904 is the same" (at 218.44 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Changjiang (JSCJ)" (at 218.44 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "MMBT3904" (at 218.44 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C20526" (at 218.44 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 218.44 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 81c3c790-7455-5972-8aea-046be4353fb7))
+    (pin "2" (uuid 565ea852-7a67-53ae-b396-5fad516b5ad1))
+    (pin "3" (uuid 9089b815-b8f4-5b2d-8988-755642202925))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "Q-LEDB") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "Q2") (unit 1))))
+  )
+  (wire (pts (xy 213.36 152.4) (xy 210.82 152.4)) (stroke (width 0) (type default)) (uuid c52c282b-6c51-534d-b786-991916603352))
+  (label "LEDB_B" (at 210.82 152.4 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 8200d263-db76-57a1-95fd-ec4ec3806d04))
+  (wire (pts (xy 220.98 147.32) (xy 220.98 144.78)) (stroke (width 0) (type default)) (uuid 4acea885-3e98-5373-8709-f8875c59b8a2))
+  (label "LEDB_K" (at 220.98 144.78 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 10298b43-1825-5e65-95e3-0a629e055e58))
+  (wire (pts (xy 220.98 157.48) (xy 220.98 160.02)) (stroke (width 0) (type default)) (uuid c45411c9-f5b8-515a-b98f-f1931012e53f))
+  (label "LEDB_SENSE" (at 220.98 160.02 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid e3523381-a8b4-57b7-9118-b2be3b4feef2))
+  (symbol (lib_id "Device:R") (at 236.22 152.4 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 5e111d2c-7e75-5bd4-8ecf-62d1f7214b0f)
+    (property "Reference" "R-LEDB-SENSE" (at 238.76 151.13 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "180R 1%" (at 238.76 153.67 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 234.95 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 236.22 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-LEDB-SENSE" (at 236.22 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 236.22 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Sets the LED current: 1/(11 x 180) = 0.505 mA per volt at the jack, 5.05 mA at 10 V, 6.0 mA at the OPA2197's 11.9 V swing - the cap. Return it to the star on its own trace" (at 236.22 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "Device:R, two-terminal: pin 1 and pin 2 are interchangeable" (at 236.22 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL" (at 236.22 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "0805W8F1800T5E" (at 236.22 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C25270" (at 236.22 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 236.22 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 93a49b48-c2f0-5b5a-b8d3-8a9cba67f8b9))
+    (pin "2" (uuid 87574b38-c2a7-5e68-964e-483aecc0cdee))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "R-LEDB-SENSE") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "R80") (unit 1))))
+  )
+  (wire (pts (xy 236.22 148.59) (xy 236.22 146.05)) (stroke (width 0) (type default)) (uuid 5a2c0504-8239-5b56-99d2-3c41706ccc6d))
+  (label "LEDB_SENSE" (at 236.22 146.05 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 81e10b70-a3e5-502d-8888-a0ae34f990d6))
+  (wire (pts (xy 236.22 156.21) (xy 236.22 158.75)) (stroke (width 0) (type default)) (uuid 5807f21f-9369-5ce6-9e37-47ddab47c634))
+  (hierarchical_label "AGND_MOD" (shape passive) (at 236.22 158.75 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid e85fce2b-3c8e-5f9b-ad8d-de7cb4ea680b)
+    (property "Dir" "ref" (at 236.22 158.75 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 236.22 158.75 0) (effects (font (size 1.27 1.27)) hide)))
+  (symbol (lib_id "Device:R") (at 254.0 152.4 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 6c57192a-5420-5530-8de8-573ee3c53a76)
+    (property "Reference" "R-LEDB-A" (at 256.54 151.13 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "1k 1% 1206" (at 256.54 153.67 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Resistor_SMD:R_1206_3216Metric" (at 252.73 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 254.0 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-LEDB-A" (at 254.0 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 254.0 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Feeds the LED's anode from the analog +12 V and limits the lead shorted to the panel to 12 mA (144 mW, a 1206). At the 6 mA cap it leaves Q-LEDB about 2 V with a 3 V LED" (at 254.0 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "Device:R, two-terminal: pin 1 and pin 2 are interchangeable" (at 254.0 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "UNI-ROYAL" (at 254.0 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "1206W4F1001T5E" (at 254.0 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C4410" (at 254.0 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 254.0 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 07db85e6-5bb7-588f-bfbf-d4a5aa370c1f))
+    (pin "2" (uuid 40210ce6-26b1-52f9-92db-21faefc2dfa9))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "R-LEDB-A") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "R81") (unit 1))))
+  )
+  (wire (pts (xy 254.0 148.59) (xy 254.0 146.05)) (stroke (width 0) (type default)) (uuid 5e1dc7cb-3da2-5b7a-ae3d-e607b4375cdc))
+  (hierarchical_label "MODULE_ANALOG_POS12" (shape input) (at 254.0 146.05 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid fa7df944-7335-5777-a54a-53b2643a8b3f)
+    (property "Dir" "in" (at 254.0 146.05 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 254.0 146.05 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 254.0 156.21) (xy 254.0 158.75)) (stroke (width 0) (type default)) (uuid 2600b9b5-d144-55b6-a702-2c59354eed32))
+  (label "LEDB_A" (at 254.0 158.75 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 013faa57-8b48-5105-801e-9507b9434e38))
+  (symbol (lib_id "Connector_Generic:Conn_01x02") (at 271.78 152.4 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 19ea0466-e9d7-5f47-b3c6-29c2f92f2deb)
+    (property "Reference" "J-LED-BREATH" (at 274.32 151.13 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "JST B2B-XH-A" (at 274.32 153.67 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical" (at 271.78 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 271.78 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "J-LED-BREATH" (at 271.78 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 271.78 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "LED-BREATH's lead plugs in here, as LED-PANEL's does into J-LED-PANEL: pin 1 = LEDB_A (the anode, the red wire), pin 2 = LEDB_K (the cathode, Q-LEDB's collector). On the main board's FRONT face below the LED; mark pin 1 and A on the silk" (at 271.78 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/connectors/JST-XH-SERIES.pdf p.3: B2B-XH-A, circuit No.1 marked on the shroud; KiCad's JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical pad 1 is circuit 1" (at 271.78 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "JST" (at 271.78 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "B2B-XH-A(LF)(SN)" (at 271.78 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C158012" (at 271.78 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "hand" (at 271.78 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 65c9890b-90de-5bc9-b3aa-338e1a1a18c9))
+    (pin "2" (uuid 86025d97-35c5-5def-bbcf-261dc6d85873))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "J-LED-BREATH") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "J6") (unit 1))))
+  )
+  (wire (pts (xy 266.7 152.4) (xy 264.16 152.4)) (stroke (width 0) (type default)) (uuid b30baa66-0863-569a-bc8d-1088d98ab3d7))
+  (label "LEDB_A" (at 264.16 152.4 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 22f2667a-f003-5b58-8197-54b72dd9e3fe))
+  (wire (pts (xy 266.7 154.94) (xy 264.16 154.94)) (stroke (width 0) (type default)) (uuid 13929fc6-6bdc-56ea-864d-f7c3533c3319))
+  (label "LEDB_K" (at 264.16 154.94 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 084a92a0-6b27-5fa4-9ccd-09841d34bf98))
+  (symbol (lib_id "Device:LED") (at 289.56 152.4 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 5273b77c-5199-59ad-9394-593a3aa7461b)
+    (property "Reference" "LED-BREATH" (at 289.56 149.86 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "605-2211-110F" (at 289.56 154.94 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "" (at 289.56 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 289.56 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "LED-BREATH" (at 289.56 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "A=2(A) K=1(K)" (at 289.56 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "THE BREATH LED (owner, 2026-10-04): brightness follows the breath CV at the jack, dark at 0 V and below. The same part as LED-PANEL, in the toggle row on the far side of SW-POWER from it. PANEL-MOUNTED: no footprint on the board - its leads are cut short and soldered to CBL-LED-BREATH, the lead that plugs into J-LED-BREATH, anode to pin 1" (at 289.56 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/led/DIALIGHT-605-SERIES-PMI-CATALOG-2021-EXCERPT.pdf p.1: 'Anode (Dot)' - the anode lead is the one the dot on the housing's back marks. A stand-in pin map: the LED is on the panel, and its pins are its two leads as the lead reaches them" (at 289.56 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Dialight" (at 289.56 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "605-2211-110F" (at 289.56 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "" (at 289.56 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "hand" (at 289.56 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid a8410b68-eb03-506b-8a9c-b8d2c2d124f2))
+    (pin "2" (uuid 9dc8c9f6-99bf-5fac-9697-6e97df76849d))
+    (instances (project "breath-receive-stage" (path "/22139c3e-7ede-5820-8fb6-f1f51a9f74b0" (reference "LED-BREATH") (unit 1))) (project "module-main" (path "/fc77e9f9-9171-5c83-92ae-8cafe880764e/b9269a67-5d3e-5ef8-9f1e-1a172d05979c" (reference "D18") (unit 1))))
+  )
+  (wire (pts (xy 285.75 152.4) (xy 283.21 152.4)) (stroke (width 0) (type default)) (uuid 456837e2-84e0-595d-bdc6-40cf63ae9437))
+  (label "LEDB_K" (at 283.21 152.4 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid a2a1497b-800e-5b28-a417-5ee969c88ed0))
+  (wire (pts (xy 293.37 152.4) (xy 295.91 152.4)) (stroke (width 0) (type default)) (uuid e58a9ced-52b0-5ef0-97ef-6161667f2316))
+  (label "LEDB_A" (at 295.91 152.4 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid dcf7ee9d-5016-55d5-b277-f2635751a650))
   (sheet_instances (path "/" (page "1")))
 )

@@ -31,8 +31,10 @@ sensor's own settling time. Going fully analog would save roughly 400 µs agains
 a 1 ms floor.
 
 For scale: the fastest physical gesture available is a hard tongue attack, with
-a rise time somewhere around 5–15 ms. The digitised path comes to **~3.1 ms**
-against a 5 ms target — **about 1.6×, not the 10× this sentence used to claim**.
+a rise time somewhere around 5–15 ms. The digitised path comes to **~2.8 ms**
+against a 5 ms target — **about 1.8×, not the 10× this sentence used to claim**
+(it was ~3.1 ms and 1.6× until the anti-alias pole moved to 1.47 kHz, *Amendment,
+2026-10-04*).
 The old figure came from a table that left out the filter poles this design
 specifies, the sampling period, and the pneumatic restrictor. See
 [the latency budget](../reference/latency-budget.md); the restrictor is still
@@ -866,3 +868,72 @@ production**, so the spares are now just spares.
 2026-02-02 and distributor stock is thin — buy both spares when the board is
 ordered; the `U-BREATH` row carries the stock and the route.)*
 
+
+## Amendment, 2026-10-04 — breath's band-limit is 1.5 kHz, then a panel toggle (#32)
+
+**The owner, in the working chat, 2026-10-04:** *"Let's go ahead and just put
+the filter to 1.5 khz"*. Their reasons, as they gave them (paraphrased, not
+quoted): the instrument must track fast breath gestures — growl and
+flutter-tongue; they already play this sensor (MPXV4006DP) on a previous
+instrument and it responds well; and they read the datasheet's 1.0 ms response
+as a full-scale figure, where their gestures are 20–30 % modulations, so the
+sensor is faster than that for what they play. Asked then where the filter is
+and whether it could be switchable, they chose the selector *"Panel 3-way
+toggle"* and the modes *"500 Hz / 1.5 kHz / wide"*, wide at about 10 kHz and
+keeping the RF and switching-hash filtering ahead of the in-amp. They added a
+second panel LED whose brightness follows the breath CV, on the other side of
+the power toggle from the power LED.
+
+**This supersedes "band-limit at both ends, around 500 Hz"** (*Impedance and
+bandwidth are non-problems*, above) and its "~159 Hz of real bandwidth":
+
+- **The module's filter is the toggle's.** One fixed capacitor across the pair
+  sets WIDE; an analog switch beside the in-amp adds one capacitor for 1.5 kHz
+  and a second for 500 Hz. The values, and why the common-mode capacitors had
+  to shrink for the wide modes to exist at all, are
+  `hardware/interfaces/breath-sense-link/breath-sense-link.md`,
+  *Component values*; the circuit is
+  `hardware/module/breath-receive-stage/breath-receive-stage.md`,
+  *The bandwidth toggle*. There is still no capacitor at the instrument end.
+- **The jack's RC no longer band-limits** (15.9 kHz, ADR 0006's table).
+- **The instrument's copy is fixed at the 1.5 kHz setting**: `C-AA-ADC` gives
+  1.47 kHz, and the sample rate stays 4 kHz — a second conversion per pass does
+  not fit `loop-budget` at its serialised end, and what folds is bounded
+  (`hardware/carrier/breath-adc/breath-adc.md`, *The sample rate stays 4 kHz*).
+  This ADR's "47 nF gives a ~564 Hz corner and 58 dB at 500 kHz" (*The ADC does
+  not go away*) is superseded by that page: the pole is now 37 dB down at
+  500 kHz `[calc: 20 log(500k/1474)]`.
+
+**On the owner's small-signal point, what the datasheets say.** The
+MPXV4006DP's own sheet states no response time at all `[ds MPXV4006DP.pdf
+pp.1–22, Table 1]`. The 1.0 ms is the family's, from the MPXV7007DP sheet:
+*"Response Time is defined as the time for the incremental change in the
+output to go from 10% to 90% of its final value when subjected to a specified
+step change in pressure"* `[ds MPXV7007DP.pdf p.2, Note 7]` — and the step is
+not specified. If the response were linear (one pole), its 10–90 % time would
+be the same for a 20 % step as for a full-scale one, and a smaller modulation
+would not be faster; it is faster only if the 1.0 ms is set by a large-signal
+limit inside the part, which neither sheet says. The owner's playing
+experience is the stronger evidence here, and **E2 measures it**: a small
+step (20–30 % of span) and a full-scale one, the sensor's output scoped.
+Either way the electronics no longer stand between them: taking the 1.0 ms as
+one pole (τ = 455 µs, 350 Hz) `[calc]`, a 150 Hz growl lost 1.58 dB and about
+1.09 ms of phase delay through the old chain (the sensor and two ~470 Hz poles)
+and now loses 1.12 / 0.77 / 0.73 dB and 0.75 / 0.54 / 0.46 ms at 500 Hz /
+1.5 kHz / WIDE, against the sensor's own 0.73 dB and 0.43 ms; a 25 Hz
+flutter is under 0.05 dB in every case, its delay 0.79 / 0.57 / 0.48 ms
+against 1.13 ms before `[calc, linear model; the sensor term is the
+datasheet's figure, not a measurement]`.
+
+**What a wider channel lets in, and where each is answered:**
+
+- **The tube's pipe modes.** The 214 Hz and 429 Hz modes (*Breath tube*,
+  above) were already inside the old band; their odd harmonics near 640 Hz,
+  1.07 kHz and 1.5 kHz now pass at 1.5 kHz and WIDE. The PTFE restrictor's
+  damping is what removes them, so **E2's ring-down test now decides more**.
+- **Common mode on the umbilical**, held to the link's 58.5 dB requirement over
+  each mode's own band (`breath-link-cmrr`, and the per-mode results in
+  `hardware/module/breath-receive-stage/sim/README.md`).
+- **Noise at the jack**, which grows with the band (`breath-jack-noise`).
+- **The LED row's 2–4 kHz PWM and the SPI frames**, held end to end at the
+  jack in WIDE by `hardware/interfaces/system/sim`.

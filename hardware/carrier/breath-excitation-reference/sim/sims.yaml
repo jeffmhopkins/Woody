@@ -80,15 +80,18 @@ sims:
     deck: ref-zout.cir
     vary: [R-ISO-REF, R-FB-REF, C-FB-REF]
     sweep: {c_vs: [100n, 10.1u]}
-    measures: [z_500, z_16k, z_peak, f_peak]
+    measures: [z_500, z_1k5, z_10k, z_16k, z_peak, f_peak]
     post:
       z_500: "at(w['zvs'], 500)"
+      # the edges of the 1.5 kHz and WIDE modes (#32): recorded; the sensor's draw is steady
+      z_1k5: "at(w['zvs'], 1500)"
+      z_10k: "at(w['zvs'], 1.0e4)"
       z_16k: "at(w['zvs'], 15.9e3)"
       z_peak: "peak(w['zvs'], 10, 10e6)"
       f_peak: "argpeak(w['zvs'], 10, 10e6)"
     asserts:
       - expr: "abs(nom['z_500'] - 1.20) < 0.12"
-        why: "|Z_out| at VS at 500 Hz, the breath channel's edge, is the 1.20 ohm riso-ref-topology derives for R_F 10 kohm + C_F 1 nF, within 10 %"
+        why: "|Z_out| at VS at 500 Hz, the 500 Hz mode's edge, is the 1.20 ohm riso-ref-topology derives for R_F 10 kohm + C_F 1 nF, within 10 %"
   - name: step-as-netlisted
     deck: ref-step.cir
     vary: [R-ISO-REF, C-FB-REF]
@@ -131,9 +134,11 @@ sims:
     deck: ref-zout.cir
     vary: [R-ISO-REF, R-FB-REF, C-FB-REF]
     set: {as_built: 1}
-    measures: [z_500, z_peak, f_peak]
+    measures: [z_500, z_1k5, z_10k, z_peak, f_peak]
     post:
       z_500: "at(w['zvs'], 500)"
+      z_1k5: "at(w['zvs'], 1500)"
+      z_10k: "at(w['zvs'], 1.0e4)"
       z_peak: "peak(w['zvs'], 10, 10e6)"
       f_peak: "argpeak(w['zvs'], 10, 10e6)"
   - name: loop-as-built

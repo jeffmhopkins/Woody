@@ -82,12 +82,12 @@ judges against; the datasheet itself rates no clamp current.
 
 ```
 R_th = 10k ∥ 15k = 6.0 kΩ
-f_c  = 1/(2π × 6k × 47 nF) = 564 Hz
-τ    = 6 kΩ × 47 nF        = 282 µs
-attenuation at the R-78E5.0's ~330 kHz switching rate = 20·log10(330k/564) = 55 dB
+f_c  = 1/(2π × 6k × 18 nF) = 1.47 kHz
+τ    = 6 kΩ × 18 nF        = 108 µs
+attenuation at the R-78E5.0's ~330 kHz switching rate = 20·log10(330k/1474) = 47 dB
 ```
 
-> **The 55 dB is ADC_IN's own path, not the converter's.** The breath signal
+> **The 47 dB is ADC_IN's own path, not the converter's.** The breath signal
 > is made from `INST_POS12`, not the 5 V rail; the R-78E5.0's ripple reaches
 > the conversion through `VDD`, which is the reference, and this filter does
 > not touch it. `sim/`'s `vdd-ripple` (#12) runs that path and, on
@@ -125,9 +125,14 @@ still unpublished (three copies of its sheet checked, 2026-10-03; none has a
 curve), so the −20 dB model, not a datasheet, is what the filter beats, and
 E9 below still measures it.
 
-> **τ = 282 µs exceeds the 250 µs loop period, and the note-on threshold is read
-> through it.** About 5.6 % of the 5 ms budget. It is booked as its own row,
-> *Anti-alias filter, 564 Hz*, in
+> **The corner is the module's 1.5 kHz mode, and it is not switched.** The owner
+> raised breath's band-limit to 1.5 kHz (2026-10-04, #32: "Let's go ahead and
+> just put the filter to 1.5 khz") and then made the module's filter a panel
+> toggle; this is the controller's own copy, read for thresholds, note gating,
+> the mod routing and MIDI, and it stays at the 1.5 kHz setting whatever the
+> toggle says (ADR 0003, *Amendment, 2026-10-04*). The note-on threshold is read
+> through τ = 108 µs, about 2 % of the 5 ms budget: its own row,
+> *Anti-alias filter, 1.47 kHz*, in
 > [`latency-budget.md`](../../../docs/reference/latency-budget.md).
 
 **Sample-cap charge sharing** `[calc]`, on `C_SAMPLE` 20 pF and `t_SAMPLE`
@@ -139,13 +144,62 @@ I_avg = 20 pF × 4 kHz = 80 nA per volt
         proportional to V_in, therefore a pure constant gain term
 ```
 
-**Simulated** (`sim/`, 2026-09-30): the shortfall at full scale is
+**Simulated** (`sim/`, 2026-10-04): the shortfall at full scale is
 `adc-sample-kickback`, larger than the average-current line above because each
-sample also takes 20 pF/47 nF of `C-AA-ADC`'s charge at once `[calc]`, which
-the 282 µs time constant has not fully restored by the next. Still a pure gain
-term. The same run confirms the 564 Hz corner, the 55 dB at 330 kHz on
-`ADC_IN`'s own path (not the converter's ripple, which arrives on `VDD`) and
-τ = 282 µs.
+sample also takes 20 pF/18 nF of `C-AA-ADC`'s charge at once `[calc: 0.11 %]`,
+which the 108 µs time constant has 90 % restored by the next. Still a pure gain
+term: 0.16 % of the span at the worst corner, which the firmware's span and
+the panel's GAIN absorb. The same run confirms the 1.47 kHz corner, the 47 dB at
+330 kHz on `ADC_IN`'s own path (not the converter's ripple, which arrives on
+`VDD`) and τ = 108 µs.
+
+### The sample rate stays 4 kHz (#32)
+
+**One conversion per 250 µs pass, as before.** With the corner at 1.47 kHz a
+4 kHz sample rate aliases: the pole is only 4.5 dB down at the 2 kHz Nyquist
+frequency and 9.2 dB down at 4 kHz (`sim/`, `filter`), against 11 and 17 dB at
+the old corner `[calc]`. Two ways out were weighed:
+
+- **Sample faster and decimate in firmware.** The MCP3202 would take it, but
+  the loop cannot. Each extra conversion is one more SPI2 transaction, 26.7 µs
+  of clocks plus ESP-IDF's 9 µs polling overhead (`loop-budget`'s own
+  arithmetic, `latency-budget.md`) `[calc]`:
+
+  | Rate | Reads per pass | Pass, chain concurrent | Pass, chain serialised |
+  |---|---|---|---|
+  | 4 kHz (as now) | 1 | 185.7 µs | 226.7 µs |
+  | 8 kHz | 2 | 221.4 µs | **262.4 µs** — over 250 |
+  | 16 kHz | 4 | **292.8 µs** | **333.8 µs** |
+
+  8 kHz closes only if the key chain's read is in flight on SPI3 while SPI2
+  polls, the low end of `loop-budget`; nothing yet shows it will be. The
+  sample capacitor would also cost more (`sim/`, `kickback-8k`,
+  `kickback-16k`, recorded what-ifs): 5.8 LSB nominal at 8 kHz, 9.0 at 16 kHz,
+  against 4.4 at 4 kHz — all gain terms.
+- **Keep 4 kHz and bound what folds.** That is the choice, because what lies
+  above 2 kHz at `ADC_IN` is small or is not a tone:
+  - **Breath itself.** The sensor is its own anti-alias filter. Its family's
+    1.0 ms response, 10 to 90 % `[ds MPXV7007DP.pdf p.2, Note 7; the MPXV4006DP's
+    own sheet states none]`, taken as one pole (10–90 % in 1.0 ms,
+    τ = 455 µs, 350 Hz) `[calc]`, is 15 dB down at 2 kHz and 21 dB at 4 kHz;
+    with this pole, 20 dB and 30 dB `[calc]`. A 150 Hz growl's harmonics up
+    there are a few LSB at most, and they fold to the band's top, where the
+    firmware's per-channel smoothing removes them.
+  - **Noise.** Sampling does not change its variance: `breath-jack-noise`'s
+    `ADC_IN` term is already integrated to 1 MHz, past this pole, because the
+    converter folds everything it samples. Whatever the rate, the reading
+    carries that much.
+  - **Tones.** The LED row's 2 kHz scan and 4 kHz refresh are the ones that
+    land badly: 4 kHz folds to DC, and a refresh a few hertz off 4 kHz is a
+    slow wander. They reach the reading through `VDD` (*The reference's filter*,
+    above) and through `AGND_INST`, not through this pole, which takes 9 dB
+    off what does arrive on `ADC_IN`. **E9 measures it**, and its remedy stands
+    (below): averaging a pair of samples nulls a 2 kHz component, and if E9
+    shows a 4 kHz one, the 8 kHz pair is the fix — with the loop measured
+    first, because it has to close.
+
+**Owner's to revisit at E9**, with the loop's real pass time in hand: 8 kHz
+conversions averaged in pairs, if the chain runs concurrently.
 
 **Noise at `ADC_IN`** is in `breath-jack-noise`, from the breath chain's noise
 sim (`hardware/module/breath-output-stage/sim/`, `noise`): this input shares
@@ -205,7 +259,7 @@ does for `CS_MOD`. Its static current is zero while deselected.
 |---|---|---|---|
 | `U-ADC` | MCP3202-CI/SN | `VDD` **is** `VREF`, on `ADC_VDD`; CH1 tied to `AGND_INST` | `[ds]` DS21034F, clock limit p.3 |
 | `R-ADCDIV-U`, `R-ADCDIV-L` | 10 kΩ / 15 kΩ 1 % | 0.6× after the buffer | `[repo]` + `[calc]` |
-| `C-AA-ADC` | 47 nF C0G | 564 Hz, and the ADC's charge reservoir | `[repo]` + `[calc]` |
+| `C-AA-ADC` | 18 nF C0G | 1.47 kHz, and the ADC's charge reservoir | `[repo]` + `[calc]` |
 | `C-ADC-BULK` | 10 µF X7R | Reservoir at MCP3202 `VDD`/`VREF`, beside the 100 nF | `[ds]` + `[calc]`; the PWM question is E9's |
 | `R-ADC-VDD` | 10 Ω 1 % | The reference's filter: `DEV_3V3` to `ADC_VDD` (owner, 2026-10-03) | `[sim]` `vdd-ripple`, `vdd-load` |
 | `C-ADC-VDD` | 22 µF X5R 25 V | The filter's capacitor at pin 8 | `[ds]` Samsung CL31A226KAHNNNE + `[web]` its DC-bias curve |

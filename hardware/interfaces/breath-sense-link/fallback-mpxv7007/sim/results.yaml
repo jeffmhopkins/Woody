@@ -4,10 +4,10 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/interfaces/breath-sense-link/fallback-mpxv7007/sim/sims.yaml: 09be77fe000601ff
+  hardware/interfaces/breath-sense-link/fallback-mpxv7007/sim/sims.yaml: a830e64704a8353d
   hardware/interfaces/breath-sense-link/netlist.yaml: 430f1e37ec9c97fa
-  hardware/carrier/breath-adc/netlist.yaml: f742c4d67eea80fb
-  hardware/module/breath-receive-stage/netlist.yaml: 9093fa5acc898eb4
+  hardware/carrier/breath-adc/netlist.yaml: 60647f404552f147
+  hardware/module/breath-receive-stage/netlist.yaml: dab496982d183718
   hardware/interfaces/breath-sense-link/fallback-mpxv7007/sim/fallback.cir: 0c480e3e3c6a8925
   datasheets/analog/INA828-ti-pspice-sbomag5c.lib: 6ae6e0285c98dc1e
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
@@ -38,10 +38,10 @@ sims:
         max: 2.42651
         max_at: r_fb- r_gnd- r_vs+ s_off+
       ina_rest:
-        nominal: -2.10753e-05
-        min: -4.25876e-05
+        nominal: -2.10319e-05
+        min: -4.25445e-05
         min_at: r_fb- r_gnd+ r_vs+ s_off+
-        max: -7.21347e-06
+        max: -7.16978e-06
         max_at: r_fb+ r_gnd+ r_vs- s_off-
       ina_28:
         nominal: -4.63607
@@ -86,17 +86,17 @@ sims:
         max: 1.27104e-05
         max_at: r_fb+ r_gnd+ r_vs- s_off-
       step_overshoot:
-        nominal: 0.126695
-        min: 0.117777
-        min_at: r_fb+ r_gnd- r_vs+ s_off-
-        max: 0.127784
-        max_at: r_fb- r_gnd+ r_vs- s_off-
-      step_settle:
-        nominal: 1.01188e-05
-        min: 1.01046e-05
+        nominal: 0.133445
+        min: 0.124858
         min_at: r_fb- r_gnd+ r_vs- s_off+
-        max: 1.01216e-05
-        max_at: r_fb+ r_gnd+ r_vs+ s_off+
+        max: 0.133966
+        max_at: r_fb+ r_gnd+ r_vs- s_off-
+      step_settle:
+        nominal: 1.01116e-05
+        min: 1.01064e-05
+        min_at: r_fb+ r_gnd+ r_vs+ s_off+
+        max: 1.0125e-05
+        max_at: r_fb+ r_gnd+ r_vs- s_off+
     asserts:
     - expr: abs(min['slope'] / fig['breath-sensor-slope'] - 1) < 0.005 and abs(max['slope'] / fig['breath-sensor-slope'] -
         1) < 0.005
@@ -146,10 +146,10 @@ sims:
         max: 5.76995
         max_at: s_off+
       ina_rest:
-        nominal: -9.03529e-05
-        min: -9.56232e-05
+        nominal: -9.03371e-05
+        min: -9.56075e-05
         min_at: s_off+
-        max: -8.50826e-05
+        max: -8.50668e-05
         max_at: s_off-
       ina_6:
         nominal: -3.69549

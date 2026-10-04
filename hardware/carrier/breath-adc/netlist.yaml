@@ -32,7 +32,7 @@ ports:
     from: carrier/carrier
 components:
   C-AA-ADC:
-    value: 47nF C0G/NP0
+    value: 18nF C0G/NP0
     pins:
     - 1
     - 2

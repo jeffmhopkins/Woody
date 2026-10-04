@@ -7,6 +7,8 @@
 * banked datasheet (Cjo, Vj, M - sims.yaml) at the leg's own bias - the signal leg at the
 * sensor's voltage, the return leg at 0 V, so the two do not match - and a reverse leakage
 * i_rm, the datasheet's maximum, as a current to PWR_GND. tvs = 0 takes both out.
+* U-BW-SW and the two switched C_diff are the receive deck's block (its en_1k5 / en_500 set
+* the bandwidth mode, #32).
 * Three excitations, one at a time: VCM the instrument's ground against the module's (the
 * receive deck's), VSIG the signal, VPG PWR_GND against the instrument's analog ground
 * (the plane at J-UMB carries the LED row's and the buck's currents; its tie to the
@@ -28,13 +30,37 @@ R5 inneg 0 {{R5}}
 CCMP inpos 0 {{C-CM-IN+}}
 CCMN inneg 0 {{C-CM-IN-}}
 CDIFF inpos inneg {{C-DIFF-BREATH}}
+* channels 1 (D inpos) and 2 (D inneg): C-DIFF-BW-1K5, closed on BW1
+RSW1 inpos s1 {{r_sw_1k5}}
+CDS1 inpos s1 {{c_ds_1k5}}
+CD1 inpos 0 {{c_d_p_1k5}}
+CS1 s1 0 {{c_s_1k5}}
+C1K5 s1 s2 {{C-DIFF-BW-1K5}}
+CS2 s2 0 {{c_s_1k5}}
+CD2 inneg 0 {{c_d_n_1k5}}
+CDS2 inneg s2 {{c_ds_1k5}}
+RSW2 inneg s2 {{r_sw_1k5}}
+* channels 3 (D inpos) and 4 (D inneg): C-DIFF-BW-500, closed on BW0
+RSW3 inpos s3 {{r_sw_500}}
+CDS3 inpos s3 {{c_ds_500}}
+CD3 inpos 0 {{c_d_p_500}}
+CS3 s3 0 {{c_s_500}}
+C500 s3 s4 {{C-DIFF-BW-500}}
+CS4 s4 0 {{c_s_500}}
+CD4 inneg 0 {{c_d_n_500}}
+CDS4 inneg s4 {{c_ds_500}}
+RSW4 inneg s4 {{r_sw_500}}
 XAMP inpos inneg pos neg out refdrv rg1 rg2 INA828
 RG rg1 rg2 {{R-GAIN-INAMP}}
 VWIP wiper 0 {{v_ref_trim}}
 XREFB wiper refdrv pos neg refdrv OPAx197
 .model DTVS_S D(Is=1e-15 N=1 Cjo={{cj_sig}} Vj={{tvs_vj}} M={{tvs_m}} BV={{tvs_bv}})
 .model DTVS_R D(Is=1e-15 N=1 Cjo={{cj_ret}} Vj={{tvs_vj}} M={{tvs_m}} BV={{tvs_bv}})
-.options method=gear rshunt=1e10
+* rshunt 1e11, not the receive deck's 1e10: with U-BW-SW's block in, TI's INA828 model found no
+* operating point at v_sensor = 1.0 V under 1e10 (gmin and source stepping both failed,
+* 2026-10-04); 1e9 and 1e11 both converge, to the same dv_leak. 100 Gohm per node is
+* five decades above the deck's highest impedance, R4/R5's 1 Mohm.
+.options method=gear rshunt=1e11
 .control
 op
 let vo_leak = v(out)

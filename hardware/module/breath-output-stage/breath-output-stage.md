@@ -92,7 +92,7 @@ the two agree, and where they do not the netlist wins.*
                                                  │
                                    [R-OUT-PROT 1k 500mW]
                                                  │
-                                                 ├──[C-OUT-BREATH 330nF film]── AGND
+                                                 ├──[C-OUT-BREATH 10nF C0G]── AGND
                                                  │
                                            BREATH jack
 ```
@@ -172,9 +172,17 @@ now: `U-ISO` draws rail to rail (ADR 0027), so both rails move with breath,
 by 9.7 mV at the header (ADR 0027's residual table). Through this divider
 that is `40.2k/95.3k × 9.7 mV` = **4.1 mV, 0.04 % of span** `[calc]`, and it
 follows breath, as this output does. The same divider carries the instrument
-LED row's 2–4 kHz PWM off −12 V; behind `R-OUT-PROT` and `C-OUT-BREATH` it is
-a fraction of a millivolt at the jack (`power-entry.md`, *The LED row's PWM*,
-simulated in `power-entry/sim` `led-pwm`).
+LED row's 2–4 kHz PWM off −12 V. `R-OUT-PROT` and `C-OUT-BREATH` no longer
+filter it (their corner is 15.9 kHz since #32), so the divider's share reaches
+the jack: **up to 1.14 mV p-p at 2 kHz on the worst corner, 0.50 mV nominal,
+against `power-entry/sim`'s 1 mV bar** (`led-pwm`; it was 0.26 mV behind the
+old 330 nF). It is below the jack's own noise in every mode, and the bar was
+not moved. **Open, for the owner (#32):** the cheap fix is to filter this leg
+where it enters — `R-BREATH-OFFNEG` as two 47.5 kΩ in series with 1 µF from
+their midpoint to `AGND_MOD`, about 6.7 Hz `[calc: 1/(2π × 23.75 kΩ × 1 µF)]`,
+which takes the PWM down by ~50 dB and the rail's breath-rate movement with
+it, at no DC change; one part and a split, on a sheet the module re-layout is
+placing anyway.
 
 ## Values
 
@@ -188,11 +196,12 @@ simulated in `power-entry/sim` `led-pwm`).
 | **R-OFF** | 21.0 kΩ 1 % | Variable positive leg |
 | **R-OFFNEG** | 95.3 kΩ 1 % | Fixed negative leg from −12 V |
 | **R-OUT-PROT** | 1 kΩ, 1206 ≥500 mW | Shared spec with the other five outputs |
-| **C-OUT-BREATH** | 330 nF film | ~482 Hz with `R-OUT-PROT`, jack side, feedback from the op-amp |
+| **C-OUT-BREATH** | 10 nF C0G | 15.9 kHz with `R-OUT-PROT`, jack side, feedback from the op-amp: above the receive stage's widest mode, so the jack sets no band-limit of its own (#32, ADR 0003 *Amendment, 2026-10-04*) |
 
 **Two op-amp halves**, which settles a count that has been wrong in the BOM
-twice: gain buffer and summer. Ten of the twelve halves in the six
-`U-OPA-PITCH` packages are used, two spare (`U-REF-BUF` B, `U-MOD-C` B); the
+twice: gain buffer and summer. Eleven of the twelve halves in the six
+`U-OPA-PITCH` packages are used, one spare (`U-MOD-C` B) — `U-REF-BUF` B drives
+the breath LED since #32 (`breath-receive-stage.md`, *The breath LED*); the
 response shaper is its own package, `U-RESP`.
 
 ## Headroom, and the combination that clips

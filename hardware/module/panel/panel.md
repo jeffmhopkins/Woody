@@ -36,6 +36,38 @@ The `Dir` and `Peer` columns are defined once in
 | panel studs | — | — | — | Two self-clinching studs (`MECH-PANEL-STUD-MOD`) holding the main board's low spacers (ADR 0024 point 15): two holes in the cut file, and two flush heads that show on the face, inside island C (`panel_standoff.*`) |
 | `SW-POWER` toggle | — | `module/umbilical-load-switch` | `panel-toggle-hole`, `panel-height-budget` | The shaped hole this page owns — it has to be in the DXF because it cannot be cut afterwards. The switch's net is that circuit's |
 | etherCON flange | — | — | `panel-width` | The umbilical connector's panel cutout |
+| `SW-BREATH-BW` toggle | — | `module/breath-receive-stage` | `panel-toggle-hole`, `panel-height-budget` | **Added 2026-10-04 (#32), not yet in the layout.** The breath bandwidth toggle (owner: "Panel 3-way toggle", "500 Hz / 1.5 kHz / wide"): an NKK M2024, the same body, bushing and shaped hole as `SW-POWER`, its lugs wired to the main board. Its position, throw and legend are the module re-layout's (*Two parts waiting for the layout*, below) |
+| `LED-BREATH` hole | — | `module/breath-receive-stage` | `panel-height-budget` | **Added 2026-10-04 (#32), not yet in the layout.** The breath indicator, the same part and hole as `LED-PANEL` (`led.hole_d`), on the far side of `SW-POWER` from it (owner); its lead goes to `J-LED-BREATH` on the main board |
+
+## Two parts waiting for the layout (#32, 2026-10-04)
+
+**`SW-BREATH-BW` and `LED-BREATH` are on the receive stage's sheet and in the
+BOM, and on no drawing of the panel yet.** The module's boards and panel are
+being re-laid out separately; this is what that work needs, and nothing in
+`config/module.yaml` has moved for it.
+
+- **`LED-BREATH`**: the owner placed it — *in the toggle row, on the other side
+  of `SW-POWER` from `LED-PANEL`*. The same envelope as `LED-PANEL`
+  (`led.*`: hole, nut, lead), its lead to `J-LED-BREATH`, a second B2B-XH-A
+  on the main board's front face below it, like `J-LED-PANEL`. Legend:
+  **BREATH**.
+- **`SW-BREATH-BW`**: the same hole as `SW-POWER` (`panel-toggle-hole`, D-flat)
+  and one front nut, but a **double-pole body**, 12.7 mm across against
+  `SW-POWER`'s 7.9, the same 9.4 mm behind the bushing, two rows of solder lugs
+  4.8 mm apart `[ds NKK-SERIES-M-TOGGLE.pdf p.11]`; three wires (the jumpered
+  commons, lug 4, lug 1) to solder pads on the main board beside `U-BW-SW`,
+  which sits beside the INA828. Its body is deeper than the gap to the jack
+  board, so it must sit **below the jack board's bottom edge**, as `SW-POWER`
+  does. **It throws left–right, like `SW-POWER`, and is mounted the same way,
+  D-flat on the left** (owner, 2026-10-04: *"full left being 500 full right
+  being wide is the intuitive placement because it matches the on off of the
+  power switch"*; ADR 0024 point 18): lever left is 500 Hz, centre 1.5 kHz,
+  right WIDE, and the wiring on `breath-receive-stage.md`, *The bandwidth
+  toggle*, is what makes it so. The panel carries no position words. Where in
+  the toggle row it sits is the re-layout's.
+- **`J-B2B-MOD` is not used by either**: it has one spare pin (19), not the two
+  a jack-board toggle would need, so both parts wire straight to the main
+  board, as `SW-POWER` and `LED-PANEL` do.
 
 ## The layout
 

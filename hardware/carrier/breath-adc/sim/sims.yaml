@@ -105,15 +105,19 @@ sims:
   - name: filter
     deck: adc-ac.cir
     vary: [R-ADCDIV-U, R-ADCDIV-L, C-AA-ADC]
-    measures: [f_3db, atten_buck_db]
+    measures: [f_3db, atten_nyq_db, atten_4k_db, atten_buck_db]
     post:
       f_3db: "cross(w['hdb'], at(w['hdb'], 1.0) - 3.0103, 1.0)"
+      # what the pole does at the 4 kHz loop's Nyquist frequency, and at 4 kHz itself - the
+      # LED row's refresh rate, which a 4 kHz sample folds to DC (breath-adc.md, 'The sample rate')
+      atten_nyq_db: "at(w['hdb'], 1.0) - at(w['hdb'], 2000.0)"
+      atten_4k_db: "at(w['hdb'], 1.0) - at(w['hdb'], 4000.0)"
       atten_buck_db: "at(w['hdb'], 1.0) - at(w['hdb'], p['f_buck'])"
     asserts:
-      - expr: "abs(nom['f_3db'] - 564) < 6"
-        why: "the page's 564 Hz corner, 1/(2 pi x 6.0 kohm x 47 nF)"
-      - expr: "min['atten_buck_db'] > 54"
-        why: "the page's 55 dB at the buck's ~330 kHz: one pole, nothing else to it"
+      - expr: "abs(nom['f_3db'] - 1474) < 15"
+        why: "the page's 1.47 kHz corner, 1/(2 pi x 6.0 kohm x 18 nF): the module's 1.5 kHz mode (#32, owner 2026-10-04), not switched here"
+      - expr: "min['atten_buck_db'] > 46"
+        why: "the page's 47 dB at the buck's ~330 kHz: one pole, nothing else to it"
   - name: step
     # a full-scale step from rest: the time constant the loop reads the note-on through
     deck: adc.cir
@@ -123,8 +127,8 @@ sims:
     post:
       tau: "cross(w['adc'], (1 - math.exp(-1)) * p['v1'] * p['ratio'], p['t_step']) - p['t_step']"
     asserts:
-      - expr: "abs(nom['tau'] - 282e-6) < 5e-6"
-        why: "the page's tau = 6 kohm x 47 nF = 282 us, the term latency-budget.md books (the sample kickback does not move it)"
+      - expr: "abs(nom['tau'] - 108e-6) < 3e-6"
+        why: "the page's tau = 6 kohm x 18 nF = 108 us, the term latency-budget.md books (the sample kickback does not move it)"
   - name: kickback
     # the sensor at full scale, held; twelve samples (ten time constants), each from a
     # discharged C_SAMPLE
@@ -141,10 +145,34 @@ sims:
       # how far C_SAMPLE got from 0 V towards ADC_IN inside the window: 1 means fully charged
       settle_frac: "at(w['cs'], p['t_first'] + 11 * p['t_loop'] + p['t_sample'] - 20e-9) / at(w['adc'], p['t_first'] + 11 * p['t_loop'] + p['t_sample'] - 20e-9)"
     asserts:
-      - expr: "min['err_lsb'] > -4 and max['err_lsb'] < 0"
-        why: "a pure gain term, under 4 LSB at every corner (adc-sample-kickback; C_SAMPLE and R_SS are typicals only). The average-current model (80 nA/V through 6 kohm) leaves out the instantaneous share each sample takes from C-AA-ADC, 20 pF/47 nF of it [calc: 0.043 %, 1.5 LSB at full scale], which the next sample finds only partly restored"
+      - expr: "min['err_lsb'] > -8 and max['err_lsb'] < 0"
+        why: "a pure gain term, under 8 LSB at every corner (adc-sample-kickback; C_SAMPLE and R_SS are typicals only). The bound was 4 LSB against 47 nF; 18 nF (#32) holds a third of the charge, so each sample takes 20 pF/18 nF of it at once [calc: 0.11 %, 4.0 LSB at full scale] on top of the average current (80 nA/V through 6 kohm, 1.7 LSB), and the 108 us time constant has it 90 % back by the next sample. A GAIN term (proportional to the reading): 0.16 % of the span at the worst corner, inside what the firmware's span and the panel's GAIN absorb (breath-adc.md, 'Sample-cap charge sharing')"
       - expr: "min['settle_frac'] > 0.9999"
         why: "C_SAMPLE charges fully inside t_SAMPLE (1.5 clocks at 900 kHz, 1.67 us against R_SS x C_SAMPLE = 20 ns): what it holds is C-AA-ADC's voltage, not a partial charge"
+  - name: kickback-8k
+    # WHAT-IF (#32): two conversions per 250 us pass, one every 125 us - the rate that would
+    # let firmware average pairs. Not what the firmware does: the loop budget has no room
+    # for the second read at its serialised end (breath-adc.md, 'The sample rate')
+    deck: adc.cir
+    set: {k0: 1.0, k1: 1.0, t_end: 3.0e-3, t_loop: 125.0e-6}
+    vary: [R-ADCDIV-U, R-ADCDIV-L, C-AA-ADC, r_ss, c_sample]
+    measures: [err_lsb, droop_lsb]
+    post: &kick_post
+      err_lsb: "(at(w['cs'], p['t_first'] + 11 * p['t_loop'] + p['t_sample'] - 20e-9) - p['v1'] * p['ratio']) / p['lsb']"
+      droop_lsb: "(p['v1'] * p['ratio'] - trough(w['adc'], p['t_first'] + 11 * p['t_loop'], p['t_first'] + 11 * p['t_loop'] + p['t_sample'])) / p['lsb']"
+    asserts:
+      - expr: "min['err_lsb'] > -8 and max['err_lsb'] < 0"
+        why: "WHAT-IF: at 8 kHz the kickback is still a pure gain term, under 8 LSB at every corner - the span knob and the firmware's span absorb it"
+  - name: kickback-16k
+    # WHAT-IF (#32): four conversions per pass, the 16 kHz the issue asked about
+    deck: adc.cir
+    set: {k0: 1.0, k1: 1.0, t_end: 3.0e-3, t_loop: 62.5e-6}
+    vary: [R-ADCDIV-U, R-ADCDIV-L, C-AA-ADC, r_ss, c_sample]
+    measures: [err_lsb, droop_lsb]
+    post: *kick_post
+    asserts:
+      - expr: "min['err_lsb'] > -16 and max['err_lsb'] < 0"
+        why: "WHAT-IF: at 16 kHz the kickback is still a gain term, under 16 LSB: the sample capacitor's average current doubles with each doubling of the rate"
   # --- #12 item 2: the power-up sequencing breath-adc.md's 'Why the upper leg is >=10 kohm'
   # cites. INST_POS12 ramps through Q-INRUSH; VS and the sensor follow it as soon as the
   # reference can; the 5 V rail (and behind it the dev board's 3V3) waits for BUCK_IN to pass
