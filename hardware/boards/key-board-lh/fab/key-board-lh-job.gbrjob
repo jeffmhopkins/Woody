@@ -5,13 +5,13 @@
       "Application": "Pcbnew",
       "Version": "9.0.9-9.0.9~ubuntu24.04.1"
     },
-    "CreationDate": "2026-10-04T19:04:57+00:00"
+    "CreationDate": "2026-10-04T19:26:54+00:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
       "Name": "key-board-lh",
       "GUID": "6b65792d-626f-4617-9264-2d6c682e6b69",
-      "Revision": "B"
+      "Revision": "A"
     },
     "Size": {
       "X": 89.0,

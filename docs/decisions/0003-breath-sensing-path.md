@@ -942,9 +942,9 @@ datasheet's figure, not a measurement]`.
 
 ### The owner's three answers, 2026-10-04 (#32)
 
-The simulations left three results failing their bars. Each was put to the
-owner in the working chat with its options; no bar was moved to make a result
-pass.
+The simulations left three results failing their bars, and the third's fix
+raised a fourth question. Each was put to the owner in the working chat with
+its options; no bar was moved to make a result pass.
 
 1. **WIDE's CMRR.** Offered *"Keep wide at ~10 kHz and only require the target
    up to ~7 kHz. No parts change."*, the owner chose **"Keep 10 kHz, accept"**.
@@ -970,3 +970,15 @@ pass.
    6.7 Hz on the offset's −12 V leg (`breath-output-stage.md`, *Why −12 V is
    acceptable here*). It raises the jack's rest level by 16 mV, which
    `POT-OFFSET` trims.
+4. **The drift that filter brings when the LED row changes.** With the leg
+   filtered at 6.7 Hz, a step in the −12 V rail's mean (the row lighting, or
+   its pattern changing) reaches the breath jack as a slow ramp over about
+   0.1 s instead of at once: in the system sim, 0.72 mV nominal and 1.58 mV at
+   the worst corner inside the 8 ms after the row lights, against 0.05 mV p-p
+   of PWM ripple. Offered *"1.6 mV slow step only when the LED pattern
+   changes; far below anything audible or musically meaningful. Record it as
+   a known figure and keep the ripple-only measure."*, the owner chose
+   **"Accept, record it (Recommended)"**. So the drift is a **recorded
+   figure, not a pass**, and the system sim asserts the ripple
+   (`breath_ripple_mv`) against its unchanged bars
+   (`hardware/interfaces/system/sim/`, `led-pwm` and `led-pattern`).

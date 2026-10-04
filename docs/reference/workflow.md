@@ -50,7 +50,10 @@ GitHub and to this table in the same change.
 
 ## Commits, not pull requests
 
-Work goes straight to the integration branch. Each commit that does work for
+Work goes straight to the integration branch. Every push, to any branch, is
+checked by CI, which reports and does not block
+([`tooling.md`](tooling.md), *CI*); look at the run before calling a push
+done. Each commit that does work for
 an issue names it in the subject or body (`#9 G2: …`, `Refs #7`). A commit that
 finishes an issue says `Closes #n` only when the push really completes it;
 otherwise the issue is closed by hand with its outcome comment.

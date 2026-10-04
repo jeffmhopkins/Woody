@@ -361,7 +361,7 @@ sims:
       - expr: "nom['pitch_cents'] < p['pitch_bound'] and max['pitch_cents'] < fig['pitch-cents-budget'] / 50"
         why: "ROADMAP M8's 'pitch scoped while the LEDs sweep', simulated: the pitch jack moves under 0.01 cents p-p at the nominal (ADR 0027's residual), and under a fiftieth of pitch-cents-budget at every corner of the rack's PSU, C2's ESR, the LED bulk's ESR and the cable's gauge. The worst corner is over 0.01 cents (README, Findings)"
       - expr: "max['breath_ripple_mv'] < 0.5 * p['breath_noise'] * 1e3"
-        why: "the breath jack's ripple from the row is under half its own noise, peak to peak (breath-jack-noise's rms x an_crest, at every corner). Measured as breath_ripple_mv since #32: the -12 V leg's RC (C-BREATH-OFFNEG, 6.7 Hz) now passes the row's turn-on step to the jack as a ~0.1 s ramp that the 4 ms skip no longer clears; breath_mv, which holds that ramp, is recorded"
+        why: "the breath jack's ripple from the row is under half its own noise, peak to peak (breath-jack-noise's rms x an_crest, at every corner). Measured as breath_ripple_mv since #32: the -12 V leg's RC (C-BREATH-OFFNEG, 6.7 Hz) now passes the row's turn-on step to the jack as a ~0.1 s ramp that the 4 ms skip no longer clears; breath_mv, which holds that ramp, is recorded, not passed (owner, 2026-10-04: 'Accept, record it (Recommended)'; ADR 0003)"
       - expr: "max['hdr_pos_mv'] < p['rail_led_bound'] * 1e3 and max['hdr_neg_mv'] < p['rail_led_bound'] * 1e3"
         why: "the case's +-12 V at the module's header ripple under led-pwm-rail-ripple, power-entry/sim's worst, at every corner of this deck"
       - expr: "max['pre_pitch_cents'] < 0.01 * min['pitch_cents'] and max['pre_breath_mv'] < 0.01 * min['breath_mv']"

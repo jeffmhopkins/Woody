@@ -252,7 +252,9 @@ net_classes:
   # block's density leaves no other way for: VS across the feedback ring stacked down the
   # mouth edge (laid out to: "VS from R8's foot to R7's head down layer 4"), REF_5V round
   # U4. Layer 1 only was tried first and left SENSOR_RAW, REF_MINUS, REF_5V and VS
-  # unroutable. ADC_VDD is U-ADC's supply AND its reference (breath-adc.md); the supplies
+  # unroutable. (That was the first layout; the board as it now stands routes all but VS
+  # wholly on layer 1, by hand - README.md, The analog block, #33.)
+  # ADC_VDD is U-ADC's supply AND its reference (breath-adc.md); the supplies
   # and references as wide as DEV_3V3
   analog_supply:
     nets: [/breath-adc/ADC_VDD, REF_VIN, /breath-excitation-reference/REF_5V, VS]
@@ -407,6 +409,23 @@ heights:
 # room over the bottom plate"); the thumb switches hang through the thumb plates instead.
 underside_rows: [SW1-n]
 
+# SOLDERING-IRON ROOM round hand-soldered pads (#34; pcb.check_iron): each rows: part's pads
+# on the face it is soldered on (a through-hole part's far face), grown 0.25 as a courtyard
+# is, kept min mm from every other part's courtyard on that face. 2.0 for the thumb
+# switches' pins (the module boards' iron_min: a 1.5-2 mm conical tip set on the pad at
+# ~45 degrees without touching the neighbour [from memory]); 1.5 for the sensor's gull-wing
+# pads (the coordinator's #34 C7 figure). except: a pair that cannot have it, and why.
+iron_room:
+  rules:
+    - {rows: [SW1-n], min: 2.0}
+    - {rows: [U-BREATH], min: 1.5}
+  except:
+    - {part: SW2, near: H2, reason: "both placed by the body CAD: the far column mount's nut 1.32 mm off the switch's leg pin. Owner 2026-10-04: key layout final for rev A - accepted for rev A, check on the boards in hand"}
+    - {part: SW6, near: H6, reason: "as SW2 / H2 (1.32 mm). Accepted for rev A, check on the boards in hand"}
+    - {part: SW8, near: J5, reason: "both placed by the body CAD (J5 the right-hand chain header): 0.01 mm. Accepted for rev A, check on the boards in hand"}
+    - {part: U10, near: R7, reason: "owner 2026-10-04, after the pad gaps were measured: Keep it, solder carefully - hand-solder U10 first with a fine tip (its Fit field). Pad to pad 0.80 mm, U10 pin 5 (no-connect) to R7 pad 2; courtyards 0.28 mm"}
+    - {part: U10, near: U3, reason: "owner 2026-10-04, after the pad gaps were measured: Keep it, solder carefully - hand-solder U10 first with a fine tip (its Fit field). Pad to pad 1.59 mm, U10 pins 5-8 (no-connect) to U3's pin-1 row; courtyards 0.86 mm"}
+
 # Placement: TOP face, body coordinates, [x, y, rot] (rot CCW seen from above).
 parts:
   # --- the analog island, at the mouth end. U-BREATH (the echo) at the top left; the
@@ -517,10 +536,31 @@ parts:
   FB2: [167.3, 41.5, 90]    # FB-CHAIN, the RH ribbon's 3V3
   U11: [175.6, 44.2, 0]     # U-TVS-CHAIN at J5 (key-chain-loom.md): SCK, SH/LD, HOP_LT_RH, HOP_RH_RT; pin 2 its own via
 
+# The hand parts' tails, cut after soldering (issue #8-11; owner, 2026-10-04: "Trim
+# length", over an insulating sheet on the plate): pcb.py render writes each one's
+# maximum into fab/main-board-hand-assembly.csv's Fit column, computed from the named
+# config/body.yaml figures, so the sheet follows them. Over the grounded bottom plate the
+# board's bottom face stands hardware.kb_spacer_l above it (the spacer at every mount);
+# a tail and its solder may reach that, less boards.tail_clear, the body's own least air
+# between a tail and what is under it - the margin is that figure, not a new one
+# [calc: kb_spacer_l - tail_clear]. drc.echo 'through-hole tails under the main board
+# clear of the bottom plate' holds the parts as supplied to the same tail_clear, so this
+# is the limit on what the solder and an uncut tail add after it. Applies to the three
+# hand parts whose tails are over the plate: J-MCU (J1) and J-CHAIN x2 (J4, J5). U-BUCK
+# (U5) is cut to boards.tht_trim, its own figure (over a window to the oak). J-UMB (J6,
+# past the plate's end) and HDR-SERVICE (J2, over a window) stand over oak, not the
+# grounded plate, and clear it as supplied (drc.echo, the same line): no trim. The
+# thumb switches enter from below, so their tails are on the top face.
+hand_trim:
+  J1: {max: "hardware.kb_spacer_l - boards.tail_clear", why: "J-MCU, over the grounded bottom plate (#8-11)"}
+  J4: {max: "hardware.kb_spacer_l - boards.tail_clear", why: "J-CHAIN (LH), over the grounded bottom plate (#8-11)"}
+  J5: {max: "hardware.kb_spacer_l - boards.tail_clear", why: "J-CHAIN (RH), over the grounded bottom plate (#8-11)"}
+  U5: {max: "boards.tht_trim", why: "U-BUCK, over its window to the oak: as supplied its pins reach the oak (drc.echo, through-hole tails)"}
+
 silk:
-  at: [100.0, 45.5]
+  at: [105.5, 37.0]         # mid-board between the switch pairs; the old place, [100.0, 45.5], is the breath pair's since #8 (#33)
   title: "WOODY main board"
-  rev: "A"                  # owner, 2026-10-03: rev A on the first board fabricated (README, Revisions)
+  rev: "A"                  # owner, 2026-10-03: rev A on the first board fabricated (README, Ordering it, Revision)
   date: "2026-10-03"
 
 # Routing: pcb_route.fanout and route_pair first (above), then every other

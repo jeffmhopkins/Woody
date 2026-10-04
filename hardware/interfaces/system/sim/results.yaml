@@ -4,11 +4,11 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/interfaces/system/sim/sims.yaml: 5adc768e780e2962
+  hardware/interfaces/system/sim/sims.yaml: b9f276978e889230
   hardware/module/breath-receive-stage/netlist.yaml: dab496982d183718
   hardware/interfaces/breath-sense-link/netlist.yaml: 3174b77569cdaf62
   hardware/carrier/netlist.yaml: ef0e3936d2b75f11
-  hardware/carrier/power-entry-instrument/netlist.yaml: d20421ddf0209f51
+  hardware/carrier/power-entry-instrument/netlist.yaml: e9a49796fdb69d0d
   hardware/carrier/breath-excitation-reference/netlist.yaml: 2d5ee10b223dc95d
   hardware/carrier/led-strip-drive/netlist.yaml: ec7ec56762e982ee
   hardware/module/power-entry/netlist.yaml: 14fd898035959809
@@ -32,7 +32,7 @@ inputs:
   hardware/module/umbilical-load-switch/sim/lt1641.inc: 59be165ccd4451a6
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
   datasheets/analog/INA828-ti-pspice-sbomag5c.lib: 6ae6e0285c98dc1e
-  hardware/module/power-entry/sim/sims.yaml: 32ce9939f04ef7f2
+  hardware/module/power-entry/sim/sims.yaml: 0d5221ddf1068795
   hardware/module/umbilical-load-switch/sim/sims.yaml: cadec99739eed8eb
   hardware/carrier/power-entry-instrument/sim/sims.yaml: c0e62a80d6155dee
   hardware/interfaces/spi-link/sim/sims.yaml: 87161a5d295990b6
@@ -515,7 +515,7 @@ sims:
       why: 'the breath jack''s ripple from the row is under half its own noise, peak to peak (breath-jack-noise''s rms x an_crest,
         at every corner). Measured as breath_ripple_mv since #32: the -12 V leg''s RC (C-BREATH-OFFNEG, 6.7 Hz) now passes
         the row''s turn-on step to the jack as a ~0.1 s ramp that the 4 ms skip no longer clears; breath_mv, which holds that
-        ramp, is recorded'
+        ramp, is recorded, not passed (owner, 2026-10-04: ''Accept, record it (Recommended)''; ADR 0003)'
       pass: true
     - expr: max['hdr_pos_mv'] < p['rail_led_bound'] * 1e3 and max['hdr_neg_mv'] < p['rail_led_bound'] * 1e3
       why: the case's +-12 V at the module's header ripple under led-pwm-rail-ripple, power-entry/sim's worst, at every corner

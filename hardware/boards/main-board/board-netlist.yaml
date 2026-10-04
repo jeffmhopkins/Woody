@@ -327,6 +327,27 @@ components:
     - 1
     - 2
     sheet: power-entry-instrument
+  C45:
+    of: C-STITCH-12V
+    value: 100nF 50V X7R
+    pins:
+    - 1
+    - 2
+    sheet: power-entry-instrument
+  C46:
+    of: C-STITCH-12V
+    value: 100nF 50V X7R
+    pins:
+    - 1
+    - 2
+    sheet: power-entry-instrument
+  C47:
+    of: C-STITCH-12V
+    value: 100nF 50V X7R
+    pins:
+    - 1
+    - 2
+    sheet: power-entry-instrument
   C5:
     of: C-REF-OUT
     value: 10uF
@@ -1627,6 +1648,9 @@ nets:
   - C37.1
   - C38.1
   - C44.1
+  - C45.1
+  - C46.1
+  - C47.1
   - D10.VDD
   - D11.VDD
   - D12.VDD
@@ -1691,6 +1715,9 @@ nets:
   - C38.2
   - C43.2
   - C44.2
+  - C45.2
+  - C46.2
+  - C47.2
   - D10.GND
   - D11.GND
   - D12.GND

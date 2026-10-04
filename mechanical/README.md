@@ -3,10 +3,12 @@
 *Installing the tools and the day-to-day loop: [`docs/reference/tooling.md`](../docs/reference/tooling.md)
 (`sudo bash tools/setup-env.sh` installs everything).*
 
-> **Status:** first model, 2026-09-26. **Layout is PROVISIONAL**: every key
-> position in `config/key-layout.yaml` is still `null` (they are M2/M3
-> outputs), so keys are placed on ADR 0009's length budget and every render
-> says so in its footer. Keys are **flush with the top face at full travel**
+> **Status:** first model, 2026-09-26. **Layout is final for rev A** (owner,
+> 2026-10-04; ADR 0010, *Amendment, 2026-10-04*): every key position in
+> `config/key-layout.yaml` is still `null`, and keys are placed from the
+> `config/body.yaml` `layout:` figures, now `settled`. Until those were settled
+> every render said PROVISIONAL in its footer; the check on the rev A boards in
+> hand stays (ROADMAP, M3). Keys are **flush with the top face at full travel**
 > — thumb keys included, on the bottom face. **There is no display board**:
 > the LED matrix is the instrument's only display (ADR 0015, 2026-09-26).
 

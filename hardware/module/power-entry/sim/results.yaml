@@ -4,13 +4,13 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/power-entry/sim/sims.yaml: 32ce9939f04ef7f2
+  hardware/module/power-entry/sim/sims.yaml: 0d5221ddf1068795
   hardware/module/power-entry/netlist.yaml: 14fd898035959809
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/mod-channels/netlist.yaml: 00739b63d111a848
   hardware/module/breath-output-stage/netlist.yaml: e28cccf37c29f7b1
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
-  hardware/carrier/power-entry-instrument/netlist.yaml: d20421ddf0209f51
+  hardware/carrier/power-entry-instrument/netlist.yaml: e9a49796fdb69d0d
   hardware/carrier/led-strip-drive/netlist.yaml: ec7ec56762e982ee
   hardware/module/power-entry/sim/poweron.cir: 0c1ee473967b4108
   hardware/module/power-entry/sim/groundshift.cir: 4aae040d6b7e03a1

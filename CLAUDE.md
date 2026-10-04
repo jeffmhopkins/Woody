@@ -48,7 +48,8 @@ must go in anyway, put a trailer line in the message,
 failures shown, and `git log --grep Gate-Red` lists every such commit. Do not
 use it to get past a failure your own change caused. A crash or a timeout is
 a FAIL. It is a Claude Code hook only: a human's `git commit` passes no gate,
-and there is no CI (`docs/reference/tooling.md`, *The commit gate*). The hook
+and is reported only after the push, by CI, which blocks nothing
+(`docs/reference/tooling.md`, *CI*). The hook
 this replaced ran the full scan before *every* `Bash` call, behind an `"if"`
 that gated nothing, and never blocked — found behaviourally by the 2026-09-22
 coverage slice (E2-8) and fixed by issue #9 (G1).

@@ -185,6 +185,14 @@ them, and each is `[sim]`. "Worst" is the worst corner.
   here*). `system.lib` also holds the RC's split at its DC value until 6 ms
   before `t_settle` (a solver aid, like `power-entry/sim`'s `ledpwm.cir`), or
   its power-on settling reads as 4.7 µV in `led-off`.
+- **The drift is a recorded figure, by the owner's decision.** Offered *"1.6
+  mV slow step only when the LED pattern changes; far below anything audible
+  or musically meaningful. Record it as a known figure and keep the
+  ripple-only measure."*, the owner chose **"Accept, record it
+  (Recommended)"** (2026-10-04, ADR 0003, *The owner's three answers*, item
+  4). Recorded, not passed: `breath_mv` **0.72 mV nominal, 1.58 mV at the
+  worst corner** in `led-pwm` (0.71 and 1.50 in `led-pattern`), a ramp of
+  about 0.1 s each time the row's mean current steps. Asserted: `breath_ripple_mv`.
 - **The case's rails stay under `led-pwm-rail-ripple` for the LED row's
   PWM**, the worst `power-entry/sim` finds, at every corner. The breath jack moves by a fraction of a
   millivolt, as `power-entry/sim` found.

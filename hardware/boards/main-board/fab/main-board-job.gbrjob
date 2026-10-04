@@ -5,13 +5,13 @@
       "Application": "Pcbnew",
       "Version": "9.0.9-9.0.9~ubuntu24.04.1"
     },
-    "CreationDate": "2026-10-04T05:19:23+00:00"
+    "CreationDate": "2026-10-04T18:30:41+00:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
       "Name": "main-board",
       "GUID": "6d61696e-2d62-46f6-9172-642e6b696361",
-      "Revision": "rev?"
+      "Revision": "A"
     },
     "Size": {
       "X": 292.5,

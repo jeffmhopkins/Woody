@@ -6,7 +6,7 @@ inputs:
   tools/sim.py: 0312a1077b9afa80
   hardware/module/umbilical-load-switch/sim/sims.yaml: cadec99739eed8eb
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
-  hardware/carrier/power-entry-instrument/netlist.yaml: d20421ddf0209f51
+  hardware/carrier/power-entry-instrument/netlist.yaml: e9a49796fdb69d0d
   hardware/module/power-entry/netlist.yaml: 14fd898035959809
   hardware/module/umbilical-load-switch/sim/loadswitch.cir: 80db5a7940e539fc
   hardware/module/umbilical-load-switch/sim/lt1641.inc: 59be165ccd4451a6
