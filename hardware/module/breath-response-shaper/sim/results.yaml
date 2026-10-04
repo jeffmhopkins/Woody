@@ -4,8 +4,8 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/breath-response-shaper/sim/sims.yaml: befba7f85cb5cd25
-  hardware/module/breath-response-shaper/netlist.yaml: 3f6549b620f9e912
+  hardware/module/breath-response-shaper/sim/sims.yaml: cc575034f8557f82
+  hardware/module/breath-response-shaper/netlist.yaml: 86e851a6e5280c53
   hardware/module/breath-response-shaper/sim/shaper.cir: b9ddbd40af4ca648
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
   figure:inamp-full-scale: -9.94 V

@@ -210,6 +210,10 @@ derived:
   t_led0: "v['t_settle']"
   t_save0: "max(0.0, v['t_settle'] - 3.0e-3)"
   t_pre0: "max(0.0, v['t_settle'] - 2.0e-3)"
+  # system.lib's hold on C-BREATH-OFFNEG's split lets go here, before every scenario's first
+  # saved or measured instant (t_save_plug is t_settle - 5 ms) (#32)
+  t_hold_off: "v['t_settle'] - 6.0e-3"
+  t_hold_off_e: "v['t_settle'] - 6.0e-3 + 1.0e-6"
   t_meas0: "v['t_settle'] + v['t_led_skip']"
   t_end_led: "v['t_settle'] + v['t_led_run']"
   # burst.cir's timeline. Every source is a PULSE whose delay is written t_b0 + an offset (a
@@ -329,10 +333,18 @@ sims:
     # the row switching at its PWM rate, all in phase
     deck: led.cir
     vary: [r_psu, esr_c2, esr_strip, k_gauge]
-    measures: [pitch_cents, breath_mv, mod_mv, hdr_pos_mv, hdr_neg_mv, rail_pos_mv, rail_neg_mv, ins_mv, vs_uv, ina_uv, gnd_cm_mv, iso_ma, pre_pitch_cents, pre_breath_mv]
+    measures: [pitch_cents, breath_mv, breath_ripple_mv, mod_mv, hdr_pos_mv, hdr_neg_mv, rail_pos_mv, rail_neg_mv, ins_mv, vs_uv, ina_uv, gnd_cm_mv, iso_ma, pre_pitch_cents, pre_breath_mv]
     post: &led_post
       pitch_cents: "(peak(w['jp'], p['t_meas0'], p['t_end_led']) - trough(w['jp'], p['t_meas0'], p['t_end_led'])) * 1200"
       breath_mv: "(peak(w['jb'], p['t_meas0'], p['t_end_led']) - trough(w['jb'], p['t_meas0'], p['t_end_led'])) * 1e3"
+      # The row's ripple at the breath jack, without the row's turn-on step (#32). Since
+      # C-BREATH-OFFNEG (6.7 Hz) the step in the -12 V rail's mean when the row lights reaches
+      # the jack over ~0.1 s instead of inside t_led_skip, so breath_mv's window holds a slow
+      # ramp (0.72 mV of it at the nominal led-pwm corner, against 0.05 mV p-p of ripple per
+      # PWM period). Over the LAST LED period: peak to peak, less half the net change across
+      # that period - close for a ramp plus a ripple, and the ramp's own size is
+      # breath-output-stage.md's accepted rail term, not ripple. breath_mv stays, recorded.
+      breath_ripple_mv: "(peak(w['jb'], p['t_end_led'] - p['t_led_per'], p['t_end_led']) - trough(w['jb'], p['t_end_led'] - p['t_led_per'], p['t_end_led']) - 0.5 * abs(at(w['jb'], p['t_end_led']) - at(w['jb'], p['t_end_led'] - p['t_led_per']))) * 1e3"
       mod_mv: "(peak(w['jm1'], p['t_meas0'], p['t_end_led']) - trough(w['jm1'], p['t_meas0'], p['t_end_led'])) * 1e3"
       hdr_pos_mv: "(peak(w['hdrp'], p['t_meas0'], p['t_end_led']) - trough(w['hdrp'], p['t_meas0'], p['t_end_led'])) * 1e3"
       hdr_neg_mv: "(peak(w['hdrn'], p['t_meas0'], p['t_end_led']) - trough(w['hdrn'], p['t_meas0'], p['t_end_led'])) * 1e3"
@@ -348,8 +360,8 @@ sims:
     asserts: &led_asserts
       - expr: "nom['pitch_cents'] < p['pitch_bound'] and max['pitch_cents'] < fig['pitch-cents-budget'] / 50"
         why: "ROADMAP M8's 'pitch scoped while the LEDs sweep', simulated: the pitch jack moves under 0.01 cents p-p at the nominal (ADR 0027's residual), and under a fiftieth of pitch-cents-budget at every corner of the rack's PSU, C2's ESR, the LED bulk's ESR and the cable's gauge. The worst corner is over 0.01 cents (README, Findings)"
-      - expr: "max['breath_mv'] < 0.5 * p['breath_noise'] * 1e3"
-        why: "the breath jack moves under half its own noise, peak to peak (breath-jack-noise's rms x an_crest, at every corner)"
+      - expr: "max['breath_ripple_mv'] < 0.5 * p['breath_noise'] * 1e3"
+        why: "the breath jack's ripple from the row is under half its own noise, peak to peak (breath-jack-noise's rms x an_crest, at every corner). Measured as breath_ripple_mv since #32: the -12 V leg's RC (C-BREATH-OFFNEG, 6.7 Hz) now passes the row's turn-on step to the jack as a ~0.1 s ramp that the 4 ms skip no longer clears; breath_mv, which holds that ramp, is recorded"
       - expr: "max['hdr_pos_mv'] < p['rail_led_bound'] * 1e3 and max['hdr_neg_mv'] < p['rail_led_bound'] * 1e3"
         why: "the case's +-12 V at the module's header ripple under led-pwm-rail-ripple, power-entry/sim's worst, at every corner of this deck"
       - expr: "max['pre_pitch_cents'] < 0.01 * min['pitch_cents'] and max['pre_breath_mv'] < 0.01 * min['breath_mv']"
@@ -360,12 +372,12 @@ sims:
     deck: led.cir
     set: {f_led: 200.0}
     vary: [r_psu, esr_c2, k_gauge]
-    measures: [pitch_cents, breath_mv, mod_mv, hdr_pos_mv, hdr_neg_mv, rail_pos_mv, rail_neg_mv, ins_mv, vs_uv, ina_uv, gnd_cm_mv, iso_ma, pre_pitch_cents, pre_breath_mv]
+    measures: [pitch_cents, breath_mv, breath_ripple_mv, mod_mv, hdr_pos_mv, hdr_neg_mv, rail_pos_mv, rail_neg_mv, ins_mv, vs_uv, ina_uv, gnd_cm_mv, iso_ma, pre_pitch_cents, pre_breath_mv]
     post: *led_post
     asserts:
       - expr: "max['pitch_cents'] < 0.1 * fig['pitch-cents-budget']"
         why: "a light pattern at 200 Hz, inside the pitch band where nothing filters it, moves the pitch jack under a tenth of pitch-cents-budget at every corner"
-      - expr: "max['breath_mv'] < 0.1 * p['R-BREATH-FB'] / (2 * p['R-BREATH-OFFNEG']) * max['hdr_neg_mv']"
+      - expr: "max['breath_ripple_mv'] < 0.1 * p['R-BREATH-FB'] / (2 * p['R-BREATH-OFFNEG']) * max['hdr_neg_mv']"
         why: "the -12 V path breath-output-stage.md names ('Why -12 V is acceptable here') is filtered since #32 (owner, 2026-10-04: 'Add RC filter (Recommended)'; C-BREATH-OFFNEG at the split of R-BREATH-OFFNEG, 6.7 Hz): a 200 Hz light pattern now moves the breath jack by under a tenth of what the unfiltered R-BREATH-FB / R-BREATH-OFFNEG share of the -12 V ripple used to put there (the run before #32 held it to that share within 20 %)"
       - expr: "max['pre_pitch_cents'] < 0.01 * min['pitch_cents'] and max['pre_breath_mv'] < 0.01 * min['breath_mv']"
         why: "the solver's floor is under 1 % of every result"
@@ -415,7 +427,7 @@ sims:
     deck: led.cir
     set: {bw: 0}
     vary: [r_psu, esr_c2, esr_strip, k_gauge]
-    measures: [pitch_cents, breath_mv, mod_mv, hdr_pos_mv, hdr_neg_mv, rail_pos_mv, rail_neg_mv, ins_mv, vs_uv, ina_uv, gnd_cm_mv, iso_ma, pre_pitch_cents, pre_breath_mv]
+    measures: [pitch_cents, breath_mv, breath_ripple_mv, mod_mv, hdr_pos_mv, hdr_neg_mv, rail_pos_mv, rail_neg_mv, ins_mv, vs_uv, ina_uv, gnd_cm_mv, iso_ma, pre_pitch_cents, pre_breath_mv]
     post: *led_post
     asserts:
       - expr: "nom['pitch_cents'] < p['pitch_bound'] and max['pitch_cents'] < fig['pitch-cents-budget'] / 50"

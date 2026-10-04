@@ -4,8 +4,8 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/breath-receive-stage/sim/sims.yaml: 094e5e14870e4390
-  hardware/interfaces/breath-sense-link/netlist.yaml: 430f1e37ec9c97fa
+  hardware/module/breath-receive-stage/sim/sims.yaml: d68adc654e1b1090
+  hardware/interfaces/breath-sense-link/netlist.yaml: 3174b77569cdaf62
   hardware/module/breath-receive-stage/netlist.yaml: dab496982d183718
   hardware/module/breath-receive-stage/sim/cmrr.cir: ac004dd0c5b58b85
   datasheets/analog/INA828-ti-pspice-sbomag5c.lib: 6ae6e0285c98dc1e
@@ -146,13 +146,19 @@ sims:
         min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5- k_sw_n+ k_sw_p-
         max: 101.869
         max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5- k_sw_n- k_sw_p-
-      cmrr_top:
-        nominal: 82.7514
-        min: 55.9739
-        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4- R5+ k_sw_n+ k_sw_p-
-        max: 82.7621
+      cmrr_7k:
+        nominal: 87.1015
+        min: 58.9625
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5- k_sw_n+ k_sw_p-
+        max: 87.1086
         max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5- k_sw_n- k_sw_p-
       cmrr_band:
+        nominal: 87.2343
+        min: 59.0574
+        min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4+ R5- k_sw_n+ k_sw_p-
+        max: 87.2413
+        max_at: C-CM-IN+- C-CM-IN-- R1- R1b- R2- R3- R4- R5- k_sw_n- k_sw_p-
+      cmrr_top:
         nominal: 82.7514
         min: 55.9739
         min_at: C-CM-IN+- C-CM-IN-+ R1+ R1b- R2- R3+ R4- R5+ k_sw_n+ k_sw_p-
@@ -173,9 +179,13 @@ sims:
       why: C_cm and the switch are fixed in every mode, so wide mode holds the requirement wherever the other modes' bands
         reach
       pass: true
-    - expr: min['cmrr_band'] > 58.5
-      why: THE REQUIREMENT OVER THIS MODE'S BAND, DC to 10 kHz, at every corner
-      pass: false
+    - expr: min['cmrr_band'] > 58.5 and min['f_req'] > 7000
+      why: 'THE REQUIREMENT OVER WIDE''S BAND, DC TO 7 kHz, at every corner. The band is the OWNER''S, not a bar moved to
+        pass: offered ''Keep wide at ~10 kHz and only require the target up to ~7 kHz. No parts change.'', the owner chose
+        ''Keep 10 kHz, accept'' (2026-10-04, ADR 0003 and ADR 0004 amendments). 7 kHz is where the worst corner first crosses
+        58.5 dB (f_req, 7.40 kHz), rounded down. Above it, to the corner, cmrr_top is RECORDED: 56.0 dB at 10 kHz at the worst
+        corner, not a pass'
+      pass: true
   cmrr-sw-spread:
     corners: 1025
     measures:

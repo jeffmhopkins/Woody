@@ -7,7 +7,7 @@ inputs:
   hardware/module/pitch-stage/sim/sims.yaml: ea934ec4c3bb645f
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/mod-channels/netlist.yaml: 00739b63d111a848
-  hardware/module/breath-output-stage/netlist.yaml: 8a1302cb7f7bd392
+  hardware/module/breath-output-stage/netlist.yaml: e28cccf37c29f7b1
   hardware/module/pitch-stage/sim/pitch-dc.cir: 039c84f738bdb7d1
   hardware/module/pitch-stage/sim/pitch-step.cir: 950f8c3e07d1df85
   hardware/module/pitch-stage/sim/pitch-loop.cir: 7cfa2c609be15558

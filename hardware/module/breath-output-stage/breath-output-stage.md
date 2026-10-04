@@ -188,7 +188,8 @@ to `AGND_MOD` — 6.7 Hz `[calc: 1/(2π × 23.75 kΩ × 1 µF)]`. The PWM and th
 rail's faster breath-rate movement are taken down before the summer; the DC
 gain from −12 V is 40.2k/95.0k: the rest level is 16 mV higher than with 95.3k (0.16 % of span),
 which `POT-OFFSET` trims (`sim/`, `offset`). What reaches the jack now is in
-`power-entry/sim` (`led-pwm`) and `sim/` (`rail`).
+`power-entry/sim` (`led-pwm`: 0.087 mV p-p at the worst corner, under its
+1 mV bar) and `sim/` (`rail`).
 
 ## Values
 
