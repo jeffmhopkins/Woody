@@ -351,7 +351,7 @@ only as good as those envelopes. Group the report's lines by these causes
    is what sends the two ends' cables toward each other; that makes the key
    board's pin numbers differ from the main board's — `key-chain-loom.md`
    says how.
-3. **The breath tube** is short: mouth cap, trap, then across over the LED
+3. **The breath tube** is short: the inlet's inner barb in the mouth cap (#36, *The breath inlet* in the README), straight into the trap on the inlet's axis, then across over the LED
    row (*"breath tube crosses the LED row clear of it"*) and back onto the sensor's port, all in the mouth band; the board has a
    slot in front of the sensor's lower port.
 4. **The U-bolt has the middle station to itself** (ADR 0025: the lid

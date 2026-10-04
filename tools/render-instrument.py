@@ -321,7 +321,7 @@ GROUPS = {
     "oak bottom": ["oak bottom"],
     "side left": ["side left"],
     "side right": ["side right"],
-    "mouth cap": ["mouth cap"],
+    "mouth cap": ["mouth cap", "breath inlet insert", "breath inlet barb", "breath inner barb"],
     "tail cap": ["tail cap", "USB-C receptacle"],
     "key plate": ["key plate"],
     "bottom plate": ["bottom plate", "main board stud *"],

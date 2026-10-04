@@ -982,3 +982,78 @@ its options; no bar was moved to make a result pass.
    figure, not a pass**, and the system sim asserts the ripple
    (`breath_ripple_mv`) against its unchanged bars
    (`hardware/interfaces/system/sim/`, `led-pwm` and `led-pattern`).
+
+## Amendment, 2026-10-04 — the inlet: a flush metal barb at the mouth cap (#36)
+
+*Supersedes, in **The mouthpiece** above, where the mouthpiece is and what the
+body offers it; and, in **The cost, and why it is affordable**, the 400 mm tube
+as the path the breath travels. What those sections say about venting at the
+corners of the mouth and about the bore being a mouth-fit decision now applies
+to the player's own mouthpiece and tube, not to anything on the body.*
+
+**The owner, in the working chat and issue #36, 2026-10-04,** in order:
+
+1. *"currently we just have a pass-through for the tube out the top of the
+   controller. I think I'd rather have some kind of bulkhead connection with a
+   short tube from bulkhead to the air sensor and then that little nub on the
+   outside then would be like a replaceable thing"* (issue #36).
+2. On the options study's luer-lock recommendation: *"Luer lock I think is
+   good, but I want metal, preferably black"*.
+3. *"Our mouth will not touch the nub. We're going to attach another tube that
+   goes to something else"*.
+4. On the metal luer bulkheads, which stood 20–35 mm proud of the oak:
+   *"These all look way too long. I was thinking more of maybe just a Barb or
+   something at the top"*.
+5. On the external tube's length: *"Don't worry about the length and the sound
+   does not get attenuated like this being the filter like you could totally
+   speak into a tube and have full audio quality go through the tube sound
+   pressure that's silly"*.
+6. Offered the short-barb options, the owner chose **"B2: 1/8" barb
+   (Recommended)"**.
+
+**What is built** (`config/body.yaml` `inlet`, each figure with its source;
+`mechanical/README.md`, *The breath inlet*):
+
+- **On today's axis**, the mouth cap's centre, where the pass-through was. The
+  plain hole is gone; the cap is drilled `inlet.tap_drill_d` and tapped M8×1.25.
+- **An E-Z LOK 550-1032 brass insert** (10-32 inside, M8×1.25 outside), bedded
+  in epoxy flush with the cap's outer face. It is longer than the cap is
+  thick, so it stands into the cavity toward `U-BREATH`;
+  `mechanical/drc.echo` *"breath inlet insert clear of U-BREATH"* holds it.
+- **A Clippard 12842 #10-32 male flush fitting to 1/8" barb**, screwed into the
+  insert from outside by hand with thread sealant, as Clippard specifies. It is
+  the only part outside the oak, `inlet.barb_a` proud, held under the owner's
+  target by *"breath inlet barb proud of the oak"*. **Finished black** (BOM
+  `INLET-BARB`): black nickel, black chrome or PVD, the bore masked; not a
+  selenium cold-blackener. It unscrews to be replaced.
+- **A second 12842 from inside** takes the internal tube (`inlet.tube_*`) to
+  the trap.
+- **The trap moves onto the inlet's axis**, straight behind the inner barb,
+  instead of in `routing.tube_lane`. That leaves the trap reachable through the
+  inlet with the external tube off. A syringe of dry air or a pipe cleaner
+  gets in without opening the body: *"clearable without disassembly"*
+  (*Condensation, in proportion*, above). **It costs one thing**, recorded as a
+  note and not hidden: on the axis the trap stands over the row's mouth-end
+  LED (ADR 0028) and shades part of its cone (`mechanical/drc.echo`
+  *"breath trap over the LED row"*). That is the owner's to weigh at M4.
+- **The tube from the trap to `P1`** wants a 3/32" ID tube to grip `P1`'s barb
+  (`routing.tube_od`'s source; BOM `TUBE`); the 1/8" ID inlet tube is loose on
+  it.
+
+**The mouthpiece is the player's now.** `MECH-MOUTH` is whatever is on the far
+end of the external tube. Nothing on the body is a lip contact, and the
+venting-at-the-corners constraint governs that mouthpiece, not the barb.
+
+**The external tube is the player's too, and its length is not a design
+figure** (the owner's words, 5 above). The delay and the pipe modes above move
+with it; `docs/reference/latency-budget.md` books the path inside the body and
+leaves the external tube as its own term. **E2 measures the real path.**
+
+**Considered and set aside** (the study, with its datasheets banked in
+`datasheets/.manifest-R54-issue36-bulkhead.csv`, `-R55-` and `-R56-`): luer-lock
+bulkheads, both the Nordson plastic and the Industrial Specialties 316 /
+nickel-brass. The owner's *"way too long"* covers them, and no native-black
+metal female-luer bulkhead exists. Also barbed and push-to-connect bulkhead
+unions, which were bulkier and two of which reached `U-BREATH`. A
+black-anodized aluminium 10-32 or M5 barb does not exist either, so the black
+comes from finishing the brass.

@@ -82,6 +82,34 @@ Where each number lives, so none is restated here:
 so an **etch test on an offcut** of the top's own board comes first (ROADMAP,
 *Bench measurements*).
 
+## The breath inlet
+
+The breath enters through **a short black metal barb at the centre of the
+mouth cap**, which the player's own tube pushes onto (owner, 2026-10-04, issue
+#36: *"just a Barb or something at the top"*; ADR 0003, *Amendment,
+2026-10-04 — the inlet*). The parts:
+
+- A Clippard 12842 flush barb screwed into an E-Z LOK 550-1032 brass insert.
+  The insert is tapped and epoxied through the oak, flush with its outer face.
+- A second 12842 inside, carrying the tube straight back into the trap. The
+  trap sits on the inlet's axis, so it can be cleared through the inlet with
+  the external tube off.
+
+BOM rows `INLET-*`, `TUBE-INLET`, `ADH-INLET` and `SEAL-INLET`.
+
+Where each number lives, so none is restated here:
+
+- **The insert, the barbs, the tap drill and the inside tube**:
+  `config/body.yaml` `inlet`, each with its source.
+- **How far the barb stands proud, and the insert's clearance to the breath
+  sensor**: [`drc.echo`](drc.echo), *"breath inlet barb proud of the oak"* and
+  *"breath inlet insert clear of U-BREATH"*.
+- **What the trap shades**: [`drc.echo`](drc.echo), *"breath trap over the LED
+  row"*. On the axis the trap stands over the row's mouth-end LED, recorded as
+  a note for the owner.
+- **The hole**: [`export/mouth-cap.dxf`](export/mouth-cap.dxf), the tap drill,
+  tapped M8×1.25 by hand.
+
 ## The one rule
 
 **Change the YAML, run the build, commit what it produced.** Never draw a

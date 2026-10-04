@@ -100,11 +100,71 @@ ends:
     status: tbd
     source: "ADR 0009 end-cap table: oak - so the oak top's stock"
     decided_by: "M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md"
-  tube_hole_d:
-    value: 6.0
+
+# -------------------------------------------------------------- inlet ----
+# THE BREATH INLET (issue #36; ADR 0003 amendment of 2026-10-04, "The
+# mouthpiece, and the inlet"). The owner chose "B2: 1/8" barb": a short metal
+# barb at the mouth cap, an external tube from it to a mouthpiece elsewhere.
+# A Clippard 12842 #10-32 male FLUSH fitting to 1/8" barb screws into an
+# E-Z LOK 550-1032 brass insert (10-32 inside, M8x1.25 outside) tapped and
+# epoxied through the oak mouth cap on today's axis (the cap's centre); a
+# second 12842 from the inside takes the internal tube to the trap. It
+# replaces the plain pass-through hole (ends.tube_hole_d, deleted).
+inlet:
+  tap_drill_d:
+    value: 6.9
+    status: settled
+    source: "[ds] datasheets/mechanical/EZLOK-THREADED-INSERTS-CATALOG-2023.pdf p.6, 550-1032: tap drill 6.9 mm, tap M8-1.25. The hole in mechanical/export/mouth-cap.dxf; the M8x1.25 thread is tapped in it by hand, and the insert bedded in epoxy (BOM ADH-INLET)"
+  insert_d:
+    value: 8.0
+    status: settled
+    source: "[ds] 550-1032 external thread M8-1.25 (EZLOK-THREADED-INSERTS-CATALOG-2023.pdf p.6): the major diameter, which the model draws"
+  insert_l:
+    value: 7.49
+    status: settled
+    source: "[ds] 550-1032 length .295 in (EZLOK-THREADED-INSERTS-CATALOG-2023.pdf p.6) [calc: .295 x 25.4]. Longer than ends.mouth_cap_t: set flush with the cap's outer face, it stands the difference into the cavity, toward U-BREATH (drc.echo 'breath inlet insert clear of U-BREATH')"
+  insert_bore:
+    value: 4.83
+    status: settled
+    source: "[calc] #10-32 UNF major diameter .190 in x 25.4: the insert's internal thread, which both barbs fill"
+  barb_a:
+    value: 8.26
+    status: settled
+    source: "[ds] datasheets/mechanical/CLIPPARD-2012-CATALOG-FITTINGS-HOSE-P288-327.pdf p.300, 12842 (1/8 in barb): A .325 in [calc: x 25.4], the barb and its 3/16 in collar above the thread. Screwed home on the flush insert this is how far the barb stands proud of the oak"
+  barb_thread_l:
+    value: 3.96
+    status: settled
+    source: "[ds] CLIPPARD-2012-CATALOG-FITTINGS-HOSE-P288-327.pdf p.300: thread .156 in [calc: x 25.4]"
+  barb_collar_d:
+    value: 4.76
+    status: settled
+    source: "[ds] CLIPPARD-2012-CATALOG-FITTINGS-HOSE-P288-327.pdf p.300: 3/16 in dia. collar"
+  barb_bore:
+    value: 2.64
+    status: settled
+    source: "[ds] CLIPPARD-2012-CATALOG-FITTINGS-HOSE-P288-327.pdf p.300: D .104 in thru [calc: x 25.4] - the narrowest bore on the path to the trap"
+  barb_ridge_d:
+    value: 4.0
     status: tbd
-    source: "ADR 0003: tube bore and OD are settled at E2"
-    decided_by: "E2 (tube bore by playing), then the tube's OD plus clearance"
+    source: "the barb's ridge diameter for 1/8 in ID tube - Clippard does not dimension it [from memory]"
+    decided_by: "calipers on a 12842"
+  inner_gap:
+    value: 0.5
+    status: nominal
+    source: "[calc] the inner barb's collar stands this far off the insert's inner end, so the two barbs' threads (barb_thread_l each, 7.92 together) share the insert's insert_l 7.49 without meeting: the outer one fills 3.96 from the outer face and the inner one the remaining 3.53, its last 0.43 outside the insert"
+  barb_proud_max:
+    value: 10.0
+    status: settled
+    source: "owner, in the working chat 2026-10-04, of the luer bulkheads that stood 20-35 mm proud: 'These all look way too long. I was thinking more of maybe just a Barb or something at the top'; the target relayed with it was 'well under 10 mm'. drc.echo 'breath inlet barb proud of the oak' holds barb_a under it"
+  tube_id:
+    value: 3.18
+    status: settled
+    source: "the internal tube from the inner barb to the trap: 1/8 in ID [calc: x 25.4] to suit the 12842's barb (BOM TUBE-INLET)"
+  tube_od:
+    value: 6.35
+    status: nominal
+    source: "1/8 x 1/4 in silicone, the common size for a 1/8 in barb [from memory] - the tube bought sets it"
+    decided_by: "the tube bought (BOM TUBE-INLET)"
 
 # ------------------------------------------------------ provisional layout --
 # USED ONLY WHILE config/key-layout.yaml HAS null POSITIONS. The first key
@@ -1206,8 +1266,8 @@ routing:
   tube_od:
     value: 5.0
     status: tbd
-    source: "breath tube outside diameter; ADR 0003 assumes a 3 mm bore, the wall is a guess [from memory]"
-    decided_by: "E2 - tube bore by playing (ADR 0003), then the tube bought"
+    source: "the tube from the trap to U-BREATH's P1 barb (the inlet's tube to the trap is inlet.tube_*). P1's barb is 2.79-3.30 OD [ds MPXV4006DP p.7, boards.sensor_port_d], so this leg wants a 3/32 in (2.4 mm) ID tube to grip it; a 1/8 in ID tube is loose on a barb at the low end. The model draws it at 0.8 x this, the wall a guess [from memory]"
+    decided_by: "the tube bought (BOM TUBE)"
   trap_d:
     value: 10.0
     status: tbd
@@ -1221,7 +1281,7 @@ routing:
   tube_lane:
     value: "left"
     status: tbd
-    source: "which side the tube and trap run on inside the mouth band (ADR 0017: sensor on the far side from the tube); there are no looms since ADR 0017"
+    source: "the side of the mouth band the sensor is NOT on (ADR 0017: sensor on the far side from the tube); there are no looms since ADR 0017. Since issue #36 the inlet tube and the trap run on the inlet's axis, the mouth cap's centre, not in this lane: from the inner barb straight into the trap, so the trap can also be cleared through the inlet with the external tube off (ADR 0003, 'clearable without disassembly')"
     decided_by: "M4"
   # STANDARD FLAT RIBBON (owner, 2026-09-26), lying FLAT down the centreline
   # (on edge it does not fit between the boards' part layers - clash check).
