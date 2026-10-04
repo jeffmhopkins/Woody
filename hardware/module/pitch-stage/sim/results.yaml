@@ -4,7 +4,7 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/module/pitch-stage/sim/sims.yaml: f771094d19f91696
+  hardware/module/pitch-stage/sim/sims.yaml: ea934ec4c3bb645f
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/mod-channels/netlist.yaml: 00739b63d111a848
   hardware/module/breath-output-stage/netlist.yaml: 8a1302cb7f7bd392
@@ -336,10 +336,11 @@ sims:
         max: 0.006709
         max_at: C-FB-PITCH+ C-FILT-PITCH- R-OUT-PROT- c_esd+
     asserts:
-    - expr: min['overshoot_pct'] > 25
+    - expr: min['overshoot_pct'] > 8
       why: 'RECORDED HAZARD, not a requirement (pitch-stage.md, ''It does not oscillate; it rings''): a passive mult to another
-        output''s jack makes every note step overshoot by several semitones. If this starts failing the hazard is gone - re-read
-        the page'
+        output''s jack makes every note step overshoot - by several semitones into a MOD jack''s 82 nF, by about a semitone
+        into the BREATH jack''s 10 nF (C-OUT-BREATH since #32; it was 330 nF and 64 %). If this starts failing the hazard
+        is gone - re-read the page'
       pass: true
   step-mult[mult=2]:
     corners: 17
@@ -363,11 +364,12 @@ sims:
         max: 0.029749
         max_at: C-FB-PITCH- C-FILT-PITCH- R-OUT-PROT+ c_esd+
     asserts:
-    - expr: min['overshoot_pct'] > 25
+    - expr: min['overshoot_pct'] > 8
       why: 'RECORDED HAZARD, not a requirement (pitch-stage.md, ''It does not oscillate; it rings''): a passive mult to another
-        output''s jack makes every note step overshoot by several semitones. If this starts failing the hazard is gone - re-read
-        the page'
-      pass: false
+        output''s jack makes every note step overshoot - by several semitones into a MOD jack''s 82 nF, by about a semitone
+        into the BREATH jack''s 10 nF (C-OUT-BREATH since #32; it was 330 nF and 64 %). If this starts failing the hazard
+        is gone - re-read the page'
+      pass: true
   step-real-mult[mult=1]:
     corners: 17
     measures:
@@ -424,7 +426,7 @@ sims:
     asserts:
     - expr: min['pm'] - 10 > 45
       why: 'the loop''s phase margin clears 45 degrees after the +-10 degree screen at every load - which is the point: the
-        same margin at 0, 82 nF and 330 nF, while the step rings (pcb-pipeline.md: ''the AC sweep is structurally blind'')'
+        same margin at 0, 82 nF and 10 nF, while the step rings (pcb-pipeline.md: ''the AC sweep is structurally blind'')'
       pass: true
     - expr: max['d_pm'] < 0.1 and min['d_pm'] > -0.1
       why: D-ESD-PITCH moves the phase margin by under 0.1 degree at every load and corner
@@ -453,7 +455,7 @@ sims:
     asserts:
     - expr: min['pm'] - 10 > 45
       why: 'the loop''s phase margin clears 45 degrees after the +-10 degree screen at every load - which is the point: the
-        same margin at 0, 82 nF and 330 nF, while the step rings (pcb-pipeline.md: ''the AC sweep is structurally blind'')'
+        same margin at 0, 82 nF and 10 nF, while the step rings (pcb-pipeline.md: ''the AC sweep is structurally blind'')'
       pass: true
     - expr: max['d_pm'] < 0.1 and min['d_pm'] > -0.1
       why: D-ESD-PITCH moves the phase margin by under 0.1 degree at every load and corner
@@ -482,7 +484,7 @@ sims:
     asserts:
     - expr: min['pm'] - 10 > 45
       why: 'the loop''s phase margin clears 45 degrees after the +-10 degree screen at every load - which is the point: the
-        same margin at 0, 82 nF and 330 nF, while the step rings (pcb-pipeline.md: ''the AC sweep is structurally blind'')'
+        same margin at 0, 82 nF and 10 nF, while the step rings (pcb-pipeline.md: ''the AC sweep is structurally blind'')'
       pass: true
     - expr: max['d_pm'] < 0.1 and min['d_pm'] > -0.1
       why: D-ESD-PITCH moves the phase margin by under 0.1 degree at every load and corner

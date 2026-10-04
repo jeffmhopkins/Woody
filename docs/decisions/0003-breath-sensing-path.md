@@ -936,4 +936,6 @@ datasheet's figure, not a measurement]`.
   `hardware/module/breath-receive-stage/sim/README.md`).
 - **Noise at the jack**, which grows with the band (`breath-jack-noise`).
 - **The LED row's 2–4 kHz PWM and the SPI frames**, held end to end at the
-  jack in WIDE by `hardware/interfaces/system/sim`.
+  jack by `hardware/interfaces/system/sim` in the 500 Hz mode, against the
+  jack's own noise in that mode, and recorded in WIDE (`led-pwm-wide`,
+  `burst-wide`).

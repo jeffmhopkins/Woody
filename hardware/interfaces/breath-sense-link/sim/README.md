@@ -40,7 +40,8 @@ frequency to 1 MHz. Two things changed it, and both are the bandwidth's price:
   1.5 kHz** and **1.2 × 10⁻² to 10 kHz** (`pg_band_*`).
 
 What reaches the *jack* is `interfaces/system/sim`'s, which runs the LED row
-and the SPI frames on `PWR_GND` end to end in WIDE; the bound here was not
+and the SPI frames on `PWR_GND` end to end, in the 500 Hz mode and recorded in
+WIDE; the bound here was not
 moved, and the assertion is left failing for the owner's decision (#32). If
 the in-band term matters, the cheap lever is the diodes' match: a
 lower-capacitance part on both legs shrinks it in proportion.

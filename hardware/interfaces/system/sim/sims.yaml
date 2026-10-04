@@ -160,10 +160,11 @@ params:
   pitch_bound: {value: 0.01, source: "ADR 0027, 'What is left, and the residual': 'Residual breath-correlated pitch error: under 0.01 cents' - everything the instrument's supply may do to the pitch jack"}
   rail_led_bound: {value: {fig: led-pwm-rail-ripple}, source: "the worst header ripple power-entry/sim finds for the LED row's PWM (ADR 0027 cites it): this deck's rails are held under it"}
   breath_noise_rms: {value: {fig: breath-jack-noise}, source: "the breath jack's own noise in the 500 Hz mode's control band at the commissioned setting, nearly all the sensor's (breath-output-stage/sim): the smallest of the three modes', so the strictest budget"}
-  # --- the receive stage's bandwidth (#32): every scenario runs in WIDE, where C_diff is the fixed
-  # 680 pF alone and nothing between the pair and the jack is below ~10 kHz - the worst case for
-  # every disturbance here (breath-output-stage/sim's c_diff_mode)
-  bw: {value: 0, source: "SW-BREATH-BW Up, WIDE (breath-output-stage/sim's bw): the largest bandwidth, so the largest disturbance at the jack"}
+  # --- the receive stage's bandwidth (#32): the scenarios run in the 500 Hz mode, the one whose
+  # noise breath-jack-noise states first and breath_noise is made from, so each breath bar is
+  # the jack's own noise in the same mode; led-pwm-wide and burst-wide record WIDE, where C_diff is
+  # the fixed 680 pF alone and the disturbances are largest (breath-output-stage/sim's c_diff_mode)
+  bw: {value: 2, source: "SW-BREATH-BW at 500 Hz (breath-output-stage/sim's bw), the mode breath_noise belongs to"}
 
 derived:
   # --- U-ISO's dynamic impedance
@@ -398,6 +399,27 @@ sims:
         why: "pitch held while mod channel 1 steps 2 V at every frame and the clock runs: the pitch jack moves under a tenth of pitch-cents-budget"
       - expr: "min['mod_swing'] > 3.0"
         why: "the burst is real: mod channel 1's jack follows the frames"
+  - name: burst-wide
+    # the same burst in WIDE (#32): its breath result recorded against breath-jack-noise's WIDE
+    # value, which this deck cannot cite (a figure gives a deck its first number); pitch still held
+    deck: burst.cir
+    set: {pad_clamp: 1.0e-9, bw: 0}
+    vary: [k_gauge]
+    measures: [breath_dev_mv, pitch_dev_cents, ina_dev_uv, agnd_mv, mod_swing, sclk_rx_max, pre_breath_mv]
+    post: *burst_post
+    asserts:
+      - expr: "max['pitch_dev_cents'] < 0.1 * fig['pitch-cents-budget'] and min['mod_swing'] > 3.0"
+        why: "the toggle does not touch pitch: held under a tenth of pitch-cents-budget, the burst real"
+  - name: led-pwm-wide
+    # the LED row's PWM in WIDE (#32), its breath result recorded as burst-wide's is
+    deck: led.cir
+    set: {bw: 0}
+    vary: [r_psu, esr_c2, esr_strip, k_gauge]
+    measures: [pitch_cents, breath_mv, mod_mv, hdr_pos_mv, hdr_neg_mv, rail_pos_mv, rail_neg_mv, ins_mv, vs_uv, ina_uv, gnd_cm_mv, iso_ma, pre_pitch_cents, pre_breath_mv]
+    post: *led_post
+    asserts:
+      - expr: "nom['pitch_cents'] < p['pitch_bound'] and max['pitch_cents'] < fig['pitch-cents-budget'] / 50"
+        why: "the toggle does not touch pitch: as led-pwm"
   - name: burst-spi
     # the same burst with no DAC output moving: the SPI edges alone
     deck: burst.cir
