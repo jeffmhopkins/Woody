@@ -7,6 +7,12 @@
 # part going INTO another by design - and `why` must say so. "It is only a
 # placeholder" is not a reason; fix the placeholder. A rule that stops
 # matching anything is reported as UNUSED: delete it.
+#
+# `near:` (issue #34) does the same for a pair UNDER its class's minimum gap
+# (config/clearance.yaml): reported as ACCEPTED NEAR-MISSES instead of failing
+# `cad.py check`. Its `why` must say what answers the tolerances the minimum
+# adds up - an assembly order, a part that is soft, a rule enforced elsewhere.
+# "The envelope is tbd" is not a reason; decide the envelope.
 
 allow:
   - a: "switch *"
@@ -66,3 +72,8 @@ allow:
   - a: "Matrix carrier screw *"
     b: "oak top"
     why: "the screw's tip runs inside its insert's hole in the oak, which the insert lines"
+
+near:
+  - a: "travel <same>"
+    b: "switch <same>"
+    why: "0.18-0.20 against cap-over-switch's 0.3 (issue #34): the 0.18 is the switch's STEM, drawn at rest, beside the socket's cut-out in the swept shell - the stem moves down with the cap, so it is no gap at all; the housing itself clears the swept shell by 0.20, against switch.keycap_wall (tbd, scaled off a photo). Accepted on the parts: the owner fitted a real MT165 on a real KS-33 and pressed it fully, 2026-10-02 (config/body.yaml switch.keycap_top_above_seat), and it did not bind. Calipers on a cap (M1, switch.keycap_wall decided_by) settle the number"

@@ -3,6 +3,7 @@
 # ALLOWED, with its reason. Globs (fnmatch) on solid ids; order does not
 # matter. The rule for adding one is mechanical/clash-allow.yaml's: the
 # overlap must be physical and deliberate, and a rule that stops matching
-# anything is reported as UNUSED - delete it.
+# anything is reported as UNUSED - delete it. `near:` accepts a pair under
+# its class's minimum gap (config/clearance.yaml), on the same terms.
 
 allow: []
