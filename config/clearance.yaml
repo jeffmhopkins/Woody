@@ -1,0 +1,160 @@
+# THE NEAR-MISS RULES (issue #34) - the least air between two solids, by pair class.
+#
+# Consumed by tools/cad.py's clash step, which measures the minimum distance
+# between every pair of named solids that come within reach (manifold3d
+# min_gap) and sorts each pair into the FIRST class below whose `pairs` globs
+# match it (either order). A pair under its class's `min` is UNDER MINIMUM in
+# mechanical/clash.txt (or mechanical/module/clash.txt) and `cad.py check`
+# FAILS on it, unless a `near:` rule in that model's clash-allow file names
+# the pair and says why it stands. Every pair under `report` is listed.
+#
+# A SEPARATE FILE, not a group in body.yaml or module.yaml: those two are
+# flattened into params.scad, so a rule here would mark every render stale.
+# Only the two clash outputs read this file.
+#
+# Globs are on solid ids; `*` and `?` as fnmatch; `<same>` is a span that must
+# read the same in both ids (a nut and ITS jack, not the next jack's).
+# `touch: true` - the class applies only to a pair that touches (a part seated
+# on its board, a nut on the panel): when such a pair does NOT touch, the next
+# class that matches sets its gap, so seating never excuses a near-miss.
+#
+# Provenance as the configs': [ds] banked document, [calc] arithmetic shown,
+# [adr] decision record, [repo] another corpus file, [from memory] UNVERIFIED -
+# a weak number, flagged so it is visible. A leaf may say `ref:` to take a
+# number another config owns, as module.yaml does; it is never restated here.
+#
+# THE TOLERANCES the classes add up (each cited once, here):
+#   PCB thickness +/-10 % at 1.6 mm: +/-0.16                 ref config/body.yaml:boards.pcb_t_tol [ds JLCPCB]
+#   PCB routed outline +/-0.2 (regular)                       [ds datasheets/fab/JLCPCB-PCB-CAPABILITIES.pdf, Outline]
+#   SMT placement +/-0.05; a hand-fitted THT part +/-0.2      [from memory - JLC does not publish placement accuracy in the banked pages]
+#   a THT part's lean on its leads, ~2 deg x its height       [from memory]
+#   plate / panel cut, laser or waterjet, +/-0.13             [from memory - no cutter's tolerance is banked]
+#   M2.5 / M3 clearance-hole float: 0.2                       ref config/body.yaml:hardware.kb_mount_float
+#   faced spacer and standoff length +/-0.05                  ref config/body.yaml:hardware.kb_spacer_l_tol
+#   oak across the grain: 1-1.5 % of the width                [adr 0009, via config/body.yaml stack.cap_clear]
+#   a tail cut to its trim length, and its fillet             ref config/body.yaml:boards.tht_trim, boards.tail_clear
+
+meta:
+  owner: "tools/cad.py clash step (mechanical/clash.txt, mechanical/module/clash.txt)"
+
+report:
+  value: 1.0
+  status: nominal
+  source: "[design] list every pair under 1 mm, whatever its class, so a reader sees what the renders show as close"
+
+sets:
+  # ----------------------------------------------------- the instrument ----
+  body:
+    - class: seated
+      touch: true
+      min: {value: 0.0, status: settled, source: "[design] parts that sit on, in or against each other by design touch; when they do not touch the next class applies"}
+      pairs:
+        - ["* board *", "*"]
+        - ["main board*", "*"]
+        - ["board *", "*"]
+        - ["key plate", "*"]
+        - ["bottom plate", "*"]
+        - ["oak *", "*"]
+        - ["side *", "*"]
+        - ["mouth cap", "*"]
+        - ["tail cap", "*"]
+        - ["Matrix *", "Matrix *"]
+        - ["Matrix carrier*", "*"]
+        - ["column *", "*"]
+        - ["key-board spacer *", "*"]
+        - ["U-bolt*", "*"]
+        - ["IDC plug *", "*"]
+        - ["ribbon *", "*"]
+        - ["Matrix ribbon", "*"]
+        - ["J-* *", "*"]
+        - ["breath *", "*"]
+        - ["etherCON", "*"]
+        - ["umbilical adapter", "*"]
+        - ["USB-C *", "*"]
+        - ["logo fill *", "*"]
+        - ["cap <same>", "switch <same>"]
+        - ["cap socket <same>", "cap <same>"]
+        - ["travel <same>", "*<same>"]
+    - class: moving-cap
+      min: {ref: "config/body.yaml:stack.cap_clear"}
+      pairs:
+        - ["cap *", "oak *"]
+        - ["travel *", "oak *"]
+        - ["cap *", "cap *"]
+        - ["travel *", "*"]
+    - class: tail-over-plate
+      min: {ref: "config/body.yaml:boards.tail_clear"}
+      pairs:
+        - ["tails *", "*"]
+    - class: part-to-board
+      min: {value: 1.0, status: nominal, source: "[calc] a part's envelope beside or facing a board it is not on: placement +/-0.2 (THT, hand) + outline +/-0.2 [ds JLCPCB] + lean 2 deg x ~10 mm = 0.35 [from memory] + board thickness 0.16 [ds JLCPCB] = 0.91, rounded up. Under boards.board_clear (1.5, owner 2026-09-26), which is the DESIGN target; this is the least the tolerances allow"}
+      pairs:
+        - ["parts *", "*"]
+        - ["tall parts *", "*"]
+        - ["switch *", "*"]
+        - ["LED row", "*"]
+        - ["J-*", "*"]
+        - ["breath sensor", "*"]
+    - class: default
+      min: {value: 0.5, status: nominal, source: "[calc] two solids with no part on the other: each one's own placement or cut tolerance, +/-0.2 [ds JLCPCB outline] and +/-0.13 [from memory, cut], plus the 0.2 a clearance hole lets a part float (hardware.kb_mount_float) = 0.53, held at 0.5 - the module's boards.part_clear, ADR 0024"}
+      pairs:
+        - ["*", "*"]
+
+  # ---------------------------------------------------- the Eurorack module ----
+  module:
+    # first, so a board's edge or a standoff touching the rail band is measured, not seated
+    - class: rail-band
+      min: {value: 0.5, status: nominal, source: "[calc] against config/module.yaml rail.band and rail.depth, both tbd: the panel's vertical float on its M3 screws in 3.2 holes, 0.1, and a rail profile's tolerance between makers, ~0.4 [from memory - no rail drawing is banked; module.yaml rail.band decided_by]"}
+      pairs:
+        - ["rail *", "* board"]
+        - ["rail *", "*standoff*"]
+    - class: seated
+      touch: true
+      min: {value: 0.0, status: settled, source: "[design] as body.seated"}
+      pairs:
+        - ["*", "jack board"]
+        - ["*", "main board"]
+        - ["*", "iso board"]
+        - ["*", "panel"]
+        - ["<same>", "<same> *"]
+        - ["knob <same>", "<same>"]
+        - ["panel screw <same>", "panel washer <same>"]
+        - ["CBL-LED-PANEL", "*LED-PANEL"]
+        - ["power ribbon*", "power socket"]
+        - ["J-PWR-EURO", "power socket"]
+        - ["panel", "rail *"]
+    - class: thread
+      min: {value: 0.0, status: settled, source: "[design] a nut on the bushing or stud it threads onto: the modelled envelopes stand off by the thread's own clearance"}
+      pairs:
+        - ["nut <same>", "<same>"]
+        - ["<same> nut", "<same>"]
+        - ["panel standoff <same>", "panel stud <same>"]
+        - ["power ribbon", "power ribbon stripe"]
+    - class: through-hole
+      min: {value: 0.2, status: nominal, source: "[calc] a screw, bushing or shaft through a cut hole: the hole's cut +/-0.13 [from memory] and its position on the part it locates, +/-0.1 (an M3 in a 3.2 hole) = 0.23, held at 0.2"}
+      pairs:
+        - ["POT-*", "panel"]
+        - ["panel screw *", "panel"]
+        - ["etherCON screw *", "J-UMBILICAL"]
+        - ["SW-POWER", "panel"]
+        - ["J-CV-*", "panel"]
+        - ["LED-PANEL*", "panel"]
+    - class: rail-band-other
+      min: {value: 0.5, status: nominal, source: "[calc] as rail-band"}
+      pairs:
+        - ["rail *", "*"]
+    - class: part-to-board
+      min: {value: 1.0, status: nominal, source: "[calc] as body.part-to-board: a part's envelope beside or facing a board it is not on"}
+      pairs:
+        - ["tall *", "* board"]
+        - ["U-ISO*", "* board"]
+        - ["C-ISO-*", "* board"]
+        - ["L-*", "* board"]
+        - ["J-*", "* board"]
+        - ["POT-*", "* board"]
+        - ["SW-POWER*", "* board"]
+        - ["LED-PANEL*", "* board"]
+    - class: default
+      min: {ref: "config/module.yaml:boards.part_clear"}
+      pairs:
+        - ["*", "*"]
