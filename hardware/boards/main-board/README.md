@@ -14,15 +14,14 @@ is part of the cassette (ADR 0025): every one of its mounts stands on the one
 bottom plate, and eight of them are columns up to the key boards (ADR 0022 as
 amended).
 
-> **Status (wave 3, 2026-10-03): re-placed to its current design and NOT YET ROUTED.**
-> The full-width tail's outline (ADR 0021 amendment), thirteen LEDs in one even row, its
-> tail-end place empty (ADR 0028's amendments of 2026-10-03), `J-MCU` turned off the row to the near edge
-> (`boards.mcu_conn_at`), the wave-2 and wave-3 parts (`R45`–`R47`, `C41`–`C43`, `U11`)
-> and the review fixes (*Wave 3*, below) are placed (`layout.yaml`, `pcb.py layout
-> --no-route`). **Routing waits for the Matrix branch's `J-MCU` / `J-MCU-C` pair (#23)**,
-> which may move `J-MCU` again; until it is routed `pcb.py check` fails on every
-> unrouted connection and `kicad.py check` with it, and `fab/` and the renders are the
-> last routed board's (rev D) - stale, and not to be ordered from. The sheets are the
+> **Status (wave 3, 2026-10-04): re-laid out to its current design and ROUTED (rev F);
+> `pcb.py check` passes.** The full-width tail's outline (ADR 0021 amendment), thirteen
+> LEDs in one even row, its tail-end place empty (ADR 0028's amendments of 2026-10-03),
+> `J-MCU` turned off the row to the near edge (`boards.mcu_conn_at`), the wave-2 and
+> wave-3 parts and the review fixes (*Wave 3*, below) are placed, on the Matrix branch's
+> merged sheets (#23: `HDR-SERVICE` 1x3, `J-MCU` pins 23/24 on no net, programming by
+> USB only). The breath pair runs the far edge with its guards and strip (*The breath
+> corridor*). `fab/` and the renders are this board's. The sheets are the
 > source and pass KiCad's ERC. Every part has its footprint and bought part on its
 > symbol (`Footprint`, `Manufacturer`, `MPN`, `LCSC`, `Assembly`), from selections whose
 > datasheets are banked, and every machine-placed part with a polarity or more than two
@@ -94,8 +93,7 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | C42 | `C-ADC-VDD` | breath-adc |
 | C11 | `C-BUCK-IN` | power-entry-instrument |
 | C43 | `C-BUCK-OUT` | power-entry-instrument |
-| C41 | `C-EN` | service-uart |
-| C13, C14 | `C-DECOUPLE-165` | REG-LT, REG-RT |
+| C13, C14, C205, C206 | `C-DECOUPLE-165` | REG-LT, REG-RT |
 | C3, C6–C8, C12, C204 | `C-DECOUPLE-CARRIER` | breath-adc, breath-excitation-reference, led-strip-drive |
 | C9 | `C-FB-REF` | breath-excitation-reference |
 | C40 | `C-INRUSH-GD` | power-entry-instrument |
@@ -170,7 +168,6 @@ finish, and every other open item:
 | **Through-hole tails under the board** (2026-10-01): every part with plated through-hole pins pokes its tails out of the underside toward the grounded bottom plate — `J-CHAIN` ×2, `J-MCU`, `J-UMB`, `HDR-SERVICE` and `U-BUCK` (`config/body.yaml`, *THE THROUGH-HOLE TAILS UNDER THE MAIN BOARD*, says which and why these). `mechanical/drc.echo` *"through-hole tails under the main board clear of the bottom plate"* tests each against what is under it, and the body model draws them for `clash.txt`. `J-CHAIN`'s and `J-MCU`'s clear the plate as supplied. The plate ends short of `J-UMB`'s tail row, and has a window to the oak under `HDR-SERVICE` and under the regulator block (`pcb-geometry.echo` `main` `plate`). **`U-BUCK`'s pins are cut to `boards.tht_trim` below the board after soldering** — as supplied they reach the oak even through the window. `HDR-SERVICE` stands where `boards.service_hdr_at` puts it and `U-BUCK` inside the regulator block, or the window moves with them | A part moved off its window: move `boards.service_hdr_at` (or the block) and rebuild the body CAD; a new through-hole part: add it to `tht_tails` in `mechanical/cad/woody_body.scad` |
 | **The references with no clear place on the silkscreen** stay on the fabrication layer; the layout names them when it writes the board | Hand-placed in KiCad, or room made round them |
 | **The revision letter on the silkscreen** reads `rev A  2026-09-30` (`layout.yaml` `silk:`, the `.kicad_pcb`), while the table below runs to D | **Decided (owner, 2026-10-03): this table's letters are design iterations only; the silkscreen reads `rev A` on the first board fabricated**, so it stays A until a board is made and the next order is B | First order |
-| **Routing (wave 3)**: placed, not routed (*Status*). `J-MCU` is at `config/body.yaml` `boards.mcu_conn_at`, the one figure the Matrix branch's `J-MCU` / `J-MCU-C` pair sets (#23; the Matrix carrier's `J-MCU-C` stands straight above it); at the value both branches carry, `mechanical/drc.echo` *"columns vertical"* asks column mount 7 (x 247.7, y 11.1) to move 0.8 mm - the pair's study settles it. Then `pcb.py route`, `check`, `render` | The Matrix branch's merge (#23), then routing |
 | **`INST_POS12`–`PWR_GND` stitching capacitors** near `J-MCU`, `J-UMB` and the analog end (#8-8): signals change layers between the two planes' references more than 20 mm from the nearest `C-LED`. New parts on the sheets, so the owner's | Owner (a sheet change) |
 | **`C203` at `U10` pin 4** (MPXV4006DP Fig. 3): pin 4 is the corner of `U10`'s own courtyard, at the mouth and far edges, so no 0805 can stand within 3 mm of it on the top face; `C203` stands at `U3`'s input, the net's other end, as before. Nearer needs an underside part and a bottom-plate window under it | Owner |
 | **Through-hole tails' margin over the grounded plate** (#8-11: `J-CHAIN` 0.75 mm, `J-MCU` 0.8 mm): an insulating sheet on the plate under the tail fields, or a trim length on the hand-assembly sheet | Owner, before assembly |
@@ -327,3 +324,4 @@ iterations below are lettered.
 | C | 2026-10-01 | Re-laid out with fix rounds F1 (`U-BREATH` and `U-BUF` decoupling, `C201`-`C204`), F6 (`R44` at `REG-LT`'s `QH`) and F4 (`KS-33` 2.8 mm pads, by `pcb.py update-footprints --pads-resized`); `VS`'s caps turned so their `VS` pads share a row; all but one connection routed | `layout.yaml`, `main-board.kicad_pcb` |
 | D | 2026-10-01 | `IO34` routed into `J-MCU` pin 14 by hand, `IO36`'s escape from pin 12 re-routed (*What the first layout settled*); `pcb.py check` passed then, to the 2026-10-01 outline; renders and `fab/` written | `main-board.kicad_pcb`, `fab/` |
 | E | 2026-10-03 | Wave 3 (#8, #17, #19, #6): the full-width tail's outline; thirteen LEDs in one even row laid out for fourteen (ADR 0028's amendments); `C-STRIP-BULK` two 6.3 x 7.7 polymer cans (`C10`, `C44`); `J-MCU` off the row at the near edge, `HDR-SERVICE` to the tail corner (`config/body.yaml`); `R45`-`R47`, `C41`-`C43`, `U11` placed; the ADC's filter on an island grown to take it, `C6` at `U4`, the TVS at its connector, the buck's caps at the module; KS-33 holes 3.0 mm (ADR 0020 Amendment 8); the routing policy's free routing. Placed; routing waits for #23 | `layout.yaml`, `main-board.kicad_pcb` |
+| F | 2026-10-04 | Wave 3, routed: the Matrix branch merged (#23: `C41` gone, `HDR-SERVICE` 1x3 in place, `J-MCU` pins 23/24 on no net, `C205`/`C206` the key registers' second decouplers); the breath pair drawn along the far edge with arcs round `H2`, `H4`, `H6`, `H8`, its guard traces and the layer-3 `AGND_INST` strip; the power block against the near edge; the rest by the router, `complete` and a few hand routes at `J-MCU`'s foot (`INST_5V_A` pin 17 to pin 3 and on to `U6`); `pcb.py check` passes; renders and `fab/` written | `layout.yaml`, `main-board.kicad_pcb`, `fab/`, `tools/pcb_route.py`, `tools/pcb_main.py`, `tools/pcb.py` |
