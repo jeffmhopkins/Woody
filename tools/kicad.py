@@ -5,6 +5,7 @@
     python3 tools/kicad.py export hardware/boards/key-board-rh      # write board-netlist.yaml, ERC it
     python3 tools/kicad.py render hardware/boards/key-board-rh      # PNG of every page
     python3 tools/kicad.py check                                    # exit 1 if any export or render is stale
+    python3 tools/kicad.py check --board key-board-lh               # the same, scoped to one board (below)
     python3 tools/kicad.py set-field <sheet> <REF> <field> <value>  # edit one field on a sheet (the source)
 
 WHAT IS THE SOURCE. For every circuit directory holding a `<name>.kicad_sch`
@@ -39,6 +40,15 @@ with a layout, holds each key board's J-CHAIN pins to the ribbon's netlist
 the ledger does not know - a stray Gerber is uploaded with the rest. It holds the
 Matrix carrier's connectors (J-MCU-C, HDR-MATRIX) to the
 carrier's J-MCU and U-MCU-RT the same way (check_matrix).
+
+`check --board <name>` scopes the per-board work to one board, for its order
+sheet's gate: that board's export, ERC and pcb.py check, the circuit sheets it
+places (their exports), and the renders and fab/ files of that board and of
+those circuits. The cross-board checks (allocation, J-CHAIN against the main
+board and the ribbon, the through-board and umbilical nets, the Matrix) still
+read every board's exported netlist, because this board's connectors are only
+right if they match their peers'; another board's layout, ERC and renders are
+not checked. The full `check` is still the commit gate's.
 
 Circuits not yet migrated keep a hand-written netlist.yaml and are untouched.
 """
@@ -904,10 +914,24 @@ def board_outputs(d):
     return out
 
 
-def cmd_check():
+def circuits_of(board_dir):
+    """The circuit directories a board's sheet places, from its sub-sheet files."""
+    mig = set(migrated_circuits())
+    return sorted({os.path.dirname(f) for f in sheet_files(board_sheet(board_dir))} & mig)
+
+
+def cmd_check(only=None):
     bad = []
     board_docs = []
-    for d in migrated_circuits():
+    if only:
+        bd = os.path.join(ROOT, "hardware", "boards", only)
+        if bd not in boards():
+            print(f"kicad: no board {only} under hardware/boards/ (one of: {', '.join(os.path.basename(b) for b in boards())})")
+            return 2
+        circuits, scope = circuits_of(bd), [bd]
+    else:
+        circuits, scope = migrated_circuits(), boards()
+    for d in circuits:
         text, problems = export_circuit(d)
         bad += [f"{os.path.relpath(d, ROOT)}: {p}" for p in problems]
         if open(os.path.join(d, "netlist.yaml")).read() != text:
@@ -915,11 +939,13 @@ def cmd_check():
                        f"python3 tools/kicad.py export {os.path.relpath(d, ROOT)}")
     for d in boards():
         text, checks = export_board(d)
+        board_docs.append((os.path.basename(d), yaml.safe_load(text)))
+        if d not in scope:
+            continue  # --board: read for the cross-board checks only
         p = os.path.join(d, "board-netlist.yaml")
         if not os.path.exists(p) or open(p).read() != text:
             bad.append(f"{os.path.relpath(p, ROOT)} is STALE - run: python3 tools/kicad.py export {os.path.relpath(d, ROOT)}")
         bad += [f"{os.path.relpath(d, ROOT)}: ERC {c}" for c in checks if c.startswith("error")]
-        board_docs.append((os.path.basename(d), yaml.safe_load(text)))
         pcbfile = os.path.join(d, os.path.basename(d) + ".kicad_pcb")
         if os.path.exists(pcbfile):
             # the board's layout: KiCad's DRC with schematic parity, and the body CAD's
@@ -936,7 +962,10 @@ def cmd_check():
     bad += check_matrix(board_docs)
     rows = ledger_rows()
     stale = {}
+    dirs = {os.path.relpath(d, ROOT) for d in scope + circuits}
     for r in rows.values():
+        if only and os.path.dirname(r["render"]).removesuffix("/fab") not in dirs:
+            continue
         png = os.path.join(ROOT, r["render"])
         if not os.path.exists(png):
             bad.append(f"{r['render']} is missing")
@@ -960,13 +989,15 @@ def cmd_check():
         bad.append(f"{items[0][0]}{f' and {len(items) - 1} more' if len(items) > 1 else ''} STALE: "
                    f"{', '.join(why)} changed - run: {fix}")
     # a generated file nobody generated: a stray Gerber is uploaded with the rest (K7-6)
-    for d in boards() + migrated_circuits():
+    for d in scope + circuits:
         for f in board_outputs(d):
             if os.path.relpath(f, ROOT) not in rows:
                 bad.append(f"{os.path.relpath(f, ROOT)} is in no ledger row - no tool made it; delete it, "
                            f"or re-render: python3 tools/{'pcb' if '.pcb-' in f or '/fab/' in f else 'kicad'}.py render "
                            f"{os.path.relpath(d, ROOT)}")
-    n = len(migrated_circuits()), len(boards()), len(rows)
+    n = len(circuits), len(scope), sum(1 for r in rows.values() if not only or os.path.dirname(r["render"]).removesuffix("/fab") in dirs)
+    if only:
+        print(f"kicad: --board {only}: other boards' layouts, ERC and renders not checked; cross-board checks read all {len(board_docs)}")
     if bad:
         print(f"kicad: FAIL - {len(bad)} problem(s) over {n[0]} source sheet(s), {n[1]} board(s), {n[2]} render(s)")
         for b in bad:
@@ -981,7 +1012,9 @@ if __name__ == "__main__":
         n = set_field(os.path.join(ROOT, sys.argv[2]), sys.argv[3], sys.argv[4], sys.argv[5])
         print(f"kicad: set {sys.argv[4]} on {sys.argv[3]} ({n} unit(s)) in {sys.argv[2]}")
         sys.exit(0)
-    if len(sys.argv) >= 2 and sys.argv[1] == "check":
+    if len(sys.argv) == 4 and sys.argv[1] == "check" and sys.argv[2] == "--board":
+        sys.exit(cmd_check(sys.argv[3]))
+    if len(sys.argv) == 2 and sys.argv[1] == "check":
         sys.exit(cmd_check())
     if len(sys.argv) == 3 and sys.argv[1] in ("export", "render"):
         sys.exit({"export": cmd_export, "render": cmd_render}[sys.argv[1]](sys.argv[2]))

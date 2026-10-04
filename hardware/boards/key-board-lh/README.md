@@ -167,8 +167,12 @@ on JLC's live order form.
 
 **Before you order, run the gates.** `python3 tools/pcb.py check
 hardware/boards/key-board-lh` must report 0 errors, and `python3 tools/kicad.py
-check` must PASS. A PASS means `fab/` was written from this board and these
-sheets, so it is the order. Then:
+check --board key-board-lh` must PASS: this board's export, ERC, layout and
+renders, the circuit sheets it places, and the checks of its `J-CHAIN` against
+the main board and the ribbon (`docs/reference/tooling.md` §3). Another board's
+layout or renders failing does not hold this order (review #6-3); the full
+`kicad.py check` is the commit gate's. A PASS means `fab/` was written from
+this board and these sheets, so it is the order. Then:
 
 ### 1. What to upload
 
@@ -194,12 +198,12 @@ Where the form has an option that is not listed here, leave it at its default.
 | PCB qty | **5** (the fewest JLC makes `[from memory]`) | Two are assembled (*3. Assembly options*). The rest are bare spares for a re-work or a second build |
 | Product type | Industrial/Consumer electronics | |
 | Different design | 1 | |
-| Delivery format | Single PCB | Not a panel: Economic PCBA takes single boards from 10 × 10 mm `[datasheets/fab/JLCPCB-PCBA-CAPABILITIES.pdf]` |
+| Delivery format | Single PCB, **edge rails and fiducials added by JLCPCB** | Standard PCBA (*3*) makes both "Necessary" and takes a single board from 70 × 70 mm `[datasheets/fab/JLCPCB-PCBA-CAPABILITIES.pdf]`; this board is 89.0 × 42.1 (the right-hand one 107.0 × 42.1; each `fab/*.gbrjob`), so it ships on JLC's rails. Whether JLC's rails alone reach 70 mm across or it asks for a panel is the quote form's. Where the rails' tooling holes land is checked in the preview (*5*) |
 | PCB thickness | `boards.key_board_t` (`config/body.yaml`) | ADR 0020 Amendment 6. `pcb.py check` holds the stackup to it, and the `.gbrjob` carries it |
-| PCB colour | **White** (`layout.yaml` `fab: mask`; ADR 0028, *Amendment, 2026-10-02*) | The undersides face the LED row: white is the cavity's reflector. **Check on the quote form:** at this thickness Economic PCBA lists white only with *leaded* HASL, 5–30 boards `[JLCPCB-PCBA-CAPABILITIES.pdf, "PCB Specs for Economic PCB Assembly"]`; if it refuses white with lead-free HASL, the owner chooses Standard PCBA or a leaded finish (*Open*) |
+| PCB colour | **White** (`layout.yaml` `fab: mask`; ADR 0028, *Amendment, 2026-10-02*) | The undersides face the LED row: white is the cavity's reflector. Standard PCBA has no colour or finish limit `[JLCPCB-PCBA-CAPABILITIES.pdf]`, which is why the order is Standard (*3*); Economic lists white at this thickness only with *leaded* HASL |
 | Silkscreen | Black (`fab: silk`) | A white legend does not read on white mask |
 | Material type | FR-4 TG135–140, the default | |
-| Surface finish | **LeadFree HASL** (`fab: finish`) | The stackup and the `.gbrjob` say it; Economic PCBA offers it at this thickness in green, not listed with white (*PCB colour*, above) |
+| Surface finish | **LeadFree HASL** (`fab: finish`) | The stackup and the `.gbrjob` say it; Standard PCBA takes it with white (*PCB colour*, above) |
 | Outer copper weight | 1 oz (`fab: copper_oz`) | Every limit in the DFM table (below) is JLC's 1 oz figure |
 | Via covering | Tented, the default | No via is a test point (the board has none, *Bring-up*) |
 | Min via hole size / diameter | the default (0.3 mm hole) | Both boards' vias are `layout.yaml` `rules: via_drill` / `via`, which JLC does not charge extra for (DFM table) |
@@ -213,12 +217,12 @@ Where the form has an option that is not listed here, leave it at its default.
 
 | Option | Pick | Why |
 |---|---|---|
-| PCBA type | **Economic** | Single-sided placement is all it needs `[JLCPCB-PCBA-CAPABILITIES.pdf]` |
+| PCBA type | **Standard** | The owner, 2026-10-04 (#17 D1: "Standard PCBA (Recommended)"; ADR 0028, *Amendment, 2026-10-04*): white with lead-free HASL, which Economic does not list `[JLCPCB-PCBA-CAPABILITIES.pdf]`. The Extended-part count (#17 D6) mattered only under Economic, so it is moot |
 | Assembly side | **Bottom side** | Every machine-placed part is on the bottom, the side facing the main board |
-| PCBA qty | **2** | Economic assembles from 2 `[JLCPCB-PCBA-CAPABILITIES.pdf]`: one for the build, one spare |
-| Tooling holes | Added by JLCPCB | The board has none of its own |
+| PCBA qty | **2** | Standard assembles from 2 `[JLCPCB-PCBA-CAPABILITIES.pdf]`: one for the build, one spare |
+| Tooling holes | Added by JLCPCB, on its rails | The board has none of its own. Where they land is checked in the preview (*5*, item 6) |
 | Confirm parts placement | **Yes** | The rotations are corrected (*4*), but JLC's preview is still the last check, and this is the first order |
-| Stencil | included in Economic PCBA | Not a separate stencil order |
+| Stencil | as the quote form offers it for Standard PCBA | Not a separate stencil order `[from memory]` |
 
 Then, in the BOM step, **confirm every row matched its LCSC number**. Leave
 the hand parts (switches, J1) out: they are not in the BOM file. Do not accept
@@ -265,10 +269,14 @@ positions. Check:
 3. **The passives** sit along their pad pairs. None of them is polarised (all MLCC or chip resistors), so only the axis matters.
 4. **C7** (`C-BULK-CHAIN`) is beside J1's 3V3 pin.
 5. **No part is drawn at J1 or at the switches.** They are hand parts. If JLC has added them, it has matched a footprint it should not have: remove them.
+6. **Where JLC's rails and tooling holes land** (review #6-6). They must be on the rails, clear of the board: of the ground pour, the switch pads and the four mounting holes. A tooling hole drilled inside the outline goes through whatever is there. If the preview shows one on the board, ask JLC to put it on the rails; if it cannot, order with rails it adds outside the outline, not holes in the board.
 
 ### 6. Cost estimate, one design, 5 PCBs with 2 assembled
 
-*Estimates.* JLC's live quote replaces this table.
+*Estimates.* JLC's live quote replaces this table. **The PCBA fees below are the
+banked FAQ's, which are Economic PCBA's**; the order is Standard (*3*), whose
+setup and stencil cost more and are not banked `[from memory]`, and the rails
+add board area. Read the subtotal as a floor.
 
 | Item | Left hand | Source |
 |---|---|---|
@@ -316,8 +324,8 @@ board's are the same.
 
 | Rule | JLC (2-layer, 1 oz) | Held by (rule) | Smallest on the board | Margin |
 |---|---|---|---|---|
-| Layers / board size | 2; Economic PCBA ≥ 10 × 10 mm | — | 2 layers; outline from the body CAD | ok |
-| Thickness | a standard FR-4 thickness; at this one Economic PCBA takes green HASL/ENIG, and white only with leaded HASL | `boards.key_board_t` | the stackup, held by `pcb.py check` | ok |
+| Layers / board size | 2; Standard PCBA ≥ 70 × 70 mm, on rails below that | — | 2 layers; outline from the body CAD, under 70 mm across: JLC's rails (*2*, Delivery format) | ok, on rails |
+| Thickness | a standard FR-4 thickness; Standard PCBA has no thickness, colour or finish limit | `boards.key_board_t` | the stackup, held by `pcb.py check` | ok |
 | Track width | ≥ 0.10 | `rules: track_min` | `rules: track` (every signal track) | 2.5× |
 | Track/pad spacing | ≥ 0.10 (pad to track 0.10; SMD pad to pad 0.15) | `rules: clearance` | the rule (the pour is filled at it) | 2× |
 | Copper to routed edge | ≥ 0.20 | `rules: edge_clearance` | ≥ the rule (DRC) | +0.1 |
@@ -443,12 +451,17 @@ J1 with pin 1's dot and the arrow out of its mouth, where it is soldered;
 |---|---|---|---|
 | A | 2026-09-27 | First layout: every key's network the same T in the same place round its switch, six test pads in one row (QH, SER, GND, SCK, SH/LD, 3V3), C7 (`C-BULK-CHAIN`), silkscreen on both sides, no acute track junction (`pcb.py check` tests every join, a track ending mid-track included). Not yet ordered; re-laid out on the same date for the screwed corner mount (keep-outs from the nut and the spacer/washer; ADR 0020 Amendment 3 then moved the heads from plugged bores into blind pockets, which changes nothing on the board); on 2026-09-28, C7 made a fitted, machine-placed part (it had been a do-not-fit footprint; owner: it costs cents) and J-CHAIN's pads lengthened on their free side; the same day the corner mounts went to M2.5 for PEM studs pressed flush into the plate (ADR 0020 Amendment 4: larger holes and keep-outs, mounts 0.2 further in), and the washer dropped, the spacer taking its length; on 2026-09-29 re-laid out for the cassette's columns (ADR 0025): no bonded mount (Amendment 5's is superseded), the mouth end 0.6 and the tail end 0.2 longer, J-CHAIN 0.5 further toward the tail and the register, its decoupler, R11 and C7 moved 0.5 with it; on 2026-10-03 re-laid out for the KS-33's pin holes, Gateron's 3.0 mm on 3.4 mm pads (issue #6-1; ADR 0020 Amendment 8), each key's network 9.0 mm from its switch so its labels clear the bigger pads | git history of this directory |
 | B | 2026-10-03 | C8, the register's second decoupler (the shared REG sheet gained it for review #6-5; the right-hand board's C9), placed by hand under U1's ground pin 8 on the bottom face: its 3V3 pad squared onto the 3V3 track's 45-degree run, its ground pad onto pin 8's ground line, both 0.4 mm. Nothing else moved. `pcb.py check` passes. Not yet ordered | `key-board-lh.kicad_pcb`, `layout.yaml` |
+| — | 2026-10-04 | Silkscreen and title block read `rev A  2026-10-03` again, not B (review #6-7; the rule below). No copper moved; renders and `fab/` re-written | `key-board-lh.kicad_pcb`, `layout.yaml` `silk:` |
 
-To make a revision, edit the board in KiCad, change the revision and date in
-the title block and in the silkscreen text, and copy them into
-`layout.yaml` `silk:` so a re-layout keeps them. Then re-render and add a row
-here. Record any correction an order needed (a part rotation in JLC's preview,
-a drill that did not fit) in the row.
+**The letters in this table are design history.** The silkscreen and title
+block read `rev A` until a board has been fabricated, and the next order is B:
+the rule for every board is the main board's
+(`hardware/boards/main-board/README.md`, *Ordering it*, **Revision**; ADR 0020,
+*Amendment 9*). So a change before the first order adds a row here and moves
+only the date, in the title block, the silkscreen text and `layout.yaml`
+`silk:` (so a re-layout keeps them); then re-render. Record any correction an
+order needed (a part rotation in JLC's preview, a drill that did not fit) in
+the row.
 
 ## Open, and what decides each
 
@@ -464,4 +477,3 @@ a drill that did not fit) in the row.
 | Part orientation in JLC's placement preview. The CPL carries JLC's convention and each part's offset from JLC's own footprint (*Ordering*, 4), but no order has yet confirmed it | the first order's preview (*Ordering*, 5); record any correction in *Revisions* |
 | No 3D model of J-CHAIN in the renders (Samtec's is behind a login; `datasheets/.manifest-R12.csv` records the attempt) | nothing blocks on it |
 | The main board's end of the ribbon | the main board's layout |
-| Whether Economic PCBA takes **white** mask with **lead-free** HASL at 1.6 mm: the banked table lists white there only with leaded HASL, 5–30 boards (*Ordering*, PCB colour; ADR 0028, *Amendment, 2026-10-02*) | the quote form at the first order; if it refuses, the owner: Standard PCBA, or a leaded finish |

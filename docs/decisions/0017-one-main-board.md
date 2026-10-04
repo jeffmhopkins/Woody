@@ -1,7 +1,8 @@
 # 0017 — One main board
 
 **Status:** Accepted; amended 2026-09-27 (the key-board chain: 1.27 mm IDC, *Amendment* below)
-and 2026-09-29 (four layers, and parts on both faces, *Amendment* below); the
+and 2026-09-29 (four layers, and parts on both faces, *Amendment* below) and
+2026-10-04 (through-hole tails over the plate trimmed to a length, *Amendment* below); the
 wiring details are [ADR 0018](0018-main-board-wiring-decisions.md)
 
 Replaces the **centre board** and the two **thumb boards** with one board.
@@ -232,3 +233,19 @@ need to." **Passives may go on the underside**, within the room between the
 board and the plate under it. `hardware/boards/main-board/README.md`,
 *Open*, gives the rule.
 
+
+## Amendment, 2026-10-04 — through-hole tails over the plate are trimmed to a length
+
+**The owner, 2026-10-04** (asked in the working chat, review #8-11, choosing
+between an insulating sheet on the bottom plate and a trim length): **"Trim
+length"**. The hand parts whose tails stand over the grounded bottom plate —
+`J-MCU` and both `J-CHAIN` — are cut after soldering, tails and solder, to at
+most `hardware.kb_spacer_l` (the board's bottom face above the plate) less
+`boards.tail_clear` (the least air between a tail and what is under it) below
+the board. No insulating sheet is added. The figure is computed, not stated:
+`hardware/boards/main-board/layout.yaml` `hand_trim:` names the two figures
+and `tools/pcb.py render` writes the result, with its arithmetic, into the
+`Fit` column of `fab/main-board-hand-assembly.csv`, so the sheet follows
+`config/body.yaml`. `U-BUCK`'s cut, `boards.tht_trim`, goes on the same
+column. The main board's README, *Ordering it* (**Through-hole tails**), says which parts and why
+the others need none.

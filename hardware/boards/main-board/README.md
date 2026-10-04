@@ -167,11 +167,8 @@ finish, and every other open item:
 | **Passives may go on the underside** (owner, 2026-09-29). The underside faces the grounded bottom plate, `hardware.kb_spacer_l` below it, over the board's whole length since the cassette (ADR 0025). At `boards.board_clear` that leaves no room for a part (`mechanical/drc.echo` *"main board underside room over the bottom plate"*), so an underside part needs a **window cut through the bottom plate** under it, down to the oak (the second figure on that line), and must be clear of the thumb switches' housings, pins and the mounts' spacers. Through-hole tails face the plate too: the next row. The thumb switches are already underside parts | The layout; each window goes into the bottom plate's outline in the body CAD |
 | **Through-hole tails under the board** (2026-10-01): every part with plated through-hole pins pokes its tails out of the underside toward the grounded bottom plate — `J-CHAIN` ×2, `J-MCU`, `J-UMB`, `HDR-SERVICE` and `U-BUCK` (`config/body.yaml`, *THE THROUGH-HOLE TAILS UNDER THE MAIN BOARD*, says which and why these). `mechanical/drc.echo` *"through-hole tails under the main board clear of the bottom plate"* tests each against what is under it, and the body model draws them for `clash.txt`. `J-CHAIN`'s and `J-MCU`'s clear the plate as supplied. The plate ends short of `J-UMB`'s tail row, and has a window to the oak under `HDR-SERVICE` and under the regulator block (`pcb-geometry.echo` `main` `plate`). **`U-BUCK`'s pins are cut to `boards.tht_trim` below the board after soldering** — as supplied they reach the oak even through the window. `HDR-SERVICE` stands where `boards.service_hdr_at` puts it and `U-BUCK` inside the regulator block, or the window moves with them | A part moved off its window: move `boards.service_hdr_at` (or the block) and rebuild the body CAD; a new through-hole part: add it to `tht_tails` in `mechanical/cad/woody_body.scad` |
 | **The references with no clear place on the silkscreen** stay on the fabrication layer; the layout names them when it writes the board | Hand-placed in KiCad, or room made round them |
-| **The revision letter on the silkscreen** reads `rev A  2026-09-30` (`layout.yaml` `silk:`, the `.kicad_pcb`), while the table below runs to D | **Decided (owner, 2026-10-03): this table's letters are design iterations only; the silkscreen reads `rev A` on the first board fabricated**, so it stays A until a board is made and the next order is B | First order |
 | **`INST_POS12`–`PWR_GND` stitching capacitors** near `J-MCU`, `J-UMB` and the analog end (#8-8): signals change layers between the two planes' references more than 20 mm from the nearest `C-LED`. New parts on the sheets, so the owner's | Owner (a sheet change) |
 | **`C203` at `U10` pin 4** (MPXV4006DP Fig. 3): pin 4 is the corner of `U10`'s own courtyard, at the mouth and far edges, so no 0805 can stand within 3 mm of it on the top face; `C203` stands at `U3`'s input, the net's other end, as before. Nearer needs an underside part and a bottom-plate window under it | Owner |
-| **Through-hole tails' margin over the grounded plate** (#8-11: `J-CHAIN` 0.75 mm, `J-MCU` 0.8 mm): an insulating sheet on the plate under the tail fields, or a trim length on the hand-assembly sheet | Owner, before assembly |
-| **Standard or Economic PCBA, white mask** (#17 D1): *Ordering it*, below | Owner, before the order |
 | **The umbilical adapter** (`PCB-UMB-ADAPTER`) is a separate small board: its schematic is [`../umb-adapter/`](../umb-adapter/README.md), not laid out | With this board's layout |
 
 What the first layout settled, and where it is held:
@@ -277,8 +274,11 @@ What the first layout settled, and where it is held:
 
 ## Ordering it — JLCPCB
 
-**Not to be ordered until it is routed and `pcb.py check` and `kicad.py check` pass**: then
-`fab/` is this board. JLC's limits are from the banked pages in `datasheets/fab/`; the
+**Not to be ordered until it is routed and its gates pass**: `python3 tools/pcb.py check
+hardware/boards/main-board` reports 0 errors and `python3 tools/kicad.py check --board
+main-board` PASSes - this board's export, ERC, layout and renders, the circuit sheets it
+places, and the cross-board connector checks (`docs/reference/tooling.md` §3); another
+board's failures do not hold this order (review #6-3). Then `fab/` is this board. JLC's limits are from the banked pages in `datasheets/fab/`; the
 pattern is the key boards' order sheet (`hardware/boards/key-board-lh/README.md`,
 *Ordering it*), and only what differs is here.
 
@@ -290,29 +290,49 @@ pattern is the key boards' order sheet (`hardware/boards/key-board-lh/README.md`
 | Mask / silk | **White / black** (`fab:`) | ADR 0028: the top face is the LED row's first reflector |
 | Surface finish | LeadFree HASL (`fab: finish`) | 4-layer FR-4 takes HASL; only 6 layers and up do not [ds `JLCPCB-PCB-CAPABILITIES.pdf`, *Surface Finish*] |
 | Copper | 1 oz outer, 0.5 oz inner (the stack's) | |
-| Delivery format | **Owner's choice** with the PCBA type (below) | |
+| Delivery format | Single PCB, **edge rails and fiducials added by JLCPCB** | Standard PCBA asks both, and a board of at least 70 × 70 mm; this one has neither and is narrower (below) |
 | PCBA side | Top | Every machine part is on the top face; the thumb switches (underneath) are fitted by hand |
 | Assembly | `fab/main-board-bom-jlc.csv`, `-cpl-jlc.csv`; `-hand-assembly.csv` for the rest | One BOM row per LCSC number, its MPN as the Comment (#17 D5) |
 
-**The PCBA type is the owner's (#17 D1)** [ds `datasheets/fab/JLCPCB-PCBA-CAPABILITIES.pdf`]:
-- **Economic PCBA** offers 4-layer boards in **green only** (its *PCB Specs for Economic PCB
-  Assembly* table: the 4-layer rows - 1.0, 1.2, 1.6 mm - are green; white appears only in the
-  1.6 mm *Red/White, Leaded HASL* row of the 2-layer group; the table's layer column does not
-  render in the banked copy, so the grouping is read from the rows' thicknesses). So this
-  board as specified - white, lead-free HASL, 4 layers - is **not an Economic board**, and
-  white with leaded HASL is not offered at 4 layers either.
-- **Standard PCBA** has no colour or finish limit ("No limit"), so it **does** take white
-  with lead-free HASL. It asks **edge rails and fiducials** ("Necessary"; JLC adds 5 mm
-  rails with 1 mm fiducials and 2 mm tooling holes [ds `JLCPCB-PCB-CAPABILITIES.pdf`,
-  *Mouse bites Panel*]) and a **single board of at least 70 × 70 mm**: this one is 292.4 ×
-  42.0, so it goes as a panel or with rails that widen it - and at 292 mm long it is past the
-  250 × 250 mm panel JLC recommends, which the PCBA FAQ allows at the customer's risk of
+**PCBA type: Standard** (owner, 2026-10-04, #17 D1: "Standard PCBA (Recommended)"; ADR 0028,
+*Amendment, 2026-10-04*) [ds `datasheets/fab/JLCPCB-PCBA-CAPABILITIES.pdf`]:
+- **Why not Economic**: its *PCB Specs for Economic PCB Assembly* table lists 4-layer boards in
+  green only (the 4-layer rows - 1.0, 1.2, 1.6 mm - are green; white appears only in the 1.6 mm
+  *Red/White, Leaded HASL* row of the 2-layer group; the table's layer column does not render
+  in the banked copy, so the grouping is read from the rows' thicknesses). Standard has no
+  colour or finish limit ("No limit"), so it takes white with lead-free HASL.
+- **Rails and fiducials, JLC's.** Standard asks edge rails and fiducials ("Necessary"; JLC's
+  are 5 mm rails with 1 mm fiducials and 2 mm tooling holes [ds `JLCPCB-PCB-CAPABILITIES.pdf`,
+  *Mouse bites Panel*]) and a single board of at least 70 × 70 mm: this one is 292.5 × 42.1
+  (`fab/`'s `.gbrjob`), so it goes with rails added by JLCPCB, which widen it; whether JLC's
+  rails alone reach 70 mm or it asks for a panel is the quote form's. At 292 mm long it is past
+  the 250 × 250 mm panel JLC recommends, which the PCBA FAQ allows at the customer's risk of
   bending. The board carries no fiducials of its own; on rails it needs none.
-- **Or green mask** under Economic, which gives up ADR 0028's white reflector on this board.
+- **The Extended-part count** (#17 D6) is moot: it mattered only under Economic PCBA.
+- **The placement preview**: check it as the key boards' order sheet says
+  (`hardware/boards/key-board-lh/README.md`, *Ordering it*, 5), including **where JLC's rails
+  and tooling holes land**: on the rails, clear of the board's ground pour, the switch pads and
+  the mounting holes. If JLC has put a tooling hole inside the board, ask for it on the rails
+  instead.
 
-**Revision.** The silkscreen reads `rev A` with the layout's date (`layout.yaml` `silk:`): the
-owner decided (2026-10-03) that the first board fabricated is A, whatever the design
-iterations below are lettered.
+**Through-hole tails** (owner, 2026-10-04, #8-11: "Trim length"; ADR 0017, *Amendment,
+2026-10-04*). `fab/main-board-hand-assembly.csv`'s **Fit** column gives the length each hand
+part's tails and their solder are cut to below the board's bottom face, computed by `pcb.py
+render` from the `config/body.yaml` figures `layout.yaml` `hand_trim:` names, with the arithmetic
+in the cell; a sheet with no Fit column was rendered before `hand_trim:` existed, so re-render
+it (`pcb.py render`) before assembly. `J-MCU` (J1) and both `J-CHAIN` (J4, J5) stand over the grounded bottom plate:
+their limit is `hardware.kb_spacer_l` (the board's bottom face above the plate) less
+`boards.tail_clear` (the least air the body allows between a tail and what is under it).
+`U-BUCK` (U5) is cut to `boards.tht_trim`. `J-UMB` (J6) and `HDR-SERVICE` (J2) stand over oak,
+past the plate's end and through a window, and clear it as supplied (`mechanical/drc.echo`
+*"through-hole tails under the main board clear of the bottom plate"*): no cut. The thumb
+switches enter from below, so their tails are on the top face.
+
+**Revision - the rule for every board.** A board's silkscreen and title block read `rev A`,
+with its layout's date (`layout.yaml` `silk:`), until a board has been fabricated; the next
+order is B. The letters in each board's *Revisions* table are design history only. The owner
+decided it for this board on 2026-10-03 and for every board on 2026-10-04 (review #6-7: "Yes,
+all rev A"; ADR 0020, *Amendment 9*); the key boards' pages cite this paragraph.
 
 ## Revisions
 
