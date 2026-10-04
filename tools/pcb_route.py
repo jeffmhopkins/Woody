@@ -1492,21 +1492,22 @@ def smooth_path(points, detours, fillet, fillet_mid=1.5):
             prims.append(Prim("L", p0=cur, p1=p1))
             prims.append(_arc_between(f1, fillet, p1, t1, sg))
             at = t1
-            # round each circle in turn; between two, a fillet of fillet_mid in the corner
-            # where they meet, on the far side of both
+            # round each circle in turn, from one to the next along their common tangent on
+            # the far side of both - one smooth sweep, never back up between them
             for k in range(len(chain) - 1):
                 (ca, ra), (cb, rb) = chain[k], chain[k + 1]
-                A_, B_ = ra + fillet_mid, rb + fillet_mid
                 d = math.dist(ca, cb)
-                x = (A_ * A_ - B_ * B_ + d * d) / (2 * d)
-                y = math.sqrt(max(A_ * A_ - x * x, 0.0))
                 e = _unit((cb[0] - ca[0], cb[1] - ca[1]))
-                cand = [(ca[0] + e[0] * x + sgn * -e[1] * y, ca[1] + e[1] * x + sgn * e[0] * y) for sgn in (1, -1)]
-                f = max(cand, key=lambda q: (q[0] - a2[0]) * nb[0] + (q[1] - a2[1]) * nb[1])
-                ta = (ca[0] + _unit((f[0] - ca[0], f[1] - ca[1]))[0] * ra, ca[1] + _unit((f[0] - ca[0], f[1] - ca[1]))[1] * ra)
-                tb = (cb[0] + _unit((f[0] - cb[0], f[1] - cb[1]))[0] * rb, cb[1] + _unit((f[0] - cb[0], f[1] - cb[1]))[1] * rb)
+                pp = (e[1], -e[0]) if e[1] * nb[0] - e[0] * nb[1] > 0 else (-e[1], e[0])
+                if pp[0] * nb[0] + pp[1] * nb[1] < 0:
+                    pp = (-pp[0], -pp[1])
+                k_ = (ra - rb) / d
+                q_ = math.sqrt(max(1 - k_ * k_, 0.0))
+                m = (e[0] * k_ + pp[0] * q_, e[1] * k_ + pp[1] * q_)
+                ta = (ca[0] + m[0] * ra, ca[1] + m[1] * ra)
+                tb = (cb[0] + m[0] * rb, cb[1] + m[1] * rb)
                 prims.append(_arc_between(ca, ra, at, ta, -sg))
-                prims.append(_arc_between(f, fillet_mid, ta, tb, sg))
+                prims.append(Prim("L", p0=ta, p1=tb))
                 at = tb
             prims.append(_arc_between(cl, rl, at, t2, -sg))
             prims.append(_arc_between(f2, fillet, t2, p2, sg))

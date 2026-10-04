@@ -243,9 +243,19 @@ What the first layout settled, and where it is held:
   The breath signal and its `AGND` leg run as one guarded pair on layer 4:
   - **One hop up at the mouth**, from the buffer `U3` (mid-board) at x 18.8 to the far
     edge, beside the sensor `U10` and clear of LED13's courtyard.
-  - **Along the far edge** (y 47.6) to x 289.5, stepping inboard round the far column
-    mounts `H2`, `H4`, `H6` and `H8`. Layer 4, not 1: the far-row keys' T networks stand
-    on layer 1 between the edge and their switch pins.
+  - **Along the far edge** (y 47.3) to x 289.5, round each far column mount (`H2`, `H4`,
+    `H6`, `H8`) by one concentric arc, r 5 mm about its centre, entered and left by 3 mm
+    fillets (owner, 2026-10-04: *"curve around standoffs much better and be mirrored
+    around them"*, then *"reduce all of them down to the same size"*). At `H2` and `H6` the
+    far-row switch's leg pad (`SW2` / `SW6` pin 1) stands 6.2 mm from the mount on its tail
+    side, so the detour carries on under both the switch's pins, r 3 mm about each,
+    joined by their common tangents - one smooth sweep - and a 3 mm fillet back up after
+    pin 2 (owner: *"go around both of these instead of going around the middle"*); it
+    passes under the switch's housing there, on layer 4, clear of its pads. The same arc
+    at every mount, asymmetric only there. The path is drawn, not searched
+    (`pcb_route.route_pair_smooth`): the legs and guards are the same path offset, KiCad
+    arcs, one spacing all the way. Layer 4, not 1: the far-row keys' T networks stand on
+    layer 1 between the edge and their switch pins.
   - **One hop down** into the series resistors `R38` / `R39` at `J-UMB` pins 1 and 2.
   - **No crossing of the LED row, and nothing on the near edge.** Its reference is an
     `AGND_INST` strip cut out of layer 3 under the whole run and both hops (`strip:
@@ -253,15 +263,15 @@ What the first layout settled, and where it is held:
   - **The power block moved to the near edge** to make room (`config/body.yaml`
     `boards.tall_side` near, `boards.tall_at_x`): the bulk pair `C10` / `C44`, `U5` in
     the regulator block, `C11`, `D4`, and `L1` above `H7`. Distances `[calc, body mm from
-    the courtyards]`: the pair at y 47.6 (its outer guard at ~48.7) against the buck's
+    the courtyards]`: the pair at y 47.3 (its outer guard at ~48.1) against the buck's
     switching loop (`U5`, `L1`, `C11`, all at y ≤ 21.7) is **over 24 mm** away, with the
     LED row between them; from the LEDs' courtyards, ~13 mm.
   - **Guard traces** (`pairs:` `guard_traces:`, `pcb_route.guard_traces`): an `AGND_INST`
     track each side of the coupled run, one clearance off the legs, stitched into the
-    strip at least every 5 mm - about 570 mm of guard and ~118 vias. **Left with the 3W
-    keep-off only** (0.75 mm, `guard:`), where another net's copper leaves no room for a
-    guard with two stitching vias: four spans of 1.6-4.4 mm where the run steps round
-    the far mounts; `route` prints each one.
+    strip at least every 5 mm - about 540 mm of guard and ~97 vias. **Left with the 3W
+    keep-off only** (0.75 mm, `guard:`), where there is no room for a guard with two
+    stitching vias: two spans of 6.2 mm, on the exit fillets at `H4` and `H8`, and a short break in the outer guard under `SW2`'s pins; `route`
+    prints each one.
   - Moved for it: `R-CHAIN-SER` to the far side of the row where the block stood,
     `U-LVLSHIFT` and the LED data by LED1, `Q-INRUSH`'s network by `J-UMB`, `R-SPI-SER`
     between `J-MCU` and `J-UMB`. `J-MCU`'s SPI and IO lines never run beside the pair.
