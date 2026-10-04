@@ -254,9 +254,14 @@ What the first layout settled, and where it is held:
   on both outer layers, no layer direction anywhere - no region of this board is a bus
   crossing that needs one. The analog block's nets prefer layer 1, over the island
   (`layer_cost:`; #8-5: layer 4's reference is the LEDs' +12 V plane). Since the trace
-  cleanup (#33) only `VS` touches layer 4, in two short hops - over `SENSOR_RAW` below
-  the sensor and under `REF_5V` in `U3`'s belly - because `VS` must reach both `R7` and
-  `R8` from the sensor's side of the `SENSOR_RAW` run (*The analog block*, below). The
+  cleanup (#33) two analog legs touch layer 4 besides the breath pair. `VS`, in two short
+  hops - over `SENSOR_RAW` below the sensor and under `REF_5V` in `U3`'s belly - because
+  `VS` must reach both `R7` and `R8` from the sensor's side of the `SENSOR_RAW` run (*The
+  analog block*, below). And `SENSOR_BUFFERED_OUT`'s branch to `R4`, from the pair's tail
+  via, 12.7 mm on layer 4 over `INST_POS12`: a layer-1 path exists only through
+  `SENSOR_RAW`, `REF_5V` and `REF_VIN`, all locked hand routes. It is acceptable because
+  the net there is the buffer's output - driven, low impedance - not the sensor's node; the
+  owner accepted it on 2026-10-04 (review #35, R17: *"Accept, fix the README"*). The
   breath pair is guarded: every other net the router lays keeps 0.75 mm (3W) off its
   legs (`pairs:` `guard:`; #8-4).
 - **The analog block** (#33, hand routes, locked so `pcb.py finish` and `rescue` leave
