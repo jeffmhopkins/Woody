@@ -420,11 +420,11 @@ iron_room:
     - {rows: [SW1-n], min: 2.0}
     - {rows: [U-BREATH], min: 1.5}
   except:
-    - {part: SW2, near: H2, reason: "both placed by the body CAD: the far column mount's nut stands 1.3 mm off the switch's leg pin; nothing on the board moves either"}
-    - {part: SW6, near: H6, reason: "as SW2 / H2"}
-    - {part: SW8, near: J5, reason: "both placed by the body CAD (J5 is the right-hand chain header, main chain); open for the owner with the switch and header positions (M2/M3)"}
-    - {part: U10, near: R7, reason: "R7 heads the feedback column (R7, R9, C9, R8) at the board's mouth edge, with REF_MINUS in the one gap beside it (README, The analog block); 1.5 mm needs the column and its routing re-laid - open for the owner (#34 C7)"}
-    - {part: U10, near: U3, reason: "U-BUF's courtyard 0.86 mm from U10's unconnected pads 5-8; moving the buffer moves the whole analog block - open for the owner (#34 C7)"}
+    - {part: SW2, near: H2, reason: "both placed by the body CAD: the far column mount's nut 1.32 mm off the switch's leg pin. Owner 2026-10-04: key layout final for rev A - accepted for rev A, check on the boards in hand"}
+    - {part: SW6, near: H6, reason: "as SW2 / H2 (1.32 mm). Accepted for rev A, check on the boards in hand"}
+    - {part: SW8, near: J5, reason: "both placed by the body CAD (J5 the right-hand chain header): 0.01 mm. Accepted for rev A, check on the boards in hand"}
+    - {part: U10, near: R7, reason: "owner 2026-10-04: accepted; hand-solder U10 first with a fine tip (its Fit field). Pad to pad 0.80 mm, U10 pin 5 (no-connect) to R7 pad 2; courtyards 0.28 mm"}
+    - {part: U10, near: U3, reason: "owner 2026-10-04: accepted; hand-solder U10 first with a fine tip (its Fit field). Pad to pad 1.59 mm, U10 pins 5-8 (no-connect) to U3's pin-1 row; courtyards 0.86 mm"}
 
 # Placement: TOP face, body coordinates, [x, y, rot] (rot CCW seen from above).
 parts:

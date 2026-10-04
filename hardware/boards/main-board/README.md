@@ -233,10 +233,16 @@ What the first layout settled, and where it is held:
   moved as one group, out of the pins' way to the nearest clear place, routed again: `LT1`
   +12.0 / 0 mm (x / y), `LT2` +9.25 / +11.75, `LT3` -12.0 / -4.25, `LT4` +7.5 / +7.75, `RT1`
   -7.5 / -7.75, `RT2` +11.25 / +11.75, `RT3` -11.0 / -0.75, `RT4` +7.5 / +8.25, spare `sw-`
-  +11.0 / -3.0. **Not met, and why** (`iron_room:` `except:`, each with its reason): `SW2` and
-  `SW6` beside their far mounts' nuts (`H2`, `H6`, 1.3 mm) and `SW8` beside `J5` - all placed by
-  the body CAD; `U10` beside `R7` (0.28 mm) and `U3` (0.86 mm) - the feedback column and the
-  buffer would have to move, and the analog block's routing with them. Open for the owner.
+  +11.0 / -3.0. **Not met, and why** (`iron_room:` `except:`, each with its reason). **Owner, 2026-10-04,
+  in the working chat:** the networks stay where they moved (*"Keep moved"*); `SW2` and `SW6`
+  beside their far mounts' nuts (`H2`, `H6`, 1.32 mm) and `SW8` beside `J5` (0.01 mm), all placed
+  by the body CAD, are **accepted for rev A** (the key layout is final for it) and checked on the
+  boards in hand; `U10` beside `R7` and `U3` is **accepted, `U10` hand-soldered first with a fine
+  tip** (*"Accept, solder sensor first"*). Measured pad to pad: `U10` pin 5 to `R7` 0.80 mm, pins
+  5-8 to `U3` 1.59 mm (courtyards 0.28 and 0.86 mm). The near pins are `U10`'s own no-connect
+  row 5-8, its mechanical joints, which **do face** `R7` and `U3`; pins 1-4 are at the far edge.
+  `R7` and `U3` are machine-fitted, so they are on the board before `U10`: the hand-assembly
+  sheet's Fit column (`U-BREATH`'s `Fit` field) says how - tip size, tape, pin by pin.
   `layout.yaml` `networks:` still records the first layout's pattern between the pins.
 - **The planes stitched** (#8-8; owner, 2026-10-04, in the working chat: *"add 2-3 now"*):
   `C-STITCH-12V` from `INST_POS12` to `PWR_GND` at `J-MCU` (`C45`), `J-UMB` (`C46`) and the

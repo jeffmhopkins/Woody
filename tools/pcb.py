@@ -2314,7 +2314,8 @@ def assembly_files(bdir, name, fab):
             m["refs"].append(ref)
             m["comment"].add(f.get("MPN") or comps[ref]["value"])
         elif how == "hand":
-            hand.append((ref, comps[ref]["value"], f.get("Manufacturer", ""), f.get("MPN", "")))
+            # a symbol's Fit field: how to fit it by hand (solder order, tip, what to mask) - #34
+            hand.append((ref, comps[ref]["value"], f.get("Manufacturer", ""), f.get("MPN", ""), f.get("Fit", "")))
         elif how != "none" and not ref.startswith("#"):
             sys.exit(f"pcb: {ref} has no Assembly field (machine, hand or none) on its sheet")
     with open(os.path.join(fab, name + "-bom-jlc.csv"), "w", newline="") as fh:
@@ -2349,8 +2350,10 @@ def assembly_files(bdir, name, fab):
         print(f"pcb: no JLC rotation offset for {', '.join(sorted(unchecked))} - confirm them in JLC's preview")
     with open(os.path.join(fab, name + "-hand-assembly.csv"), "w", newline="") as fh:
         w = csv.writer(fh)
-        w.writerow(["Designator", "Value", "Manufacturer", "MPN"])
-        w.writerows(hand)
+        # the Fit column only where a part has one: a board with none keeps its four columns
+        fit = any(h[4] for h in hand)
+        w.writerow(["Designator", "Value", "Manufacturer", "MPN"] + (["Fit"] if fit else []))
+        w.writerows([h if fit else h[:4] for h in hand])
     if none:
         print(f"pcb: not in any order (Assembly = none: excluded from the BOM, or a net tie drawn in copper): {', '.join(none)}")
     subs = re.findall(r'\(property "Sheetfile" "([^"]+)"', open(root).read())

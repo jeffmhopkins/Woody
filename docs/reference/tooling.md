@@ -331,7 +331,7 @@ assemble and bring it up, what is open.
 ```
 python3 tools/pcb.py layout hardware/boards/key-board-lh   # FIRST layout: place, route, pour, fill (refuses if the board exists; --force)
 python3 tools/pcb.py check  hardware/boards/key-board-lh   # DRC + parity + fab limits + the body CAD's outline, thickness and positions
-python3 tools/pcb.py render hardware/boards/key-board-lh   # 3D both sides, 2D copper, and fab/ (Gerbers, PTH and NPTH drills, placement, and the JLCPCB BOM, CPL and hand-assembly list)
+python3 tools/pcb.py render hardware/boards/key-board-lh   # 3D both sides, 2D copper, and fab/ (Gerbers, PTH and NPTH drills, placement, and the JLCPCB BOM, CPL and hand-assembly list - with a Fit column, from each symbol's `Fit` field, when any hand-fitted part has one)
 ```
 
 **3D models for `woody` footprints** whose maker's STEP could not be had are
