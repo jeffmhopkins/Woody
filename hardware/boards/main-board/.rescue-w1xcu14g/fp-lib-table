@@ -1,4 +1,0 @@
-(fp_lib_table
-  (version 7)
-  (lib (name "woody")(type "KiCad")(uri "${KIPRJMOD}/../../lib/woody.pretty")(options "")(descr "Woody project footprints - hardware/lib/README.md"))
-)
