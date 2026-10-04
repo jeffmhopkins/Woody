@@ -254,13 +254,16 @@ exports:
   - {name: dxf-matrix-carrier, src: mechanical/cad/woody_body.scad, out: mechanical/export/matrix-carrier.dxf, defines: {part: "matrix_carrier"}}
   - {name: pcb-geometry, src: mechanical/cad/woody_body.scad, out: mechanical/export/pcb-geometry.echo, defines: {part: "pcb_geom"}}
 
-# The interference check: every named solid against every other. Report
-# only - clashes are design findings, like drc.echo, not build failures.
+# The interference check: every named solid against every other, and its
+# and clearance check (issue #34): `check` fails on an unexcused clash or a pair
+# under its class's minimum gap (config/clearance.yaml).
 clashes:
   - name: clash
     src: mechanical/cad/woody_body.scad
     out: mechanical/clash.txt
     allow: mechanical/clash-allow.yaml
+    clearance: config/clearance.yaml
+    clearance_set: body
 
 # THE PHOTOGRAPHS (owner, 2026-10-01): tools/render-instrument.py, Blender
 # Cycles on the CPU, as the module's are (mechanical/module/outputs.yaml). The

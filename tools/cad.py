@@ -392,6 +392,10 @@ def output_inputs(o):
         deps = scad_deps(o["src"])
     if o["kind"] == "clash":
         deps.add(o["allow"])
+        cs = clearance_set(o)
+        if cs:
+            deps.add(o["clearance"])
+            deps.update(cs[2])
     return sorted(deps)
 
 
@@ -593,12 +597,107 @@ def mesh_step(o, out_abs):
 # nothing is reported too: a stale excuse reads exactly like a live one.
 
 CLASH_EPS = 0.05   # mm^3 - below this, two faces touching, not two parts overlapping
+SEATED_EPS = 0.01  # mm - a gap this small is two faces touching
+GAP_EPS = 0.005    # mm - the meshes are float32: a gap drawn AT its class's minimum measures a few microns either side of it
+CLEARANCE = "config/clearance.yaml"
+
+# THE NEAR-MISS CHECK (issue #34). An intersection test is silent on a pair
+# 0.05 mm apart, so every pair whose boxes come within reach is also measured
+# for its MINIMUM DISTANCE (manifold3d's min_gap: exact, triangle to
+# triangle, on the meshes OpenSCAD tessellates - a cylinder is its polygon).
+# config/clearance.yaml sorts each pair into a class by glob; each class has
+# a minimum gap with its provenance, the first class that matches wins. A
+# pair under its class's minimum is UNDER MINIMUM - and `cad.py check` fails
+# on it - unless a `near:` rule in the allow file names it and says why.
+# Every pair under the report threshold is listed, with where it is.
+
+
+def glob_rx(p):
+    """A glob on a solid id as a regex: * and ? as fnmatch's, and <same> as a span
+    that must read the same in both ids of the pair (a nut and ITS jack)."""
+    out = ""
+    for tok in re.split(r"(<same>|\*|\?)", p):
+        out += {"<same>": "(?P<same>.+)", "*": ".*", "?": "."}.get(tok, re.escape(tok))
+    return re.compile(out + r"\Z", re.S)
+
+
+def pair_match(ra, rb, a, b):
+    ma, mb = glob_rx(ra).match(a), glob_rx(rb).match(b)
+    if not (ma and mb):
+        return False
+    sa, sb = ma.groupdict().get("same"), mb.groupdict().get("same")
+    return sa is None or sb is None or sa == sb
+
+
+def clearance_set(o):
+    """The clearance classes for this clash output: [(id, [(a, b)], min, source)], the
+    report threshold, and every file a `ref:` leaf read."""
+    if not o.get("clearance"):
+        return None
+    cfg = yaml.safe_load(open(os.path.join(ROOT, o["clearance"]), encoding="utf-8"))
+    read = set()
+
+    def leaf(v, where):
+        if "ref" in v:
+            read.add(v["ref"].partition(":")[0])
+            got = resolve_ref(v["ref"])
+            return float(got["value"]), f"ref {v['ref']}: {got.get('source', '')}"
+        if "value" not in v:
+            raise SystemExit(f"cad.py: {o['clearance']}: {where} has neither value nor ref")
+        return float(v["value"]), v.get("source", "")
+    report, _ = leaf(cfg["report"], "report")
+    sets = cfg.get("sets") or {}
+    if o["clearance_set"] not in sets:
+        raise SystemExit(f"cad.py: {o['clearance']} has no set {o['clearance_set']!r} (for {o['name']})")
+    classes = []
+    for c in sets[o["clearance_set"]]:
+        mn, src = leaf(c["min"], f"{o['clearance_set']}.{c['class']}.min")
+        classes.append((c["class"], [tuple(p) for p in c["pairs"]], mn, src, bool(c.get("touch"))))
+    if not classes or ("*", "*") not in classes[-1][1]:
+        raise SystemExit(f"cad.py: {o['clearance']}: set {o['clearance_set']!r} must end with a class "
+                         f"matching [\"*\", \"*\"], so no pair goes unclassed")
+    return classes, report, sorted(read)
+
+
+def clash_cache_dir(o, inputs):
+    """Per-solid meshes are cached by everything they are made from, so a rebuild
+    of clash.txt after a config-only change to clearance.yaml re-renders nothing."""
+    h = hashlib.sha256(f"{RECIPE}\n{openscad_version()}\n{json.dumps(defines(o))}\n{o['src']}\n".encode())
+    for p in inputs:
+        if p.endswith((".scad", ".stl", ".dxf", ".svg", ".csv", ".json", ".dat", ".png")):
+            h.update(f"{p}\0{blob_id(p)}\n".encode())
+    return os.path.join(os.path.expanduser("~/.cache/woody"), "clash-solids", h.hexdigest()[:16])
 
 
 def run_scad(src, out, defines_, deps=None):
     cmd = ["openscad", "-o", out] + (["-d", deps] if deps else []) + defines_ + [os.path.join(ROOT, src)]
     r = subprocess.run(cmd, capture_output=True, text=True, cwd=ROOT)
     return r.returncode, r.stdout + r.stderr
+
+
+def near_location(ta, tb, gap):
+    """Roughly where two meshes come closest: the nearest pair among points sampled
+    on each, cropped to where their boxes meet. min_gap gives the distance exactly;
+    this only says where to look."""
+    import numpy as np
+    lo = np.maximum(ta.bounds[0], tb.bounds[0]) - gap - 0.5
+    hi = np.minimum(ta.bounds[1], tb.bounds[1]) + gap + 0.5
+    P = []
+    for t in (ta, tb):
+        p = np.vstack([t.vertices, t.sample(20000, seed=1)])
+        p = p[((p >= lo) & (p <= hi)).all(1)]
+        if len(p) > 6000:
+            p = p[np.linspace(0, len(p) - 1, 6000).astype(int)]
+        P.append(p)
+    if not len(P[0]) or not len(P[1]):
+        return None
+    best = (1e18, None)
+    for i in range(0, len(P[0]), 500):
+        d = ((P[0][i:i + 500, None, :] - P[1][None, :, :]) ** 2).sum(-1)
+        k = np.unravel_index(d.argmin(), d.shape)
+        if d[k] < best[0]:
+            best = (d[k], (P[0][i + k[0]] + P[1][k[1]]) / 2)
+    return best[1]
 
 
 def clash_step(o, out_abs, inputs):
@@ -613,7 +712,11 @@ def clash_step(o, out_abs, inputs):
                          f"`pip install manifold3d trimesh`")
     allow = yaml.safe_load(open(os.path.join(ROOT, o["allow"]), encoding="utf-8")) or {}
     rules = allow.get("allow") or []
+    near_rules = allow.get("near") or []
+    cs = clearance_set(o)
     base = ["-D", "explode=0", "-D", 'cut="none"', "-D", "ghost_shell=false"] + defines(o)
+    cache = clash_cache_dir(o, inputs)
+    os.makedirs(cache, exist_ok=True)
     with tempfile.TemporaryDirectory() as td:
         ids_echo = os.path.join(td, "ids.echo")
         rc, log = run_scad(o["src"], ids_echo, base + ["-D", "list_solids=true"], os.path.join(td, "deps"))
@@ -628,12 +731,19 @@ def clash_step(o, out_abs, inputs):
 
         def one(i_id):
             i, sid = i_id
-            stl = os.path.join(td, f"{i}.stl")
-            rc, log = run_scad(o["src"], stl, base + ["-D", f"only={json.dumps(sid)}"])
-            if rc != 0 or not os.path.exists(stl):
+            stl = os.path.join(cache, hashlib.sha256(sid.encode()).hexdigest()[:16] + ".stl")
+            if os.path.exists(stl):
+                return sid, stl, None
+            if os.path.exists(stl + ".empty"):
+                return sid, None, "empty"
+            tmp = os.path.join(td, f"{i}.stl")
+            rc, log = run_scad(o["src"], tmp, base + ["-D", f"only={json.dumps(sid)}"])
+            if rc != 0 or not os.path.exists(tmp):
                 if "top level object is empty" in log.lower() or "empty" in log.lower():
+                    open(stl + ".empty", "w").close()
                     return sid, None, "empty"
                 return sid, None, log[-800:]
+            shutil.move(tmp, stl)
             return sid, stl, None
 
         meshes, empty = {}, []
@@ -649,54 +759,139 @@ def clash_step(o, out_abs, inputs):
                     raise SystemExit(f"cad.py: solid {sid!r} is not a closed mesh - it cannot be intersected; fix it")
                 m = mf.Manifold(mf.Mesh(vert_properties=np.asarray(tm.vertices, dtype=np.float32),
                                         tri_verts=np.asarray(tm.faces, dtype=np.uint32)))
-                meshes[sid] = (m, tm.bounds)
+                meshes[sid] = (m, tm.bounds, tm)
 
-    def allowed(a, b):
-        for n, r in enumerate(rules):
-            if ((fnmatch.fnmatch(a, r["a"]) and fnmatch.fnmatch(b, r["b"])) or
-                    (fnmatch.fnmatch(b, r["a"]) and fnmatch.fnmatch(a, r["b"]))):
+    def match(pats, a, b):
+        for n, r in enumerate(pats):
+            ra, rb = (r["a"], r["b"]) if isinstance(r, dict) else r
+            if pair_match(ra, rb, a, b) or pair_match(ra, rb, b, a):
                 return n
         return None
 
+    reach = 0.0
+    if cs:
+        classes, report, _ = cs
+        reach = max([report] + [c[2] for c in classes]) + 0.5
     names = sorted(meshes)
     clashes, excused, used = [], [], set()
+    near, under, accepted, seated, near_used = [], [], [], [], set()
     for i, a in enumerate(names):
-        ma, ba = meshes[a]
+        ma, ba, ta = meshes[a]
         for b in names[i + 1:]:
-            mb, bb = meshes[b]
-            if (ba[1] <= bb[0]).any() or (bb[1] <= ba[0]).any():
+            mb, bb, tb = meshes[b]
+            if (ba[1] + reach <= bb[0]).any() or (bb[1] + reach <= ba[0]).any():
                 continue
-            inter = ma ^ mb
-            v = inter.volume()
-            if v <= CLASH_EPS:
+            v = (ma ^ mb).volume() if not ((ba[1] <= bb[0]).any() or (bb[1] <= ba[0]).any()) else 0.0
+            if v > CLASH_EPS:
+                inter = ma ^ mb
+                bx = inter.bounding_box()
+                where = "X %.1f-%.1f  Y %.1f-%.1f  Z %.1f-%.1f" % (bx[0], bx[3], bx[1], bx[4], bx[2], bx[5])
+                n = match(rules, a, b)
+                if n is None:
+                    clashes.append((v, a, b, where))
+                else:
+                    used.add(n)
+                    excused.append((v, a, b, rules[n]["why"]))
                 continue
-            bx = inter.bounding_box()
-            where = "X %.1f-%.1f  Y %.1f-%.1f  Z %.1f-%.1f" % (bx[0], bx[3], bx[1], bx[4], bx[2], bx[5])
-            n = allowed(a, b)
-            if n is None:
-                clashes.append((v, a, b, where))
+            if not cs:
+                continue
+            g = ma.min_gap(mb, reach)
+            if g >= reach:
+                continue
+            # a `touch:` class applies only to a pair that touches: parts that may sit on each
+            # other, and must clear like anything else when they do not
+            k = next(c for c in classes if match(c[1], a, b) is not None
+                     and (g <= SEATED_EPS or not c[4]))
+            cid, _, mn, _, _ = k
+            if mn <= 0 and g <= SEATED_EPS:
+                seated.append((cid, a, b))
+                continue
+            if g >= max(report, mn):
+                continue
+            at = near_location(ta, tb, g)
+            at = "" if at is None else "at %.1f, %.1f, %.1f" % tuple(at)
+            row = (g, mn, cid, a, b, at)
+            if g < mn - GAP_EPS:
+                n = match(near_rules, a, b)
+                if n is None:
+                    under.append(row)
+                else:
+                    near_used.add(n)
+                    accepted.append(row + (n,))
             else:
-                used.add(n)
-                excused.append((v, a, b, rules[n]["why"]))
+                near.append(row)
     dead = [r for n, r in enumerate(rules) if n not in used]
-    L = [f"# Interference check - GENERATED by tools/cad.py from {o['src']}",
+    dead_near = [r for n, r in enumerate(near_rules) if n not in near_used]
+    L = [f"# Interference and clearance check - GENERATED by tools/cad.py from {o['src']}",
          f"# {len(names)} solids, {len(names) * (len(names) - 1) // 2} pairs; overlap > {CLASH_EPS} mm^3 counts.",
          f"# Excuses: {o['allow']}. Every solid is a modelled envelope - many sizes are tbd",
-         f"# (config/body.yaml), so a clean result is only as good as those envelopes.", ""]
+         f"# (config/body.yaml), so a clean result is only as good as those envelopes."]
+    if cs:
+        L += [f"# Clearance: {o['clearance']} set {o['clearance_set']!r} - each pair's class sets its minimum gap;",
+              f"# every pair under {report:g} mm (or its class's minimum, if larger) is listed. Gaps are exact",
+              f"# mesh distances (manifold3d min_gap) on float32 meshes, so a gap within {GAP_EPS} of its minimum",
+              f"# meets it; 'at' is approximate. `cad.py check` fails on UNDER MINIMUM."]
+    L.append("")
     L.append(f"CLASH {len(clashes)}" + ("" if clashes else " - none"))
     for v, a, b, where in sorted(clashes, reverse=True):
         L.append(f"  {v:10.1f} mm3  {a}  x  {b}   [{where}]")
+    if cs:
+        hdr = "  gap    min  margin  class                pair"
+        L += ["", f"UNDER MINIMUM {len(under)}" + ("" if under else " - none")]
+        if under:
+            L.append(hdr)
+        for g, mn, cid, a, b, at in sorted(under, key=lambda r: r[0] - r[1]):
+            L.append(f"  {g:5.2f}  {mn:5.2f}  {g - mn:+6.2f}  {cid:20} {a}  x  {b}   [{at}]")
+        L += ["", f"ACCEPTED NEAR-MISSES {len(accepted)} (by `near:` rule in {o['allow']})"]
+        for n in sorted({r[6] for r in accepted}):
+            L.append(f"  near: {near_rules[n]['a']}  x  {near_rules[n]['b']} - {near_rules[n]['why']}")
+            for g, mn, cid, a, b, at, _ in sorted((r for r in accepted if r[6] == n), key=lambda r: r[0] - r[1]):
+                L.append(f"    {g:5.2f}  {mn:5.2f}  {g - mn:+6.2f}  {cid:20} {a}  x  {b}   [{at}]")
+        L += ["", f"NEAR {len(near)} (at or over the minimum, under {report:g} mm)"]
+        for g, mn, cid, a, b, at in sorted(near):
+            L.append(f"  {g:5.2f}  {mn:5.2f}  {g - mn:+6.2f}  {cid:20} {a}  x  {b}   [{at}]")
+        by = {}
+        for cid, a, b in seated:
+            by.setdefault(cid, []).append(f"{a} x {b}")
+        L += ["", f"SEATED {len(seated)} (touching, in a class whose minimum is 0)"]
+        for cid in sorted(by):
+            L.append(f"  {cid} {len(by[cid])}: " + "; ".join(sorted(by[cid])))
     L += ["", f"ALLOWED {len(excused)} (by rule in {o['allow']})"]
     for v, a, b, why in sorted(excused, reverse=True):
         L.append(f"  {v:10.1f} mm3  {a}  x  {b}   - {why}")
-    L += ["", f"UNUSED ALLOW RULES {len(dead)}" + (" - delete them or they will excuse the next clash" if dead else "")]
+    L += ["", f"UNUSED ALLOW RULES {len(dead) + len(dead_near)}" +
+          (" - delete them or they will excuse the next clash" if dead or dead_near else "")]
     for r in dead:
         L.append(f"  {r['a']}  x  {r['b']}   - {r['why']}")
+    for r in dead_near:
+        L.append(f"  near: {r['a']}  x  {r['b']}   - {r['why']}")
     if empty:
         L += ["", f"EMPTY SOLIDS {len(empty)} (named, but drew nothing)"] + ["  " + e for e in empty]
     open(out_abs, "w", encoding="utf-8", newline="\n").write("\n".join(L) + "\n")
-    print(f"      {len(names)} solids: {len(clashes)} clash(es), {len(excused)} allowed, {len(dead)} unused rule(s)")
+    print(f"      {len(names)} solids: {len(clashes)} clash(es), {len(excused)} allowed, "
+          f"{len(under)} under minimum, {len(accepted)} accepted near, {len(near)} near, "
+          f"{len(dead) + len(dead_near)} unused rule(s)")
     return f"{openscad_version()}; manifold3d"
+
+
+def clash_failures(o):
+    """What a clash output reports that must fail `check`: an unexcused CLASH or a
+    pair UNDER MINIMUM. Read from the output itself - check never runs OpenSCAD."""
+    path = os.path.join(ROOT, o["out"])
+    if not os.path.exists(path):
+        return []
+    out, sect = [], None
+    for line in open(path, encoding="utf-8"):
+        m = re.match(r"^(CLASH|UNDER MINIMUM) (\d+)", line)
+        if m:
+            sect = m.group(1)
+            continue
+        if re.match(r"^[A-Z]", line):
+            sect = None
+            continue
+        if sect and line.startswith("  ") and not line.strip().startswith("gap "):
+            out.append(f"{o['name']}: {sect} {line.strip()}")
+    return out
 
 
 def script_step(o, out_abs, inputs, fp):
@@ -822,6 +1017,8 @@ def all_problems():
     ledger = load_ledger()
     for o in outs:
         out += problems_for(o, ledger.get(o["name"]))
+        if o["kind"] == "clash":
+            out += clash_failures(o)
     owned = {o["out"] for o in outs}
     for n in ledger:
         if n not in {o["name"] for o in outs}:
@@ -852,8 +1049,12 @@ def cmd_check():
     if probs:
         for p in probs:
             print("  " + p)
+        near = sum(1 for p in probs if ": UNDER MINIMUM " in p or ": CLASH " in p)
         print(f"FAIL {len(probs)} CAD output problem(s) of {n} outputs - "
-              f"run `python3 tools/cad.py build`")
+              + (f"run `python3 tools/cad.py build`" if len(probs) > near else "")
+              + ("; " if near and len(probs) > near else "")
+              + (f"{near} clash/clearance finding(s): fix the design, or excuse each in its "
+                 f"clash-allow file (`allow:` / `near:`) with its reason" if near else ""))
         return 1
     print(f"PASS {n} CAD outputs match their sources")
     return 0

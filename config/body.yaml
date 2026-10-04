@@ -88,6 +88,11 @@ stack:
     status: tbd
     source: "per side of the acrylic, so the lid lifts off; acrylic sheet thickness varies [from memory]"
     decided_by: "M4, against the sheet actually bought"
+  plate_side_clear:
+    value: 0.8
+    status: nominal
+    source: "the key plate's and the bottom plate's long edges, in from each acrylic side's inside face (issue #34 C6; it was groove_clear, 0.2): the side floats groove_clear in its groove, the oak that holds the grooves moves 1.5 % across the grain [adr 0009] of the body's width, ~0.43 a side, and the plate's cut +/-0.13 [from memory] - config/clearance.yaml body.plate-to-side, which mechanical/clash.txt holds"
+    decided_by: "M4, with the oak's grain direction and the plates as cut"
 # ----------------------------------------------------------------- ends ----
 ends:
   mouth_cap_t:
@@ -661,7 +666,7 @@ boards:
   matrix_notch_clear:
     value: 0.5
     status: nominal
-    source: "how far the carrier's slot under the Matrix's USB-C receptacle stands off the receptacle's shell, each side and at its end, and how far the carrier's mouth edge stands off the extension's plug: the least drc.echo 'Matrix's back-side parts clear the carrier' accepts. The slot is for the shell only (owner, 2026-10-03, option A): the plug is in front of the carrier, not over it [drawing convention]"
+    source: "how far the carrier's slot under the Matrix's USB-C receptacle stands off the receptacle's shell, each side and at its end - its corners rounded about the shell's corners, so the clearance holds there too (issue #34 C8: the outline's own rounding used to fillet them back to 0.29): and how far the carrier's mouth edge stands off the extension's plug: the least drc.echo 'Matrix's back-side parts clear the carrier' accepts, and config/clearance.yaml body.slot-round-smd. The slot is for the shell only (owner, 2026-10-03, option A): the plug is in front of the carrier, not over it"
   matrix_hdr_reach:
     value: 3.0
     status: settled
@@ -732,9 +737,9 @@ openings:
     source: "oak lip the acrylic rests on, per side - the rebate is the opening plus twice this"
     decided_by: "M4, with the acrylic's cut size"
   matrix_relief_d:
-    value: 0.5
+    value: 0.6
     status: nominal
-    source: "a shallow pocket routed into the oak top's underside over the Matrix (its square and 0.5 round it), which its top face rises into: the Matrix carrier's stack (hardware.mx_spacer_l under the oak, boards.matrix_hdr_h) puts the Matrix's top 0.1 above the oak's underside, and the relief leaves it 0.4 of air and the LEDs 2.0 under the acrylic (drc.echo 'Matrix carrier hangs from the oak', 'LED tops under the frosted window'). It thins the window's lip by as much (drc.echo 'oak lip under the frosted window') [drawing convention]"
+    source: "a shallow pocket routed into the oak top's underside over the Matrix (its square and 0.5 round it), which its top face rises into: the Matrix carrier's stack (hardware.mx_spacer_l under the oak, boards.matrix_hdr_h) puts the Matrix's top just above the oak's underside, and the relief leaves it the air config/clearance.yaml body.against-oak asks (issue #34 C11) - drc.echo 'Matrix carrier hangs from the oak' gives the air, 'LED tops under the frosted window' the LEDs' room (drc.echo 'Matrix carrier hangs from the oak', 'LED tops under the frosted window'). It thins the window's lip by as much (drc.echo 'oak lip under the frosted window') [drawing convention]"
   matrix_acrylic_t:
     value: 3.0
     status: tbd
@@ -770,6 +775,10 @@ openings:
     status: tbd
     source: "the recovery cable's plug, its overmould across the body, at most: centred on the Matrix's receptacle it must pass the carrier's arm and J-MCU-C (the carrier's outline was drawn for it, owner 2026-10-03 option A). Common cables are ~12-14.5 wide [from memory]. The key keeps its name from CBL-USB-EXT's plug, which it was until issue #37"
     decided_by: "calipers on the recovery cable"
+  usb_pocket_clear:
+    value: 0.55
+    status: nominal
+    source: "the air the oak top's pocket over the Matrix's USB-C plug (since issue #37 the lid-off recovery plug) leaves round the plug's overmould - over its top, and past its tail-side face where the pocket ends unless the window's rebate ends it first (issue #34 C9; it was 0.3): config/clearance.yaml body.against-oak's 0.5 and a little. The rebate DOES end it first: the pocket may not run under the acrylic's rebate (drc.echo 'recovery USB-C plug clear of the oak top'), so the end wall still stands under 0.5 off the plug (mechanical/clash.txt, UNDER MINIMUM) - open. The overmould's own size is openings.usb_overmold, tbd: it settles with the cable in hand, and this clearance is re-measured then"
   usb_overmold:
     value: [15.0, 9.0]
     status: tbd
@@ -928,6 +937,10 @@ ethercon:
     status: tbd
     source: "placeholder - off-centre, so the lane beside it takes the MIDI jack (midi; it was the USB-C receptacle's until issue #37)"
     decided_by: "M4 tail-face paper check (ADR 0009)"
+  floor_clear:
+    value: 0.55
+    status: nominal
+    source: "the air between the oak bottom and the connector's flange and its adapter's lower edge: the connector stands on the floor (owner, 2026-09-26: raise the body rather than pocket the oak bottom), this far above it - config/clearance.yaml body.against-oak's 0.5 and a little (issue #34 C10; it was a 0.3 drawing convention in woody_body.scad). drc.echo 'body thickness takes the etherCON on the floor' holds the body's thickness against it"
 
 # ------------------------------------------------------------- hardware ----
 hardware:
