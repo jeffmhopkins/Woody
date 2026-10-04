@@ -14,7 +14,7 @@ is part of the cassette (ADR 0025): every one of its mounts stands on the one
 bottom plate, and eight of them are columns up to the key boards (ADR 0022 as
 amended).
 
-> **Status (wave 3, 2026-10-04): re-laid out to its current design and ROUTED (rev H: traces cleaned up #33, planes stitched #8-8);
+> **Status (wave 3, 2026-10-04): re-laid out to its current design and ROUTED (rev I: traces cleaned up #33, planes stitched #8-8, iron room #34);
 > `pcb.py check` passes.** The full-width tail's outline (ADR 0021 amendment), thirteen
 > LEDs in one even row, its tail-end place empty (ADR 0028's amendments of 2026-10-03),
 > `J-MCU` turned off the row to the near edge (`boards.mcu_conn_at`), the wave-2 and
@@ -226,6 +226,18 @@ What the first layout settled, and where it is held:
 - **The clamps at their connector** (#8-9): `D-TVS-PWR` (D3) beside `J-UMB`'s pins 3 and 6,
   `D-REVSHUNT` (D2) beside it; the buck's caps at the module (#8-7): `C11` at `U5`'s input,
   `C43` (owner, 2026-10-03) at its output, returned to its GND pin.
+- **Soldering-iron room round the hand-soldered pads** (#34; `layout.yaml` `iron_room:`, held by
+  `pcb.py check`): every other part's courtyard 2.0 mm from a thumb switch's pin pads on the top
+  face, where they are soldered, and 1.5 mm from `U10`'s. Each switch's key network (its
+  `R-KEY-PU`, `C-KEY`, `R-KEY-SER`) stood between the switch's own pins, touching them, so each
+  moved as one group, out of the pins' way to the nearest clear place, routed again: `LT1`
+  +12.0 / 0 mm (x / y), `LT2` +9.25 / +11.75, `LT3` -12.0 / -4.25, `LT4` +7.5 / +7.75, `RT1`
+  -7.5 / -7.75, `RT2` +11.25 / +11.75, `RT3` -11.0 / -0.75, `RT4` +7.5 / +8.25, spare `sw-`
+  +11.0 / -3.0. **Not met, and why** (`iron_room:` `except:`, each with its reason): `SW2` and
+  `SW6` beside their far mounts' nuts (`H2`, `H6`, 1.3 mm) and `SW8` beside `J5` - all placed by
+  the body CAD; `U10` beside `R7` (0.28 mm) and `U3` (0.86 mm) - the feedback column and the
+  buffer would have to move, and the analog block's routing with them. Open for the owner.
+  `layout.yaml` `networks:` still records the first layout's pattern between the pins.
 - **The planes stitched** (#8-8; owner, 2026-10-04, in the working chat: *"add 2-3 now"*):
   `C-STITCH-12V` from `INST_POS12` to `PWR_GND` at `J-MCU` (`C45`), `J-UMB` (`C46`) and the
   analog end (`C47`, on `PWR_GND` beside the island), each pad to its plane by its own via
@@ -347,3 +359,4 @@ iterations below are lettered.
 | F | 2026-10-04 | Wave 3, routed: the Matrix branch merged (#23: `C41` gone, `HDR-SERVICE` 1x3 in place, `J-MCU` pins 23/24 on no net, `C205`/`C206` the key registers' second decouplers); the breath pair drawn along the far edge with arcs round `H2`, `H4`, `H6`, `H8`, its guard traces and the layer-3 `AGND_INST` strip; the power block against the near edge; the rest by the router, `complete` and a few hand routes at `J-MCU`'s foot (`INST_5V_A` pin 17 to pin 3 and on to `U6`); `pcb.py check` passes; renders and `fab/` written | `layout.yaml`, `main-board.kicad_pcb`, `fab/`, `tools/pcb_route.py`, `tools/pcb_main.py`, `tools/pcb.py` |
 | G | 2026-10-04 | Trace cleanup (#33; owner: *"not drastic changes ... pretty up the runs, get rid of unnecessary weaving and via usage and make sure analog circuits are the best they can be"*): no part moved; the analog block re-laid by hand on layer 1 (*The analog block*: `SENSOR_RAW` 6 vias to none, `REF_MINUS` and `REF_5V` 2 to none); every other unlocked signal run routed again where that came out shorter, straighter or with fewer vias, string-pulled to straight and 45-degree runs, loops and doubled copper taken out; the breath pair, its guards and arcs untouched; `pcb.py check` passes; renders and `fab/` written | `main-board.kicad_pcb`, `fab/` |
 | H | 2026-10-04 | The planes stitched (#8-8; owner: *"add 2-3 now"*): `C45`–`C47` (`C-STITCH-12V`) on the power-entry sheet and placed at `J-MCU`, `J-UMB` and the analog end, each pad to its plane by its own via; nothing else moved | `power-entry-instrument.kicad_sch`, `main-board.kicad_pcb`, `fab/` |
+| I | 2026-10-04 | Iron room (#34): the eight thumb keys' networks and the spare `sw-` network moved out from between their switch's pins (*What the first layout settled*), the nets they cut routed again by `complete` and cleaned as in G; `pcb.py check` now holds the room (`iron_room:`) | `layout.yaml`, `main-board.kicad_pcb`, `fab/`, `tools/pcb.py` |

@@ -372,6 +372,12 @@ prints which, exits 1, and leaves any existing board as it was.
   silkscreen lacks the title or its `rev <rev>  <date>` line (`check_title`;
   #33: the main board lost all three in a hand-drawn pass and every check
   passed);
+- a hand-soldered part with no iron room (`check_iron`, #34): layout.yaml
+  `iron_room:` `rules:` - each `{rows, min}` - holds every such part's pads on
+  the face it is soldered on (a through-hole part's far face), grown 0.25 as a
+  courtyard is, `min` mm from every other part's courtyard on that face;
+  `except:` names a pair that cannot have it, with its reason, and an
+  exception no longer needed fails as well;
 - a `layout.yaml` `pairs:` entry with a `guard:` whose legs (the pair's
   locked tracks and arcs of its width, on its layer) have any other net's
   track or via - the pair's own nets and its guard net aside - nearer than the

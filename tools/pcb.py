@@ -1748,6 +1748,58 @@ def check_title(board, lay):
     return bad
 
 
+def check_iron(board, lay, comps):
+    """layout.yaml `iron_room:` - a hand-soldered part's pads need a soldering iron's room
+    (#34): every `rows:` part's pads on the face it is soldered on (an SMD part's own face, a
+    through-hole part's far face), each grown by 0.25 as a courtyard is, kept `min` mm from
+    every other part's courtyard on that face. `except:` names a pair that cannot have it,
+    with its reason; an exception no longer needed fails too, so the list stays true."""
+    spec = lay.get("iron_room")
+    if not spec:
+        return []
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+
+    def poly(sps):
+        out = []
+        for i in range(sps.OutlineCount()):
+            o = sps.Outline(i)
+            out.append(Polygon([(pcbnew.ToMM(o.CPoint(k).x), pcbnew.ToMM(o.CPoint(k).y)) for k in range(o.PointCount())]).buffer(0))
+        return unary_union(out)
+    ex = {(e["part"], e["near"]): e for e in spec.get("except") or []}
+    used, bad = set(), []
+    cys = {}
+    for fp in board.GetFootprints():
+        for L, cl in ((pcbnew.F_Cu, pcbnew.F_CrtYd), (pcbnew.B_Cu, pcbnew.B_CrtYd)):
+            c = fp.GetCourtyard(cl)
+            if c.OutlineCount():
+                cys[(fp.GetReference(), L)] = poly(c)
+    for rule in spec.get("rules") or []:
+        for fp in board.GetFootprints():
+            ref = fp.GetReference()
+            if comps.get(ref, {}).get("row") not in rule["rows"]:
+                continue
+            tht = any(p.HasHole() and p.GetAttribute() != pcbnew.PAD_ATTRIB_NPTH for p in fp.Pads())
+            face = (pcbnew.F_Cu if fp.IsFlipped() else pcbnew.B_Cu) if tht else (pcbnew.B_Cu if fp.IsFlipped() else pcbnew.F_Cu)
+            pads = unary_union([poly(p.GetEffectivePolygon(face)) for p in fp.Pads()
+                                if p.IsOnLayer(face) and p.GetAttribute() != pcbnew.PAD_ATTRIB_NPTH]).buffer(0.25)
+            for (r, L), g in cys.items():
+                if L != face or r == ref:
+                    continue
+                d = pads.distance(g)
+                if d >= rule["min"] - 1e-3:
+                    continue
+                if (ref, r) in ex:
+                    used.add((ref, r))
+                    continue
+                bad.append(f"error: [iron] {ref}'s hand-soldered pads are {d:.2f} mm from {r}'s courtyard on the "
+                           f"{'top' if face == pcbnew.F_Cu else 'bottom'} face, under layout.yaml iron_room {rule['min']} mm")
+    for k, e in ex.items():
+        if k not in used:
+            bad.append(f"error: [iron] layout.yaml iron_room except: {k[0]} / {k[1]} has its room now - take the exception out")
+    return bad
+
+
 def check_pair_guard(board, lay):
     """layout.yaml pairs: `guard:` held on the board, not only by the router that laid it
     (#8-4, #33): no track or via of any net but the pair's own within the clearance plus
@@ -2139,6 +2191,7 @@ def cmd_check(bdir):
     bad += check_holes(board, lay)
     bad += check_connect_first(board, lay)
     comps, _ = sheet_netlist(os.path.join(bdir, name + ".kicad_sch"))
+    bad += check_iron(board, lay, comps)
     if lay.get("kind") == "main":
         import pcb_main
         bad += pcb_main.check_cad(board, lay, comps)
