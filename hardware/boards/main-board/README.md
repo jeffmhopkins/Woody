@@ -14,7 +14,7 @@ is part of the cassette (ADR 0025): every one of its mounts stands on the one
 bottom plate, and eight of them are columns up to the key boards (ADR 0022 as
 amended).
 
-> **Status (wave 3, 2026-10-04): re-laid out to its current design and ROUTED (rev G, traces cleaned up #33);
+> **Status (wave 3, 2026-10-04): re-laid out to its current design and ROUTED (rev H: traces cleaned up #33, planes stitched #8-8);
 > `pcb.py check` passes.** The full-width tail's outline (ADR 0021 amendment), thirteen
 > LEDs in one even row, its tail-end place empty (ADR 0028's amendments of 2026-10-03),
 > `J-MCU` turned off the row to the near edge (`boards.mcu_conn_at`), the wave-2 and
@@ -105,6 +105,7 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | C201 | `C-SENSOR-VS-BULK` | breath-sense-link |
 | C202 | `C-SENSOR-VS-HF` | breath-sense-link |
 | C10, C44 | `C-STRIP-BULK` | power-entry-instrument |
+| C45–C47 | `C-STITCH-12V` | power-entry-instrument |
 | D21 | `D-INRUSH-RST` | power-entry-instrument |
 | D8–D20 | `D-LED` | led-strip-drive |
 | D1 | `D-REF-CLAMP` | breath-excitation-reference |
@@ -168,7 +169,6 @@ finish, and every other open item:
 | **Through-hole tails under the board** (2026-10-01): every part with plated through-hole pins pokes its tails out of the underside toward the grounded bottom plate — `J-CHAIN` ×2, `J-MCU`, `J-UMB`, `HDR-SERVICE` and `U-BUCK` (`config/body.yaml`, *THE THROUGH-HOLE TAILS UNDER THE MAIN BOARD*, says which and why these). `mechanical/drc.echo` *"through-hole tails under the main board clear of the bottom plate"* tests each against what is under it, and the body model draws them for `clash.txt`. `J-CHAIN`'s and `J-MCU`'s clear the plate as supplied. The plate ends short of `J-UMB`'s tail row, and has a window to the oak under `HDR-SERVICE` and under the regulator block (`pcb-geometry.echo` `main` `plate`). **`U-BUCK`'s pins are cut to `boards.tht_trim` below the board after soldering** — as supplied they reach the oak even through the window. `HDR-SERVICE` stands where `boards.service_hdr_at` puts it and `U-BUCK` inside the regulator block, or the window moves with them | A part moved off its window: move `boards.service_hdr_at` (or the block) and rebuild the body CAD; a new through-hole part: add it to `tht_tails` in `mechanical/cad/woody_body.scad` |
 | **The references with no clear place on the silkscreen** stay on the fabrication layer; the layout names them when it writes the board | Hand-placed in KiCad, or room made round them |
 | **The revision letter on the silkscreen** reads `rev A` and the layout's date, both from `layout.yaml` `silk:` (in the title block too, so the Gerber job's "Revision"; `pcb.py check` fails a board that lost either, #33), while the table below runs to D | **Decided (owner, 2026-10-03): this table's letters are design iterations only; the silkscreen reads `rev A` on the first board fabricated**, so it stays A until a board is made and the next order is B | First order |
-| **`INST_POS12`–`PWR_GND` stitching capacitors** near `J-MCU`, `J-UMB` and the analog end (#8-8): signals change layers between the two planes' references more than 20 mm from the nearest `C-LED`. New parts on the sheets, so the owner's | Owner (a sheet change) |
 | **`C203` at `U10` pin 4** (MPXV4006DP Fig. 3): pin 4 is the corner of `U10`'s own courtyard, at the mouth and far edges, so no 0805 can stand within 3 mm of it on the top face; `C203` stands at `U3`'s input, the net's other end, as before. Nearer needs an underside part and a bottom-plate window under it | Owner |
 | **Through-hole tails' margin over the grounded plate** (#8-11: `J-CHAIN` 0.75 mm, `J-MCU` 0.8 mm): an insulating sheet on the plate under the tail fields, or a trim length on the hand-assembly sheet | Owner, before assembly |
 | **Standard or Economic PCBA, white mask** (#17 D1): *Ordering it*, below | Owner, before the order |
@@ -226,6 +226,10 @@ What the first layout settled, and where it is held:
 - **The clamps at their connector** (#8-9): `D-TVS-PWR` (D3) beside `J-UMB`'s pins 3 and 6,
   `D-REVSHUNT` (D2) beside it; the buck's caps at the module (#8-7): `C11` at `U5`'s input,
   `C43` (owner, 2026-10-03) at its output, returned to its GND pin.
+- **The planes stitched** (#8-8; owner, 2026-10-04, in the working chat: *"add 2-3 now"*):
+  `C-STITCH-12V` from `INST_POS12` to `PWR_GND` at `J-MCU` (`C45`), `J-UMB` (`C46`) and the
+  analog end (`C47`, on `PWR_GND` beside the island), each pad to its plane by its own via
+  (`power-entry-instrument.md` §2, *Plane stitching*).
 - **`U11`** (`U-TVS-CHAIN`) at `J5`, as `U9` at `J4`, its pin 2 to `PWR_GND` by its own via.
 - **The routing policy** (owner, 2026-10-03; `docs/reference/tooling.md`): free 45° routing
   on both outer layers, no layer direction anywhere - no region of this board is a bus
@@ -342,3 +346,4 @@ iterations below are lettered.
 | E | 2026-10-03 | Wave 3 (#8, #17, #19, #6): the full-width tail's outline; thirteen LEDs in one even row laid out for fourteen (ADR 0028's amendments); `C-STRIP-BULK` two 6.3 x 7.7 polymer cans (`C10`, `C44`); `J-MCU` off the row at the near edge, `HDR-SERVICE` to the tail corner (`config/body.yaml`); `R45`-`R47`, `C41`-`C43`, `U11` placed; the ADC's filter on an island grown to take it, `C6` at `U4`, the TVS at its connector, the buck's caps at the module; KS-33 holes 3.0 mm (ADR 0020 Amendment 8); the routing policy's free routing. Placed; routing waits for #23 | `layout.yaml`, `main-board.kicad_pcb` |
 | F | 2026-10-04 | Wave 3, routed: the Matrix branch merged (#23: `C41` gone, `HDR-SERVICE` 1x3 in place, `J-MCU` pins 23/24 on no net, `C205`/`C206` the key registers' second decouplers); the breath pair drawn along the far edge with arcs round `H2`, `H4`, `H6`, `H8`, its guard traces and the layer-3 `AGND_INST` strip; the power block against the near edge; the rest by the router, `complete` and a few hand routes at `J-MCU`'s foot (`INST_5V_A` pin 17 to pin 3 and on to `U6`); `pcb.py check` passes; renders and `fab/` written | `layout.yaml`, `main-board.kicad_pcb`, `fab/`, `tools/pcb_route.py`, `tools/pcb_main.py`, `tools/pcb.py` |
 | G | 2026-10-04 | Trace cleanup (#33; owner: *"not drastic changes ... pretty up the runs, get rid of unnecessary weaving and via usage and make sure analog circuits are the best they can be"*): no part moved; the analog block re-laid by hand on layer 1 (*The analog block*: `SENSOR_RAW` 6 vias to none, `REF_MINUS` and `REF_5V` 2 to none); every other unlocked signal run routed again where that came out shorter, straighter or with fewer vias, string-pulled to straight and 45-degree runs, loops and doubled copper taken out; the breath pair, its guards and arcs untouched; `pcb.py check` passes; renders and `fab/` written | `main-board.kicad_pcb`, `fab/` |
+| H | 2026-10-04 | The planes stitched (#8-8; owner: *"add 2-3 now"*): `C45`–`C47` (`C-STITCH-12V`) on the power-entry sheet and placed at `J-MCU`, `J-UMB` and the analog end, each pad to its plane by its own via; nothing else moved | `power-entry-instrument.kicad_sch`, `main-board.kicad_pcb`, `fab/` |

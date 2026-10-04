@@ -5,7 +5,7 @@
 inputs:
   tools/sim.py: 0312a1077b9afa80
   hardware/carrier/power-entry-instrument/sim/sims.yaml: c0e62a80d6155dee
-  hardware/carrier/power-entry-instrument/netlist.yaml: d20421ddf0209f51
+  hardware/carrier/power-entry-instrument/netlist.yaml: e9a49796fdb69d0d
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
   hardware/module/power-entry/netlist.yaml: 14fd898035959809
   hardware/carrier/led-strip-drive/netlist.yaml: ec7ec56762e982ee

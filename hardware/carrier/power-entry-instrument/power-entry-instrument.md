@@ -372,6 +372,22 @@ and it is not settled by this board.
 E11 is the test: the breath reading at rest with the LEDs sweeping and the
 keys scanning, at both ends of the link.
 
+### Plane stitching — `C-STITCH-12V`
+
+A signal that changes from layer 1 to layer 4 changes its reference from
+layer 2 (`PWR_GND`) to layer 3 (`INST_POS12`), and its return current has to
+cross between the two planes at the same place. On this board the only
+capacitors between them were the LEDs' own `C-LED`, along the row; the
+layout found signals changing layers more than 20 mm from the nearest one,
+at `J-MCU`, at `J-UMB` and at the analog end (#8-8). **Three
+`C-STITCH-12V`, 100 nF 50 V X7R, one at each** (owner, 2026-10-04: *"add 2-3
+now"*), so each of those returns crosses within a few millimetres of where the
+signal does. Each pad meets its plane through its own via beside the pad: the
+stitch is only as good as the inductance in series with it, and a track to a
+distant via is most of that. The part is `C-LED`'s; at the analog end its
+`PWR_GND` via stands outside the `AGND_INST` island, on the plane, never on the
+island.
+
 ---
 
 ## Bulk at the LED row's feed
@@ -425,6 +441,7 @@ named as they stand; **proposed** rows have no BOM entry yet.*
 | `C-INRUSH-GS` | 1 µF 50 V X7R | Gate to source: the gate follows the plug-in step. **At least 45× `C-INRUSH-GD`** | `[calc]`, `[sim]` |
 | `C-INRUSH-GD`, `R-INRUSH-GD` | 22 nF 50 V X7R, 22 Ω | The Miller ramp, and the damping of `J-UMB`'s node at the plug | `[calc]`, `[sim]` |
 | `D-INRUSH-RST` | 1N4148W | Resets the gate after an unplug | `[sim]` |
+| `C-STITCH-12V` ×3 | 100 nF 50 V X7R 0805 (`C-LED`'s part) | `INST_POS12` to `PWR_GND` at `J-MCU`, `J-UMB` and the analog end: the return path where signals change layers (§2, *Plane stitching*) | owner decision, #8-8 |
 
 ---
 

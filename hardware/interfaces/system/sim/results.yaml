@@ -8,7 +8,7 @@ inputs:
   hardware/module/breath-receive-stage/netlist.yaml: 9093fa5acc898eb4
   hardware/interfaces/breath-sense-link/netlist.yaml: 430f1e37ec9c97fa
   hardware/carrier/netlist.yaml: ef0e3936d2b75f11
-  hardware/carrier/power-entry-instrument/netlist.yaml: d20421ddf0209f51
+  hardware/carrier/power-entry-instrument/netlist.yaml: e9a49796fdb69d0d
   hardware/carrier/breath-excitation-reference/netlist.yaml: 2d5ee10b223dc95d
   hardware/carrier/led-strip-drive/netlist.yaml: ec7ec56762e982ee
   hardware/module/power-entry/netlist.yaml: 14fd898035959809
