@@ -1439,7 +1439,7 @@ def _arc_between(c, r, p, q, sign, through=None):
     return Prim("A", c=c, r=r, a0=a0, sweep=sw)
 
 
-def smooth_path(points, detours, fillet):
+def smooth_path(points, detours, fillet, fillet_mid=1.5):
     """The centreline through `points` (PCB mm), every corner filleted, and round each
     detour (centre, r) where a straight run passes it: [Prim]."""
     segs, prims = [], []
@@ -1465,27 +1465,50 @@ def smooth_path(points, detours, fillet):
         b2 = (b[0] - u[0] * cut_in[i + 1], b[1] - u[1] * cut_in[i + 1])
         nl = (-u[1], u[0])
         here = []
-        for c, rc in detours:
+        for chain in detours:
+            c, rc = chain[0]
             s_ = (c[0] - a2[0]) * u[0] + (c[1] - a2[1]) * u[1]
             h = (c[0] - a2[0]) * nl[0] + (c[1] - a2[1]) * nl[1]
             if abs(h) < rc and 0 < s_ < math.dist(a2, b2):
-                here.append((s_, c, rc, h))
+                here.append((s_, chain, h))
         cur = a2
-        for s_, c, rc, h in sorted(here):
+        for s_, chain, h in sorted(here, key=lambda e: e[0]):
             sg = 1 if h > 0 else -1               # the mount's side; the path passes beyond it
             nb = (nl[0] * sg, nl[1] * sg)
-            hd = abs(h)
-            dx = math.sqrt((fillet + rc) ** 2 - (fillet - hd) ** 2)
-            p1 = (a2[0] + u[0] * (s_ - dx), a2[1] + u[1] * (s_ - dx))
-            p2 = (a2[0] + u[0] * (s_ + dx), a2[1] + u[1] * (s_ + dx))
+            loc = lambda q: ((q[0] - a2[0]) * u[0] + (q[1] - a2[1]) * u[1], abs((q[0] - a2[0]) * nl[0] + (q[1] - a2[1]) * nl[1]))
+            # in: a fillet from the run onto the first circle
+            (c0, r0), (cl, rl) = chain[0], chain[-1]
+            s0, hd0 = loc(c0)
+            sl, hdl = loc(cl)
+            dx0 = math.sqrt((fillet + r0) ** 2 - (fillet - hd0) ** 2)
+            dxl = math.sqrt((fillet + rl) ** 2 - (fillet - hdl) ** 2)
+            p1 = (a2[0] + u[0] * (s0 - dx0), a2[1] + u[1] * (s0 - dx0))
+            p2 = (a2[0] + u[0] * (sl + dxl), a2[1] + u[1] * (sl + dxl))
             f1 = (p1[0] + nb[0] * fillet, p1[1] + nb[1] * fillet)
             f2 = (p2[0] + nb[0] * fillet, p2[1] + nb[1] * fillet)
-            v1, v2 = _unit((c[0] - f1[0], c[1] - f1[1])), _unit((c[0] - f2[0], c[1] - f2[1]))
+            v1, v2 = _unit((c0[0] - f1[0], c0[1] - f1[1])), _unit((cl[0] - f2[0], cl[1] - f2[1]))
             t1 = (f1[0] + v1[0] * fillet, f1[1] + v1[1] * fillet)
             t2 = (f2[0] + v2[0] * fillet, f2[1] + v2[1] * fillet)
             prims.append(Prim("L", p0=cur, p1=p1))
             prims.append(_arc_between(f1, fillet, p1, t1, sg))
-            prims.append(_arc_between(c, rc, t1, t2, -sg))
+            at = t1
+            # round each circle in turn; between two, a fillet of fillet_mid in the corner
+            # where they meet, on the far side of both
+            for k in range(len(chain) - 1):
+                (ca, ra), (cb, rb) = chain[k], chain[k + 1]
+                A_, B_ = ra + fillet_mid, rb + fillet_mid
+                d = math.dist(ca, cb)
+                x = (A_ * A_ - B_ * B_ + d * d) / (2 * d)
+                y = math.sqrt(max(A_ * A_ - x * x, 0.0))
+                e = _unit((cb[0] - ca[0], cb[1] - ca[1]))
+                cand = [(ca[0] + e[0] * x + sgn * -e[1] * y, ca[1] + e[1] * x + sgn * e[0] * y) for sgn in (1, -1)]
+                f = max(cand, key=lambda q: (q[0] - a2[0]) * nb[0] + (q[1] - a2[1]) * nb[1])
+                ta = (ca[0] + _unit((f[0] - ca[0], f[1] - ca[1]))[0] * ra, ca[1] + _unit((f[0] - ca[0], f[1] - ca[1]))[1] * ra)
+                tb = (cb[0] + _unit((f[0] - cb[0], f[1] - cb[1]))[0] * rb, cb[1] + _unit((f[0] - cb[0], f[1] - cb[1]))[1] * rb)
+                prims.append(_arc_between(ca, ra, at, ta, -sg))
+                prims.append(_arc_between(f, fillet_mid, ta, tb, sg))
+                at = tb
+            prims.append(_arc_between(cl, rl, at, t2, -sg))
             prims.append(_arc_between(f2, fillet, t2, p2, sg))
             cur = p2
         prims.append(Prim("L", p0=cur, p1=b2))
@@ -1516,8 +1539,10 @@ def route_pair_smooth(board, lay, obs, spec):
     import pcb
     nets, w, gap, L = spec["nets"], spec["width"], spec["gap"], {"F.Cu": "F", "B.Cu": "B"}[spec["layer"]]
     pts = [pcb.to_pcb(*p) for p in spec["through"]]
-    dets = [(pcb.to_pcb(*d["at"]), float(d["r"])) for d in spec["detours"]]
-    prims = smooth_path(pts, dets, float(spec.get("fillet", 3.0)))
+    # each detour a chain: its mount, then any circle it must also pass round (`then:`)
+    dets = [[(pcb.to_pcb(*d["at"]), float(d["r"]))] + [(pcb.to_pcb(*t["at"]), float(t["r"])) for t in d.get("then") or []]
+            for d in spec["detours"]]
+    prims = smooth_path(pts, dets, float(spec.get("fillet", 3.0)), float(spec.get("fillet_mid", 1.5)))
     half = (w + gap) / 2
     # which side is which net: the leg whose start lies nearer that net's `from` pad
     pf = {}
