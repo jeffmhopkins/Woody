@@ -64,7 +64,7 @@ courtyard_overhang:
     reason: "as J2: the other pad row's header, its mouth end 0.2 past the carrier's mouth edge"
     source: "as J2"
   J1:
-    reason: "J-MCU-C's courtyard (its insulator plus 0.25) reaches the corner where the arm's mouth end meets its top edge, which the outline rounds; the insulator itself is inside by boards.matrix_carrier_past"
+    reason: "J-MCU-C's insulator overhangs the arm's mouth end by 0.3: the arm stops boards.matrix_carrier_past short of the right-hand key board's tail end, which stands just over it, and the insulator hangs under the carrier, clear of that board. Plastic over air; no pad off the board"
     source: "config/body.yaml boards.matrix_carrier_past; mechanical/cad/woody_body.scad mx_arm and the outline's corner radius kb_corner_r"
 
 # Top-face parts' heights (pcb.py check_heights), against the one room the echo gives: under

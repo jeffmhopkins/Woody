@@ -1456,7 +1456,9 @@ mx_x1 = matrix_xy[0] + boards_matrix_board / 2 + boards_matrix_carrier_past;
 mx_notch_w = boards_matrix_usb[2] + 2 * boards_matrix_notch_clear;
 mx_notch = [mx_x0 - 1, matrix_xy[1] - mx_notch_w / 2,
             matrix_xy[0] - boards_matrix_board / 2 + boards_matrix_usb[1] + boards_matrix_notch_clear, matrix_xy[1] + mx_notch_w / 2];
-mx_arm = [jk_x0 - boards_matrix_carrier_past, cb_y[0], mx_x0 + 1, jk_y + jm_sz[1] / 2 + boards_matrix_carrier_past];
+// the arm's mouth end: past J-MCU-C's insulator, but short of the right-hand key board's
+// tail end, which stands over it (the clash check found them 0.3 into each other)
+mx_arm = [max(jk_x0 - boards_matrix_carrier_past, kb_rect("right_hand")[2] + boards_matrix_carrier_past), cb_y[0], mx_x0 + 1, jk_y + jm_sz[1] / 2 + boards_matrix_carrier_past];
 mx_mounts = [for (c = boards_matrix_mount_corners) matrix_xy + [c[0] * boards_matrix_mount_dxy[0], c[1] * boards_matrix_mount_dxy[1]]];
 module matrix_carrier_2d() {
     offset(r = kb_corner_r) offset(delta = -kb_corner_r) offset(r = -kb_corner_r) offset(delta = kb_corner_r) difference() {
@@ -1649,8 +1651,10 @@ module parts_3d() {
             }
     // (the square's mouth side starts where the receptacle, drawn below, ends)
     let(x0 = max(matrix_xy[0] - 9.5, matrix_xy[0] - boards_matrix_board / 2 + boards_matrix_usb[1]))
-        P([0.20, 0.20, 0.22], false, "Matrix underside parts") translate([x0, matrix_xy[1] - 9.5, matrix_board_z - boards_matrix_under_h + explode])
-            cube([matrix_xy[0] + 9.5 - x0, 19, boards_matrix_under_h]);
+        // the deepest of them over the carrier (the buttons, boards.matrix_under_rest_h);
+        // the receptacle, deeper, is its own solid over the carrier's slot
+        P([0.20, 0.20, 0.22], false, "Matrix underside parts") translate([x0, matrix_xy[1] - 9.5, matrix_board_z - boards_matrix_under_rest_h + explode])
+            cube([matrix_xy[0] + 9.5 - x0, 19, boards_matrix_under_rest_h]);
     // its USB-C receptacle, at the mouth edge and over it (boards.matrix_usb)
     P([0.20, 0.20, 0.22], false, "Matrix USB-C receptacle")
         translate([matrix_xy[0] - boards_matrix_board / 2 - boards_matrix_usb[0], matrix_xy[1] - boards_matrix_usb[2] / 2, matrix_board_z - boards_matrix_under_h + explode])
