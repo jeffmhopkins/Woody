@@ -339,7 +339,7 @@ figures:
     value: "24-way"
     status: settled
     owner: hardware/carrier/carrier.md
-    derivation: "ADR 0018 decision 1: twelve used GPIO, three 5 V, four ground, 3V3, EN, IO0 and two spare GPIO."
+    derivation: "ADR 0018 decision 1: twelve used GPIO, three 5 V, four ground, 3V3, EN, IO0 and two spare GPIO. Since 2026-10-03 EN and IO0 are not wired out; since issue #37 pin 23 (was IO0) carries IO6 and pin 5 (IO2) the MIDI out's pair, and pin 24 is unused (hardware/carrier/carrier.md, the pin map)."
     # Tracked 2026-09-27 (K8-8): three ADR lines dated to the IDC change still
     # said "20-way ribbon". ADR 0018 narrates the change as "It was 20-way"
     # and "keep 20-way and spend", which this pattern does not match.

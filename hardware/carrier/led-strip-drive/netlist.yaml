@@ -23,6 +23,21 @@ ports:
     dir: in
     from: carrier/power-entry-instrument
     figure: umbilical-current
+  IO6:
+    dir: in
+    from: carrier/carrier
+  IO2:
+    dir: in
+    from: carrier/carrier
+  MIDI_TIP_DRV:
+    dir: out
+    to: carrier/midi-out
+  MIDI_RING_DRV:
+    dir: out
+    to: carrier/midi-out
+  DEV_3V3:
+    dir: in
+    from: carrier/carrier
 components:
   C-DECOUPLE-LED:
     of: C-DECOUPLE-CARRIER
@@ -319,6 +334,26 @@ components:
     - 1
     - 2
     note: Series at the driver into LED 1 DIN1 and LED 2 DIN2 (the backup input), damping the edge at its source
+  R-MIDI-PU-R:
+    of: R-MIDI-PU
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    note: 'PULL-UP, and the power-on default of the MIDI out (issue #37). IO6 and IO2 are high-impedance through
+      the bootloader window and OE is tied low, so without it the AHCT gate would square up a floating input into
+      the loop. Both inputs pulled HIGH put tip and ring at the same 5 V: no loop current, so no byte, whichever
+      of Type A or B the receiver is wired for. To DEV_3V3, not 5 V: the ESP32-S3''s pads are not 5 V tolerant'
+  R-MIDI-PU-T:
+    of: R-MIDI-PU
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    note: 'PULL-UP, and the power-on default of the MIDI out (issue #37). IO6 and IO2 are high-impedance through
+      the bootloader window and OE is tied low, so without it the AHCT gate would square up a floating input into
+      the loop. Both inputs pulled HIGH put tip and ring at the same 5 V: no loop current, so no byte, whichever
+      of Type A or B the receiver is wired for. To DEV_3V3, not 5 V: the ESP32-S3''s pads are not 5 V tolerant'
   U-LVLSHIFT:
     value: 74AHCT125
     pins:
@@ -337,9 +372,16 @@ components:
     - VCC
     - GND
     note: 'ON THE 5 V RAIL, and that is the point: TTL thresholds mean a 3.3 V input reads high, and the output
-      (~4.4 V minimum) clears the WS2815B-V1 V_IH (2.7 V min) and stays under its 5.7 V logic-input maximum. Gates
-      B, C and D are spare: the row has one data line, and LED 1 grounds its DIN2 rather than having it driven'
+      (~4.4 V minimum) clears the WS2815B-V1 V_IH (2.7 V min) and stays under its 5.7 V logic-input maximum. Gate
+      A drives the row (one data line; LED 1 grounds its DIN2). Gates B and C are the MIDI out''s tip and ring drivers
+      since issue #37 (carrier/midi-out): IO6 into B, IO2 into C, each output through 220R to the jack - push-pull
+      at 5 V, so either line can be the current source or the sink and TRS Type A/B is a firmware choice. Gate D
+      is spare, input and enable tied low'
 nets:
+  DEV_3V3:
+  - port: DEV_3V3
+  - R-MIDI-PU-R.1
+  - R-MIDI-PU-T.1
   GATE_A_OUT:
   - R-LED-SER.1
   - U-LVLSHIFT.1Y
@@ -379,6 +421,14 @@ nets:
   - port: IO1
   - R-LED-PD.1
   - U-LVLSHIFT.1A
+  IO2:
+  - port: IO2
+  - R-MIDI-PU-R.2
+  - U-LVLSHIFT.3A
+  IO6:
+  - port: IO6
+  - R-MIDI-PU-T.2
+  - U-LVLSHIFT.2A
   LED_D1:
   - D-LED-1.DO
   - D-LED-2.DIN1
@@ -430,6 +480,12 @@ nets:
   - D-LED-1.DIN1
   - D-LED-2.DIN2
   - R-LED-SER.2
+  MIDI_RING_DRV:
+  - port: MIDI_RING_DRV
+  - U-LVLSHIFT.3Y
+  MIDI_TIP_DRV:
+  - port: MIDI_TIP_DRV
+  - U-LVLSHIFT.2Y
   PWR_GND:
   - port: PWR_GND
   - C-DECOUPLE-LED.2
@@ -466,19 +522,11 @@ nets:
   - U-LVLSHIFT.4A
   - U-LVLSHIFT.4OE
   - U-LVLSHIFT.2OE
-  - U-LVLSHIFT.2A
   - U-LVLSHIFT.GND
-  - U-LVLSHIFT.3A
   DO:
   - D-LED-13.DO
-  2Y:
-  - U-LVLSHIFT.2Y
-  3Y:
-  - U-LVLSHIFT.3Y
   4Y:
   - U-LVLSHIFT.4Y
 external_endpoints:
-- 2Y
-- 3Y
 - 4Y
 - DO

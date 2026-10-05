@@ -3,6 +3,8 @@
 **Status:** Superseded by [ADR 0015](0015-one-mcu-no-display.md) (2026-09-26): configuration is over
 USB only and the instrument has no radio. The need this ADR argues — too much
 to configure through buttons — still stands; the phone and WiFi do not.
+**Partly reinstated 2026-10-04** by ADR 0015's amendment of that date (issue
+#37; *Note, 2026-10-04*).
 
 ## Context
 
@@ -132,3 +134,29 @@ always be convenient.
 - Whether config mode is entered by a physical input or a key gesture.
 - Whether the web app's state is the authority, or the instrument's NVS is, when
   they disagree after an interrupted session.
+
+## Note, 2026-10-04 — partly reinstated (issue #37)
+
+The owner, 2026-10-04: *"What's the ability for us to write a firmware that
+can do over-the-air updates so we can close up the USB all together?"* and
+*"the idea is probably we have a button configuration that we press that puts
+it into configuration mode where Wi-Fi is turned on but Wi-Fi isn't turned on
+all the time"*. Then: *"Let's not worry about the firmware now. Just add the
+capability"*. [ADR 0015](0015-one-mcu-no-display.md), *Amendment,
+2026-10-04*, records the decision.
+
+What comes back from this ADR:
+
+- **The SoftAP, WPA2, a page served from flash to a phone's browser, and OTA
+  update.** iOS Safari reaches a plain HTTP page and a WebSocket, where Web
+  Serial and Web MIDI do not exist `[from memory]`. That is the reason a phone
+  needs Wi-Fi rather than USB.
+- **Rule 1 of *The radio must be off while playing*, now absolute:** the radio
+  is off at every boot, and configuration mode does not run the output loop.
+  The ADR 0013 relaxation above, live configuration while playing, does not
+  come back. Its premise was a second MCU, and there is one.
+
+*Open* above, answered: config mode is entered by a key combination (the
+right thumb's control keys), and the instrument's NVS is the authority. The
+firmware that does all this is deferred. Its draft is
+[`docs/research/2026-10-04-config-mode-ota-draft.md`](../research/2026-10-04-config-mode-ota-draft.md).

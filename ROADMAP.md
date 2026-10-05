@@ -22,7 +22,7 @@ Deliberately skips CV entirely:
 
 > **E1 → E2 → E4 → E5 on a bench, mounted to M2.**
 >
-> Dev board, breath sensor, key scan, USB MIDI, on a laser-cut test plate.
+> Dev board, breath sensor, key scan, MIDI out, on a laser-cut test plate.
 
 That is a real instrument you can play into a DAW. It validates the ergonomics
 and the fingering system with actual playing, and it is a working fallback if
@@ -42,7 +42,7 @@ existing. Drive it from any dev board with a test pattern and a multimeter.
 | E2 | Breath sensing | **Port orientation confirmed with a syringe first** — a reversed DP reads zero, not backwards. Then **a human plays it for 20 minutes** through a real mouthpiece, tube and trap — not a syringe. Ambient zeroing tracks, no condensation artefacts. **The restrictor is sized by ring-down, not by frequency**: tap the mouthpiece end and watch the sensor settle — one time constant, or a decaying oscillation that needs a denser plug. The 214–429 Hz pipe mode is inside the breath band in every mode of the module's bandwidth toggle, and its odd harmonics are too at 1.5 kHz and WIDE; it is independent of trap volume, so it is damped, not placed (ADR 0003). **And measure the sensor's response at small and full-scale steps** (20–30 % of span against 0–100 %): whether a breath-sized modulation is faster than the family's 1.0 ms is the owner's premise for the 1.5 kHz band and no datasheet says (ADR 0003, *Amendment, 2026-10-04*). **Also settles the tube bore** by playing a bare tube in two or three sizes. **And measures `breath-working-point`** with a manometer teed at `P1` (the test is in ADR 0003). Sensor + ADC at the bottom with the real-time board |
 | E3 | IMU | Tilt and roll angles read reliably at rate |
 | E4 | Key scan | The shift-register chain (`U-KEYS`) reads all switches; debounce asymmetric (instant press, filtered release) |
-| E5 | **USB MIDI out** | Plays into a DAW. Fingering table exercised. First playable milestone |
+| E5 | **MIDI out** | Plays into a DAW through a USB-MIDI interface and a TRS adapter (issue #37: USB MIDI is not built; on the bench before the main board exists, the CA-033 circuit on a breadboard, `hardware/carrier/midi-out/`). Fingering table exercised. First playable milestone |
 | E6 | Module power | ±12V from rack via keyed header, the PTCs and reverse protection; `U-ISO` (the instrument's isolated 12 V, rail to rail, ADR 0027), the local DAC regulator (`dac-rail`) and `LOGIC_5V` up — the bus +5 V is not used; input filtering; load switch limits and ramps the umbilical feed. **The case's −12 V under the instrument's load** (ADR 0027 now draws on it). A quick replug with a current probe on `U-ISO` (`replug-early`, `power-entry-instrument.md` §1a). No noise injected back into the rack: the ±12 V at 2–4 kHz with the LED row at mid brightness (predicted: `led-pwm-rail-ripple`, `power-entry/sim` `led-pwm`), and `U-ISO`'s 550 kHz common mode on `AGND_MOD` against `BUS_GND`, and a current probe on the star tie: `L-CM-ISO` and `C-ISO-Y` hold it under 10 % of the converter's common-mode current in `power-entry/sim` `cm-loop`, on estimated copper (ADR 0027, amendments 2026-10-01) |
 | E7 | DAC raw | Commanded codes produce expected voltages on the meter, all six channels. **First, measure `DAC_AVDD` and record it. On the first build, do it BEFORE fitting `U-DAC` and `U-LVL-MOD`**: an open `R-SET-DAC` reads ~11 V there, over both parts' absolute maxima, and the owner accepted that failure without a clamp (2026-10-01; `power-entry.md`, *Its failures*) — so it must never reach a DAC. Both are machine-placed (`Assembly` = `machine`), so the first `module-main` assembly order leaves them unpopulated and they are hand-fitted after this reading. Over 5.50 V, stop. Then fit them and measure again; on every later build, measure with them fitted. There is nothing to adjust: `U-REG-DAC` (LT3042) is set by `R-SET-DAC` (`power-entry.md`, *The DAC rail*). **Pass: inside 5.00–5.50 V**, the DAC8568 C grade's window (SBAS430E, `datasheets/analog/DAC8568CIPW.pdf`); outside it, look for a wrong or damaged `R-SET-DAC` or leakage at `SET`, never a substitute value |
 | E8 | Pitch channel scaled | Raw analog gain and offset trimmed to target, linear across the span. The 5%-over kludge is deleted — trimmers go both ways (ADR 0006) |
@@ -73,7 +73,7 @@ the tail — by the body CAD (`mechanical/drc.echo`, "overall length"). It was
 | M3 | Layout locked | Ergonomics settled after 2–3 iterations of M2. No aluminium cut before this. **Rev A goes ahead on the current layout** (owner, 2026-10-04: final for rev A; ADR 0010, *Amendment, 2026-10-04*): the check on the rev A boards in hand stays, and a change it finds is rev B |
 | M4 | Stack design | Full laminated stack in CAD, every layer a 2D part, **modelled against the real KS-33 STEP solid** rather than a nominal box (ADR 0002) |
 | M5 | Aluminium top plate | Cut, fitted, switches retained solidly, **bonded to `PWR_GND`**. Not before E13 — see the ordering rules below |
-| M6 | Body | Oak top and bottom, frosted acrylic sides, strap points, **matrix window + diffuser on the top face after the keys, and the USB-C slot** (ADR 0009) |
+| M6 | Body | Oak top and bottom, frosted acrylic sides, strap points, **matrix window + diffuser on the top face after the keys, and the MIDI jack through the oak bottom** (ADR 0009; ADR 0015, *Amendment, 2026-10-04*) |
 | M7 | Integration | Electronics mounted in the body, umbilical connector fitted and strain-relieved |
 | M8 | **Final-assembly gate** | The cassette tested on the bench and dry-fitted in the shell, not yet bonded, not signed off. (This row said **Pre-bond gate / assembled but not bonded** until 2026-09-21. The body closed on six fasteners onto an RTV gasket from then until ADR 0025, 2026-09-29; it is now glued shut round the cassette with RTV and opened by cutting it, so M8 is again the last gate before the cassette is bonded in — dry-assemble, balance and test before then.) Full E11 breath-noise test re-run on the *final* harness, **thermal soak at the lighting clamp, watching temperature *and the breath zero* at the sensor**, two-hour play test, failure injection, self-test, **pitch scoped while the LEDs sweep** (ADR 0006 — the one test the plan was missing; simulated, `led-pwm-pitch`, read against the receiving module's ground), and **recover the MCU through the service header** so the last route in is known good, not assumed (ADR 0009). Nothing closes until this passes |
 
@@ -142,9 +142,9 @@ not a release, and should not be filtered as though the phrase were ending.
 | F2 | Breath response | Curve shaping, ambient zeroing **of the digital copy** (seeded at power-on, then gated on sub-threshold AND quiet), threshold and note gating |
 | F3 | Channel output | Fixed-rate DAC loop, per-channel smoothing in software |
 | F4 | Routing matrix | Four mod channels: source, scale, offset, curve, slew |
-| F5 | **USB config app** | A page on a computer over the instrument's USB port — USB-Serial-JTAG by default, SysEx when MIDI is on (`firmware/README.md`, ADR 0015). Fingering table, routing matrix, breath curves |
-| F6 | Live monitoring | Telemetry over the same USB link: breath, IMU angles, commanded CV |
-| F7 | Status display | Note, breath, active channels, mode — on the 8×8 matrix, the only display (ADR 0015). Status only — config lives on the computer |
+| F5 | **Configuration mode and OTA** (deferred) | A Wi-Fi configuration mode entered by a key combination, the radio off at every boot and the output loop stopped while it is on: a page served to a phone for the fingering table, routing matrix, breath curves and MIDI settings (TRS Type A/B), and firmware updates into the other app slot with rollback (ADR 0015, *Amendment, 2026-10-04*; the draft is `docs/research/2026-10-04-config-mode-ota-draft.md`) |
+| F6 | Live monitoring | Telemetry on configuration mode's page: breath, IMU angles, commanded CV (diagnostic: the loop does not play in that mode); on the bench, over the Matrix's own USB-C |
+| F7 | Status display | Note, breath, active channels, mode — on the 8×8 matrix, the only display (ADR 0015). Status only — config lives on the phone's page |
 | F9 | **Matrix surface** | 8×8 as a generic assignable sink: breath by default, other sources and render modes from config. Alarm states preempt and cannot be configured off (ADR 0014) |
 | F8 | Persistence | Config and calibration in NVS; presets |
 
@@ -155,17 +155,18 @@ not a release, and should not be filtered as though the phrase were ending.
 | Phase | Contains | Outcome |
 |---|---|---|
 | **0** | This repository | Decisions recorded, structure in place |
-| **1** | E1–E5, M1–M2 | Playable USB MIDI instrument on a test plate |
+| **1** | E1–E5, M1–M2 | Playable MIDI instrument on a test plate |
 | **2** | M3, E6–E9 | Layout locked; pitch CV calibrated and accurate |
 | **3** | E10–E12, M4 | Module complete and racked; stack designed. **M5 moves to Phase 4** — the plate is cut after the carrier layout exists |
 | **4** | E13, E14, M5–M7, M8 | Carrier built and re-proven; plate cut; real instrument in a real body, validated before it is called finished |
-| **5** | F4–F9 | Routing matrix, USB config, monitoring, presets, matrix surface |
+| **5** | F4–F9 | Routing matrix, configuration mode and OTA, monitoring, presets, matrix surface |
 
 ## Out-of-order work worth pulling forward
 
 **F6 (live monitoring) is worth building well before its phase.** A computer
-showing live breath pressure, IMU angles and commanded CV over USB is a
-test instrument, not just a convenience:
+showing live breath pressure, IMU angles and commanded CV over the Matrix's own
+USB on the bench, before the body closes, is a test instrument, not just a
+convenience:
 
 - **M2/M3** — see which keys actually register while trying a layout, instead of
   inferring it by ear
@@ -173,8 +174,8 @@ test instrument, not just a convenience:
   of alternating between a meter and a menu
 - **E2** — see the breath response curve while playing against it
 
-It depends only on E1 and the USB link, so it can be built as soon as there is a
-dev board on the bench.
+It depends only on E1 and the bench USB link, so it can be built as soon as there is a
+dev board on the bench. Once the body is closed it is configuration mode's (F5).
 
 ## Bench measurements the review asked for
 
@@ -187,7 +188,7 @@ came out of the analog design review specifically.
 | Measure | At | Why |
 |---|---|---|
 | **Real-time board idle current** | E1 | 64 unlit `WS2812B-0807` drivers are an estimated ~50 mA and 0.25 W. **The part number is now read off the banked Waveshare schematic and the estimate is still an estimate** — Worldsemi publishes no WS2812B-0807 datasheet at all. Bracketing surrogates give 22 mA (XINGLIGHT 2022, 0.35 mA/device), <38 mA (Worldsemi WS2812B-2020, <0.6 mA) and **160 mA** (XINGLIGHT 2024, 2.5 mA/device), so ~50 mA is plausible but could be 3× low. E1 measures it, spent whether or not anything is displayed. The shared lighting budget is sized from this number (ADR 0014) |
-| **1:1 paper fit check, both faces** | M4 | The etherCON flange against a 50.50 mm 10HP panel *and* against the instrument's tail face beside the USB-C slot. Was called comfortable at the superseded 8HP; the tail is now the tight one (ADR 0004, ADR 0009) |
+| **1:1 paper fit check, both faces** | M4 | The etherCON flange against a 50.50 mm 10HP panel *and* against the instrument's tail face. Was called comfortable at the superseded 8HP; the tail is now the tight one (ADR 0004, ADR 0009) |
 | **Side-light diffusion test** | **Before the main board is ordered (M4)** — moved from M6 by ADR 0028; the layout goes ahead of it and the row is reshuffled if the test moves it (owner's choice (b), 2026-09-30, ADR 0028 amendment) | Fixes `lighting.led_count`, `lighting.led_pitch` and the tail corner LED's place and gain (`lighting.tail_led`, ADR 0028's 2026-10-02 amendment), which the board fixes for good when it is made. A strip offcut at board height (the row's LEDs sit ~0.85 mm lower than a strip's) under a white-masked mock key board, with the real acrylic at the side distance (ADR 0014, *Diffusion is a prototype question*; ADR 0028) |
 | **Maker's mark etch test on an offcut** | Before the oak top is etched (M4) | Settles `logo.depth` and `logo.laser_min_gap` (`config/body.yaml`), and with them whether `logo.scale` holds: scaled to fit its band, the mark's gaps are under `branding/README.md`'s laser guideline (`mechanical/drc.echo`, "logo: smallest gap in the etch"). Etch `mechanical/export/oak-logo.dxf` into an offcut of the top's own board, seal, pour both colours, sand flush: pass if every gap stands, the two pours stay apart and the tips come out clean (ADR 0009, *Amended 2026-10-01*; `branding/README.md`, *Etching notes*, *Colour fill*) |
 | **LED row current at full white** | E6 | Settles `led-row-current`: ADR 0014 read the WS2815's "15 mA" as per channel, which the WS2815B-V1's own maximum power rules out; a current probe on the row's 12 V feed with all thirteen at full white (ADR 0028) |

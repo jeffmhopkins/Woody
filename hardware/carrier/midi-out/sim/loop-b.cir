@@ -1,0 +1,17 @@
+* MIDI out, Type B (the tip and ring swapped: tip = DIN pin 4, the source; ring = pin 5,
+* the sink), into a Type B receiver. Gate C (the ring) sends one start bit; gate B (the
+* tip) is held high. The same parts in the other roles.
+VBIT bit 0 PULSE(0 1 {{t_d}} {{tr_out}} {{tr_out}} {{t_bit}} 1)
+XGT 0 gt MGATE
+XGR bit gr MGATE
+XLT gt tip MLINE
+XLR gr ring MLINE
+XC tip ring tipf ringf MCABLE
+VS tipf p4 0
+XRX p4 ringf led MRX
+.control
+tran 20n {{t_end}} 0 20n
+wrdata i.dat i(vs)
+quit
+.endc
+.end

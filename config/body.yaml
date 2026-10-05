@@ -745,109 +745,110 @@ openings:
     status: tbd
     source: "frosted acrylic window thickness [from memory: common sheet]; must leave an oak lip under it"
     decided_by: "M6, with the diffusion prototype"
-  # USB-C REACHES THE TAIL THROUGH A PANEL-MOUNT EXTENSION (owner,
-  # 2026-09-26): the Matrix board sits under the top window, a few cm inboard
-  # of the tail face, and a short USB-C extension brings its port to a
-  # receptacle in the tail cap. The slot is the receptacle's panel cutout.
-  usb_slot_w:
-    value: 12.5
-    status: tbd
-    source: "panel cutout for a panel-mount USB-C extension receptacle [from memory]"
-    decided_by: "M4, against the extension bought"
-  usb_slot_h:
-    value: 7.0
-    status: tbd
-    source: "as usb_slot_w [from memory]"
-    decided_by: "M4"
-  # THE RECEPTACLE STANDS ON END (2026-09-26), centred in the lane between
-  # the etherCON's recess and the side (drc.echo, "USB-C extension
-  # receptacle beside the etherCON flange", "tail cap web between the USB-C
-  # cutout and the etherCON recess"). USB-C is reversible, so the
-  # receptacle's orientation costs the user nothing. Its height is DERIVED:
-  # centred in the cavity, unless the main board runs on under its back
-  # (boards.main_tail "full", 2026-10-02), when it stands boards.board_clear
-  # above the board's parts (drc.echo 'main board's tail end runs full width
-  # beside the etherCON adapter').
-  usb_slot_portrait:
-    value: true
-    status: tbd
-    source: "[calc] portrait takes usb_slot_h across instead of usb_slot_w, and usb_slot_w tall in the cavity's height; drc.echo gives the lane and the webs either way"
-    decided_by: "M4, against the extension bought - its screw ears, if any, would run up and down the tail face, which is why it is earless (usb_mount)"
+  # THE MATRIX'S OWN USB-C IS A LID-OFF RECOVERY PORT (issue #37, ADR 0015
+  # amendment 2026-10-04). The tail-face extension (CBL-USB-EXT), its
+  # receptacle, the tail cap's slot and pocket and the lead are gone: the
+  # instrument is configured and updated over Wi-Fi in configuration mode,
+  # and its MIDI leaves on a TRS jack (midi, below). Nothing is plugged into
+  # the Matrix with the lid on. These keys now describe the recovery cable's
+  # plug, a right-angle USB-C turned down, plugged with the lid lifted off
+  # (the Matrix hangs from the oak top on its carrier): the oak pocket over it
+  # stays (drc.echo 'recovery USB-C plug clear of the oak top'), and so does
+  # the carrier's slot under the receptacle.
   usb_plug_l:
     value: 15.0
     status: tbd
-    source: "RIGHT-ANGLE USB-C plug on the extension (2026-09-26): the Matrix's edge to the far side of the moulding, where the lead turns across the body [from memory]. A straight plug is 25-30 and, doubled by the centred Matrix, added ~24 mm of body"
-    decided_by: "M4, against the extension bought"
-  # THE PLUG'S LEAD LEAVES DOWNWARD (2026-10-02). With the Matrix on the
-  # right-hand key board's rails, a lead leaving the right-angle plug across
-  # the body at the plug's height runs into the far rail; turned down, it
-  # leaves the plug's bottom, below the rails, and runs under the far rail to
-  # the receptacle beside the etherCON (drc.echo 'USB-C plug and lead clear of
-  # the right-hand key board's rails').
+    source: "a RIGHT-ANGLE USB-C plug, turned down: its length below the Matrix's receptacle [from memory: common right-angle plugs are 12-16]. Used only for the recovery fit"
+    decided_by: "the recovery cable kept with the instrument"
   usb_plug_turn:
     value: "down"
     status: nominal
     source: "down = a right-angle plug whose lead leaves toward the main board: its overmould (openings.usb_overmold) centred on the Matrix's receptacle (boards.matrix_usb), its thickness along the body in front of the receptacle's face and openings.usb_plug_l from its top down; across = the lead leaves across the body at the plug's height (usb_plug_l along the body), which the far rail now stands in. Right-angle USB-C plugs are sold both ways [from memory]"
-    decided_by: "M4, against the extension bought"
+    decided_by: "the recovery cable kept with the instrument"
   matrix_usb_to_tail:
     value: false
     status: tbd
     source: "false = the Matrix's USB-C edge faces the MOUTH, so its plug runs under the key boards instead of into the connector's housing; datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-dimensions.jpg shows the port overhanging one edge"
     decided_by: "M4, the Matrix's orientation under its window"
-  usb_ext_depth:
-    value: 20.0
-    status: tbd
-    source: "the extension receptacle's body behind the panel [from memory]"
-    decided_by: "M4, against the extension bought"
-  # THE PLUG HAS TO REACH THE RECEPTACLE (2026-09-26). The tail cap is 6 mm
-  # of oak, thicker than the 1-2 mm panel a panel-mount receptacle is made
-  # for [from memory], and a plug's overmould is bigger than the receptacle's
-  # cutout, so behind a plain slot the plug would stop short. The cap is
-  # POCKETED from the tail face, overmould-sized, down to a thin panel; the
-  # receptacle's nose passes that panel's slot (usb_slot_w x usb_slot_h), its
-  # face level with the pocket floor. drc 'USB-C plug overmould reaches the
-  # receptacle'. The alternative, a receptacle mounted from the front, would
-  # put its flange on the tail face, where the lane has no room for one.
   usb_ext_overmold_w:
     value: 13.0
     status: tbd
-    source: "THE EXTENSION'S OWN PLUG at the Matrix (CBL-USB-EXT's right-angle male), its overmould across the body, at most: the owner's cable rule (2026-10-03, option A, ADR 0021 amendment 2026-10-03). Centred on the Matrix's receptacle, its near face then stands where the Matrix ribbon's carrier end (J-MCU-C's plug) and its closed folds clear it (drc.echo 'USB-C plug clear of the Matrix ribbon and J-MCU-C'). Common cables are ~12-14.5 wide [from memory], so the bought cable is chosen to it. The player's cable at the tail is openings.usb_overmold, not this"
-    decided_by: "calipers on the cable, CBL-USB-EXT as bought"
+    source: "the recovery cable's plug, its overmould across the body, at most: centred on the Matrix's receptacle it must pass the carrier's arm and J-MCU-C (the carrier's outline was drawn for it, owner 2026-10-03 option A). Common cables are ~12-14.5 wide [from memory]. The key keeps its name from CBL-USB-EXT's plug, which it was until issue #37"
+    decided_by: "calipers on the recovery cable"
   usb_pocket_clear:
     value: 0.55
     status: nominal
-    source: "the air the oak top's pocket over the extension's plug leaves round the plug's overmould - over its top, and past its tail-side face where the pocket ends unless the window's rebate ends it first (issue #34 C9; it was 0.3): config/clearance.yaml body.against-oak's 0.5 and a little. The rebate DOES end it first: the pocket may not run under the acrylic's rebate (drc.echo 'USB-C plug clear of the key plate and the oak top'), so the end wall still stands under 0.5 off the plug (mechanical/clash.txt, UNDER MINIMUM) - open. The overmould's own size is openings.usb_overmold, tbd: it settles with the cable in hand, and this clearance is re-measured then"
+    source: "the air the oak top's pocket over the Matrix's USB-C plug (since issue #37 the lid-off recovery plug) leaves round the plug's overmould - over its top, and past its tail-side face where the pocket ends unless the window's rebate ends it first (issue #34 C9; it was 0.3): config/clearance.yaml body.against-oak's 0.5 and a little. The rebate DOES end it first: the pocket may not run under the acrylic's rebate (drc.echo 'recovery USB-C plug clear of the oak top'), so the end wall still stands under 0.5 off the plug (mechanical/clash.txt, UNDER MINIMUM) - open. The overmould's own size is openings.usb_overmold, tbd: it settles with the cable in hand, and this clearance is re-measured then"
   usb_overmold:
     value: [15.0, 9.0]
     status: tbd
-    source: "the plug's overmould, [wide, thick], plus clearance: common USB-C cables are ~12-14.5 x 6.5-8.5 [from memory]. Stood on end the thick side is across the body, and the lane beside the etherCON flange takes up to 10 with a 2 mm web (drc 'tail cap web between the USB-C cutout and the etherCON flange') - a cable fatter than that does not fit this face"
-    decided_by: "M4, calipers on the cables the instrument will actually be used with"
-  usb_panel_t:
-    value: 1.5
-    status: tbd
-    source: "oak left under the overmould pocket, the panel the receptacle clamps to [from memory: panel-mount USB-C is made for ~1-2 mm panels]"
-    decided_by: "M4, against the receptacle bought - it must not exceed usb_nose_l"
-  usb_nose_l:
+    source: "the recovery plug's overmould, [wide, thick], plus clearance: common USB-C cables are ~12-14.5 x 6.5-8.5 [from memory]. Its thickness, centred on the receptacle's axis, is what rises past the Matrix into the oak's pocket"
+    decided_by: "calipers on the recovery cable"
+    decided_by: "M4, against the extension bought"
+
+
+# THE MIDI OUT JACK (issue #37; owner, 2026-10-04: "on the bottom face, and
+# then just do a connector to the main board instead of actually mounting it
+# to PCB"). A panel-mount 3.5 mm jack (J-MIDI-OUT, Same Sky SJ5-43502PM)
+# through the oak bottom, in the lane beside the etherCON that the tail-face
+# USB-C receptacle stood in: centred in the lane across, and between the
+# adapter's front face and the tail cap along. It is fitted from inside: a
+# counterbore takes its collar and leaves the oak the thread can clamp, and
+# its nut goes on from outside. Its tabs are soldered to CBL-MIDI, which plugs
+# into J-MIDI on the main board's freed tail corner
+# (hardware/carrier/midi-out/midi-out.md). drc.echo 'MIDI jack in the oak
+# bottom', 'MIDI jack clear of the etherCON and its adapter', 'MIDI jack lead
+# to J-MIDI', 'J-MIDI and its plug under the Matrix carrier'.
+midi:
+  jack_thread:
+    value: [7.0, 4.5]
+    status: nominal
+    source: "M7 x 0.75, [diameter, length past the collar] [ds datasheets/connectors/SAMESKY-SJ5-43502PM.pdf p.2]"
+  jack_nut_t:
     value: 2.0
+    status: nominal
+    source: "the nut's thickness, the 2.00 on the drawing [ds datasheets/connectors/SAMESKY-SJ5-43502PM.pdf p.2]"
+  jack_collar:
+    value: [10.0, 1.5]
+    status: nominal
+    source: "the collar behind the thread, [across its corners, thick]: hex 10.0 as drawn, 1.5 [ds datasheets/connectors/SAMESKY-SJ5-43502PM.pdf p.2]"
+  jack_body:
+    value: [9.0, 10.2, 4.0]
+    status: nominal
+    source: "[diameter, length behind the collar, the solder tabs past it] [ds datasheets/connectors/SAMESKY-SJ5-43502PM.pdf p.2]"
+  hole_d:
+    value: 7.3
     status: tbd
-    source: "how far the receptacle's shell stands proud of its clamping shoulder, i.e. the thickest panel it can sit flush in [from memory]"
-    decided_by: "M4, against the receptacle bought"
-  # EARLESS (2026-09-26). Stood on end, a receptacle's two screw ears run up
-  # and down the tail face, and at the usual pitch they land outside the
-  # cavity behind the cap (drc 'USB-C receptacle mount inside the cavity'
-  # prints where). So the receptacle is an earless one, held against the
-  # panel by a clamp plate across its body, screwed to the cap's inside face
-  # in the lane above and below it - or bonded, if the part has no shoulder.
-  usb_mount:
-    value: "earless"
+    source: "the through-hole for the M7 thread, 0.3 over [drawing convention]"
+    decided_by: "a test hole in an offcut of the chosen oak, with the part in hand"
+  cbore_clear:
+    value: 1.0
     status: tbd
-    source: "earless | ears. 'ears' is checked against usb_ear_pitch and fails at this cavity height; see the note above"
-    decided_by: "M4, against the extension bought"
-  usb_ear_pitch:
-    value: 29.0
+    source: "the counterbore's radius past the collar's corners, for the hex to turn in as the nut is tightened [drawing convention]"
+    decided_by: "the part in hand"
+  # Where the lead plugs in on the main board: the freed tail corner, outside
+  # both key boards' outlines, toward the lane (midi-out.md, Placement). The
+  # layout places it; this is the body CAD's nominal, for the clash and the
+  # lead's run.
+  hdr_at:
+    value: [293.5, 43.0]
+    status: nominal
+    source: "J-MIDI's centre, [along the body, across], body frame: in the corner the USB-C receptacle's keep-out held (pcb-geometry.echo), past HDR-SERVICE's plate window and the carrier's mounts"
+    decided_by: "the main board's layout after #35"
+  hdr_sz:
+    value: [8.0, 4.8, 6.0]
     status: tbd
-    source: "screw-ear pitch of a typical panel-mount USB-C extension, ~28-30 [from memory]; used only to show why the ears do not fit on end"
-    decided_by: "M4, against the extension bought"
+    source: "JST B3B-PH-SM4-TB, surface mount, top entry, [along its row with the fixing tabs, across, height over the board] [from memory]. Surface mount so that no tails stand over the bottom plate"
+    decided_by: "JST's drawing, banked with the part"
+  hdr_mated_h:
+    value: 10.0
+    status: tbd
+    source: "J-MIDI with CBL-MIDI's PHR-3 housing mated, over the board, and the wires' turn [from memory]"
+    decided_by: "JST's drawing"
+  lead_slack:
+    value: 15.0
+    status: nominal
+    source: "CBL-MIDI's length past the straight run from the jack's tabs to J-MIDI, for plugging it with the lid off after the cassette drops in [drawing convention]"
 
 ethercon:
   # Neutrik NE8FAV: etherCON A-series, VERTICAL PCB mount, rear mounting
@@ -934,7 +935,7 @@ ethercon:
   offset_y:
     value: -7.0
     status: tbd
-    source: "placeholder - off-centre so the USB-C slot fits beside it"
+    source: "placeholder - off-centre, so the lane beside it takes the MIDI jack (midi; it was the USB-C receptacle's until issue #37)"
     decided_by: "M4 tail-face paper check (ADR 0009)"
   floor_clear:
     value: 0.55

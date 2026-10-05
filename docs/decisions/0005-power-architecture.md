@@ -208,7 +208,12 @@ errors in opposite directions.)*
 
 > **Every row above includes the display board, which no longer exists (2026-09-26, [ADR 0015](0015-one-mcu-no-display.md)).**
 > Its share was only ever estimated, so the table is now an **upper bound**, and
-> the "live config over WiFi" row describes nothing — there is no radio. The
+> the "live config over WiFi" row describes nothing — there is no radio.
+> *(Since 2026-10-04, issue #37, there is a radio again, in a configuration
+> mode that does not play: that row's 12 V column does not apply, and its
+> 5 V column is to be re-derived without the display board. The draft puts
+> the ESP32-S3's transmit peak on top of the quiescent row,
+> `docs/research/2026-10-04-config-mode-ota-draft.md`, *Power*.)* The
 > register's `umbilical-current` is blocked on E6 rather than re-derived from
 > a guess.
 

@@ -4,10 +4,12 @@
 
 - `realtime/` — the ESP32-S3-Matrix. Keys, breath, IMU, DAC loop, the LEDs
   (WS2815B-V1 on the main board, `lighting.led_count`, ADR 0028) and the 8×8 matrix
-  (the only display), USB MIDI and USB configuration. Owns all state and
-  persistence. This is the instrument.
+  (the only display), the MIDI out on its TRS jack, and configuration. Owns all
+  state and persistence. This is the instrument.
 
-There is no display board and no radio: WiFi and BLE stay off.
+There is no display board. **The radio is off in play**: Wi-Fi is started only
+in a configuration mode, which does not run the output loop (ADR 0015,
+*Amendment, 2026-10-04*; the firmware is deferred, below). BLE stays off.
 
 PlatformIO, ESP-IDF underneath. Nothing here yet — Track F follows Track E
 (see [ROADMAP.md](../ROADMAP.md)).
@@ -41,9 +43,11 @@ negotiable without revisiting those:
   that firmware neither sees nor sets: it acts on the jack, not on the ADC.
 - **Nothing expressive touches the ESP32's internal ADC.** It is noisy and
   nonlinear, and breath drives a 0–10V output where that shows.
-- **There is no radio.** WiFi and BLE are never started, so no transmit burst
-  can preempt the output loop or land on the rail the breath path shares
-  ([ADR 0015](../docs/decisions/0015-one-mcu-no-display.md)).
+- **The radio is off whenever the output loop runs.** Wi-Fi is started only in
+  configuration mode, a separate boot in which the loop does not run, so no
+  transmit burst can preempt it or land on the rail the breath path shares while
+  it is live ([ADR 0015](../docs/decisions/0015-one-mcu-no-display.md),
+  *Amendment, 2026-10-04*). BLE is never started.
 - **Refresh everything, every pass. Never write-on-change.** The umbilical is
   write-only — `MISO` was deleted from the cable (ADR 0004) — so nothing
   downstream can ever be read back. *With no readback, shared state can only be
@@ -186,8 +190,32 @@ Pins: `SCK` IO38, `SH/LD` IO7, chain-end `SER` IO33, `QH` IO40.
 
 ### Other pins
 
-- **`IO2` and `IO3` driven low after boot** — shields on the ribbon
-  (`carrier.md`, *The pin map*; recovery ladder, below).
+- **`IO3` driven low after boot**, a shield on the ribbon (`carrier.md`, *The
+  pin map*). `IO2` is the MIDI out's ring line since issue #37 (below).
+
+### The MIDI out (issue #37)
+
+`hardware/carrier/midi-out/midi-out.md` owns the circuit and the numbers.
+
+- **UART1, 31,250 baud, 8-N-1, TX only**, through the GPIO matrix to the
+  sink line's pin. IO6 is the tip, IO2 the ring.
+- **Type A or B is a setting.** In Type A the tip (IO6) carries TX and IO2 is
+  held high; in Type B the reverse. Hold the other line high, never low, and
+  never drive both low. To swap, drive both high, let the FIFO empty, wait one
+  byte time, then re-route.
+- **Both lines are pulled high through boot** (`R-MIDI-PU-T`, `R-MIDI-PU-R`),
+  so nothing goes out before firmware chooses a setting. Leave them high until
+  it has. The one exception is the pads' own ~60 µs power-up glitch, which
+  drives both low together; only its mismatch reaches the loop
+  (`hardware/carrier/midi-out/midi-out.md`, *The power-on default*).
+- **Write MIDI from the loop without blocking it**: into the UART's FIFO, with
+  running status. The line carries 3,125 bytes a second `[calc: 31,250 / 10]`,
+  so breath as a controller is rate-limited, sent on change with a periodic
+  full-state refresh. That is the statelessness rule in MIDI's terms: a
+  receiver plugged in mid-play recovers.
+- **In Type B, IO2 switches beside `IO1` and `IO7` on the ribbon.** Use the
+  pad's lowest drive strength, and watch the chain's marker counter
+  (`midi-out.md`, *The ribbon conductors*).
 
 ### The lights
 
@@ -205,12 +233,13 @@ Pins: `SCK` IO38, `SH/LD` IO7, chain-end `SER` IO33, `QH` IO40.
   down it reads near zero. Gate the row on the reading sitting above about
   half the rest count, and blank it when it falls below.
 - **Cap the matrix while a USB host is attached** (owner, 2026-10-03, #18
-  E1: "Firmware cap"). With the rack up and USB plugged in, the Matrix's
+  E1: "Firmware cap"). Since issue #37 that is the Matrix's own USB-C, on the
+  bench or with the lid off. With the rack up and USB plugged in, the Matrix's
   `VCC_5V` is fed from both the buck (through `D-USBOR`) and `VBUS` (through
   the Matrix's own `D1`, a B5819WS), and tens of millivolts decide which
   carries it: at the corners all of it comes through `D1`
   (`power-entry-instrument.md`, *Rack and USB together*). So whenever the
-  USB-Serial-JTAG (or, with MIDI on, the USB-OTG) peripheral reports a host
+  USB-Serial-JTAG peripheral reports a host
   connected, clamp the **matrix's** LEDs to **about 120 mA** of estimated
   current `[calc: the ~283 mA ADR 0014 derives for D1 at a 60 °C interior,
   *Current: sparse is free, full field is not*, less ~160 mA for the
@@ -237,30 +266,39 @@ from the cassette's columns, unplugging the Matrix's ribbon and the key
 boards' ribbons from the main board (ADR 0017), and bonding it all back with
 fresh silicone. Everything here exists so that it never has to be the answer.
 
-- **Two app partitions, with `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE`.** There
-  is no OTA — no radio — but an image flashed over USB into the inactive slot
-  that does not mark itself valid is still rolled back by the bootloader on the
-  next boot. It turns the most likely bricking event into a reboot.
-- **USB MIDI is opt-in, not the default.** On the ESP32-S3 the internal PHY
-  routes to USB-Serial-JTAG *or* USB-OTG, never both. The moment the
-  application claims OTG the `DTR`/`RTS` download-mode path is gone. Leaving
-  MIDI off until the player enables it keeps the serial-JTAG reset path alive
-  through every boot that has not been asked for MIDI.
-- **The recovery ladder, in order.** (1) Rollback to the other app slot. (2) USB-Serial-JTAG
-  through the tail USB-C slot — which is why MIDI is opt-in. (3) The console
-  header on the main board, with the body opened (ADR 0025 — there is no
-  service cover since 2026-09-26), for watching a board that boots
-  but misbehaves. (4) **The Matrix's own BOOT and RESET buttons.** Since 2026-10-03 the
-  Matrix is **programmed and recovered over USB-C only** (owner: "Program
-  over USB only"; ADR 0021, *Amendment, 2026-10-03*): `EN` and `IO0` are not
-  wired out, and `HDR-SERVICE` carries the console's TXD, RXD and GND only
-  (`hardware/carrier/service-uart/`). Hold BOOT, press RESET, and the ROM's
-  download mode takes a flash over USB-Serial-JTAG through the tail USB-C -
-  so a corrupted *bootloader* is recovered without a UART. The buttons are
+- **Two app partitions, with `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE`.** An
+  image written into the inactive slot that does not mark itself valid is
+  rolled back by the bootloader on the next boot. Since issue #37 the image
+  arrives over the air, in configuration mode (deferred, below), and over the
+  Matrix's own USB-C on the bench. It turns the most likely bricking event into
+  a reboot.
+- **USB MIDI is not built** (issue #37: MIDI leaves on the TRS jack). On the
+  ESP32-S3 the internal PHY routes to USB-Serial-JTAG *or* USB-OTG, never both,
+  and the moment an application claims OTG the `DTR`/`RTS` download-mode path
+  is gone. Nothing claims it now, so the serial-JTAG reset path is alive at
+  every boot.
+- **The recovery ladder, in order.** (1) Rollback to the other app slot. (2)
+  USB-Serial-JTAG through **the Matrix's own USB-C, with the lid lifted off**:
+  the tail-face USB-C is gone since issue #37, and the lid comes off by cutting
+  its silicone (ADR 0025). The Matrix hangs from the lid on its carrier, and
+  the oak's pocket and the carrier's slot keep room for a recovery plug
+  (`mechanical/drc.echo` *"recovery USB-C plug clear of the oak top"*). (3) The
+  console header on the main board, with the body opened, for watching a board
+  that boots but misbehaves. (4) **The Matrix's own BOOT and RESET buttons.**
+  Since 2026-10-03 the Matrix is **programmed and recovered over USB-C only**
+  (owner: "Program over USB only"; ADR 0021, *Amendment, 2026-10-03*): `EN` and
+  `IO0` are not wired out, and `HDR-SERVICE` carries the console's TXD, RXD and
+  GND only (`hardware/carrier/service-uart/`). Hold BOOT, press RESET, and the
+  ROM's download mode takes a flash over USB-Serial-JTAG through that USB-C,
+  so a corrupted *bootloader* is recovered without a UART. **Since issue #37
+  rungs 2–4 all need the lid off**: the cheap wired rung is gone, which is why
+  configuration mode validates a new image before marking it (the draft,
+  below). The buttons are
   on the Matrix's underside, over its carrier; how they are reached with the
-  lid lifted is open (ADR 0021, *Amendment, 2026-10-03*, *Open*). The two spare GPIO on the ribbon (`IO2`, `IO3`) sit beside fast
-  lines as shields; drive them low after boot (`IO3` is a strapping pin
+  lid lifted is open (ADR 0021, *Amendment, 2026-10-03*, *Open*). `IO3`, a spare on the ribbon, sits beside fast
+  lines as a shield; drive it low after boot (`IO3` is a strapping pin
   [from memory], harmless once booted) — pin map in `hardware/carrier/carrier.md`.
+  `IO2`, the other, is the MIDI out's ring line since issue #37.
 - **Exercise the ladder at M8**, before the body closes, so it is known good
   rather than assumed.
 
@@ -295,36 +333,39 @@ Two things are explicitly configuration rather than compiled constants
 - **Routing matrix** — four mod channels, each with source, scale, offset, curve
   and slew.
 
-Both live in NVS and are edited over USB.
+Both live in NVS and are edited in configuration mode (deferred, below).
 
 ## Bring-up fixtures
 
 Throwaway test firmware for E-track milestones belongs in `fixtures/`, not in
 the instrument firmware. It is a tool, not a deliverable.
 
-## Configuration is over USB
+## Configuration mode and OTA (deferred)
 
-Config is a page on a computer, talking to the instrument over its own USB-C
-port, not a menu system and not a phone
-([ADR 0015](../docs/decisions/0015-one-mcu-no-display.md)). The matrix shows
-status only.
+**The hardware supports it; the firmware is deferred** (owner, 2026-10-04:
+*"Let's not worry about the firmware now. Just add the capability"*; ADR 0015,
+*Amendment, 2026-10-04*). Configuration and firmware updates are to go over
+Wi-Fi, from a phone, in a configuration mode entered by a key combination.
+The radio is off at every boot. The mode does not run the output loop, and it
+holds the DAC safe. This replaces configuration over USB-Serial-JTAG and SysEx:
+the tail-face USB-C is gone, and an iPhone has no Web Serial or Web MIDI.
 
-**The transport follows the USB PHY rule above.** With MIDI off — the default —
-the only USB function is USB-Serial-JTAG, so configuration rides it (Web Serial
-from a browser, or a host tool). With MIDI on, the same framed messages go as
-SysEx, which Web MIDI can reach. One message format, two carriers; do not let
-configuration be the reason MIDI stops being opt-in.
+The draft design (entry keys, the SoftAP and its page, security, the
+validate-before-mark OTA order, the power figures, and the TRS A/B setting) is
+a research note, **not this README's authority yet**:
+[`docs/research/2026-10-04-config-mode-ota-draft.md`](../docs/research/2026-10-04-config-mode-ota-draft.md).
+What stands now:
 
-**Single source of truth:** every config edit round-trips. The page edits, the
-instrument validates, applies, persists and echoes back. The page never holds
-authoritative state.
+- **Single source of truth:** every config edit round-trips. The page edits,
+  the instrument validates, applies, persists and echoes back. The page never
+  holds authoritative state.
+- **The latency budget is valid only with the radio off.** Configuration mode
+  does not play.
 
-Build live telemetry over the same link early — it is a test instrument for the
-mechanical and calibration work, not just a configuration convenience.
+## MIDI out
 
-## USB MIDI
-
-A **bring-up tool, not a feature.** Keys, fingering and breath response get
-validated in a DAW before any analog hardware exists (milestone E5). The
-instrument is a tethered rack device; USB MIDI does not get to constrain the
-design.
+**MIDI 1.0 out on a 3.5 mm TRS jack in the oak bottom** (issue #37; the
+circuit is `hardware/carrier/midi-out/`). It replaces USB MIDI, which was
+a bring-up tool. Milestone E5 plays into a DAW through any USB-MIDI interface,
+with a TRS-to-DIN adapter of the jack's type. The instrument is a tethered rack
+device; MIDI out does not get to constrain the design.
