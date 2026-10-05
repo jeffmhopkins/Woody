@@ -488,6 +488,16 @@ So, on every board:
    stitched, and straight supply runs with 45° bends - is drawn in its
    `.kicad_pcb`, which is the source once it exists (`layout.yaml` `route:
    false`). `pcb.py check` holds it like any other board.
+4. **Route in families, in order** (issue #41). **The owner, 2026-10-05:**
+   *"we should do families of traces... then do those and then do the next
+   ones then do the next ones instead of just letting the auto router go
+   Willy-nilly"*. So a board routed by the autorouter is routed family by
+   family - power and rails, then sensitive analog with its guard and return,
+   then buses as bundles, then the rest - each family finished and fixed
+   before the next, not every net in one shortest-first queue where the early
+   nets box in the late ones. The mechanism is `layout.yaml` `families:`
+   (*The router: families*, below); the method is the `pcb-routing` skill
+   (`.claude/skills/pcb-routing/SKILL.md`).
 
 ### The router, and its limits
 
@@ -591,7 +601,8 @@ this order (step 4 is Freerouting's only):
    board; and with `directions: chamfer`, each right-angle corner cut to two
    45-degree bends where the diagonal keeps its clearance); **`pcb_route.complete`**
    - every connection KiCad's DRC still counts missing (under `route: astar`,
-   every signal connection), shortest first, routed by A* on both outer layers at once on the lazy 0.2 mm
+   every signal connection; with `families:`, family by family - *The router:
+   families*, below), shortest first, routed by A* on both outer layers at once on the lazy 0.2 mm
    grid, a step against its layer's `directions:` costing `against_cost`, a via
    wherever `Obstacles.via_ok` allows, from one item and then, if that search
    is boxed in, from the other. With `rip_up: n`, a connection with no way
@@ -694,6 +705,79 @@ locked before anything else), then every missing connection by
 `pcb_route.complete` in chunks, the board saved and the zones filled after
 each, so a killed run picks up where it stopped; then the rip-up rescue, the
 silkscreen clear of every via, and the stackup.
+
+### The router: families (`layout.yaml` `families:`)
+
+Under `route: astar` (the main board, the module's boards, the Matrix carrier),
+`families:` turns the one shortest-first queue of `pcb_route.complete` into an
+ordered list of families (`pcb_route.route_families`; the owner's rule is point
+4 of *The routing policy*). A board without `families:` routes exactly as before:
+`route_families` is then `complete` itself, and `tools/pcb_families_test.py
+--identity <board>` proves it byte for byte on a scratch copy.
+
+```yaml
+families:
+  - name: rails                 # why this family, and why here
+    nets: [class:power5, UMBILICAL_POS12, "/power-entry-instrument/*"]
+    via_cost: 40
+  - name: chain
+    nets: ["/CHAIN_*"]
+    bundle: true
+  - name: tail
+    nets: ["/midi-out/*", /IO2, /IO6]
+    region: [265, 100, 360, 143]
+  - name: rest                  # optional: the options for everything not named
+    time_s: 600
+```
+
+- **`nets:`** names (the leading `/` optional), `fnmatch` globs, or
+  `class:<name>` for a `net_classes:` entry's nets. A net belongs to the
+  **first** family that names it. Nets no family names go to an implicit last
+  family, `rest`; a family named `rest` only sets its options. Plane, island,
+  fanout and pair nets are not in any family: `prepare` lays them first.
+- **`layers:`** (`[F.Cu, B.Cu]`, …) narrows the routed layers; a net class's
+  `layers:` and `layer_cost:` still hold inside it. **`region:`** `[x0, y0, x1,
+  y1]` confines the family's negotiated routes to a rectangle in the **board's
+  own mm** (KiCad's frame, as `tools/pcb_plot.py` draws it - not the body frame
+  of `directions: regions:`). **`via_cost:`** replaces `directions: via_cost:`
+  for the family. **`rip_up: true`** lets the family's fallback take up earlier
+  families' unlocked copper; by default they are frozen. **`bundle: true`**:
+  the cells one `pitch:` off a bundle-mate's track are cheaper, so the family's
+  nets run side by side through one corridor (the pitch defaults to the least
+  the track and clearance allow, on the grid). **`iterations:`** and
+  **`time_s:`** cap the negotiation (`pcb_route.FAMILY_ITERATIONS`,
+  `FAMILY_TIME_S`).
+- **Inside a family: negotiated congestion** (PathFinder). Every connection
+  is routed letting its track share grid cells with the family's other nets -
+  never with copper already laid, a keep-out or the edge, which stay hard - at a
+  cost of *(step + history) × (1 + present × the other nets there)*. After each
+  round every shared cell's history grows and the present factor doubles, and
+  all the family's connections are routed again, until none share a cell or a
+  cap is reached. The order is **crossing-aware**: fewest airwire crossings
+  first, then shortest (the idea from drandyhaas/KiCadRoutingTools, MIT; no
+  code taken). A connection that negotiated clear is laid only if every
+  segment and via passes `Obstacles`' exact test against the copper then on
+  the board; the rest - still shared, unreachable, or failing that test - go
+  to `complete`, with the earlier families frozen out of its rip-up.
+- **`route_first:`** leads as a family of that name, before the listed ones,
+  unless a family is itself called `route_first`. **`connect_first:`** is
+  unchanged: `prepare` routes and locks it before any family.
+- **Unchanged:** locked copper is an obstacle to every family and never taken
+  up; per-class layers, layer costs and via sizes; 45° moves and turn costs;
+  the planes, `prepare` and `tidy`. Each family's copper is fixed for the
+  families after it **in this run only** - it is not given KiCad's lock flag,
+  and `pcb.rescue`, which runs after all of them, is not family-aware.
+- **The report**, one line per family: connections routed of those it had,
+  how many negotiated and how many `complete` took, failed, vias, length,
+  rounds, cells still shared, seconds. `pcb.py route` goes family by family,
+  saving and filling after each, so a killed run resumes at the first family
+  with a connection missing; `layout` and `finish` route every family in one
+  pass.
+- **Inspecting it:** `python3 tools/pcb_plot.py <board or .kicad_pcb> -o
+  out.png --family <name>` (or `--nets` with names and globs; `--window`,
+  `--labels`, `--layout` for a trial's own `layout.yaml`) draws the family in
+  colour over everything else in grey, with each net's length and vias. It
+  only reads.
 
 ### Learned the hard way
 
@@ -1145,6 +1229,8 @@ re-described here.
 | `kicad.py` | Sheets: export, render, set fields, `check` (needs KiCad 9, run by hand) | §3 |
 | `sch.py` | A hand-written netlist built into a sheet | §3 |
 | `pcb.py`, `pcb_route.py`, `pcb_main.py`, `pcb_freeroute.py` | Board layout, routing, the main board's kind, the Freerouting round trip | §4 |
+| `pcb_plot.py` | A board's routing in 2D, nets by name, glob or family (read-only) | §4, *The router: families* |
+| `pcb_families_test.py` | The families stage on a constructed boxing-in board; `--identity <board>`: no `families:` routes byte for byte as before | its docstring; §4, *The router: families* |
 | `lib-models.py` | 3D models drawn from banked drawings | §4 |
 | `sim.py`, `sim_coverage.py` | Circuit simulation and its coverage table | §5 |
 | `check-staleness.py` | The commit gate: figures, links and their anchors, generated files, CAD, sims | `repo-maintenance.md` §2 |
