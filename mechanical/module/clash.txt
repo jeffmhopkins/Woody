@@ -19,8 +19,8 @@ ACCEPTED NEAR-MISSES 0 (by `near:` rule in mechanical/module/clash-allow.yaml)
 
 NEAR 22 (at or over the minimum, under 1 mm)
    0.01   0.00   +0.01  thread               power ribbon  x  power ribbon stripe   [at 44.4, 26.9, -40.8]
-   0.05   0.00   +0.05  thread               LED-PANEL  x  LED-PANEL nut   [at 4.0, 48.7, -3.2]
-   0.05   0.00   +0.05  thread               SW-POWER  x  nut SW-POWER   [at 26.6, 46.6, 0.7]
+   0.05   0.00   +0.05  thread               LED-PANEL  x  LED-PANEL nut   [at 5.4, 47.2, -3.4]
+   0.05   0.00   +0.05  thread               SW-POWER  x  nut SW-POWER   [at 26.1, 52.6, 0.9]
    0.16   0.00   +0.16  thread               J-CV-BREATH  x  nut J-CV-BREATH   [at 18.6, 89.6, 1.2]
    0.16   0.00   +0.16  thread               J-CV-MOD1  x  nut J-CV-MOD1   [at 18.6, 76.6, 1.2]
    0.16   0.00   +0.16  thread               J-CV-MOD2  x  nut J-CV-MOD2   [at 18.6, 63.6, 1.2]
