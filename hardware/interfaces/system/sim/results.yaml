@@ -6,7 +6,7 @@ inputs:
   tools/sim.py: 0312a1077b9afa80
   hardware/interfaces/system/sim/sims.yaml: b9f276978e889230
   hardware/module/breath-receive-stage/netlist.yaml: dab496982d183718
-  hardware/interfaces/breath-sense-link/netlist.yaml: 3174b77569cdaf62
+  hardware/interfaces/breath-sense-link/netlist.yaml: 589dc991272a7d9c
   hardware/carrier/netlist.yaml: 7bca7b6145113279
   hardware/carrier/power-entry-instrument/netlist.yaml: 34a972189d3e5b5d
   hardware/carrier/breath-excitation-reference/netlist.yaml: 2d5ee10b223dc95d
