@@ -54,7 +54,7 @@ The left-hand page's *Ordering it — JLCPCB* is the order sheet, with
 and a separate order**: one instrument needs one of each. Put both in one cart
 so they ship together. It is ordered as the left-hand board is, as **Standard
 PCBA on JLC-added rails and fiducials** (owner, 2026-10-04; ADR 0028,
-*Amendment, 2026-10-04*): 107.0 × 42.1 (`fab/key-board-rh-job.gbrjob`) is under
+*Amendment, 2026-10-04*): its size (`fab/key-board-rh-job.gbrjob`, `"Size"`) is under
 Standard's 70 × 70 mm minimum across. What differs:
 
 - **The gates**: `python3 tools/pcb.py check hardware/boards/key-board-rh`, 0
@@ -94,7 +94,7 @@ with the latest layout's date until a board is fabricated
 | Rev | Date | What changed | Where |
 |---|---|---|---|
 | A | 2026-09-28 | First layout, from the left-hand board's (`layout.yaml`). Not yet ordered; re-laid out 2026-09-29 for the cassette's columns (ADR 0025): the mouth end 0.6 and the tail end 0.2 longer, `J-CHAIN` 13.0 further toward the tail where the shorter ribbon lets the body CAD put it, the register, C7 and C8 following it, the switch side's title moved off the header's tails | git history of this directory |
-| B | 2026-10-03 | Laid out again: C9, U1's second decoupler at VCC (pin 16, review #6-5); white mask and black legend (ADR 0028); the KS-33's 3.0 mm holes, with the networks 9.0 mm from their switches as the left-hand board's (9.4 put a label on the bigger pads) and `/KEY_RH4` routed third. The board keeps its original outline: the Matrix is on its own carrier board (`hardware/boards/matrix-carrier/`, ADR 0021 amendment 2026-10-03). Two hand edits after `pcb.py layout`: C9's strap to U1 pin 16 (`connect_first`), which a later rip-up had taken; and `J1` pin 12's thermal, which had one spoke a face - `/CHAIN_SHLD` moved from y 46.3 to 46.85 beside it and `/CHAIN_SCK`'s via and detour off it, and pin 12 tied to pin 10. `pcb.py check` passes. Not yet ordered | `key-board-rh.kicad_pcb`, `layout.yaml` |
+| B | 2026-10-03 | Laid out again: C9, U1's second decoupler at VCC (pin 16, review #6-5); white mask and black legend (ADR 0028); the KS-33's 3.0 mm holes, with the networks 9.0 mm from their switches as the left-hand board's (9.4 put a label on the bigger pads) and `/KEY_RH4` routed third. The board keeps its original outline: the Matrix is on its own carrier board (`hardware/boards/matrix-carrier/`, ADR 0021 amendment 2026-10-03). Two hand edits after `pcb.py layout`: C9's strap to U1 pin 16 (`connect_first`), which a later rip-up had taken; and `J1` pin 12's thermal, which had one spoke a face - `/CHAIN_SHLD` moved from y 46.3 to 46.85 beside it and `/CHAIN_SCK`'s via and detour off it, and pin 12 tied to pin 10. `pcb.py check` passes. On 2026-10-05 the mouth end lengthened and its two mounts moved with it, so the columns keep `hardware.col_web_min` of plate from the thumb switches' cutouts (issue #43; ADR 0025, Amendment 2026-10-05 (2)): the outline's mouth edge, H1, H2, their keep-outs and the pour's edge moved, every part and track where it was. Not yet ordered | `key-board-rh.kicad_pcb`, `layout.yaml` |
 | — | 2026-10-04 | Silkscreen and title block dated 2026-10-03, the latest layout's date, still `rev A` (review #6-7; the rule above). No copper moved; renders and `fab/` re-written | `key-board-rh.kicad_pcb`, `layout.yaml` `silk:` |
 
 ## Open, and what decides each
