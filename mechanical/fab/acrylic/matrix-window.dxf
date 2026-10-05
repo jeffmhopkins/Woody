@@ -7,7 +7,7 @@ Thickness: 3 mm (openings.matrix_acrylic_t)
 999
 Quantity per instrument: 1
 999
-Units mm. Cut every closed outline. cad 5e1f2bdcc978; verify: python3 tools/cad.py explain fab-dxf-matrix-window
+Units mm. Cut every closed outline. cad 75401bec5fde; verify: python3 tools/cad.py explain fab-dxf-matrix-window
   0
 SECTION
   2

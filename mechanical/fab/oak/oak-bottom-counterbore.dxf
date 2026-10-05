@@ -7,7 +7,7 @@ Thickness: 6 mm (the flush rule: switch.keycap_top_above_seat - switch.total_tra
 999
 Quantity per instrument: 1
 999
-Units mm. Cut every closed outline. cad 45cc3a650903; verify: python3 tools/cad.py explain fab-dxf-oak-bottom-counterbore
+Units mm. Cut every closed outline. cad 753a1d561e4a; verify: python3 tools/cad.py explain fab-dxf-oak-bottom-counterbore
   0
 SECTION
   2
