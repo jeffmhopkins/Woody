@@ -102,6 +102,9 @@ nets:
   /IO40:
   - J1.5
   - J3.IO40
+  /IO6:
+  - J1.2
+  - J2.IO6
   /IO7:
   - J1.19
   - J2.IO7
@@ -113,14 +116,10 @@ nets:
   - J3.IO43
   J1.1:
   - J1.1
-  J1.2:
-  - J1.2
   J2.IO4:
   - J2.IO4
   J2.IO5:
   - J2.IO5
-  J2.IO6:
-  - J2.IO6
   PWR_GND:
   - J1.10
   - J1.14
@@ -129,7 +128,5 @@ nets:
   - J2.GND
 external_endpoints:
 - J1.1
-- J1.2
 - J2.IO4
 - J2.IO5
-- J2.IO6

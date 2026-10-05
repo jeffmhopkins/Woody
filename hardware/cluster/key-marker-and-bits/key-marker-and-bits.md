@@ -66,7 +66,7 @@ A marker is a framing check: firmware reads it every scan, and a frame that
 fails it holds the previous frame and increments a visible error counter
 `[repo] 0001`. Its whole value is converting an invisible intermittent fault
 into a number someone can read — the error counter. There is no display
-(ADR 0015); how the counter is surfaced, on the matrix or over USB, is
+(ADR 0015); how the counter is surfaced, on the matrix or on configuration mode's page, is
 firmware's (F7).
 
 **Six bits cannot do that per device in both directions, and eight can.** With

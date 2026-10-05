@@ -8,7 +8,7 @@ inputs:
   hardware/carrier/power-entry-instrument/netlist.yaml: e9a49796fdb69d0d
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
   hardware/module/power-entry/netlist.yaml: 14fd898035959809
-  hardware/carrier/led-strip-drive/netlist.yaml: ec7ec56762e982ee
+  hardware/carrier/led-strip-drive/netlist.yaml: e4c3ffbbe5c48f52
   hardware/carrier/power-entry-instrument/sim/pei-z.cir: 7142ec09b25a23ab
   hardware/carrier/power-entry-instrument/sim/pei-start.cir: a6ebb516eedc017e
   hardware/carrier/power-entry-instrument/sim/pei-pwm.cir: 9a3106a2fc613c56

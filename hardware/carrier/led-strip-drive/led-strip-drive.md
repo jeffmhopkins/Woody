@@ -11,7 +11,10 @@ circuit used to be is in [`notes.md`](notes.md).
 
 The 74AHCT125 that lifts the ESP32-S3's 3.3 V data to the LEDs, the pull-down
 that holds it quiet through reset, the series damping at the driver, and the
-LEDs themselves, each with its 100 nF. **The 12 V feed and
+LEDs themselves, each with its 100 nF. **Since issue #37 the same package's
+gates B and C also drive the MIDI out's tip and ring**
+([`midi-out`](../midi-out/midi-out.md), which owns the derivation), with their
+two pull-ups here, because the gates are here. **The 12 V feed and
 `C-STRIP-BULK` are not here** — they belong to
 [`power-entry-instrument`](../power-entry-instrument/power-entry-instrument.md).
 
@@ -32,10 +35,14 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| IO1 | in | `J-MCU` | — | High-impedance through the bootloader window; `R-LED-PD` is what holds it down in it. IO2 is spare (ADR 0016) |
+| IO1 | in | `J-MCU` | — | High-impedance through the bootloader window; `R-LED-PD` is what holds it down in it |
+| IO6 | in | `J-MCU` | — | The MIDI out's tip line (issue #37), into gate B; `R-MIDI-PU-T` holds it high through boot |
+| IO2 | in | `J-MCU` | — | The MIDI out's ring line, into gate C; `R-MIDI-PU-R` holds it high through boot. A spare until issue #37 (ADR 0016) |
+| `DEV_3V3` | in | `J-MCU` (the Matrix's LDO) | — | The two MIDI pull-ups' rail: the ESP32-S3's pads are not 5 V tolerant |
+| `MIDI_TIP_DRV`, `MIDI_RING_DRV` | out | `carrier/midi-out` | — | Gates B and C, push-pull at 5 V. Sourced here |
 | 5 V | in | `carrier/power-entry-instrument` | `matrix-led-current` | The buck. The 74AHCT125's rail; TTL thresholds on this rail are why 3.3 V in reads high |
 | `INST_POS12` | in | `carrier/power-entry-instrument` (`C-STRIP-BULK` at the row's feed) | `umbilical-current`, `led-row-current` | Every LED's `VDD` and its 100 nF. Since ADR 0027 it is the module's isolated 12 V, through the load switch; on this board it is the node behind `Q-INRUSH`, the hot-plug inrush limiter, so the LEDs' 1.3 µF of `C-LED` `[calc: 13 × 100 nF]` charges on its ramp and not off the plug |
-| `PWR_GND` | ref | `carrier/power-entry-instrument` | `dig-gnd-topology` | The LEDs' ground, LED 1's `DIN2`, the spare gates and enables |
+| `PWR_GND` | ref | `carrier/power-entry-instrument` | `dig-gnd-topology` | The LEDs' ground, LED 1's `DIN2`, the spare gate D and the enables |
 | `OE_INST` ×4 | ref | — | — | `U-LVLSHIFT`'s four enables, tied LOW on this board, which is why the pull-down is needed rather than optional. **Not `OE_MOD`**, the module buffer's |
 
 ## §5 LED data
@@ -64,7 +71,9 @@ the two agree, and where they do not the netlist wins.*
   each LED: VDD (pin 2) = +12V, GND (pin 5), pin 1 NC
             [C-LED-1 100nF] ... [C-LED-13 100nF], one at each LED's VDD pin
 
-  gates B, C, D SPARE, inputs tied to GND
+  gate B: IO6 in (R-MIDI-PU-T 10k to DEV_3V3), out MIDI_TIP_DRV  ┐ the MIDI out,
+  gate C: IO2 in (R-MIDI-PU-R 10k to DEV_3V3), out MIDI_RING_DRV ┘ carrier/midi-out
+  gate D SPARE, input tied to GND
   74AHCT125 rail = 5 V (TTL thresholds, so 3.3 V in reads high)
   OE ×4 tied LOW
   [C-DECOUPLE-LED 100nF] at the package

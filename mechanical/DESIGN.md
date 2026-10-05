@@ -79,7 +79,7 @@ drawing.
 - **There is no display board** (owner, 2026-09-26: "remove the upper
   display ... we can do all this with the matrix led, keep things more
   compact and cleaner"; ADR 0015). The LED matrix on the top face is the
-  instrument's only display, configuration is over USB, and the body lost the
+  instrument's only display, configuration is over Wi-Fi in a configuration mode since issue #37 (ADR 0015's amendment), and the body lost the
   display band at the mouth end.
 - **The sides sit between the oak panels, in grooves** (decided 2026-09-26).
   Oak top and bottom run the full width; each acrylic side is one sheet
@@ -129,14 +129,13 @@ Several things can claim each end, and the largest wins:
   its pad rows stand it on the carrier (`boards.matrix_hdr_h`, *"Matrix's
   back-side parts clear the carrier"*), and the carrier hangs on three
   spacers from inserts in the oak (*"Matrix carrier hangs from the oak"*).
-  It lifts off with the lid. Off the Matrix's mouth edge: the extension's
-  **right-angle USB-C plug**, centred on the Matrix's receptacle
-  (`boards.matrix_usb`) and turned so its lead leaves downward, beside the
-  carrier, and runs to the tail under it (`openings.usb_plug_turn`,
-  *"USB-C plug and lead clear of the Matrix carrier"*). Its overmould rises past the
-  key plate's underside, so the plate stops in front of it, and past the
-  oak's, which has a pocket over it (*"USB-C plug clear of the key plate and
-  the oak top"*; review #19 F1). Under it, the main board's tail end with
+  It lifts off with the lid. Off the Matrix's mouth edge, **nothing with the
+  lid on since issue #37**: the tail-face USB-C extension is gone, and the
+  Matrix's own USB-C is a recovery port reached with the lid off. A recovery
+  plug (a right-angle USB-C turned down, `openings.usb_plug_turn`) still
+  fits: the carrier keeps its slot under the receptacle, the key plate still
+  stops in front of it, and the oak keeps its pocket over it (*"recovery USB-C
+  plug clear of the oak top"*; review #19 F1). Under it, the main board's tail end with
   J-UMB on it. Behind it, the etherCON (an NE8FAV,
   ADR 0021) on its **adapter board**, which stands the connector's full
   height parallel to the tail cap. The connector **stands on the floor**, and
@@ -146,8 +145,8 @@ Several things can claim each end, and the largest wins:
   that sets the thickness. `drc.echo` itemises "behind the Matrix", confirms
   J-UMB passes under it, and gives the thinnest body that works. **With the matrix centred, anything in front of or
   behind it counts twice, and the gap between the hands copies the result** —
-  a straight USB-C plug cost about 24 mm of body, which is why the plug is
-  right-angle (`openings.usb_plug_l`).
+  a straight USB-C plug cost about 24 mm of body, which is why the extension's
+  plug was right-angle until issue #37 took it away.
 - **The lights are a row of LEDs on the main board** (ADR 0028; before it
   one strip, ADR 0016): `lighting.led_count` WS2815B-V1 at one pitch, equal
   margins to the main board's ends (ADR 0028 amendment 2026-10-03; the pitch
@@ -182,10 +181,11 @@ Several things can claim each end, and the largest wins:
   board to the etherCON's adapter, carrying J-UMB (ADR 0021). **That tail
   end is full width** (owner, 2026-10-02; `boards.main_tail`). It was a
   tongue as wide as the adapter, narrowed for lid screws that ADR 0025
-  removed. The corner it gains held nothing at the board's height, and the
-  USB-C receptacle above it stands `boards.board_clear` over the board's
-  parts (*"main board's tail end runs full width beside the etherCON
-  adapter"*). It is clamped in the
+  removed. The corner it gains held nothing at the board's height; the
+  USB-C receptacle that stood over it went with issue #37, and **J-MIDI**, the
+  MIDI jack's lead header, is proposed in it (*"main board's tail end runs full
+  width beside the etherCON adapter"*, *"J-MIDI and its plug under the Matrix
+  carrier"*). It is clamped in the
   U-bolt's stack, on a spacer from the bottom plate with a washer and the nut
   above, with a clearance hole for each leg (ADR 0022 point 7, ADR 0025). It
   has no edge notches. Every one of its mounts is on the bottom plate: a
@@ -249,7 +249,7 @@ decision, not a correction.
    from behind a panel of `ethercon.panel_max` at most, and the oak tail cap
    is thicker. A router pocket from outside leaves exactly that much oak
    where the flange clamps; it takes the flange's outline and the PUSH tab,
-   which stands in it (ADR 0021). Like the USB-C overmould pocket it is not
+   which stands in it (ADR 0021). Like the counterbores it is not
    in the tail cap's DXF, which carries the through-cuts; the tail-face
    figure and *"tail cap recess for the etherCON inside the tail face"* give
    it. *"etherCON PUSH tab against the tail face"* says how far the tab
@@ -259,32 +259,21 @@ decision, not a correction.
    (`body-thickness`, 2026-09-26).
    *Rules: "etherCON body inside the cavity height", "body thickness takes
    the etherCON on the floor".*
-3. **The Matrix's USB-C reaches the tail through an extension** (owner,
-   2026-09-26). Its port cannot reach the face — the etherCON fills the
-   tail's depth — so a panel-mount USB-C extension runs to a receptacle
-   beside the connector (`CBL-USB-EXT`). **The receptacle stands on end**
-   (`openings.usb_slot_portrait`, 2026-09-26): the etherCON sits off-centre
-   toward one side, and on end the receptacle sits centred in the lane
-   between its recess and the other side; USB-C is reversible, so the user
-   never sees the difference. *"USB-C extension receptacle beside the
-   etherCON flange"* and *"tail cap web between the USB-C cutout and the
-   etherCON recess"* give the lane and the oak between them.
-   **The plug has to reach it, and it has no screw ears** (2026-09-26). The
-   tail cap is much thicker than the panel a panel-mount receptacle is made
-   for, and a plug's overmould is bigger than the receptacle's cutout, so the
-   cap is **pocketed from the tail face**, overmould-sized, down to a thin
-   panel; the receptacle's nose passes that panel's slot, its face level with
-   the pocket floor (`openings.usb_overmold`, `usb_panel_t`, `usb_nose_l`).
-   The pocket is a router pass: `export/tail-cap.dxf` carries the slot, the
-   render shows the pocket. On end, a receptacle's screw ears would run up
-   and down the face and land outside the cavity, so it is **earless**,
-   clamped against the panel from behind (`openings.usb_mount`) — the clamp
-   is not modelled. A front-mounted receptacle was the alternative; its
-   flange would need the tail face's width that the lane does not have.
-   *Rules: "USB-C extension receptacle beside the etherCON flange", "tail cap
-   web between the USB-C cutout and the etherCON flange", "USB-C plug
-   overmould reaches the receptacle", "USB-C receptacle mount inside the
-   cavity"; the cable run is an INFO line.*
+3. **The lane beside the etherCON takes the MIDI jack** (issue #37; owner,
+   2026-10-04: "on the bottom face, and then just do a connector to the main
+   board"). Until then a panel-mount USB-C extension's receptacle (`CBL-USB-EXT`)
+   stood there, on end, behind an overmould pocket in the tail face; all of
+   that is gone (ADR 0015, *Amendment, 2026-10-04*). The jack (`J-MIDI-OUT`, a
+   Same Sky SJ5-43502PM, `config/body.yaml` `midi`) goes through the **oak
+   bottom**, centred in the lane: a counterbore from inside takes its collar and
+   leaves the oak its nut can clamp, and its nut stands under the bottom face. It
+   is fitted from inside before the cassette drops in, and its lead (`CBL-MIDI`)
+   plugs into J-MIDI on the main board with the lid off. The counterbore is a
+   router pass, exported on its own (`export/oak-bottom-pockets.dxf`); the
+   through-hole is in `export/oak-bottom.dxf`.
+   *Rules: "MIDI jack in the oak bottom", "MIDI jack lead to J-MIDI", "J-MIDI
+   and its plug under the Matrix carrier", "oak-bottom cuts at least 3 mm
+   apart".*
 4. **The display set the mouth end — resolved by the owner.** It is gone
    (ADR 0015), and the mouth end is now the equal band. *Rule: "what the
    mouth end needs".*
@@ -370,7 +359,7 @@ only as good as those envelopes. Group the report's lines by these causes
    end** (owner, 2026-09-26). The Matrix sits on a carrier board of its own
    (owner, 2026-10-03, ADR 0021 amendment 2026-10-03), hung from the oak top
    on three mounts (*"Matrix carrier hangs from the oak"*): two 1×10 headers
-   through its pad rows (`HDR-MATRIX`), a notch round its USB-C and the plug.
+   through its pad rows (`HDR-MATRIX`), a notch round its USB-C (and room for a recovery plug, lid off).
    A plain 24-way IDC ribbon (allocation on `CBL-MCU-RIBBON`, ADR 0018) runs
    from `J-MCU-C`, hung under the carrier straight above J-MCU, down into
    J-MCU at the main board's near edge. It plugs there with the lid raised,
@@ -383,8 +372,8 @@ only as good as those envelopes. Group the report's lines by these causes
    etherCON's footprint"*). The LED row stops short of J-MCU. The rows are
    `J-MCU` and `CBL-MCU-RIBBON` (`hardware/carrier/`), `J-UMBILICAL-INST`,
    `J-UMB` and `PCB-UMB-ADAPTER` (`hardware/interfaces/spi-link/`).
-6. **The tail is clear.** The etherCON and its adapter, J-UMB, the USB-C
-   plug, receptacle and lead and the Matrix meet nothing, and the connector fits the cavity without cutting the oak.
+6. **The tail is clear.** The etherCON and its adapter, J-UMB, the MIDI jack,
+   its lead and J-MIDI, and the Matrix meet nothing, and the connector fits the cavity without cutting the oak.
 
 Found by the check and fixed as model bugs, not findings: the oak bottom's
 missing counterbores, thumb boards drawn with switch holes, the display cut

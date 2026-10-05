@@ -218,7 +218,11 @@ constant; it is part of what the owner tunes out, as in every Eurorack module.
   to a computer while the umbilical is plugged in (ADR 0005's bench-only OR)
   joins the isolated return to mains earth; the instrument's current still
   returns to the converter, but the computer's ground loop is back. Bench
-  only, as ADR 0005 already says.
+  only, as ADR 0005 already says. *(Since issue #37 there is no external USB:
+  the Matrix's own USB-C is reached only with the lid off, and the MIDI out
+  that replaced USB MIDI joins no ground, because a MIDI input is
+  opto-isolated and leaves pin 2 unconnected. ADR 0015, Amendment,
+  2026-10-04.)*
 - **What the bench checks (E6/E11)**: the pitch jack against a second
   module's ground with the lights sweeping full scale — the measurement this
   decision predicts at under a hundredth of a cent — and the case's −12 V

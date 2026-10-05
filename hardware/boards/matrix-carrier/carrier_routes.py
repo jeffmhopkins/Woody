@@ -191,6 +191,18 @@ track("/IO1", B, [down(21, 7.95)[-1], (x10 - C, 7.95), (x10, 7.95 + C), (x10, 13
 via("/IO1", (x10, 13.4))
 track("/IO1", F, [(x10, 13.4), j2_in(10)])
 
+# IO6, the MIDI out's tip line (issue #37): J-MCU-C pin 2 (J-MCU 23) straight up the bottom face
+# beside the header's tail end - nothing else leaves there on that face - under the arm's far
+# edge to past the ladder's first column's lane, through a via, and into J2.5 from the side on
+# the top face, under the ladder's first rows. J-MCU-C pin 1 (J-MCU 24) cannot be reached at
+# all: the back row's ten lanes fill both faces under it and the via diagonal fences it on the
+# top face, so the MIDI pair's ring line is IO2, which was already routed (to J2.9).
+Y6 = 19.4
+x2 = j1(2)[0]
+track("/IO6", B, [j1(2), (x2, Y6 - C), (x2 + C, Y6), (279.6, Y6)])
+via("/IO6", (279.6, Y6))
+track("/IO6", F, [(279.6, Y6), (j2(5)[0], Y6)])
+
 # ---- ground stitching: the two pours joined where both are open ------------------------------
 STITCH = [(296.6, 25.0), (296.6, 18.5), (294.0, 30.0), (290.0, 30.0), (286.9, 30.0), (290.0, 34.0),
           (294.0, 34.0), (284.4, 31.0), (276.0, 42.4), (253.2, 14.0), (253.2, 9.0), (296.5, 46.5), (284.5, 46.5)]

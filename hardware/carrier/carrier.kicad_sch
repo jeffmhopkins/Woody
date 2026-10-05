@@ -15,7 +15,7 @@
     (comment 4 "Ports are hierarchical labels (Dir, From/To, Figure); the main board places this sheet")
   )
   (lib_symbols
-    (symbol "Connector_Generic:Conn_01x17"
+    (symbol "Connector_Generic:Conn_01x18"
 		(pin_names
 			(offset 1.016)
 			(hide yes)
@@ -31,8 +31,8 @@
 				)
 			)
 		)
-		(property "Value" "Conn_01x17"
-			(at 0 -22.86 0)
+		(property "Value" "Conn_01x18"
+			(at 0 -25.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -57,7 +57,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Generic connector, single row, 01x17, script generated (kicad-library-utils/schlib/autogen/connector/)"
+		(property "Description" "Generic connector, single row, 01x18, script generated (kicad-library-utils/schlib/autogen/connector/)"
 			(at 0 0 0)
 			(effects
 				(font
@@ -84,10 +84,10 @@
 				(hide yes)
 			)
 		)
-		(symbol "Conn_01x17_1_1"
+		(symbol "Conn_01x18_1_1"
 			(rectangle
 				(start -1.27 21.59)
-				(end 1.27 -21.59)
+				(end 1.27 -24.13)
 				(stroke
 					(width 0.254)
 					(type default)
@@ -275,6 +275,17 @@
 			(rectangle
 				(start -1.27 -20.193)
 				(end 0 -20.447)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 -22.733)
+				(end 0 -22.987)
 				(stroke
 					(width 0.1524)
 					(type default)
@@ -582,6 +593,24 @@
 					)
 				)
 				(number "17"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -22.86 0)
+				(length 3.81)
+				(name "Pin_18"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "18"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -2017,16 +2046,16 @@
 		(embedded_fonts no)
 	)
   )
-  (symbol (lib_id "Connector_Generic:Conn_01x17") (at 40.64 55.88 0) (unit 1)
+  (symbol (lib_id "Connector_Generic:Conn_01x18") (at 40.64 55.88 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid a1ea1dbb-bdf3-5e7f-89f0-f44bc8b76825)
     (property "Reference" "U-MCU-RT" (at 40.64 33.02 0) (effects (font (size 1.27 1.27))))
-    (property "Value" "ESP32-S3-Matrix" (at 40.64 78.74 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "ESP32-S3-Matrix" (at 40.64 81.28 0) (effects (font (size 1.27 1.27))))
     (property "Footprint" "" (at 40.64 55.88 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 40.64 55.88 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "U-MCU-RT" (at 40.64 55.88 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Pins" "IO1=1 IO2=2 IO3=3 IO7=4 IO33=5 IO34=6 IO35=7 IO36=8 IO37=9 IO38=10 IO39=11 IO40=12 IO43=13 IO44=14 P3V3=15 P5V=16 GND=17" (at 40.64 55.88 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "On its own carrier board, hung from the oak top (hardware/boards/matrix-carrier; ADR 0021 amendment 2026-10-03), reached from J-MCU by CBL-MCU-RIBBON and the carrier's J-MCU-C; this sheet holds it for its pad-to-pin map, and tools/kicad.py check holds the carrier's HDR-MATRIX pins to these pins. Its own LDO is the instrument's only 3V3. Pins are its two pad rows only: it is programmed and recovered over its own USB-C, with its BOOT and RESET buttons (owner, 2026-10-03), so EN and IO0 are not wired out, and its pad-row 5V and GND carry its supply (TP2 and TP3 are not used) [datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf]. IO2 to IO6 are SPARE (IO5 and IO6 since ADR 0015, IO2 since ADR 0016; IO3 and IO4 have no assignment); IO2 and IO3 reach J-MCU, IO4 to IO6 do not" (at 40.64 55.88 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "IO1=1 IO2=2 IO3=3 IO7=4 IO33=5 IO34=6 IO35=7 IO36=8 IO37=9 IO38=10 IO39=11 IO40=12 IO43=13 IO44=14 P3V3=15 P5V=16 GND=17 IO6=18" (at 40.64 55.88 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "On its own carrier board, hung from the oak top (hardware/boards/matrix-carrier; ADR 0021 amendment 2026-10-03), reached from J-MCU by CBL-MCU-RIBBON and the carrier's J-MCU-C; this sheet holds it for its pad-to-pin map, and tools/kicad.py check holds the carrier's HDR-MATRIX pins to these pins. Its own LDO is the instrument's only 3V3. Pins are its two pad rows only: it is programmed and recovered over its own USB-C, with its BOOT and RESET buttons (owner, 2026-10-03), so EN and IO0 are not wired out, and its pad-row 5V and GND carry its supply (TP2 and TP3 are not used) [datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf]. IO6 and IO2 are the MIDI out pair since issue #37 (ADR 0015 amendment 2026-10-04): IO6 (the tip) reaches J-MCU pin 23 (J-MCU-C pin 2), IO2 (the ring) its own pin 5, and firmware routes UART1 TX to whichever is the current sink (TRS Type A or B, carrier/midi-out). J-MCU pin 24 stays on no net: on the carrier J-MCU-C pin 1 is boxed in by the bus (carrier_routes.py). IO3 reaches J-MCU as a shield; IO4 and IO5 are spare and reach nothing" (at 40.64 55.88 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins_source" "A stand-in: the Matrix is on the lid (on_board no), and its pins are its pads as the ribbon reaches them, numbered in netlist order" (at 40.64 55.88 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Waveshare" (at 40.64 55.88 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "ESP32-S3-Matrix" (at 40.64 55.88 0) (effects (font (size 1.27 1.27)) hide))
@@ -2049,6 +2078,7 @@
     (pin "7" (uuid 406aa374-b83b-525a-ab7b-a0e318858a72))
     (pin "8" (uuid 31e3d271-f18f-5ff9-ac84-dc5a6bff7e63))
     (pin "9" (uuid a86212b8-f846-5423-b1c1-50d8665f81e4))
+    (pin "18" (uuid 2214524d-b427-45f7-a109-104d995c00fd))
     (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/a85e29d2-c931-5bfb-b9d3-d7fa7fbe8a61" (reference "A1") (unit 1))) (project "carrier" (path "/37c35da0-1428-5d60-8327-f4837789ec8d" (reference "U-MCU-RT") (unit 1))))
   )
   (symbol (lib_id "Connector_Generic:Conn_02x12_Odd_Even") (at 40.64 152.4 0) (unit 1)
@@ -2060,7 +2090,7 @@
     (property "Datasheet" "" (at 40.64 152.4 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "J-MCU" (at 40.64 152.4 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 9=9 10=10 11=11 12=12 13=13 14=14 15=15 16=16 17=17 18=18 19=19 20=20 21=21 22=22 23=23 24=24" (at 40.64 152.4 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "The Matrix's ribbon lands here, conductor n on pin n (ADR 0018); its other end is J-MCU-C on the Matrix carrier, pin 25-n (ADR 0021 amendment 2026-10-03). Pins 23 and 24, IO0 and EN until the owner chose to program the Matrix over its own USB-C only (2026-10-03), are on no net. Every fast line has a ground, a supply or a static line on both sides, and pin 9 (GND) separates SCLK (pin 10) from the chain clock (pin 8)" (at 40.64 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "The Matrix's ribbon lands here, conductor n on pin n (ADR 0018); its other end is J-MCU-C on the Matrix carrier, pin 25-n (ADR 0021 amendment 2026-10-03). Pin 23 carries IO6, the MIDI out's tip line, since issue #37 (carrier/midi-out), and pin 5 IO2, its ring line; pin 24 is on no net (it and pin 23 were IO0 and EN until the owner chose to program the Matrix over its own USB-C only, 2026-10-03). IO2 stays between IO1 and IO7 as before: it is static (held high) except while it is the sink, in Type B Every fast line has a ground, a supply or a static line on both sides, and pin 9 (GND) separates SCLK (pin 10) from the chain clock (pin 8)" (at 40.64 152.4 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins_source" "ribbon conductor n on pin n (ADR 0018); odd/even across the two rows as a 2x12 IDC header numbers them" (at 40.64 152.4 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "XKB Connection" (at 40.64 152.4 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "X1270WR-2x12A-9TV01" (at 40.64 152.4 0) (effects (font (size 1.27 1.27)) hide))
@@ -2384,9 +2414,7 @@
     (property "From" "module/power-entry" (at 40.64 287.02 0) (effects (font (size 1.27 1.27)) hide))
     (property "Figure" "dig-gnd-topology" (at 40.64 287.02 0) (effects (font (size 1.27 1.27)) hide)))
   (wire (pts (xy 35.56 38.1) (xy 33.02 38.1)) (stroke (width 0) (type default)) (uuid 1a8f3234-ecee-5a47-b3b8-a2c2f374189a))
-  (label "IO2" (at 33.02 38.1 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid a32f9e3c-42f8-5d37-a9cb-46b2fbfe32e6))
   (wire (pts (xy 35.56 144.78) (xy 33.02 144.78)) (stroke (width 0) (type default)) (uuid ef5913a0-503e-5a04-baf5-2e9fcd9c0b4a))
-  (label "IO2" (at 33.02 144.78 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 5e69ec65-07cc-5ad5-8f61-a88a2606fd2e))
   (wire (pts (xy 35.56 40.64) (xy 33.02 40.64)) (stroke (width 0) (type default)) (uuid 97fd43ed-c878-5c23-bef3-7ac7489d2867))
   (label "IO3" (at 33.02 40.64 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 3873aa2f-a8f1-58f9-b2ad-12d9ec6f6942))
   (wire (pts (xy 35.56 147.32) (xy 33.02 147.32)) (stroke (width 0) (type default)) (uuid 37a27294-fb37-568e-868a-c4a231e59291))
@@ -2419,7 +2447,20 @@
     (property "Figure" "key-pullup-qty" (at 116.84 226.06 0) (effects (font (size 1.27 1.27)) hide)))
   (wire (pts (xy 116.84 237.49) (xy 116.84 241.3)) (stroke (width 0) (type default)) (uuid 52519b6b-0a5d-4b88-a38a-97cb624096fa))
   (label "IO34" (at 116.84 241.3 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid cae2b8e6-22c4-4d40-b269-308f2f52f9d5))
-  (no_connect (at 35.56 167.64) (uuid 9ee43345-d4f5-54b3-8122-444d7cc0b722))
   (no_connect (at 48.26 167.64) (uuid 9ef0d638-1e80-5ab6-8fcf-c7c9dda46bf9))
+  (wire (pts (xy 35.56 167.64) (xy 33.02 167.64)) (stroke (width 0) (type default)) (uuid d1137cae-bb5a-4f0d-ad28-7f6e8ea3d189))
+  (hierarchical_label "IO6" (shape output) (at 33.02 167.64 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 3fa82e42-0051-4810-aede-22e3cfedcd5e)
+    (property "Dir" "out" (at 33.02 167.64 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "carrier/led-strip-drive" (at 33.02 167.64 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 35.56 78.74) (xy 33.02 78.74)) (stroke (width 0) (type default)) (uuid b607b68f-15ab-490e-9208-79f6ebaceaa7))
+  (hierarchical_label "IO6" (shape output) (at 33.02 78.74 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 12153011-565d-490d-94d8-042363f53555)
+    (property "Dir" "out" (at 33.02 78.74 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "carrier/led-strip-drive" (at 33.02 78.74 0) (effects (font (size 1.27 1.27)) hide)))
+  (hierarchical_label "IO2" (shape output) (at 33.02 38.1 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid cef4c3bb-f735-4e0d-9c9b-ce01b7a6cc42)
+    (property "Dir" "out" (at 33.02 38.1 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "carrier/led-strip-drive" (at 33.02 38.1 0) (effects (font (size 1.27 1.27)) hide)))
+  (hierarchical_label "IO2" (shape output) (at 33.02 144.78 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid be4c73de-3b29-45b2-bbc0-ee66a1b70d06)
+    (property "Dir" "out" (at 33.02 144.78 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "carrier/led-strip-drive" (at 33.02 144.78 0) (effects (font (size 1.27 1.27)) hide)))
   (sheet_instances (path "/" (page "1")))
 )

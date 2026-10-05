@@ -11,7 +11,8 @@ board's `J-MCU`, which the Matrix ribbon (`CBL-MCU-RIBBON`) joins.
 > **Status: orderable as a prototype.** Two things are decided with parts in
 > hand, before it is ordered (ADR 0021's *Open* table): which side the
 > Matrix's 5V..IO1 pad row is on with its USB-C toward the mouth, and the
-> extension plug's overmould (`openings.usb_ext_overmold_w`).
+> recovery plug's overmould (`openings.usb_ext_overmold_w`; the tail-face
+> extension it was drawn for is gone since issue #37).
 
 ## Where everything comes from
 
@@ -36,3 +37,4 @@ board's `J-MCU`, which the Matrix ribbon (`CBL-MCU-RIBBON`) joins.
 | Rev | Date | What changed | Where |
 |---|---|---|---|
 | A | 2026-10-03 | First layout, every track by hand (`carrier_routes.py`): a bottom-face bus at 0.7 mm, one ladder of vias onto the top face, 5V, 3V3 and ground on the top face 0.4 mm, PWR_GND poured both faces and stitched. `pcb.py check` passes. Not yet ordered | `matrix-carrier.kicad_pcb`, `layout.yaml`, `carrier_routes.py` |
+| B | 2026-10-04 | IO6, the MIDI out's tip line (issue #37), from J-MCU-C pin 2 straight up the bottom face, a via, and into J2.5 on the top face (`carrier_routes.py`). J-MCU-C pin 1 stays unconnected: the bus boxes it in. `pcb.py check` passes | `matrix-carrier.kicad_pcb`, `carrier_routes.py` |

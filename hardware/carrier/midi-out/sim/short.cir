@@ -1,0 +1,20 @@
+* Shorts at the jack. (1) A line held high, shorted to the sleeve: a mono plug on the
+* ring in Type A for as long as it is in, or either line at idle in a shorted cable.
+* (2) The tip shorted to the ring during a start bit: one gate high, one low.
+XG1 0 g1 MGATE
+XL1 g1 j1 MLINE
+VSH1 j1 0 0
+XG2 0 g2 MGATE
+VONE one 0 1
+XG3 one g3 MGATE
+XL2 g2 j2 MLINE
+XL3 g3 j3 MLINE
+VSH2 j2 j3 0
+.control
+op
+let i_short = i(vsh1)
+let i_tr = i(vsh2)
+print i_short i_tr
+quit
+.endc
+.end

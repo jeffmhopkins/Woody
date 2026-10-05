@@ -362,7 +362,7 @@ rules.
 Span as a setting matters because the sensor's 6 kPa range is roughly twice
 what real playing produces (ADR 0003), so a fixed full-scale mapping would
 leave the top of the display unreachable. The player sets where full brightness
-lands, over the USB configuration interface (ADR 0015), like any other
+lands, in the instrument's configuration (configuration mode, ADR 0015 as amended 2026-10-04), like any other
 per-channel setting.
 
 ## The 8×8 matrix
@@ -375,7 +375,7 @@ run. Facing the player's downward glance, not the audience.
 ### It is a generic assignable surface, defaulting to breath
 
 The same shape as the mod channels in ADR 0006: a **sink with a configurable
-source**, set over the USB configuration interface (ADR 0015) rather than wired
+source**, set in the instrument's configuration (configuration mode, ADR 0015 as amended 2026-10-04) rather than wired
 to one thing.
 
 | | |
@@ -559,7 +559,9 @@ and fall back to the forgiving one only if that proves impossible.
   laminated construction gives it for free (ADR 0009).
 - **A USB-C slot at the tail**, which the instrument needs regardless — flashing
   and USB MIDI both require it in a body that cannot be opened. Keep that edge
-  of the board at the tail face.
+  of the board at the tail face. *(Retired 2026-10-04, issue #37: there is no
+  tail-face USB-C; updates go over the air and MIDI out on a TRS jack, ADR 0015
+  amendment of that date.)*
 
 ## Diffusion is a prototype question
 

@@ -20,3 +20,5 @@ depends_on:
 - refdes:R-SPI-PULL
 - refdes:U-LVLSHIFT
 - circuit:carrier/power-entry-instrument
+- circuit:carrier/midi-out
+- refdes:R-MIDI-PU

@@ -462,6 +462,14 @@ extension carries without a second thought; USB-Serial-JTAG recovery through
 it is unchanged. The body CAD checks the receptacle fits beside the connector
 and reports the cable run (`mechanical/drc.echo`).
 
+> **Retired 2026-10-04 (issue #37; ADR 0015, *Amendment, 2026-10-04*): there is
+> no tail-face USB-C.** Updates are planned over the air in a Wi-Fi
+> configuration mode, and MIDI leaves on a 3.5 mm TRS jack through the oak
+> bottom, in the lane beside the etherCON the receptacle stood in (owner: "on
+> the bottom face"; `hardware/carrier/midi-out/`). The Matrix's own USB-C is a
+> recovery and bench port, reached with the lid off. The tail face carries the
+> etherCON alone.
+
 **And the umbilical connector, which is the reason the tail face is now
 crowded.** *(Since [ADR 0021](0021-pcb-mount-ethercon.md) the instrument's
 etherCON is an NE8FAV: a square flange, a smaller bore, mounted latch up
@@ -554,6 +562,11 @@ why losing the boot-force pins is acceptable:
 
 > **(2026-09-26, [ADR 0015](0015-one-mcu-no-display.md)): no radio, so no OTA.** The first line of defence below is
 > gone; USB-Serial-JTAG is now the first, and this header the second.
+>
+> **(2026-10-04, issue #37, ADR 0015's amendment):** OTA rollback is back as
+> the first line once its firmware exists. USB-Serial-JTAG is through the
+> Matrix's own USB-C with the lid off, because the tail slot is gone, and USB
+> MIDI is not built. `firmware/README.md` has the ladder as it stands.
 
 1. **OTA rollback.** An image that does not mark itself valid is rolled back by
    the bootloader at the next boot. Covers the likely case — a bad flash.
@@ -884,7 +897,7 @@ The ends are separate parts, not extensions of the top or the bottom.
 | End | Material | Why |
 |---|---|---|
 | **Mouthpiece end** | **Acrylic**, with a drilled circle for the tube pass-through | It is the part most likely to want changing. A pass-through diameter that turns out wrong, or a mouthpiece that wants a different mount, is one flat part to re-cut — and acrylic is the material already being cut for the sides |
-| **Tail end** | **Oak**, carrying the etherCON and the USB-C slot (the matrix window is on the top face since 2026-09-26) | So the wood reads as wrapping from the top face around the bottom and up the back, which is the look. And it is the face with the most openings in it, which wants the material that takes a backing plate |
+| **Tail end** | **Oak**, carrying the etherCON (the USB-C slot until issue #37; the matrix window is on the top face since 2026-09-26) | So the wood reads as wrapping from the top face around the bottom and up the back, which is the look. And it is the face with the most openings in it, which wants the material that takes a backing plate |
 
 > **Decided 2026-09-26 (owner): the mouthpiece end is oak**, the same stock
 > as the tail cap - the wood now wraps both ends. The table above is the

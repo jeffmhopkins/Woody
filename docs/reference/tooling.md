@@ -1075,6 +1075,7 @@ so.
 | the breath ADC's anti-alias filter, its time constant, and the MCP3202's sample capacitor against it, at 4 kHz and, as what-ifs, 8 and 16 kHz | `hardware/carrier/breath-adc/sim/` |
 | the instrument's input LC against the buck's negative resistance, and its start from `U-ISO` through the load switch and the cable, cold and hot-plugged | `hardware/carrier/power-entry-instrument/sim/` |
 | the LED row's data line: its edge and `T0H` at the first LED | `hardware/carrier/led-strip-drive/sim/` |
+| the MIDI out's current loop: Type A and B into CA-033's receiver, its edges through 1-3 m of cable, shorts at the jack, the power-on default and the wrong A/B setting | `hardware/carrier/midi-out/sim/` |
 | the module's two 5 V rails at power-on and power-off, and `SYNC` at the DAC between them (TI's SN74AHCT125 model and the DAC8568's IBIS clamp) | `hardware/module/digital-and-supervision/sim/` |
 | the DAC8568's power-on glitch and its 3-state reference, into the pitch and mod jacks | `hardware/module/dac8568/sim/` |
 | the breath link's TVS diodes: CMRR, `PWR_GND` rejection, leakage, in each bandwidth mode | `hardware/interfaces/breath-sense-link/sim/` |
@@ -1100,6 +1101,7 @@ circuit without a `sim/`, the answer was written nowhere.
 | `carrier/breath-excitation-reference` | own | |
 | `carrier/led-strip-drive` | own | |
 | `carrier/power-entry-instrument` | own | |
+| `carrier/midi-out` | own | |
 | `carrier/service-uart` | n/a | A connector, `R-TXD-SER` in series with a UART line and `C-EN` on `EN`: static parts with nothing to simulate against (`EN` and `IO0`'s pulls are the Matrix's own; `C-EN` against `R8` is one RC, τ = 10 ms on the page) |
 | `cluster/key-marker-and-bits` | covered | `hardware/boards/key-board-lh/sim/`: the free bit's `R-KEY-PU` is in the board deck, and `m_free_high` holds it over `V_T+` max with every key open and every key pressed |
 | `cluster/key-register` | covered | `hardware/boards/key-board-lh/sim/` (`U-KEYS`'s inputs against their thresholds) and `hardware/interfaces/key-chain-loom/sim/` (`C-DECOUPLE-165` against `U-KEYS`'s `C_pd` on the rail; `QH` over the ribbon) |
