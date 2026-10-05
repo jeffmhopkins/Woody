@@ -845,7 +845,8 @@ def post_route(path, bdir):
     # wall in gets through by complete's rip-up, layout.yaml rip_up:)
     miss = sorted(unconnected_of(path), key=lambda m: math.dist(m[1], m[2]))
     board = pcbnew.LoadBoard(path)
-    failed = pcb_route.complete(board, lay, miss)
+    # layout.yaml families: family by family (pcb_route.route_families); without it, complete
+    failed = pcb_route.route_families(board, lay, miss)
     print(f"route: complete - {len(miss) - len(failed)} of {len(miss)} connection(s) the autorouter left, routed")
     # tidy on the board as saved, loaded afresh: run in the process that just laid the
     # tracks it took hundreds of them for dangling and left a board KiCad's filler crashed on
@@ -1075,7 +1076,25 @@ def cmd_route(bdir, chunk=30):
         pcbnew.SaveBoard(path, board)
     _fill(path)
     tried = set()
-    while True:
+    if lay.get("families"):
+        # family by family (pcb_route.route_families), each saved, tidied and filled before
+        # the next: a killed run resumes at the first family with a connection still missing
+        allnets = sorted(str(n) for n in pcbnew.LoadBoard(path).GetNetsByName().keys())
+        done = set()
+        for spec, nets in pcb_route.family_plan(lay, allnets):
+            miss = sorted((m for m in unconnected_of(path) if m[0] in nets), key=lambda m: math.dist(m[1], m[2]))
+            board = pcbnew.LoadBoard(path)
+            rec = pcb_route.route_family(board, lay, spec, miss, frozen=set() if spec.get("rip_up") else done)
+            done |= nets
+            if not miss:
+                continue
+            pcbnew.SaveBoard(path, board)
+            board = pcbnew.LoadBoard(path)          # tidy on a fresh load (post_route says why)
+            pcb_route.tidy(board, lay)
+            pcbnew.SaveBoard(path, board)
+            _fill(path)
+            print(f"route: family {spec['name']} - {rec['routed']} of {rec['connections']} routed; saved", flush=True)
+    while not lay.get("families"):
         # route_first: nets a crowded corner needs before its neighbours take the room
         first = {n.lstrip("/") for n in lay.get("route_first") or []}
         miss = sorted((m for m in unconnected_of(path) if (m[0], round(m[1][0], 1), round(m[1][1], 1), round(m[2][0], 1), round(m[2][1], 1)) not in tried),
@@ -1143,7 +1162,7 @@ def cmd_finish(bdir):
         _fill(tmp)
         miss = unconnected_of(tmp)
         board = pcbnew.LoadBoard(tmp)
-        failed = pcb_route.complete(board, lay, miss)
+        failed = pcb_route.route_families(board, lay, miss)
         print(f"route: complete - {len(miss) - len(failed)} of {len(miss)} connection(s) routed")
         pcbnew.SaveBoard(tmp, board)
         board = pcbnew.LoadBoard(tmp)        # tidy on a fresh load (post_route says why)
