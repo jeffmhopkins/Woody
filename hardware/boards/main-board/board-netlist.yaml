@@ -160,6 +160,20 @@ components:
     - 1
     - 2
     sheet: REG-LT
+  C207:
+    of: C-USBOR
+    value: 100nF 50V X7R
+    pins:
+    - 1
+    - 2
+    sheet: power-entry-instrument
+  C208:
+    of: C-USBOR
+    value: 100nF 50V X7R
+    pins:
+    - 1
+    - 2
+    sheet: power-entry-instrument
   C21:
     of: C-KEY
     value: 47nF
@@ -522,13 +536,6 @@ components:
     - A
     - K
     sheet: power-entry-instrument
-  D4:
-    of: D-USBOR
-    value: SS14
-    pins:
-    - A
-    - K
-    sheet: power-entry-instrument
   D5:
     of: D-TVS-BREATH
     value: PESD12VL1BA
@@ -711,6 +718,14 @@ components:
   Q1:
     of: Q-INRUSH
     value: AO3401A
+    pins:
+    - G
+    - S
+    - D
+    sheet: power-entry-instrument
+  Q2:
+    of: Q-USBOR
+    value: DMN3404L
     pins:
     - G
     - S
@@ -1175,6 +1190,17 @@ components:
     - CH4
     - GND
     sheet: midi-out
+  U13:
+    of: U-USBOR
+    value: LM74700-Q1
+    pins:
+    - ANODE
+    - CATHODE
+    - GATE
+    - VCAP
+    - EN
+    - GND
+    sheet: power-entry-instrument
   U2:
     of: U-ADC
     value: MCP3202-CI/SN
@@ -1616,8 +1642,11 @@ nets:
   - FB3.1
   - R50.2
   /power-entry-instrument/BUCK_A_OUT:
+  - C207.2
   - C43.1
-  - D4.A
+  - Q2.S
+  - U13.EN
+  - U13.ANODE
   - U5.OUT
   /power-entry-instrument/INRUSH_GATE:
   - C39.2
@@ -1629,6 +1658,12 @@ nets:
   /power-entry-instrument/INRUSH_MILLER:
   - C40.2
   - R43.1
+  /power-entry-instrument/USBOR_GATE:
+  - Q2.G
+  - U13.GATE
+  /power-entry-instrument/USBOR_VCAP:
+  - C207.1
+  - U13.VCAP
   /service-uart/TXD_HDR:
   - J2.1
   - R46.2
@@ -1727,10 +1762,12 @@ nets:
   INST_5V_A:
   - A1.P5V
   - C12.1
-  - D4.K
+  - C208.1
   - J1.1
   - J1.17
   - J1.3
+  - Q2.D
+  - U13.CATHODE
   - U6.VCC
   INST_POS12:
   - C10.1
@@ -1795,6 +1832,7 @@ nets:
   - C20.2
   - C205.2
   - C206.2
+  - C208.2
   - C21.2
   - C22.2
   - C23.2
@@ -1874,6 +1912,7 @@ nets:
   - U12.GND
   - U12.CH3
   - U12.CH4
+  - U13.GND
   - U5.GND
   - U6.1OE
   - U6.3OE

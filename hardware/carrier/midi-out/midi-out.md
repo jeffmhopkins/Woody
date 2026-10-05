@@ -9,7 +9,8 @@ from TRS a to b, ideally just in firmware"*; *"I think you need it on the
 bottom face, and then just do a connector to the main board instead of
 actually mounting it to PCB"*). **The parts are on the sheet and in the BOM;
 `J-MIDI`, the two resistors, the beads and the TVS are not yet placed on
-`main-board.kicad_pcb`**, which issue #35 has open (*Placement*, below).
+`main-board.kicad_pcb`**, which issue #35 has open (*Placement*, below). **Amended 2026-10-05 (#39):** `R-MIDI` is
+182 Ω 1 % and the rail comes through an ideal-diode OR (*Amendment*, below).
 
 **The sheet:** [`midi-out.sch.png`](midi-out.sch.png) (KiCad:
 [`midi-out.kicad_sch`](midi-out.kicad_sch)) is the SOURCE for this circuit
@@ -37,8 +38,8 @@ The `Dir` and `Peer` columns are defined once in
 
 ```
   ON THE MAIN BOARD                                                 IN THE OAK BOTTOM
-  U-LVLSHIFT gate B (5 V) ── MIDI_TIP_DRV ──[R-MIDI-T 220R]──[FB-MIDI-T 600R@100MHz]──┬── J-MIDI 1 ═╗
-  U-LVLSHIFT gate C (5 V) ── MIDI_RING_DRV ─[R-MIDI-R 220R]──[FB-MIDI-R 600R@100MHz]──┼── J-MIDI 2 ═╬═ CBL-MIDI ═ [J-MIDI-OUT SJ5-43502PM]
+  U-LVLSHIFT gate B (5 V) MIDI_TIP_DRV ──[R-MIDI-T 182R 1%]──[FB-MIDI-T 600R@100MHz]──┬── J-MIDI 1 ═╗
+  U-LVLSHIFT gate C (5 V) MIDI_RING_DRV ─[R-MIDI-R 182R 1%]──[FB-MIDI-R 600R@100MHz]──┼── J-MIDI 2 ═╬═ CBL-MIDI ═ [J-MIDI-OUT SJ5-43502PM]
                                                                          [U-TVS-MIDI SP0504BAHTG]    ║    T = tip, R1 = ring,
   PWR_GND ─────────────────────────────────────────────────────────────────┴── J-MIDI 3 ═╝    R2 + S = sleeve
 ```
@@ -47,7 +48,10 @@ The `Dir` and `Peer` columns are defined once in
 and 220 Ω from the driver to pin 5 (RC), 0.25 W, with optional 1 kΩ-at-100 MHz
 beads at the jack `[ds connectors/MIDI-CA-033-ELECTRICAL-SPEC-UPDATE-2014.pdf p.3]`.
 The two lines here are identical, so each resistor is RA or RC according to
-which line firmware makes the source. The beads are `FB-CHAIN`'s part, 600 Ω
+which line firmware makes the source. **They are 182 Ω 1 %, not 220 Ω 5 %,
+since issue #39** (*Amendment*, below): CA-033's 5 V row assumes an ideal
+driver, and this one has its own resistance, so the row's value is
+re-sized against the gate's short-circuit rating. The beads are `FB-CHAIN`'s part, 600 Ω
 rather than CA-033's example 1 kΩ: they are optional (p.6) and the board then
 carries one bead part number.
 
@@ -76,40 +80,76 @@ The driver: VOH ≥ 3.8 V at −8 mA and VOL ≤ 0.44 V at 8 mA, both at a 4.5 V
 supply `[ds logic/SN74AHCT125.pdf p.4]`, which is about 87.5 Ω sourcing and
 55 Ω sinking `[calc: (4.5 − 3.8) / 8 mA; 0.44 / 8 mA]`.
 
-```
-worst  VCC 4.5 V (CA-033's -10 % floor), opto 1.9 V, all three 220 ohm at +5 % (231 ohm):
-       (4.5 - 1.9) / (87.5 + 231 + 231 + 231 + 55) = 3.11 mA              [calc]
-       CA-033's own 5 V row with an ideal driver: (4.5 - 1.9) / 693 = 3.75 mA   [calc]
-typ    VCC 4.6 V, opto 1.4 V, resistors 220 ohm, driver ~115 ohm in all:
-       (4.6 - 1.4) / (660 + 115) = 4.1 mA; 3.7 mA with a 1.7 V opto          [calc]
-```
+The rail: `INST_5V_A`, **4.625–5.325 V with the rack up** — the buck's
+±6.5 % less the ideal-diode OR's 50 mV at most, both ends asserted by
+`power-entry-instrument/sim`'s `or-rack` (`power-entry-instrument.md`, §1b).
 
-The rail is about 4.5–4.65 V here, because `INST_5V_A` arrives through
-`D-USBOR` `[calc: the buck's 5 V less the SS14's V_F, 0.50 V max at 1 A,
-power-entry-instrument.md]`. **This sits at the low edge of the 5 V row**, and
-CA-033 itself admits its 3.3 V row's 4.47 mA is marginal `[ds p.5]`.
-**What decides it:** an E-test with two real receivers, a 6N138 DIN interface
-through an RP-054 adapter and a TRS-input synth.
+```
+worst  VCC 4.625 V, opto 1.9 V, R-MIDI 182 ohm at +1 % (183.8), the receiver's 220 at +5 % (231):
+       (4.625 - 1.9) / (87.5 + 183.8 + 183.8 + 231 + 55) = 3.68 mA        [calc]
+       CA-033's own 5 V row with an ideal driver: (4.5 - 1.9) / 693 = 3.75 mA   [calc]
+typ    VCC 4.98 V, opto 1.4 V, resistors at value, driver ~115 ohm in all:
+       (4.98 - 1.4) / (182 + 182 + 220 + 115) = 5.1 mA; 4.7 mA with a 1.7 V opto   [calc]
+```
 
 **Simulated** ([`sim/`](sim/sims.yaml), `type-a` and `type-b`, every corner of
-VCC 4.5–5.25 V, both gate resistances, R-MIDI and the receiver's 220 Ω at
-±5 %, the opto at 1.4–1.9 V and 1–3 m of cable): the worst corner is this
-arithmetic's to within 1 %, the loop current's edges stay well under CA-033's
-2 µs, and Type B is Type A to the last digit, as the symmetric loop says it
-must. **Recorded, not asserted, because it does not pass:** the worst corner
-is below CA-033's own 5 V transmitter at *its* worst corner (3.75 mA, above)
-and below the PC900V's 4 mA worst-case need `[ds p.4]`. The nominal is above
-both. CA-033 states no minimum for a transmitter, only that a receiver must
-turn on with under 5 mA `[ds p.2]`; the E-test above decides it. **Accepted
-by the owner** (2026-10-05, chat), asked whether to add a stronger driver:
-"Agreed" — no buffer; the two-receiver E-test stands, and a failure there is a
-part swap on the main board (a lower-impedance driver with TTL inputs and the
-resistors re-sized against its short-circuit rating), not a redesign.
+VCC 4.625–5.325 V, both gate resistances, R-MIDI at ±1 %, the receiver's
+220 Ω at ±5 %, the opto at 1.4–1.9 V and 1–3 m of cable): the worst corner is
+**3.69 mA**, the nominal 5.14 mA and the strongest 6.24 mA; the
+arithmetic above to within 0.5 %; the loop current's edges stay well under
+CA-033's 2 µs, and Type B is Type A to the last digit, as the symmetric loop
+says it must. **Recorded, not asserted, because it still does not pass:** the
+worst corner is up from 3.11 mA with the SS14 and 220 Ω 5 %, but still below
+CA-033's own 5 V transmitter at *its* worst corner (3.75 mA, above) and the
+PC900V's 4 mA worst-case need `[ds p.4]`. The nominal is above both. CA-033
+states no minimum for a transmitter, only that a receiver must turn on with
+under 5 mA `[ds p.2]`. **What decides it:** an E-test with two real
+receivers, a 6N138 DIN interface through an RP-054 adapter and a TRS-input
+synth. **Accepted by the owner** (2026-10-05, chat), asked whether to add a
+stronger driver: "Agreed" — no buffer; the two-receiver E-test stands, and a
+failure there is a part swap on the main board (a lower-impedance driver
+with TTL inputs and the resistors re-sized against its short-circuit
+rating), not a redesign.
 
-**Why not lower resistors.** At 150 Ω each the worst case is 3.78 mA, but a
-line shorted to the sleeve then draws 5.0 / 142.5 = 35 mA `[calc]`, past the
-gate's ±25 mA absolute maximum `[ds SN74AHCT125.pdf p.3]`. 220 Ω keeps it at
-5.0 / 209 = 23.9 mA and 0.12 W `[calc, at the −5 % resistor]`.
+**On USB alone** (the bench) the rail is `VBUS` less the Matrix's `D1`,
+4.2–4.3 V (`power-entry-instrument.md`, §1b), and the loop is weaker again;
+that is not a playing configuration (no breath on USB alone, the same page).
+
+**Why not lower resistors.** The resistors are sized to the gate's ±25 mA
+absolute maximum `[ds SN74AHCT125.pdf p.3]` with a line shorted to the
+sleeve, at the strongest corner: the rail's 5.325 V ceiling, the resistor at
+−1 %, and the gate's own resistance at its minimum — 35 Ω, half its 25 °C
+figure `[assumption: the datasheet gives no minimum]`:
+
+```
+5.325 / (0.99 R + 35) < 25 mA   ->   R > (213 - 35) / 0.99 = 179.8 ohm     [calc]
+E96: 182 ohm. 5.325 / (180.2 + 35) = 24.7 mA, 0.11 W in the resistor       [calc]
+     (180 ohm, E24: 24.98 mA, 0.1 % inside - too close to call; 182 at 5 %
+     would be 25.6 mA)
+```
+
+It leans on that assumed minimum: with an ideal driver the same short is
+5.325 / 180.2 = 29.5 mA `[calc]`. The 220 Ω it replaces held 23.9 mA with an
+ideal driver at 5.0 V. Both lines shorted at once put 2 × 24.7 = 49.5 mA
+through the package's `VCC`, inside its 50 mA `[ds p.3]` by 1 %
+(`sim/`, `shorts`, asserts both).
+
+## Amendment, 2026-10-05 — more loop current (issue #39)
+
+The worst corner was 3.11 mA, below CA-033's own reference transmitter at its
+worst corner (3.75 mA). Asked whether to tighten `R-MIDI` to 1 % and replace
+`D-USBOR`'s Schottky with an ideal-diode OR, the owner: *"Let's go both, that
+seems the best way to ensure we're good"* (chat, 2026-10-05).
+
+- **The rail:** `U-USBOR` (LM74700-Q1) and `Q-USBOR` (DMN3404L) replace the
+  SS14 (`power-entry-instrument.md`, §1b). `INST_5V_A` is 4.625–5.325 V with
+  the rack up, from about 4.5–4.65 V.
+- **The resistors:** 182 Ω 1 %, sized to that ceiling (*Why not lower
+  resistors*, above).
+- **The result:** the worst corner is 3.69 mA, up from 3.11 mA — **still
+  under 3.75 mA**, so it stays recorded, not asserted, and the E-test above
+  still decides. What is left between the two is the driver's own ~140 Ω
+  and the rail's 4.625 V floor against CA-033's 4.5 V with none.
 
 ## Type A and Type B, in firmware
 
@@ -162,18 +202,18 @@ GPIO0, 3, 45 and 46 `[ds ESP32-S3-datasheet-v2.2.pdf p.32]`.
 
 ## Protection
 
-- **A short of either line to the sleeve:** 23.9 mA with an ideal driver,
-  inside the gate's rating (above); 21.5 mA at 5.25 V with the gate's own
-  resistance at its assumed minimum `[sim: shorts]`, and both lines shorted
-  at once stay inside the package's 50 mA through VCC `[ds SN74AHCT125.pdf p.3]`. A mono plug does exactly this to the ring for as long as it
+- **A short of either line to the sleeve:** 24.7 mA at 5.325 V with the
+  gate's own resistance at its assumed minimum `[sim: shorts]`, inside the
+  gate's 25 mA (above), and both lines shorted at once stay inside the
+  package's 50 mA through VCC `[ds SN74AHCT125.pdf p.3]`. A mono plug does exactly this to the ring for as long as it
   is in.
-- **Shorted to each other:** one gate high and one low, 5.0 / (2 × 209) =
-  12 mA `[calc]`.
+- **Shorted to each other:** one gate high and one low, 12.7 mA at the
+  strongest corner `[sim: shorts]`.
 - **The wrong A/B setting:** the start bit reverse-biases the receiver's LED,
   and its D1 clamps it to about 0.68 V; the loop runs through D1 at under
-  7 mA `[sim: wrong-ab]`. No damage, no data.
+  8 mA `[sim: wrong-ab]`. No damage, no data.
 - **A DC-coupled headphone driver on the jack**, RP-054's named case
-  `[ds RP-054 p.1]`: the 220 Ω limits it the same way.
+  `[ds RP-054 p.1]`: `R-MIDI` limits it the same way.
 - **ESD:** `U-TVS-MIDI` at `J-MIDI`, CH1 the tip and CH2 the ring.
 - **Ground:** the sleeve is `PWR_GND`. A MIDI receiver's input is
   opto-isolated, and its pin 2 has no DC path to its ground `[ds CA-033 p.3]`.
@@ -238,7 +278,7 @@ outlines, and nothing stands over it but the Matrix carrier
 
 | Ref | Value | Job | Confidence |
 |---|---|---|---|
-| `R-MIDI-T`, `R-MIDI-R` | 220 Ω 5 % 0.25 W, 1206 | RA/RC, either way round | `[ds CA-033 p.3]`; LCSC code open |
+| `R-MIDI-T`, `R-MIDI-R` | 182 Ω 1 % 0.25 W, 1206 (UNI-ROYAL 1206W4F1820T5E, LCSC C247358) | RA/RC, either way round; **1 %, never 5 %** | `[ds CA-033 p.3]`, `[calc]`, `[sim]` |
 | `FB-MIDI-T`, `FB-MIDI-R` | 600 Ω @ 100 MHz | CA-033's optional RF beads | `FB-CHAIN`'s part |
 | `U-TVS-MIDI` | SP0504BAHTG | ESD at the header | `U-TVS-CHAIN`'s part |
 | `J-MIDI` | JST B3B-PH-SM4-TB | The lead's header, surface mount: no tails over the bottom plate | `[from memory]` until JST's drawing is banked; LCSC code open |

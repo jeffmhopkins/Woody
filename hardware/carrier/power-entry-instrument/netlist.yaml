@@ -20,14 +20,14 @@ ports:
     dir: ref
     from: module/power-entry
     figure: umbilical-pinmap
-  INST_5V_A:
-    dir: out
-    to: carrier/led-strip-drive
-    figure: matrix-led-current
   AGND_INST:
     dir: ref
     from: carrier/power-entry-instrument
     figure: dig-gnd-topology
+  INST_5V_A:
+    dir: out
+    to: carrier/led-strip-drive
+    figure: matrix-led-current
 components:
   C-BUCK-IN:
     value: 100uF
@@ -43,7 +43,7 @@ components:
     - 2
     note: 'D1 (owner, 2026-10-03: ''10 ohm + 22 uF + 10 uF''): RECOM''s standard-application output capacitor, a
       10 uF MLCC at U-BUCK-A''s OUT pin (R-78E5.0-1.0 datasheet p.I-4), returned to its GND pin. It lowers the converter''s
-      ripple at its source, ahead of D-USBOR-A. Well inside the part''s 220 uF capacitive-load limit'
+      ripple at its source, ahead of U-USBOR and Q-USBOR. Well inside the part''s 220 uF capacitive-load limit'
   C-INRUSH-GD:
     value: 22nF 50V X7R
     pins:
@@ -103,6 +103,22 @@ components:
       PWM steps its whole current at once, and each LED''s own 100 nF (C-LED) takes only the edges (ADR 0028). Two
       6.3 x 7.7 polymer cans, not one 10 x 10 electrolytic, so the bulk stands 7.7 mm, not 10.2, in the LEDs'' cone
       (#19): 440 uF and 14 mohm together [ds JIERR-MA-SERIES-MA25V220M6X8.pdf p.3]'
+  C-USBOR-CAP:
+    of: C-USBOR
+    value: 100nF 50V X7R
+    pins:
+    - 1
+    - 2
+    note: 'U-USBOR''s charge-pump capacitor, VCAP to ANODE: 0.1 uF minimum and at least 10 x Q-USBOR''s Ciss (498
+      pF) [TI-LM74700-Q1.pdf p.17]. Sees up to 13.9 V'
+  C-USBOR-OUT:
+    of: C-USBOR
+    value: 100nF 50V X7R
+    pins:
+    - 1
+    - 2
+    note: 'U-USBOR''s CATHODE capacitor, 0.1 uF minimum [TI-LM74700-Q1.pdf p.5, p.17], at the controller: the Matrix''s
+      own 5 V capacitors are across the ribbon. (C-BUCK-OUT is its ANODE capacitor, 22 nF minimum)'
   D-INRUSH-RST:
     value: 1N4148W
     pins:
@@ -125,13 +141,6 @@ components:
     - A
     - K
     note: Across the power pair
-  D-USBOR-A:
-    of: D-USBOR
-    value: SS14
-    pins:
-    - A
-    - K
-    note: 'Between the buck and the dev board''s 5V pin: the OR node is that pin, and USB can back-feed it'
   L-BUCK-IN:
     value: 22uH
     pins:
@@ -155,6 +164,15 @@ components:
       diode points back at the connector, so nothing charges C-STRIP-BULK or C-BUCK-IN except through the channel,
       and the channel opens only as fast as C-INRUSH-GD lets the drain rise (power-entry-instrument.md, Hot-plug
       inrush). V_GS is +/-12 V max: the 1:1 divider holds it at half the input'
+  Q-USBOR:
+    value: DMN3404L
+    pins:
+    - G
+    - S
+    - D
+    note: 'The OR''s pass FET: source on BUCK_A_OUT, drain on INST_5V_A, so its body diode points the way D-USBOR
+      did and blocks when U-USBOR holds the gate off. 28 mohm max at VGS 10 V; the gate sees 10.8-13.9 V from U-USBOR''s
+      charge pump, inside its +/-20 V'
   R-INRUSH-G:
     value: 1M 1%
     pins:
@@ -186,14 +204,30 @@ components:
     - GND
     note: 'The one buck: the real-time board, the 8x8 matrix and the 74AHCT125. Loaded to 68-78 percent of its 1
       A rating inside a body running 10-20 K above ambient'
+  U-USBOR:
+    value: LM74700-Q1
+    pins:
+    - ANODE
+    - CATHODE
+    - GATE
+    - VCAP
+    - EN
+    - GND
+    note: 'Ideal-diode controller for the 5 V OR (issue #39, owner 2026-10-05): drives Q-USBOR so the buck''s 5
+      V reaches INST_5V_A 20 mV down instead of an SS14''s 0.5 V, and turns it off when INST_5V_A is above BUCK_A_OUT
+      (the Matrix''s USB-C 5 V through its D1), so neither source back-feeds the other. EN tied to ANODE: always
+      on'
 nets:
   AGND_INST:
   - port: AGND_INST
   - NT-AGND.1
   BUCK_A_OUT:
   - C-BUCK-OUT.1
-  - D-USBOR-A.A
+  - C-USBOR-CAP.2
+  - Q-USBOR.S
   - U-BUCK-A.OUT
+  - U-USBOR.EN
+  - U-USBOR.ANODE
   INRUSH_GATE:
   - C-INRUSH-GD.1
   - C-INRUSH-GS.2
@@ -206,7 +240,9 @@ nets:
   - R-INRUSH-GD.1
   INST_5V_A:
   - port: INST_5V_A
-  - D-USBOR-A.K
+  - C-USBOR-OUT.1
+  - Q-USBOR.D
+  - U-USBOR.CATHODE
   INST_POS12:
   - port: INST_POS12
   - C-STITCH-12V-1.1
@@ -226,12 +262,14 @@ nets:
   - C-STITCH-12V-3.2
   - C-STRIP-BULK-1.2
   - C-STRIP-BULK-2.2
+  - C-USBOR-OUT.2
   - D-INRUSH-RST.A
   - D-REVSHUNT.A
   - D-TVS-PWR.A
   - NT-AGND.2
   - R-INRUSH-G.2
   - U-BUCK-A.GND
+  - U-USBOR.GND
   UMBILICAL_POS12:
   - port: UMBILICAL_POS12
   - C-INRUSH-GS.1
@@ -239,6 +277,12 @@ nets:
   - D-TVS-PWR.K
   - Q-INRUSH.S
   - R-INRUSH-GS.1
+  USBOR_GATE:
+  - Q-USBOR.G
+  - U-USBOR.GATE
+  USBOR_VCAP:
+  - C-USBOR-CAP.1
+  - U-USBOR.VCAP
   BUCK_IN:
   - C-BUCK-IN.1
   - L-BUCK-IN.2

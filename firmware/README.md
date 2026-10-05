@@ -235,7 +235,8 @@ Pins: `SCK` IO38, `SH/LD` IO7, chain-end `SER` IO33, `QH` IO40.
 - **Cap the matrix while a USB host is attached** (owner, 2026-10-03, #18
   E1: "Firmware cap"). Since issue #37 that is the Matrix's own USB-C, on the
   bench or with the lid off. With the rack up and USB plugged in, the Matrix's
-  `VCC_5V` is fed from both the buck (through `D-USBOR`) and `VBUS` (through
+  `VCC_5V` is fed from both the buck (through the ideal-diode OR, `U-USBOR`
+  and `Q-USBOR`, since #39) and `VBUS` (through
   the Matrix's own `D1`, a B5819WS), and tens of millivolts decide which
   carries it: at the corners all of it comes through `D1`
   (`power-entry-instrument.md`, *Rack and USB together*). So whenever the

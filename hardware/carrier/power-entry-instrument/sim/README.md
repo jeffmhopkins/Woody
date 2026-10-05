@@ -46,6 +46,7 @@ put `V_GS` at 16.5 V with the output at 12 V.)
 | `supply-replug-late` | `replug-late` with U-ISO at ±3.1 % | `J-UMB` 14.10 V, `INST_POS12` 12.21 V at most; U-ISO under 0.53 A |
 | `led-pwm` | the LED row's PWM (in phase, half duty, 2/3/3.39/4 kHz, 0.195 A — every LED, thirteen — and 0.367 A swing) on the input LC, 136 runs | `BUCK_IN` ripple **21–140 mV p-p**, never below **11.23 V**; `INST_POS12` ripple 17–145 mV p-p, never above **12.34 V** |
 | `led-pwm-matrix` | the same with the buck's input power swinging 3.08 W in phase (the Matrix from typical play to the 5 V rail's clamp-legal worst), 68 runs | `BUCK_IN` ripple up to **0.96 V p-p** at `C-BUCK-IN`'s 120 Hz ESR maximum, never below **10.70 V** — 2.7 V over the R-78E5.0's 8 V minimum; `INST_POS12` at most 12.29 V |
+| `or-rack`, `or-both`, `or-usb-unplug`, `or-rack-loss` | the 5 V OR (#39): `U-USBOR` (LM74700-Q1, behavioural from its datasheet) and `Q-USBOR` (DMN3404L, level 1) between the buck and `INST_5V_A`, against the Matrix's `VBUS` through `D1` (B5819WS); deck `pei-or.cir`. The or- tolerance ranges ride on each sim's `tol:`, not in `vary:` (the assertions' environment takes the product of every `vary:` entry) | the results are tabled in `power-entry-instrument.md` §1b, which owns them |
 
 **The LT1641's fault `TIMER` on the circuit as built** (`timer_peak`, since #5
 finding 3 moved `C-TIMER-LOADSW`'s sizing check here from

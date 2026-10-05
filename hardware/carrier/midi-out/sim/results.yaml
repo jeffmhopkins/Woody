@@ -4,8 +4,8 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/carrier/midi-out/sim/sims.yaml: 7f9d685ee8c991b0
-  hardware/carrier/midi-out/netlist.yaml: e8588ca63e3f25de
+  hardware/carrier/midi-out/sim/sims.yaml: e48712898bfb62b3
+  hardware/carrier/midi-out/netlist.yaml: 19915f9a9ed41460
   hardware/carrier/led-strip-drive/netlist.yaml: e4c3ffbbe5c48f52
   hardware/carrier/midi-out/sim/loop-a.cir: aff2c845cbfc661b
   hardware/carrier/midi-out/sim/loop-b.cir: 6253d59c6fa9f8bb
@@ -14,51 +14,52 @@ inputs:
   hardware/carrier/midi-out/sim/power-on.cir: bfe7ee8258b4e92a
   hardware/carrier/midi-out/sim/midi.lib: 1ba78729f96f2c10
   datasheets/discrete-and-power/BLM21SP601SN1-murata-spice.lib: e858b365fef2f77b
-  bom:R-MIDI: 220R 5% 0.25W
+  bom:R-MIDI: 182R 1% 0.25W
 ngspice: '42'
 sims:
   type-a:
     corners: 129
     measures:
       i_on:
-        nominal: 0.00464615
-        min: 0.00313691
+        nominal: 0.00514343
+        min: 0.00369303
         min_at: R-MIDI+ len+ r_rx+ r_snk+ r_src+ vcc- vf+
-        max: 0.00561231
+        max: 0.00623898
         max_at: R-MIDI- len- r_rx- r_snk- r_src- vcc+ vf-
       i_idle:
-        nominal: 1.85373e-10
-        min: 5.26255e-13
-        min_at: R-MIDI+ len- r_rx- r_snk+ r_src- vcc- vf+
-        max: 3.61553e-10
-        max_at: R-MIDI- len- r_rx- r_snk- r_src- vcc+ vf-
+        nominal: 2.02591e-10
+        min: 3.97173e-12
+        min_at: R-MIDI+ len+ r_rx+ r_snk- r_src- vcc+ vf+
+        max: 3.54522e-10
+        max_at: R-MIDI+ len- r_rx- r_snk- r_src+ vcc+ vf-
       t_rise:
-        nominal: 7.14881e-08
-        min: 2.51329e-08
+        nominal: 6.54417e-08
+        min: 2.57678e-08
         min_at: R-MIDI- len- r_rx+ r_snk- r_src+ vcc- vf+
-        max: 1.48808e-07
+        max: 1.2623e-07
         max_at: R-MIDI+ len+ r_rx+ r_snk+ r_src- vcc- vf+
       t_fall:
-        nominal: 2.97222e-08
-        min: 1.50208e-08
-        min_at: R-MIDI+ len- r_rx- r_snk+ r_src- vcc- vf+
-        max: 4.03724e-08
+        nominal: 2.9756e-08
+        min: 1.59463e-08
+        min_at: R-MIDI- len- r_rx- r_snk+ r_src- vcc- vf+
+        max: 4.01625e-08
         max_at: R-MIDI+ len+ r_rx+ r_snk- r_src+ vcc+ vf-
       width_err:
-        nominal: -5.24241e-09
-        min: -2.02673e-08
+        nominal: -4.8479e-09
+        min: -1.8116e-08
         min_at: R-MIDI+ len+ r_rx- r_snk+ r_src- vcc+ vf-
-        max: 3.82888e-09
+        max: 3.70745e-09
         max_at: R-MIDI+ len- r_rx+ r_snk- r_src+ vcc- vf+
     asserts:
     - expr: abs(min['i_on'] / p['i_worst_calc'] - 1) < 0.03
-      why: 'the simulated worst corner is midi-out.md''s worst-case arithmetic, (4.5 - 1.9) / (87.5 + 3 x 231 + 55) = 3.11
-        mA, to within 3 % (the LED''s forward voltage falls ~25 mV below 1.9 V at 3 mA, the bead adds its DC resistance).
-        The page''s figure is the circuit''s. It is BELOW CA-033''s own 5 V transmitter at its own worst corner (i_ca033_worst,
-        3.75 mA) and the PC900V''s 4 mA (i_pc900): recorded in midi-out.md, not asserted, because it does not pass'
+      why: 'the simulated worst corner is midi-out.md''s worst-case arithmetic, (4.625 - 1.9) / (87.5 + 2 x 183.8 + 231 +
+        55) = 3.68 mA, to within 3 % (the LED''s forward voltage falls ~15 mV below 1.9 V at 3.7 mA, the bead adds its DC
+        resistance). The page''s figure is the circuit''s. It is still BELOW CA-033''s own 5 V transmitter at its own worst
+        corner (i_ca033_worst, 3.75 mA) and the PC900V''s 4 mA (i_pc900): recorded in midi-out.md, not asserted, because it
+        does not pass'
       pass: true
     - expr: max['i_on'] < p['i_abs']
-      why: the source gate's current at the strongest corner (5.25 V, the strong part, -5 % resistors, a 1.4 V LED) stays
+      why: the source gate's current at the strongest corner (5.325 V, the strong part, -1 % resistors, a 1.4 V LED) stays
         inside the 74AHCT125's 25 mA continuous rating [ds p.3]
       pass: true
     - expr: max['i_idle'] < 1.0e-6
@@ -77,44 +78,45 @@ sims:
     corners: 129
     measures:
       i_on:
-        nominal: 0.00464615
-        min: 0.00313691
+        nominal: 0.00514343
+        min: 0.00369303
         min_at: R-MIDI+ len+ r_rx+ r_snk+ r_src+ vcc- vf+
-        max: 0.00561231
+        max: 0.00623898
         max_at: R-MIDI- len- r_rx- r_snk- r_src- vcc+ vf-
       i_idle:
-        nominal: 1.8537e-10
-        min: 5.3336e-13
-        min_at: R-MIDI+ len- r_rx- r_snk+ r_src- vcc- vf+
-        max: 3.61553e-10
-        max_at: R-MIDI- len- r_rx- r_snk- r_src- vcc+ vf-
+        nominal: 2.02587e-10
+        min: 3.97091e-12
+        min_at: R-MIDI+ len+ r_rx+ r_snk- r_src- vcc+ vf+
+        max: 3.54522e-10
+        max_at: R-MIDI+ len- r_rx- r_snk- r_src+ vcc+ vf-
       t_rise:
-        nominal: 7.14881e-08
-        min: 2.51329e-08
+        nominal: 6.54417e-08
+        min: 2.57678e-08
         min_at: R-MIDI- len- r_rx+ r_snk- r_src+ vcc- vf+
-        max: 1.48808e-07
+        max: 1.2623e-07
         max_at: R-MIDI+ len+ r_rx+ r_snk+ r_src- vcc- vf+
       t_fall:
-        nominal: 2.97222e-08
-        min: 1.50208e-08
-        min_at: R-MIDI+ len- r_rx- r_snk+ r_src- vcc- vf+
-        max: 4.03724e-08
+        nominal: 2.9756e-08
+        min: 1.59463e-08
+        min_at: R-MIDI- len- r_rx- r_snk+ r_src- vcc- vf+
+        max: 4.01625e-08
         max_at: R-MIDI+ len+ r_rx+ r_snk- r_src+ vcc+ vf-
       width_err:
-        nominal: -5.24241e-09
-        min: -2.02673e-08
+        nominal: -4.8479e-09
+        min: -1.8116e-08
         min_at: R-MIDI+ len+ r_rx- r_snk+ r_src- vcc+ vf-
-        max: 3.82888e-09
+        max: 3.70745e-09
         max_at: R-MIDI+ len- r_rx+ r_snk- r_src+ vcc- vf+
     asserts:
     - expr: abs(min['i_on'] / p['i_worst_calc'] - 1) < 0.03
-      why: 'the simulated worst corner is midi-out.md''s worst-case arithmetic, (4.5 - 1.9) / (87.5 + 3 x 231 + 55) = 3.11
-        mA, to within 3 % (the LED''s forward voltage falls ~25 mV below 1.9 V at 3 mA, the bead adds its DC resistance).
-        The page''s figure is the circuit''s. It is BELOW CA-033''s own 5 V transmitter at its own worst corner (i_ca033_worst,
-        3.75 mA) and the PC900V''s 4 mA (i_pc900): recorded in midi-out.md, not asserted, because it does not pass'
+      why: 'the simulated worst corner is midi-out.md''s worst-case arithmetic, (4.625 - 1.9) / (87.5 + 2 x 183.8 + 231 +
+        55) = 3.68 mA, to within 3 % (the LED''s forward voltage falls ~15 mV below 1.9 V at 3.7 mA, the bead adds its DC
+        resistance). The page''s figure is the circuit''s. It is still BELOW CA-033''s own 5 V transmitter at its own worst
+        corner (i_ca033_worst, 3.75 mA) and the PC900V''s 4 mA (i_pc900): recorded in midi-out.md, not asserted, because it
+        does not pass'
       pass: true
     - expr: max['i_on'] < p['i_abs']
-      why: the source gate's current at the strongest corner (5.25 V, the strong part, -5 % resistors, a 1.4 V LED) stays
+      why: the source gate's current at the strongest corner (5.325 V, the strong part, -1 % resistors, a 1.4 V LED) stays
         inside the 74AHCT125's 25 mA continuous rating [ds p.3]
       pass: true
     - expr: max['i_idle'] < 1.0e-6
@@ -133,22 +135,22 @@ sims:
     corners: 17
     measures:
       i_short:
-        nominal: 0.0172383
-        min: 0.0141265
+        nominal: 0.0198373
+        min: 0.0170431
         min_at: R-MIDI+ r_snk- r_src+ vcc-
-        max: 0.0215119
+        max: 0.0247409
         max_at: R-MIDI- r_snk- r_src- vcc+
       i_tr:
-        nominal: 0.00900735
-        min: 0.00744292
+        nominal: 0.0104362
+        min: 0.00906434
         min_at: R-MIDI+ r_snk+ r_src+ vcc-
-        max: 0.0110386
+        max: 0.0127404
         max_at: R-MIDI- r_snk- r_src- vcc+
     asserts:
     - expr: max['i_short'] < p['i_abs']
       why: 'a line held high and shorted to the sleeve (a mono plug on the ring in Type A, for as long as it is in) stays
-        inside the 74AHCT125''s 25 mA continuous output rating [ds p.3] at the strongest corner: 5.25 V, R-MIDI at -5 %, the
-        gate''s resistance at its assumed minimum'
+        inside the 74AHCT125''s 25 mA continuous output rating [ds p.3] at the strongest corner: 5.325 V, R-MIDI at -1 %,
+        the gate''s resistance at its assumed minimum. THE CORNER R-MIDI WAS SIZED AT (midi-out.md, Why not lower resistors)'
       pass: true
     - expr: max['i_tr'] < p['i_abs']
       why: 'the tip shorted to the ring during a start bit, one gate high and one low through both R-MIDI: half a short to
@@ -158,7 +160,7 @@ sims:
       why: 'both lines high into a dead short at idle: the package''s VCC pin carries both, inside its 50 mA [ds p.3]. Gate
         A drives LED_DI''s CMOS inputs and gate D is unused (led-strip-drive''s netlist): no DC beside them'
       pass: true
-    - expr: max['i_short'] ** 2 * 1.05 * p['R-MIDI'] < p['p_r_max']
+    - expr: max['i_short'] ** 2 * 1.01 * p['R-MIDI'] < p['p_r_max']
       why: R-MIDI's dissipation in that short, the largest current into the largest resistance (conservative), inside its
         0.25 W
       pass: true
@@ -166,22 +168,22 @@ sims:
     corners: 65
     measures:
       v_led_fwd:
-        nominal: 5.47403e-07
-        min: 7.55713e-09
-        min_at: R-MIDI+ len+ r_rx+ r_snk- r_src+ vcc-
-        max: 5.19809e-06
-        max_at: R-MIDI- len- r_rx- r_snk- r_src- vcc+
+        nominal: 7.24067e-10
+        min: 7.24067e-10
+        min_at: nominal
+        max: 5.6093e-06
+        max_at: R-MIDI+ len- r_rx+ r_snk+ r_src- vcc-
       v_led_rev:
-        nominal: -0.667099
-        min: -0.675601
-        min_at: R-MIDI- len- r_rx- r_snk- r_src- vcc+
-        max: -0.65697
+        nominal: -0.672701
+        min: -0.680957
+        min_at: R-MIDI- len+ r_rx- r_snk- r_src- vcc+
+        max: -0.664703
         max_at: R-MIDI+ len+ r_rx+ r_snk+ r_src+ vcc-
       i_rev:
-        nominal: 0.00578239
-        min: 0.00468039
+        nominal: 0.00647182
+        min: 0.00550375
         min_at: R-MIDI+ len+ r_rx+ r_snk+ r_src+ vcc-
-        max: 0.00694743
+        max: 0.00772259
         max_at: R-MIDI- len- r_rx- r_snk- r_src- vcc+
     asserts:
     - expr: max['v_led_fwd'] < 0.5
@@ -206,16 +208,16 @@ sims:
         max: 2.84016
         max_at: R-MIDI-PU- dev_3v3+ g_r- g_t-
       i_hold:
-        nominal: 3.55271e-15
-        min: 1.19602e-15
+        nominal: 3.25588e-15
+        min: 0.0
         min_at: R-MIDI-PU- dev_3v3- g_r- g_t-
-        max: 7.07598e-10
-        max_at: R-MIDI-PU+ dev_3v3+ g_r+ g_t-
+        max: 3.12318e-10
+        max_at: R-MIDI-PU- dev_3v3+ g_r+ g_t-
       w_fwd:
         nominal: 0.0
         min: 0.0
         min_at: nominal
-        max: 1.20441e-05
+        max: 1.20459e-05
         max_at: R-MIDI-PU+ dev_3v3+ g_r- g_t+
     asserts:
     - expr: min['v_in_min'] > p['vih']

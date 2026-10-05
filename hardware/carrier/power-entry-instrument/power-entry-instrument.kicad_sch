@@ -15,6 +15,414 @@
     (comment 4 "Ports are hierarchical labels (Dir, From/To, Figure); the main board places this sheet")
   )
   (lib_symbols
+    (symbol "Power_Management:LM74700"
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "U"
+			(at -9.525 -8.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LM74700"
+			(at 7.62 -8.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23-6"
+			(at -9.525 -8.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "http://www.ti.com/lit/gpn/LM74700-Q1"
+			(at -9.525 -8.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Low Iq reverse battery protection ideal diode controller, SOT-23-6"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "ideal-diode or-ing"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "SOT?23*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "LM74700_0_1"
+			(rectangle
+				(start -10.16 7.62)
+				(end 10.16 -7.62)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+		)
+		(symbol "LM74700_1_1"
+			(pin passive line
+				(at -12.7 -2.54 0)
+				(length 2.54)
+				(name "VCAP"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -12.7 -5.08 0)
+				(length 2.54)
+				(name "EN"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at -7.62 10.16 270)
+				(length 2.54)
+				(name "ANODE"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "6"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin output line
+				(at 0 10.16 270)
+				(length 2.54)
+				(name "GATE"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at 0 -10.16 90)
+				(length 2.54)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at 7.62 10.16 270)
+				(length 2.54)
+				(name "CATHODE"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Transistor_FET:DMN3404L"
+        (property "ki_fp_filters" "SOT?23*"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (pin_names
+          (offset 0)
+          (hide yes))
+        (exclude_from_sim no)
+        (in_bom yes)
+        (on_board yes)
+        (property "Reference" "Q"
+          (at 5.08 1.905 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (justify left)))
+        (property "Value" "DMN3404L"
+          (at 5.08 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (justify left)))
+        (property "Footprint" "Package_TO_SOT_SMD:SOT-23"
+          (at 5.08 -1.905 0)
+          (effects
+            (font
+              (size 1.27 1.27)
+              (italic yes))
+            (justify left)
+            (hide yes)))
+        (property "Datasheet" "http://www.diodes.com/assets/Datasheets/ds31787.pdf"
+          (at 5.08 -3.81 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (justify left)
+            (hide yes)))
+        (property "Description" "5.8A Id, 30V Vds, N-Channel MOSFET, SOT-23"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (property "ki_keywords" "N-Channel MOSFET"
+          (at 0 0 0)
+          (effects
+            (font
+              (size 1.27 1.27))
+            (hide yes)))
+        (symbol "DMN3404L_0_1"
+          (polyline
+            (pts
+              (xy 0.254 1.905)
+              (xy 0.254 -1.905))
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type none)))
+          (polyline
+            (pts
+              (xy 0.254 0)
+              (xy -2.54 0))
+            (stroke
+              (width 0)
+              (type default))
+            (fill
+              (type none)))
+          (polyline
+            (pts
+              (xy 0.762 2.286)
+              (xy 0.762 1.27))
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type none)))
+          (polyline
+            (pts
+              (xy 0.762 0.508)
+              (xy 0.762 -0.508))
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type none)))
+          (polyline
+            (pts
+              (xy 0.762 -1.27)
+              (xy 0.762 -2.286))
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type none)))
+          (polyline
+            (pts
+              (xy 0.762 -1.778)
+              (xy 3.302 -1.778)
+              (xy 3.302 1.778)
+              (xy 0.762 1.778))
+            (stroke
+              (width 0)
+              (type default))
+            (fill
+              (type none)))
+          (polyline
+            (pts
+              (xy 1.016 0)
+              (xy 2.032 0.381)
+              (xy 2.032 -0.381)
+              (xy 1.016 0))
+            (stroke
+              (width 0)
+              (type default))
+            (fill
+              (type outline)))
+          (circle
+            (center 1.651 0)
+            (radius 2.794)
+            (stroke
+              (width 0.254)
+              (type default))
+            (fill
+              (type none)))
+          (polyline
+            (pts
+              (xy 2.54 2.54)
+              (xy 2.54 1.778))
+            (stroke
+              (width 0)
+              (type default))
+            (fill
+              (type none)))
+          (circle
+            (center 2.54 1.778)
+            (radius 0.254)
+            (stroke
+              (width 0)
+              (type default))
+            (fill
+              (type outline)))
+          (circle
+            (center 2.54 -1.778)
+            (radius 0.254)
+            (stroke
+              (width 0)
+              (type default))
+            (fill
+              (type outline)))
+          (polyline
+            (pts
+              (xy 2.54 -2.54)
+              (xy 2.54 0)
+              (xy 0.762 0))
+            (stroke
+              (width 0)
+              (type default))
+            (fill
+              (type none)))
+          (polyline
+            (pts
+              (xy 2.921 0.381)
+              (xy 3.683 0.381))
+            (stroke
+              (width 0)
+              (type default))
+            (fill
+              (type none)))
+          (polyline
+            (pts
+              (xy 3.302 0.381)
+              (xy 2.921 -0.254)
+              (xy 3.683 -0.254)
+              (xy 3.302 0.381))
+            (stroke
+              (width 0)
+              (type default))
+            (fill
+              (type none))))
+        (symbol "DMN3404L_1_1"
+          (pin input line
+            (at -5.08 0 0)
+            (length 2.54)
+            (name "G"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "1"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin passive line
+            (at 2.54 5.08 270)
+            (length 2.54)
+            (name "D"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "3"
+              (effects
+                (font
+                  (size 1.27 1.27)))))
+          (pin passive line
+            (at 2.54 -5.08 90)
+            (length 2.54)
+            (name "S"
+              (effects
+                (font
+                  (size 1.27 1.27))))
+            (number "2"
+              (effects
+                (font
+                  (size 1.27 1.27))))))
+        (embedded_fonts no))
     (symbol "Connector_Generic:Conn_01x02"
 		(pin_names
 			(offset 1.016)
@@ -394,156 +802,6 @@
 				(at 0 -3.81 90)
 				(length 2.794)
 				(name "~"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "2"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-		)
-		(embedded_fonts no)
-	)
-    (symbol "Device:D_Schottky"
-		(pin_numbers
-			(hide yes)
-		)
-		(pin_names
-			(offset 1.016)
-			(hide yes)
-		)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(property "Reference" "D"
-			(at 0 2.54 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "D_Schottky"
-			(at 0 -2.54 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Schottky diode"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "ki_keywords" "diode Schottky"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "ki_fp_filters" "TO-???* *_Diode_* *SingleDiode* D_*"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(symbol "D_Schottky_0_1"
-			(polyline
-				(pts
-					(xy -1.905 0.635) (xy -1.905 1.27) (xy -1.27 1.27) (xy -1.27 -1.27) (xy -0.635 -1.27) (xy -0.635 -0.635)
-				)
-				(stroke
-					(width 0.254)
-					(type default)
-				)
-				(fill
-					(type none)
-				)
-			)
-			(polyline
-				(pts
-					(xy 1.27 1.27) (xy 1.27 -1.27) (xy -1.27 0) (xy 1.27 1.27)
-				)
-				(stroke
-					(width 0.254)
-					(type default)
-				)
-				(fill
-					(type none)
-				)
-			)
-			(polyline
-				(pts
-					(xy 1.27 0) (xy -1.27 0)
-				)
-				(stroke
-					(width 0)
-					(type default)
-				)
-				(fill
-					(type none)
-				)
-			)
-		)
-		(symbol "D_Schottky_1_1"
-			(pin passive line
-				(at -3.81 0 0)
-				(length 2.54)
-				(name "K"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "1"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin passive line
-				(at 3.81 0 180)
-				(length 2.54)
-				(name "A"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -2062,25 +2320,6 @@
     (pin "3" (uuid 736ce398-9d64-53ef-9035-366521fde392))
     (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/4727eca5-0a6b-5761-98ac-51ca9f544ea2" (reference "U5") (unit 1))) (project "power-entry-instrument" (path "/ba12e546-d582-5654-bb26-6a94a8f78514" (reference "U-BUCK-A") (unit 1))))
   )
-  (symbol (lib_id "Device:D_Schottky") (at 142.24 96.52 0) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no)
-    (uuid c0ded7d4-a4a6-5f0a-9587-310b69b7eaf3)
-    (property "Reference" "D-USBOR-A" (at 142.24 93.98 0) (effects (font (size 1.27 1.27))))
-    (property "Value" "SS14" (at 142.24 99.06 0) (effects (font (size 1.27 1.27))))
-    (property "Footprint" "Diode_SMD:D_SMA" (at 142.24 96.52 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Datasheet" "" (at 142.24 96.52 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Row" "D-USBOR" (at 142.24 96.52 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Pins" "A=2(A) K=1(K)" (at 142.24 96.52 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "Between the buck and the dev board's 5V pin: the OR node is that pin, and USB can back-feed it" (at 142.24 96.52 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Pins_source" "KiCad's diode convention: 1 cathode (the band), 2 anode" (at 142.24 96.52 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Manufacturer" "Vishay" (at 142.24 96.52 0) (effects (font (size 1.27 1.27)) hide))
-    (property "MPN" "SS14-E3/61T" (at 142.24 96.52 0) (effects (font (size 1.27 1.27)) hide))
-    (property "LCSC" "C47460" (at 142.24 96.52 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Assembly" "machine" (at 142.24 96.52 0) (effects (font (size 1.27 1.27)) hide))
-    (pin "1" (uuid 4dda25fd-e1ab-5c4e-98be-1c8e01ae9097))
-    (pin "2" (uuid 339143b1-0b97-59f7-84da-1e51d17a4e5b))
-    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/4727eca5-0a6b-5761-98ac-51ca9f544ea2" (reference "D4") (unit 1))) (project "power-entry-instrument" (path "/ba12e546-d582-5654-bb26-6a94a8f78514" (reference "D-USBOR-A") (unit 1))))
-  )
   (symbol (lib_id "Device:NetTie_2") (at 193.04 96.52 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 307892ad-893d-5f73-83e8-d4536d0aab09)
@@ -2165,13 +2404,6 @@
   )
   (wire (pts (xy 99.06 96.52) (xy 101.6 96.52)) (stroke (width 0) (type default)) (uuid 45470805-a979-5ce0-a9eb-0acb40a4ff26))
   (label "BUCK_A_OUT" (at 101.6 96.52 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 767a391b-9444-5a86-a6d6-9dba6a1c4cb3))
-  (wire (pts (xy 146.05 96.52) (xy 148.59 96.52)) (stroke (width 0) (type default)) (uuid 0e72caf7-a371-5861-a9af-a950decfc444))
-  (label "BUCK_A_OUT" (at 148.59 96.52 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 03d89334-3e58-533e-a905-c3f785e0867f))
-  (wire (pts (xy 138.43 96.52) (xy 135.89 96.52)) (stroke (width 0) (type default)) (uuid 037462e5-703b-566e-a9dc-9cc4e8b86668))
-  (hierarchical_label "INST_5V_A" (shape output) (at 135.89 96.52 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 4dd0db40-b8b0-53b1-987b-39de9191d0f6)
-    (property "Dir" "out" (at 135.89 96.52 0) (effects (font (size 1.27 1.27)) hide))
-    (property "To" "carrier/led-strip-drive" (at 135.89 96.52 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Figure" "matrix-led-current" (at 135.89 96.52 0) (effects (font (size 1.27 1.27)) hide)))
   (wire (pts (xy 44.45 50.8) (xy 46.99 50.8)) (stroke (width 0) (type default)) (uuid 35926532-f914-5357-add0-fbf66625863e))
   (hierarchical_label "PWR_GND" (shape passive) (at 46.99 50.8 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 7f1b774e-dd93-56e7-a754-03d77d984bc6)
     (property "Dir" "ref" (at 46.99 50.8 0) (effects (font (size 1.27 1.27)) hide))
@@ -2425,7 +2657,7 @@
     (property "Datasheet" "" (at 101.60 180.34 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "C-BUCK-OUT" (at 101.60 180.34 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 101.60 180.34 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "D1 (owner, 2026-10-03: '10 ohm + 22 uF + 10 uF'): RECOM's standard-application output capacitor, a 10 uF MLCC at U-BUCK-A's OUT pin (R-78E5.0-1.0 datasheet p.I-4), returned to its GND pin. It lowers the converter's ripple at its source, ahead of D-USBOR-A. Well inside the part's 220 uF capacitive-load limit" (at 101.60 180.34 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "D1 (owner, 2026-10-03: '10 ohm + 22 uF + 10 uF'): RECOM's standard-application output capacitor, a 10 uF MLCC at U-BUCK-A's OUT pin (R-78E5.0-1.0 datasheet p.I-4), returned to its GND pin. It lowers the converter's ripple at its source, ahead of U-USBOR and Q-USBOR. Well inside the part's 220 uF capacitive-load limit" (at 101.60 180.34 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins_source" "a two-terminal capacitor" (at 101.60 180.34 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Samsung Electro-Mechanics" (at 101.60 180.34 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "CL31A106KBHNNNE" (at 101.60 180.34 0) (effects (font (size 1.27 1.27)) hide))
@@ -2530,5 +2762,128 @@
     (property "From" "module/power-entry" (at 114.3 231.14 0) (effects (font (size 1.27 1.27)) hide))
     (property "Figure" "umbilical-pinmap" (at 114.3 231.14 0) (effects (font (size 1.27 1.27)) hide)))
   (text "PLANE STITCHING (#8-8; owner, 2026-10-04: \"add 2-3 now\"): three 100 nF from INST_POS12 (layer 3) to PWR_GND\n(layer 2), one each at J-MCU, J-UMB and the analog end, where signals change layers between the two planes'\nreferences more than 20 mm from the nearest C-LED. Each pad meets its plane by its own via at the pad\n(power-entry-instrument.md, Plane stitching)." (at 40.64 205.74 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 7b0775e8-25a1-4f5c-8f4f-40d1227ce1ec))
+  (symbol (lib_id "Power_Management:LM74700") (at 325.12 157.48 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 1029a2a1-91a9-56dd-b947-ff8ecd6ae73e)
+    (property "Reference" "U-USBOR" (at 316.23 166.37 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "LM74700-Q1" (at 332.74 166.37 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Package_TO_SOT_SMD:SOT-23-6" (at 316.23 166.37 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 316.23 166.37 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-USBOR" (at 325.12 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "ANODE=6(ANODE) CATHODE=4(CATHODE) GATE=5(GATE) VCAP=1(VCAP) EN=3(EN) GND=2(GND)" (at 325.12 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "Ideal-diode controller for the 5 V OR (issue #39, owner 2026-10-05): drives Q-USBOR so the buck's 5 V reaches INST_5V_A 20 mV down instead of an SS14's 0.5 V, and turns it off when INST_5V_A is above BUCK_A_OUT (the Matrix's USB-C 5 V through its D1), so neither source back-feeds the other. EN tied to ANODE: always on" (at 325.12 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/discrete-and-power/TI-LM74700-Q1.pdf p.3, DBV: 1 VCAP, 2 GND, 3 EN, 4 CATHODE, 5 GATE, 6 ANODE" (at 325.12 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Texas Instruments" (at 325.12 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "LM74700QDBVTQ1" (at 325.12 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C2653623" (at 325.12 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 325.12 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 31147b69-2742-5e45-8123-252d39e96758))
+    (pin "2" (uuid fdbd9135-2ff6-58ea-8dd1-3a03c649ba85))
+    (pin "3" (uuid 3e17d770-025e-501f-994a-14aa1bf17b03))
+    (pin "4" (uuid 8f639300-26e9-50ef-b2b5-61879140c145))
+    (pin "5" (uuid b2b687a0-f239-5f9f-91ef-51ad56d47ef5))
+    (pin "6" (uuid 28fe7bec-fa86-5937-953c-e92eb285d3cf))
+    (instances (project "power-entry-instrument" (path "/ba12e546-d582-5654-bb26-6a94a8f78514" (reference "U-USBOR") (unit 1))) (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/4727eca5-0a6b-5761-98ac-51ca9f544ea2" (reference "U13") (unit 1))))
+  )
+  (wire (pts (xy 312.42 160.02) (xy 309.88 160.02)) (stroke (width 0) (type default)) (uuid 3b441fe6-01fd-5df6-a259-b2be554ccafc))
+  (label "USBOR_VCAP" (at 309.88 160.02 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid ee36fc2b-f179-574f-aa21-8648fe1adc0e))
+  (wire (pts (xy 312.42 162.56) (xy 309.88 162.56)) (stroke (width 0) (type default)) (uuid 3fc82d85-6855-5c66-a75c-8c57f5cdf575))
+  (label "BUCK_A_OUT" (at 309.88 162.56 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 7c5ae053-ba0b-5ff3-8de4-3c7eb90d23d7))
+  (wire (pts (xy 317.5 147.32) (xy 317.5 144.78)) (stroke (width 0) (type default)) (uuid df40de40-c810-5e4d-8752-deca1b167a19))
+  (label "BUCK_A_OUT" (at 317.5 144.78 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 78163a53-571c-56f8-8896-377ecdaf072d))
+  (wire (pts (xy 325.12 147.32) (xy 325.12 144.78)) (stroke (width 0) (type default)) (uuid 71dc99f7-a28d-59a9-a247-33d77c35063f))
+  (label "USBOR_GATE" (at 325.12 144.78 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 4ac20281-731e-59a6-80b6-73c166d1b6f7))
+  (wire (pts (xy 325.12 167.64) (xy 325.12 170.18)) (stroke (width 0) (type default)) (uuid 539c59f9-9ee8-590e-a3a5-6a5dbe408172))
+  (hierarchical_label "PWR_GND" (shape passive) (at 325.12 170.18 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 6e60ca9e-43da-5dcf-b2a6-f818c452f6df)
+    (property "Dir" "ref" (at 325.12 170.18 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 325.12 170.18 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "umbilical-pinmap" (at 325.12 170.18 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 332.74 147.32) (xy 332.74 144.78)) (stroke (width 0) (type default)) (uuid 6221ae24-9c37-5eaf-b629-0fe287702ab6))
+  (hierarchical_label "INST_5V_A" (shape output) (at 332.74 144.78 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 2ec70a98-4f15-5c9d-864d-2e18b4e786ef)
+    (property "Dir" "out" (at 332.74 144.78 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "carrier/led-strip-drive" (at 332.74 144.78 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "matrix-led-current" (at 332.74 144.78 0) (effects (font (size 1.27 1.27)) hide)))
+  (symbol (lib_id "Transistor_FET:DMN3404L") (at 353.06 157.48 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid d8934652-65c8-5b83-85f1-b211601238c2)
+    (property "Reference" "Q-USBOR" (at 358.14 156.21 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "DMN3404L" (at 358.14 158.75 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Package_TO_SOT_SMD:SOT-23" (at 358.14 158.75 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 358.14 161.29 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "Q-USBOR" (at 353.06 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "G=1(G) S=2(S) D=3(D)" (at 353.06 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "The OR's pass FET: source on BUCK_A_OUT, drain on INST_5V_A, so its body diode points the way D-USBOR did and blocks when U-USBOR holds the gate off. 28 mohm max at VGS 10 V; the gate sees 10.8-13.9 V from U-USBOR's charge pump, inside its +/-20 V" (at 353.06 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/discrete-and-power/DIODES-DMN3404L.pdf p.1, SOT23: 1 G, 2 S, 3 D" (at 353.06 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "Diodes Incorporated" (at 353.06 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "DMN3404L-7" (at 353.06 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C155257" (at 353.06 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 353.06 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 15aa92a2-d4aa-5f38-aaf9-f95df92800b1))
+    (pin "2" (uuid 981bb00f-da8a-532f-8523-9b8b868aba48))
+    (pin "3" (uuid 9854e912-2e08-5436-8dda-0660396960f7))
+    (instances (project "power-entry-instrument" (path "/ba12e546-d582-5654-bb26-6a94a8f78514" (reference "Q-USBOR") (unit 1))) (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/4727eca5-0a6b-5761-98ac-51ca9f544ea2" (reference "Q2") (unit 1))))
+  )
+  (wire (pts (xy 347.98 157.48) (xy 345.44 157.48)) (stroke (width 0) (type default)) (uuid d564cb02-4b6f-5ce3-ad90-48a6edefb529))
+  (label "USBOR_GATE" (at 345.44 157.48 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 7d3f233a-15e4-5839-91cf-b8410a36d2f8))
+  (wire (pts (xy 355.6 152.4) (xy 355.6 149.86)) (stroke (width 0) (type default)) (uuid 77953da2-030d-53f9-a5cd-f72fcd7e3aa5))
+  (hierarchical_label "INST_5V_A" (shape output) (at 355.6 149.86 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 6578d4a3-6f1a-5579-918b-c0abcbf971f9)
+    (property "Dir" "out" (at 355.6 149.86 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "carrier/led-strip-drive" (at 355.6 149.86 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "matrix-led-current" (at 355.6 149.86 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 355.6 162.56) (xy 355.6 165.1)) (stroke (width 0) (type default)) (uuid c2b8891d-a798-5b80-8dc6-5d80435e1d00))
+  (label "BUCK_A_OUT" (at 355.6 165.1 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 9dbe067e-235a-54a6-8b69-fbbd6077cc6e))
+  (symbol (lib_id "Device:C") (at 279.4 157.48 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid a001d752-7825-5b79-8c5e-ead9853b1b06)
+    (property "Reference" "C-USBOR-CAP" (at 281.94 156.21 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100nF 50V X7R" (at 281.94 158.75 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 280.67 161.29 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 279.4 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-USBOR" (at 279.4 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 279.4 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "U-USBOR's charge-pump capacitor, VCAP to ANODE: 0.1 uF minimum and at least 10 x Q-USBOR's Ciss (498 pF) [TI-LM74700-Q1.pdf p.17]. Sees up to 13.9 V" (at 279.4 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "a ceramic capacitor: either way round" (at 279.4 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "YAGEO" (at 279.4 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "CC0805KRX7R9BB104" (at 279.4 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C49678" (at 279.4 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 279.4 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid a6a97404-648a-58e9-bbd3-b698a3b68812))
+    (pin "2" (uuid 0c7e5f78-3321-5b02-904e-ad0d1233d17a))
+    (instances (project "power-entry-instrument" (path "/ba12e546-d582-5654-bb26-6a94a8f78514" (reference "C-USBOR-CAP") (unit 1))) (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/4727eca5-0a6b-5761-98ac-51ca9f544ea2" (reference "C207") (unit 1))))
+  )
+  (wire (pts (xy 279.4 153.67) (xy 279.4 151.13)) (stroke (width 0) (type default)) (uuid f1fc0c2b-4538-5592-87eb-064a99254b65))
+  (label "USBOR_VCAP" (at 279.4 151.13 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid b44cdc2c-215b-5c46-8188-22140018b5dd))
+  (wire (pts (xy 279.4 161.29) (xy 279.4 163.83)) (stroke (width 0) (type default)) (uuid abdb0f39-811c-5b50-bcf9-36795bd570bf))
+  (label "BUCK_A_OUT" (at 279.4 163.83 270) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 381140e9-f8df-5c1c-9683-749b0c57ba44))
+  (symbol (lib_id "Device:C") (at 375.92 157.48 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid e7ba391c-2865-5736-91a5-1f36b07dda4f)
+    (property "Reference" "C-USBOR-OUT" (at 378.46 156.21 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Value" "100nF 50V X7R" (at 378.46 158.75 0) (effects (font (size 1.27 1.27)) (justify left)))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 377.19 161.29 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 375.92 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "C-USBOR" (at 375.92 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 375.92 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "U-USBOR's CATHODE capacitor, 0.1 uF minimum [TI-LM74700-Q1.pdf p.5, p.17], at the controller: the Matrix's own 5 V capacitors are across the ribbon. (C-BUCK-OUT is its ANODE capacitor, 22 nF minimum)" (at 375.92 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "a ceramic capacitor: either way round" (at 375.92 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "YAGEO" (at 375.92 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "CC0805KRX7R9BB104" (at 375.92 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C49678" (at 375.92 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 375.92 157.48 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid b23ce31d-24eb-52b4-bf35-3bfe12a856bd))
+    (pin "2" (uuid aebadaab-93b1-5244-9b01-65d7a2a6ad29))
+    (instances (project "power-entry-instrument" (path "/ba12e546-d582-5654-bb26-6a94a8f78514" (reference "C-USBOR-OUT") (unit 1))) (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/4727eca5-0a6b-5761-98ac-51ca9f544ea2" (reference "C208") (unit 1))))
+  )
+  (wire (pts (xy 375.92 153.67) (xy 375.92 151.13)) (stroke (width 0) (type default)) (uuid 47d5ed80-5862-5604-98eb-029221ad6d10))
+  (hierarchical_label "INST_5V_A" (shape output) (at 375.92 151.13 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 26b60982-1572-5c37-8c71-815374a7a7f9)
+    (property "Dir" "out" (at 375.92 151.13 0) (effects (font (size 1.27 1.27)) hide))
+    (property "To" "carrier/led-strip-drive" (at 375.92 151.13 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "matrix-led-current" (at 375.92 151.13 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 375.92 161.29) (xy 375.92 163.83)) (stroke (width 0) (type default)) (uuid 19e23119-2517-505f-8450-9586dd1570d3))
+  (hierarchical_label "PWR_GND" (shape passive) (at 375.92 163.83 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid f1e6c806-21eb-5b9e-9c9d-3f286d4581fd)
+    (property "Dir" "ref" (at 375.92 163.83 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 375.92 163.83 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "umbilical-pinmap" (at 375.92 163.83 0) (effects (font (size 1.27 1.27)) hide)))
+  (text "IDEAL-DIODE OR (issue #39; owner, 2026-10-05: \"Let's go both\"): U-USBOR (LM74700-Q1) and Q-USBOR replace\nD-USBOR-A (SS14). BUCK_A_OUT reaches INST_5V_A through the FET, 20 mV regulated; the Matrix's USB-C 5 V\n(through its own D1) cannot back-feed the buck, nor the buck the USB host (power-entry-instrument.md)." (at 279.4 119.38 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 83a5b9af-1740-5fb7-933d-d1538a624ad3))
   (sheet_instances (path "/" (page "1")))
 )
