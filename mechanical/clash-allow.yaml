@@ -89,3 +89,6 @@ near:
   - a: "travel <same>"
     b: "switch <same>"
     why: "0.18-0.20 against cap-over-switch's 0.3 (issue #34): the 0.18 is the switch's STEM, drawn at rest, beside the socket's cut-out in the swept shell - the stem moves down with the cap, so it is no gap at all; the housing itself clears the swept shell by 0.20, against switch.keycap_wall (tbd, scaled off a photo). Accepted on the parts: the owner fitted a real MT165 on a real KS-33 and pressed it fully, 2026-10-02 (config/body.yaml switch.keycap_top_above_seat), and it did not bind. Calipers on a cap (M1, switch.keycap_wall decided_by) settle the number"
+  - a: "breath inlet barb"
+    b: "breath inner barb"
+    why: "issue #36: the two Clippard 12842 barbs' #10-32 threads meet end to end inside the E-Z LOK insert's bore, and the gap between their ends is set by inlet.inner_gap so that the two threads do not touch (config/body.yaml inlet). It is a gap along one bore, not a clearance between parts that move or are placed independently, so default's 0.5 does not apply"
