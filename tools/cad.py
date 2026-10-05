@@ -28,7 +28,8 @@ as hardware/bom.csv:
                                                  (+ branding/'s spec.json and EPOXY, for the logo)
     mechanical/cad/generated/module-params.scad  from config/module.yaml (the Eurorack module)
     mechanical/OUTPUTS.csv, mechanical/module/OUTPUTS.csv   the fingerprint ledgers
-    every file named as `out` in mechanical/outputs.yaml or mechanical/module/outputs.yaml
+    every file named as `out` in mechanical/outputs.yaml or mechanical/module/outputs.yaml,
+    among them mechanical/fab/ - the files the shops are sent (tools/fab.py, issue #42)
 
 TWO MODELS, ONE PIPELINE. The instrument body and the Eurorack module are
 separate models with separate configs, spec files and ledgers (SPECS below),
@@ -84,9 +85,11 @@ BRANDING_SPEC = "branding/export/spec.json"
 BRANDING_BUILD = "branding/build.py"
 # Directories whose every file must be an output this tool owns. A PNG that
 # nobody can regenerate is exactly the artefact this tool exists to prevent.
-OWNED_DIRS = [f"{MECH}/renders", f"{MECH}/export", f"{MECH}/cad/vendor",
+# mechanical/fab/ is the shops' set (issue #42): STEP, STL, drawings, the
+# open-figure list - every file but its README is an output.
+OWNED_DIRS = [f"{MECH}/renders", f"{MECH}/export", f"{MECH}/cad/vendor", f"{MECH}/fab",
               f"{MECH}/module/renders", f"{MECH}/module/export", f"{MECH}/module/art"]
-OWNED_EXT = (".png", ".dxf", ".svg", ".stl", ".echo", ".txt", ".pdf")
+OWNED_EXT = (".png", ".dxf", ".svg", ".stl", ".echo", ".txt", ".pdf", ".step", ".csv")
 
 # Bump when the way an output is MADE changes (stamp layout, mesh settings,
 # render flags) - it is part of every fingerprint, so a bump marks every

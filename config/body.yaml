@@ -1048,8 +1048,8 @@ hardware:
     source: "the largest hole PEM allows in the part that bears on the sheet round an FHL-M2.5 stud - here the spacer's bore [datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-7]"
   stud_l:
     value: 10
-    status: nominal
-    source: "the FHL-M2.5 stud's length code L, from the head's face (stocked 6, 8, 10, 12, 15, 18 [datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-7]): the bottom plate + spacer + main board, and thread_engage_min diameters into the column standoff, at the stud's shortest [calc: 1.2 + 1.3 + 1.6 + 1.5 x 2.5 + 0.4 = 8.25, so 10; 8 gives 3.5 of the 3.75 wanted]. One length for every mount: at an end mount it leaves thread past the nut. drc.echo 'column: stud thread in the standoff', 'end mounts: stud thread past the nut'. The part is datasheets/mechanical/PEM-FHL-M2.5-10ZI-SALES-DRAWING.pdf"
+    status: settled
+    source: "owner, 2026-10-05: 'I think our standoffs are solidified' (ADR 0025, Amendment 2026-10-05): the stud chosen is the FHL-M2.5-10ZI, length code 10 from the head's face (stocked 6, 8, 10, 12, 15, 18 [datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-7]): the bottom plate + spacer + main board, and thread_engage_min diameters into the column standoff, at the stud's shortest [calc: 1.2 + 1.3 + 1.6 + 1.5 x 2.5 + 0.4 = 8.25, so 10; 8 gives 3.5 of the 3.75 wanted]. One length for every mount: at an end mount it leaves thread past the nut. drc.echo 'column: stud thread in the standoff', 'end mounts: stud thread past the nut'. The part is datasheets/mechanical/PEM-FHL-M2.5-10ZI-SALES-DRAWING.pdf"
   stud_l_tol:
     value: [-0.4, 0.4]
     status: settled
@@ -1077,14 +1077,12 @@ hardware:
     source: "M2.5 clearance through the key boards and the main board, ISO 273 fine [from memory]: each board locates on its columns and studs, so the fine fit"
   kb_spacer_l:
     value: 1.3
-    status: tbd
-    source: "a plain metal spacer for M2.5, flat both ends, and the only thing between a plate and its board at a mount: the switches' housing below the plate, which the board is pressed against [calc: 2.50 - 1.20]. The switches hold the gap only where they are; at a mount there is no switch, and without the spacer the clamp would pull the board up into the plate (owner, 2026-09-29). The same part, faced alike, stands under the key plate on every column (MECH-KB-SPACER) and on the bottom plate under the main board at every mount (MECH-MB-SPACER); its bore, at most stud_attached_hole, matters on the bottom plate, where it bears on the stud's sheet. NOT STOCKED at 1.3: face Ettinger 5.52.015 (M2.5, 1.5 long, bore 2.6 [datasheets/mechanical/ETTINGER-CATALOG-2024-P79-DISTANZHUELSEN-MESSING.html]) down to 1.3 +/-0.05, in metal, not printed, which would creep under the clamp"
-    decided_by: "M4, with the spacers faced and measured"
+    status: settled
+    source: "owner, 2026-10-05: 'I think our standoffs are solidified' (ADR 0025, Amendment 2026-10-05): a plain metal spacer for M2.5, flat both ends, faced to this length, the only thing between a plate and its board at a mount: the switches' housing below the plate, which the board is pressed against [calc: 2.50 - 1.20]. The switches hold the gap only where they are; at a mount there is no switch, and without the spacer the clamp would pull the board up into the plate (owner, 2026-09-29). The same part, faced alike, stands under the key plate on every column (MECH-KB-SPACER) and on the bottom plate under the main board at every mount (MECH-MB-SPACER); its bore, at most stud_attached_hole, matters on the bottom plate, where it bears on the stud's sheet. NOT STOCKED at this length: face Ettinger 5.52.015 (M2.5, 1.5 long, bore 2.6 [datasheets/mechanical/ETTINGER-CATALOG-2024-P79-DISTANZHUELSEN-MESSING.html]) down to it within kb_spacer_l_tol, in metal, not printed, which would creep under the clamp; measure each one faced"
   kb_spacer_l_tol:
     value: [-0.05, 0.05]
-    status: tbd
-    source: "the faced spacer's length tolerance, to be held when it is faced (kb_spacer_l)"
-    decided_by: "as kb_spacer_l"
+    status: settled
+    source: "owner, 2026-10-05: 'I think our standoffs are solidified' (ADR 0025, Amendment 2026-10-05): the faced spacer's length tolerance, held when it is faced (kb_spacer_l) and checked with calipers on each one"
   kb_spacer_od:
     value: 4.5
     status: nominal
@@ -1098,19 +1096,16 @@ hardware:
   # tolerance limits').
   col_standoff_af:
     value: 5.0
-    status: tbd
-    source: "an M2.5 female-female hex standoff across its flats [from memory: 5 mm is the common M2.5 hex, the same as the ISO 4032 nut, mb_nut_e]. Its across-corners, af / cos 30, stands on the main board's top face and under the key board, and both boards keep copper and parts out from under it"
-    decided_by: "M4, with the standoff bought (MECH-COL-STANDOFF)"
+    status: settled
+    source: "owner, 2026-10-05: 'I think our standoffs are solidified' (ADR 0025, Amendment 2026-10-05): an M2.5 female-female hex standoff, 5 mm across its flats, the common M2.5 hex and the same as the ISO 4032 nut (mb_nut_e). Its across-corners, af / cos 30, stands on the main board's top face and under the key board, and both boards keep copper and parts out from under it. Buy to it (MECH-COL-STANDOFF)"
   col_standoff_stock_l:
     value: 20
-    status: tbd
-    source: "the stocked M2.5 female-female length it is faced down from: the next one above the gap (drc.echo 'column standoff length (derived)') [from memory: the common series step 15, 18, 20]. drc.echo 'column standoff faced from its stock length'"
-    decided_by: "M4, with the standoff bought"
+    status: settled
+    source: "owner, 2026-10-05: 'I think our standoffs are solidified' (ADR 0025, Amendment 2026-10-05): the stocked M2.5 female-female length it is faced down from, the next one above the gap (drc.echo 'column standoff length (derived)'; the common series steps 15, 18, 20). drc.echo 'column standoff faced from its stock length'"
   col_standoff_l_tol:
     value: [-0.05, 0.05]
-    status: tbd
-    source: "the faced standoff's length tolerance, held as the spacers' is (kb_spacer_l_tol) [drawing convention]"
-    decided_by: "M4, with the standoffs faced and measured"
+    status: settled
+    source: "owner, 2026-10-05: 'I think our standoffs are solidified' (ADR 0025, Amendment 2026-10-05): the faced standoff's length tolerance, held as the spacers' is (kb_spacer_l_tol) and checked with calipers on each one"
   col_screw_head_d:
     value: 4.5
     status: tbd
@@ -1123,8 +1118,8 @@ hardware:
     decided_by: "as col_screw_head_d"
   col_screw_l:
     value: 10
-    status: nominal
-    source: "the column screw's length under its head: the key plate + spacer + key board, and thread_engage_min diameters into the standoff, at the screw's shortest [calc: 1.2 + 1.3 + 1.6 + 1.5 x 2.5 + 0.3 = 8.15, so 10; 8 gives 3.6 of the 3.75 wanted]. drc.echo 'column: screw thread in the standoff', and 'column: stud and screw ends apart in the standoff'"
+    status: settled
+    source: "owner, 2026-10-05: 'I think our standoffs are solidified' (ADR 0025, Amendment 2026-10-05): the column screw's length under its head, M2.5 x 10 (MECH-COL-SCREW): the key plate + spacer + key board, and thread_engage_min diameters into the standoff, at the screw's shortest [calc: 1.2 + 1.3 + 1.6 + 1.5 x 2.5 + 0.3 = 8.15, so 10; 8 gives 3.6 of the 3.75 wanted]. drc.echo 'column: screw thread in the standoff', and 'column: stud and screw ends apart in the standoff'"
   col_screw_l_tol:
     value: [-0.3, 0.3]
     status: tbd
@@ -1398,6 +1393,55 @@ lighting:
     value: [7.6, 6.1]
     status: settled
     source: "a centred rectangle round the footprint's courtyard, woody:LED_WS2815B-V1_PLCC6_5.4x5.0mm_P1.6mm [repo hardware/lib/woody.pretty]: the courtyard is x -3.45..3.80 and y -2.75..3.05 (7.25 x 5.80), off centre where it takes in the silk chamfer mark, so this is twice its larger half each way [calc: 2 x 3.80, 2 x 3.05], which covers it at either rotation"
+
+# --------------------------------------------------------- fabrication ----
+# WHAT THE SHOPS ARE TOLD (issue #42; mechanical/fab/README.md). Read by
+# tools/fab.py into each part's drawing (mechanical/fab/*.pdf). The plate
+# thickness is not here: it is config/key-layout.yaml's, the register's
+# `plate-thickness`. The oak parts' thickness is the model's (the flush rule,
+# stack above; ends.*_cap_t).
+fabrication:
+  revision:
+    value: "A"
+    status: settled
+    source: "owner 2026-10-04: the layout is final for rev A (ADR 0010, Amendment 2026-10-04; ROADMAP M3: 'Rev A goes ahead on the current layout'). A change the rev A parts in hand find is rev B"
+  plate_alloy:
+    value: "aluminium, 5052 or 6061"
+    status: nominal
+    source: "PLATE-TOP and PLATE-BOTTOM are '1.20mm aluminium' and name no alloy. Either takes the PEM FHL studs, which are rated for aluminium to HRB 80 / HB 150 [datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-7] (hardware.stud_torque). Whichever the vendor stocks at the plate thickness"
+  plate_finish:
+    value: "un-anodised (mill finish)"
+    status: settled
+    source: "PLATE-TOP and PLATE-BOTTOM: both plates carry PWR_GND through bare metal - the column screws' heads on the key plate's top face, the studs' clinch and the spacers' faces on the bottom plate (ADR 0025) - so they are ordered un-anodised"
+  plate_profile_tol:
+    value: [-0.13, 0.13]
+    status: nominal
+    source: "the plates' profile and hole tolerance: a laser or waterjet shop's usual figure in thin aluminium [from memory], the one stack.plate_side_clear allows for"
+  cutout_tol:
+    value: [-0.02, 0.05]
+    status: settled
+    source: "[ds] the switch cutout, 14.00 +0.05/-0.02 square, off Gateron's own drawing for the KS-33 (datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf; the register's `plate-thickness` note; PLATE-TOP). Tighter than plate_profile_tol: config/key-layout.yaml says the cutter's kerf decides it, on a coupon"
+  stud_hole_tol:
+    value: [0, 0.08]
+    status: settled
+    source: "[ds] the PEM FHL-M2.5 stud's mounting hole, hardware.stud_hole +0.08 (datasheets/mechanical/PEM-FHL-M2.5-10ZI-SALES-DRAWING.pdf)"
+  wood_species:
+    value: "hardwood, the owner's choice (the parts are named oak)"
+    status: tbd
+    source: "ADR 0009, 'The species is open' - the owner: 'I'll probably use a harder wood, but it really doesn't matter for the design aspect'. The cross-grain movement the cap clearance (stack.cap_clear) is argued from assumes oak"
+    decided_by: "the owner, before the wood is ordered"
+  wood_finish:
+    value: "stained a very dark ebony, the grain still showing, under a satin oil finish"
+    status: settled
+    source: "owner, 2026-09-28 (ADR 0009, 'Finishes'; BODY-OAK)"
+  wood_profile_tol:
+    value: [-0.2, 0.2]
+    status: nominal
+    source: "the oak parts' profile tolerance on a CNC router in hardwood [drawing convention]; the cap slots' clearance (stack.cap_clear) is several times it"
+  wood_depth_tol:
+    value: [-0.1, 0.1]
+    status: nominal
+    source: "the oak parts' pocket, groove and rebate depths from the face named [drawing convention]; drc.echo 'column screw pockets leave wood over them' has margin over it"
 
 # ---------------------------------------------------------------- logo ----
 logo:
