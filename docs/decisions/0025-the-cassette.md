@@ -352,7 +352,11 @@ beside the last keys, and was already wider than the figure below.
 
 1. **A column's hole keeps `hardware.col_web_min` of metal from every switch
    cutout, in both plates** (*"column holes: plate web to the switch
-   cutouts"*). The figure and its reasoning are in `config/body.yaml`.
+   cutouts"*). The figure and its reasoning are in `config/body.yaml`. A
+   first figure was put to the owner with two recommendations - a wider web,
+   and the tail pair (point 4) lined up across the body - and the owner
+   approved both: *"Go through recommendations. That sounds fine"*
+   (2026-10-05), so the figure is settled.
 2. **The key boards are longer at the mouth end** to meet it
    (`boards.kb_end_margin`). The columns move with the boards' corners, and
    because a column is vertical, so do the main board's four mouth column
@@ -377,7 +381,9 @@ The owner, the same day, on the main board's two tail-end mounts:
    walks toward the mouth until it clears HDR-SERVICE's notch, J-UMB's band,
    U-BUCK's window, J-MIDI and its plug, and the rest of what a mount must
    clear. On the near side, J-UMB's band and HDR-SERVICE's notch still hold
-   it short of the end; on the far side, J-MIDI does
+   it short of the end. The pair then stands at the one place along the
+   body that both reach, level across it as the columns are (owner's
+   approval, above); J-MIDI does not bind it there and stays where it was
    (*"main board mounts on the bottom plate"*; the places are
    `mechanical/export/pcb-geometry.echo`).
 

@@ -1634,7 +1634,8 @@ n_cols = len(cb_cols);
 // body, as far toward the tail as the bottom plate's end allows (a stud keeps
 // hardware.stud_edge from it, and from HDR-SERVICE's window), and is walked
 // toward the mouth until it is clear of what so_clear names - J-UMB's band
-// among them, which still binds the near-side one: J-UMB spans that line.
+// among them, which still binds the near-side one: J-UMB spans that line -
+// and the pair then stands at the one x both reach (tail_pair_x).
 col_line_y = [min([for (m = columns()) m[1]]), max([for (m = columns()) m[1]])];
 tail_mount_x0 = min(ua_x0 - 4, bplate_x1 - hardware_stud_edge);
 function tail_clear(p) = so_clear(p) && p[0] <= bplate_x1 - hardware_stud_edge
@@ -1643,8 +1644,14 @@ function tail_clear(p) = so_clear(p) && p[0] <= bplate_x1 - hardware_stud_edge
     && rect_gap(p, [(svc_at[0] + svc_end[0]) / 2, svc_at[1]], [svc_end[0] - svc_at[0] + boards_pin_pad, boards_pin_pad], 0) >= mb_keep_d / 2 + boards_board_clear
     // and J-MIDI with its plug, in the far corner (midi.hdr_at, issue #37)
     && rect_gap(p, midi_hdr_at, [midi_hdr_sz[0], midi_hdr_sz[1]], 0) >= mb_keep_d / 2 + boards_board_clear;
+// The pair STANDS LEVEL ACROSS THE BODY, as the columns do (owner, 2026-10-05,
+// issue #43: "Go through recommendations. That sounds fine"): the first x,
+// walking from the plate's end, at which both are clear.
+tail_pair_x = let(ok = [for (d = [0 : 0.5 : 40]) let(x = tail_mount_x0 - d)
+                            if (tail_clear([x, col_line_y[0]]) && tail_clear([x, col_line_y[1]])) x]) len(ok) > 0 ? ok[0] : undef;
+tail_pair = [for (y = col_line_y) tail_pair_x == undef ? undef : [tail_pair_x, y]];
 cb_ends = concat([for (y = [cb_y[0] + end_mount_in, cb_y[1] - end_mount_in]) first_clear([for (d = [0 : 1 : 30]) [cb_x[0] + 4 + d, y]])],
-                 [for (y = col_line_y) let(ok = [for (d = [0 : 0.5 : 40]) let(p = [tail_mount_x0 - d, y]) if (tail_clear(p)) p]) len(ok) > 0 ? ok[0] : undef]);
+                 tail_pair);
 // An end mount with a column's mount within hardware.end_mount_merge_d is
 // dropped: the column already holds the board there (owner, 2026-09-30).
 function near_col(p) = min([for (c = cb_cols) norm(p - c[0])]);
