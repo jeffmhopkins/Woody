@@ -746,7 +746,17 @@ families:
   nets run side by side through one corridor (the pitch defaults to the least
   the track and clearance allow, on the grid). **`iterations:`** and
   **`time_s:`** cap the negotiation (`pcb_route.FAMILY_ITERATIONS`,
-  `FAMILY_TIME_S`).
+  `FAMILY_TIME_S`), **`fallback_s:`** the `complete` fallback after it
+  (`FALLBACK_TIME_S`); what is still queued at the cap is reported failed.
+  **A region holds the fallback too:** `complete` lays nothing outside the
+  family's `region:` and takes up no net with copper outside it or with locked
+  copper, nor an earlier family's - a connection whose only way through is such a
+  net fails at once (`pcb_families_test.py` case 5). **A layer-3 channel:** a
+  family whose `layers:` names `In2.Cu` routes on it whatever `directions:` says,
+  best inside a `region:`; an In2 rule-area keep-out holds there as on any layer
+  (case 6). After families, `pcb.py route`'s rescue stays inside `route_fence:`,
+  else the box round the families' regions, and stops at `rescue_s:` (default
+  `FALLBACK_TIME_S`).
 - **Inside a family: negotiated congestion** (PathFinder). Every connection
   is routed letting its track share grid cells with the family's other nets -
   never with copper already laid, a keep-out or the edge, which stay hard - at a

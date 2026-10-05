@@ -976,7 +976,7 @@ def _fill(path):
                     f"import pcb_route; pcb_route.fill_zones({path!r})"], check=True)
 
 
-def rescue(path, bdir, radii=(1.5, 3.0, 5.0)):
+def rescue(path, bdir, radii=(1.5, 3.0, 5.0), fence=None, time_s=None):
     """Rip-up for what pcb_route.complete could not route, on a saved, filled board: for
     each connection still missing, the unlocked tracks and vias of OTHER nets within
     `radii` of it (never a plane net's, never locked copper: the pair and the fanout) are
@@ -988,7 +988,10 @@ def rescue(path, bdir, radii=(1.5, 3.0, 5.0)):
     from shapely.geometry import Point, box
     lay = layout_yaml(bdir)
     planes = set(lay.get("fanout") or []) | {pl["net"] for pl in lay.get("planes") or []}
-    fence = pcb_route.fence_of(lay)         # layout.yaml route_fence: nothing outside it is taken up
+    # layout.yaml route_fence (or the caller's fence): nothing outside it is taken up or laid
+    fence = fence or pcb_route.fence_of(lay)
+    import time as _time
+    t_start = _time.monotonic()
     score = lambda p: (lambda d: len(d.get("unconnected_items", [])) + len(d.get("violations", [])))(drc(p))
     base, kept, tried = score(path), 0, set()
     # the trial board beside its own project file, so DRC reads the same rules
@@ -1002,6 +1005,10 @@ def rescue(path, bdir, radii=(1.5, 3.0, 5.0)):
         while progress:
             progress = False
             for net, pa, pb in unconnected_of(path):
+                if time_s is not None and _time.monotonic() - t_start > time_s:
+                    print(f"route: rescue - time cap ({time_s:.0f} s) reached", flush=True)
+                    progress = False
+                    break
                 key = (net, round(pa[0], 1), round(pa[1], 1), round(pb[0], 1), round(pb[1], 1))
                 if key in tried:
                     continue
@@ -1025,13 +1032,13 @@ def rescue(path, bdir, radii=(1.5, 3.0, 5.0)):
                     hit, nv = {t.GetNetname() for t in victims}, len(victims)
                     for t in victims:
                         board.Delete(t)
-                    if pcb_route.complete(board, lay, [(net, pa, pb)]):
+                    if pcb_route.complete(board, lay, [(net, pa, pb)], region=fence):
                         continue
                     try:
                         pcbnew.SaveBoard(tmp, board)
                         _fill(tmp)
                         b2 = pcbnew.LoadBoard(tmp)
-                        pcb_route.complete(b2, lay, [m for m in unconnected_of(tmp) if m[0] in hit])
+                        pcb_route.complete(b2, lay, [m for m in unconnected_of(tmp) if m[0] in hit], region=fence)
                         pcb_route.tidy(b2, lay)
                         pcbnew.SaveBoard(tmp, b2)
                         _fill(tmp)
@@ -1119,7 +1126,17 @@ def cmd_route(bdir, chunk=30):
         print(f"route: {len(batch) - len(failed)} of {len(batch)} routed this step; saved", flush=True)
     left = unconnected_of(path)
     if left and not lay.get("no_rescue"):
-        print(f"route: rescue - {rescue(path, bdir)} kept", flush=True)
+        fence, cap = None, None
+        if lay.get("families"):
+            # after families, the rescue stays where they routed: route_fence, else the box
+            # round every family's region (when any has one); and it is capped (#40: one ran
+            # past an hour, re-routing chain lines 140 mm outside the region)
+            regs = [f_["region"] for f_ in lay["families"] if f_.get("region")]
+            if not lay.get("route_fence") and regs:
+                fence = (min(min(r[0], r[2]) for r in regs), min(min(r[1], r[3]) for r in regs),
+                         max(max(r[0], r[2]) for r in regs), max(max(r[1], r[3]) for r in regs))
+            cap = float(lay.get("rescue_s", pcb_route.FALLBACK_TIME_S))
+        print(f"route: rescue - {rescue(path, bdir, fence=fence, time_s=cap)} kept", flush=True)
     board = pcbnew.LoadBoard(path)
     pcb_route.tidy(board, lay)
     for d in list(board.GetDrawings()):

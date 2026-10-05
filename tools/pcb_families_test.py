@@ -23,6 +23,19 @@ first - lays SHORT straight across and walls LONG in.
   1. no families:          the old order, complete() itself
   2. families: [LONG]       LONG first, then SHORT (rest) goes round
   3. families: [both]       one family: negotiation finds the same answer itself
+
+THE FENCE CASE (#40: the tail trial's fallback re-routed chain lines 140 mm outside its
+region). WALL, already routed and unlocked, runs from its pad at x 10 along the bottom
+edge and up x 30 to its pad at the top edge: TARGET (25, 5) -> (40, 15) has no way past
+it on its one layer, so the only way through is to take WALL up - and WALL has copper
+outside the region x 20-60.
+  4. no region, rip_up: 1  (control) WALL is taken up and TARGET routed
+  5. region [20, 0, 60, 20]          TARGET fails, cleanly and at once; WALL untouched
+
+THE LAYER-3 CHANNEL. A four-layer board; TARGET (10, 10) -> (50, 10) on the front, a
+locked wall of another net across the front at x 30, and an In2.Cu keep-out over
+x 25-35 but for a channel y 9-11. The family names [F.Cu, In2.Cu] and a region:
+  6. it routes, through In2.Cu, inside the channel, nothing on In2 in the keep-out
 """
 import argparse
 import os
@@ -86,6 +99,115 @@ def run(families, plot=None, tag=""):
         import pcb_plot
         pcb_plot.plot(p, os.path.join(plot, f"families-test-{tag}.png"), nets=list(PADS), title=f"families test: {tag}")
     return sorted(m[0] for m in failed), length, rep
+
+
+def edge(b, w, h):
+    for (x0, y0), (x1, y1) in (((0, 0), (w, 0)), ((w, 0), (w, h)), ((w, h), (0, h)), ((0, h), (0, 0))):
+        s_ = pcbnew.PCB_SHAPE(b)
+        s_.SetShape(pcbnew.SHAPE_T_SEGMENT)
+        s_.SetLayer(pcbnew.Edge_Cuts)
+        s_.SetStart(pcbnew.VECTOR2I(MM(x0), MM(y0)))
+        s_.SetEnd(pcbnew.VECTOR2I(MM(x1), MM(y1)))
+        s_.SetWidth(MM(0.1))
+        b.Add(s_)
+
+
+def pads(b, net, pts, ref0):
+    ni = pcbnew.NETINFO_ITEM(b, net)
+    b.Add(ni)
+    for m, (x, y) in enumerate(pts):
+        fp = pcbnew.FOOTPRINT(b)
+        fp.SetReference(f"TP{ref0 + m}")
+        b.Add(fp)
+        pad = pcbnew.PAD(fp)
+        pad.SetAttribute(pcbnew.PAD_ATTRIB_SMD)
+        pad.SetShape(pcbnew.PAD_SHAPE_RECT)
+        pad.SetSize(pcbnew.VECTOR2I(MM(1.0), MM(1.0)))
+        ls = pcbnew.LSET()
+        ls.AddLayer(pcbnew.F_Cu)
+        pad.SetLayerSet(ls)
+        pad.SetNumber("1")
+        fp.Add(pad)
+        fp.SetPosition(pcbnew.VECTOR2I(MM(x), MM(y)))
+        pad.SetNet(ni)
+    return ni
+
+
+def track(b, ni, pts, layer=pcbnew.F_Cu, locked=False, w=0.25):
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+        t = pcbnew.PCB_TRACK(b)
+        t.SetStart(pcbnew.VECTOR2I(MM(x0), MM(y0)))
+        t.SetEnd(pcbnew.VECTOR2I(MM(x1), MM(y1)))
+        t.SetWidth(MM(w))
+        t.SetLayer(layer)
+        t.SetNet(ni)
+        t.SetLocked(locked)
+        b.Add(t)
+
+
+def copper(b, net):
+    return sorted((t.GetLayer(), t.GetStart().x, t.GetStart().y, t.GetEnd().x, t.GetEnd().y)
+                  for t in b.GetTracks() if t.GetNetname() == net)
+
+
+def fence_case(region):
+    """4 / 5: WALL is the only rip-up candidate, and it has copper outside the region."""
+    import time
+    b = pcbnew.BOARD()
+    edge(b, 60.0, 20.0)
+    pads(b, "TARGET", [(25.0, 5.0), (40.0, 15.0)], 1)
+    wall = pads(b, "WALL", [(10.0, 15.0), (30.0, 1.0)], 3)
+    track(b, wall, [(10.0, 15.0), (10.0, 19.2), (30.0, 19.2), (30.0, 1.0)])
+    before = copper(b, "WALL")
+    lay = dict(LAY, rip_up=1, net_classes={"one_layer": {"nets": ["TARGET", "WALL"], "track": 0.25, "layers": ["F.Cu"]}})
+    fam = {"name": "t", "nets": ["TARGET"]}
+    if region:
+        fam["region"] = region
+    lay["families"] = [fam]
+    t0 = time.monotonic()
+    failed = pcb_route.route_families(b, lay, [("TARGET", (25.0, 5.0), (40.0, 15.0))])
+    return sorted({m[0] for m in failed}), copper(b, "WALL") == before, copper(b, "TARGET"), time.monotonic() - t0
+
+
+def channel_case(plot=None):
+    """6: a family on [F.Cu, In2.Cu] through an In2 channel between keep-outs."""
+    from shapely.geometry import LineString, box
+    b = pcbnew.BOARD()
+    b.SetCopperLayerCount(4)
+    edge(b, 60.0, 20.0)
+    pads(b, "TARGET", [(10.0, 10.0), (50.0, 10.0)], 1)
+    wall = pcbnew.NETINFO_ITEM(b, "WALL")
+    b.Add(wall)
+    track(b, wall, [(30.0, 0.6), (30.0, 19.4)], locked=True)
+    keep = [(25.0, 0.0, 35.0, 9.0), (25.0, 11.0, 35.0, 20.0)]
+    for x0, y0, x1, y1 in keep:
+        z = pcbnew.ZONE(b)
+        z.SetIsRuleArea(True)
+        ls = pcbnew.LSET()
+        ls.AddLayer(pcbnew.In2_Cu)
+        z.SetLayerSet(ls)
+        z.SetDoNotAllowTracks(True)
+        z.SetDoNotAllowVias(True)
+        z.SetDoNotAllowCopperPour(True)
+        ol = z.Outline()
+        ol.NewOutline()
+        for x, y in ((x0, y0), (x1, y0), (x1, y1), (x0, y1)):
+            ol.Append(MM(x), MM(y))
+        b.Add(z)
+    lay = dict(LAY, net_classes={}, families=[{"name": "channel", "nets": ["TARGET"], "layers": ["F.Cu", "In2.Cu"],
+                                              "region": [5.0, 2.0, 55.0, 18.0]}])
+    failed = pcb_route.route_families(b, lay, [("TARGET", (10.0, 10.0), (50.0, 10.0))])
+    inner = [t for t in b.GetTracks() if type(t) is pcbnew.PCB_TRACK and t.GetNetname() == "TARGET" and t.GetLayer() == pcbnew.In2_Cu]
+    kz = [box(*k) for k in keep]
+    hit = [t for t in inner if any(LineString([(pcbnew.ToMM(t.GetStart().x), pcbnew.ToMM(t.GetStart().y)),
+                                               (pcbnew.ToMM(t.GetEnd().x), pcbnew.ToMM(t.GetEnd().y))]).buffer(0.125).intersects(k) for k in kz)]
+    vias = sum(1 for t in b.GetTracks() if isinstance(t, pcbnew.PCB_VIA) and t.GetNetname() == "TARGET")
+    if plot:
+        p = os.path.join(tempfile.mkdtemp(prefix="families-"), "c.kicad_pcb")
+        pcbnew.SaveBoard(p, b)
+        import pcb_plot
+        pcb_plot.plot(p, os.path.join(plot, "families-test-channel.png"), nets=["TARGET", "WALL"], title="families test: In2 channel")
+    return [m[0] for m in failed], len(inner), len(hit), vias
 
 
 RUN = """
@@ -167,6 +289,18 @@ def main():
     print(f"3. families: [both] (negotiated):           failed {f3 or 'none'}, {l3:.1f} mm of track, "
           f"{r3[0]['negotiated']} negotiated in {r3[0]['rounds']} round(s)")
     ok &= not f3 and r3[0]["negotiated"] == 2
+    f4, same4, t4, s4 = fence_case(None)
+    print(f"4. fence case, no region (control):         failed {f4 or 'none'}, WALL {'untouched' if same4 else 'taken up'}, "
+          f"TARGET {len(t4)} track(s), {s4:.1f} s")
+    ok &= not f4 and not same4
+    f5, same5, t5, s5 = fence_case([20.0, 0.0, 60.0, 20.0])
+    print(f"5. fence case, region x 20-60:              failed {f5 or 'none'}, WALL {'untouched' if same5 else 'taken up'}, "
+          f"TARGET {len(t5)} track(s), {s5:.1f} s")
+    ok &= f5 == ["TARGET"] and same5 and not t5
+    f6, n6, h6, v6 = channel_case(a.plot)
+    print(f"6. In2.Cu channel:                          failed {f6 or 'none'}, {n6} In2 track(s), {v6} via(s), "
+          f"{h6} In2 track(s) in the keep-out")
+    ok &= not f6 and n6 > 0 and h6 == 0
     print("PASS" if ok else "FAIL")
     return 0 if ok else 1
 

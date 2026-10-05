@@ -1957,7 +1957,8 @@ def chamfer(board, lay, size):
     return n
 
 
-def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500, frozen=(), layers=None, via_cost=None):
+def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500, frozen=(), layers=None, via_cost=None,
+             region=None, time_s=None):
     """After the autorouter: each connection KiCad still counts missing - `unconnected`,
     [(net, (x, y), (x, y))], the two copper items' positions from its DRC - routed by
     A* on both outer layers at once, on the lazy 0.2 mm grid, a via wherever one is legal
@@ -1970,8 +1971,14 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500, frozen=(), 
 
     The three keywords are the families stage's (route_families) and change nothing at
     their defaults: `frozen` nets the rip-up may not take up (an earlier family's),
-    `layers` the routed layers ('F', 'B', 'I') it may use, `via_cost` in place of
-    directions: via_cost."""
+    `layers` the routed layers ('F', 'B', 'I') it may use - 'I' (In2.Cu, layer 3) too
+    when named, whatever directions: says - and `via_cost` in place of directions:
+    via_cost. And `region` [x0, y0, x1, y1] (board mm), else layout.yaml route_fence: no
+    copper is laid outside it (its search stays inside, but for the target copper
+    itself), and no net with copper outside it, or with locked copper, is taken up.
+    `time_s` caps the whole call: what is still queued then is returned failed."""
+    import time as _time
+    t_start = _time.monotonic()
     import pcb
     obs = Obstacles(board, lay)
     classes = lay.get("net_classes") or {}
@@ -1979,11 +1986,13 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500, frozen=(), 
     failed = []
     fixed = set(lay.get("fanout") or []) | {pl["net"] for pl in lay.get("planes") or []} | \
         {s_["net"] for s_ in lay.get("islands") or []} | {n for pr in lay.get("pairs") or [] for n in pr["nets"]} | set(frozen)
-    fence = fence_of(lay)
+    fence = fence_of({"route_fence": region}) if region else fence_of(lay)
     if fence is not None:
-        # layout.yaml route_fence: a net with any copper outside it is not taken up (its
-        # rip-up is the whole net), and neither is a net with locked copper
+        # a region (a family's, or route_fence:): a net with any copper outside it is not
+        # taken up (its rip-up is the whole net), and neither is a net with locked copper
         fixed |= {t.GetNetname() for t in board.GetTracks() if is_fixed(t, fence)}
+        from shapely.prepared import prep as _prep
+        fence_box = box(*fence)
     limit, rips = int(lay.get("rip_up", 0)), {}
     queue = list(unconnected)
     # the layers it routes: the outer two, and layer 3 where layout.yaml directions: names it
@@ -1991,7 +2000,7 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500, frozen=(), 
     dirs_ = lay.get("directions") or {}
     routed_all = ["F", "B"] + (["I"] if "In2.Cu" in (dirs_.get("layers") or {}) or "In2.Cu" in (dirs_.get("routed") or []) else [])
     if layers is not None:
-        routed_all = [L for L in routed_all if L in layers]
+        routed_all = [L for L in ("F", "B", "I") if L in layers]
     via_cost = float(dirs_.get("via_cost", VIA) if via_cost is None else via_cost)
     # a net class's `layers:` - the only layers its nets route on (an analog net kept on
     # layer 1, over its island, not on layer 4 over another rail's plane)
@@ -2006,6 +2015,10 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500, frozen=(), 
     via_of = {n: tuple(float(v) for v in c["via"]) for c in classes.values() if c.get("via") for n in c["nets"]}
     via_default = (obs.via, obs.drill)
     while queue:
+        if time_s is not None and _time.monotonic() - t_start > time_s:
+            print(f"route: complete - time cap ({time_s:.0f} s) reached; {len(queue)} connection(s) left", flush=True)
+            failed += [(n_, a_, b_, "the time cap") for n_, a_, b_ in queue]
+            break
         net, pa, pb = queue.pop(0)
         if (obs.via, obs.drill) != via_of.get(net, via_default):
             obs.via, obs.drill = via_of.get(net, via_default)
@@ -2013,7 +2026,15 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500, frozen=(), 
         routed = [L for L in routed_all if L in only.get(net, routed_all)]
         lc_ = lcost.get(net, {})
         w = width_of(net)
+        if not routed:
+            failed.append((net, pa, pb, "no layer it may use"))
+            continue
         grids = {L: Grid(obs, L, w / 2, own={net}) for L in routed}
+        if fence is not None:
+            # nothing laid outside the region: its cells are closed (the target's own
+            # copper is still reached - a cell in dst is entered whatever it is)
+            for g_ in grids.values():
+                g_.inner = _prep(obs.outline.buffer(-(obs.edge + w / 2 + SLACK)).intersection(fence_box))
         gF = grids[routed[0]]       # every layer's grid has one frame: its cells and points
         vcache = {}
 
@@ -2229,6 +2250,7 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500, frozen=(), 
 
 FAMILY_ITERATIONS = 16      # negotiation rounds, a family's `iterations:`
 FAMILY_TIME_S = 300.0       # seconds a family may negotiate, its `time_s:`
+FALLBACK_TIME_S = 600.0     # seconds its complete() fallback may take, its `fallback_s:`
 PRES0, PRES_GROW = 0.5, 2.0     # the present-sharing factor, and its growth per round
 HIST = 1.0                  # what one round of sharing adds to a cell's history cost
 LANE = 0.55                 # `bundle: true`: a step on a lane beside a bundle-mate costs this much
@@ -2416,7 +2438,9 @@ def route_family(board, lay, spec, conns, frozen=()):
     routed_all = ["F", "B"] + (["I"] if "In2.Cu" in (dirs_.get("layers") or {}) or "In2.Cu" in (dirs_.get("routed") or []) else [])
     fam_layers = [_LK[L] for L in spec["layers"]] if spec.get("layers") else None
     if fam_layers:
-        routed_all = [L for L in routed_all if L in fam_layers]
+        # a family that names In2.Cu routes on it (a layer-3 channel, best inside a
+        # region:), whatever directions: says; its keep-outs hold there as anywhere
+        routed_all = [L for L in ("F", "B", "I") if L in fam_layers]
     if not routed_all:
         raise SystemExit(f"route: family {name} - its layers: {spec.get('layers')} are none the board routes")
     via_cost = float(spec.get("via_cost", dirs_.get("via_cost", VIA)))
@@ -2659,7 +2683,8 @@ def route_family(board, lay, spec, conns, frozen=()):
         obs.via, obs.drill = via_default
         obs._via_inner = None
     if left:
-        fl = complete(board, lay, left, frozen=frozen, layers=fam_layers, via_cost=spec.get("via_cost"))
+        fl = complete(board, lay, left, frozen=frozen, layers=fam_layers, via_cost=spec.get("via_cost"),
+                      region=spec.get("region"), time_s=float(spec.get("fallback_s", FALLBACK_TIME_S)))
         rec["fallback"] = len(left) - len(fl)
         rec["failed_list"] = fl
     rec["failed"] = len(rec["failed_list"])
