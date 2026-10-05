@@ -57,7 +57,7 @@ components:
       at the transmitter only) [ds connectors/SAMESKY-SJ5-43502PM.pdf p.2]'
   R-MIDI-R:
     of: R-MIDI
-    value: 220R
+    value: 182R 1%
     pins:
     - 1
     - 2
@@ -65,14 +65,15 @@ components:
       source), RC in Type B'
   R-MIDI-T:
     of: R-MIDI
-    value: 220R
+    value: 182R 1%
     pins:
     - 1
     - 2
-    note: 'TIP''s series resistor, CA-033 Figure 1''s 5 V row (220 ohm 5 % 0.25 W) [ds connectors/MIDI-CA-033-ELECTRICAL-SPEC-UPDATE-2014.pdf
-      p.3]. It is RA when the tip is the source (Type B) and RC when it is the sink (Type A): the two lines are
-      identical so the choice is firmware''s. Limits a short of the tip to the sleeve to 5.0 V / 209 ohm = 23.9
-      mA, inside U-LVLSHIFT''s 25 mA continuous rating (midi-out.md)'
+    note: 'TIP''s series resistor: CA-033 Figure 1''s 5 V row, re-sized to 182 ohm 1 % 0.25 W (issue #39) - the
+      smallest E96 value that holds a short of the tip to the sleeve under U-LVLSHIFT''s 25 mA absolute maximum
+      at the rail''s ceiling, the resistor at -1 % (midi-out.md, Why not lower resistors). DO NOT FIT 5 %: the derivation
+      needs 1 %. It is RA when the tip is the source (Type B) and RC when it is the sink (Type A): the two lines
+      are identical so the choice is firmware''s'
   U-TVS-MIDI:
     value: SP0504BAHTG
     pins:

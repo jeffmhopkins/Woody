@@ -349,7 +349,7 @@ nets:
 
   INST_5V_A:
     kind: power
-    carries: "Buck A, through D-USBOR onto the dev board's 5 V pin"
+    carries: "Buck A, through the ideal-diode OR (U-USBOR, Q-USBOR) onto the dev board's 5 V pin"
     figure: matrix-led-current
     driver: carrier/power-entry-instrument
     receivers: [carrier/led-strip-drive, carrier/carrier]

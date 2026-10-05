@@ -4,16 +4,18 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/carrier/power-entry-instrument/sim/sims.yaml: c0e62a80d6155dee
-  hardware/carrier/power-entry-instrument/netlist.yaml: e9a49796fdb69d0d
+  hardware/carrier/power-entry-instrument/sim/sims.yaml: 74df1b0396d96b17
+  hardware/carrier/power-entry-instrument/netlist.yaml: 34a972189d3e5b5d
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
   hardware/module/power-entry/netlist.yaml: 14fd898035959809
   hardware/carrier/led-strip-drive/netlist.yaml: e4c3ffbbe5c48f52
   hardware/carrier/power-entry-instrument/sim/pei-z.cir: 7142ec09b25a23ab
   hardware/carrier/power-entry-instrument/sim/pei-start.cir: a6ebb516eedc017e
   hardware/carrier/power-entry-instrument/sim/pei-pwm.cir: 9a3106a2fc613c56
+  hardware/carrier/power-entry-instrument/sim/pei-or.cir: 6955961510f33cb8
   hardware/module/umbilical-load-switch/sim/lt1641.inc: 59be165ccd4451a6
   hardware/module/umbilical-load-switch/sim/sims.yaml: cadec99739eed8eb
+  drc:Matrix ribbon length: '49.15'
   figure:umbilical-current: 359 mA
 ngspice: '42'
 sims:
@@ -841,4 +843,214 @@ sims:
     - expr: max['pos12_max'] < 13.5
       why: INST_POS12 stays under the WS2815B-V1's 13.5 V absolute maximum as the row switches (the row going dark kicks it
         up through the cable's inductance)
+      pass: true
+  or-rack[or_i_load=0.05]:
+    corners: 33
+    measures:
+      v_inst:
+        nominal: 4.97938
+        min: 4.64536
+        min_at: or_rds+ or_v_buck- or_v_cp- or_v_reg+ or_vth+
+        max: 5.3114
+        max_at: or_rds- or_v_buck+ or_v_cp- or_v_reg- or_vth-
+      drop_mv:
+        nominal: 20.116
+        min: 13.1014
+        min_at: or_rds- or_v_buck- or_v_cp- or_v_reg- or_vth-
+        max: 29.1428
+        max_at: or_rds+ or_v_buck+ or_v_cp- or_v_reg+ or_vth+
+      i_rev:
+        nominal: -0.0500072
+        min: -0.0500075
+        min_at: or_rds- or_v_buck+ or_v_cp- or_v_reg- or_vth-
+        max: -0.0500069
+        max_at: or_rds- or_v_buck- or_v_cp- or_v_reg+ or_vth+
+    asserts:
+    - expr: max['drop_mv'] < 50.0
+      why: 'the OR costs under 50 mV from BUCK_A_OUT to INST_5V_A at every corner, up to the 5 V rail''s clamp-legal worst
+        - against the SS14''s 0.50 V max at 1 A it replaces: 20 mV regulated at light load, the FET''s R_DS(on) fully enhanced
+        at the top'
+      pass: true
+    - expr: min['v_inst'] > 4.625
+      why: 'INST_5V_A''s floor with the rack alone, the buck at 4.675 V less the OR: the 4.625 V the MIDI out''s loop current
+        is worked at (midi-out.md, The loop current)'
+      pass: true
+    - expr: max['v_inst'] < 5.325
+      why: 'and its ceiling, the buck''s 5.325 V: the MIDI out''s short-circuit corner (midi-out.md, Why not lower resistors)'
+      pass: true
+  or-rack[or_i_load=0.928]:
+    corners: 33
+    measures:
+      v_inst:
+        nominal: 4.9698
+        min: 4.63039
+        min_at: or_rds+ or_v_buck- or_v_cp- or_v_reg+ or_vth-
+        max: 5.30078
+        max_at: or_rds- or_v_buck+ or_v_cp+ or_v_reg- or_vth+
+      drop_mv:
+        nominal: 20.9152
+        min: 14.935
+        min_at: or_rds- or_v_buck- or_v_cp+ or_v_reg- or_vth+
+        max: 35.325
+        max_at: or_rds+ or_v_buck+ or_v_cp- or_v_reg+ or_vth-
+      i_rev:
+        nominal: -0.928007
+        min: -0.928008
+        min_at: or_rds- or_v_buck+ or_v_cp+ or_v_reg- or_vth+
+        max: -0.928007
+        max_at: or_rds+ or_v_buck- or_v_cp- or_v_reg+ or_vth-
+    asserts:
+    - expr: max['drop_mv'] < 50.0
+      why: 'the OR costs under 50 mV from BUCK_A_OUT to INST_5V_A at every corner, up to the 5 V rail''s clamp-legal worst
+        - against the SS14''s 0.50 V max at 1 A it replaces: 20 mV regulated at light load, the FET''s R_DS(on) fully enhanced
+        at the top'
+      pass: true
+    - expr: min['v_inst'] > 4.625
+      why: 'INST_5V_A''s floor with the rack alone, the buck at 4.675 V less the OR: the 4.625 V the MIDI out''s loop current
+        is worked at (midi-out.md, The loop current)'
+      pass: true
+    - expr: max['v_inst'] < 5.325
+      why: 'and its ceiling, the buck''s 5.325 V: the MIDI out''s short-circuit corner (midi-out.md, Why not lower resistors)'
+      pass: true
+  or-both[or_i_load=0.05]:
+    corners: 17
+    measures:
+      v_inst:
+        nominal: 4.97938
+        min: 4.65438
+        min_at: or_is_d1- or_v_buck- or_v_rev- or_v_usb-
+        max: 5.30438
+        max_at: or_is_d1- or_v_buck+ or_v_rev- or_v_usb-
+      i_rev:
+        nominal: -0.0500022
+        min: -0.0500034
+        min_at: or_is_d1+ or_v_buck+ or_v_rev- or_v_usb-
+        max: 4.9414e-10
+        max_at: or_is_d1+ or_v_buck- or_v_rev- or_v_usb+
+      i_usb_back:
+        nominal: -4.67798e-08
+        min: -0.0500022
+        min_at: or_is_d1- or_v_buck- or_v_rev- or_v_usb+
+        max: 1.18285e-06
+        max_at: or_is_d1+ or_v_buck+ or_v_rev- or_v_usb-
+    asserts:
+    - expr: max['i_rev'] < 10.0e-6
+      why: 'NO BACK-FEED INTO THE BUCK: with VBUS through D1 above the buck, U-USBOR holds Q-USBOR off and its body diode
+        blocks, at every corner of the two sources, D1 and V(AK REV) - against a buck modelled as a source that would SINK
+        whatever came back (the bound: U-USBOR''s own CATHODE sink, 2.2 uA, and the FET''s leakage)'
+      pass: true
+    - expr: max['i_usb_back'] < 50.0e-6
+      why: 'and none into the host: D1 blocks the buck from VBUS - its leakage, modelled as 40 uA at 40 V, is all that flows'
+      pass: true
+  or-both[or_i_load=0.928]:
+    corners: 17
+    measures:
+      v_inst:
+        nominal: 4.9698
+        min: 4.6448
+        min_at: or_is_d1- or_v_buck- or_v_rev- or_v_usb-
+        max: 5.2948
+        max_at: or_is_d1- or_v_buck+ or_v_rev- or_v_usb+
+      i_rev:
+        nominal: -0.928002
+        min: -0.928003
+        min_at: or_is_d1+ or_v_buck+ or_v_rev- or_v_usb-
+        max: 4.65816e-10
+        max_at: or_is_d1+ or_v_buck- or_v_rev- or_v_usb+
+      i_usb_back:
+        nominal: -1.08311e-07
+        min: -0.928002
+        min_at: or_is_d1+ or_v_buck- or_v_rev- or_v_usb+
+        max: 1.1647e-06
+        max_at: or_is_d1+ or_v_buck+ or_v_rev- or_v_usb-
+    asserts:
+    - expr: max['i_rev'] < 10.0e-6
+      why: 'NO BACK-FEED INTO THE BUCK: with VBUS through D1 above the buck, U-USBOR holds Q-USBOR off and its body diode
+        blocks, at every corner of the two sources, D1 and V(AK REV) - against a buck modelled as a source that would SINK
+        whatever came back (the bound: U-USBOR''s own CATHODE sink, 2.2 uA, and the FET''s leakage)'
+      pass: true
+    - expr: max['i_usb_back'] < 50.0e-6
+      why: 'and none into the host: D1 blocks the buck from VBUS - its leakage, modelled as 40 uA at 40 V, is all that flows'
+      pass: true
+  or-usb-unplug:
+    corners: 9
+    measures:
+      v_inst:
+        nominal: 4.6519
+        min: 4.6518
+        min_at: or_rds+ or_t_fwd- or_vth+
+        max: 4.65195
+        max_at: or_rds- or_t_fwd+ or_vth-
+      v_dip:
+        nominal: 4.62692
+        min: 4.61935
+        min_at: or_rds+ or_t_fwd+ or_vth+
+        max: 4.62737
+        max_at: or_rds- or_t_fwd- or_vth-
+      i_rev_before:
+        nominal: 4.84022e-10
+        min: 4.84022e-10
+        min_at: nominal
+        max: 4.84063e-10
+        max_at: or_rds- or_t_fwd- or_vth+
+    asserts:
+    - expr: max['i_rev_before'] < 10.0e-6
+      why: 'before the unplug USB carries the rail and Q-USBOR is off: no back-feed into the buck'
+      pass: true
+    - expr: min['v_dip'] > 4.675 - 0.1
+      why: 'SWITCH-OVER: as VCC_5V falls to the buck''s level, U-USBOR''s comparator clears and, after its forward-recovery
+        delay (1.4-2.6 us, TI-LM74700-Q1.pdf p.7), regulates Q-USBOR on; the Matrix''s ~11 uF carries the gap, so INST_5V_A
+        never falls more than 100 mV below the buck''s 4.675 V floor at any corner - the FET''s body diode, 0.75 V down, never
+        takes the load'
+      pass: true
+  or-rack-loss:
+    corners: 17
+    measures:
+      v_inst:
+        nominal: 4.2419
+        min: 4.2419
+        min_at: nominal
+        max: 4.33427
+        max_at: or_is_d1+ or_rds- or_t_rev- or_v_rev-
+      v_dip:
+        nominal: 4.22121
+        min: 4.20057
+        min_at: or_is_d1- or_rds+ or_t_rev+ or_v_rev+
+        max: 4.33427
+        max_at: or_is_d1+ or_rds- or_t_rev- or_v_rev-
+      i_rev:
+        nominal: 4.32863e-10
+        min: 4.32863e-10
+        min_at: nominal
+        max: 4.42299e-10
+        max_at: or_is_d1+ or_rds- or_t_rev- or_v_rev-
+      i_rev_peak:
+        nominal: 0.103467
+        min: 0.0197874
+        min_at: or_is_d1- or_rds- or_t_rev- or_v_rev-
+        max: 0.173637
+        max_at: or_is_d1+ or_rds+ or_t_rev+ or_v_rev+
+      t_rev_on:
+        nominal: 8.17103e-06
+        min: 1.05029e-06
+        min_at: or_is_d1- or_rds- or_t_rev- or_v_rev-
+        max: 1.35302e-05
+        max_at: or_is_d1+ or_rds+ or_t_rev+ or_v_rev+
+    asserts:
+    - expr: max['i_rev'] < 10.0e-6
+      why: once the buck is down, VBUS through D1 carries the Matrix and nothing flows back into the dead buck's output at
+        any corner
+      pass: true
+    - expr: max['i_rev_peak'] < 0.017 / 0.024
+      why: 'during the fall a reverse current flows only until U-USBOR sees it: its V(AK REV), -2 to -17 mV [TI-LM74700-Q1.pdf
+        p.6], across Q-USBOR''s 24 mohm at the least lets at most 0.71 A flow before it trips - and this model''s buck is
+        a source that can SINK it, the pessimistic case. i_rev_peak records how much does'
+      pass: true
+    - expr: max['t_rev_on'] < 20.0e-6
+      why: 'and it is a transient, not a back-feed: over 10 mA for under 20 us at every corner, while the buck''s output passes
+        INST_5V_A on its way down, then nothing (i_rev). A real R-78E with its input gone sinks far less than this model''s
+        source'
+      pass: true
+    - expr: min['v_dip'] > 4.0
+      why: INST_5V_A falls only to VBUS less D1 and the ribbon through the hand-over, above 4.0 V
       pass: true

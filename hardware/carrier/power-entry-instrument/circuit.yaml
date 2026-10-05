@@ -20,7 +20,9 @@ depends_on:
 - refdes:C-STRIP-BULK
 - refdes:D-REVSHUNT
 - refdes:D-TVS-PWR
-- refdes:D-USBOR
+- refdes:U-USBOR
+- refdes:Q-USBOR
+- refdes:C-USBOR
 - refdes:J-MCU
 - refdes:J-UMB
 - refdes:L-BUCK-IN

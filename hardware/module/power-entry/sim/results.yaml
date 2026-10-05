@@ -10,7 +10,7 @@ inputs:
   hardware/module/mod-channels/netlist.yaml: 00739b63d111a848
   hardware/module/breath-output-stage/netlist.yaml: e28cccf37c29f7b1
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
-  hardware/carrier/power-entry-instrument/netlist.yaml: e9a49796fdb69d0d
+  hardware/carrier/power-entry-instrument/netlist.yaml: 34a972189d3e5b5d
   hardware/carrier/led-strip-drive/netlist.yaml: e4c3ffbbe5c48f52
   hardware/module/power-entry/sim/poweron.cir: 0c1ee473967b4108
   hardware/module/power-entry/sim/groundshift.cir: 4aae040d6b7e03a1
@@ -23,7 +23,8 @@ inputs:
   hardware/module/power-entry/sim/lt3042.lib: 2664843cbe66f3e8
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
   hardware/module/umbilical-load-switch/sim/sims.yaml: cadec99739eed8eb
-  hardware/carrier/power-entry-instrument/sim/sims.yaml: c0e62a80d6155dee
+  hardware/carrier/power-entry-instrument/sim/sims.yaml: 74df1b0396d96b17
+  drc:Matrix ribbon length: '49.15'
   figure:umbilical-current: 359 mA
   figure:dac-rail: 5.23 V
   figure:mod-reference: 3.3333 V
