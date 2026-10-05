@@ -8,6 +8,9 @@ pieces at the end of this file from it, the ones an autorouter would get wrong:
 each plane net's pad to its plane by its own via (`fanout`), a pair of nets
 side by side (`route_pair`), and the moat's keep-out round an analog island
 (`moat_keepout`). Freerouting routes the rest (tools/pcb_freeroute.py).
+Under `route: astar` the rest is `complete` - or, with layout.yaml `families:`,
+`route_families`: family by family, each negotiated (issue #41; the comment above
+route_families).
 
 HOW IT WORKS
   * Both copper layers become grids (GRID mm). A cell is blocked for a net
@@ -1915,7 +1918,7 @@ def chamfer(board, lay, size):
     return n
 
 
-def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
+def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500, frozen=(), layers=None, via_cost=None):
     """After the autorouter: each connection KiCad still counts missing - `unconnected`,
     [(net, (x, y), (x, y))], the two copper items' positions from its DRC - routed by
     A* on both outer layers at once, on the lazy 0.2 mm grid, a via wherever one is legal
@@ -1924,21 +1927,28 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
     searched again through other nets' copper, each cell of it costing SOFT: the nets that
     path crosses are taken up whole (never a plane net's, the pair's or locked copper,
     and each net at most n times), the connection laid, and theirs queued again, pad to
-    pad. Returns the ones it could not route."""
+    pad. Returns the ones it could not route.
+
+    The three keywords are the families stage's (route_families) and change nothing at
+    their defaults: `frozen` nets the rip-up may not take up (an earlier family's),
+    `layers` the routed layers ('F', 'B', 'I') it may use, `via_cost` in place of
+    directions: via_cost."""
     import pcb
     obs = Obstacles(board, lay)
     classes = lay.get("net_classes") or {}
     width_of = lambda net: next((c["track"] for c in classes.values() if net in c["nets"]), lay["rules"]["track"])
     failed = []
     fixed = set(lay.get("fanout") or []) | {pl["net"] for pl in lay.get("planes") or []} | \
-        {s_["net"] for s_ in lay.get("islands") or []} | {n for pr in lay.get("pairs") or [] for n in pr["nets"]}
+        {s_["net"] for s_ in lay.get("islands") or []} | {n for pr in lay.get("pairs") or [] for n in pr["nets"]} | set(frozen)
     limit, rips = int(lay.get("rip_up", 0)), {}
     queue = list(unconnected)
     # the layers it routes: the outer two, and layer 3 where layout.yaml directions: names it
     # (a four-layer board whose layer 3 is a routing layer, the module's)
     dirs_ = lay.get("directions") or {}
     routed_all = ["F", "B"] + (["I"] if "In2.Cu" in (dirs_.get("layers") or {}) or "In2.Cu" in (dirs_.get("routed") or []) else [])
-    via_cost = float(dirs_.get("via_cost", VIA))
+    if layers is not None:
+        routed_all = [L for L in routed_all if L in layers]
+    via_cost = float(dirs_.get("via_cost", VIA) if via_cost is None else via_cost)
     # a net class's `layers:` - the only layers its nets route on (an analog net kept on
     # layer 1, over its island, not on layer 4 over another rail's plane)
     LK_ = {"F.Cu": "F", "B.Cu": "B", "In2.Cu": "I"}
@@ -1960,11 +1970,12 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
         lc_ = lcost.get(net, {})
         w = width_of(net)
         grids = {L: Grid(obs, L, w / 2, own={net}) for L in routed}
+        gF = grids[routed[0]]       # every layer's grid has one frame: its cells and points
         vcache = {}
 
         def via_ok(i, j):
             if (i, j) not in vcache:
-                x, y = grids["F"].xy((i, j))
+                x, y = gF.xy((i, j))
                 vcache[(i, j)] = obs.via_ok(x, y, net)
             return vcache[(i, j)]
 
@@ -1976,10 +1987,10 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
                 if n == net and kind in ("pad", "smd", "track", "via") and g.distance(Point(x, y)) < 0.05:
                     gx0, gy0, gx1, gy1 = g.bounds
                     g_ = g.buffer(-0.02)
-                    c0, c1 = grids["F"].cell(gx0, gy0), grids["F"].cell(gx1, gy1)
+                    c0, c1 = gF.cell(gx0, gy0), gF.cell(gx1, gy1)
                     for i in range(c0[0], c1[0] + 1):
                         for j in range(c0[1], c1[1] + 1):
-                            if g_.contains(Point(*grids["F"].xy((i, j)))):
+                            if g_.contains(Point(*gF.xy((i, j)))):
                                 out |= {(L, i, j) for L in ls if L in grids}    # a THT pad's inner layer only where it is routed
             return out
         src, dst = cells_of(pa), cells_of(pb)
@@ -2036,7 +2047,7 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
 
         def way_at(L, i, j):
             if regions:
-                x, y = grids["F"].xy((i, j))
+                x, y = gF.xy((i, j))
                 for rx0, ry0, rx1, ry1, w_ in regions:
                     if rx0 <= x <= rx1 and ry0 <= y <= ry1 and L in w_:
                         return w_[L]
@@ -2053,7 +2064,7 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
             return c if along else c * ag
 
         def search(src, dst, target, soft=False):
-            ti, tj = grids["F"].cell(*target)
+            ti, tj = gF.cell(*target)
             h = lambda i, j: math.hypot(i - ti, j - tj)
             openq, came, cost, seen = [], {}, {}, set()
             for s_ in src:
@@ -2144,16 +2155,479 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500):
             while m + 1 < len(path) and path[m + 1][0] == path[k][0]:
                 m += 1
             run = [p[1:] for p in path[k:m + 1]]
-            pts = [grids["F"].xy(c) for c in corners(run)]
+            pts = [gF.xy(c) for c in corners(run)]
             for a, b in zip(pts, pts[1:]):
                 lay_track(board, obs, net, a, b, w, path[k][0], locked=False)
             if m + 1 < len(path):
-                lay_via(board, obs, net, *grids["F"].xy(path[m][1:]), locked=False)
+                lay_via(board, obs, net, *gF.xy(path[m][1:]), locked=False)
             k = m + 1
     if (obs.via, obs.drill) != via_default:
         obs.via, obs.drill = via_default
         obs._via_inner = None
     return failed
+
+
+# ------------------------------------------------------------------ families (issue #41)
+#
+# The owner, 2026-10-05: "we should do families of traces... then do those and then do
+# the next ones then do the next ones instead of just letting the auto router go
+# Willy-nilly". layout.yaml `families:` - an ordered list - is routed one family at a
+# time, and each family's copper is fixed for the families after it. Inside a family
+# the connections are routed together by negotiated congestion (PathFinder, McMurchie
+# and Ebeling, 1995): every connection is routed letting its track share cells with
+# the family's other nets, each shared cell gets dearer (a present cost that grows
+# each round and a history cost that remembers), and all of them are routed again,
+# until none share a cell or the round or time cap is reached. The order is
+# crossing-aware - fewest airwire crossings first, then shortest - an idea from
+# drandyhaas/KiCadRoutingTools (MIT; the idea only, no code). What negotiation leaves
+# shared, or cannot reach, goes to complete() as before, the earlier families frozen.
+# Without `families:`, route_families() IS complete(): nothing else changes.
+
+FAMILY_ITERATIONS = 16      # negotiation rounds, a family's `iterations:`
+FAMILY_TIME_S = 300.0       # seconds a family may negotiate, its `time_s:`
+PRES0, PRES_GROW = 0.5, 2.0     # the present-sharing factor, and its growth per round
+HIST = 1.0                  # what one round of sharing adds to a cell's history cost
+LANE = 0.55                 # `bundle: true`: a step on a lane beside a bundle-mate costs this much
+_LK = {"F.Cu": "F", "B.Cu": "B", "In2.Cu": "I"}
+
+
+def _net_key(n):
+    return n.lstrip("/") if n else n
+
+
+def family_match(net, pats, lay):
+    """Is `net` one of `pats` - a name (with or without its leading /), an fnmatch glob,
+    or class:<name> (a layout.yaml net_classes: entry's nets)?"""
+    import fnmatch
+    k = _net_key(net)
+    for p in pats:
+        p = str(p)
+        if p.startswith("class:"):
+            c = (lay.get("net_classes") or {}).get(p[6:])
+            if c is None:
+                raise SystemExit(f"route: families - no net class {p[6:]!r} in net_classes:")
+            if k in {_net_key(n) for n in c["nets"]}:
+                return True
+        elif fnmatch.fnmatchcase(k, _net_key(p)):
+            return True
+    return False
+
+
+def family_plan(lay, nets):
+    """layout.yaml families: as [(spec, set of nets)], in routing order. `route_first:`
+    leads, as a family of that name; each net goes to the FIRST family that names it;
+    `rest` - every net no family names - is last, with the options of a family named
+    rest if one is listed. Plane, island, fanout and pair nets are routed before any
+    family (prepare) and are left out. An empty family is kept, so the report says so."""
+    skip = set(lay.get("fanout") or []) | {pl["net"] for pl in lay.get("planes") or []} | \
+        {s_["net"] for s_ in lay.get("islands") or []} | {n for pr in lay.get("pairs") or [] for n in pr["nets"]}
+    specs = list(lay.get("families") or [])
+    names = [s_.get("name") for s_ in specs]
+    if len(set(names)) != len(names) or None in names:
+        raise SystemExit("route: families - every family needs a name, and each name once")
+    if lay.get("route_first") and "route_first" not in names:
+        specs = [{"name": "route_first", "nets": list(lay["route_first"])}] + specs
+    rest_spec = next((s_ for s_ in specs if s_["name"] == "rest"), {"name": "rest"})
+    specs = [s_ for s_ in specs if s_["name"] != "rest"]
+    left = [n for n in nets if n and not n.startswith("unconnected") and n not in skip]
+    plan = []
+    for s_ in specs:
+        mine = {n for n in left if family_match(n, s_.get("nets") or [], lay)}
+        left = [n for n in left if n not in mine]
+        plan.append((s_, mine))
+    plan.append((rest_spec, set(left)))
+    return plan
+
+
+def _crossings(conns):
+    """For each connection (net, a, b), how many other nets' airwires its own crosses."""
+    def orient(p, q, r):
+        v = (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0])
+        return (v > 1e-9) - (v < -1e-9)
+    out = []
+    for k, (n, a, b) in enumerate(conns):
+        out.append(sum(1 for m, (n2, p, q) in enumerate(conns)
+                       if m != k and n2 != n and orient(a, b, p) * orient(a, b, q) < 0 and orient(p, q, a) * orient(p, q, b) < 0))
+    return out
+
+
+class _Shared:
+    """One layer's routing grid for one track width, shared by every net of that width
+    (Grid's test, cached once for all of them): each cell holds the nets whose copper is
+    within the clearance, as a frozenset, or None where nothing may go - outside the edge
+    clearance, a keep-out, an unplated hole, copper on no net. A cell is free for a net
+    when it holds no net but that one."""
+
+    def __init__(self, obs, layer, half):
+        from shapely.prepared import prep
+        self.obs, self.L = obs, layer
+        self.rad = half + obs.clear + SLACK
+        self.x0, self.y0 = obs.outline.bounds[:2]
+        self.inner = prep(obs.outline.buffer(-(obs.edge + half + SLACK)))
+        self.cache = {}
+
+    xy = Grid.xy
+    cell = Grid.cell
+
+    def holds(self, i, j):
+        c = self.cache.get((i, j), 0)
+        if c == 0:
+            p = Point(*self.xy((i, j)))
+            if not self.inner.contains(p):
+                c = None
+            else:
+                nets = set()
+                for g, n, ls, kind in self.obs.within(p, self.rad - 1e-4):
+                    if self.L not in ls or kind in ("silk", "hole", "vhole"):
+                        continue
+                    if kind in ("keepout", "npth") or not n:
+                        nets = None
+                        break
+                    nets.add(n)
+                c = None if nets is None else frozenset(nets)
+            self.cache[(i, j)] = c
+        return c
+
+    def free(self, net, i, j):
+        c = self.holds(i, j)
+        return c is not None and (not c or c == {net})
+
+
+def _directions(lay, xy):
+    """complete()'s `directions:` cost, as step_cost(L, di, dj, c, i, j)."""
+    import pcb
+    dirs = lay.get("directions") or {}
+    ag = float(dirs.get("against_cost", 1.0))
+    way = {_LK[k]: v for k, v in (dirs.get("layers") or {}).items() if k in _LK}
+    regions = []
+    for rg in dirs.get("regions") or []:
+        x0, y0, x1, y1 = rg["rect"]
+        (ax, ay), (bx, by) = pcb.to_pcb(x0, y0), pcb.to_pcb(x1, y1)
+        regions.append((min(ax, bx), min(ay, by), max(ax, bx), max(ay, by),
+                        {_LK[k]: v for k, v in (rg.get("layers") or {}).items() if k in _LK}))
+
+    def way_at(L, i, j):
+        if regions:
+            x, y = xy((i, j))
+            for rx0, ry0, rx1, ry1, w_ in regions:
+                if rx0 <= x <= rx1 and ry0 <= y <= ry1 and L in w_:
+                    return w_[L]
+        return way.get(L)
+
+    def step_cost(L, di, dj, c, i, j):
+        wl = way_at(L, i, j)
+        if wl is None:
+            return c
+        if di and dj:
+            return c * (1 + ag) / 2
+        return c if (di if wl == "horizontal" else dj) else c * ag
+    return step_cost
+
+
+def route_families(board, lay, unconnected, report=None):
+    """complete(), family by family, when layout.yaml has `families:`; complete() itself
+    when it has not. `unconnected` as complete's; returns what could not be routed. Each
+    family's record (route_family) is printed, and appended to `report` if one is given."""
+    if not lay.get("families"):
+        return complete(board, lay, unconnected)
+    allnets = sorted({str(n) for n in board.GetNetsByName().keys()} | {m[0] for m in unconnected})
+    failed, done = [], set()
+    for spec, nets in family_plan(lay, allnets):
+        conns = [m for m in unconnected if m[0] in nets]
+        rec = route_family(board, lay, spec, conns, frozen=set() if spec.get("rip_up") else done)
+        failed += rec.pop("failed_list")
+        if report is not None:
+            report.append(rec)
+        done |= nets
+    return failed
+
+
+def family_line(rec):
+    return (f"route: family {rec['family']:<14} {rec['routed']:>3} of {rec['connections']:<3} routed "
+            f"({rec['negotiated']} negotiated, {rec['fallback']} by complete), {rec['failed']} failed, "
+            f"{rec['vias']} via(s), {rec['length_mm']:.1f} mm; {rec['rounds']} round(s), "
+            f"{rec['shared_cells']} cell(s) still shared, {rec['seconds']:.0f} s")
+
+
+def route_family(board, lay, spec, conns, frozen=()):
+    """One family: `conns` [(net, (x, y), (x, y))] negotiated together (the comment
+    above), then what that leaves to complete(), the `frozen` nets kept from its rip-up.
+    Returns the family's record: connections, routed, negotiated, fallback (routed by
+    complete), failed, vias, length_mm, rounds, shared_cells, seconds, failed_list."""
+    import time
+    t0 = time.monotonic()
+    name = spec.get("name", "?")
+    rec = {"family": name, "connections": len(conns), "routed": 0, "negotiated": 0, "fallback": 0,
+           "failed": 0, "vias": 0, "length_mm": 0.0, "rounds": 0, "shared_cells": 0, "seconds": 0.0,
+           "failed_list": []}
+    if not conns:
+        print(family_line(rec), flush=True)
+        return rec
+    iters = int(spec.get("iterations", FAMILY_ITERATIONS))
+    tcap = float(spec.get("time_s", FAMILY_TIME_S))
+    obs = Obstacles(board, lay)
+    classes = lay.get("net_classes") or {}
+    width_of = lambda net: next((c["track"] for c in classes.values() if net in c["nets"]), lay["rules"]["track"])
+    dirs_ = lay.get("directions") or {}
+    routed_all = ["F", "B"] + (["I"] if "In2.Cu" in (dirs_.get("layers") or {}) or "In2.Cu" in (dirs_.get("routed") or []) else [])
+    fam_layers = [_LK[L] for L in spec["layers"]] if spec.get("layers") else None
+    if fam_layers:
+        routed_all = [L for L in routed_all if L in fam_layers]
+    if not routed_all:
+        raise SystemExit(f"route: family {name} - its layers: {spec.get('layers')} are none the board routes")
+    via_cost = float(spec.get("via_cost", dirs_.get("via_cost", VIA)))
+    only = {n: [_LK[L] for L in c["layers"]] for c in classes.values() if c.get("layers") for n in c["nets"]}
+    lcost = {n: {_LK[L]: float(v) for L, v in c["layer_cost"].items()} for c in classes.values() if c.get("layer_cost") for n in c["nets"]}
+    via_of = {n: tuple(float(v) for v in c["via"]) for c in classes.values() if c.get("via") for n in c["nets"]}
+    via_default = (obs.via, obs.drill)
+    shared = {}
+
+    def grid(L, w):
+        if (L, w) not in shared:
+            shared[(L, w)] = _Shared(obs, L, w / 2)
+        return shared[(L, w)]
+    g0 = grid(routed_all[0], lay["rules"]["track"])
+    xy, cell = g0.xy, g0.cell
+    step_cost = _directions(lay, xy)
+    region = None
+    if spec.get("region"):
+        # in the board's own (KiCad) mm, as tools/pcb_plot.py draws it
+        x0, y0, x1, y1 = spec["region"]
+        (a0, b0), (a1, b1) = cell(min(x0, x1), min(y0, y1)), cell(max(x0, x1), max(y0, y1))
+        region = (a0, b0, a1, b1)
+    vcache = {}
+
+    def use_via(net):
+        want = via_of.get(net, via_default)
+        if (obs.via, obs.drill) != want:
+            obs.via, obs.drill = want
+            obs._via_inner = None
+
+    def via_ok(net, i, j):
+        k = (net, i, j)
+        if k not in vcache:
+            use_via(net)
+            vcache[k] = obs.via_ok(*xy((i, j)), net)
+        return vcache[k]
+
+    # each connection's context: its layers, width, and the cells on its two items
+    ctx = []
+    for net, pa, pb in conns:
+        w = width_of(net)
+        layers = [L for L in routed_all if L in only.get(net, routed_all)]
+        c = {"net": net, "pa": pa, "pb": pb, "w": w, "layers": layers, "lc": lcost.get(net, {}), "src": set(), "dst": set()}
+        ctx.append(c)
+        if not layers:
+            continue
+
+        def cells_of(p):
+            out = set()
+            for g, n, ls, kind in obs.near(Point(*p), 0.05):
+                if n == net and kind in ("pad", "smd", "track", "via") and g.distance(Point(*p)) < 0.05:
+                    gx0, gy0, gx1, gy1 = g.bounds
+                    g_ = g.buffer(-0.02)
+                    c0, c1 = cell(gx0, gy0), cell(gx1, gy1)
+                    for i in range(c0[0], c1[0] + 1):
+                        for j in range(c0[1], c1[1] + 1):
+                            if g_.contains(Point(*xy((i, j)))):
+                                out |= {(L, i, j) for L in ls if L in layers}
+            return out
+        src, dst = cells_of(pa), cells_of(pb)
+        if src & dst and {q[0] for q in src | dst} != {"F"} and any(q[0] == "F" for q in src | dst):
+            src, dst = {q for q in src | dst if q[0] == "F"}, {q for q in src | dst if q[0] != "F"}
+        c["src"] = {q for q in src if grid(q[0], w).free(net, q[1], q[2])} or src
+        c["dst"] = {q for q in dst if grid(q[0], w).free(net, q[1], q[2])} or dst
+    cross = _crossings(conns)
+    order = sorted(range(len(conns)), key=lambda k: (cross[k], math.dist(conns[k][1], conns[k][2])))
+    # sharing: within this of another net's track centre, a track centre is too near -
+    # the widest of the family's tracks (both halves), the clearance, and the grid's
+    # slack (Grid's own margin: a diagonal between two free cells); round a via, its
+    # larger copper instead of a track's half
+    wmax = max(c["w"] for c in ctx)
+    reach = wmax + obs.clear + SLACK
+    vmax = max([via_default[0]] + [via_of[c["net"]][0] for c in ctx if c["net"] in via_of])
+    vreach = vmax / 2 + wmax / 2 + obs.clear + SLACK
+
+    def disc_of(r):
+        R = int(math.ceil(r / GRID))
+        return [(di, dj) for di in range(-R, R + 1) for dj in range(-R, R + 1) if math.hypot(di, dj) * GRID < r - 1e-6]
+    disc, vdisc = disc_of(reach), disc_of(vreach)
+    vvdisc = disc_of(vmax + obs.clear + SLACK)       # a via from another net's via
+    # a bundle's lanes: the cells one pitch off a bundle-mate's track, the pitch the
+    # family's `pitch:` or the least the clearance allows, on the grid
+    pitch = float(spec.get("pitch", math.ceil(reach / GRID - 1e-6) * GRID))
+    P = int(math.ceil(pitch / GRID)) + 1
+    ring = [(di, dj) for di in range(-P, P + 1) for dj in range(-P, P + 1) if abs(math.hypot(di, dj) * GRID - pitch) <= GRID * 0.5]
+    bundle = bool(spec.get("bundle"))
+    occ, vocc, hist, lanes = {}, {}, {}, {}
+    paths = [None] * len(conns)
+
+    def is_via(p, idx):
+        return (idx + 1 < len(p) and p[idx + 1][0] != p[idx][0]) or (idx > 0 and p[idx - 1][0] != p[idx][0])
+
+    def bump(d_, q, net, sign):
+        d = d_.setdefault(q, {})
+        d[net] = d.get(net, 0) + sign
+        if not d[net]:
+            del d[net]
+            if not d:
+                del d_[q]
+
+    def mark(k, sign):
+        p = paths[k]
+        if not p:
+            return
+        net = ctx[k]["net"]
+        cells, vcells = set(), set()
+        for idx, (L, i, j) in enumerate(p):
+            via = is_via(p, idx)
+            for L2 in (ctx[k]["layers"] if via else (L,)):
+                cells |= {(L2, i + di, j + dj) for di, dj in (vdisc if via else disc)}
+            if via:
+                vcells |= {(i + di, j + dj) for di, dj in vvdisc}
+        for q in cells:
+            bump(occ, q, net, sign)
+        for q in vcells:
+            bump(vocc, q, net, sign)
+        if bundle:
+            for L, i, j in p:
+                for di, dj in ring:
+                    q = (L, i + di, j + dj)
+                    lanes[q] = lanes.get(q, 0) + sign
+
+    def others(net, q, d_=occ):
+        d = d_.get(q)
+        return 0 if not d else sum(1 for n in d if n != net)
+
+    def search(k, pres):
+        c = ctx[k]
+        net, src, dst, w, lc = c["net"], c["src"], c["dst"], c["w"], c["lc"]
+        if not src or not dst:
+            return None
+        grids = {L: grid(L, w) for L in c["layers"]}
+        ti, tj = cell(*c["pb"])
+        h = lambda i, j: math.hypot(i - ti, j - tj)
+        budget = 250000 + 2500 * math.dist(c["pa"], c["pb"])
+        moves = [(1, 0, 1), (-1, 0, 1), (0, 1, 1), (0, -1, 1), (1, 1, DIAG), (1, -1, DIAG), (-1, 1, DIAG), (-1, -1, DIAG)]
+        openq, came, cost, seen = [], {}, {}, set()
+        for s_ in src:
+            cost[s_] = 0
+            heapq.heappush(openq, (h(s_[1], s_[2]), 0, s_, None))
+
+        def inside(i, j):
+            return region is None or (region[0] <= i <= region[2] and region[1] <= j <= region[3])
+
+        def enter(q, base, via=False):
+            # PathFinder: (base + history) x (1 + present x the other nets sharing it)
+            n_ = others(net, q) + (others(net, q[1:], vocc) if via else 0)
+            f = LANE if bundle and lanes.get(q) and not n_ else 1.0
+            return (base * f + hist.get(q, 0.0)) * (1 + pres * n_)
+        while openq and len(seen) < budget:
+            f, g, cur, pd = heapq.heappop(openq)
+            if cur in seen:
+                continue
+            seen.add(cur)
+            if cur in dst:
+                path = [cur]
+                while path[-1] in came:
+                    path.append(came[path[-1]])
+                return path[::-1]
+            L, i, j = cur
+            gr = grids[L]
+            for di, dj, cst in moves:
+                nxt = (L, i + di, j + dj)
+                if nxt in seen:
+                    continue
+                if nxt not in dst and not (gr.free(net, i + di, j + dj) and inside(i + di, j + dj)):
+                    continue
+                if di and dj and not (gr.free(net, i + di, j) and gr.free(net, i, j + dj)):
+                    continue
+                base = step_cost(L, di, dj, cst, i, j) * lc.get(L, 1.0) + (TURN.get(steps45(pd, (di, dj)), 0) if pd else 0)
+                ng = g + enter(nxt, base)
+                if ng < cost.get(nxt, 1e18):
+                    cost[nxt], came[nxt] = ng, cur
+                    heapq.heappush(openq, (ng + h(i + di, j + dj), ng, nxt, (di, dj)))
+            for O in c["layers"]:
+                if O == L:
+                    continue
+                nxt = (O, i, j)
+                if nxt not in seen and via_ok(net, i, j) and (grids[O].free(net, i, j) or nxt in dst):
+                    ng = g + enter(nxt, via_cost, via=True)
+                    if ng < cost.get(nxt, 1e18):
+                        cost[nxt], came[nxt] = ng, cur
+                        heapq.heappush(openq, (ng + h(i, j), ng, nxt, None))
+        return None
+
+    def shared_cells(k):
+        p, net = paths[k], ctx[k]["net"]
+        return {q for idx, q in enumerate(p) if others(net, q) or (is_via(p, idx) and others(net, q[1:], vocc))} if p else set()
+    pres, timed_out = PRES0, False
+    for rnd in range(iters):
+        rec["rounds"] = rnd + 1
+        for k in order:
+            if time.monotonic() - t0 > tcap:
+                timed_out = True
+                break
+            mark(k, -1)
+            paths[k] = search(k, pres)
+            mark(k, +1)
+        clash = set()
+        for k in range(len(conns)):
+            clash |= shared_cells(k)
+        for q in clash:
+            hist[q] = hist.get(q, 0.0) + HIST
+        rec["shared_cells"] = len(clash)
+        if not clash or timed_out:
+            break
+        pres *= PRES_GROW
+    if timed_out:
+        print(f"route: family {name} - its time cap, {tcap:.0f} s, reached in round {rec['rounds']}", flush=True)
+    # lay what negotiated clear, each piece tested against the copper as it then stands
+    # (the grid's sharing test is an estimate; Obstacles' is exact); the rest to complete()
+    left = []
+    for k in order:
+        net, p = ctx[k]["net"], paths[k]
+        if not p or shared_cells(k):
+            left.append(conns[k])
+            continue
+        w = ctx[k]["w"]
+        segs, vias = [], []
+        m0 = 0
+        while m0 < len(p):
+            m = m0
+            while m + 1 < len(p) and p[m + 1][0] == p[m0][0]:
+                m += 1
+            pts = [xy(q) for q in corners([q[1:] for q in p[m0:m + 1]])]
+            segs += [(a, b, p[m0][0]) for a, b in zip(pts, pts[1:])]
+            if m + 1 < len(p):
+                vias.append(xy(p[m][1:]))
+            m0 = m + 1
+        use_via(net)
+        if all(obs.track_ok(a, b, w, net, L) for a, b, L in segs) and all(obs.via_ok(x, y, net) for x, y in vias):
+            for a, b, L in segs:
+                lay_track(board, obs, net, a, b, w, L, locked=False)
+            for x, y in vias:
+                lay_via(board, obs, net, x, y, locked=False)
+            rec["negotiated"] += 1
+        else:
+            left.append(conns[k])
+    if (obs.via, obs.drill) != via_default:
+        obs.via, obs.drill = via_default
+        obs._via_inner = None
+    if left:
+        fl = complete(board, lay, left, frozen=frozen, layers=fam_layers, via_cost=spec.get("via_cost"))
+        rec["fallback"] = len(left) - len(fl)
+        rec["failed_list"] = fl
+    rec["failed"] = len(rec["failed_list"])
+    rec["routed"] = rec["connections"] - rec["failed"]
+    # the family's own copper: its nets' unlocked tracks and vias (prepare's are locked)
+    nets = {c["net"] for c in ctx}
+    mine = [t for t in board.GetTracks() if t.GetNetname() in nets and not t.IsLocked()]
+    rec["vias"] = sum(1 for t in mine if isinstance(t, pcbnew.PCB_VIA))
+    rec["length_mm"] = sum(TO(t.GetLength()) for t in mine if type(t) is pcbnew.PCB_TRACK)
+    rec["seconds"] = time.monotonic() - t0
+    print(family_line(rec), flush=True)
+    return rec
 
 
 def plane_orphans(board, lay):
