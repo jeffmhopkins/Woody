@@ -1531,11 +1531,14 @@ tht_tails = concat(
       min(boards_buck_tail - switch_pcb_t, boards_tht_trim), "window"]]);
 // The windows through the bottom plate, each the tails' extent and the parts
 // clearance round it; one that would leave less than boards.plate_web_min of
-// plate to the plate's edge opens to the edge instead.
+// plate to the plate's edge opens to the edge instead - along the body too, so
+// a window near a corner becomes a corner notch rather than leaving a tab
+// (owner, 2026-10-05: "close proximity to the corner which means we should
+// just probably notch it").
 bplate_windows = [for (t = tht_tails) if (t[3] == "window") let(w = grow(t[1], boards_board_clear))
-    [w[0],
+    [w[0] - x_in0 < boards_plate_web_min ? x_in0 - 1 : w[0],
      w[1] - bplate_y[0] < boards_plate_web_min ? bplate_y[0] - 1 : w[1],
-     w[2],
+     bplate_x1 - w[2] < boards_plate_web_min ? bplate_x1 + 1 : w[2],
      bplate_y[1] - w[3] < boards_plate_web_min ? bplate_y[1] + 1 : w[3]]];
 // What is under a part's tails: the oak where they stand inside a window or
 // past the plate's end, else the plate.
