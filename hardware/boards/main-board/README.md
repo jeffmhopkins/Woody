@@ -106,7 +106,7 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | C202 | `C-SENSOR-VS-HF` | breath-sense-link |
 | C10, C44 | `C-STRIP-BULK` | power-entry-instrument |
 | C45–C47 | `C-STITCH-12V` | power-entry-instrument |
-| C207, C208 | `C-USBOR` | power-entry-instrument (#39; not yet placed on the layout) |
+| C207, C208 | `C-USBOR` | power-entry-instrument (#39) |
 | D21 | `D-INRUSH-RST` | power-entry-instrument |
 | D8–D20 | `D-LED` | led-strip-drive |
 | D1 | `D-REF-CLAMP` | breath-excitation-reference |
@@ -114,15 +114,18 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | D5, D6 | `D-TVS-BREATH` | breath-sense-link |
 | D3 | `D-TVS-PWR` | power-entry-instrument |
 | FB1, FB2 | `FB-CHAIN` | root |
+| FB3, FB4 | `FB-MIDI` | midi-out (#37) |
 | J2 | `HDR-SERVICE` | service-uart |
 | J4, J5 | `J-CHAIN` | root |
+| J7 | `J-MIDI` | midi-out (#37) |
+| J8 | `J-MIDI-OUT` | midi-out (#37; in the oak bottom, not on this board: `layout.yaml` `not_on_board:`) |
 | J1 | `J-MCU` | carrier |
 | J6 | `J-UMB` | root |
 | L1 | `L-BUCK-IN` | power-entry-instrument |
 | NT2 | `NT-AGND` | power-entry-instrument |
 | NT1 | `NT-DIG` | carrier |
 | Q1 | `Q-INRUSH` | power-entry-instrument |
-| Q2 | `Q-USBOR` | power-entry-instrument (#39; not yet placed on the layout) |
+| Q2 | `Q-USBOR` | power-entry-instrument (#39) |
 | R47 | `R-ADC-VDD` | breath-adc |
 | R5 | `R-ADCDIV-L` | breath-adc |
 | R4 | `R-ADCDIV-U` | breath-adc |
@@ -139,6 +142,8 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | R12, R14, R16, R18, R20, R22, R24, R26, R28, R30, R32, R33 | `R-KEY-PU` | LT1, LT2, LT3, LT4, RT1, RT2, RT3, RT4, sw+, sw-, FREE1, FREE2 |
 | R13, R15, R17, R19, R21, R23, R25, R27, R29, R31 | `R-KEY-SER` | LT1, LT2, LT3, LT4, RT1, RT2, RT3, RT4, sw+, sw- |
 | R10 | `R-LED-PD` | led-strip-drive |
+| R50, R51 | `R-MIDI` | midi-out (#37) |
+| R48, R49 | `R-MIDI-PU` | led-strip-drive (#37) |
 | R11 | `R-LED-SER` | led-strip-drive |
 | R6 | `R-REF-IN` | breath-excitation-reference |
 | R38, R39 | `R-SER-BREATH-INST` | breath-sense-link |
@@ -155,8 +160,9 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | A1 | `U-MCU-RT` | carrier |
 | U4 | `U-REF-BREATH` | breath-excitation-reference |
 | U9, U11 | `U-TVS-CHAIN` | root |
+| U12 | `U-TVS-MIDI` | midi-out (#37) |
 | U1 | `U-TVS-SPI` | carrier |
-| U13 | `U-USBOR` | power-entry-instrument (#39; not yet placed on the layout) |
+| U13 | `U-USBOR` | power-entry-instrument (#39) |
 
 ## Open, and what decides each
 
@@ -307,7 +313,7 @@ What the first layout settled, and where it is held:
     true`), so neither the LEDs' +12 V plane nor their return is under it.
   - **The power block moved to the near edge** to make room (`config/body.yaml`
     `boards.tall_side` near, `boards.tall_at_x`): the bulk pair `C10` / `C44`, `U5` in
-    the regulator block, `C11`, `D4`, and `L1` above `H7`. Distances `[calc, body mm from
+    the regulator block, `C11`, the 5 V OR (`Q2`, `U13`, #39), and `L1` above `H7`. Distances `[calc, body mm from
     the courtyards]`: the pair at y 47.3 (its outer guard at ~48.1) against the buck's
     switching loop (`U5`, `L1`, `C11`, all at y ≤ 21.7) is **over 24 mm** away, with the
     LED row between them; from the LEDs' courtyards, ~13 mm.

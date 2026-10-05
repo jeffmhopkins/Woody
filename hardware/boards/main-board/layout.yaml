@@ -299,6 +299,7 @@ not_on_board:
   A1: "the Matrix: on its carrier hung from the lid (#23), no footprint here; J-MCU is its connector"
   SW9: "sw+ spare switch: not fitted, no place in the body CAD"
   SW10: "sw- spare switch: not fitted, no place in the body CAD"
+  J8: "J-MIDI-OUT, the TRS jack: panel-mounted through the oak bottom (#37), wired to CBL-MIDI; J-MIDI (J7) is its connector here"
 
 # The mounts: every one plated on PWR_GND, pads on both faces (ADR 0022 point 6,
 # ADR 0025; the README's Open table: not _Pad_Via, whose ring of vias breaks the
@@ -402,6 +403,7 @@ heights:
   IDC-Header_2x06_P1.27mm_Samtec: 5.59   # [repo config/body.yaml boards.chain_hdr_h; ds SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf sheet 1, .220 REF]
   IDC-Header_2x12_P1.27mm_XKB: 5.1       # [repo config/body.yaml boards.mcu_conn_h; ds XKB-X1270WR-2x12A-9TV01.pdf]
   LED_WS2815B: 1.65            # [repo pcb-geometry.echo led height]
+  JST_PH_B3B-PH-SM4-TB: 10.0   # [repo config/body.yaml midi.hdr_mated_h: J-MIDI with CBL-MIDI's plug mated, what stands over the corner]
   PinHeader_1x08: 2.5          # [repo config/body.yaml boards.umb_joint_h]
 
 # The only parts the UNDERSIDE may carry (pcb_main.check_heights, #19 F2): it faces the
@@ -512,7 +514,12 @@ parts:
   C11: [237.0, 12.5, 90]   # C-BUCK-IN 100 uF (5.8 mm) at pin 1 (VIN), on the block's tail side
   L1:  [247.8, 18.5, 0]   # L-BUCK-IN 22 uH, above H7, INST_POS12 into C11
   C43: [220.0, 18.3, 0]   # C-BUCK-OUT 10 uF at pin 3 (OUT), returned to its own via
-  D4:  [237.0, 20.0, 0]   # D-USBOR, between C-BUCK-IN and the LED row, toward J-MCU's 5 V pins
+  # #39: the 5 V OR where D-USBOR stood - Q-USBOR with its drain on the 5 V run and its
+  # source on the buck's run, U-USBOR beside it gate to gate, C-USBOR at VCAP and at the 5 V
+  Q2:  [238.0, 21.1, 90]    # Q-USBOR DMN3404L: drain (pin 3) up on INST_5V_A, source (2) down on BUCK_A_OUT
+  U13: [233.3, 20.4, 0]     # U-USBOR LM74700-Q1: GATE (5) straight to Q2's gate; ANODE (3) down to the buck's run
+  C207: [229.8, 20.4, 270]  # C-USBOR, VCAP to ANODE, at U13 pin 1
+  C208: [241.6, 20.6, 0]    # C-USBOR, on the 5 V run at Q2's drain
   C10: [212.2, 11.5, 0]   # C-STRIP-BULK-1 220 uF polymer (7.7 mm), against the near edge on the mouth side of the regulator block
   C44: [212.2, 18.7, 0]   # C-STRIP-BULK-2, its pair, inboard of it
   U6:  [270.9, 30.0, 0]   # U-LVLSHIFT 74AHCT125, on the LED row's tail side of the breath crossing, by LED 1
@@ -535,6 +542,18 @@ parts:
   R37: [62.0, 39.8, 90]     # R-SER-TERM on the LH ribbon's SER
   FB2: [167.3, 41.5, 90]    # FB-CHAIN, the RH ribbon's 3V3
   U11: [175.6, 44.2, 0]     # U-TVS-CHAIN at J5 (key-chain-loom.md): SCK, SH/LD, HOP_LT_RH, HOP_RH_RT; pin 2 its own via
+  # #37, MIDI out (midi-out.md, Placement): J-MIDI in the freed tail corner (config/body.yaml
+  # midi.hdr_at, nominal [293.5, 43.0]; here 0.5 mm toward the tail so its fixing pad clears
+  # the breath pair's stitching via), the TVS and beads at it, R-MIDI by U-LVLSHIFT's side
+  # of the board, R-MIDI-PU on the DEV_3V3 run above U6
+  J7:  [294.0, 43.0, 0]     # J-MIDI B3B-PH-SM4-TB, pins along the body
+  U12: [296.9, 36.6, 90]    # U-TVS-MIDI at the header pins
+  FB3: [291.95, 36.6, 90]   # FB-MIDI-T
+  FB4: [294.05, 36.6, 90]   # FB-MIDI-R
+  R50: [273.3, 43.0, 90]    # R-MIDI-T 182R 1%
+  R51: [275.8, 43.0, 90]    # R-MIDI-R 182R 1%
+  R48: [265.6, 37.4, 90]    # R-MIDI-PU on IO6 (U6 gate B)
+  R49: [263.5, 37.4, 90]    # R-MIDI-PU on IO2 (U6 gate C)
 
 # The hand parts' tails, cut after soldering (issue #8-11; owner, 2026-10-04: "Trim
 # length", over an insulating sheet on the plate): pcb.py render writes each one's
@@ -580,7 +599,7 @@ route: astar
 # routed again, each net at most this many times.
 rip_up: 10
 # The rails that are layer-1 tracks (#8-6, net_classes: layers) cannot hop a via, so
-# they route before the signals do: routed last, the 5 V from J-MCU to D-USBOR and
+# they route before the signals do: routed last, the 5 V from J-MCU to the 5 V OR and
 # J-UMB's +12 V to Q-INRUSH's gate divider found layer 1 already crossed by the bus
 # running the board's length (the first wave-3 route left both open).
 route_first: [INST_5V_A, /power-entry-instrument/BUCK_A_OUT, BUCK_IN, UMBILICAL_POS12, DEV_3V3]
