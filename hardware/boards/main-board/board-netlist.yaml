@@ -1043,14 +1043,14 @@ components:
     sheet: breath-adc
   R50:
     of: R-MIDI
-    value: 220R
+    value: 182R 1%
     pins:
     - 1
     - 2
     sheet: midi-out
   R51:
     of: R-MIDI
-    value: 220R
+    value: 182R 1%
     pins:
     - 1
     - 2
