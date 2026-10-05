@@ -7,9 +7,9 @@ requirement then would be a TRS connector on the bottom for midiout, and
 adding a midi circuit to the main board"*; *"TRS should be able to be swapped
 from TRS a to b, ideally just in firmware"*; *"I think you need it on the
 bottom face, and then just do a connector to the main board instead of
-actually mounting it to PCB"*). **The parts are on the sheet and in the BOM;
-`J-MIDI`, the two resistors, the beads and the TVS are not yet placed on
-`main-board.kicad_pcb`**, which issue #35 has open (*Placement*, below). **Amended 2026-10-05 (#39):** `R-MIDI` is
+actually mounting it to PCB"*). **The parts are on the sheet, in the BOM and
+placed and routed on `main-board.kicad_pcb`** (issue #35 pass 2; *Placement*,
+below, and the board's `layout.yaml` `parts:`). **Amended 2026-10-05 (#39):** `R-MIDI` is
 182 Ω 1 % and the rail comes through an ideal-diode OR (*Amendment*, below).
 
 **The sheet:** [`midi-out.sch.png`](midi-out.sch.png) (KiCad:

@@ -106,7 +106,7 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | C202 | `C-SENSOR-VS-HF` | breath-sense-link |
 | C10, C44 | `C-STRIP-BULK` | power-entry-instrument |
 | C45–C47 | `C-STITCH-12V` | power-entry-instrument |
-| C207, C208 | `C-USBOR` | power-entry-instrument (#39; not yet placed on the layout) |
+| C207, C208 | `C-USBOR` | power-entry-instrument (#39) |
 | D21 | `D-INRUSH-RST` | power-entry-instrument |
 | D8–D20 | `D-LED` | led-strip-drive |
 | D1 | `D-REF-CLAMP` | breath-excitation-reference |
@@ -114,15 +114,18 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | D5, D6 | `D-TVS-BREATH` | breath-sense-link |
 | D3 | `D-TVS-PWR` | power-entry-instrument |
 | FB1, FB2 | `FB-CHAIN` | root |
+| FB3, FB4 | `FB-MIDI` | midi-out (#37) |
 | J2 | `HDR-SERVICE` | service-uart |
 | J4, J5 | `J-CHAIN` | root |
+| J7 | `J-MIDI` | midi-out (#37) |
+| J8 | `J-MIDI-OUT` | midi-out (#37; in the oak bottom, not on this board: `layout.yaml` `not_on_board:`) |
 | J1 | `J-MCU` | carrier |
 | J6 | `J-UMB` | root |
 | L1 | `L-BUCK-IN` | power-entry-instrument |
 | NT2 | `NT-AGND` | power-entry-instrument |
 | NT1 | `NT-DIG` | carrier |
 | Q1 | `Q-INRUSH` | power-entry-instrument |
-| Q2 | `Q-USBOR` | power-entry-instrument (#39; not yet placed on the layout) |
+| Q2 | `Q-USBOR` | power-entry-instrument (#39) |
 | R47 | `R-ADC-VDD` | breath-adc |
 | R5 | `R-ADCDIV-L` | breath-adc |
 | R4 | `R-ADCDIV-U` | breath-adc |
@@ -139,6 +142,8 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | R12, R14, R16, R18, R20, R22, R24, R26, R28, R30, R32, R33 | `R-KEY-PU` | LT1, LT2, LT3, LT4, RT1, RT2, RT3, RT4, sw+, sw-, FREE1, FREE2 |
 | R13, R15, R17, R19, R21, R23, R25, R27, R29, R31 | `R-KEY-SER` | LT1, LT2, LT3, LT4, RT1, RT2, RT3, RT4, sw+, sw- |
 | R10 | `R-LED-PD` | led-strip-drive |
+| R50, R51 | `R-MIDI` | midi-out (#37) |
+| R48, R49 | `R-MIDI-PU` | led-strip-drive (#37) |
 | R11 | `R-LED-SER` | led-strip-drive |
 | R6 | `R-REF-IN` | breath-excitation-reference |
 | R38, R39 | `R-SER-BREATH-INST` | breath-sense-link |
@@ -155,8 +160,9 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | A1 | `U-MCU-RT` | carrier |
 | U4 | `U-REF-BREATH` | breath-excitation-reference |
 | U9, U11 | `U-TVS-CHAIN` | root |
+| U12 | `U-TVS-MIDI` | midi-out (#37) |
 | U1 | `U-TVS-SPI` | carrier |
-| U13 | `U-USBOR` | power-entry-instrument (#39; not yet placed on the layout) |
+| U13 | `U-USBOR` | power-entry-instrument (#39) |
 
 ## Open, and what decides each
 
@@ -256,9 +262,14 @@ What the first layout settled, and where it is held:
   on both outer layers, no layer direction anywhere - no region of this board is a bus
   crossing that needs one. The analog block's nets prefer layer 1, over the island
   (`layer_cost:`; #8-5: layer 4's reference is the LEDs' +12 V plane). Since the trace
-  cleanup (#33) only `VS` touches layer 4, in two short hops - over `SENSOR_RAW` below
-  the sensor and under `REF_5V` in `U3`'s belly - because `VS` must reach both `R7` and
-  `R8` from the sensor's side of the `SENSOR_RAW` run (*The analog block*, below). The
+  cleanup (#33) two analog legs touch layer 4 besides the breath pair. `VS`, in two short
+  hops - over `SENSOR_RAW` below the sensor and under `REF_5V` in `U3`'s belly - because
+  `VS` must reach both `R7` and `R8` from the sensor's side of the `SENSOR_RAW` run (*The
+  analog block*, below). And `SENSOR_BUFFERED_OUT`'s branch to `R4`, from the pair's tail
+  via, 12.7 mm on layer 4 over `INST_POS12`: a layer-1 path exists only through
+  `SENSOR_RAW`, `REF_5V` and `REF_VIN`, all locked hand routes. It is acceptable because
+  the net there is the buffer's output - driven, low impedance - not the sensor's node; the
+  owner accepted it on 2026-10-04 (review #35, R17: *"Accept, fix the README"*). The
   breath pair is guarded: every other net the router lays keeps 0.75 mm (3W) off its
   legs (`pairs:` `guard:`; #8-4).
 - **The analog block** (#33, hand routes, locked so `pcb.py finish` and `rescue` leave
@@ -302,7 +313,7 @@ What the first layout settled, and where it is held:
     true`), so neither the LEDs' +12 V plane nor their return is under it.
   - **The power block moved to the near edge** to make room (`config/body.yaml`
     `boards.tall_side` near, `boards.tall_at_x`): the bulk pair `C10` / `C44`, `U5` in
-    the regulator block, `C11`, `D4`, and `L1` above `H7`. Distances `[calc, body mm from
+    the regulator block, `C11`, the 5 V OR (`Q2`, `U13`, #39), and `L1` above `H7`. Distances `[calc, body mm from
     the courtyards]`: the pair at y 47.3 (its outer guard at ~48.1) against the buck's
     switching loop (`U5`, `L1`, `C11`, all at y ≤ 21.7) is **over 24 mm** away, with the
     LED row between them; from the LEDs' courtyards, ~13 mm.
@@ -392,3 +403,4 @@ all rev A"; ADR 0020, *Amendment 9*); the key boards' pages cite this paragraph.
 | G | 2026-10-04 | Trace cleanup (#33; owner: *"not drastic changes ... pretty up the runs, get rid of unnecessary weaving and via usage and make sure analog circuits are the best they can be"*): no part moved; the analog block re-laid by hand on layer 1 (*The analog block*: `SENSOR_RAW` 6 vias to none, `REF_MINUS` and `REF_5V` 2 to none); every other unlocked signal run routed again where that came out shorter, straighter or with fewer vias, string-pulled to straight and 45-degree runs, loops and doubled copper taken out; the breath pair, its guards and arcs untouched; `pcb.py check` passes; renders and `fab/` written | `main-board.kicad_pcb`, `fab/` |
 | H | 2026-10-04 | The planes stitched (#8-8; owner: *"add 2-3 now"*): `C45`–`C47` (`C-STITCH-12V`) on the power-entry sheet and placed at `J-MCU`, `J-UMB` and the analog end, each pad to its plane by its own via; nothing else moved | `power-entry-instrument.kicad_sch`, `main-board.kicad_pcb`, `fab/` |
 | I | 2026-10-04 | Iron room (#34): the eight thumb keys' networks and the spare `sw-` network moved out from between their switch's pins (*What the first layout settled*), the nets they cut routed again by `complete` and cleaned as in G; `pcb.py check` now holds the room (`iron_room:`) | `layout.yaml`, `main-board.kicad_pcb`, `fab/`, `tools/pcb.py` |
+| J | 2026-10-05 | Routing review #35 pass 2 (`docs/review/2026-10-04-main-board-routing/REPORT.md`, owner: *"slight detours in longer runs for no reason ... via transfers [not] actually needed"*): the five proven single-run fixes (R1-R5); the U8 / J5 fan-in re-laid as one group, `DEV_3V3` first on layer 1, then the key lines, the chain, the IO bus (R6-R11, R21: 82 -> 72 vias on those nets); `CHAIN_SHLD` over the top of J4 (R12) and shortened at J5 (R13); `IO36` from `R2` to `U1` with no via (R16); the overlapping ends joined (R18); the worst pad entries on their pad's centre (R19); the near-edge bus at one 0.8 mm pitch where local (R20); `C1`, `D5`, `D6` values to the sheets (owner: *"Yes, go ahead"*). #37: `J-MIDI` (`J7`) in the freed tail corner, `U12`, `FB3`/`FB4`, `R50`/`R51`, `R48`/`R49`; `U6` gates B and C on `IO6`/`IO2`. #39: `D4` (`D-USBOR`) out, the 5 V OR (`Q2`, `U13`, `C207`, `C208`) in its place on layer 1. No other part moved; the breath pair, its guards and the analog hand routes untouched | `main-board.kicad_pcb`, `layout.yaml`, `fab/` |
