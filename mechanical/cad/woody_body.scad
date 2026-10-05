@@ -111,8 +111,8 @@ tail_margin = boards_kb_tail_margin;     // and its TAIL end past its last: long
 // The MOUTH END. There is no display (owner, 2026-09-26: "remove the upper
 // display ... we can do all this with the matrix led"; ADR 0015), so the
 // keys start where the first top cap clears the mouth cap, the first thumb
-// recess clears it too, and the breath trap fits across the mouth band
-// before the first key board and thumb row. Everything is measured from x_in0,
+// recess clears it too, and the breath sensor's leads stop short of the first
+// thumb row (there is no breath trap since 2026-10-05, ADR 0003). Everything is measured from x_in0,
 // the inside face of the mouth cap.
 // The left-thumb cluster's extent relative to LH1 (x_lh0 = 0), recesses included.
 // A straight line: a pair, the thumb rest, a pair (owner, 2026-09-26).
@@ -127,18 +127,14 @@ lt_rest_rel = run_rel(layout_lt_rest_under);
 // LT2 side by side toward the mouth, LT3 / LT4 side by side toward the tail.
 lt_rel = [for (i = [0 : 3]) lt_rest_rel + (i < 2 ? -1 : 1) * layout_lt_rest / 2];
 lt_dy = [for (i = [0 : 3]) (i % 2 == 0 ? -1 : 1) * thumb_pitch / 2];   // across, from the centreline
-// The breath trap sits mid-height, above the main board's parts, so it has
-// to clear the first KEY board: clash.txt checks it against the main board.
-// The breath sensor is at the mouth end too (ADR 0017), and its leads must
+// The breath sensor is at the mouth end (ADR 0017), and its leads must
 // stop short of the first thumb row's pins.
 ks33_stub = 2.6;   // half-width of the KS-33's pole and pins where they stand proud of a board [clash.txt, off the vendor STEP]
 board_lead = plate_cutout / 2 + cluster_margin;   // first key board edge before LH1
-trap_band = boards_board_clear + routing_trap_l + boards_board_clear;
-mouth_names = ["the first top key", "the first thumb recess", "the breath trap before the first boards",
+mouth_names = ["the first top key", "the first thumb recess",
                "the breath sensor before the first thumb row"];
 mouth_claims = [x_in0 + layout_mouth_extra + switch_keycap / 2 + stack_cap_clear,
                 x_in0 + layout_underside_clear - (min(lt_rel) - rc / 2),
-                x_in0 + trap_band + board_lead,
                 x_in0 + boards_board_clear + 0.5 + boards_sensor_body / 2 + boards_sensor_lead_row / 2 + ks33_stub + 0.5 - min(lt_rel)];
 mouth_req = max(mouth_claims);
 
@@ -704,24 +700,24 @@ module u_channel() {
 // THE BREATH INLET (issue #36, ADR 0003 amendment 2026-10-04; config/body.yaml
 // inlet): an E-Z LOK 550-1032 insert flush with the mouth cap's outer face, a
 // Clippard 12842 flush barb screwed into it from outside (finished black) and a
-// second from inside for the tube to the trap. Drawn along +x on the inlet's axis.
+// 12843 (3/32") from inside for the clear tube to U-BREATH. Drawn along +x on the inlet's axis.
 module inlet_cyl(x0, x1, d) translate([min(x0, x1), tube_yz[0], tube_yz[1]]) rotate([0, 90, 0]) cylinder(d = d, h = abs(x1 - x0));
 // A flush barb: its collar's face at x0, the thread toward +s and the barb toward -s.
-module flush_barb(x0, s) difference() {
+module flush_barb(x0, s, a = inlet_barb_a, bore = inlet_barb_bore, ridge = inlet_barb_ridge_d) difference() {
     union() {
         inlet_cyl(x0, x0 + s * inlet_barb_thread_l, inlet_insert_bore);
-        inlet_cyl(x0, x0 - s * inlet_barb_a, inlet_barb_ridge_d - 0.8);
+        inlet_cyl(x0, x0 - s * a, ridge - 0.8);
         inlet_cyl(x0, x0 - s * 0.4, inlet_barb_collar_d);
-        for (k = [0.45, 0.85]) inlet_cyl(x0 - s * inlet_barb_a * k, x0 - s * (inlet_barb_a * k + 1.4), inlet_barb_ridge_d);
+        for (k = [0.45, 0.85]) inlet_cyl(x0 - s * a * k, x0 - s * (a * k + 1.4), ridge);
     }
-    inlet_cyl(x0 - s * (inlet_barb_a + 1), x0 + s * (inlet_barb_thread_l + 1), inlet_barb_bore);
+    inlet_cyl(x0 - s * (a + 1), x0 + s * (inlet_barb_thread_l + 1), bore);
 }
 inlet_in_x = inlet_insert_l + inlet_inner_gap;   // the inner barb's collar face
-inlet_in_tip = inlet_in_x + inlet_barb_a;        // and its tip
+inlet_in_tip = inlet_in_x + inlet_inner_barb_a;  // and its tip
 module inlet_3d() translate([-explode / 3, 0, 0]) {
     P(C_BRASS, false, "breath inlet insert") difference() { inlet_cyl(0, inlet_insert_l, inlet_insert_d); inlet_cyl(-1, inlet_insert_l + 1, inlet_insert_bore); }
     P([0.09, 0.09, 0.10], false, "breath inlet barb") flush_barb(0, 1);
-    P(C_BRASS, false, "breath inner barb") flush_barb(inlet_in_x, -1);
+    P(C_BRASS, false, "breath inner barb") flush_barb(inlet_in_x, -1, inlet_inner_barb_a, inlet_inner_barb_bore, inlet_inner_ridge_d);
 }
 // render(): the preview renderer (OpenCSG) drops the cut-outs of an
 // intersection() it has to draw as CSG, so without it the tail face showed
@@ -1075,8 +1071,8 @@ module led_row() {
 }
 
 // ------------------------------------------------------------ routing -----
-// The breath tube runs from the inlet's inner barb straight into the trap on
-// the inlet's axis (issue #36), and from the trap across to the sensor, which
+// The breath tube is one clear tube from the inlet's inner barb to the
+// sensor's P1, no trap (owner, 2026-10-05; tube_route below), and the sensor
 // stands on the far side from routing_tube_lane; there are no looms
 // since ADR 0017 - the key boards are on 1.27 mm IDC ribbons and the Matrix
 // on a ribbon, both drawn below. The lane is a model choice (config/body.yaml
@@ -1134,7 +1130,7 @@ function pins_at(p, r) = len([for (k = bottom_keys) if (max(abs(key_xy(k)[0] - p
 
 // THE BREATH SENSOR: MPXV4006DP case 1351-01, SURFACE MOUNT (datasheet p.2),
 // AT THE MOUTH END (owner, 2026-09-26, with the main board): on the far side
-// from the tube, ports towards the tail, beside the breath trap - the
+// from the tube, ports towards the tail, beside the tube's first bend - the
 // shortest tube this body can have. The lower barb reaches the board's
 // surface (p.7), so the board has a slot in front of it.
 // Across: in from the board's edge by the wider of the lead tips and the land
@@ -1679,26 +1675,35 @@ module parts_3d() {
             cube([boards_matrix_usb[0] + boards_matrix_usb[1], boards_matrix_usb[2], boards_matrix_under_h]);
 }
 
+// THE BREATH TUBE'S ROUTE, in plan at the inlet's height: along the inlet's
+// axis off the inner barb, an S of two arcs at routing.tube_bend_r over to
+// the U's lower leg, one U at tube_bend_r turning back toward the mouth, and
+// straight onto P1, which faces the tail. The U's lower leg sits 2 x the bend
+// radius from P1's line, so the U is exactly the tightest bend allowed; the S
+// takes up the rest. tube_d_s is how far the S moves the tube across.
+tube_r = routing_tube_bend_r;
+tube_d_s = tube_yz[0] - (p1_tip[1] - 2 * tube_r);        // + = toward the near side
+tube_th = acos(1 - tube_d_s / (2 * tube_r));
+tube_s0 = inlet_in_tip + 1;
+tube_xu = max(tube_s0 + 2 * tube_r * sin(tube_th), p1_tip[0] + 4);
+function tube_v2y(v) = tube_yz[0] - v;
+function tube_arc(c, a0, a1, n = 8) = [for (i = [0 : n]) let(a = a0 + (a1 - a0) * i / n) c + tube_r * [cos(a), sin(a)]];
+tube_plan = concat([[inlet_in_x + 0.4, 0]],
+    tube_arc([tube_s0, tube_r], -90, -90 + tube_th),
+    tube_arc([tube_s0 + 2 * tube_r * sin(tube_th), tube_d_s - tube_r], 90 + tube_th, 90),
+    tube_arc([tube_xu, tube_d_s - tube_r], 90, -90, 16),
+    [[p1_tip[0] - 2, tube_d_s - 2 * tube_r]]);
+tube_route = [for (i = [0 : len(tube_plan) - 1]) let(t = i / (len(tube_plan) - 1))
+              [tube_plan[i][0], tube_v2y(tube_plan[i][1]), tube_yz[1] + (p1_tip[2] - tube_yz[1]) * t]];
+tube_len = sum([for (i = [1 : len(tube_route) - 1]) norm(tube_route[i] - tube_route[i - 1])]);
+
 module routing_3d() {
     inlet_3d();   // with the routing, not the caps, so a view without the shell still shows the inlet
-    trap_y = tube_yz[0];   // on the inlet's axis (issue #36), not in routing.tube_lane
-    // The trap sits in the mouth band, above the main board and before the
-    // first key board, straight behind the inlet. The sensor is beside it on
-    // the far side (ADR 0017): from the trap the tube turns across, over the
-    // LED row, and back onto the sensor's port, which faces the tail.
-    trap_x0 = x_lh0 - board_lead - boards_board_clear - routing_trap_l;
-    trap_z = tube_yz[1];
-    // the inlet's tube, pushed over the inner barb to its collar, straight into the trap
-    P([0.95, 0.60, 0.45], false, "breath tube") difference() {
-        inlet_cyl(inlet_in_x + 0.4, trap_x0 + 1, inlet_tube_od);
-        inlet_cyl(inlet_in_tip, trap_x0 + 2, inlet_tube_id);
-    }
-    P([0.95, 0.60, 0.45], false, "breath trap") translate([trap_x0, trap_y, trap_z]) rotate([0, 90, 0])
-        cylinder(d = routing_trap_d, h = routing_trap_l);
-    P([0.95, 0.60, 0.45], false, "breath tube to sensor") run([
-        [trap_x0 + routing_trap_l, trap_y, trap_z], [trap_x0 + routing_trap_l + 4, trap_y, p1_tip[2]],
-        [trap_x0 + routing_trap_l + 4, p1_tip[1], p1_tip[2]], [p1_tip[0] + routing_tube_od + 1, p1_tip[1], p1_tip[2]],
-        [p1_tip[0] - 2, p1_tip[1], p1_tip[2]]], routing_tube_od * 0.8);
+    // THE BREATH TUBE (owner, 2026-10-05; ADR 0003): one clear silicone tube,
+    // no trap, from the inner barb's collar to over P1's barb. Clear, so it
+    // may cross the LED row (the owner: "it's not a diffusion risk because
+    // it'll be clear"); it bends at routing.tube_bend_r and no tighter.
+    P([0.80, 0.90, 0.95], false, "breath tube") run(tube_route, routing_tube_od);
 }
 
 module hardware_3d() {
@@ -1853,15 +1858,16 @@ module drc_report() {
             "mm: the inlet's insert to U-BREATH's body, against 1.0, config/clearance.yaml's part-to-board minimum for 'breath sensor' (the clash step enforces the same pair); along the body and across it; and how far the insert stands into the cavity past the cap's inside face");
     drc(inlet_barb_a <= inlet_barb_proud_max, "breath inlet barb proud of the oak", [inlet_barb_a, inlet_barb_proud_max],
         "mm the outer barb stands proud of the mouth cap's face, against inlet.barb_proud_max (owner, 2026-10-04: 'just a Barb or something at the top')");
-    let(trap_x0 = x_lh0 - board_lead - boards_board_clear - routing_trap_l,
-        tb = [trap_x0, tube_yz[0] - routing_trap_d / 2, trap_x0 + routing_trap_l, tube_yz[0] + routing_trap_d / 2],
-        plan = min([for (n = [1 : led_n]) rect_gap_r(tb, [led_xy(n)[0] - lighting_led_court[0] / 2, led_xy(n)[1] - lighting_led_court[1] / 2,
-                                                          led_xy(n)[0] + lighting_led_court[0] / 2, led_xy(n)[1] + lighting_led_court[1] / 2])]),
-        above = tube_yz[1] - routing_trap_d / 2 - cb_top - lighting_led_h)
-        drc(above >= boards_board_clear ? (plan > 0 ? true : undef) : false, "breath trap over the LED row", [above, plan],
-            "mm: the trap's underside above the LEDs' tops (against boards.board_clear), and its plan gap to the nearest LED's courtyard (0 or less = over it: on the inlet's axis since issue #36 the trap stands over the mouth-end LED and shades part of its cone - a note, not a failure: the owner's to weigh)");
-    drc(p1_tip[2] - routing_tube_od * 0.4 >= cb_top + lighting_led_h + boards_board_clear, "breath tube crosses the LED row clear of it",
-        p1_tip[2] - routing_tube_od * 0.4 - cb_top - lighting_led_h, "mm above the LEDs' top faces, wherever it crosses the centreline");
+    assert(tube_d_s > 0 && tube_d_s <= 4 * tube_r, "the breath tube's S cannot reach the U's leg at routing.tube_bend_r - re-route it");
+    drc(tube_r >= routing_tube_bend_r, "breath tube bends no tighter than routing.tube_bend_r", [tube_r, tube_th, tube_d_s, tube_len],
+        "mm: the S's and the U's centreline radius (it is drawn at exactly routing.tube_bend_r); the S's angle (degrees) and how far it moves across; the tube's length, inner barb to P1 (clear silicone, no trap - ADR 0003, 2026-10-05)");
+    let(cols = columns(), keep = hardware_col_standoff_af / cos(30) / 2 + routing_tube_od / 2,
+        gap = min([for (p = tube_route, c = cols) norm([p[0] - c[0], p[1] - c[1]]) - keep]))
+        drc(gap >= boards_board_clear, "breath tube clear of the columns", gap,
+            "mm from the tube's outside to the nearest column standoff's corners, in plan, against boards.board_clear");
+    let(low = min([for (p = tube_route) p[2]]) - routing_tube_od / 2 - cb_top - lighting_led_h)
+        drc(low >= boards_board_clear, "breath tube crosses the LED row clear of it",
+            low, "mm from the tube's underside down to the LEDs' top faces, at its lowest (the tube is clear, so where it crosses the row is free)");
     // Each run's end keys put half a cap into the neighbouring band - the
     // ADR 0009 table counts runs centre to centre.
     lh = xs(cluster_keys("left_hand")); rh = xs(cluster_keys("right_hand"));

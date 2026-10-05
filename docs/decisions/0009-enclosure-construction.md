@@ -388,7 +388,7 @@ the geometry follows. No pocketing anywhere in the design.
 
 The breath system is closed and dead-ended, so condensation is modest and there
 is no flow carrying saliva into the sensor (ADR 0003). A small dead-volume trap
-at the sensor end handles what accumulates.
+at the sensor end handles what accumulates. *(Amended 2026-10-05, ADR 0003: there is no trap; one clear tube runs from the inlet to the sensor.)*
 
 The only stack requirement is **access to clear it without disassembly**. Not a
 drain plumbed through the body — just a serviceable path to the sensor end.

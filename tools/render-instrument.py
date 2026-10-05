@@ -326,7 +326,7 @@ GROUPS = {
     "key plate": ["key plate"],
     "bottom plate": ["bottom plate", "main board stud *"],
     "main board spacers": ["main board spacer *", "U-bolt spacer *"],
-    "main board": ["@main-board", "IDC plug * main board", "main board nut *", "breath tube", "breath trap", "breath tube to sensor"],
+    "main board": ["@main-board", "IDC plug * main board", "main board nut *", "breath tube"],
     "thumb caps": ["cap LT*", "cap RT*", "cap socket LT*", "cap socket RT*"],
     "U-bolt": ["U-bolt"],
     "U-bolt nuts": ["U-bolt nut *", "U-bolt washer *"],

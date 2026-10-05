@@ -133,7 +133,7 @@ REF_VIN──┬─┤VIN VOUT├─┬── 5.000 V ─┤+IN                 
                                                               │   soldered down
                                                               │   P1 ◄── breath tube
                                                               │           + PTFE plug
-                                                              │           + ≤1 mL trap
+                                                              │           (clear tube, no trap)
                                                               │   P2 ◄── OPEN TO CAVITY
                                                               │           never blocked
                                                               │
@@ -581,10 +581,6 @@ Ordered by what blocks what. The first two block layout.
   its own adapter, joined to this board's tongue by `J-UMB`. `J-UMB`'s part
   is chosen. What is open is the tail cap's recess margin (M4) and whether the
   NE8MX cable connector latches in it (`J-UMBILICAL-CABLE`).
-- **The breath trap "clearable without disassembly"** (ADR 0003). The sensor
-  is reached with the lid off and replaced with an iron (`breath-sense-link.md`,
-  *Mounting*); the trap is a separate question, decided with the trap's own
-  design.
 - ~~**The MCP3202's maximum clock at 3.3 V**~~ — **closed 2026-09-21**, §4.
   0.9 MHz is not an interpolation; it is the datasheet's *guaranteed* 2.7 V
   maximum, so using it at 3.3 V is conservative rather than approximate.

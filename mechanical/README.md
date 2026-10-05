@@ -91,22 +91,23 @@ mouth cap**, which the player's own tube pushes onto (owner, 2026-10-04, issue
 
 - A Clippard 12842 flush barb screwed into an E-Z LOK 550-1032 brass insert.
   The insert is tapped and epoxied through the oak, flush with its outer face.
-- A second 12842 inside, carrying the tube straight back into the trap. The
-  trap sits on the inlet's axis, so it can be cleared through the inlet with
-  the external tube off.
+- A Clippard 12843 inside, onto which one clear silicone tube runs to the
+  sensor: no trap (owner, 2026-10-05; ADR 0003). It may loop, and it crosses
+  the LED row, which a clear tube does not shade.
 
-BOM rows `INLET-*`, `TUBE-INLET`, `ADH-INLET` and `SEAL-INLET`.
+BOM rows `INLET-*`, `TUBE`, `ADH-INLET` and `SEAL-INLET`.
 
 Where each number lives, so none is restated here:
 
-- **The insert, the barbs, the tap drill and the inside tube**:
-  `config/body.yaml` `inlet`, each with its source.
+- **The insert, the barbs and the tap drill**: `config/body.yaml` `inlet`,
+  each with its source.
 - **How far the barb stands proud, and the insert's clearance to the breath
   sensor**: [`drc.echo`](drc.echo), *"breath inlet barb proud of the oak"* and
   *"breath inlet insert clear of U-BREATH"*.
-- **What the trap shades**: [`drc.echo`](drc.echo), *"breath trap over the LED
-  row"*. On the axis the trap stands over the row's mouth-end LED, recorded as
-  a note for the owner.
+- **The tube's route**: [`drc.echo`](drc.echo), *"breath tube bends no
+  tighter than routing.tube_bend_r"* (its radius, and its length) and
+  *"breath tube clear of the columns"*; the figures are `config/body.yaml`
+  `routing.tube_*`.
 - **The hole**: [`export/mouth-cap.dxf`](export/mouth-cap.dxf), the tap drill,
   tapped M8×1.25 by hand.
 

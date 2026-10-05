@@ -40,14 +40,14 @@ copy — thresholds, note gating, mod routing, MIDI — is sampled, and pays for
 
 | Stage | Time | Notes |
 |---|---|---|
-| Tube propagation, inside the body | **~0.17 ms** | About 60 mm from the inlet's barb through the trap to `P1` `[calc: 16.9 + 12 + ~30 mm along mechanical/cad/woody_body.scad's run; 60 mm / 343 m/s]`. The sensor is at the mouth end beside the trap (ADR 0017) |
+| Tube propagation, inside the body | **~0.21 ms** | About 72 mm from the inlet's outer barb to `P1`: the barbs and insert, and the one clear tube, whose length `mechanical/drc.echo` prints (*"breath tube bends no tighter than routing.tube_bend_r"*) `[calc: ~8 + ~64 mm; 72 mm / 343 m/s]`. No trap since ADR 0003's amendment of 2026-10-05; the sensor is at the mouth end (ADR 0017) |
 | **The external tube** | **+ L / 343 m/s** | From the inlet's barb at the mouth cap to the player's mouthpiece, wherever that is: the owner's, with no length set (ADR 0003, *Amendment, 2026-10-04 — the inlet*). About 2.9 µs per mm `[calc]`. **E2 measures the real path** |
 | **Pneumatic restrictor** | **? — sized at E2** | A deliberate low-pass, added to damp the tube's pipe mode (ADR 0003). **Not previously in this budget at all**, and the term most able to break it |
 | Pressure transducer | **~1 ms** | A property of the sensor, not the design |
 | Buffer and cable propagation | < 10 µs | |
 | Receive filter, **a panel toggle**: 495 Hz / 1.57 kHz / ~10 kHz | **322 / 102 / 16 µs** | `1/(2πf)`: 2 × 11 kΩ against the `C_diff` the toggle switches in and the two `C_cm` in series (`breath-sense-link.md`, *Component values*; owner, 2026-10-04, ADR 0003 *Amendment, 2026-10-04*). One pole |
 | Output RC at the jack, 15.9 kHz | **10 µs** | `R-OUT-PROT` against `C-OUT-BREATH`, above every mode (#32) |
-| **Total** | **~1.51 / 1.29 / 1.21 ms + the external tube + restrictor** | 500 Hz / 1.5 kHz / WIDE |
+| **Total** | **~1.55 / 1.33 / 1.25 ms + the external tube + restrictor** | 500 Hz / 1.5 kHz / WIDE |
 
 **The filter line used to read "< 0.2 ms" and it was the design's own
 specified corners that broke it.** Three reviewers found the same thing: a
@@ -57,7 +57,7 @@ and the receive filter is the player's choice on the panel.
 
 ### Breath digital copy (sampled)
 
-Everything above as far as the sensor output — **~1.17 ms plus the external tube** — then:
+Everything above as far as the sensor output — **~1.21 ms plus the external tube** — then:
 
 | Stage | Time | Notes |
 |---|---|---|
@@ -77,13 +77,13 @@ the converter is fast.
 
 ### The tube is the player's term now
 
-The sensor sits at the mouth end beside the trap (ADR 0017), so the tube inside
-the body is short: about 60 mm, **0.17 ms**. What the breath travels before it
+The sensor sits at the mouth end (ADR 0017), so the path inside the body is
+short: about 72 mm of barbs and clear tube, **0.21 ms**. What the breath travels before it
 is the external tube the owner fits from the inlet's barb to a mouthpiece
 elsewhere (issue #36), and its length is not a design figure: *"Don't worry
 about the length"* (owner, 2026-10-04; ADR 0003, *Amendment, 2026-10-04 — the
 inlet*). It adds its length at the speed of sound, about 2.9 µs per mm
-`[calc]`. Without it the chain is **~1.76 ms against a 5 ms target** (the
+`[calc]`. Without it the chain is **~1.8 ms against a 5 ms target** (the
 digital copy's worst, since #32's 1.47 kHz anti-alias pole), and E2 measures
 the real path, external tube included.
 

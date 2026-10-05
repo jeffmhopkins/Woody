@@ -113,8 +113,10 @@ ends:
 # A Clippard 12842 #10-32 male FLUSH fitting to 1/8" barb screws into an
 # E-Z LOK 550-1032 brass insert (10-32 inside, M8x1.25 outside) tapped and
 # epoxied through the oak mouth cap on today's axis (the cap's centre); a
-# second 12842 from the inside takes the internal tube to the trap. It
-# replaces the plain pass-through hole (ends.tube_hole_d, deleted).
+# Clippard 12843 (the same flush fitting at 3/32") from the inside takes the
+# clear tube to U-BREATH. There is no trap in the body (owner, 2026-10-05;
+# ADR 0003 amendment of that date). It replaces the plain pass-through hole
+# (ends.tube_hole_d, deleted).
 inlet:
   tap_drill_d:
     value: 6.9
@@ -147,7 +149,7 @@ inlet:
   barb_bore:
     value: 2.64
     status: settled
-    source: "[ds] CLIPPARD-2012-CATALOG-FITTINGS-HOSE-P288-327.pdf p.300: D .104 in thru [calc: x 25.4] - the narrowest bore on the path to the trap"
+    source: "[ds] CLIPPARD-2012-CATALOG-FITTINGS-HOSE-P288-327.pdf p.300: D .104 in thru [calc: x 25.4] "
   barb_ridge_d:
     value: 4.0
     status: tbd
@@ -156,20 +158,24 @@ inlet:
   inner_gap:
     value: 0.5
     status: nominal
-    source: "[calc] the inner barb's collar stands this far off the insert's inner end, so the two barbs' threads (barb_thread_l each, 7.92 together) share the insert's insert_l 7.49 without meeting: the outer one fills 3.96 from the outer face and the inner one the remaining 3.53, its last 0.43 outside the insert"
+    source: "[calc] the inner barb's collar stands this far off the insert's inner end, so the two barbs' threads (barb_thread_l each - the 12843's is the 12842's .156 in, the same page - 7.92 together) share the insert's insert_l 7.49 without meeting: the outer one fills 3.96 from the outer face and the inner one the remaining 3.53, its last 0.43 outside the insert"
   barb_proud_max:
     value: 10.0
     status: settled
     source: "owner, in the working chat 2026-10-04, of the luer bulkheads that stood 20-35 mm proud: 'These all look way too long. I was thinking more of maybe just a Barb or something at the top'; the target relayed with it was 'well under 10 mm'. drc.echo 'breath inlet barb proud of the oak' holds barb_a under it"
-  tube_id:
-    value: 3.18
+  inner_barb_a:
+    value: 6.15
     status: settled
-    source: "the internal tube from the inner barb to the trap: 1/8 in ID [calc: x 25.4] to suit the 12842's barb (BOM TUBE-INLET)"
-  tube_od:
-    value: 6.35
-    status: nominal
-    source: "1/8 x 1/4 in silicone, the common size for a 1/8 in barb [from memory] - the tube bought sets it"
-    decided_by: "the tube bought (BOM TUBE-INLET)"
+    source: "[ds] CLIPPARD-2012-CATALOG-FITTINGS-HOSE-P288-327.pdf p.300, 12843 (3/32 in barb), the INSIDE barb: A .242 in [calc: x 25.4]. 3/32 in so one clear tube (routing.tube_*) grips both it and U-BREATH's P1 barb"
+  inner_barb_bore:
+    value: 1.85
+    status: settled
+    source: "[ds] CLIPPARD-2012-CATALOG-FITTINGS-HOSE-P288-327.pdf p.300: 12843 D .073 in thru [calc: x 25.4] - the narrowest bore on the path to the sensor"
+  inner_ridge_d:
+    value: 3.3
+    status: tbd
+    source: "the 12843's ridge diameter for 3/32 in ID tube - Clippard does not dimension it [from memory]"
+    decided_by: "calipers on a 12843"
 
 # ------------------------------------------------------ provisional layout --
 # USED ONLY WHILE config/key-layout.yaml HAS null POSITIONS. The first key
@@ -1277,25 +1283,29 @@ hardware:
 # check). Where they run is a MODEL CHOICE, not a document's - each is a
 # lane the design must keep free, and the clash check reports what is in it.
 routing:
+  # THE BREATH TUBE (owner, 2026-10-05; ADR 0003 amendment of that date): ONE
+  # clear silicone tube from the inlet's inner barb to U-BREATH's P1, no trap.
+  # It runs from the barb along the inlet's axis, swings toward the near side
+  # and turns back onto P1 (which faces the tail) in one U at tube_bend_r; it
+  # may cross the LED row, because it is clear.
+  tube_id:
+    value: 2.38
+    status: settled
+    source: "3/32 in ID [calc: x 25.4]: grips both the inner barb (inlet.inner_barb_a, a 3/32 in 12843) and P1's barb, 2.79-3.30 OD [ds MPXV4006DP p.7, boards.sensor_port_d] (BOM TUBE)"
   tube_od:
-    value: 5.0
-    status: tbd
-    source: "the tube from the trap to U-BREATH's P1 barb (the inlet's tube to the trap is inlet.tube_*). P1's barb is 2.79-3.30 OD [ds MPXV4006DP p.7, boards.sensor_port_d], so this leg wants a 3/32 in (2.4 mm) ID tube to grip it; a 1/8 in ID tube is loose on a barb at the low end. The model draws it at 0.8 x this, the wall a guess [from memory]"
+    value: 5.56
+    status: nominal
+    source: "3/32 x 7/32 in clear silicone, a common size [from memory: 7/32 in x 25.4] - the tube bought sets it"
     decided_by: "the tube bought (BOM TUBE)"
-  trap_d:
-    value: 10.0
+  tube_bend_r:
+    value: 9.5
     status: tbd
-    source: "dead-volume trap diameter; ADR 0003 caps the trap at 1 mL"
-    decided_by: "E2"
-  trap_l:
-    value: 12.0
-    status: tbd
-    source: "trap length: 10 mm bore x 12 mm = 0.94 mL, inside ADR 0003's 1 mL [calc]"
-    decided_by: "E2"
+    source: "the least centreline bend radius the clear tube takes without kinking - about 1.7 x its OD for soft silicone [from memory]; the model bends it at exactly this, and drc.echo 'breath tube bends no tighter than routing.tube_bend_r' says so"
+    decided_by: "bending the tube bought around a mandrel until it kinks, at M4"
   tube_lane:
     value: "left"
     status: tbd
-    source: "the side of the mouth band the sensor is NOT on (ADR 0017: sensor on the far side from the tube); there are no looms since ADR 0017. Since issue #36 the inlet tube and the trap run on the inlet's axis, the mouth cap's centre, not in this lane: from the inner barb straight into the trap, so the trap can also be cleared through the inlet with the external tube off (ADR 0003, 'clearable without disassembly')"
+    source: "the side of the mouth band the sensor is NOT on (ADR 0017: sensor on the far side from the tube); there are no looms since ADR 0017. Since issue #36 the breath tube leaves the inlet on its axis, the mouth cap's centre, and swings toward this side before turning back onto P1 (routing.tube_*)"
     decided_by: "M4"
   # STANDARD FLAT RIBBON (owner, 2026-09-26), lying FLAT down the centreline
   # (on edge it does not fit between the boards' part layers - clash check).

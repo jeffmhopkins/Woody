@@ -111,8 +111,7 @@ model computes the length rather than reading it (`config/key-layout.yaml`'s
 Several things can claim each end, and the largest wins:
 
 - **Mouth end:** the first top cap plus `layout.mouth_extra`; the first
-  thumb recess; the breath trap, which sits across the mouth band before the
-  first key board; or the breath sensor, which must stop short of the first
+  thumb recess; or the breath sensor, which must stop short of the first
   thumb row's pins — and then the equal bands (below).
 - **Tail end:** the **LED matrix on the top face, centred** after the keys
   (owner, 2026-09-26), with the etherCON and its adapter behind it; or the
@@ -206,7 +205,7 @@ Several things can claim each end, and the largest wins:
 - **Its parts have room** — `drc.echo` prints the height under the key boards
   and where none is overhead, and both clear the regulator block and the
   breath sensor. **The breath sensor is at the mouth end** (owner, with this
-  board), beside the breath trap, ports toward the tail: the thumb switches'
+  board), ports toward the tail: the thumb switches'
   pins leave the LED row the centreline band, and the sensor is too wide to sit
   beside it (*"breath sensor fits at the mouth end"*; the mouth end also
   claims room for it, *"what the mouth end needs"*).
@@ -340,8 +339,7 @@ only as good as those envelopes. Group the report's lines by these causes
    is what sends the two ends' cables toward each other; that makes the key
    board's pin numbers differ from the main board's — `key-chain-loom.md`
    says how.
-3. **The breath tube** is short: the inlet's inner barb in the mouth cap (#36, *The breath inlet* in the README), straight into the trap on the inlet's axis, then across over the LED
-   row (*"breath tube crosses the LED row clear of it"*) and back onto the sensor's port, all in the mouth band; the board has a
+3. **The breath tube** is short: the inlet's inner barb in the mouth cap (#36, *The breath inlet* in the README), then one clear tube, no trap (ADR 0003, 2026-10-05): along the inlet's axis, an S toward the near side and one U back onto the sensor's port, at `routing.tube_bend_r` and no tighter (*"breath tube bends no tighter than routing.tube_bend_r"*), across the LED row (*"breath tube crosses the LED row clear of it"*), all in the mouth band; the board has a
    slot in front of the sensor's lower port.
 4. **The U-bolt has the middle station to itself** (ADR 0025: the lid
    screws that shared it, and the backplate, are gone). Its legs pass the oak

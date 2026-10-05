@@ -1057,3 +1057,38 @@ metal female-luer bulkhead exists. Also barbed and push-to-connect bulkhead
 unions, which were bulkier and two of which reached `U-BREATH`. A
 black-anodized aluminium 10-32 or M5 barb does not exist either, so the black
 comes from finishing the brass.
+
+## Amendment, 2026-10-05 — no trap: one clear tube from the inlet to the sensor (#36)
+
+**The owner, in the working chat, 2026-10-05:** *"I think we should remove it
+from the inside and it's okay to kind of have a longer tube that loops around I
+think. Also it's not a diffusion risk because it'll be clear"*.
+
+**What changes:**
+
+- **The dead-volume trap is gone from the instrument.** There is no trap, no
+  `routing.trap_*` and no *"breath trap over the LED row"* note. This
+  supersedes the trap in *Condensation, in proportion* ("a small dead-volume
+  trap at the sensor end", "clearable without disassembly"), the "≤1 mL" in
+  *The cost, and why it is affordable*, and the trap and inner-tube bullets of
+  the amendment of 2026-10-04 above.
+- **One clear silicone tube** (`routing.tube_*`, BOM `TUBE`) runs from the
+  inlet's inner barb to `P1`. The inner barb is now a Clippard 12843 at 3/32"
+  (`inlet.inner_barb_*`, BOM `INLET-BARB-IN`), so one tube grips both it and
+  `P1`'s barb.
+- **The route.** The tube leaves along the inlet's axis, makes an S toward the
+  near side and turns back onto `P1` in one U. It is longer than the shortest
+  path, as the owner allows. Its only constraint is kinking: it bends at
+  `routing.tube_bend_r` and no tighter (`mechanical/drc.echo` *"breath tube
+  bends no tighter than routing.tube_bend_r"*, which also prints its length).
+- **It crosses the LED row.** The owner's reason it may: the tube is clear,
+  so it does not shade the row.
+
+**Why the trap can go.** The sensor sees pressure, not flow (*The closed tube
+is correct, and why*). The tube is dead-ended at the diaphragm, so no air is
+carried into it, and the inline run gathers only the little that condenses
+on its own walls. The vapour argument in *But the vapour problem is
+underestimated in kind* never depended on the trap: a trap catches liquid and
+does nothing about vapour. The PTFE plug and spare sensors stand as written.
+Any moisture handling the player wants is outside the instrument, on the
+external tube between the inlet and the mouthpiece.
