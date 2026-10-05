@@ -312,12 +312,33 @@ even there, so they are **cut to `boards.tht_trim` after soldering**. The
 windows are in `plate-bottom.dxf` and in `pcb-geometry.echo` (`main`
 `plate`), so a layout that moves either part moves its window.
 
+## Amendment, 2026-10-05 — the standoffs are settled
+
+The owner, 2026-10-05, asked for the parts the shops need (issue #42):
+
+> "I think our standoffs are solidified."
+
+So the column's hardware is the design, and the figures that were `tbd` or
+`nominal` only because they waited on that choice are `settled` in
+`config/body.yaml`, each citing this note: the stud's length
+(`hardware.stud_l`), the spacer's faced length and its tolerance
+(`hardware.kb_spacer_l`, `kb_spacer_l_tol`), the column standoff's across
+flats, the stocked length it is faced from and its faced tolerance
+(`hardware.col_standoff_af`, `col_standoff_stock_l`, `col_standoff_l_tol`),
+and the column screw's length (`hardware.col_screw_l`).
+
+What a choice cannot settle stays open, below: a dimension only the bought
+part or its drawing gives - the screw's head and its length tolerance - and
+what the standoff's material decides, `hardware.thread_engage_min`. Each
+faced spacer and standoff is still measured; that checks the parts against
+the figure, and no longer sets it.
+
 ## Open, and what decides each
 
 | Item | Decided by |
 |---|---|
-| The column standoff: across flats, material, and whether it is tapped through or deep enough from each end after facing (`hardware.col_standoff_*`; *"column standoff: thread it needs from each end"*) | M4, with the standoff bought (`MECH-COL-STANDOFF`) |
-| The column screw: head and length tolerance (`hardware.col_screw_*`) | M4, with the screw bought (`MECH-COL-SCREW`) |
+| The column standoff: its material, and whether it is tapped through or deep enough from each end after facing (*"column standoff: thread it needs from each end"*); its size is settled (Amendment, 2026-10-05) | M4, with the standoff bought (`MECH-COL-STANDOFF`) |
+| The column screw: head and length tolerance (`hardware.col_screw_head_d`, `col_screw_head_h`, `col_screw_l_tol`) | M4, with the screw bought (`MECH-COL-SCREW`) |
 | `hardware.thread_engage_min`, 1.5 d from memory: an aluminium standoff wants more than brass or steel | M4, with the standoff's material known |
 | How the silicone is cut: a wire drawn along the plate-to-wood bead and the groove joints, and whether the bottom plate's bond ever needs cutting in ordinary service | M8, on the mule |
 | How the end caps are held. ADR 0009's table said "fasteners into the stack", which were never drawn, and the owner wants nothing screwed into the wood | Owner, with the caps cut (M4) |

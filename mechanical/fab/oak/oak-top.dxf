@@ -1,0 +1,344 @@
+999
+Woody controller body rev A - Oak top (oak_top)
+999
+Material: hardwood, the owner's choice (the parts are named oak); stained a very dark ebony, the grain still showing, under a satin oil finish
+999
+Thickness: 6 mm (the flush rule: switch.keycap_top_above_seat - switch.total_travel)
+999
+Quantity per instrument: 1
+999
+Units mm. Cut every closed outline. cad b559b18b8abb; verify: python3 tools/cad.py explain fab-dxf-oak-top
+  0
+SECTION
+  2
+BLOCKS
+  0
+ENDSEC
+  0
+SECTION
+  2
+ENTITIES
+  0
+LINE
+  8
+0
+ 10
+313.8
+ 20
+57
+ 11
+0
+ 21
+57
+  0
+LINE
+  8
+0
+ 10
+0
+ 20
+57
+ 11
+0
+ 21
+0
+  0
+LINE
+  8
+0
+ 10
+0
+ 20
+0
+ 11
+313.8
+ 21
+0
+  0
+LINE
+  8
+0
+ 10
+313.8
+ 20
+0
+ 11
+313.8
+ 21
+57
+  0
+LINE
+  8
+0
+ 10
+93
+ 20
+10.5
+ 11
+93
+ 21
+19.5
+  0
+LINE
+  8
+0
+ 10
+93
+ 20
+19.5
+ 11
+35
+ 21
+19.5
+  0
+LINE
+  8
+0
+ 10
+35
+ 20
+19.5
+ 11
+35
+ 21
+37.5
+  0
+LINE
+  8
+0
+ 10
+35
+ 20
+37.5
+ 11
+93
+ 21
+37.5
+  0
+LINE
+  8
+0
+ 10
+93
+ 20
+37.5
+ 11
+93
+ 21
+46.5
+  0
+LINE
+  8
+0
+ 10
+93
+ 20
+46.5
+ 11
+111
+ 21
+46.5
+  0
+LINE
+  8
+0
+ 10
+111
+ 20
+46.5
+ 11
+111
+ 21
+10.5
+  0
+LINE
+  8
+0
+ 10
+111
+ 20
+10.5
+ 11
+93
+ 21
+10.5
+  0
+LINE
+  8
+0
+ 10
+201
+ 20
+10.5
+ 11
+201
+ 21
+19.5
+  0
+LINE
+  8
+0
+ 10
+201
+ 20
+19.5
+ 11
+143
+ 21
+19.5
+  0
+LINE
+  8
+0
+ 10
+143
+ 20
+19.5
+ 11
+143
+ 21
+37.5
+  0
+LINE
+  8
+0
+ 10
+143
+ 20
+37.5
+ 11
+201
+ 21
+37.5
+  0
+LINE
+  8
+0
+ 10
+201
+ 20
+37.5
+ 11
+201
+ 21
+46.5
+  0
+LINE
+  8
+0
+ 10
+201
+ 20
+46.5
+ 11
+219
+ 21
+46.5
+  0
+LINE
+  8
+0
+ 10
+219
+ 20
+46.5
+ 11
+219
+ 21
+28.5
+  0
+LINE
+  8
+0
+ 10
+219
+ 20
+28.5
+ 11
+237
+ 21
+28.5
+  0
+LINE
+  8
+0
+ 10
+237
+ 20
+28.5
+ 11
+237
+ 21
+10.5
+  0
+LINE
+  8
+0
+ 10
+237
+ 20
+10.5
+ 11
+201
+ 21
+10.5
+  0
+LINE
+  8
+0
+ 10
+267.4
+ 20
+17.5
+ 11
+267.4
+ 21
+39.5
+  0
+LINE
+  8
+0
+ 10
+267.4
+ 20
+39.5
+ 11
+289.4
+ 21
+39.5
+  0
+LINE
+  8
+0
+ 10
+289.4
+ 20
+39.5
+ 11
+289.4
+ 21
+17.5
+  0
+LINE
+  8
+0
+ 10
+289.4
+ 20
+17.5
+ 11
+267.4
+ 21
+17.5
+  0
+ENDSEC
+  0
+SECTION
+  2
+OBJECTS
+  0
+DICTIONARY
+  0
+ENDSEC
+  0
+EOF
