@@ -1167,7 +1167,7 @@ function pins_at(p, r) = len([for (k = bottom_keys) if (max(abs(key_xy(k)[0] - p
 sensor_c = [cb_x[0] + 0.5 + boards_sensor_body / 2, cb_y[tube_side < 0 ? 1 : 0] + tube_side * (max(boards_sensor_leads, boards_sensor_land_w) / 2 + 0.5)];
 sensor_face_x = sensor_c[0] + boards_sensor_body / 2;
 p2_y = sensor_c[1] + boards_sensor_port_offset;
-// The slot in the main board in front of the lower port: 1 clear of the barb all round.
+// Where a slot in front of the lower port stood (removed, owner 2026-10-05); mounts still keep off it.
 port_slot_sz = [boards_sensor_port_l + 2, boards_sensor_port_d + 2];
 port_slot_c = [sensor_face_x + port_slot_sz[0] / 2, p2_y];
 p1_tip = [sensor_face_x + boards_sensor_port_l, sensor_c[1] - boards_sensor_port_offset, cb_top + boards_sensor_port_z[0]];
@@ -1412,10 +1412,9 @@ module cb_2d() {
             // width, flush with the board's edge on the near side (tongue_board_y).
             translate([cb_x[1] - EPS, cb_tail_y[0]]) square([ua_x0 - cb_x[1] + EPS, cb_tail_y[1] - cb_tail_y[0]]);
         }
-        // The slot in front of the sensor's lower port.
-        // Its corners rounded to the board house's mill (boards.cutout_corner_r): it cannot cut a square one.
-        translate(port_slot_c - port_slot_sz / 2 - [EPS, 0])
-            offset(r = boards_cutout_corner_r) offset(delta = -boards_cutout_corner_r) square(port_slot_sz);
+        // No slot in front of the sensor's lower port (owner, 2026-10-05: "No
+        // cutout, it'll be fine"): the barb stands just clear of the board's top
+        // face; port_slot_c / _sz still keep the mounts off that patch.
         // A hole for each U-bolt leg; no edge notches (ADR 0025).
         for (u = ubolt_legs()) translate(u) circle(r = ubolt_board_hole_r);
         // the mounts' holes (ADR 0022): the board locates on its studs
