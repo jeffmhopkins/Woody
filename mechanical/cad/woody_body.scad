@@ -111,8 +111,8 @@ tail_margin = boards_kb_tail_margin;     // and its TAIL end past its last: long
 // The MOUTH END. There is no display (owner, 2026-09-26: "remove the upper
 // display ... we can do all this with the matrix led"; ADR 0015), so the
 // keys start where the first top cap clears the mouth cap, the first thumb
-// recess clears it too, and the breath trap fits across the mouth band
-// before the first key board and thumb row. Everything is measured from x_in0,
+// recess clears it too, and the breath sensor's leads stop short of the first
+// thumb row (there is no breath trap since 2026-10-05, ADR 0003). Everything is measured from x_in0,
 // the inside face of the mouth cap.
 // The left-thumb cluster's extent relative to LH1 (x_lh0 = 0), recesses included.
 // A straight line: a pair, the thumb rest, a pair (owner, 2026-09-26).
@@ -127,18 +127,14 @@ lt_rest_rel = run_rel(layout_lt_rest_under);
 // LT2 side by side toward the mouth, LT3 / LT4 side by side toward the tail.
 lt_rel = [for (i = [0 : 3]) lt_rest_rel + (i < 2 ? -1 : 1) * layout_lt_rest / 2];
 lt_dy = [for (i = [0 : 3]) (i % 2 == 0 ? -1 : 1) * thumb_pitch / 2];   // across, from the centreline
-// The breath trap sits mid-height, above the main board's parts, so it has
-// to clear the first KEY board: clash.txt checks it against the main board.
-// The breath sensor is at the mouth end too (ADR 0017), and its leads must
+// The breath sensor is at the mouth end (ADR 0017), and its leads must
 // stop short of the first thumb row's pins.
 ks33_stub = 2.6;   // half-width of the KS-33's pole and pins where they stand proud of a board [clash.txt, off the vendor STEP]
 board_lead = plate_cutout / 2 + cluster_margin;   // first key board edge before LH1
-trap_band = boards_board_clear + routing_trap_l + boards_board_clear;
-mouth_names = ["the first top key", "the first thumb recess", "the breath trap before the first boards",
+mouth_names = ["the first top key", "the first thumb recess",
                "the breath sensor before the first thumb row"];
 mouth_claims = [x_in0 + layout_mouth_extra + switch_keycap / 2 + stack_cap_clear,
                 x_in0 + layout_underside_clear - (min(lt_rel) - rc / 2),
-                x_in0 + trap_band + board_lead,
                 x_in0 + boards_board_clear + 0.5 + boards_sensor_body / 2 + boards_sensor_lead_row / 2 + ks33_stub + 0.5 - min(lt_rel)];
 mouth_req = max(mouth_claims);
 
@@ -152,28 +148,29 @@ rt_rest_rel = [run_rel(layout_rt_rest_under), W / 2];
 function rt_rel(i) = rt_rest_rel + [(i < 2 ? -1 : 1) * layout_rt_rest / 2, (i % 2 == 0 ? -1 : 1) * thumb_pitch / 2];
 top_last_rel = max([for (i = [0 : len(layout_rh_gaps)]) cum(layout_rh_gaps, i)]);
 rt_last_rel = max([for (i = [0 : count("right_thumb") - 1]) rt_rel(i)[0]]);
-// BEHIND THE MATRIX, IN ORDER: the USB-C extension's plug off the Matrix's
-// tail edge (if that edge faces the tail), a clearance, then the etherCON
+// BEHIND THE MATRIX, IN ORDER: a clearance, then the etherCON
 // (ADR 0021): its adapter board, the connector's body to the flange, and the
 // tail cap. The adapter stands the connector's full height, so it queues
 // behind the Matrix; J-UMB, low on the main board, passes under it.
-usb_behind = openings_matrix_usb_to_tail ? (openings_usb_plug_turn == "down" ? openings_usb_slot_h : openings_usb_plug_l) : 0;
+// (A USB-C extension's plug stood off the Matrix here until issue #37; since
+// then nothing is plugged into the Matrix with the lid on.)
+usb_behind = 0;
 ec_stack_d = boards_umb_adapter_t + ethercon_pcb_setback;   // the adapter's rear face to the flange's front face
 behind_matrix = usb_behind + layout_tail_clear + ec_stack_d + ends_tail_cap_t;
-// IN FRONT OF IT: the USB-C plug off the mouth edge (if that edge faces the
-// mouth) reaches forward, and must clear the right-hand key board. Measured
-// from the last key centre to where the equipment starts. (A pair of lid
-// screws stood here until the module, ADR 0025.) Turned down (openings.
-// usb_plug_turn, 2026-10-02), the plug's overmould stands only its thickness
-// in front of the edge and its length below the Matrix.
+// IN FRONT OF IT: nothing with the lid on since issue #37 (ADR 0015 amendment
+// 2026-10-04). The Matrix's own USB-C is a recovery port, plugged with the lid
+// lifted off: the recovery plug below is drawn for its fit in the oak's pocket
+// and the carrier's slot, and does not size the body. Turned down (openings.
+// usb_plug_turn), its overmould stands its thickness in front of the edge and
+// its length below the Matrix.
 assert(openings_usb_plug_turn == "down" || openings_usb_plug_turn == "across", "openings.usb_plug_turn is down or across");
 // The plug's overmould is centred on the Matrix's receptacle (boards.matrix_usb,
 // review #19 F1), whose face stands its overhang past the board's edge.
 assert(openings_usb_plug_turn == "across" || !openings_matrix_usb_to_tail, "a turned-down plug is drawn at the mouth edge only");
 usb_plug_d = openings_usb_plug_turn == "down" ? boards_matrix_usb[0] + openings_usb_overmold[1] : openings_usb_plug_l;   // past the board's edge, along the body
-usb_plug_h = openings_usb_plug_turn == "down" ? openings_usb_plug_l : openings_usb_slot_h;   // its height
-usb_front = openings_matrix_usb_to_tail ? 0 : usb_plug_d;
-usb_plug_w = openings_usb_plug_turn == "down" ? openings_usb_ext_overmold_w : openings_usb_slot_w;   // across the body: the extension's own plug
+usb_plug_h = openings_usb_plug_l;   // its height
+usb_front = 0;   // the recovery plug is lid-off: it claims no body length
+usb_plug_w = openings_usb_ext_overmold_w;   // across the body: the recovery cable's plug
 equip_start_rel = plate_cutout / 2 + tail_margin + layout_tail_clear;
 tail_claims_rel = [
     top_last_rel + equip_start_rel + boards_umb_joint_d + ec_stack_d + ends_tail_cap_t,
@@ -362,7 +359,7 @@ module cutout_at(xy, rot, s) {
 // to its standoff (ADR 0025).
 module plate_top_2d() {
     difference() {
-        translate([0, stack_groove_clear]) square([plate_x1 - x_in0, u_w - 2 * stack_groove_clear]);
+        translate([0, stack_plate_side_clear]) square([plate_x1 - x_in0, u_w - 2 * stack_plate_side_clear]);
         translate([-plate_x0, -plate_y0]) {
             for (k = top_keys) cutout_at(key_xy(k), key_rot(k), plate_cutout);
             for (m = columns()) translate(m) circle(d = hardware_col_plate_hole);
@@ -403,9 +400,14 @@ module oak_bottom_2d() {
                 for (k = bottom_keys) translate(key_xy(k)) rotate(key_rot(k)) square(rc, center = true);
             for (s = spare_xy) translate(s) square(switch_keycap + 2 * thumb_recess_clear, center = true);
             for (u = ubolt_legs()) translate(u) circle(d = ubolt_hole_d);
+            translate(midi_xy) circle(d = midi_hole_d);
         }
     }
 }
+// The MIDI jack's counterbore, from the oak bottom's inside face (a router
+// pass, like the oak top's pockets, so a layer of its own): it takes the
+// jack's collar and leaves midi_panel of oak for the nut to clamp.
+module oak_bottom_pockets_2d() { translate([-x_in0, 0]) translate(midi_xy) circle(d = midi_cbore_d); }
 
 // Where a thumb cluster's switches are.
 function thumb_pts(cl) = [for (k = cluster_keys(cl)) key_xy(k)];
@@ -421,7 +423,7 @@ function thumb_pts(cl) = [for (k = cluster_keys(cl)) key_xy(k)];
 // Its extent, bplate_x1 and bplate_y, is set below the etherCON's placement.
 module plate_bottom_2d() {
     difference() {
-        translate([0, stack_groove_clear]) square([bplate_x1 - x_in0, u_w - 2 * stack_groove_clear]);
+        translate([0, stack_plate_side_clear]) square([bplate_x1 - x_in0, u_w - 2 * stack_plate_side_clear]);
         translate([-plate_x0, -plate_y0]) {
             for (k = bottom_keys) cutout_at(key_xy(k), key_rot(k), plate_cutout);
             for (u = ubolt_legs()) translate(u) circle(d = ubolt_hole_d);
@@ -447,9 +449,10 @@ module oak_grooves_2d() { for (y = side_y) translate([0, y - stack_groove_clear]
 module mouth_cap_2d() {
     difference() {
         rrect(W, T, stack_edge_r);
-        translate(tube_yz) circle(d = ends_tube_hole_d);
+        translate(tube_yz) circle(d = inlet_tap_drill_d);   // tapped M8x1.25 for the inlet's insert (issue #36)
     }
 }
+// THE BREATH INLET'S AXIS: the mouth cap's centre, where the pass-through was.
 tube_yz = [W / 2, z_floor + cavity_h / 2];
 
 // The NE8FAV (ADR 0021), rear-mounted: flange and body behind the tail cap,
@@ -458,7 +461,7 @@ tube_yz = [W / 2, z_floor + cavity_h / 2];
 // PUSH tab on top, the contact rows above the axis and G below it.
 ec_rot = ethercon_rotated ? 90 : 0;
 ec_fl = ethercon_rotated ? [ethercon_flange_h, ethercon_flange_w] : [ethercon_flange_w, ethercon_flange_h];   // [across Y, height Z]
-ec_clear = 0.3;    // drawing convention: connector envelope to the floor
+ec_clear = ethercon_floor_clear;    // connector envelope to the floor (config/body.yaml ethercon.floor_clear)
 // THE CONNECTOR STANDS ON THE FLOOR (owner, 2026-09-26: raise the body's
 // thickness rather than pocket the oak bottom): the flange's lower edge
 // ec_clear above the oak bottom, the axis half a flange above that.
@@ -473,7 +476,7 @@ ua_x0 = ec_pcb_x1 - boards_umb_adapter_t;          // the adapter's rear face
 // board clear of the bottom plate').
 ju_tail_x = ua_x0 - boards_umb_joint_d - boards_umb_joint_row_back;   // J-UMB's tail row, along the body
 bplate_x1 = ju_tail_x - boards_pin_pad / 2 - boards_board_clear;
-bplate_y = [u_y0 + stack_groove_clear, W - u_y0 - stack_groove_clear];
+bplate_y = [u_y0 + stack_plate_side_clear, W - u_y0 - stack_plate_side_clear];
 // The panel holes, upper left and lower right seen from the front ([ds]);
 // from the front, +Y is on the right. (Y, Z) on the tail face.
 ec_holes = [for (s = [-1, 1]) ec_c + s * [ethercon_hole_dx, -ethercon_hole_dy] / 2];
@@ -483,8 +486,8 @@ function ec_pt(p) = ec_c + (ethercon_rotated ? [p[1], -p[0]] : p);
 // most, and the cap is thicker, so a pocket from outside leaves that much
 // oak where the flange clamps. It takes the flange's outline, the PUSH tab
 // (which stands in it, in front of the panel), and a margin for the cable
-// connector's shell and a thumb. A router pass, like the USB-C overmould
-// pocket: the DXF carries the through-cuts only.
+// connector's shell and a thumb. A router pass: the DXF carries the
+// through-cuts only.
 ec_panel_t = min(ethercon_panel_max, ends_tail_cap_t);
 function ethercon_fl_top() = ethercon_flange_h / 2;   // the flange's edge above the axis, in the connector's frame
 ec_recess_d = ends_tail_cap_t - ec_panel_t;
@@ -494,38 +497,22 @@ module ec_recess_2d() {
         for (s = [-1, 1]) translate(ec_pt([s * ethercon_tab_w / 2, ethercon_tab_top])) circle(d = EPS * 10);
     }
 }
-// The USB-C extension's receptacle (owner, 2026-09-26): beside the
-// etherCON, inside the sides, at the cavity's mid height. Stood on end
-// (openings.usb_slot_portrait) it fits the lane between the etherCON's
-// flange and the side, and sits centred in it, so the oak web to the flange
-// and the room to the side share what the lane has spare.
-usb_web_min = 2;   // drawing convention: oak between two tail-face cutouts
-usb_sz = openings_usb_slot_portrait ? [openings_usb_slot_h, openings_usb_slot_w] : [openings_usb_slot_w, openings_usb_slot_h];   // [across Y, height Z]
-usb_lane = [ec_c[0] + ec_fl[0] / 2, W - u_y0];   // flange edge to the side's inside face
-// Centred in the cavity's height, UNLESS the main board runs on under it
-// (boards.main_tail "full", owner 2026-10-02): then the receptacle's body,
-// which reaches back to within boards.board_clear of the board's tail end,
-// stands at least boards.board_clear above the board's parts - the same
-// clearance a key board keeps from the parts under it. (The board's top face
-// is thumb_z, below; it is written out here because thumb_z comes later.)
-usb_over_board = boards_main_tail == "full" && x_in1 - openings_usb_ext_depth < ua_x0 + boards_board_clear;
-usb_board_top = z_floor + switch_thumb_pcb_below_seat + switch_pcb_t;   // = thumb_z = cb_top
-usb_c = [(usb_lane[0] + usb_lane[1]) / 2,
-         max(z_floor + cavity_h / 2, usb_over_board ? usb_board_top + boards_smt_h + boards_board_clear + usb_sz[1] / 2 : 0)];
-// THE OVERMOULD POCKET (openings.usb_overmold): from the tail face down to a
-// thin panel, so the plug's overmould reaches the receptacle, whose nose
-// passes the panel's slot with its face level with the pocket floor. A
-// router pass, like the counterbores: the DXF carries the through-cut slot.
-usb_om = openings_usb_slot_portrait ? [openings_usb_overmold[1], openings_usb_overmold[0]] : openings_usb_overmold;   // [across Y, height Z]
-usb_pocket_d = ends_tail_cap_t - openings_usb_panel_t;
-usb_cut_y = max(usb_sz[0], usb_om[0]);   // the widest USB-C cutout on the tail face, across
+// THE LANE BESIDE THE ETHERCON: from the flange's edge to the side's inside
+// face, the adapter's front face to the tail cap. The USB-C extension's
+// receptacle stood in it until issue #37; since then the MIDI jack does, through
+// the oak bottom (config/body.yaml midi; owner, 2026-10-04: "on the bottom face").
+tail_web_min = 2;   // drawing convention: oak between two cutouts in a face
+ec_lane = [ec_c[0] + ec_fl[0] / 2, W - u_y0];   // across: flange edge to the side's inside face
+midi_xy = [(ec_pcb_x1 + x_in1) / 2, (ec_lane[0] + ec_lane[1]) / 2];
+midi_panel = midi_jack_thread[1] - midi_jack_nut_t;   // the thickest panel the nut still clamps [calc from the drawing]
+midi_cbore_d = midi_jack_collar[0] + 2 * midi_cbore_clear;
+midi_cbore_depth = oak_bottom_t - midi_panel;   // from the inside face, leaving midi_panel of oak
 
 module tail_cap_2d() {
     difference() {
         rrect(W, T, stack_edge_r);
         translate(ec_c) circle(d = ethercon_bore_d);
         for (h = ec_holes) translate(h) circle(d = ethercon_hole_d);
-        translate(usb_c) square(usb_sz, center = true);
     }
 }
 // The matrix window: frosted acrylic, flush with the oak top, on an oak lip
@@ -541,10 +528,10 @@ module oak_rebates_2d() { translate([-x_in0, 0]) translate(matrix_xy) square(mat
 // the rebates; their depth is the head's and a clearance
 // (drc.echo "column screw pockets leave wood over them"). Frame: as the oak panels.
 col_pocket_depth = hardware_col_screw_head_h + hardware_col_pocket_clear;
-// ...and one over the USB-C plug, where its overmould rises past the oak's
-// underside (review #19 F1): the same depth, cut in the same pass, ending at
-// the window's rebate.
-function usb_oak_pocket() = let(x1 = min(matrix_xy[0] - boards_matrix_board / 2 - boards_matrix_usb[0] + 0.3, matrix_xy[0] - matrix_rebate / 2))
+// ...and one over the Matrix's USB-C, where a recovery plug's overmould rises
+// past the oak's underside (review #19 F1; lid off since issue #37): the same
+// depth, cut in the same pass, ending at the window's rebate.
+function usb_oak_pocket() = let(x1 = min(matrix_xy[0] - boards_matrix_board / 2 - boards_matrix_usb[0] + openings_usb_pocket_clear, matrix_xy[0] - matrix_rebate / 2))
     [usb_plug_x0 - 0.5, matrix_xy[1] - usb_plug_w / 2 - 0.5, x1, matrix_xy[1] + usb_plug_w / 2 + 0.5];
 // THE MATRIX CARRIER'S INSERTS (hardware.mx_insert_*): blind holes drilled up
 // into the oak top's underside, one per hanging mount, deeper than the
@@ -630,7 +617,7 @@ module cluster_window_2d(ks) {
     offset(delta = (switch_cluster_pcb_w - plate_cutout) / 2) keys_2d(ks, plate_cutout, close = 3);
 }
 
-// Tail equipment: the Matrix, the etherCON and the USB-C extension.
+// Tail equipment: the Matrix and the etherCON.
 // TIGHT TO THE WINDOW (owner, 2026-09-26: "led matrix tighter to the
 // acrylic"). The key plate stops short of the Matrix, so the board's top
 // face comes up under the oak top's underside and its LEDs stand up into the
@@ -645,15 +632,15 @@ mx_carrier_bot = mx_carrier_top - switch_pcb_t;
 matrix_board_z = mx_carrier_top + boards_matrix_hdr_h;
 matrix_top_z = matrix_board_z + boards_matrix_t + boards_matrix_led_h;   // LED tops
 // The key plate ends before the Matrix, so past it the lid is the oak alone.
-// AND SHORT OF THE USB-C PLUG (review #19 F1): the plug's overmould is centred
-// on the receptacle's axis, so it rises past the plate's underside; the plate
-// stops a millimetre in front of it, which also opens J-MCU's side to a hand.
+// It stops a millimetre in front of where the plug's overmould stood (review
+// #19 F1), which opens J-MCU's side to a hand; since issue #37 nothing is
+// plugged there with the lid on, and the plate keeps that end.
 usb_axis_z = matrix_board_z - boards_matrix_usb[3];   // the receptacle's axis, below the Matrix's underside
-usb_plug_top = openings_usb_plug_turn == "down" ? usb_axis_z + openings_usb_overmold[1] / 2 : usb_axis_z + openings_usb_slot_h / 2;
-usb_pocket_need = usb_plug_top + 0.3 - z_oak_top_bot;   // drawing convention: 0.3 of air over the overmould
+usb_plug_top = usb_axis_z + openings_usb_overmold[1] / 2;   // the recovery plug's overmould, centred on the axis
+usb_pocket_need = usb_plug_top + openings_usb_pocket_clear - z_oak_top_bot;   // openings.usb_pocket_clear of air over the overmould
 plate_x1 = min(matrix_xy[0] - boards_matrix_board / 2 - 1,
                usb_plug_top > z_plate_bot ? matrix_xy[0] - boards_matrix_board / 2 - usb_plug_d - 1 : 1e9);
-// The USB-C extension's plug, in the Matrix's mouth or tail edge.
+// The recovery plug, in the Matrix's mouth or tail edge.
 usb_plug_x0 = openings_matrix_usb_to_tail ? matrix_xy[0] + boards_matrix_board / 2 : matrix_xy[0] - boards_matrix_board / 2 - usb_plug_d;
 // The tail equipment starts at the first of that plug and J-UMB, behind the
 // etherCON's adapter.
@@ -701,6 +688,7 @@ module u_channel() {
     P(C_OAK, true, "oak bottom") translate([x_in0, 0, -explode]) intersection() { sanded_panel(x_in1 - x_in0, oak_bottom_t); difference() {
         linear_extrude(oak_bottom_t) oak_bottom_2d();
         translate([0, 0, oak_bottom_t - stack_groove_depth]) linear_extrude(stack_groove_depth + EPS) oak_grooves_2d();
+        translate([0, 0, midi_panel]) linear_extrude(midi_cbore_depth + EPS) oak_bottom_pockets_2d();
     } }
     // Each side: one sheet, bottom edge in the bottom groove, top edge in the top.
     // Exploded, the sides move out and down so the boards between them show.
@@ -709,16 +697,37 @@ module u_channel() {
             linear_extrude(stack_side_t) side_2d();
 }
 
+// THE BREATH INLET (issue #36, ADR 0003 amendment 2026-10-04; config/body.yaml
+// inlet): an E-Z LOK 550-1032 insert flush with the mouth cap's outer face, a
+// Clippard 12842 flush barb screwed into it from outside (finished black) and a
+// 12843 (3/32") from inside for the clear tube to U-BREATH. Drawn along +x on the inlet's axis.
+module inlet_cyl(x0, x1, d) translate([min(x0, x1), tube_yz[0], tube_yz[1]]) rotate([0, 90, 0]) cylinder(d = d, h = abs(x1 - x0));
+// A flush barb: its collar's face at x0, the thread toward +s and the barb toward -s.
+module flush_barb(x0, s, a = inlet_barb_a, bore = inlet_barb_bore, ridge = inlet_barb_ridge_d) difference() {
+    union() {
+        inlet_cyl(x0, x0 + s * inlet_barb_thread_l, inlet_insert_bore);
+        inlet_cyl(x0, x0 - s * a, ridge - 0.8);
+        inlet_cyl(x0, x0 - s * 0.4, inlet_barb_collar_d);
+        for (k = [0.45, 0.85]) inlet_cyl(x0 - s * a * k, x0 - s * (a * k + 1.4), ridge);
+    }
+    inlet_cyl(x0 - s * (a + 1), x0 + s * (inlet_barb_thread_l + 1), bore);
+}
+inlet_in_x = inlet_insert_l + inlet_inner_gap;   // the inner barb's collar face
+inlet_in_tip = inlet_in_x + inlet_inner_barb_a;  // and its tip
+module inlet_3d() translate([-explode / 3, 0, 0]) {
+    P(C_BRASS, false, "breath inlet insert") difference() { inlet_cyl(0, inlet_insert_l, inlet_insert_d); inlet_cyl(-1, inlet_insert_l + 1, inlet_insert_bore); }
+    P([0.09, 0.09, 0.10], false, "breath inlet barb") flush_barb(0, 1);
+    P(C_BRASS, false, "breath inner barb") flush_barb(inlet_in_x, -1, inlet_inner_barb_a, inlet_inner_barb_bore, inlet_inner_ridge_d);
+}
 // render(): the preview renderer (OpenCSG) drops the cut-outs of an
 // intersection() it has to draw as CSG, so without it the tail face showed
-// neither the USB-C slot nor the flange screw holes.
+// neither the bore nor the flange screw holes.
 module caps() {
     P(C_OAK_DARK, true, "mouth cap") translate([ends_mouth_cap_t - explode / 3, 0, 0]) rotate([90, 0, 90]) mirror([0, 0, 1])
         render() intersection() { linear_extrude(ends_mouth_cap_t) mouth_cap_2d(); sanded_cap(ends_mouth_cap_t); }
     P(C_OAK_DARK, true, "tail cap") translate([x_in1 + explode / 3, 0, 0]) rotate([90, 0, 90])
         render() difference() {
             intersection() { linear_extrude(ends_tail_cap_t) tail_cap_2d(); sanded_cap(ends_tail_cap_t); }
-            translate([usb_c[0] - usb_om[0] / 2, usb_c[1] - usb_om[1] / 2, openings_usb_panel_t]) cube([usb_om[0], usb_om[1], usb_pocket_d + EPS]);
             if (ec_recess_d > 0) translate([0, 0, ec_panel_t]) linear_extrude(ec_recess_d + EPS) ec_recess_2d();
         }
 }
@@ -966,13 +975,12 @@ module pcb_geometry() {
     echo("PCB", "main", "keepout", "elsewhere", cb_x[0], cb_y[0], ua_x0, cb_y[1], gap_room);
     for (cl = chain_ribbon_cls) let(sp = chain_span(chain_x(cl), chain_dir(cl)))
         echo("PCB", "main", "keepout", str("ribbon ", cl), sp[0], chain_y - boards_chain_hdr_l / 2, sp[1], chain_y + boards_chain_hdr_l / 2, 0);
-    // The corner under the USB-C extension's receptacle and its lead
-    // (boards.main_tail "full"): parts to boards.smt_h, which the receptacle
-    // clears by boards.board_clear (drc.echo 'main board's tail end runs full
-    // width beside the etherCON adapter').
-    if (boards_main_tail == "full")
-        echo("PCB", "main", "keepout", "USB-C receptacle and lead", cb_x[1], usb_c[0] - usb_sz[0] / 2 - boards_board_clear, ua_x0, cb_y[1],
-             usb_c[1] - usb_sz[1] / 2 - boards_board_clear - cb_top);
+    // The corner the USB-C extension's receptacle and lead held until issue #37
+    // is the main board's again; J-MIDI is proposed in it (config/body.yaml
+    // midi.hdr_at, placed by the layout): nothing taller than its mated plug there.
+    echo("PCB", "main", "keepout", "J-MIDI and CBL-MIDI's plug (proposed)", midi_hdr_at[0] - midi_hdr_sz[0] / 2 - boards_board_clear,
+         midi_hdr_at[1] - midi_hdr_sz[1] / 2 - boards_board_clear, midi_hdr_at[0] + midi_hdr_sz[0] / 2 + boards_board_clear,
+         midi_hdr_at[1] + midi_hdr_sz[1] / 2 + boards_board_clear, midi_hdr_mated_h);
     // The Matrix ribbon (since 2026-10-02 an IDC ribbon up to the right-hand
     // key board): nothing in J-MCU's mated socket and the ribbon's rise off its
     // back (height 0); past it, parts under the closed fold's lowest leg there.
@@ -1038,18 +1046,19 @@ module tail_equipment() {
     }
     // The umbilical adapter: the flange's outline, parallel to the tail cap.
     P(C_PCB, false, "umbilical adapter") translate([ua_x0, ec_c[0] - ec_fl[0] / 2, ec_c[1] - ec_fl[1] / 2]) cube([boards_umb_adapter_t, ec_fl[0], ec_fl[1]]);
-    // The USB-C extension's plug in the Matrix's USB-C edge, under the board:
-    // along the body and down from it as openings.usb_plug_turn turns it.
-    P([0.35, 0.35, 0.38], false, "USB-C plug") translate([usb_plug_x0, matrix_xy[1] - usb_plug_w / 2, usb_plug_top - usb_plug_h + e_kb])
-        cube([usb_plug_d - boards_matrix_usb[0], usb_plug_w, usb_plug_h]);
-    // The USB-C extension: receptacle body behind the tail cap, and a cable
-    // run to the Matrix board's edge (drawn straight; it is a flexible lead).
-    // Its nose passes the panel under the overmould pocket, face level with
-    // the pocket floor; an earless body, clamped from behind (openings.usb_mount).
-    P(C_CONN, false, "USB-C receptacle") translate([x_in1 - openings_usb_ext_depth, usb_c[0] - usb_sz[0] / 2, usb_c[1] - usb_sz[1] / 2])
-        cube([openings_usb_ext_depth + openings_usb_panel_t, usb_sz[0], usb_sz[1]]);
-    // Routed beside the etherCON, on the receptacle's side.
-    P([0.15, 0.15, 0.15], false, "USB-C lead") run(usb_lead, 4);
+    // THE MIDI JACK (issue #37): through the oak bottom in the lane, its collar in
+    // the counterbore, its nut under the bottom face, its body and tabs up into
+    // the lane; CBL-MIDI from the tabs to J-MIDI on the main board.
+    P(C_CONN, false, "MIDI jack") translate([midi_xy[0], midi_xy[1], z_floor - oak_bottom_t - explode]) {
+        translate([0, 0, -midi_jack_nut_t]) cylinder(d = midi_jack_collar[0], h = midi_jack_nut_t, $fn = 6);
+        translate([0, 0, -midi_jack_nut_t]) cylinder(d = midi_jack_thread[0], h = midi_jack_thread[1] + midi_jack_nut_t);
+        translate([0, 0, midi_panel]) cylinder(d = midi_jack_collar[0], h = midi_jack_collar[1], $fn = 6);
+        translate([0, 0, midi_panel + midi_jack_collar[1]]) cylinder(d = midi_jack_body[0], h = midi_jack_body[1]);
+        translate([-0.5, -2, midi_panel + midi_jack_collar[1] + midi_jack_body[1]]) cube([1, 4, midi_jack_body[2]]);
+    }
+    P(C_CONN, false, "J-MIDI") translate([midi_hdr_at[0] - midi_hdr_sz[0] / 2, midi_hdr_at[1] - midi_hdr_sz[1] / 2, cb_top])
+        cube([midi_hdr_sz[0], midi_hdr_sz[1], midi_hdr_mated_h]);
+    P([0.15, 0.15, 0.15], false, "MIDI lead") run(midi_lead, 3);
 }
 
 // THE LEDS (ADR 0028): WS2815B-V1 on the main board's top face, one row down
@@ -1062,8 +1071,9 @@ module led_row() {
 }
 
 // ------------------------------------------------------------ routing -----
-// The breath tube runs from the mouth cap to the trap and the sensor inside
-// the mouth band, against one side (routing_tube_lane); there are no looms
+// The breath tube is one clear tube from the inlet's inner barb to the
+// sensor's P1, no trap (owner, 2026-10-05; tube_route below), and the sensor
+// stands on the far side from routing_tube_lane; there are no looms
 // since ADR 0017 - the key boards are on 1.27 mm IDC ribbons and the Matrix
 // on a ribbon, both drawn below. The lane is a model choice (config/body.yaml
 // routing): the clash check reports what is in it.
@@ -1120,7 +1130,7 @@ function pins_at(p, r) = len([for (k = bottom_keys) if (max(abs(key_xy(k)[0] - p
 
 // THE BREATH SENSOR: MPXV4006DP case 1351-01, SURFACE MOUNT (datasheet p.2),
 // AT THE MOUTH END (owner, 2026-09-26, with the main board): on the far side
-// from the tube, ports towards the tail, beside the breath trap - the
+// from the tube, ports towards the tail, beside the tube's first bend - the
 // shortest tube this body can have. The lower barb reaches the board's
 // surface (p.7), so the board has a slot in front of it.
 // Across: in from the board's edge by the wider of the lead tips and the land
@@ -1430,14 +1440,11 @@ mcu_rises = (mcu_zs[0] - (jm_z + boards_mcu_plug_t / 2)) + ((kbm_z - boards_mcu_
 // LEDs' courtyards plus board_clear each side. Nothing of J-MCU, J-MCU-C,
 // their plugs or the ribbon stands in it.
 led_band = [led_y - lighting_led_court[1] / 2 - boards_board_clear, led_y + lighting_led_court[1] / 2 + boards_board_clear];
-// How far forward the ribbon may reach: short of the USB-C plug by board_clear
-// when the mouths face the tail; short of the LED row's band when they face it,
-// and of the extension's plug where the folds pass under it (its overmould
-// comes down past the folds' height beside J-MCU; owner, 2026-10-03, option A).
-usb_plug_y0 = matrix_xy[1] - usb_plug_w / 2;     // the extension plug's near face
-usb_plug_over_mcu = jm_dir == 90 && usb_plug_x0 < jm_x1 && usb_plug_x0 + usb_plug_d - boards_matrix_usb[0] > jm_x0;
-mcu_front_max = jm_dir == 0 ? usb_plug_x0 - boards_board_clear
-              : usb_plug_over_mcu ? min(led_band[0], usb_plug_y0 - boards_board_clear) : led_band[0];
+// How far forward the ribbon may reach: short of the Matrix's mouth edge by
+// board_clear when the mouths face the tail; short of the LED row's band when
+// they face it. (Until issue #37 the extension's plug, over J-MCU's row, set it
+// tighter: owner, 2026-10-03, option A.)
+mcu_front_max = jm_dir == 0 ? matrix_xy[0] - boards_matrix_board / 2 - boards_board_clear : led_band[0];
 // How far the legs reach back (facing the far side: over J-MCU and on past its
 // back, to a fold short of the board's near edge; otherwise to 1 mm short of
 // J-MCU's back) and forward, at most, from mcu_us[0]. The legs run back 4 times
@@ -1461,6 +1468,8 @@ mcu_fold = mcu_rect(mcu_fold_u[0], mcu_fold_u[1], min(mcu_c) - mcu_cw / 2, max(m
 mx_x0 = matrix_xy[0] - boards_matrix_board / 2;
 mx_x1 = matrix_xy[0] + boards_matrix_board / 2 + boards_matrix_carrier_past;
 mx_notch_w = boards_matrix_usb[2] + 2 * boards_matrix_notch_clear;
+mx_shell = [mx_x0 - 1 - boards_matrix_notch_clear, matrix_xy[1] - boards_matrix_usb[2] / 2,
+            matrix_xy[0] - boards_matrix_board / 2 + boards_matrix_usb[1], matrix_xy[1] + boards_matrix_usb[2] / 2];
 mx_notch = [mx_x0 - 1, matrix_xy[1] - mx_notch_w / 2,
             matrix_xy[0] - boards_matrix_board / 2 + boards_matrix_usb[1] + boards_matrix_notch_clear, matrix_xy[1] + mx_notch_w / 2];
 // the arm's mouth end: past J-MCU-C's insulator, but short of the right-hand key board's
@@ -1468,26 +1477,26 @@ mx_notch = [mx_x0 - 1, matrix_xy[1] - mx_notch_w / 2,
 mx_arm = [max(jk_x0 - boards_matrix_carrier_past, kb_rect("right_hand")[2] + boards_matrix_carrier_past), cb_y[0], mx_x0 + 1, jk_y + jm_sz[1] / 2 + boards_matrix_carrier_past];
 mx_mounts = [for (c = boards_matrix_mount_corners) matrix_xy + [c[0] * boards_matrix_mount_dxy[0], c[1] * boards_matrix_mount_dxy[1]]];
 module matrix_carrier_2d() {
-    offset(r = kb_corner_r) offset(delta = -kb_corner_r) offset(r = -kb_corner_r) offset(delta = kb_corner_r) difference() {
-        union() {
+    // the slot is cut after the outline's rounding, as the receptacle's shell grown by
+    // boards.matrix_notch_clear with its corners round about the shell's: rounded with the
+    // outline, its inside corners were filleted back into the clearance (issue #34 C8)
+    difference() {
+        offset(r = kb_corner_r) offset(delta = -kb_corner_r) offset(r = -kb_corner_r) offset(delta = kb_corner_r) union() {
             translate([mx_x0, cb_y[0]]) square([mx_x1 - mx_x0, cb_y[1] - cb_y[0]]);
             translate([mx_arm[0], mx_arm[1]]) square([mx_arm[2] - mx_arm[0], mx_arm[3] - mx_arm[1]]);
         }
-        translate([mx_notch[0], mx_notch[1]]) square([mx_notch[2] - mx_notch[0], mx_notch[3] - mx_notch[1]]);
+        offset(r = boards_matrix_notch_clear) translate([mx_shell[0], mx_shell[1]]) square([mx_shell[2] - mx_shell[0], mx_shell[3] - mx_shell[1]]);
     }
 }
 function half_turn(c, r, a0, a1) = [for (i = [0 : 8]) let(a = a0 + (a1 - a0) * i / 8) [c[0] + r * cos(a), c[1] + r * sin(a)]];
-// The lead (4 mm, drawn straight between its bends): turned down, out of the
-// plug's bottom and across under the right-hand key board's far rail at
-// usb_lead_z, then up to the receptacle beside the etherCON; across, out of
-// the plug's far side at its own height.
-usb_lead_z = openings_usb_plug_turn == "down" ? max(usb_plug_top - usb_plug_h, cb_top + boards_smt_h + boards_board_clear + 2) : matrix_board_z - openings_usb_slot_h / 2;
-usb_lead = openings_usb_plug_turn == "down"
-    ? let(x = usb_plug_x0 + (usb_plug_d - boards_matrix_usb[0]) / 2)
-        [[x, matrix_xy[1], usb_plug_top - usb_plug_h + 2], [x, matrix_xy[1], usb_lead_z], [x + 4, usb_c[0], usb_lead_z],
-         [x_in1 - openings_usb_ext_depth - 4, usb_c[0], usb_c[1]], [x_in1 - openings_usb_ext_depth, usb_c[0], usb_c[1]]]
-    : let(f = [openings_matrix_usb_to_tail ? matrix_xy[0] + boards_matrix_board / 2 + usb_behind : usb_plug_x0, matrix_xy[1], matrix_board_z - openings_usb_slot_h / 2])
-        [f, [f[0] + 4, usb_c[0], f[2]], [x_in1 - openings_usb_ext_depth - 4, usb_c[0], usb_c[1]], [x_in1 - openings_usb_ext_depth, usb_c[0], usb_c[1]]];
+// CBL-MIDI (3 mm, drawn straight between its bends): up off the jack's tabs,
+// across the lane beside the adapter and over the main board's end to J-MIDI's
+// mated plug, beside the etherCON's footprint (the lane is clear of it).
+midi_tab_top = z_floor - oak_bottom_t + midi_panel + midi_jack_collar[1] + midi_jack_body[1] + midi_jack_body[2];
+midi_lead_z = max(midi_tab_top, cb_top + midi_hdr_mated_h) + 2;
+midi_lead = [[midi_xy[0], midi_xy[1], midi_tab_top], [midi_xy[0], midi_xy[1], midi_lead_z],
+             [midi_hdr_at[0], midi_hdr_at[1], midi_lead_z], [midi_hdr_at[0], midi_hdr_at[1], cb_top + midi_hdr_mated_h]];
+midi_run = path_len([for (p = midi_lead) [p[0], p[2]]]) + norm([midi_xy[1] - midi_hdr_at[1], 0]);
 // in (u, z): up off J-MCU's socket, the four legs, and up into J-MCU-C's
 mcu_path = concat([[mcu_us[0], jm_z + boards_mcu_plug_t / 2], [mcu_us[0], mcu_zs[0]]],
                   half_turn([mcu_us[0] - mcu_reach[0], (mcu_zs[0] + mcu_zs[1]) / 2], mcu_fr, 270, 90),
@@ -1595,8 +1604,6 @@ function near_col(p) = min([for (c = cb_cols) norm(p - c[0])]);
 cb_ends_dropped = [for (c = cb_ends) if (c != undef && near_col(c) < hardware_end_mount_merge_d) c];
 // Every mount on the bottom plate: the columns first (n_cols of them), then the ends.
 cb_standoffs = concat([for (c = cb_cols) c[0]], [for (c = cb_ends) if (c != undef && near_col(c) >= hardware_end_mount_merge_d) c]);
-// The breath tube's lane (routing_3d), placed once the mounts it keeps clear of are.
-tube_y = lane_y(routing_tube_lane, routing_tube_od);
 module centre_board_3d() {
     P(C_PCB, false, "main board") translate([0, 0, cb_z]) linear_extrude(switch_pcb_t) cb_2d();
     P(C_ENVELOPE, false, "parts main board") translate([0, 0, cb_top]) linear_extrude(boards_smt_h) difference() {
@@ -1668,24 +1675,35 @@ module parts_3d() {
             cube([boards_matrix_usb[0] + boards_matrix_usb[1], boards_matrix_usb[2], boards_matrix_under_h]);
 }
 
+// THE BREATH TUBE'S ROUTE, in plan at the inlet's height: along the inlet's
+// axis off the inner barb, an S of two arcs at routing.tube_bend_r over to
+// the U's lower leg, one U at tube_bend_r turning back toward the mouth, and
+// straight onto P1, which faces the tail. The U's lower leg sits 2 x the bend
+// radius from P1's line, so the U is exactly the tightest bend allowed; the S
+// takes up the rest. tube_d_s is how far the S moves the tube across.
+tube_r = routing_tube_bend_r;
+tube_d_s = tube_yz[0] - (p1_tip[1] - 2 * tube_r);        // + = toward the near side
+tube_th = acos(1 - tube_d_s / (2 * tube_r));
+tube_s0 = inlet_in_tip + 1;
+tube_xu = max(tube_s0 + 2 * tube_r * sin(tube_th), p1_tip[0] + 4);
+function tube_v2y(v) = tube_yz[0] - v;
+function tube_arc(c, a0, a1, n = 8) = [for (i = [0 : n]) let(a = a0 + (a1 - a0) * i / n) c + tube_r * [cos(a), sin(a)]];
+tube_plan = concat([[inlet_in_x + 0.4, 0]],
+    tube_arc([tube_s0, tube_r], -90, -90 + tube_th),
+    tube_arc([tube_s0 + 2 * tube_r * sin(tube_th), tube_d_s - tube_r], 90 + tube_th, 90),
+    tube_arc([tube_xu, tube_d_s - tube_r], 90, -90, 16),
+    [[p1_tip[0] - 2, tube_d_s - 2 * tube_r]]);
+tube_route = [for (i = [0 : len(tube_plan) - 1]) let(t = i / (len(tube_plan) - 1))
+              [tube_plan[i][0], tube_v2y(tube_plan[i][1]), tube_yz[1] + (p1_tip[2] - tube_yz[1]) * t]];
+tube_len = sum([for (i = [1 : len(tube_route) - 1]) norm(tube_route[i] - tube_route[i - 1])]);
+
 module routing_3d() {
-    trap_y = lane_y(routing_tube_lane, routing_trap_d);   // inboard of the mouth-end mounts, like the tube
-    // The trap sits in the mouth band, above the main board and before the
-    // first key board. The sensor is beside it on the far side (ADR 0017):
-    // from the trap the tube turns across, over the LED row, and back onto the
-    // sensor's port, which faces the tail.
-    trap_x0 = x_lh0 - board_lead - boards_board_clear - routing_trap_l;
-    trap_z = z_floor + cavity_h / 2;
-    P([0.95, 0.60, 0.45], false, "breath tube") run([
-        [0, tube_yz[0], tube_yz[1]], [x_in0 + 3, tube_yz[0], tube_yz[1]],
-        [x_in0 + 12, tube_y, trap_z],
-        [trap_x0 - 6, tube_y, trap_z], [trap_x0, trap_y, trap_z]], routing_tube_od);
-    P([0.95, 0.60, 0.45], false, "breath trap") translate([trap_x0, trap_y, trap_z]) rotate([0, 90, 0])
-        cylinder(d = routing_trap_d, h = routing_trap_l);
-    P([0.95, 0.60, 0.45], false, "breath tube to sensor") run([
-        [trap_x0 + routing_trap_l, trap_y, trap_z], [trap_x0 + routing_trap_l + 4, trap_y, p1_tip[2]],
-        [trap_x0 + routing_trap_l + 4, p1_tip[1], p1_tip[2]], [p1_tip[0] + routing_tube_od + 1, p1_tip[1], p1_tip[2]],
-        [p1_tip[0] - 2, p1_tip[1], p1_tip[2]]], routing_tube_od * 0.8);
+    inlet_3d();   // with the routing, not the caps, so a view without the shell still shows the inlet
+    // THE BREATH TUBE (owner, 2026-10-05; ADR 0003): one clear silicone tube,
+    // no trap, from the inner barb's collar to over P1's barb. Clear, so it
+    // may cross the LED row (the owner: "it's not a diffusion risk because
+    // it'll be clear"); it bends at routing.tube_bend_r and no tighter.
+    P([0.80, 0.90, 0.95], false, "breath tube") run(tube_route, routing_tube_od);
 }
 
 module hardware_3d() {
@@ -1750,10 +1768,10 @@ module drc_report() {
     drc(undef, "what the tail end needs", layout_matrix_centred && matrix_centred_req >= max(tail_claims_rel) - top_last_rel
         ? str("the LED matrix centred after the keys, with ", cap_edge_rel + 2 * (boards_matrix_board / 2 + behind_matrix)
             >= 2 * (equip_start_rel + usb_front + boards_matrix_board / 2) - cap_edge_rel
-            ? "the etherCON behind it" : "its USB-C plug in front of it, clear of the key board") : tail_names[search(max(tail_claims_rel), tail_claims_rel)[0]],
+            ? "the etherCON behind it" : "its own half-width in front of it, clear of the key board") : tail_names[search(max(tail_claims_rel), tail_claims_rel)[0]],
         str(tail_req, " mm after the last key"));
     echo("DRC", "INFO", "behind the Matrix, to the tail face", behind_matrix,
-         str("mm = USB-C plug ", usb_behind, " + clearance ", layout_tail_clear, " + the etherCON's adapter ", boards_umb_adapter_t,
+         str("mm = clearance ", layout_tail_clear, " + the etherCON's adapter ", boards_umb_adapter_t,
              " + the connector to its flange ", ethercon_pcb_setback, " + tail cap ", ends_tail_cap_t, " - J-UMB passes under the Matrix"));
     under_m = matrix_board_z - boards_matrix_under_h;
     m_x1 = matrix_xy[0] + boards_matrix_board / 2 + usb_behind;
@@ -1783,21 +1801,19 @@ module drc_report() {
         "LEDs and the places the row is laid out for (ADR 0028, amended 2026-10-03: one row, equal margins to the board's ends; the tail-end places empty), their pitch, the margin from each end to the end place, the mouth-end (LED led_count) and tail-end (LED 1) centres along the body, the span their centres may take (past the breath sensor's courtyard + board_clear, short of J-UMB's pads + board_clear), and the even tiling's pitch (half a pitch at each end), which the sensor's bound overrides at the mouth");
     // EVERY LED CLEAR OF ITS NEIGHBOURS (ADR 0028 amendment, 2026-10-03): each courtyard on
     // the board and boards.board_clear clear of J-MCU and the regulator block; clear of the
-    // mounts' nut keep-outs and HDR-SERVICE's pads; its top under the USB-C receptacle's
-    // keep-out height wherever it stands in it. Its 100 nF is the layout's (layout.yaml led_caps).
+    // mounts' nut keep-outs and HDR-SERVICE's pads. Its 100 nF is the layout's (layout.yaml led_caps).
     let(ct = lighting_led_court,
         box_of = function(n) [led_xy(n) - ct / 2, led_xy(n) + ct / 2],
         edge = min([for (n = [1 : led_n]) let(b = box_of(n)) min(b[0][0] - mb_ends[0], mb_ends[1] - b[1][0], b[0][1] - cb_y[0], cb_y[1] - b[1][1])]),
         jmcu = min([for (n = [1 : led_n]) let(b = box_of(n)) rect_gap_r([jm_x0, jm_y - jm_sz[1] / 2, jm_x1, jm_y + jm_sz[1] / 2], [b[0][0], b[0][1], b[1][0], b[1][1]])]),
         block = min([for (n = [1 : led_n]) let(b = box_of(n)) rect_gap_r([tall_c[0][0] - tall_sz[0] / 2, tall_c[0][1] - tall_sz[1] / 2, tall_c[0][0] + tall_sz[0] / 2, tall_c[0][1] + tall_sz[1] / 2], [b[0][0], b[0][1], b[1][0], b[1][1]])]),
         nut = min([for (n = [1 : led_n], c = cb_standoffs) rect_gap(c, led_xy(n), ct, 0)]) - mb_keep_d / 2,
-        svc = min([for (n = [1 : led_n]) let(b = box_of(n)) rect_gap_r(pad_row(svc_at, svc_end), [b[0][0], b[0][1], b[1][0], b[1][1]])]),
-        usb_room = usb_c[1] - usb_sz[1] / 2 - boards_board_clear - cb_top - lighting_led_h)
-        drc(edge >= boards_board_clear && jmcu >= boards_board_clear && block >= boards_board_clear && nut >= 0 && svc >= boards_board_clear && usb_room >= 0,
+        svc = min([for (n = [1 : led_n]) let(b = box_of(n)) rect_gap_r(pad_row(svc_at, svc_end), [b[0][0], b[0][1], b[1][0], b[1][1]])]))
+        drc(edge >= boards_board_clear && jmcu >= boards_board_clear && block >= boards_board_clear && nut >= 0 && svc >= boards_board_clear,
             "LED row clear of its neighbours",
-            [edge, jmcu, block, nut, svc, usb_room],
+            [edge, jmcu, block, nut, svc],
             str("mm, the least over every LED, from its courtyard to: the board's nearest edge, J-MCU, the regulator block (each against boards.board_clear ", boards_board_clear,
-                "), a mount's nut keep-out (against 0), HDR-SERVICE's pads (board_clear); and an LED's top below the USB-C receptacle's keep-out height (against 0)"));
+                "), a mount's nut keep-out (against 0), HDR-SERVICE's pads (board_clear)"));
     // THE LED ROW'S BAND (ADR 0028 amendment, 2026-10-03): the LEDs' courtyards across the
     // body plus board_clear each side, over the row's length, at every height. Nothing of
     // J-MCU, its mated plug or the Matrix ribbon's rise may stand in it - over or in the
@@ -1830,8 +1846,28 @@ module drc_report() {
         rows = [for (r = tall) let(d = dist(r[1]), need = max(0, (r[2] - lighting_led_h) * t)) [r[0], r[2], d, need, max(0, (r[2] - lighting_led_h) - d / t)]])
         drc(undef, "tall parts in the LEDs' cone", rows,
             str("each: height, least mm to an LED's courtyard, the mm a ", lighting_led_view_angle, "-degree cone asks, and the mm of its top inside the cone (lighting.led_view_angle; the J-CHAIN headers and the layout's own tall parts - C-STRIP-BULK, C-BUCK-IN - are the board README's to list)"));
-    drc(p1_tip[2] - routing_tube_od * 0.4 >= cb_top + lighting_led_h + boards_board_clear, "breath tube crosses the LED row clear of it",
-        p1_tip[2] - routing_tube_od * 0.4 - cb_top - lighting_led_h, "mm above the LEDs' top faces, wherever it crosses the centreline");
+    // THE BREATH INLET (issue #36): the insert stands inlet.insert_l - ends.mouth_cap_t into
+    // the cavity on the inlet's axis, toward U-BREATH's body; the gap is box to cylinder.
+    let(sx0 = sensor_c[0] - boards_sensor_body / 2,
+        sy = [sensor_c[1] - boards_sensor_body / 2, sensor_c[1] + boards_sensor_body / 2],
+        sz = [cb_top, cb_top + boards_sensor_h],
+        dx = max(0, sx0 - inlet_insert_l),
+        dyz = max(0, norm([max(0, sy[0] - tube_yz[0], tube_yz[0] - sy[1]), max(0, sz[0] - tube_yz[1], tube_yz[1] - sz[1])]) - inlet_insert_d / 2),
+        gap = norm([dx, dyz]))
+        drc(gap >= 1.0, "breath inlet insert clear of U-BREATH", [gap, dx, dyz, inlet_insert_l - ends_mouth_cap_t],
+            "mm: the inlet's insert to U-BREATH's body, against 1.0, config/clearance.yaml's part-to-board minimum for 'breath sensor' (the clash step enforces the same pair); along the body and across it; and how far the insert stands into the cavity past the cap's inside face");
+    drc(inlet_barb_a <= inlet_barb_proud_max, "breath inlet barb proud of the oak", [inlet_barb_a, inlet_barb_proud_max],
+        "mm the outer barb stands proud of the mouth cap's face, against inlet.barb_proud_max (owner, 2026-10-04: 'just a Barb or something at the top')");
+    assert(tube_d_s > 0 && tube_d_s <= 4 * tube_r, "the breath tube's S cannot reach the U's leg at routing.tube_bend_r - re-route it");
+    drc(tube_r >= routing_tube_bend_r, "breath tube bends no tighter than routing.tube_bend_r", [tube_r, tube_th, tube_d_s, tube_len],
+        "mm: the S's and the U's centreline radius (it is drawn at exactly routing.tube_bend_r); the S's angle (degrees) and how far it moves across; the tube's length, inner barb to P1 (clear silicone, no trap - ADR 0003, 2026-10-05)");
+    let(cols = columns(), keep = hardware_col_standoff_af / cos(30) / 2 + routing_tube_od / 2,
+        gap = min([for (p = tube_route, c = cols) norm([p[0] - c[0], p[1] - c[1]]) - keep]))
+        drc(gap >= boards_board_clear, "breath tube clear of the columns", gap,
+            "mm from the tube's outside to the nearest column standoff's corners, in plan, against boards.board_clear");
+    let(low = min([for (p = tube_route) p[2]]) - routing_tube_od / 2 - cb_top - lighting_led_h)
+        drc(low >= boards_board_clear, "breath tube crosses the LED row clear of it",
+            low, "mm from the tube's underside down to the LEDs' top faces, at its lowest (the tube is clear, so where it crosses the row is free)");
     // Each run's end keys put half a cap into the neighbouring band - the
     // ADR 0009 table counts runs centre to centre.
     lh = xs(cluster_keys("left_hand")); rh = xs(cluster_keys("right_hand"));
@@ -1851,8 +1887,8 @@ module drc_report() {
         stack_cap_holes == "slot" ? "n/a - one slot per hand" : cap_gap - 2 * stack_cap_clear,
         "mm of oak between adjacent holes; under 2 mm, cross-grain, it will not survive - use slots");
     drc(min_pair(plate_cutout) >= 2.0, "key plate web between cutouts", min_pair(plate_cutout), "mm of aluminium");
-    edge_web = min([for (k = top_keys) min(key_xy(k)[1] - plate_cutout / 2 - (u_y0 + stack_groove_clear),
-                                            (W - u_y0 - stack_groove_clear) - key_xy(k)[1] - plate_cutout / 2)]);
+    edge_web = min([for (k = top_keys) min(key_xy(k)[1] - plate_cutout / 2 - (u_y0 + stack_plate_side_clear),
+                                            (W - u_y0 - stack_plate_side_clear) - key_xy(k)[1] - plate_cutout / 2)]);
     drc(edge_web >= 3, "key plate web from a cutout to the plate edge", edge_web,
         "mm; the switch's latch arms need plate round them, and the plate edge sits in the side grooves' shadow");
     edge_cap = min([for (k = top_keys) min(key_xy(k)[1] - switch_keycap / 2 - stack_cap_clear, W - key_xy(k)[1] - switch_keycap / 2 - stack_cap_clear)]);
@@ -1893,12 +1929,13 @@ module drc_report() {
                            [(min(x) + max(x)) / 2, (min(y) + max(y)) / 2], [max(x) - min(x) + rc, max(y) - min(y) + rc]]]
                        : [for (k = bottom_keys) [k[0], key_xy(k), [rc, rc]]],
                    [for (i = [0 : 1 : len(spare_xy) - 1]) [str("spare ", i + 1), spare_xy[i], [rc, rc]]],
-                   [for (u = ubolt_legs()) ["U-bolt leg", u, [ubolt_hole_d, ubolt_hole_d]]]);
+                   [for (u = ubolt_legs()) ["U-bolt leg", u, [ubolt_hole_d, ubolt_hole_d]]],
+                   [["MIDI jack", midi_xy, [midi_cbore_d, midi_cbore_d]]]);
     function gap(a, b) = max(abs(a[1][0] - b[1][0]) - (a[2][0] + b[2][0]) / 2,
                              abs(a[1][1] - b[1][1]) - (a[2][1] + b[2][1]) / 2);
     clashes = [for (i = [0 : len(feats) - 1], j = [i + 1 : 1 : len(feats) - 1])
                if (gap(feats[i], feats[j]) < 3) str(feats[i][0], " / ", feats[j][0], " ", gap(feats[i], feats[j]))];
-    drc(len(clashes) == 0, "oak-bottom cuts at least 3 mm apart (thumb recesses, U-bolt)",
+    drc(len(clashes) == 0, "oak-bottom cuts at least 3 mm apart (thumb recesses, U-bolt, MIDI jack)",
         clashes, "pairs closer than 3 mm, with the web between them (negative = overlap)");
     // Through-cuts only. The oak ends at the groove's wall, groove_clear
     // outside the acrylic - the same edge the key plate rules measure to.
@@ -2019,25 +2056,14 @@ module drc_report() {
             "main board's tongue flush with its edge on the near side of the adapter",
             [tongue_flush_lo ? "low y" : "high y", tongue_flush_lo ? tongue_y[0] - cb_y[0] : cb_y[1] - tongue_y[1], tongue_flush_lo ? cb_y[1] - tongue_y[1] : tongue_y[0] - cb_y[0]],
             "the side run straight through (owner, 2026-09-30), the step it no longer has (mm), and the step the other side keeps (mm)");
-    // THE FULL-WIDTH TAIL END (owner, 2026-10-02). What stands over the corner
-    // the old tongue left cut away - past the right-hand key board, beside the
-    // adapter's width: the USB-C extension's receptacle (its back reaches the
-    // board's end) and its lead coming down to it from the Matrix, the Matrix
-    // ribbon's edge on its level run, and nothing else at the board's height
-    // (the etherCON and its adapter stand at and past the board's end, across
-    // the adapter's width only; the bottom plate is under the board, as
-    // everywhere). Each must stand boards.board_clear clear of the parts
-    // (boards.smt_h) the corner may now carry.
-    if (boards_main_tail == "full") let(
-        corner = [ua_x0 - cb_x[1], cb_y[1] - tongue_y[1]],
-        parts_top = cb_top + boards_smt_h,
-        rec_gap = usb_c[1] - usb_sz[1] / 2 - parts_top,
-        lead_gap = min(usb_c[1], usb_lead_z) - 2 - parts_top,   // the lead's 4 mm section (tail_wiring), at its lowest
-        rec_back = x_in1 - openings_usb_ext_depth - ua_x0)
-        drc(tongue_y[0] >= cb_y[0] - 0.01 && (rec_back >= boards_board_clear || rec_gap >= boards_board_clear - 0.01) && lead_gap >= boards_board_clear - 0.01,
-            "main board's tail end runs full width beside the etherCON adapter",
-            [corner, rec_gap, lead_gap, rec_back],
-            "mm: the corner the old tongue cut away (along the body, across), now board; the USB-C receptacle's underside above the board's parts, and its lead's (against boards.board_clear); the receptacle's back past the board's end (negative = over the board, which is why it stands clear above it)");
+    // THE FULL-WIDTH TAIL END (owner, 2026-10-02). The corner the old tongue left
+    // cut away - past the right-hand key board, beside the adapter's width. The
+    // USB-C extension's receptacle and lead stood over it until issue #37; now
+    // J-MIDI stands in it (below), and nothing else at the board's height.
+    if (boards_main_tail == "full") let(corner = [ua_x0 - cb_x[1], cb_y[1] - tongue_y[1]])
+        drc(tongue_y[0] >= cb_y[0] - 0.01,
+            "main board's tail end runs full width beside the etherCON adapter", corner,
+            "mm: the corner the old tongue cut away (along the body, across), now board; J-MIDI is proposed in it (drc 'J-MIDI and its plug under the Matrix carrier')");
     // Where J-UMB's row meets the adapter, in the connector's own frame:
     // between G below the axis and the peg line through it, a pad's worth
     // (a pitch) clear of each, and above the adapter's lower edge.
@@ -2051,21 +2077,8 @@ module drc_report() {
         && mcu_fold_front <= mcu_front_max + 0.01,
         "Matrix ribbon closed: its folds between the sockets", [mcu_reach, mcu_reach_max, mcu_fr, mcu_fold_u, mcu_front_max, [mcu_du, mcu_dc], path_len(mcu_path)],
         str("mm: the legs' reach back over J-MCU and forward from J-MCU's socket's back; the most each may reach (1 mm short of J-MCU's back; forward, short of ",
-            jm_dir == 0 ? "the USB-C plug by boards.board_clear" : "the LED row's band", "); the folds' radius (against routing.chain_bend_r); the closed fold's extent along the mouths' axis and the most its front may reach; ",
+            jm_dir == 0 ? "the Matrix's mouth edge by boards.board_clear" : "the LED row's band", "); the folds' radius (against routing.chain_bend_r); the closed fold's extent along the mouths' axis and the most its front may reach; ",
             "J-MCU-C's socket's offset from J-MCU's along that axis and along the rows (0, 0: straight above it); the closed path's length"));
-    // THE EXTENSION'S PLUG AGAINST THE MATRIX RIBBON (owner, 2026-10-03, option A):
-    // where the plug stands over J-MCU's row, its overmould comes down past the
-    // ribbon's closed folds and J-MCU-C's socket. The folds stop board_clear short
-    // of its near face; J-MCU-C's socket and the ribbon's rise into it, fixed by
-    // J-MCU's place, keep 0.3 [drawing convention].
-    let(top_mcu = jm_z + boards_mcu_plug_t / 2,
-        z_plug0 = usb_plug_top - usb_plug_h,
-        g_fold = usb_plug_y0 - mcu_fold_front,
-        g_jk = usb_plug_y0 - max(jk_plug[3], mcu_us[1] + routing_mcu_ribbon_t / 2),
-        low = top_mcu <= z_plug0)
-        drc(!usb_plug_over_mcu || (g_fold >= boards_board_clear - 0.01 && g_jk >= 0.3 && low),
-            "USB-C plug clear of the Matrix ribbon and J-MCU-C", [usb_plug_over_mcu, usb_plug_y0, g_fold, g_jk, top_mcu, z_plug0],
-            "whether the extension's plug stands over J-MCU's row, its near face (openings.usb_ext_overmold_w), then mm: the ribbon's closed folds short of it (against board_clear); J-MCU-C's socket and the ribbon's rise into it (against 0.3); J-MCU's socket's top under the overmould's bottom");
     // THE MATRIX CARRIER (boards.matrix_mount "carrier", ADR 0021 amendment
     // 2026-10-03), hung from the oak top. Its stack: the Matrix's top under the
     // oak, and the thread and the wood at each mount.
@@ -2075,7 +2088,7 @@ module drc_report() {
             "Matrix carrier hangs from the oak", [air, engage, want, hardware_mx_insert_l, skin, hardware_col_pocket_skin],
             "mm: the Matrix's top under the floor of the oak's relief over it (openings.matrix_relief_d; against 0.1); the screw's thread in the insert (hardware.mx_screw_l less the washer, the carrier and the spacer), against thread_engage_min diameters and the insert's own length; the oak left over each insert, against col_pocket_skin");
     // What hangs under the Matrix: its back-side parts over the carrier, and the
-    // USB-C receptacle and the plug's overmould in the carrier's notch.
+    // USB-C receptacle in the carrier's notch, with room for a recovery plug in front.
     let(over = boards_matrix_hdr_h - boards_matrix_under_rest_h,
         r_side = min(matrix_xy[1] - boards_matrix_usb[2] / 2 - mx_notch[1], mx_notch[3] - (matrix_xy[1] + boards_matrix_usb[2] / 2)),
         r_reach = mx_notch[2] - (matrix_xy[0] - boards_matrix_board / 2 + boards_matrix_usb[1]),
@@ -2083,7 +2096,7 @@ module drc_report() {
         rows = min(mx_notch[1] - (matrix_xy[1] - matrix_row_dy + boards_matrix_hdr_reach), (matrix_xy[1] + matrix_row_dy - boards_matrix_hdr_reach) - mx_notch[3]))
         drc(over >= 0.5 && r_side >= 0.5 && r_reach >= 0.5 && p_side >= boards_matrix_notch_clear - 0.01 && rows >= 0.3, "Matrix's back-side parts clear the carrier",
             [over, r_side, r_reach, p_side, rows],
-            "mm: the deepest part over the carrier (boards.matrix_under_rest_h) above its top face (against 0.5); the notch's sides and end past the USB-C receptacle (against 0.5); the carrier's mouth edge behind the extension plug's overmould (against boards.matrix_notch_clear); HDR-MATRIX's pads (boards.matrix_hdr_reach) inside the notch's edges (against the boards' edge clearance, 0.3)");
+            "mm: the deepest part over the carrier (boards.matrix_under_rest_h) above its top face (against 0.5); the notch's sides and end past the USB-C receptacle (against 0.5); the carrier's mouth edge behind a recovery plug's overmould (against boards.matrix_notch_clear); HDR-MATRIX's pads (boards.matrix_hdr_reach) inside the notch's edges (against the boards' edge clearance, 0.3)");
     // The mounts: the spacer beside the Matrix, inside the carrier, clear of
     // J-MCU-C under the arm (the screw's head), and the insert in the oak clear of
     // the window's rebate and the plug's pocket.
@@ -2098,17 +2111,23 @@ module drc_report() {
         drc(g_mx >= 0.3 && g_edge >= 0.3 && g_jk >= boards_board_clear && g_rb >= hardware_col_pocket_wall && g_pk >= hardware_col_pocket_wall,
             "Matrix carrier's mounts clear", [mx_mounts, g_mx, g_edge, g_jk, g_rb, g_pk],
             "the mounts (boards.matrix_mount_dxy), then mm: spacer to the Matrix's edge (against 0.3); washer to the carrier's edge (0.3); screw head and washer to J-MCU-C and its plug under the arm (board_clear); insert to the window's rebate and to the plug's pocket in the oak (col_pocket_wall)");
-    // THE PLUG AGAINST THE KEY PLATE AND THE OAK (review #19 F1): centred on
-    // the receptacle, the overmould rises past the plate's underside, so the
-    // plate stops in front of it, and past the oak's, which is pocketed over it.
+    // THE RECOVERY PLUG AGAINST THE OAK (review #19 F1; lid off since issue #37):
+    // centred on the receptacle, a plug's overmould rises past the oak's
+    // underside, which is pocketed over it so the Matrix can be reflashed on the
+    // lifted lid.
     let(q = usb_oak_pocket(), rebate_x0 = matrix_xy[0] - matrix_rebate / 2)
-        drc(plate_x1 <= usb_plug_x0 - 1 + 0.01 && usb_pocket_need <= col_pocket_depth && q[2] <= rebate_x0 + 0.01,
-            "USB-C plug clear of the key plate and the oak top", [usb_plug_top, z_plate_bot, usb_plug_x0 - plate_x1, usb_pocket_need, col_pocket_depth],
-            "mm: the overmould's top (openings.usb_overmold, centred on boards.matrix_usb); the plate's underside; the plate's end in front of the plug; the oak pocket over it the overmould needs (0.3 of air) and the depth it is cut, the column pockets' (oak-pockets.dxf), ending at the window's rebate");
-    let(lz = usb_lead_z + 2)
-        drc(openings_usb_plug_turn == "down" && lz <= mx_carrier_bot - hardware_col_screw_head_h - boards_board_clear,
-            "USB-C plug and lead clear of the Matrix carrier", mx_carrier_bot - hardware_col_screw_head_h - lz,
-            "mm from the lead's top, where it runs across under the carrier's far side, up to the carrier's mounting screws' heads (against boards.board_clear); a lead leaving across at the plug's height would run into the carrier (openings.usb_plug_turn)");
+        drc(usb_pocket_need <= col_pocket_depth && q[2] <= rebate_x0 + 0.01,
+            "recovery USB-C plug clear of the oak top", [usb_plug_top, usb_pocket_need, col_pocket_depth],
+            "mm: a recovery plug's overmould top (openings.usb_overmold, centred on boards.matrix_usb); the oak pocket over it the overmould needs (openings.usb_pocket_clear of air) and the depth it is cut, the column pockets' (oak-pockets.dxf), ending at the window's rebate");
+    // J-MIDI (issue #37) in the main board's freed corner, under the Matrix
+    // carrier: its mated plug clear of the carrier's underside and its mounting
+    // screws' heads, and on the board.
+    let(top = cb_top + midi_hdr_mated_h,
+        under = mx_carrier_bot - hardware_col_screw_head_h,
+        r = [midi_hdr_at[0] - midi_hdr_sz[0] / 2, midi_hdr_at[1] - midi_hdr_sz[1] / 2, midi_hdr_at[0] + midi_hdr_sz[0] / 2, midi_hdr_at[1] + midi_hdr_sz[1] / 2],
+        on = min(r[0] - cb_x[0], ua_x0 - r[2], r[1] - cb_y[0], cb_y[1] - r[3]))
+        drc(under - top >= boards_board_clear && on >= boards_board_clear, "J-MIDI and its plug under the Matrix carrier", [under - top, on],
+            "mm: the mated plug's top (midi.hdr_mated_h) under the carrier's mounting screws' heads, the lowest thing over the corner (against boards.board_clear); the header inside the board's edges (against board_clear)");
     // THE KEY CHAIN'S RIBBONS (ADR 0017, amended 2026-09-27): long enough to
     // plug in with the lid laid beside the body; closed, a flat hairpin.
     drc(undef, "key-chain ribbon length (derived)", chain_len,
@@ -2255,38 +2274,36 @@ module drc_report() {
     // The bore is what is cut from the cap; the flange only clamps against it.
     drc(undef, "tail cap material below and above the etherCON bore",
         [ec_c[1] - ethercon_bore_d / 2, T - (ec_c[1] + ethercon_bore_d / 2)], "mm - the connector stands on the floor, so it is not centred");
-    // USB-C by panel-mount extension (owner, 2026-09-26). The receptacle sits
-    // behind the cap beside the flange, so its room is the lane from the
-    // flange's edge to the side's inside face, not the space beside the housing.
-    usb_room = usb_lane[1] - usb_lane[0];
-    drc(usb_room >= usb_sz[0] + usb_web_min, "USB-C extension receptacle beside the etherCON flange", usb_room - usb_sz[0],
-        str("mm spare across the ", usb_room, " mm lane from the flange's edge to the side, for a receptacle ", usb_sz[0], " mm across (",
-            openings_usb_slot_portrait ? "on end" : "flat", ")"));
-    usb_web = (usb_c[0] - usb_cut_y / 2) - (ec_c[0] + ec_fl[0] / 2 + ethercon_recess_margin);
-    drc(usb_web >= usb_web_min, "tail cap web between the USB-C cutout and the etherCON recess", usb_web,
-        str("mm of oak on the tail face, from the widest USB-C cutout (", usb_cut_y, " mm across: the overmould pocket or the slot)"));
+    // THE MIDI JACK (issue #37) through the oak bottom in the lane beside the
+    // etherCON: the panel its nut clamps, its counterbore's webs to the
+    // etherCON's footprint on the floor, the side's groove, the adapter and the
+    // tail cap, and its body's top in the cavity.
+    let(panel = oak_bottom_t - midi_cbore_depth,
+        proud = midi_jack_thread[1] - panel,
+        r = midi_cbore_d / 2,
+        w_ec = (midi_xy[1] - r) - ec_lane[0],
+        w_side = (W - u_y0 - stack_groove_clear) - (midi_xy[1] + r),
+        w_ad = (midi_xy[0] - r) - ec_pcb_x1,
+        w_cap = x_in1 - (midi_xy[0] + r),
+        w_plate = (midi_xy[0] - r) - bplate_x1,
+        head = z_oak_top_bot - (midi_tab_top))
+        drc(panel <= midi_panel + 0.01 && panel >= tail_web_min && min(w_ec, w_side, w_ad, w_cap) >= 1 && w_plate >= 0 && head >= 2,
+            "MIDI jack in the oak bottom", [panel, midi_cbore_d, midi_cbore_depth, proud, [w_ec, w_side, w_ad, w_cap, w_plate], head],
+            str("mm: the oak the nut clamps (at most the thread past the collar less the nut, ", midi_panel, " [ds SAMESKY-SJ5-43502PM.pdf p.2]; at least ",
+                tail_web_min, "); the counterbore from inside, across and deep; the thread and nut standing proud of the bottom face; the counterbore's oak to the etherCON's footprint, to the side's groove, to the adapter's front face and to the tail cap (against 1), and its edge past the bottom plate's end (against 0); the tabs' top under the oak top's underside (against 2)"));
+    drc(undef, "MIDI jack lead to J-MIDI", midi_run + midi_lead_slack,
+        str("mm of CBL-MIDI from the jack's tabs to J-MIDI: the run through its bends, ", midi_run, ", plus midi.lead_slack"));
     // The recess (ADR 0021): the NE8FAV's panel limit, met by a pocket from
     // outside; its edges stay on the face with oak round them.
     rc_top = ethercon_rotated ? ec_c[1] + ec_fl[1] / 2 : ec_c[1] + ethercon_tab_top;
     rc_web = min(T - (rc_top + ethercon_recess_margin), ec_c[1] - ec_fl[1] / 2 - ethercon_recess_margin,
                  ec_c[0] - ec_fl[0] / 2 - ethercon_recess_margin - u_y0);
-    drc(rc_web >= usb_web_min, "tail cap recess for the etherCON inside the tail face", rc_web,
+    drc(rc_web >= tail_web_min, "tail cap recess for the etherCON inside the tail face", rc_web,
         str("mm of oak round the ", ec_recess_d, " mm recess that leaves the NE8FAV its ", ec_panel_t, " mm panel (ethercon.panel_max ", ethercon_panel_max, ")"));
     drc(undef, "etherCON PUSH tab against the tail face", ethercon_tab_front - ends_tail_cap_t,
         "mm the tab stands proud of the tail face (negative = inside the recess)");
     drc(undef, "etherCON locating pegs, cut off flush", ethercon_peg_below - ec_clear,
         "mm the two pegs under the flange would reach into the oak bottom if left on (ethercon.peg_below; ADR 0021)");
-    drc(usb_om[0] >= usb_sz[0] && usb_om[1] >= usb_sz[1] && openings_usb_panel_t <= openings_usb_nose_l,
-        "USB-C plug overmould reaches the receptacle", [usb_pocket_d, openings_usb_panel_t, openings_usb_nose_l],
-        "mm: the overmould pocket's depth from the tail face; the panel left under it; the receptacle's nose, which must pass that panel so its face is level with the pocket floor");
-    ear_z = [usb_c[1] - openings_usb_ear_pitch / 2, usb_c[1] + openings_usb_ear_pitch / 2];
-    ears_fit = ear_z[0] >= z_floor && ear_z[1] <= z_oak_top_bot;
-    drc(openings_usb_mount != "ears" || ears_fit, "USB-C receptacle mount inside the cavity", [openings_usb_mount, ear_z, [z_floor, z_oak_top_bot]],
-        str("the mount; where screw ears at ", openings_usb_ear_pitch, " mm pitch would put their centres on end; the cavity's height behind the cap - ",
-            ears_fit ? "ears would fit" : "ears would not, so the receptacle is earless, clamped from behind (openings.usb_mount)"));
-    usb_run = norm([x_in1 - openings_usb_ext_depth - (matrix_xy[0] + boards_matrix_board / 2), usb_c[0] - matrix_xy[1], usb_c[1] - (matrix_board_z - 2)]);
-    echo("DRC", "INFO", "USB-C extension cable run, Matrix edge to receptacle", usb_run,
-         "mm straight line; buy the shortest extension that reaches, with slack for the tail cap to come off");
 
     // THE MAKER'S MARK (owner, 2026-10-01; body.yaml logo)
     let(m = [logo_c[0] - logo_sz[0] / 2 - logo_band[0], logo_band[1] - (logo_c[0] + logo_sz[0] / 2),
@@ -2319,6 +2336,7 @@ module part_2d(p) {
     if (p == "plate_top") plate_top_2d();
     else if (p == "oak_top") oak_top_2d();
     else if (p == "oak_bottom") oak_bottom_2d();
+    else if (p == "oak_bottom_pockets") oak_bottom_pockets_2d();
     else if (p == "plate_bottom") plate_bottom_2d();
     else if (p == "oak_grooves") oak_grooves_2d();
     else if (p == "side") side_2d();

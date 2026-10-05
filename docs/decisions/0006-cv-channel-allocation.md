@@ -66,7 +66,7 @@ reason to design into a hard limit of four.
 Mod channels are generic rather than fixed-function — a gate can be assigned to
 one if wanted, without the design being *limited* to a gate. Per-channel source,
 scale, offset, curve and slew are set in the instrument's configuration
-(over USB since ADR 0015, which removed the display).
+(over USB since ADR 0015, which removed the display; in its Wi-Fi configuration mode since its amendment of 2026-10-04).
 
 ## Why dedicating pitch and breath is better than full genericity
 
@@ -370,7 +370,7 @@ stand does not.
 
 **And log the accumulated correction.** The zero is allowed to move; it is not
 allowed to move silently. A running total, reported in the instrument's
-configuration (over USB; there is no display or web app since ADR 0015), turns all three concealed failures into a number that walks — which is
+configuration (there is no display since ADR 0015; in its configuration mode, ADR 0015 as amended 2026-10-04), turns all three concealed failures into a number that walks — which is
 the diagnostic the design otherwise does not have.
 
 It is also now an *honest* diagnostic, which it was not before. While the same
@@ -901,7 +901,7 @@ does not degrade gracefully — it loses its impedance entirely and becomes a wi
 
 Every jack's word — `breath`, `pitch`, `mod 1` … `mod 4` — is printed in a
 pill on the panel, in the order ADR 0024 point 13 fixes, with the
-instrument's configuration (over USB, ADR 0015) as the authority on what is
+instrument's configuration (configuration mode, ADR 0015 as amended 2026-10-04) as the authority on what is
 actually routed where
 (ADR 0026 points 4 and 7). *(Amended 2026-10-01: this said pitch and breath
 silkscreened and the mods on a write-on strip, which ADR 0026 dropped.)*

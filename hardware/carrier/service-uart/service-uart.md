@@ -56,8 +56,8 @@ and `J-MCU` like every other pad-row line.
 ## Programming and recovery: over the Matrix's USB-C only
 
 The owner's choice of 2026-10-03, *"Program over USB only"*: the Matrix is
-programmed and recovered through its own USB-C — USB-Serial-JTAG through the
-tail receptacle (`CBL-USB-EXT`) — and, when that fails, by forcing download
+programmed and recovered through its own USB-C — USB-Serial-JTAG, reached
+with the lid off since issue #37 removed the tail receptacle — and, when that fails, by forcing download
 mode with its own `BOOT` and `RESET` buttons with the lid off (they are on
 its back, under the carrier's notch side, and reachable once the lid is
 lifted). The procedure is `firmware/README.md`'s. **`EN` and `IO0` are no

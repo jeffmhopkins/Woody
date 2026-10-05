@@ -1,0 +1,42 @@
+* MIDI out: the pieces every deck shares, filled like a deck from sims.yaml.
+
+* One gate of U-LVLSHIFT (74AHCT125, push-pull on the 5 V rail), as two switches:
+* ctl below 0.5 V = output high through r_src, above = output low through r_snk. The
+* resistances are the datasheet's VOH/VOL rows (sims.yaml); the edge is the switch's.
+.subckt MGATE ctl out
+VCCG vh 0 {{vcc}}
+SH vh out 0 ctl SWH
+SL out 0 ctl 0 SWL
+.model SWH SW(VT=-0.5 VH=0 RON={{r_src}} ROFF=1e9)
+.model SWL SW(VT=0.5 VH=0 RON={{r_snk}} ROFF=1e9)
+.ends
+
+* One line on the main board: R-MIDI, FB-MIDI (Murata's model, banked), and
+* U-TVS-MIDI's capacitance where it sits at J-MIDI. The ~40 mm lead to the jack is
+* not modelled.
+.subckt MLINE drv jack
+RM drv b {{R-MIDI}}
+XFB b jack BLM21SP601SN1
+CTVS jack 0 {{c_tvs}}
+.ends
+
+* The cable: each conductor's capacitance to the shield (pin 2, the sleeve, grounded
+* at the transmitter), half at each end, and its wire resistance.
+.subckt MCABLE t r tf rf
+CT1 t 0 {{c_half}}
+CR1 r 0 {{c_half}}
+RT t tf {{r_wire}}
+RR r rf {{r_wire}}
+CT2 tf 0 {{c_half}}
+CR2 rf 0 {{c_half}}
+.ends
+
+* CA-033's receiver (Figure 2): DIN pin 4 through RB to the opto's LED, out at pin 5;
+* D1 (1N914) across the LED, reversed. `led` is the LED's anode, brought out to be measured.
+.subckt MRX p4 p5 led
+RB p4 led {{r_rx}}
+DLED led p5 DOPTO
+D1 p5 led D1N914
+.ends
+.model DOPTO D(IS={{is_led}} N={{n_led}} CJO={{cj_led}})
+.model D1N914 D(IS=2.52n RS=0.568 N=1.752 CJO=4p M=0.4 TT=20n)

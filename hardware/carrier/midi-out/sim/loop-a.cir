@@ -1,0 +1,17 @@
+* MIDI out, Type A (RP-054: tip = DIN pin 5, the sink; ring = DIN pin 4, the source),
+* into a Type A receiver. Gate B (the tip) sends one start bit, low from t_d for t_bit;
+* gate C (the ring) is held high.
+VBIT bit 0 PULSE(0 1 {{t_d}} {{tr_out}} {{tr_out}} {{t_bit}} 1)
+XGT bit gt MGATE
+XGR 0 gr MGATE
+XLT gt tip MLINE
+XLR gr ring MLINE
+XC tip ring tipf ringf MCABLE
+VS ringf p4 0
+XRX p4 tipf led MRX
+.control
+tran 20n {{t_end}} 0 20n
+wrdata i.dat i(vs)
+quit
+.endc
+.end

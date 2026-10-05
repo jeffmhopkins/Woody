@@ -339,7 +339,7 @@ figures:
     value: "24-way"
     status: settled
     owner: hardware/carrier/carrier.md
-    derivation: "ADR 0018 decision 1: twelve used GPIO, three 5 V, four ground, 3V3, EN, IO0 and two spare GPIO."
+    derivation: "ADR 0018 decision 1: twelve used GPIO, three 5 V, four ground, 3V3, EN, IO0 and two spare GPIO. Since 2026-10-03 EN and IO0 are not wired out; since issue #37 pin 23 (was IO0) carries IO6 and pin 5 (IO2) the MIDI out's pair, and pin 24 is unused (hardware/carrier/carrier.md, the pin map)."
     # Tracked 2026-09-27 (K8-8): three ADR lines dated to the IDC change still
     # said "20-way ribbon". ADR 0018 narrates the change as "It was 20-way"
     # and "keep 20-way and spend", which this pattern does not match.
@@ -535,7 +535,7 @@ figures:
     status: disputed
     owner: docs/decisions/0003-breath-sensing-path.md
     candidates: ["2.8 kPa (cited to ADR 0003, which does not contain it; the two schematic pages cite each other)", "0-5 kPa (what ADR 0003 actually says)", "3-4 kPa (published wind-controller figures)"]
-    decided_by: "E2 (ROADMAP: breath sensing, a human playing through the real mouthpiece, tube and trap), with a manometer teed at P1 - the test is specified in docs/decisions/0003-breath-sensing-path.md beside the 0-6 kPa range. Sets the panel gain range AND the ADC headroom."
+    decided_by: "E2 (ROADMAP: breath sensing, a human playing through the real mouthpiece and tube), with a manometer teed at P1 - the test is specified in docs/decisions/0003-breath-sensing-path.md beside the 0-6 kPa range. Sets the panel gain range AND the ADC headroom."
     forbidden: []
 
   - id: pitch-cents-budget

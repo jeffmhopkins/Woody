@@ -46,7 +46,11 @@ Six CV channels from the module:
 - **Pitch** — dedicated, 1V/oct, −2V to +7V, per-unit calibrated
 - **Breath** — dedicated, 0–10V, with panel knobs for gain and offset
 - **Mod 1–4** — assignable; source, scale, offset, curve and slew configured
-  over the instrument's USB port (ADR 0015)
+  in the instrument's configuration mode, over Wi-Fi from a phone (ADR 0015,
+  *Amendment, 2026-10-04*; the firmware is deferred)
+
+And **MIDI out** on a 3.5 mm TRS jack in the oak bottom, Type A or B by a
+setting (`hardware/carrier/midi-out/`).
 
 ## Design scope
 
@@ -54,15 +58,16 @@ Six CV channels from the module:
 patched into one, and played in front of one. That is the design case, and
 decisions get made for it.
 
-It is explicitly **not**: battery powered, wireless, standalone, a USB MIDI
-controller product, or a touring instrument. Requirements that only make sense
+It is explicitly **not**: battery powered, wireless in play, standalone, a
+MIDI controller product, or a touring instrument. (Its radio is on only in a
+configuration mode, for settings and updates, which does not play.) Requirements that only make sense
 away from the rack do not belong here, and past versions of these documents
 drifted into arguing for some of them.
 
-USB exists for flashing, and USB MIDI on top of it is a **bring-up tool** — it
-is how keys, fingering and breath response get validated in a DAW before any
-analog hardware is built (milestone E5). It is not a feature and it does not
-get to constrain anything.
+The external USB is gone (issue #37): the Matrix's own USB-C is a bench and
+recovery port, reached with the lid off. The MIDI out replaces USB MIDI as
+the way keys, fingering and breath response get validated in a DAW before any
+analog hardware is built (milestone E5). It does not get to constrain anything.
 
 There is no onboard synthesizer. There is no battery.
 

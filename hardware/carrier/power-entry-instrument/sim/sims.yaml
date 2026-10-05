@@ -9,7 +9,8 @@
 # datasheet parameters are imported from there (params_from), not restated. Since #12 it
 # also sweeps U-ISO's output over its tolerance (the supply-* sims: INST_POS12 against the
 # LED row's 13.5 V and J-UMB against the TVS's 15 V), and drives the input LC with the LED
-# row's PWM (pei-pwm.cir, the led-pwm sims). Run:
+# row's PWM (pei-pwm.cir, the led-pwm sims). Since #39 it also runs the 5 V OR (pei-or.cir,
+# the or-* sims): U-USBOR and Q-USBOR against the Matrix's USB VBUS through its D1. Run:
 #   python3 tools/sim.py run hardware/carrier/power-entry-instrument/sim
 title: Instrument power entry - input LC damping and start-up behind the load switch
 values:
@@ -70,6 +71,43 @@ params:
   pw_t_end: {value: 30.0e-3, source: "the run's end; the ripple is read over its last pw_t_win, 25 ms after the PWM starts (the LC rings down in under 1 ms at Q < 4; C-STRIP-BULK behind the cable in ~0.2 ms)"}
   pw_t_win: {value: 5.0e-3}
 
+  # --- pei-or.cir: the 5 V OR (#39), U-USBOR (LM74700-Q1) and Q-USBOR (DMN3404L) in place of
+  # D-USBOR's SS14, against the Matrix's USB-C VBUS through its own D1. Prefixed or_ because
+  # module/power-entry/sim and interfaces/system/sim import this file's params.
+  or_v_buck: {value: 5.0, source: "U-BUCK-A's output: R-78E5.0-1.0 output accuracy +/-5.0 % max and load regulation +/-1.5 % max (10-100 % load) [datasheets/discrete-and-power/R-78E5.0-1.0.pdf p.2], STACKED [assumption: the datasheet does not say whether the accuracy includes the load regulation]; its line regulation, +/-1 % over 8-28 V, is taken as nothing over this input's ~1 V [assumption] (vary)"}
+  or_r_buck: {value: 0.01, source: "the converter's output resistance inside regulation [assumption]; its load regulation is in or_v_buck's range. A voltage source, so it SINKS: a FET conducting backwards shows as current into it"}
+  or_t_bk0: {value: 1.0, source: "when the buck starts to fall (the rack unplugged): after the run unless a sim sets it"}
+  or_t_bk1: {value: 1.001, source: "when it reaches or_v_bk_off"}
+  or_v_bk_off: {value: 0.0, source: "the buck's output once it has fallen"}
+  or_v_rev: {value: -0.011, source: "U-USBOR's V(AK REV), reverse-current threshold, -17/-11/-2 mV [datasheets/discrete-and-power/TI-LM74700-Q1.pdf p.6] (vary)"}
+  or_v_reg: {value: 0.020, source: "its regulated forward V(AK), 13/20/29 mV [same p.6] (vary)"}
+  or_v_full: {value: 0.050, source: "its full-conduction threshold, 50 mV typical (34-57) [same p.6]: above it the gate is tied to VCAP"}
+  or_v_por: {value: 3.9, source: "its ANODE POR rising threshold, 3.9 V max [same p.6]: below it the gate is held at ANODE"}
+  or_t_rev: {value: 0.45e-6, source: "its reverse-detection-to-gate-off delay, 0.45 typ / 0.75 max us [same p.7] (vary)"}
+  or_t_fwd: {value: 1.4e-6, source: "its forward-recovery delay, 1.4 typ / 2.6 max us [same p.7] (vary)"}
+  or_r_dis: {value: 2.0, source: "its gate discharge switch, 0.4 typ / 2 ohm max [same p.6]: the maximum, the slower turn-off"}
+  or_i_src: {value: 3.0e-3, source: "its peak gate source current, 3 mA min / 11 typ [same p.6]: the minimum"}
+  or_r_full: {value: 100.0, source: "GATE switched to VCAP in full conduction [same p.15]: the switch's resistance is not published [assumption: 100 ohm; VCAP's 0.1 uF holds the charge, so the gate's ~0.5 nF follows in tens of ns]"}
+  or_i_sink: {value: 6.0e-6, source: "its regulation sink current, 6 uA min / 26 typ [same p.6]: the minimum, the slowest graceful turn-off"}
+  or_gm: {value: 1.8e-3, source: "its regulation amplifier's transconductance, 1200/1800/3100 uA/V [same p.6]"}
+  or_v_cp: {value: 12.1, source: "VCAP above ANODE, the gate drive in full conduction: the charge pump runs between its 10.8-12.9 V turn-on and 11.6-13.9 V turn-off [same p.7] (vary)"}
+  or_i_cath: {value: 2.2e-6, source: "its CATHODE sink current, 2.2 uA max [same p.7]"}
+  or_rds: {value: 0.028, source: "Q-USBOR's R_DS(on), 24 typ / 28 max mohm at V_GS 10 V, 25 C [datasheets/discrete-and-power/DIODES-DMN3404L.pdf p.3]; up to 42 mohm hot [assumption: 1.5x at a hot junction, the usual trench-FET curve] (vary)"}
+  or_vth: {value: 1.5, source: "its V_GS(th), 1.0/1.5/2.0 V [same p.3] (vary)"}
+  or_c_iss: {value: 498.0e-12, source: "its C_iss, 498 pF typ [same p.3], gate to source"}
+  or_c_rss: {value: 45.0e-12, source: "its C_rss, 45 pF typ [same p.3], gate to drain"}
+  or_is_body: {value: 2.6e-13, source: "its body diode: V_SD 0.75 V typ at 1 A [same p.3], n = 1 [calc: 1 A / exp(0.75 / 0.025852)]"}
+  or_len_rib: {value: {drc: "Matrix ribbon length", scale: 0.001}, source: "CBL-MCU-RIBBON between its sockets (mechanical/drc.echo), as breath-adc/sim takes it"}
+  or_c_mx: {value: 11.0e-6, source: "the Matrix's own capacitance on VCC_5V, ~11 uF (power-entry-instrument.md, The buck's output capacitor)"}
+  or_i_load: {value: 0.928, source: "the 5 V rail's clamp-legal worst, 928 mA [repo ADR 0005's load table] - an upper bound, the removed display board's share still in it; or a light 50 mA (sweep)"}
+  or_v_usb: {value: 5.0, source: "the host's VBUS, 4.75-5.25 V [from memory: USB 2.0], as the page takes it (vary)"}
+  or_r_usb: {value: 0.1, source: "the USB cable and connector to D1 [assumption]"}
+  or_t_us0: {value: 1.0, source: "when VBUS starts to fall (the USB lead pulled): after the run unless a sim sets it"}
+  or_t_us1: {value: 1.01, source: "when it reaches 0 (a sim sets 1 us, abrupt [assumption: D1 isolates the host's own capacitance])"}
+  or_is_d1: {value: 2.1e-8, source: "the Matrix's D1, B5819WS: V_F 0.60 V max at 1 A and 0.90 V max at 3 A [datasheets/discrete-and-power/B5819WS.pdf p.2] fit with n 1.05 and RS 0.12 ohm [calc: 0.87 V at 3 A]; up to 30x, a typical part ~90 mV lower, ~0.31 V at 50 mA [assumption, against the shape of its p.4 Fig. 1] (vary)"}
+  or_r_d1_leak: {value: 1.0e6, source: "D1's leakage: I_R 40 uA max at 40 V [same p.2], as a linear 1 Mohm [calc: pessimistic at 5 V]"}
+  or_t_end: {value: 0.3e-3, source: "the run's length; a switch-over sim sets it longer"}
+
 derived:
   # C-STRIP-BULK is two cans of one row in parallel (#19): every deck takes the pair
   c_strip: "v['C-STRIP-BULK'] * v['n:C-STRIP-BULK']"
@@ -91,6 +129,10 @@ derived:
   pw_i_other: "max(v.get('i_12', 0.0) - v['pw_i_swing'], 0.0)"
   pw_t_win0: "v['pw_t_end'] - v['pw_t_win']"
 
+  # pei-or.cir: Q-USBOR as a level-1 FET with its R_DS(on) at V_GS 10 V, where the datasheet
+  # states it; CBL-MCU-RIBBON's 5 V conductors and its grounds, as breath-adc/sim's r_rib5
+  or_kp: "1.0 / (v['or_rds'] * (10.0 - v['or_vth']))"
+  or_r_rib: "0.34 * v['or_len_rib'] * (1.0 / 3.0 + 1.0 / 4.0)"
 vary:
   v_bus:  {tol: [-0.031, 0.031], source: "U-ISO's output: +/-3.1 %, as umbilical-load-switch/sim varies it (RECOM-RPA20-AW.pdf PD-5: accuracy 2.0 % + line 0.2 % + load 0.1 % + tempco 0.02 %/K x 40 K)"}
   esr_buck: {tol: [-0.667, 6.15], source: "0.087 ohm (a third of the 100 kHz maximum) to 1.86 ohm (the 120 Hz maximum)"}
@@ -106,7 +148,6 @@ vary:
   c_tvs:  {tol: [-0.7, 0.0], source: "300 pF at the standoff to 1000 pF at 0 V"}
   R-ILIM: {tol: from-value, source: "its value field's 1 % (umbilical-load-switch netlist): the limit, V_SENSETRIP / R-ILIM, moves with it"}
   dvg:    {tol: [0.0, 2.3333], source: "dV_GATE from its 4.5 V minimum [LT1641.pdf p.2] to 15 V, where D-GATE-CLAMP holds V_GS (the pump's 18 V maximum is above it): the load switch's V_GS before a plug, which its limit has to pull back from"}
-
 sims:
   - name: input-z
     # the impedance at C-BUCK-IN: its peak against the buck's negative input resistance
@@ -269,3 +310,97 @@ sims:
     measures: *pwm_measures
     post: *pwm_post
     asserts: *pwm_asserts
+  # --- #39: the 5 V OR. U-USBOR and Q-USBOR (an ideal-diode controller and its FET) replace
+  # D-USBOR's SS14 between U-BUCK-A and INST_5V_A, which the Matrix's USB-C VBUS also feeds
+  # through its own D1. pei-or.cir; the controller is behavioural, built from its datasheet.
+  - name: or-rack
+    # the rack alone (no USB host): the rail the MIDI out's gates and U-LVLSHIFT run from
+    deck: pei-or.cir
+    set: {or_v_usb: 0.0}
+    sweep: {or_i_load: [0.05, 0.928]}
+    vary: [or_v_buck, or_rds, or_vth, or_v_cp, or_v_reg]
+    # the or- ranges ride on each sim (tol:), not in vary: above - sim.py's assertion
+    # environment takes the product of every vary: entry, and ten more would be 2^24 corners
+    tol: &or_tol
+      or_v_buck: [-0.065, 0.065]   # +/-5.0 % accuracy and +/-1.5 % load regulation, stacked: 4.675-5.325 V
+      or_v_rev: [-0.818, 0.545]    # -2 and -17 mV about -11
+      or_v_reg: [-0.35, 0.45]      # 13 and 29 mV about 20
+      or_t_rev: [0.0, 0.667]       # 0.45 to 0.75 us
+      or_t_fwd: [0.0, 0.857]       # 1.4 to 2.6 us
+      or_v_cp: [-0.1074, 0.1488]   # 10.8 to 13.9 V
+      or_rds: [-0.143, 0.5]        # 24 mohm typical to 42 hot
+      or_vth: [-0.3333, 0.3333]    # 1.0 to 2.0 V
+      or_v_usb: [-0.05, 0.05]
+      or_is_d1: [0.0, 29.0]
+    measures: [v_inst, drop_mv, i_rev]
+    post: &or_post
+      v_inst: "at(w['vinst'], p['or_t_end'] - 1e-6)"
+      drop_mv: "1000 * (at(w['vba'], p['or_t_end'] - 1e-6) - at(w['vinst'], p['or_t_end'] - 1e-6))"
+      i_rev: "at(w['irev'], p['or_t_end'] - 1e-6)"
+    asserts:
+      - expr: "max['drop_mv'] < 50.0"
+        why: "the OR costs under 50 mV from BUCK_A_OUT to INST_5V_A at every corner, up to the 5 V rail's clamp-legal worst - against the SS14's 0.50 V max at 1 A it replaces: 20 mV regulated at light load, the FET's R_DS(on) fully enhanced at the top"
+      - expr: "min['v_inst'] > 4.625"
+        why: "INST_5V_A's floor with the rack alone, the buck at 4.675 V less the OR: the 4.625 V the MIDI out's loop current is worked at (midi-out.md, The loop current)"
+      - expr: "max['v_inst'] < 5.325"
+        why: "and its ceiling, the buck's 5.325 V: the MIDI out's short-circuit corner (midi-out.md, Why not lower resistors)"
+  - name: or-both
+    # rack and USB together, every corner of both sources and of D1, at a light and the full load
+    deck: pei-or.cir
+    sweep: {or_i_load: [0.05, 0.928]}
+    vary: [or_v_buck, or_v_usb, or_is_d1, or_v_rev]
+    tol: *or_tol
+    measures: [v_inst, i_rev, i_usb_back]
+    post:
+      <<: *or_post
+      # the most current pushed back into the host over the run, after the operating point
+      i_usb_back: "-trough(w['iusb'], 1e-6, p['or_t_end'])"
+    asserts:
+      - expr: "max['i_rev'] < 10.0e-6"
+        why: "NO BACK-FEED INTO THE BUCK: with VBUS through D1 above the buck, U-USBOR holds Q-USBOR off and its body diode blocks, at every corner of the two sources, D1 and V(AK REV) - against a buck modelled as a source that would SINK whatever came back (the bound: U-USBOR's own CATHODE sink, 2.2 uA, and the FET's leakage)"
+      - expr: "max['i_usb_back'] < 50.0e-6"
+        why: "and none into the host: D1 blocks the buck from VBUS - its leakage, modelled as 40 uA at 40 V, is all that flows"
+  - name: or-usb-unplug
+    # USB carrying the rail (VBUS high, the buck low), then the USB lead pulled: Q-USBOR has
+    # been off, so the buck takes over through its body diode until U-USBOR turns it on. The
+    # load is what the firmware allows while a USB host is attached: the matrix capped so the
+    # whole of VCC_5V fits D1's ~283 mA (firmware/README.md, The lights)
+    deck: pei-or.cir
+    set: {or_v_buck: 4.675, or_v_usb: 5.25, or_is_d1: 6.3e-7, or_i_load: 0.283, or_t_us0: 0.5e-3, or_t_us1: 0.501e-3, or_t_end: 1.0e-3}
+    vary: [or_t_fwd, or_vth, or_rds]
+    tol: *or_tol
+    measures: [v_inst, v_dip, i_rev_before]
+    post:
+      v_inst: "at(w['vinst'], p['or_t_end'] - 1e-6)"
+      v_dip: "trough(w['vinst'], p['or_t_us0'], p['or_t_end'])"
+      i_rev_before: "at(w['irev'], p['or_t_us0'] - 1e-6)"
+    asserts:
+      - expr: "max['i_rev_before'] < 10.0e-6"
+        why: "before the unplug USB carries the rail and Q-USBOR is off: no back-feed into the buck"
+      - expr: "min['v_dip'] > 4.675 - 0.1"
+        why: "SWITCH-OVER: as VCC_5V falls to the buck's level, U-USBOR's comparator clears and, after its forward-recovery delay (1.4-2.6 us, TI-LM74700-Q1.pdf p.7), regulates Q-USBOR on; the Matrix's ~11 uF carries the gap, so INST_5V_A never falls more than 100 mV below the buck's 4.675 V floor at any corner - the FET's body diode, 0.75 V down, never takes the load"
+  - name: or-rack-loss
+    # the buck carrying the rail with a USB host attached (the firmware's cap on the load, as
+    # above), then the rack unplugged: the buck's output falls over 1 ms - modelled as a source
+    # that SINKS, the pessimistic case - and VBUS takes over through D1
+    deck: pei-or.cir
+    set: {or_v_buck: 5.325, or_v_usb: 4.75, or_i_load: 0.283, or_t_bk0: 0.3e-3, or_t_bk1: 1.3e-3, or_t_end: 2.0e-3}
+    vary: [or_t_rev, or_v_rev, or_rds, or_is_d1]
+    tol: *or_tol
+    measures: [v_inst, v_dip, i_rev, i_rev_peak, t_rev_on]
+    post:
+      v_inst: "at(w['vinst'], p['or_t_end'] - 1e-6)"
+      v_dip: "trough(w['vinst'], p['or_t_bk0'], p['or_t_end'])"
+      i_rev: "at(w['irev'], p['or_t_end'] - 1e-6)"
+      i_rev_peak: "peak(w['irev'], p['or_t_bk0'], p['or_t_end'])"
+      # how long the reverse current is above 10 mA (0 if it never is)
+      t_rev_on: "(cross(w['irev'], 0.01, cross(w['irev'], 0.01, p['or_t_bk0']) + 1e-9) - cross(w['irev'], 0.01, p['or_t_bk0'])) if peak(w['irev'], p['or_t_bk0'], p['or_t_end']) > 0.01 else 0.0"
+    asserts:
+      - expr: "max['i_rev'] < 10.0e-6"
+        why: "once the buck is down, VBUS through D1 carries the Matrix and nothing flows back into the dead buck's output at any corner"
+      - expr: "max['i_rev_peak'] < 0.017 / 0.024"
+        why: "during the fall a reverse current flows only until U-USBOR sees it: its V(AK REV), -2 to -17 mV [TI-LM74700-Q1.pdf p.6], across Q-USBOR's 24 mohm at the least lets at most 0.71 A flow before it trips - and this model's buck is a source that can SINK it, the pessimistic case. i_rev_peak records how much does"
+      - expr: "max['t_rev_on'] < 20.0e-6"
+        why: "and it is a transient, not a back-feed: over 10 mA for under 20 us at every corner, while the buck's output passes INST_5V_A on its way down, then nothing (i_rev). A real R-78E with its input gone sinks far less than this model's source"
+      - expr: "min['v_dip'] > 4.0"
+        why: "INST_5V_A falls only to VBUS less D1 and the ribbon through the hand-over, above 4.0 V"

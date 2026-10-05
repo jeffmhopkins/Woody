@@ -284,7 +284,7 @@ nets:
     carries: "The dev board's own LDO, the only 3V3 on the instrument"
     figure: key-pullup-qty
     driver: carrier/carrier
-    receivers: [interfaces/key-chain-loom, carrier/breath-adc]
+    receivers: [interfaces/key-chain-loom, carrier/breath-adc, carrier/led-strip-drive]
     note: "IT IS ALSO THE MCP3202'S REFERENCE, which is what makes the 24 pull-ups' static draw a live trade rather than a free one"
 
   # ======================================================================
@@ -303,6 +303,36 @@ nets:
     receivers: [carrier/led-strip-drive]
     note: "HIGH-IMPEDANCE THROUGH THE BOOTLOADER WINDOW, which is why R-LED-PD exists: OE is tied low, so a floating AHCT input becomes clean 5 V edges into the LED row before any firmware runs"
 
+  IO6:
+    kind: signal
+    domain: digital
+    carries: "The MIDI out's tip line, ESP32 GPIO6 to U-LVLSHIFT gate B, through J-MCU pin 23 (J-MCU-C pin 2): UART1 TX in Type A, held high in Type B (issue #37)"
+    driver: carrier/carrier
+    receivers: [carrier/led-strip-drive]
+    note: "HIGH-IMPEDANCE THROUGH THE BOOTLOADER WINDOW: R-MIDI-PU-T holds it high, so tip and ring sit at one voltage and no byte goes out"
+
+  IO2:
+    kind: signal
+    domain: digital
+    carries: "The MIDI out's ring line, ESP32 GPIO2 to U-LVLSHIFT gate C, through J-MCU pin 5: held high in Type A, UART1 TX in Type B (issue #37). A spare shield between IO1 and IO7 until then"
+    driver: carrier/carrier
+    receivers: [carrier/led-strip-drive]
+    note: "HIGH-IMPEDANCE THROUGH THE BOOTLOADER WINDOW: R-MIDI-PU-R holds it high, as IO6. Static in Type A, so it still shields IO1 from IO7 on the ribbon; it switches only as Type B's sink"
+
+  MIDI_TIP_DRV:
+    kind: signal
+    domain: digital
+    carries: "U-LVLSHIFT gate B's 5 V push-pull output to R-MIDI-T and the jack's tip"
+    driver: carrier/led-strip-drive
+    receivers: [carrier/midi-out]
+
+  MIDI_RING_DRV:
+    kind: signal
+    domain: digital
+    carries: "U-LVLSHIFT gate C's 5 V push-pull output to R-MIDI-R and the jack's ring"
+    driver: carrier/led-strip-drive
+    receivers: [carrier/midi-out]
+
   U0TXD:
     kind: signal
     domain: digital
@@ -319,7 +349,7 @@ nets:
 
   INST_5V_A:
     kind: power
-    carries: "Buck A, through D-USBOR onto the dev board's 5 V pin"
+    carries: "Buck A, through the ideal-diode OR (U-USBOR, Q-USBOR) onto the dev board's 5 V pin"
     figure: matrix-led-current
     driver: carrier/power-entry-instrument
     receivers: [carrier/led-strip-drive, carrier/carrier]
@@ -466,6 +496,7 @@ nets:
       - carrier/service-uart
       - carrier/led-strip-drive
       - carrier/carrier
+      - carrier/midi-out
       - interfaces/breath-sense-link
     note: >
       The bottom plate bonds to this net through the main board's mounts

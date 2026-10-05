@@ -1,0 +1,1271 @@
+(kicad_sch (version 20250114) (generator "sch.py") (generator_version "9.0")
+  (uuid 4b60816b-23dc-5f77-b39b-2d8620b1398e)
+  (paper "A4")
+  (title_block
+    (title "MIDI out on a 3.5 mm TRS jack (hardware/carrier/midi-out)")
+    (comment 5 "circuit: carrier/midi-out")
+    (comment 6 "page: midi-out.md")
+    (comment 7 "title: MIDI out on a 3.5 mm TRS jack")
+    (date "")
+    (rev "")
+    (company "Woody")
+    (comment 1 "SOURCE for this circuit - edit in KiCad 9. netlist.yaml is exported from it: python3 tools/kicad.py export hardware/carrier/midi-out")
+    (comment 2 "Part facts ride on each symbol: Row (BOM row), Pins + Pins_source (pin map and its datasheet), Note")
+    (comment 3 "Issue #37, ADR 0015 amendment 2026-10-04 - written by tools/sch.py from a hand-written netlist, then made the source")
+    (comment 4 "Ports are hierarchical labels (Dir, From/To, Figure); the main board places this sheet")
+  )
+  (lib_symbols
+    (symbol "Connector_Audio:AudioJack4"
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "J"
+			(at 0 8.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "AudioJack4"
+			(at 0 6.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Audio Jack, 4 Poles (TRRS)"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "audio jack receptacle stereo headphones TRRS connector"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "Jack*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "AudioJack4_0_1"
+			(rectangle
+				(start -6.35 -5.08)
+				(end -7.62 -7.62)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(polyline
+				(pts
+					(xy -5.715 -5.08) (xy -5.08 -5.715) (xy -4.445 -5.08) (xy -4.445 2.54) (xy 2.54 2.54)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -1.905 -5.08) (xy -1.27 -5.715) (xy -0.635 -5.08) (xy -0.635 -2.54) (xy 2.54 -2.54)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 -5.08) (xy 0.635 -5.715) (xy 1.27 -5.08) (xy 2.54 -5.08)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 2.54 3.81)
+				(end -6.35 -7.62)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.54 0) (xy -2.54 0) (xy -2.54 -5.08) (xy -3.175 -5.715) (xy -3.81 -5.08)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "AudioJack4_1_1"
+			(pin passive line
+				(at 5.08 2.54 180)
+				(length 2.54)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "S"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 5.08 0 180)
+				(length 2.54)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "R2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 5.08 -2.54 180)
+				(length 2.54)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "R1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 5.08 -5.08 180)
+				(length 2.54)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "T"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Connector_Generic:Conn_01x03"
+		(pin_names
+			(offset 1.016)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "J"
+			(at 0 5.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_01x03"
+			(at 0 -5.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "connector"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "Connector*:*_1x??_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "Conn_01x03_1_1"
+			(rectangle
+				(start -1.27 3.81)
+				(end 1.27 -3.81)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(rectangle
+				(start -1.27 2.667)
+				(end 0 2.413)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 0.127)
+				(end 0 -0.127)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 -2.413)
+				(end 0 -2.667)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(pin passive line
+				(at -5.08 2.54 0)
+				(length 3.81)
+				(name "Pin_1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 0 0)
+				(length 3.81)
+				(name "Pin_2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -2.54 0)
+				(length 3.81)
+				(name "Pin_3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Device:FerriteBead_Small"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "FB"
+			(at 1.905 1.27 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "FerriteBead_Small"
+			(at 1.905 -1.27 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at -1.778 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Ferrite bead, small symbol"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "L ferrite bead inductor filter"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "Inductor_* L_* *Ferrite*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "FerriteBead_Small_0_1"
+			(polyline
+				(pts
+					(xy -1.8288 0.2794) (xy -1.1176 1.4986) (xy 1.8288 -0.2032) (xy 1.1176 -1.4224) (xy -1.8288 0.2794)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 0.889) (xy 0 1.2954)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 -1.27) (xy 0 -0.7874)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "FerriteBead_Small_1_1"
+			(pin passive line
+				(at 0 2.54 270)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -2.54 90)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Device:R"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "R"
+			(at 2.032 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "R"
+			(at 0 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at -1.778 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "R res resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "R_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "R_0_1"
+			(rectangle
+				(start -1.016 -2.54)
+				(end 1.016 2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "R_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+    (symbol "Power_Protection:SP0504BAHT"
+		(pin_names
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "D"
+			(at 7.62 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "SP0504BAHT"
+			(at 7.62 0.635 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23-5"
+			(at 7.62 -1.27 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "http://www.littelfuse.com/~/media/files/littelfuse/technical%20resources/documents/data%20sheets/sp05xxba.pdf"
+			(at 3.175 3.175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "TVS Diode Array, 5.5V Standoff, 4 Channels, SOT-23-5 package"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "usb esd protection suppression transient"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "SOT?23*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "SP0504BAHT_0_0"
+			(pin passive line
+				(at 0 -5.08 90)
+				(length 2.54)
+				(name "A"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(symbol "SP0504BAHT_0_1"
+			(rectangle
+				(start -4.445 2.54)
+				(end 6.985 -2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(polyline
+				(pts
+					(xy -3.302 1.016) (xy -3.302 1.27) (xy -1.778 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.54 2.54) (xy -2.54 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.54 1.27) (xy -2.54 -1.27) (xy 2.54 -1.27) (xy 2.54 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.54 1.27) (xy -1.905 0) (xy -3.175 0) (xy -2.54 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 2.54) (xy 0 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 -1.27) (xy 0 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 -1.27) (xy 0 -2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 0 -1.27)
+				(radius 0.254)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0.635 0) (xy -0.635 0) (xy 0 1.27) (xy 0.635 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0.762 1.27) (xy -0.762 1.27) (xy -0.762 1.016)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.778 1.016) (xy 1.778 1.27) (xy 3.175 1.27) (xy 3.302 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.54 2.54) (xy 2.54 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.54 1.27) (xy 1.905 0) (xy 3.175 0) (xy 2.54 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 2.54 -1.27)
+				(radius 0.254)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(polyline
+				(pts
+					(xy 4.318 1.016) (xy 4.318 1.27) (xy 5.715 1.27) (xy 5.842 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 5.08 2.54) (xy 5.08 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 5.08 1.27) (xy 5.08 -1.27) (xy 2.54 -1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 5.08 1.27) (xy 4.445 0) (xy 5.715 0) (xy 5.08 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "SP0504BAHT_1_1"
+			(pin passive line
+				(at -2.54 5.08 270)
+				(length 2.54)
+				(name "K"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 5.08 270)
+				(length 2.54)
+				(name "K"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 2.54 5.08 270)
+				(length 2.54)
+				(name "K"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 5.08 5.08 270)
+				(length 2.54)
+				(name "K"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+  )
+  (symbol (lib_id "Device:R") (at 60.96 50.8 90) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid aa55483f-e14b-52bd-a418-1995266a789b)
+    (property "Reference" "R-MIDI-T" (at 60.96 48.26 90) (effects (font (size 1.27 1.27))))
+    (property "Value" "182R 1%" (at 60.96 53.34 90) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Resistor_SMD:R_1206_3216Metric" (at 60.96 52.07 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 60.96 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-MIDI" (at 60.96 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 60.96 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "TIP's series resistor: CA-033 Figure 1's 5 V row, re-sized to 182 ohm 1 % 0.25 W (issue #39) - the smallest E96 value that holds a short of the tip to the sleeve under U-LVLSHIFT's 25 mA absolute maximum at the rail's ceiling, the resistor at -1 % (midi-out.md, Why not lower resistors). DO NOT FIT 5 %: the derivation needs 1 %. It is RA when the tip is the source (Type B) and RC when it is the sink (Type A): the two lines are identical so the choice is firmware's" (at 60.96 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid be8e1df2-3fce-50fc-bf2e-c2801526da5b))
+    (pin "2" (uuid 37b9c97e-eb4f-524c-9fc4-a9f354227fbd))
+    (property "Manufacturer" "UNI-ROYAL" (at 60.96 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "1206W4F1820T5E" (at 60.96 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C247358" (at 60.96 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 60.96 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "a two-terminal resistor" (at 60.96 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/e02c6272-2aa9-4bec-ba9c-1e4212a18689" (reference "R50") (unit 1))) (project "midi-out" (path "/4b60816b-23dc-5f77-b39b-2d8620b1398e" (reference "R-MIDI-T") (unit 1))))
+  )
+  (symbol (lib_id "Device:FerriteBead_Small") (at 91.44 50.8 90) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid fd6ef20c-30c5-5089-8ba2-31c6fbc7c95d)
+    (property "Reference" "FB-MIDI-T" (at 91.44 48.26 90) (effects (font (size 1.27 1.27))))
+    (property "Value" "600R@100MHz" (at 91.44 53.34 90) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Inductor_SMD:L_0805_2012Metric" (at 91.44 52.07 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "FB-MIDI" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "CA-033's optional RF bead (p.3, p.6: 1k at 100 MHz such as MMZ1608Y102BT, as close to the jack as possible); FB-CHAIN's part, so the main board carries one bead part number. Fitted: costs nothing and the jack is a hole in the body. A 0R is the fallback if a receiver ever disagrees" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 9b337618-b9fd-5a57-9669-847c2d1a5cd4))
+    (pin "2" (uuid b70e696b-7c15-5030-8181-5fdec197afa0))
+    (property "Manufacturer" "Murata" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "BLM21SP601SN1D" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C3716677" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "a two-terminal bead" (at 91.44 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/e02c6272-2aa9-4bec-ba9c-1e4212a18689" (reference "FB3") (unit 1))) (project "midi-out" (path "/4b60816b-23dc-5f77-b39b-2d8620b1398e" (reference "FB-MIDI-T") (unit 1))))
+  )
+  (symbol (lib_id "Device:R") (at 60.96 76.2 90) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid d057c836-deff-560b-b9c4-09e8ae13b518)
+    (property "Reference" "R-MIDI-R" (at 60.96 73.66 90) (effects (font (size 1.27 1.27))))
+    (property "Value" "182R 1%" (at 60.96 78.74 90) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Resistor_SMD:R_1206_3216Metric" (at 60.96 77.47 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 60.96 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "R-MIDI" (at 60.96 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 60.96 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "RING's series resistor, the same part and argument as R-MIDI-T: RA in Type A (ring = DIN pin 4, the source), RC in Type B" (at 60.96 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 9f612b41-ad7f-5e58-b3b5-5ccf907cc2c7))
+    (pin "2" (uuid 61fbd813-8545-5d9c-9785-c7d3989038c0))
+    (property "Manufacturer" "UNI-ROYAL" (at 60.96 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "1206W4F1820T5E" (at 60.96 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C247358" (at 60.96 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 60.96 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "a two-terminal resistor" (at 60.96 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/e02c6272-2aa9-4bec-ba9c-1e4212a18689" (reference "R51") (unit 1))) (project "midi-out" (path "/4b60816b-23dc-5f77-b39b-2d8620b1398e" (reference "R-MIDI-R") (unit 1))))
+  )
+  (symbol (lib_id "Device:FerriteBead_Small") (at 91.44 76.2 90) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 796e319e-601d-5130-ada8-7d869e39f629)
+    (property "Reference" "FB-MIDI-R" (at 91.44 73.66 90) (effects (font (size 1.27 1.27))))
+    (property "Value" "600R@100MHz" (at 91.44 78.74 90) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Inductor_SMD:L_0805_2012Metric" (at 91.44 77.47 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 91.44 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "FB-MIDI" (at 91.44 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2" (at 91.44 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "The ring's RF bead, as FB-MIDI-T" (at 91.44 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid ecc06b0e-90c9-5b5f-93a3-7a84aa6df9f5))
+    (pin "2" (uuid 78447709-168e-567a-881a-6b4463d90332))
+    (property "Manufacturer" "Murata" (at 91.44 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "BLM21SP601SN1D" (at 91.44 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C3716677" (at 91.44 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 91.44 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "a two-terminal bead" (at 91.44 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/e02c6272-2aa9-4bec-ba9c-1e4212a18689" (reference "FB4") (unit 1))) (project "midi-out" (path "/4b60816b-23dc-5f77-b39b-2d8620b1398e" (reference "FB-MIDI-R") (unit 1))))
+  )
+  (symbol (lib_id "Power_Protection:SP0504BAHT") (at 121.92 106.68 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 947af926-66d3-5018-9712-ebbbb1096755)
+    (property "Reference" "U-TVS-MIDI" (at 129.54 104.14 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "SP0504BAHTG" (at 129.54 106.68 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Package_TO_SOT_SMD:SOT-23-5" (at 129.54 107.95 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 124.46 104.14 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "U-TVS-MIDI" (at 121.92 106.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "CH1=1(K) CH2=3(K) CH3=4(K) CH4=5(K) GND=2(A)" (at 121.92 106.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "ESD on the two lines a plug touches, AT J-MIDI: CH1 the tip, CH2 the ring; CH3 and CH4 spare, tied to PWR_GND. 5 V working (the loop's source line sits at 5 V). The jack is the only exposed conductor this board has besides the etherCON, and it is handled every gig" (at 121.92 106.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/discrete-and-power/SP0504BAHT.pdf p.1 pinout (SOT-23-5): I/O on 1, 3, 4, 5, ground on 2" (at 121.92 106.68 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "2" (uuid bdc2a4ed-e6d2-51c0-b61f-4af8612c6a5f))
+    (pin "1" (uuid 8b1c7e73-7bfb-5994-8179-029398388eb6))
+    (pin "3" (uuid 0f3d0c85-bdeb-5720-8d63-31748146018e))
+    (pin "4" (uuid 55c4d402-ffa3-5fdf-b71a-1d9e6884d592))
+    (pin "5" (uuid bb317823-cb3d-5203-a2d1-93a59824e3ee))
+    (property "Manufacturer" "Littelfuse" (at 121.92 106.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "SP0504BAHTG" (at 121.92 106.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "C10675" (at 121.92 106.68 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 121.92 106.68 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/e02c6272-2aa9-4bec-ba9c-1e4212a18689" (reference "U12") (unit 1))) (project "midi-out" (path "/4b60816b-23dc-5f77-b39b-2d8620b1398e" (reference "U-TVS-MIDI") (unit 1))))
+  )
+  (symbol (lib_id "Connector_Generic:Conn_01x03") (at 167.64 63.5 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid e6e5e1ac-3c04-574a-a0f7-943fc140390d)
+    (property "Reference" "J-MIDI" (at 167.64 55.88 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "B3B-PH-SM4-TB" (at 167.64 58.42 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Connector_JST:JST_PH_B3B-PH-SM4-TB_1x03-1MP_P2.00mm_Vertical" (at 167.64 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 167.64 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "J-MIDI" (at 167.64 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2 3=3" (at 167.64 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "The MIDI jack's lead plugs in here, on the main board's freed tail corner (issue #37): pin 1 MIDI_TIP, pin 2 MIDI_RING, pin 3 PWR_GND. A JST PH, surface mount and top entry, so no tails stand under the board over the bottom plate. Polarised; reached with the lid off after the cassette drops in, as HDR-SERVICE is" (at 167.64 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "1" (uuid 078f5eef-d012-5316-9168-2e9b338a9624))
+    (pin "2" (uuid 44ddbfbf-4f0a-55ac-b8f9-d7387595e88c))
+    (pin "3" (uuid 39ac5d0d-1f60-5c78-9b7d-b345461a0cfb))
+    (property "Manufacturer" "JST" (at 167.64 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "B3B-PH-SM4-TB(LF)(SN)" (at 167.64 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "" (at 167.64 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "hand" (at 167.64 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "JST PH, surface mount, top entry: pin 1 by the shroud's key [from memory; JST's drawing to bank with the part]" (at 167.64 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/e02c6272-2aa9-4bec-ba9c-1e4212a18689" (reference "J7") (unit 1))) (project "midi-out" (path "/4b60816b-23dc-5f77-b39b-2d8620b1398e" (reference "J-MIDI") (unit 1))))
+  )
+  (symbol (lib_id "Connector_Audio:AudioJack4") (at 228.6 63.5 180) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 29bde22e-3180-5485-b9bc-85a6f9d733f7)
+    (property "Reference" "J-MIDI-OUT" (at 228.6 72.39 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "SJ5-43502PM" (at 228.6 69.85 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "" (at 228.6 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "" (at 228.6 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Row" "J-MIDI-OUT" (at 228.6 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "T=T R1=R1 R2=R2 S=S" (at 228.6 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "PANEL-MOUNTED THROUGH THE OAK BOTTOM, NO FOOTPRINT (owner, 2026-10-04: \"on the bottom face, and then just do a connector to the main board\"): its tabs are soldered to CBL-MIDI, which plugs into J-MIDI. A 4-conductor jack taking a 3-conductor plug: the plug's sleeve spans R2 and S, so both are PWR_GND (MIDI pin 2, grounded at the transmitter only) [ds connectors/SAMESKY-SJ5-43502PM.pdf p.2]" (at 228.6 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "datasheets/connectors/SAMESKY-SJ5-43502PM.pdf p.2: 1 tip, 2 ring 1, 3 ring 2, 4 sleeve (KiCad's AudioJack4 names them T, R1, R2, S)" (at 228.6 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (pin "R1" (uuid b1622c1c-2c88-51c4-94b8-9cf6eb31e995))
+    (pin "R2" (uuid 5daf8022-8c0b-5036-8869-afcf1e4bc5a3))
+    (pin "S" (uuid 7a3ff788-98a9-5fb6-8897-0c322ba7d331))
+    (pin "T" (uuid 99ede19d-25b7-5455-97e5-e447a65a2881))
+    (property "Manufacturer" "Same Sky" (at 228.6 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "SJ5-43502PM" (at 228.6 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "LCSC" "" (at 228.6 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "none" (at 228.6 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/e02c6272-2aa9-4bec-ba9c-1e4212a18689" (reference "J8") (unit 1))) (project "midi-out" (path "/4b60816b-23dc-5f77-b39b-2d8620b1398e" (reference "J-MIDI-OUT") (unit 1))))
+  )
+  (wire (pts (xy 64.77 50.8) (xy 88.9 50.8)) (stroke (width 0) (type default)) (uuid 48ca8e37-1d6f-552c-a7b8-a5eb5b73a261))
+  (wire (pts (xy 64.77 76.2) (xy 88.9 76.2)) (stroke (width 0) (type default)) (uuid ace80c19-9028-5ca6-b6de-0108c0820cda))
+  (label "MIDI_TIP_R" (at 76.2 50.8 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid b1ce4c76-888b-5fc5-b775-f0316ecdb2b6))
+  (label "MIDI_RING_R" (at 76.2 76.2 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid c72c1372-69ba-5c92-b988-30b024edb70d))
+  (wire (pts (xy 57.15 50.8) (xy 54.61 50.8)) (stroke (width 0) (type default)) (uuid 205d704c-b9fa-55ba-aaaf-0ec75bd87374))
+  (hierarchical_label "MIDI_TIP_DRV" (shape input) (at 54.61 50.8 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 2751e7ad-3c7d-581d-a871-2169c08d64bd)
+    (property "Dir" "in" (at 54.61 50.8 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/led-strip-drive" (at 54.61 50.8 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 57.15 76.2) (xy 54.61 76.2)) (stroke (width 0) (type default)) (uuid 861248d9-afc6-5a11-9cf8-13db11117c24))
+  (hierarchical_label "MIDI_RING_DRV" (shape input) (at 54.61 76.2 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid caa66e8e-cb9e-5cdd-8abc-7d2ba07dfedc)
+    (property "Dir" "in" (at 54.61 76.2 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "carrier/led-strip-drive" (at 54.61 76.2 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 93.98 50.8) (xy 96.52 50.8)) (stroke (width 0) (type default)) (uuid 7b56bbbf-65f5-5a30-af9f-0c8fd57c2fa2))
+  (label "MIDI_TIP" (at 96.52 50.8 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 63d02959-6f1d-50f5-b7fb-d494cedc7134))
+  (wire (pts (xy 119.38 101.6) (xy 119.38 99.06)) (stroke (width 0) (type default)) (uuid 7f4050bc-5cb8-52b8-a028-43acd5c8c8ea))
+  (label "MIDI_TIP" (at 119.38 99.06 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 950f6e79-24ed-591e-ae96-26b554122062))
+  (wire (pts (xy 162.56 60.96) (xy 160.02 60.96)) (stroke (width 0) (type default)) (uuid 24a9f453-ddf4-570f-94ac-fd6ed1fd6a57))
+  (label "MIDI_TIP" (at 160.02 60.96 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 81d0b39a-3f67-5bec-bf21-247097e773b0))
+  (wire (pts (xy 223.52 58.42) (xy 220.98 58.42)) (stroke (width 0) (type default)) (uuid 0d924bd8-b887-5770-8f73-040811c7e4a3))
+  (label "MIDI_TIP" (at 220.98 58.42 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 6f7b539a-c3ce-5ecf-b9c8-61e18afb65aa))
+  (wire (pts (xy 93.98 76.2) (xy 96.52 76.2)) (stroke (width 0) (type default)) (uuid 0ed9b282-1786-58e5-bb4a-51c568815e3a))
+  (label "MIDI_RING" (at 96.52 76.2 0) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 67e806b3-be4e-5a15-9c26-438f63f45ed2))
+  (wire (pts (xy 121.92 101.6) (xy 121.92 99.06)) (stroke (width 0) (type default)) (uuid ca13060e-85be-5b7e-9539-8c8fda02e494))
+  (label "MIDI_RING" (at 121.92 99.06 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 508843c6-e30d-56ed-bce9-8b508ace41a2))
+  (wire (pts (xy 162.56 63.5) (xy 160.02 63.5)) (stroke (width 0) (type default)) (uuid 7f4b4c95-146e-5b3e-9579-0f8203239c79))
+  (label "MIDI_RING" (at 160.02 63.5 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 6b2f6b19-4d7a-53e1-a865-3e306f5b8f04))
+  (wire (pts (xy 223.52 60.96) (xy 220.98 60.96)) (stroke (width 0) (type default)) (uuid 96f52063-ae6b-5202-9415-d57405863355))
+  (label "MIDI_RING" (at 220.98 60.96 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid b3688b4e-f3ea-5058-8682-672f2d574308))
+  (wire (pts (xy 121.92 111.76) (xy 121.92 114.3)) (stroke (width 0) (type default)) (uuid f6c13754-f82e-5ba3-975b-d36887c8e0da))
+  (hierarchical_label "PWR_GND" (shape passive) (at 121.92 114.3 270) (effects (font (size 1.27 1.27)) (justify right)) (uuid 3d854681-d57f-5d05-b422-92cf929c0ac0)
+    (property "Dir" "ref" (at 121.92 114.3 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 121.92 114.3 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 121.92 114.3 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 124.46 101.6) (xy 124.46 99.06)) (stroke (width 0) (type default)) (uuid 7802092f-0590-5b63-9de2-f67105338e6d))
+  (hierarchical_label "PWR_GND" (shape passive) (at 124.46 99.06 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 720470a5-99d7-5242-961a-045b30521b31)
+    (property "Dir" "ref" (at 124.46 99.06 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 124.46 99.06 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 124.46 99.06 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 127.0 101.6) (xy 127.0 99.06)) (stroke (width 0) (type default)) (uuid 644e7b59-3a60-5733-be3f-7e88609a1550))
+  (hierarchical_label "PWR_GND" (shape passive) (at 127.0 99.06 90) (effects (font (size 1.27 1.27)) (justify left)) (uuid 52cd347c-cc1b-5343-835a-dd05cb185154)
+    (property "Dir" "ref" (at 127.0 99.06 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 127.0 99.06 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 127.0 99.06 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 162.56 66.04) (xy 160.02 66.04)) (stroke (width 0) (type default)) (uuid b2749d4a-ea08-5299-8b3a-8c2c40a88605))
+  (hierarchical_label "PWR_GND" (shape passive) (at 160.02 66.04 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid b263b20a-333d-5531-a0f7-e9da53020299)
+    (property "Dir" "ref" (at 160.02 66.04 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 160.02 66.04 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 160.02 66.04 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 223.52 63.5) (xy 220.98 63.5)) (stroke (width 0) (type default)) (uuid 19a8099a-8fb5-5693-8362-a1369b6d6d1d))
+  (hierarchical_label "PWR_GND" (shape passive) (at 220.98 63.5 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid ed2bfa8a-d32b-5dda-9ab3-1a0ec5f0890c)
+    (property "Dir" "ref" (at 220.98 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 220.98 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 220.98 63.5 0) (effects (font (size 1.27 1.27)) hide)))
+  (wire (pts (xy 223.52 66.04) (xy 220.98 66.04)) (stroke (width 0) (type default)) (uuid ea932682-16ac-5bbe-aaae-34a215990b31))
+  (hierarchical_label "PWR_GND" (shape passive) (at 220.98 66.04 180) (effects (font (size 1.27 1.27)) (justify right)) (uuid 2f8ca022-8940-5842-9449-0063aaa73c04)
+    (property "Dir" "ref" (at 220.98 66.04 0) (effects (font (size 1.27 1.27)) hide))
+    (property "From" "module/power-entry" (at 220.98 66.04 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Figure" "dig-gnd-topology" (at 220.98 66.04 0) (effects (font (size 1.27 1.27)) hide)))
+  (text "MIDI OUT, issue #37 (ADR 0015 amendment 2026-10-04). CA-033 Figure 1's 5 V row: 220R on each of pins 4 and 5,\nfrom U-LVLSHIFT gates B (tip, IO6) and C (ring, IO2), push-pull on the 5 V rail. Symmetric, so TRS Type A or B is\nfirmware's: UART1 TX on the sink line's GPIO, the source line's GPIO held high. midi-out.md has the loop current,\nthe A/B table and the power-on default. J-MIDI-OUT is panel-mounted in the oak bottom with no footprint; its\ntabs are soldered to CBL-MIDI, which plugs into J-MIDI (a JST PH, SMD) on the main board's tail corner." (at 20.32 137.16 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid a5318728-6f6e-5454-856a-697e39c3993c))
+  (sheet_instances (path "/" (page "1")))
+)

@@ -1,0 +1,118 @@
+# GENERATED from hardware/carrier/midi-out/midi-out.kicad_sch by tools/kicad.py - DO NOT EDIT.
+# The KiCad sheet is authoritative for this circuit: edit it in KiCad 9, then run
+#   python3 tools/kicad.py export hardware/carrier/midi-out
+# Every note and argument that used to live in this file is on the sheet
+# (part fields, sheet text) or on midi-out.md.
+
+circuit: carrier/midi-out
+title: MIDI out on a 3.5 mm TRS jack
+page: midi-out.md
+ports:
+  MIDI_TIP_DRV:
+    dir: in
+    from: carrier/led-strip-drive
+  MIDI_RING_DRV:
+    dir: in
+    from: carrier/led-strip-drive
+  PWR_GND:
+    dir: ref
+    from: module/power-entry
+    figure: dig-gnd-topology
+components:
+  FB-MIDI-R:
+    of: FB-MIDI
+    value: 600R@100MHz
+    pins:
+    - 1
+    - 2
+    note: The ring's RF bead, as FB-MIDI-T
+  FB-MIDI-T:
+    of: FB-MIDI
+    value: 600R@100MHz
+    pins:
+    - 1
+    - 2
+    note: 'CA-033''s optional RF bead (p.3, p.6: 1k at 100 MHz such as MMZ1608Y102BT, as close to the jack as possible);
+      FB-CHAIN''s part, so the main board carries one bead part number. Fitted: costs nothing and the jack is a
+      hole in the body. A 0R is the fallback if a receiver ever disagrees'
+  J-MIDI:
+    value: B3B-PH-SM4-TB
+    pins:
+    - 1
+    - 2
+    - 3
+    note: 'The MIDI jack''s lead plugs in here, on the main board''s freed tail corner (issue #37): pin 1 MIDI_TIP,
+      pin 2 MIDI_RING, pin 3 PWR_GND. A JST PH, surface mount and top entry, so no tails stand under the board over
+      the bottom plate. Polarised; reached with the lid off after the cassette drops in, as HDR-SERVICE is'
+  J-MIDI-OUT:
+    value: SJ5-43502PM
+    pins:
+    - T
+    - R1
+    - R2
+    - S
+    note: 'PANEL-MOUNTED THROUGH THE OAK BOTTOM, NO FOOTPRINT (owner, 2026-10-04: "on the bottom face, and then
+      just do a connector to the main board"): its tabs are soldered to CBL-MIDI, which plugs into J-MIDI. A 4-conductor
+      jack taking a 3-conductor plug: the plug''s sleeve spans R2 and S, so both are PWR_GND (MIDI pin 2, grounded
+      at the transmitter only) [ds connectors/SAMESKY-SJ5-43502PM.pdf p.2]'
+  R-MIDI-R:
+    of: R-MIDI
+    value: 182R 1%
+    pins:
+    - 1
+    - 2
+    note: 'RING''s series resistor, the same part and argument as R-MIDI-T: RA in Type A (ring = DIN pin 4, the
+      source), RC in Type B'
+  R-MIDI-T:
+    of: R-MIDI
+    value: 182R 1%
+    pins:
+    - 1
+    - 2
+    note: 'TIP''s series resistor: CA-033 Figure 1''s 5 V row, re-sized to 182 ohm 1 % 0.25 W (issue #39) - the
+      smallest E96 value that holds a short of the tip to the sleeve under U-LVLSHIFT''s 25 mA absolute maximum
+      at the rail''s ceiling, the resistor at -1 % (midi-out.md, Why not lower resistors). DO NOT FIT 5 %: the derivation
+      needs 1 %. It is RA when the tip is the source (Type B) and RC when it is the sink (Type A): the two lines
+      are identical so the choice is firmware''s'
+  U-TVS-MIDI:
+    value: SP0504BAHTG
+    pins:
+    - CH1
+    - CH2
+    - CH3
+    - CH4
+    - GND
+    note: 'ESD on the two lines a plug touches, AT J-MIDI: CH1 the tip, CH2 the ring; CH3 and CH4 spare, tied to
+      PWR_GND. 5 V working (the loop''s source line sits at 5 V). The jack is the only exposed conductor this board
+      has besides the etherCON, and it is handled every gig'
+nets:
+  MIDI_RING:
+  - FB-MIDI-R.2
+  - J-MIDI.2
+  - J-MIDI-OUT.R1
+  - U-TVS-MIDI.CH2
+  MIDI_RING_DRV:
+  - port: MIDI_RING_DRV
+  - R-MIDI-R.1
+  MIDI_RING_R:
+  - FB-MIDI-R.1
+  - R-MIDI-R.2
+  MIDI_TIP:
+  - FB-MIDI-T.2
+  - J-MIDI.1
+  - J-MIDI-OUT.T
+  - U-TVS-MIDI.CH1
+  MIDI_TIP_DRV:
+  - port: MIDI_TIP_DRV
+  - R-MIDI-T.1
+  MIDI_TIP_R:
+  - FB-MIDI-T.1
+  - R-MIDI-T.2
+  PWR_GND:
+  - port: PWR_GND
+  - J-MIDI.3
+  - J-MIDI-OUT.R2
+  - J-MIDI-OUT.S
+  - U-TVS-MIDI.GND
+  - U-TVS-MIDI.CH3
+  - U-TVS-MIDI.CH4

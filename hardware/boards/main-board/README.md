@@ -106,13 +106,13 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | C202 | `C-SENSOR-VS-HF` | breath-sense-link |
 | C10, C44 | `C-STRIP-BULK` | power-entry-instrument |
 | C45–C47 | `C-STITCH-12V` | power-entry-instrument |
+| C207, C208 | `C-USBOR` | power-entry-instrument (#39; not yet placed on the layout) |
 | D21 | `D-INRUSH-RST` | power-entry-instrument |
 | D8–D20 | `D-LED` | led-strip-drive |
 | D1 | `D-REF-CLAMP` | breath-excitation-reference |
 | D2 | `D-REVSHUNT` | power-entry-instrument |
 | D5, D6 | `D-TVS-BREATH` | breath-sense-link |
 | D3 | `D-TVS-PWR` | power-entry-instrument |
-| D4 | `D-USBOR` | power-entry-instrument |
 | FB1, FB2 | `FB-CHAIN` | root |
 | J2 | `HDR-SERVICE` | service-uart |
 | J4, J5 | `J-CHAIN` | root |
@@ -122,6 +122,7 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | NT2 | `NT-AGND` | power-entry-instrument |
 | NT1 | `NT-DIG` | carrier |
 | Q1 | `Q-INRUSH` | power-entry-instrument |
+| Q2 | `Q-USBOR` | power-entry-instrument (#39; not yet placed on the layout) |
 | R47 | `R-ADC-VDD` | breath-adc |
 | R5 | `R-ADCDIV-L` | breath-adc |
 | R4 | `R-ADCDIV-U` | breath-adc |
@@ -155,6 +156,7 @@ Numeric, as the key boards'. The BOM row each one buys from is its `Row` field.
 | U4 | `U-REF-BREATH` | breath-excitation-reference |
 | U9, U11 | `U-TVS-CHAIN` | root |
 | U1 | `U-TVS-SPI` | carrier |
+| U13 | `U-USBOR` | power-entry-instrument (#39; not yet placed on the layout) |
 
 ## Open, and what decides each
 

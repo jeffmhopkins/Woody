@@ -6,11 +6,11 @@ inputs:
   tools/sim.py: 0312a1077b9afa80
   hardware/interfaces/system/sim/sims.yaml: b9f276978e889230
   hardware/module/breath-receive-stage/netlist.yaml: dab496982d183718
-  hardware/interfaces/breath-sense-link/netlist.yaml: 3174b77569cdaf62
-  hardware/carrier/netlist.yaml: ef0e3936d2b75f11
-  hardware/carrier/power-entry-instrument/netlist.yaml: e9a49796fdb69d0d
+  hardware/interfaces/breath-sense-link/netlist.yaml: 589dc991272a7d9c
+  hardware/carrier/netlist.yaml: 7bca7b6145113279
+  hardware/carrier/power-entry-instrument/netlist.yaml: 34a972189d3e5b5d
   hardware/carrier/breath-excitation-reference/netlist.yaml: 2d5ee10b223dc95d
-  hardware/carrier/led-strip-drive/netlist.yaml: ec7ec56762e982ee
+  hardware/carrier/led-strip-drive/netlist.yaml: e4c3ffbbe5c48f52
   hardware/module/power-entry/netlist.yaml: 14fd898035959809
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
   hardware/module/panel-led/netlist.yaml: 90d3bf8e99aa8da8
@@ -34,7 +34,7 @@ inputs:
   datasheets/analog/INA828-ti-pspice-sbomag5c.lib: 6ae6e0285c98dc1e
   hardware/module/power-entry/sim/sims.yaml: 0d5221ddf1068795
   hardware/module/umbilical-load-switch/sim/sims.yaml: cadec99739eed8eb
-  hardware/carrier/power-entry-instrument/sim/sims.yaml: c0e62a80d6155dee
+  hardware/carrier/power-entry-instrument/sim/sims.yaml: 74df1b0396d96b17
   hardware/interfaces/spi-link/sim/sims.yaml: 87161a5d295990b6
   hardware/module/breath-response-shaper/sim/sims.yaml: cc575034f8557f82
   hardware/module/breath-output-stage/sim/sims.yaml: e5483d8285264109
@@ -42,6 +42,7 @@ inputs:
   hardware/module/panel-led/sim/sims.yaml: 652a64f857dfee0b
   hardware/carrier/breath-excitation-reference/sim/sims.yaml: 753190052498805c
   hardware/interfaces/breath-sense-link/sim/sims.yaml: 5a411332ff72b057
+  drc:Matrix ribbon length: '49.15'
   figure:pitch-cents-budget: 0.76 cents worst-case linear sum (0.45 cents RSS)
   figure:dac-rail: 5.23 V
   figure:mod-reference: 3.3333 V

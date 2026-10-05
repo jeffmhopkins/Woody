@@ -1,0 +1,19 @@
+* The wrong setting: Type A sent (gate B on the tip sinks, gate C on the ring held high)
+* into a Type B receiver (DIN pin 4 on the tip). The start bit reverse-biases the LED,
+* and the receiver's D1 carries the loop.
+VBIT bit 0 PULSE(0 1 {{t_d}} {{tr_out}} {{tr_out}} {{t_bit}} 1)
+XGT bit gt MGATE
+XGR 0 gr MGATE
+XLT gt tip MLINE
+XLR gr ring MLINE
+XC tip ring tipf ringf MCABLE
+VS tipf p4 0
+XRX p4 ringf led MRX
+.control
+tran 20n {{t_end}} 0 20n
+wrdata i.dat i(vs)
+let vl = v(led) - v(ringf)
+wrdata vled.dat vl
+quit
+.endc
+.end

@@ -519,7 +519,7 @@ altogether (below).
    (`routing.mcu_ribbon_t`). `J-MCU`'s place is `boards.mcu_conn_at`, the
    main board's (option 1, along the near edge, off the LED row).
 5. **Program over USB only.** The Matrix is programmed and recovered over
-   its own USB-C - USB-Serial-JTAG through the tail receptacle - and, when
+   its own USB-C - USB-Serial-JTAG through the tail receptacle (*since issue #37, with the lid off: the tail receptacle is gone, ADR 0015 amendment 2026-10-04*) - and, when
    that fails, with its own BOOT and RESET buttons, the lid off. **`EN` and
    `IO0` are no longer wired out**: `J-MCU` pins 23 and 24 are on no net,
    `HDR-SERVICE` is a 1×3 (TXD, RXD, GND; `service_hdr_pins`), and the
@@ -559,7 +559,7 @@ numbers (2026-10-03), the owner chose **A**:
   plus `boards.matrix_notch_clear` each side and at its end), and the
   carrier's mouth edge is flush with the Matrix's, behind the plug.
 - **The extension's plug is at most `openings.usb_ext_overmold_w` across**
-  (`CBL-USB-EXT`, decided with calipers on the cable as bought). The study
+  (`CBL-USB-EXT`, decided with calipers on the cable as bought; since issue #37 the lid-off recovery cable's plug). The study
   found that today's ribbon folds and `J-MCU-C`'s socket stood inside the
   15 mm overmould allowance by up to 2.6 mm, which no rule checked. Now the
   folds stop `board_clear` short of the plug, running back past `J-MCU`'s

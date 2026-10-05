@@ -1,0 +1,65 @@
+* The 5 V OR (issue #39): U-BUCK-A's 5 V through U-USBOR (LM74700-Q1, behavioural) and
+* Q-USBOR (DMN3404L) onto INST_5V_A; the Matrix's USB-C VBUS through its own D1 (B5819WS)
+* onto the Matrix's 5 V pad; CBL-MCU-RIBBON's 5 V conductors between the two; the Matrix's
+* load on its pad. Either source can be switched off part-way through the run.
+*
+* The buck: a voltage source behind or_r_buck, which can SINK - so a FET that conducted
+* backwards would show as current into it, not as a node that merely floats up.
+VBK bk 0 PWL(0 {{or_v_buck}} {{or_t_bk0}} {{or_v_buck}} {{or_t_bk1}} {{or_v_bk_off}})
+RBK bk ba {{or_r_buck}}
+CBO ba 0 {{C-BUCK-OUT}}
+* Q-USBOR: source on BUCK_A_OUT (ba), drain on INST_5V_A (inst). VQ reads the current
+* from INST_5V_A into the drain: positive is REVERSE current, towards the buck.
+VQ inst qd 0
+M1 qd g ba ba QOR
+DQB ba qd DQORB
+CGS g ba {{or_c_iss}}
+CGD g qd {{or_c_rss}}
+RGS g ba 10meg
+* U-USBOR. The reverse comparator (ANODE - CATHODE below V(AK REV), or ANODE under its
+* POR) goes through two delay lines: the gate is pulled to ANODE t_rev after it trips and
+* released t_fwd after it clears (the datasheet's reverse and forward-recovery delays).
+* Every switch is a tanh over a millivolt or so, so the operating point can be found.
+BCMP cmp 0 V = 1 - (1 - 0.5 * (1 + tanh(({{or_v_rev}} - V(ba,inst)) / 1m))) * (1 - 0.5 * (1 + tanh(({{or_v_por}} - V(ba)) / 20m)))
+RT1 cmp c1 50
+T1 c1 0 cd1 0 Z0=50 TD={{or_t_rev}}
+RL1 cd1 0 50
+RT2 cmp c2 50
+T2 c2 0 cd2 0 Z0=50 TD={{or_t_fwd}}
+RL2 cd2 0 50
+BREV rev 0 V = 1 - (1 - 0.5 * (1 + tanh((V(cd1) - 0.25) / 20m))) * (1 - 0.5 * (1 + tanh((V(cd2) - 0.25) / 20m)))
+BFULL full 0 V = 0.5 * (1 + tanh((V(ba,inst) - {{or_v_full}}) / 2m))
+* the regulation amplifier: Gm towards a 20 mV drop, sourcing up to i_src (and no higher
+* than VCAP), sinking up to i_sink
+BREG reg 0 V = (V(ba,inst) > {{or_v_reg}}) ? {{or_i_src}} * tanh({{or_gm}} * (V(ba,inst) - {{or_v_reg}}) / {{or_i_src}}) * 0.5 * (1 + tanh((V(ba) + {{or_v_cp}} - V(g)) / 0.1)) : {{or_i_sink}} * tanh({{or_gm}} * (V(ba,inst) - {{or_v_reg}}) / {{or_i_sink}})
+* Gate drive: reverse -> to ANODE through the discharge switch; full conduction -> GATE
+* switched to VCAP (ANODE + the charge pump); between, the regulation amplifier
+BG 0 g I = V(rev) * (V(ba) - V(g)) / {{or_r_dis}} + (1 - V(rev)) * (V(full) * (V(ba) + {{or_v_cp}} - V(g)) / {{or_r_full}} + (1 - V(full)) * V(reg))
+ICAT inst 0 {{or_i_cath}}
+* INST_5V_A on the main board: C-USBOR-OUT. Then the ribbon to the Matrix's 5 V pad.
+COUT inst 0 {{C-USBOR}}
+RRIB inst mx {{or_r_rib}}
+* The Matrix: its own capacitance on VCC_5V, its load, and D1 from its USB-C VBUS.
+* VIU reads the USB source's current: negative is current pushed BACK into the host.
+CMX mx 0 {{or_c_mx}}
+BLD mx 0 I = {{or_i_load}} * max(0, min(1, V(mx) / 4.0))
+VUS us 0 PWL(0 {{or_v_usb}} {{or_t_us0}} {{or_v_usb}} {{or_t_us1}} 0)
+RUS us vb {{or_r_usb}}
+VIU vb vb1 0
+DD1 vb1 mx DB5819
+RD1L vb1 mx {{or_r_d1_leak}}
+.model QOR NMOS(level=1 vto={{or_vth}} kp={{or_kp}})
+.model DQORB D(is={{or_is_body}} n=1)
+.model DB5819 D(is={{or_is_d1}} n=1.05 rs=0.12)
+.options method=gear rshunt=1e10
+.control
+tran 100n {{or_t_end}} 0 200n
+wrdata vinst.dat v(inst)
+wrdata vba.dat v(ba)
+wrdata vgs.dat v(g) - v(ba)
+wrdata vak.dat v(ba) - v(inst)
+wrdata irev.dat i(VQ)
+wrdata iusb.dat i(VIU)
+quit
+.endc
+.end

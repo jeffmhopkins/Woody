@@ -152,7 +152,7 @@ Solder mask between pads, as p.6 asks.
 ### Where it sits
 
 **At the mouth end of the main board, on the far side from the tube, ports
-towards the tail, beside the breath trap** (ADR 0017), parts face up. It is not
+towards the tail, beside the breath tube's first bend** (ADR 0017; no trap since ADR 0003's amendment of 2026-10-05), parts face up. It is not
 under a key board: the room it has is `mechanical/drc.echo` "breath sensor fits
 at the mouth end". **The buffered breath signal runs the board's length to
 `J-UMB`** (ADR 0017), so `U-BUF` sits beside the sensor and what makes the run

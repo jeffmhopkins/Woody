@@ -29,7 +29,7 @@ The `Dir` and `Peer` columns are defined once in
 | `PWR_GND` at `J-UMB` | ref | `module/power-entry` | `umbilical-pinmap`, `dig-gnd-topology` | This board's only supply return, down the umbilical to `U-ISO`'s 0V at the module (ADR 0027). It reaches the module's star only through `DIG_GND` and `NT-DIG-MOD`, and none of this board's DC current crosses the star (`dig-gnd-topology`) |
 | `INST_POS12`, the LED row feed | out | `carrier/led-strip-drive` | `led-row-current` | `Q-INRUSH`'s drain (§1a), which `C-STRIP-BULK`, this circuit's part, sits on. Nothing is in series between the drain and this tap |
 | `INST_POS12`, analog | out | `carrier/breath-excitation-reference` | — | REF5050 `VIN`, and the V+ of both OPA2197 halves. **The same node as the row above**, for the same reason |
-| 5 V, buck A | out | `J-MCU`, `carrier/led-strip-drive` | `matrix-led-current` | Through `D-USBOR` and `J-MCU`, down three conductors of `CBL-MCU-RIBBON` onto the dev board's 5 V pad and `TP2`, and on to the 74AHCT125 |
+| 5 V, buck A | out | `J-MCU`, `carrier/led-strip-drive` | `matrix-led-current` | Through the ideal-diode OR (`U-USBOR`, `Q-USBOR`, §1b) and `J-MCU`, down three conductors of `CBL-MCU-RIBBON` onto the dev board's 5 V pad and `TP2`, and on to the 74AHCT125 |
 | `PWR_GND` pour | ref | `carrier/service-uart`, `carrier/led-strip-drive`, `carrier/carrier`, `interfaces/breath-sense-link` | `dig-gnd-topology` | Layer 2, §2. The whole board returns here, and the breath link's two clamps, and so do the plates: the bottom plate through this board's mounts, the key plate through the cassette's columns to the same mounts (ADR 0022, ADR 0025). **`carrier/breath-adc` and `carrier/breath-excitation-reference` are no longer listed**: both of those pages say their return is `AGND_INST`, which reaches this pour on the **single tie** and is a different node everywhere else — and that distinction is the whole point of the star |
 
 ## §1 Power entry
@@ -59,12 +59,15 @@ the two agree, and where they do not the netlist wins.*
                      ├── OPA2197 V+ ────────┤
                      │                      │
                      ├──[L-BUCK-IN]──┬──────┼──[R-78E5.0 A]──▷|──┬── dev board 5V
-                     │   22 µH       │      │      │          D-USBOR  ├── 74AHCT125
+                     │   22 µH       │      │      │          Q-USBOR  ├── 74AHCT125
                      │   [C-BUCK-IN 100µF]  │ [C-BUCK-OUT 10µF]        └── (8×8 matrix,
                      │      25V, real ESR   │   at its OUT pin              via the board)
                      │                      │
  J-UMB pin 6 PWR_GND ┴──────────────────────┴──── PWR_GND pour
 ```
+
+*The `▷|` after the buck is the ideal-diode OR, `Q-USBOR` switched by
+`U-USBOR` (§1b), not a diode.*
 
 **`D-REVSHUNT` goes at the connector, ahead of `Q-INRUSH` and `L-BUCK-IN`.** Its job is a
 rollover patch lead swapping pins 3 and 6 `[repo] 0004`; it has to conduct
@@ -152,11 +155,10 @@ figure a bench reading replaces. #18 E2 also asked for a thermocouple on
 ROADMAP M8 has it.
 
 **Rack and USB together: the share is not controlled in hardware** (#18 E1). With the rack up and a USB host plugged in — the
-configuration and telemetry case, `firmware/README.md` — `VCC_5V` is fed from
-both sides: the buck through `D-USBOR` (SS14, `V_F` 0.50 V max at 1 A
-`[ds SS14.pdf]`) and `VBUS` through the Matrix's own `D1` (B5819WS, 0.60 V
-max at 1 A `[ds B5819WS.pdf]`). The sources are 5.0 V ± 5 % (`[ds
-R-78E5.0-1.0.pdf p.2]`) and USB's 4.75–5.25 V `[from memory: USB 2.0]`, so
+bench case since issue #37, the Matrix's own USB-C with the lid off (`firmware/README.md`) — `VCC_5V` is fed from
+both sides: the buck through the ideal-diode OR (§1b, at most 50 mV down)
+and `VBUS` through the Matrix's own `D1` (B5819WS, 0.60 V
+max at 1 A `[ds B5819WS.pdf]`). The sources are the buck's 5.0 V ± 6.5 % (§1b) and USB's 4.75–5.25 V `[from memory: USB 2.0]`, so
 which one carries the load is set by tens of millivolts, and at the corners
 `VBUS` carries all of it. All of it is up to the ~0.82 A above, and `D1` is
 rated `P_D` 200 mW at `RθJA` 500 °C/W `[ds B5819WS.pdf]` — about 0.45 W
@@ -166,15 +168,19 @@ attached, the firmware caps the Matrix's own LED-matrix brightness so that
 the whole of `VCC_5V` could come through `D1` and stay inside what ADR 0014
 derives for it on USB (*Current: sparse is free, full field is not*):
 `firmware/README.md`, *The lights*, states the rule and its number. No
-hardware changes — no ideal diode, `D1` stays fitted — and the LED row is
-not touched by the cap, being fed from `INST_POS12`, not `VCC_5V`.
+hardware change for this — `D1` stays fitted — and the LED row is not
+touched by the cap, being fed from `INST_POS12`, not `VCC_5V`. *(Since
+2026-10-05 the buck's side is an ideal-diode OR, §1b, chosen for the MIDI
+out's rail. It does not settle the share: the buck's floor is 4.675 V, and
+`VBUS` less `D1` at a light load can be above it, so `D1` can still carry
+all of it and the cap stands.)*
 
 **The buck's output capacitor** (`C-BUCK-OUT`, owner, 2026-10-03, D1: "10 Ω
 + 22 µF + 10 µF"). RECOM's standard application puts a 10 µF MLCC on +Vout
 `[ds R-78E5.0-1.0.pdf p.I-4]`, and its 120 mV p-p ripple-and-noise figure is
 stated with only 100 nF across the output `[p.I-1]`; until now the board had
 neither. `C-BUCK-OUT` is that 10 µF, at `U-BUCK-A`'s OUT pin and returned to
-its GND pin, ahead of `D-USBOR`; it is part of the breath ADC's reference
+its GND pin, ahead of the OR (§1b), whose ANODE capacitor it is; it is part of the breath ADC's reference
 filter decision (`breath-adc.md`, *The reference's filter*), where the
 simulation gives it no credit. With the Matrix's ~11 µF it is far inside the
 part's 220 µF capacitive-load limit `[ds p.I-1]`.
@@ -314,7 +320,9 @@ is out of scope, and no clamp is added (ADR 0027, its 2026-10-01 amendment).
 
 ### On USB power alone
 
-ADR 0005 keeps the USB OR so the instrument runs on the bench without a rack.
+ADR 0005 keeps the USB OR so the instrument runs on the bench without a rack
+(through the Matrix's own USB-C, with the lid off since issue #37 removed the
+tail-face extension).
 **Since the analog block and the LED row moved to `INST_POS12`, USB alone runs
 the MCU, the matrix and the keys only**: no breath (the sensor, `U-REF-BREATH`
 and `U-BUF` are on `INST_POS12`) and no LED supply. The LED buffer
@@ -325,6 +333,88 @@ absent `[ds WS2815B-V1.pdf p.2]`. **There is no 12 V sense; firmware gates the
 row on the breath reading instead** — with the rail up the ADC reads the
 sensor's zero-pressure offset, with it down near zero (`firmware/README.md`,
 *What the hardware requires*, *The lights*). Recorded 2026-10-01 (A4-15).
+
+---
+
+## §1b The 5 V OR — `U-USBOR` and `Q-USBOR`
+
+*Added 2026-10-05, issue #39. Simulated in `sim/` (`or-rack`, `or-both`,
+`or-usb-unplug`, `or-rack-loss`).*
+
+**What meets here.** `INST_5V_A` is fed from two sides: `U-BUCK-A`'s 5 V
+on this board, and the Matrix's own USB-C `VBUS` through its `D1`
+(B5819WS) onto its `VCC_5V`, which `CBL-MCU-RIBBON` joins to `INST_5V_A`
+(*Rack and USB together*, above). `D1` keeps the buck out of the USB host.
+The part here keeps `VBUS` out of the buck — and, with the rack down, out of
+the buck's input and `INST_POS12` behind it. That was `D-USBOR`'s job, an
+SS14 at up to 0.50 V `[ds SS14.pdf]`, and that drop was most of what the
+MIDI out's worst corner was short by (`midi-out.md`, *The loop current*).
+
+**Decided by the owner, 2026-10-05** (#39, asked whether to replace the
+diode with an ideal-diode OR and tighten `R-MIDI` to 1 %): *"Let's go both,
+that seems the best way to ensure we're good"*.
+
+```
+ BUCK_A_OUT ──┬────────────── S [Q-USBOR DMN3404L] D ──────────┬── INST_5V_A ── J-MCU (the ribbon) ── Matrix VCC_5V ──◁|── D1 ── USB-C VBUS
+ (U-BUCK-A    │                     G                           │
+  OUT, and    ├─ ANODE, EN ─[U-USBOR LM74700-Q1]─ CATHODE ──────┤
+  C-BUCK-OUT) │                GATE ┘    │ VCAP                [C-USBOR-OUT 100nF]
+              └──────[C-USBOR-CAP 100nF]─┘                      │
+ PWR_GND ───────────────────────── GND ─────────────────────────┴────
+```
+
+**The part** `[ds TI-LM74700-Q1.pdf]`: an ideal-diode controller with an
+external N-FET. It regulates the FET's drop to 20 mV (13–29 mV) and ties the
+gate to its charge pump above 50 mV (p.6, p.15); when `CATHODE` rises 2–17 mV
+above `ANODE` it pulls the gate to `ANODE` within 0.75 µs (p.6–7) and the
+body diode blocks. It runs from `ANODE` at 4 V up (p.6), which the buck's
+floor clears. `EN` tied to `ANODE`, always on. `Q-USBOR`, a DMN3404L, is
+28 mΩ at 10 V, `V_GS` ±20 V, `V_GS(th)` 2.0 V max
+`[ds DIODES-DMN3404L.pdf p.1–3]` — what TI's selection rule asks for a gate
+the pump drives to 10.8–13.9 V (p.7, p.17). SOT-23-6, SOT-23 and two 0805s.
+
+**Why not the integrated parts** (`LM66100`, `LM66200`, `TPS2116`, all
+JLC-stocked). The LM66100's always-on reverse blocking trips on 0–80 mV of
+reverse drop across its own 79 mΩ, which it states as a reverse current of
+0.5–1 A `[ds TI LM66100 SLVSEZ8A p.5, p.9; read, not banked]`. A buck that
+cannot sink never makes that current, so `VBUS` would hold the buck's output
+up through the switch — the back-feed this part is here to stop. The
+LM66200 and TPS2116 are two-input muxes, and `VBUS` is inside the Matrix,
+behind `D1`, where this board cannot reach it.
+
+**The rail** `[calc]`, with the rack up:
+
+```
+the buck, R-78E5.0-1.0: output accuracy ±5.0 % max, load regulation ±1.5 % max
+  [ds R-78E5.0-1.0.pdf p.2], stacked [assumption: the datasheet does not
+  say whether one includes the other]                        4.675–5.325 V
+less the OR: 13–29 mV regulated; fully on at the 5 V rail's clamp-legal
+  928 mA (ADR 0005), 0.928 A x 42 mΩ = 39 mV [assumption: 1.5x the 25 C
+  maximum, hot]                                               ≤ 50 mV
+INST_5V_A                                                     4.625–5.325 V
+Q-USBOR at 0.928 A: 0.928² x 42 mΩ = 36 mW                    [calc]
+```
+
+`midi-out.md` works its loop current and its short circuit at these two
+ends. **On USB alone** (the bench, lid off) the rail is `VBUS` less `D1` and
+the ribbon: 4.24–4.33 V at the ~283 mA the firmware's cap allows with a host
+attached (`or-rack-loss`, below), as it always was — the OR is on the
+buck's side.
+
+**Simulated** (`sim/`, `pei-or.cir`; the controller behavioural, built from
+its datasheet, the buck a source that would sink whatever came back):
+
+| Sim | What | Result |
+|---|---|---|
+| `or-rack` | the rack alone, 50 mA and 928 mA, the buck, the FET and the regulation at every corner | `INST_5V_A` **4.630–5.311 V**; the OR costs 13–35 mV, against the SS14's 0.50 V |
+| `or-both` | rack and USB together, every corner of both sources, `D1` and `V(AK REV)`, both loads | **no back-feed either way**: under 1 nA into the buck, 1.2 µA into the host (`D1`'s leakage) |
+| `or-usb-unplug` | USB carrying the rail, then pulled | the buck takes over through the FET; `INST_5V_A` dips to 4.619 V, never onto the body diode |
+| `or-rack-loss` | the buck carrying it, then the rack pulled (the buck's output falling over 1 ms) | a reverse pulse of 20–170 mA for 1–14 µs as the buck's output passes the rail, then nothing; `USB` holds 4.20 V at the lowest |
+
+The reverse pulse is the controller's threshold at work: −2 to −17 mV across
+24–42 mΩ is up to 0.7 A before it trips, so a lower-resistance FET would let
+more through, not less (TI says so, p.17). It flows only into a buck that can
+sink it, which is the model's pessimism, not a fault the R-78E has.
 
 ---
 
@@ -431,8 +521,10 @@ named as they stand; **proposed** rows have no BOM entry yet.*
 | `U-BUCK` | R-78E5.0-1.0 SIP-3 | The one dev board, the matrix, the level shifter. **10.4 mm tall upright**, which fits anywhere on the main board, under the key boards included (`mechanical/drc.echo` "main board parts room under the key boards", and "regulator block fits where it stands") | `[repo]` |
 | `L-BUCK-IN` | 22 µH ≥1 A (SWPA6028S220MT) | The L of the input LC, one per buck (one buck) | `[repo]` + `[calc]` |
 | `C-BUCK-IN` | 100 µF 25 V electrolytic (UCM1E101MCL1GS) | **Must have real ESR; a ceramic breaks the damping** | `[ds]` + `[calc]` |
-| `C-BUCK-OUT` | 10 µF X5R 50 V 1206 (CL31A106KBHNNNE) | At the buck's OUT pin, ahead of `D-USBOR`: RECOM's standard application (owner, 2026-10-03, D1; below) | `[ds]` |
-| `D-USBOR` | SS14 | **Between the buck and the dev board's 5V pin** — the OR node is that pin, and USB can back-feed it | `[repo]` |
+| `C-BUCK-OUT` | 10 µF X5R 50 V 1206 (CL31A106KBHNNNE) | At the buck's OUT pin, ahead of the OR, its ANODE capacitor: RECOM's standard application (owner, 2026-10-03, D1; below) | `[ds]` |
+| `U-USBOR` | LM74700-Q1, SOT-23-6 | The ideal-diode controller of the 5 V OR (§1b): `Q-USBOR` on at 20 mV, off within 0.75 µs of a reverse | `[ds]`, `[sim]` |
+| `Q-USBOR` | DMN3404L N-FET, SOT-23 | The OR's switch: **source on the buck, drain on `INST_5V_A`**, so its body diode points the way the SS14 did | `[ds]`, `[sim]` |
+| `C-USBOR` ×2 | 100 nF 50 V X7R 0805 (`C-LED`'s part) | `U-USBOR`'s charge-pump capacitor (VCAP to ANODE) and its CATHODE capacitor | `[ds]` |
 | `D-REVSHUNT` | SS34 | At the connector, ahead of `L-BUCK-IN` | `[repo]` |
 | `D-TVS-PWR` | SMAJ15A | Across the power pair | `[repo]` |
 | `C-STRIP-BULK` ×2 | 220 µF 25 V polymer (MA25V220M6X8), in parallel | At the LED row's feed end, on this board (ADR 0028) | `[ds]`, `[calc]`, `[sim]` |

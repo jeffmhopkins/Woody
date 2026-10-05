@@ -10,7 +10,7 @@ inputs:
   hardware/module/pitch-stage/netlist.yaml: 0c6895dbc1b46c4b
   hardware/module/mod-channels/netlist.yaml: 00739b63d111a848
   hardware/module/breath-receive-stage/netlist.yaml: dab496982d183718
-  hardware/interfaces/breath-sense-link/netlist.yaml: 3174b77569cdaf62
+  hardware/interfaces/breath-sense-link/netlist.yaml: 589dc991272a7d9c
   hardware/carrier/breath-excitation-reference/netlist.yaml: 2d5ee10b223dc95d
   hardware/carrier/breath-adc/netlist.yaml: 60647f404552f147
   hardware/module/power-entry/netlist.yaml: 14fd898035959809

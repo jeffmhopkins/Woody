@@ -102,10 +102,20 @@ the way it is). This is the working summary.
      overlap that is meant (a nut on its bolt) goes in
      `mechanical/clash-allow.yaml` with its reason; a rule nothing matches any
      more is reported, so the list cannot rot.
+     **It also lists the near-misses** (issue #34): the minimum distance of
+     every pair that comes within reach, each pair sorted into a class in
+     `config/clearance.yaml` whose minimum gap carries its provenance (the
+     tolerances it adds up). A pair under its class's minimum is
+     `UNDER MINIMUM` unless a `near:` rule in the clash-allow file names it
+     with its reason; every pair under the file's `report` threshold is
+     listed with where it is. The per-solid meshes are cached under
+     `~/.cache/woody/clash-solids/`, keyed by what they are built from, so a
+     change to the clearance rules alone re-measures without re-rendering.
    - the renders in `mechanical/renders/`, listed in `mechanical/README.md`.
 4. **Check before committing**: `python3 tools/cad.py check` (also run by
    `tools/check-staleness.py`) fails on any output that is stale, hand-edited,
-   or built by nothing. `python3 tools/cad.py explain <output>` says which input
+   or built by nothing - and on an unexcused `CLASH` or `UNDER MINIMUM` line
+   in either model's `clash.txt`. `python3 tools/cad.py explain <output>` says which input
    moved since it was built.
 
 **The Eurorack module is a second model in the same pipeline**:
@@ -1063,8 +1073,9 @@ so.
 | the breath output stage: its offset table, gain ends, clip, a step and the loop into a passive mult, the −12 V rail's path to the jack, and the chain — the response shaper and this stage one after the other, at the commissioned setting and across `POT-RESP`; and the whole breath chain's noise, sensor to jack and to the instrument's ADC, per stage and per bandwidth mode; and the breath LED's driver on its output, against a twin of the stage without it (TI's OPA2197, INA828 and REF5050 models, each held to its datasheet) | `hardware/module/breath-output-stage/sim/` |
 | the response shaper's curve at `POT-RESP`'s ends and centre, and its clip, with a behavioural `D-RESP` fitted to the 1N4448W's guaranteed window; `TRIM-RESP` commissioned in the deck (bisected to its target per corner) and at both ends of its travel, 0–40 °C | `hardware/module/breath-response-shaper/sim/` |
 | the breath ADC's anti-alias filter, its time constant, and the MCP3202's sample capacitor against it, at 4 kHz and, as what-ifs, 8 and 16 kHz | `hardware/carrier/breath-adc/sim/` |
-| the instrument's input LC against the buck's negative resistance, and its start from `U-ISO` through the load switch and the cable, cold and hot-plugged | `hardware/carrier/power-entry-instrument/sim/` |
+| the instrument's input LC against the buck's negative resistance, and its start from `U-ISO` through the load switch and the cable, cold and hot-plugged; the 5 V ideal-diode OR (`U-USBOR`, `Q-USBOR`) against the Matrix's USB `VBUS`: back-feed, switch-over and the rail's range (#39) | `hardware/carrier/power-entry-instrument/sim/` |
 | the LED row's data line: its edge and `T0H` at the first LED | `hardware/carrier/led-strip-drive/sim/` |
+| the MIDI out's current loop: Type A and B into CA-033's receiver, its edges through 1-3 m of cable, shorts at the jack, the power-on default and the wrong A/B setting | `hardware/carrier/midi-out/sim/` |
 | the module's two 5 V rails at power-on and power-off, and `SYNC` at the DAC between them (TI's SN74AHCT125 model and the DAC8568's IBIS clamp) | `hardware/module/digital-and-supervision/sim/` |
 | the DAC8568's power-on glitch and its 3-state reference, into the pitch and mod jacks | `hardware/module/dac8568/sim/` |
 | the breath link's TVS diodes: CMRR, `PWR_GND` rejection, leakage, in each bandwidth mode | `hardware/interfaces/breath-sense-link/sim/` |
@@ -1090,6 +1101,7 @@ circuit without a `sim/`, the answer was written nowhere.
 | `carrier/breath-excitation-reference` | own | |
 | `carrier/led-strip-drive` | own | |
 | `carrier/power-entry-instrument` | own | |
+| `carrier/midi-out` | own | |
 | `carrier/service-uart` | n/a | A connector, `R-TXD-SER` in series with a UART line and `C-EN` on `EN`: static parts with nothing to simulate against (`EN` and `IO0`'s pulls are the Matrix's own; `C-EN` against `R8` is one RC, τ = 10 ms on the page) |
 | `cluster/key-marker-and-bits` | covered | `hardware/boards/key-board-lh/sim/`: the free bit's `R-KEY-PU` is in the board deck, and `m_free_high` holds it over `V_T+` max with every key open and every key pressed |
 | `cluster/key-register` | covered | `hardware/boards/key-board-lh/sim/` (`U-KEYS`'s inputs against their thresholds) and `hardware/interfaces/key-chain-loom/sim/` (`C-DECOUPLE-165` against `U-KEYS`'s `C_pd` on the rail; `QH` over the ribbon) |

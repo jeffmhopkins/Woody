@@ -25,6 +25,7 @@ components:
     - P3V3
     - P5V
     - GND
+    - IO6
     sheet: carrier
   C1:
     of: C-AA-ADC
@@ -159,6 +160,20 @@ components:
     - 1
     - 2
     sheet: REG-LT
+  C207:
+    of: C-USBOR
+    value: 100nF 50V X7R
+    pins:
+    - 1
+    - 2
+    sheet: power-entry-instrument
+  C208:
+    of: C-USBOR
+    value: 100nF 50V X7R
+    pins:
+    - 1
+    - 2
+    sheet: power-entry-instrument
   C21:
     of: C-KEY
     value: 47nF
@@ -521,13 +536,6 @@ components:
     - A
     - K
     sheet: power-entry-instrument
-  D4:
-    of: D-USBOR
-    value: SS14
-    pins:
-    - A
-    - K
-    sheet: power-entry-instrument
   D5:
     of: D-TVS-BREATH
     value: PESD12VL1BA
@@ -574,6 +582,20 @@ components:
     pins:
     - 1
     - 2
+  FB3:
+    of: FB-MIDI
+    value: 600R@100MHz
+    pins:
+    - 1
+    - 2
+    sheet: midi-out
+  FB4:
+    of: FB-MIDI
+    value: 600R@100MHz
+    pins:
+    - 1
+    - 2
+    sheet: midi-out
   J1:
     of: J-MCU
     value: 2x12 1.27mm shrouded box header
@@ -655,6 +677,23 @@ components:
     - 6
     - 7
     - 8
+  J7:
+    of: J-MIDI
+    value: B3B-PH-SM4-TB
+    pins:
+    - 1
+    - 2
+    - 3
+    sheet: midi-out
+  J8:
+    of: J-MIDI-OUT
+    value: SJ5-43502PM
+    pins:
+    - T
+    - R1
+    - R2
+    - S
+    sheet: midi-out
   L1:
     of: L-BUCK-IN
     value: 22uH
@@ -679,6 +718,14 @@ components:
   Q1:
     of: Q-INRUSH
     value: AO3401A
+    pins:
+    - G
+    - S
+    - D
+    sheet: power-entry-instrument
+  Q2:
+    of: Q-USBOR
+    value: DMN3404L
     pins:
     - G
     - S
@@ -973,6 +1020,20 @@ components:
     - 1
     - 2
     sheet: breath-adc
+  R48:
+    of: R-MIDI-PU
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: led-strip-drive
+  R49:
+    of: R-MIDI-PU
+    value: 10k 1%
+    pins:
+    - 1
+    - 2
+    sheet: led-strip-drive
   R5:
     of: R-ADCDIV-L
     value: 15k 1%
@@ -980,6 +1041,20 @@ components:
     - 1
     - 2
     sheet: breath-adc
+  R50:
+    of: R-MIDI
+    value: 182R 1%
+    pins:
+    - 1
+    - 2
+    sheet: midi-out
+  R51:
+    of: R-MIDI
+    value: 182R 1%
+    pins:
+    - 1
+    - 2
+    sheet: midi-out
   R6:
     of: R-REF-IN
     value: 330R 1%
@@ -1105,6 +1180,27 @@ components:
     - CH3
     - CH4
     - GND
+  U12:
+    of: U-TVS-MIDI
+    value: SP0504BAHTG
+    pins:
+    - CH1
+    - CH2
+    - CH3
+    - CH4
+    - GND
+    sheet: midi-out
+  U13:
+    of: U-USBOR
+    value: LM74700-Q1
+    pins:
+    - ANODE
+    - CATHODE
+    - GATE
+    - VCAP
+    - EN
+    - GND
+    sheet: power-entry-instrument
   U2:
     of: U-ADC
     value: MCP3202-CI/SN
@@ -1281,6 +1377,11 @@ nets:
   - J1.4
   - R10.1
   - U6.1A
+  /IO2:
+  - A1.IO2
+  - J1.5
+  - R49.2
+  - U6.3A
   /IO33:
   - A1.IO33
   - J1.19
@@ -1310,6 +1411,11 @@ nets:
   - J1.16
   - R45.2
   - U2.CS
+  /IO6:
+  - A1.IO6
+  - J1.23
+  - R48.2
+  - U6.2A
   /IO7:
   - A1.IO7
   - J1.6
@@ -1382,6 +1488,12 @@ nets:
   /LT4/SWITCH_LEG:
   - R19.2
   - SW4.1
+  /MIDI_RING_DRV:
+  - R51.1
+  - U6.3Y
+  /MIDI_TIP_DRV:
+  - R50.1
+  - U6.2Y
   /MOSI:
   - J6.5
   - R2.2
@@ -1450,9 +1562,6 @@ nets:
   - C9.1
   - R8.2
   - U3.INA-
-  /carrier/IO2:
-  - A1.IO2
-  - J1.5
   /carrier/IO3:
   - A1.IO3
   - J1.7
@@ -1516,9 +1625,28 @@ nets:
   - D8.DIN1
   - D9.DIN2
   - R11.2
+  /midi-out/MIDI_RING:
+  - FB4.2
+  - J7.2
+  - J8.R1
+  - U12.CH2
+  /midi-out/MIDI_RING_R:
+  - FB4.1
+  - R51.2
+  /midi-out/MIDI_TIP:
+  - FB3.2
+  - J7.1
+  - J8.T
+  - U12.CH1
+  /midi-out/MIDI_TIP_R:
+  - FB3.1
+  - R50.2
   /power-entry-instrument/BUCK_A_OUT:
+  - C207.2
   - C43.1
-  - D4.A
+  - Q2.S
+  - U13.EN
+  - U13.ANODE
   - U5.OUT
   /power-entry-instrument/INRUSH_GATE:
   - C39.2
@@ -1530,6 +1658,12 @@ nets:
   /power-entry-instrument/INRUSH_MILLER:
   - C40.2
   - R43.1
+  /power-entry-instrument/USBOR_GATE:
+  - Q2.G
+  - U13.GATE
+  /power-entry-instrument/USBOR_VCAP:
+  - C207.1
+  - U13.VCAP
   /service-uart/TXD_HDR:
   - J2.1
   - R46.2
@@ -1619,6 +1753,8 @@ nets:
   - R40.1
   - R45.1
   - R47.1
+  - R48.1
+  - R49.1
   - U7.C
   - U7.VCC
   - U8.B
@@ -1626,10 +1762,12 @@ nets:
   INST_5V_A:
   - A1.P5V
   - C12.1
-  - D4.K
+  - C208.1
   - J1.1
   - J1.17
   - J1.3
+  - Q2.D
+  - U13.CATHODE
   - U6.VCC
   INST_POS12:
   - C10.1
@@ -1669,8 +1807,6 @@ nets:
   - R43.2
   - R6.1
   - U3.V+
-  J1.23:
-  - J1.23
   J1.24:
   - J1.24
   J4.11:
@@ -1696,6 +1832,7 @@ nets:
   - C20.2
   - C205.2
   - C206.2
+  - C208.2
   - C21.2
   - C22.2
   - C23.2
@@ -1753,6 +1890,9 @@ nets:
   - J5.7
   - J5.9
   - J6.6
+  - J7.3
+  - J8.R2
+  - J8.S
   - NT1.2
   - NT2.2
   - R10.2
@@ -1769,15 +1909,17 @@ nets:
   - SW9.2
   - U1.GND
   - U11.GND
+  - U12.GND
+  - U12.CH3
+  - U12.CH4
+  - U13.GND
   - U5.GND
   - U6.1OE
   - U6.3OE
   - U6.4A
   - U6.4OE
   - U6.2OE
-  - U6.2A
   - U6.GND
-  - U6.3A
   - U7.D
   - U7.CLKINH
   - U7.GND
@@ -1813,10 +1955,6 @@ nets:
   - U4.TEMP
   U4.TRIM_NR:
   - U4.TRIM_NR
-  U6.2Y:
-  - U6.2Y
-  U6.3Y:
-  - U6.3Y
   U6.4Y:
   - U6.4Y
   U7.QH_BAR:
@@ -1854,7 +1992,6 @@ external_endpoints:
 - D20.DO
 - D8.1
 - D9.1
-- J1.23
 - J1.24
 - J4.11
 - J4.12
@@ -1871,8 +2008,6 @@ external_endpoints:
 - U4.NC7
 - U4.TEMP
 - U4.TRIM_NR
-- U6.2Y
-- U6.3Y
 - U6.4Y
 - U7.QH_BAR
 - U8.QH_BAR

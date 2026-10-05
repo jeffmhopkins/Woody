@@ -110,6 +110,8 @@ clashes:
     src: mechanical/cad/module.scad
     out: mechanical/module/clash.txt
     allow: mechanical/module/clash-allow.yaml
+    clearance: config/clearance.yaml
+    clearance_set: module
     defines: {vendor: false, show_plugs: false, show_rails: true}
 
 # Outputs a Python tool makes (tools/cad.py `scripts:`). Each names EVERY input

@@ -89,9 +89,9 @@ renders:
     camera: [0, 28, 10, 50, 0, 340, 440]
     defines: {origin: "centre", show_lid: false, show_caps: false,
               highlight: ["main board*", "parts *", "tall parts*", "breath sensor", "LED row", "ribbon *", "J-CHAIN *", "IDC plug *", "board *",
-                          "switch *", "Matrix*", "etherCON", "USB-C*", "umbilical adapter", "J-UMB", "J-MCU"]}
+                          "switch *", "Matrix*", "etherCON", "MIDI*", "J-MIDI", "umbilical adapter", "J-UMB", "J-MCU"]}
   - name: breakdown-breath
-    title: "Breakdown: the breath path - mouth cap, tube, trap, sensor, at the mouth end"
+    title: "Breakdown: the breath path - the inlet in the mouth cap, the clear tube, the sensor, at the mouth end"
     src: mechanical/cad/woody_body.scad
     out: mechanical/renders/breakdown-breath.png
     imgsize: [1400, 900]
@@ -115,7 +115,7 @@ renders:
     camera: [0, 22, 0, 0, 0, 0, 250]
     defines: {origin: "centre", cut: "y2d", cut_key: "LT1"}
   - name: view-tail
-    title: From the tail end, oak top and key plate off - Matrix, etherCON, USB-C, and the main board's tail
+    title: From the tail end, oak top and key plate off - Matrix, etherCON, the MIDI jack, and the main board's tail
     src: mechanical/cad/woody_body.scad
     out: mechanical/renders/view-tail.png
     imgsize: [1400, 900]
@@ -211,7 +211,7 @@ renders:
     projection: o
     camera: [8, 18, 0, 0, 0, 0, 205]
   - name: tail-face
-    title: The tail face - etherCON rotated, USB-C beside it
+    title: The tail face - the etherCON in its recess
     src: mechanical/cad/fig_tail_face.scad
     out: mechanical/renders/tail-face.png
     imgsize: [1200, 900]
@@ -236,6 +236,7 @@ exports:
   - {name: dxf-plate-top, src: mechanical/cad/woody_body.scad, out: mechanical/export/plate-top.dxf, defines: {part: "plate_top"}}
   - {name: dxf-oak-top, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-top.dxf, defines: {part: "oak_top"}}
   - {name: dxf-oak-bottom, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-bottom.dxf, defines: {part: "oak_bottom"}}
+  - {name: dxf-oak-bottom-pockets, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-bottom-pockets.dxf, defines: {part: "oak_bottom_pockets"}}
   - {name: dxf-plate-bottom, src: mechanical/cad/woody_body.scad, out: mechanical/export/plate-bottom.dxf, defines: {part: "plate_bottom"}}
   - {name: dxf-side, src: mechanical/cad/woody_body.scad, out: mechanical/export/side.dxf, defines: {part: "side"}}
   - {name: dxf-oak-grooves, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-grooves.dxf, defines: {part: "oak_grooves"}}
@@ -253,13 +254,16 @@ exports:
   - {name: dxf-matrix-carrier, src: mechanical/cad/woody_body.scad, out: mechanical/export/matrix-carrier.dxf, defines: {part: "matrix_carrier"}}
   - {name: pcb-geometry, src: mechanical/cad/woody_body.scad, out: mechanical/export/pcb-geometry.echo, defines: {part: "pcb_geom"}}
 
-# The interference check: every named solid against every other. Report
-# only - clashes are design findings, like drc.echo, not build failures.
+# The interference check: every named solid against every other, and its
+# and clearance check (issue #34): `check` fails on an unexcused clash or a pair
+# under its class's minimum gap (config/clearance.yaml).
 clashes:
   - name: clash
     src: mechanical/cad/woody_body.scad
     out: mechanical/clash.txt
     allow: mechanical/clash-allow.yaml
+    clearance: config/clearance.yaml
+    clearance_set: body
 
 # THE PHOTOGRAPHS (owner, 2026-10-01): tools/render-instrument.py, Blender
 # Cycles on the CPU, as the module's are (mechanical/module/outputs.yaml). The

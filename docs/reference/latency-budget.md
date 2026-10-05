@@ -40,13 +40,14 @@ copy — thresholds, note gating, mod routing, MIDI — is sampled, and pays for
 
 | Stage | Time | Notes |
 |---|---|---|
-| Tube propagation | **~1.17 ms** | 400 mm. The sensor sits at the bottom with the real-time board (ADR 0003) |
+| Tube propagation, inside the body | **~0.21 ms** | About 72 mm from the inlet's outer barb to `P1`: the barbs and insert, and the one clear tube, whose length `mechanical/drc.echo` prints (*"breath tube bends no tighter than routing.tube_bend_r"*) `[calc: ~8 + ~64 mm; 72 mm / 343 m/s]`. No trap since ADR 0003's amendment of 2026-10-05; the sensor is at the mouth end (ADR 0017) |
+| **The external tube** | **+ L / 343 m/s** | From the inlet's barb at the mouth cap to the player's mouthpiece, wherever that is: the owner's, with no length set (ADR 0003, *Amendment, 2026-10-04 — the inlet*). About 2.9 µs per mm `[calc]`. **E2 measures the real path** |
 | **Pneumatic restrictor** | **? — sized at E2** | A deliberate low-pass, added to damp the tube's pipe mode (ADR 0003). **Not previously in this budget at all**, and the term most able to break it |
 | Pressure transducer | **~1 ms** | A property of the sensor, not the design |
 | Buffer and cable propagation | < 10 µs | |
 | Receive filter, **a panel toggle**: 495 Hz / 1.57 kHz / ~10 kHz | **322 / 102 / 16 µs** | `1/(2πf)`: 2 × 11 kΩ against the `C_diff` the toggle switches in and the two `C_cm` in series (`breath-sense-link.md`, *Component values*; owner, 2026-10-04, ADR 0003 *Amendment, 2026-10-04*). One pole |
 | Output RC at the jack, 15.9 kHz | **10 µs** | `R-OUT-PROT` against `C-OUT-BREATH`, above every mode (#32) |
-| **Total** | **~2.51 / 2.29 / 2.21 ms + restrictor** | 500 Hz / 1.5 kHz / WIDE |
+| **Total** | **~1.55 / 1.33 / 1.25 ms + the external tube + restrictor** | 500 Hz / 1.5 kHz / WIDE |
 
 **The filter line used to read "< 0.2 ms" and it was the design's own
 specified corners that broke it.** Three reviewers found the same thing: a
@@ -56,7 +57,7 @@ and the receive filter is the player's choice on the panel.
 
 ### Breath digital copy (sampled)
 
-Everything above as far as the sensor output — **~2.17 ms** — then:
+Everything above as far as the sensor output — **~1.21 ms plus the external tube** — then:
 
 | Stage | Time | Notes |
 |---|---|---|
@@ -67,27 +68,33 @@ Everything above as far as the sensor output — **~2.17 ms** — then:
 | SPI to DAC over umbilical | ~96 µs | Six 32-bit words at 2 MHz. The loop refreshes all of them every pass (`firmware/README.md`), so the whole burst is the latency, not one word |
 | DAC settling | ~10 µs | |
 | Reconstruction filter | ~82 µs | Mod channels, 1.94 kHz. Pitch is 15.9 kHz and costs ~10 µs |
-| **Total** | **~2.5–2.8 ms + restrictor** | |
+| **Total** | **~1.5–1.8 ms + the external tube + restrictor** | |
 
 The sampling period was previously omitted from this table entirely, which
 understated the digital path by up to a quarter of a millisecond. It is not a
 conversion time — it is quantisation in *time*, and it is there whether or not
 the converter is fast.
 
-### The tube is now the largest single term
+### The tube is the player's term now
 
-Moving the sensor to the bottom of the instrument (ADR 0003) traded 0.09 ms of
-tube for 1.17 ms. That was a deliberate exchange for a short, quiet analog run
-instead of a 400 mm one, and the budget absorbs it: **2.76 ms against a 5 ms
-target** (the digital copy's worst, since #32's 1.47 kHz anti-alias pole), with the two largest terms both physical rather than architectural.
+The sensor sits at the mouth end (ADR 0017), so the path inside the body is
+short: about 72 mm of barbs and clear tube, **0.21 ms**. What the breath travels before it
+is the external tube the owner fits from the inlet's barb to a mouthpiece
+elsewhere (issue #36), and its length is not a design figure: *"Don't worry
+about the length"* (owner, 2026-10-04; ADR 0003, *Amendment, 2026-10-04 — the
+inlet*). It adds its length at the speed of sound, about 2.9 µs per mm
+`[calc]`. Without it the chain is **~1.8 ms against a 5 ms target** (the
+digital copy's worst, since #32's 1.47 kHz anti-alias pole), and E2 measures
+the real path, external tube included.
 
 For scale: a hard tongue attack has a rise time of roughly 5–15 ms. Diaphragm
-dynamics are far slower. Even at 2.8 ms the chain has margin against the
-fastest gesture physically available.
+dynamics are far slower. At ~1.8 ms inside the instrument the chain has margin
+against the fastest gesture physically available; the external tube spends
+some of it, at its length over the speed of sound.
 
 **But "roughly 10× margin" was never true and is not true now.** ADR 0003 used
-that phrase; against a 5 ms target the real figure is about **1.8×**, and the
-restrictor has not been measured yet. Two terms are unbounded until E2 — the
+that phrase; against a 5 ms target the real figure depends on the external
+tube and the restrictor, and neither has been measured yet. Two terms are unbounded until E2 — the
 restrictor and the transducer's own response, which is a datasheet number — and
 between them they decide whether this budget holds. The honest statement is
 that the design has margin, not headroom, and the end-to-end measurement at the
@@ -150,13 +157,13 @@ load-bearing enough that being wrong about them would change the design.
 | What | How | Why it matters |
 |---|---|---|
 | **Breath transducer response** | Step the pressure, scope the sensor output, measure rise time | A large term and a datasheet figure. If it is really 3 ms the margin shrinks; if it is 200 µs there is far more headroom than assumed |
-| **Tube delay, ring-down, and the restrictor's time constant** | Step the pressure at the mouthpiece, scope at the sensor. Measure the delay, the ring-down, and — with the plug fitted — the added time constant | Now the **largest single term** at 400 mm, and the one term tunable by design. The restrictor is sized by damping, not by frequency (ADR 0003), and **its time constant is a latency term this budget cannot fill in until E2** |
+| **Tube delay, ring-down, and the restrictor's time constant** | Step the pressure at the mouthpiece, scope at the sensor. Measure the delay, the ring-down, and — with the plug fitted — the added time constant | The external tube's length is the player's, and the restrictor is the one term tunable by design. The restrictor is sized by damping, not by frequency (ADR 0003), and **its time constant is a latency term this budget cannot fill in until E2** |
 | **KS-33 contact bounce** | Scope a switch, measure bounce duration on press *and* release | **No longer an unknown, only an unmeasured maximum.** Gateron's banked drawing publishes **5 ms max at 16 in/sec actuation** (`ks33-geometry.md`); this row used to frame it as unpublished. The 2021 firmware used a flat 20 ms window, so the published maximum alone buys back 15 ms of the release filter — and a measured typical, likely well under it, buys back more. Actuation speed is a player variable, so measure at a musical one |
 | **ADC + SPI round trip** | Logic analyser on the bus | Datasheet conversion time excludes driver overhead. The real number includes it |
 | **SPI over the umbilical at length** | Logic analyser at the module end, cable at full length | Setup/hold margin, ringing, double-clocking. This is where a long cable bites, and it is invisible without an LA. Gates E11 |
 | **DAC settling and filter corners** | Scope a commanded step | Confirm settling to within an LSB, and that the pitch and breath filters actually sit where they were designed to |
 | **Rack rail ripple, both directions** | Scope +12V at the module with the instrument running | Incoming ripple lands on the CV outputs; outgoing noise from the local buck lands on every other module in the rack. Gates E6 |
-| **Loop timing with the lights running** | A GPIO toggled at each pass's start and end, on a logic analyser, with the matrix and the LED row animating and USB configuration traffic flowing | The one MCU now carries the lights and the loop (ADR 0015). Confirms the pass stays inside `loop-budget` and that lighting on the other core never stretches it. Replaces the WiFi-burst and inter-MCU UART rows, whose radio and second MCU no longer exist |
+| **Loop timing with the lights running** | A GPIO toggled at each pass's start and end, on a logic analyser, with the matrix and the LED row animating and the MIDI out sending (issue #37) | The one MCU now carries the lights and the loop (ADR 0015). Confirms the pass stays inside `loop-budget` and that lighting on the other core never stretches it. Replaces the WiFi-burst and inter-MCU UART rows, whose radio and second MCU no longer exist |
 | **Umbilical link** | Logic analyser at the module end, cable at length | **2 MHz** — the 0.6 MHz this row used to give came from a 2 kHz mod rate and does not close at 4 kHz (ADR 0004). Confirm it is clean at the rate actually needed, and that RS-485 stays unnecessary |
 | **Breath channel noise** | Scope the breath jack while sweeping the matrix's brightness and the LED row's animation | The end test for the analog breath decision. Any of those appearing on the output means AGND is picking up power return current, or the module is sensing against local ground (ADR 0003) |
 | **End-to-end, in one shot** | Two scope channels: one on the sensor output, one on the CV jack | Measures the real gesture-to-output time directly instead of summing estimates. This is the number that actually matters, and it is the one measurement that validates or refutes the entire table above |

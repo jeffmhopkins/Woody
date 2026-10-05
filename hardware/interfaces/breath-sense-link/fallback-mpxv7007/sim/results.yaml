@@ -5,7 +5,7 @@
 inputs:
   tools/sim.py: 0312a1077b9afa80
   hardware/interfaces/breath-sense-link/fallback-mpxv7007/sim/sims.yaml: a830e64704a8353d
-  hardware/interfaces/breath-sense-link/netlist.yaml: 3174b77569cdaf62
+  hardware/interfaces/breath-sense-link/netlist.yaml: 589dc991272a7d9c
   hardware/carrier/breath-adc/netlist.yaml: 60647f404552f147
   hardware/module/breath-receive-stage/netlist.yaml: dab496982d183718
   hardware/interfaces/breath-sense-link/fallback-mpxv7007/sim/fallback.cir: 0c480e3e3c6a8925
