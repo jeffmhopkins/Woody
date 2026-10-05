@@ -333,6 +333,84 @@ what the standoff's material decides, `hardware.thread_engage_min`. Each
 faced spacer and standoff is still measured; that checks the parts against
 the figure, and no longer sets it.
 
+## Amendment, 2026-10-05 (2) — the web round a column, and rounded cutouts
+
+The owner, 2026-10-05 (issue #43), looking at the plates' cut files:
+
+> "I'm a little concerned of the rigidity of the headers near the key cutouts"
+
+> "make the keyboards longer so that the standoffs are further away"
+
+> "down for having a clean rounded corner as long as it doesn't interfere with
+> the keys"
+
+Measured off the plates' DXFs before the change, the thin web was in the
+**bottom plate**, under the four mouth columns: each stud hole stood about a
+millimetre and three quarters from the first thumb switch's cutout, about one
+and a half plate thicknesses. The key plate's least was at the tail corners,
+beside the last keys, and was already wider than the figure below.
+
+1. **A column's hole keeps `hardware.col_web_min` of metal from every switch
+   cutout, in both plates** (*"column holes: plate web to the switch
+   cutouts"*). The figure and its reasoning are in `config/body.yaml`. A
+   first figure was put to the owner with two recommendations - a wider web,
+   and the tail pair (point 4) lined up across the body - and the owner
+   approved both: *"Go through recommendations. That sounds fine"*
+   (2026-10-05), so the figure is settled.
+2. **The key boards are longer at the mouth end** to meet it
+   (`boards.kb_end_margin`). The columns move with the boards' corners, and
+   because a column is vertical, so do the main board's four mouth column
+   mounts and the bottom plate's studs under them. The mouth margin claims
+   none of the body's length (*"overall length (derived)"* does not move).
+   The tail ends are unchanged: their columns already clear the figure in the
+   key plate.
+3. **The switch cutouts' inside corners are rounded**, in both plates, to
+   `switch.cutout_r`. Gateron's drawing gives no radius; the figure comes
+   from the banked footprint and the banked STEP's housing, and a cut coupon
+   with a switch clipped in confirms it.
+
+The owner, the same day, on the main board's two tail-end mounts:
+
+> "these far end standoffs I think were here when the tail section had to
+> cut out, I think they should match the other standoffs now"
+
+4. **The tail pair stands on the columns' lines across the body.** The
+   main board has run full width to the etherCON's adapter since ADR 0021's
+   2026-10-02 amendment, so the tongue no longer places them. Each starts at
+   the bottom plate's end (a stud keeps `hardware.stud_edge` from it) and
+   walks toward the mouth until it clears HDR-SERVICE's notch, J-UMB's band,
+   U-BUCK's window, J-MIDI and its plug, and the rest of what a mount must
+   clear. On the near side, J-UMB's band and HDR-SERVICE's notch still hold
+   it short of the end. The pair then stands at the one place along the
+   body that both reach, level across it as the columns are (owner's
+   approval, above); J-MIDI does not bind it there and stays where it was
+   (*"main board mounts on the bottom plate"*; the places are
+   `mechanical/export/pcb-geometry.echo`).
+
+And on every corner:
+
+> "round all corners that we can, not drastically but enough to enable them
+> to not be a hazard and to be more structurally sound"
+
+5. **Every cut part's corners are rounded** to `fabrication.corner_r_outer`
+   outside and `fabrication.corner_r_inner` inside: both plates' outlines,
+   the bottom plate's windows and the corners its notches leave on the
+   edge, the acrylic sides, the oak top's cap slots and window opening, the
+   oak bottom's thumb recesses, and the window's rebate with the acrylic
+   window in it, which is rounded concentrically so that it drops into a
+   routed rebate (*"rounded inside corners clear the caps and the LED
+   array"*). **Kept as they are, because something mates with them:** the
+   switch cutouts (their own radius, which the switch's clips set); the oak
+   panels' ends, which butt the end caps; the tail cap's bore, holes and
+   recess, which take the etherCON's flange (the recess was already rounded
+   by its margin); and the end caps, already sanded round. The sides'
+   rounded corners lie inside the groove, which is deeper than the radius,
+   so the acrylic seats in its groove as before.
+
+The oak top's pockets over the columns are held by their own rule
+(`hardware.col_pocket_wall`; *"column screw pockets clear of the wood top's
+cuts"*), which the tail corners set, and this amendment does not change it.
+
 ## Open, and what decides each
 
 | Item | Decided by |

@@ -319,6 +319,11 @@ switch:
     value: 0.45
     status: settled
     source: "[ds] Gateron KS-33H10B050NN-Y24 sheet 6, side elevation: the 15.0 x 15.0 collar's thickness, from the seat"
+  cutout_r:
+    value: 0.5
+    status: nominal
+    source: "the switch cutouts' inside corner radius, in both plates (owner, 2026-10-05: 'down for having a clean rounded corner as long as it doesn't interfere with the keys'; issue #43). Gateron's drawing gives no radius (datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf, sheet 6, the cutout only as the 14.00 body). The banked footprint draws the cutout with R0.5 corners (datasheets/mechanical/GATERON-KS-33-SW_KS33_1u.kicad_mod, Eco2.User arcs); and the banked STEP solid (datasheets/mechanical/GATERON-KS-33-3D.step, meshed to mechanical/cad/vendor/ks33.stl), cut across through the plate's thickness below the seat, stands 0.5 back from each corner of the 14 mm square and overlaps nothing an R0.5 corner leaves, where an R0.75 corner meets it [calc: the housing's section at 0.1 to 2.0 below the seat against the square less the rounded square, 0.000 mm2 at R0.5, 0.007 at R0.75, 0.043 at R1.0]. Two third-party sources and no vendor figure, so nominal"
+    decided_by: "M1, the kerf coupon that settles the cutout (config/key-layout.yaml): a switch clipped into it"
   housing_top_above_seat:
     value: 3.35
     status: settled
@@ -634,7 +639,7 @@ boards:
   service_hdr_at:
     value: [284.0, 9.3]
     status: nominal
-    source: "HDR-SERVICE's pin 1, body frame, its three pins running toward the tail (+x): on the tongue between the right-hand key board's end and the tongue's end mounts, where the lid comes off over it - the first layout's place (hardware/boards/main-board/layout.yaml J2, 2026-10-01), taken here so the bottom plate's window under its tails is cut where it stands. The layout keeps it here or moves this"
+    source: "HDR-SERVICE's pin 1, body frame, its three pins running toward the tail (+x): on the tail end past the right-hand key board, beside the tail end mounts, where the lid comes off over it - the first layout's place (hardware/boards/main-board/layout.yaml J2, 2026-10-01), taken here so the bottom plate's window under its tails is cut where it stands. The layout keeps it here or moves this"
     decided_by: "M4 main board layout"
   service_hdr_h:
     value: 8.5
@@ -682,9 +687,9 @@ boards:
     status: settled
     source: "a finished 1.6 mm board's thickness tolerance, key boards and main board: +/-10 % at 1.0 mm and over [datasheets/fab/JLCPCB-PCB-CAPABILITIES.pdf, 'Thickness Tolerance']. A board's top face is set by its spacer, so this moves only its other face - and so the gap the column standoff fills (drc.echo 'cassette height at the hardware's tolerance limits')"
   kb_end_margin:
-    value: 6.6
+    value: 8.8
     status: tbd
-    source: "a key board's MOUTH end past its first switch cutout, along the body. The mouth corners' columns stand over the first thumb row, and a column cannot lean (ADR 0025), so the key board's mount must be where its stud in the bottom plate keeps hardware.stud_edge, and its spacer 0.5, from a thumb switch's cutout: 0.6 more than the 6.0 the key board alone needed (drc.echo 'columns vertical: the main board's mounts under the key boards'', 'bottom-plate studs clear of the plate's edges and cutouts', 'bottom-plate spacers clear of the thumb switch cutouts')"
+    source: "a key board's MOUTH end past its first switch cutout, along the body. The mouth corners' columns stand over the first thumb row, and a column cannot lean (ADR 0025), so its stud hole in the bottom plate must keep hardware.col_web_min of metal from that thumb switch's cutout (owner, 2026-10-05, issue #43: 'make the keyboards longer so that the standoffs are further away') [calc: the column is hardware.kb_mount_inset in from the board's end and 0.4 outside the cutout's side across the body, so the web is hypot(m - 3.6 + 0.5, 0.4 + 0.5) - 0.5 - 1.25 for the cutout's R0.5 corner (switch.cutout_r) and the stud hole's radius: 8.8 gives hypot(5.7, 0.9) - 1.75 = 4.02]. The mouth margin claims none of the body's length (drc.echo 'overall length (derived)'). drc.echo 'column holes: plate web to the switch cutouts', 'columns vertical: the main board's mounts under the key boards'', 'bottom-plate studs clear of the plate's edges and cutouts'"
     decided_by: "M4, with the boards laid out"
   kb_tail_margin:
     value: 10.3
@@ -1129,6 +1134,10 @@ hardware:
     value: 2.9
     status: nominal
     source: "M2.5 clearance through the key plate, ISO 273 medium [from memory]: the key plate and the key boards are one part once the switches are soldered, and each board locates on its columns by the fine hole (kb_board_hole), so the plate takes the medium one; the screw's head (col_screw_head_d) bears on the plate round it"
+  col_web_min:
+    value: 4.0
+    status: settled
+    source: "the least aluminium between a column's hole and the nearest switch cutout, in both plates: the key plate's screw hole (col_plate_hole) and the bottom plate's stud holes (stud_hole), against the cutout as cut, its corners rounded (switch.cutout_r). Owner, 2026-10-05, on the plates' rigidity at the columns, approving 4.0: 'Go through recommendations. That sounds fine' (issue #43; ADR 0025, Amendment 2026-10-05 (2)). A third of a plate thickness over 3 (`plate-thickness`, config/figures.yaml), twice the usual sheet-metal rule of a hole at least two thicknesses from an edge [from memory - no banked figure]; on the bottom plate it keeps the spacer's bearing circle (kb_spacer_od, off its axis by kb_mount_float) more than two plate thicknesses inside the metal [calc: stud_hole / 2 + 4.0 - (kb_spacer_od / 2 + kb_mount_float) = 1.25 + 4.0 - 2.45 = 2.8]. drc.echo 'column holes: plate web to the switch cutouts'; boards.kb_end_margin is set by it"
   col_pocket_d:
     value: 6.35
     status: nominal
@@ -1485,6 +1494,21 @@ fabrication:
     value: [-0.1, 0.1]
     status: nominal
     source: "a laser cut in acrylic [from memory]; inside stack.groove_clear for the sides and the window's clearance in its rebate"
+  # ROUNDED CORNERS (owner, 2026-10-05, issue #43: "round all corners that we
+  # can, not drastically but enough to enable them to not be a hazard and to be
+  # more structurally sound"). Every cut part's outline and through-cut, except
+  # where a corner mates with something; ADR 0025, Amendment 2026-10-05 (2),
+  # lists which.
+  corner_r_outer:
+    value: 1.0
+    status: nominal
+    source: "the radius on every outside corner of a cut part - the plates' outlines and the corners where a window opens to a plate's edge, the acrylic sides, the points of oak between a cap slot's holes - owner, 2026-10-05: 'round all corners that we can, not drastically but enough to enable them to not be a hazard and to be more structurally sound' (issue #43). 1 mm takes the point off a sheet's corner [from memory: the usual deburr-and-break-corners note on a sheet-metal drawing is 0.5 to 1], is the key boards' own corner (kb_corner_r in woody_body.scad)"
+    decided_by: "M4, on the first parts cut"
+  corner_r_inner:
+    value: 1.6
+    status: nominal
+    source: "the radius in every inside corner of a through-cut or a cut a part fits into - the bottom plate's windows and notches, the oak top's cap slots and window opening, the oak bottom's thumb recesses, the window's rebate - owner, 2026-10-05, as fabrication.corner_r_outer (issue #43). The oak is cut on a CNC router (wood_profile_tol), which cannot cut an inside corner tighter than its bit's radius: 1.6 takes a 1/8 in (3.175 mm) end mill, the usual small bit for hardwood profiles [from memory]. The laser or waterjet that cuts the aluminium and the acrylic does any radius over its kerf, so one figure serves every material. The switch cutouts are the exception: their radius is switch.cutout_r, which the switch's fit sets"
+    decided_by: "M4, the oak shop's smallest bit"
 # ---------------------------------------------------------------- logo ----
 logo:
   # THE MAKER'S MARK ON THE OAK TOP (owner, 2026-10-01: "Logo should be here,
