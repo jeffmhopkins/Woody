@@ -114,6 +114,8 @@ for m in Capacitor_SMD.3dshapes/C_0805_2012Metric.step \
          Package_SO.3dshapes/SOIC-14_3.9x8.7mm_P1.27mm.step \
          Package_TO_SOT_SMD.3dshapes/SOT-23-5.step \
          Package_TO_SOT_SMD.3dshapes/SOT-23.step \
+         Package_TO_SOT_SMD.3dshapes/SOT-23-6.step \
+         Connector_JST.3dshapes/JST_PH_B3B-PH-K_1x03_P2.00mm_Vertical.step \
          Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x05_P2.54mm_Vertical.step \
          Connector_PinHeader_2.54mm.3dshapes/PinHeader_2x10_P2.54mm_Vertical.step \
          Connector_PinHeader_2.54mm.3dshapes/PinHeader_2x05_P2.54mm_Vertical.step \

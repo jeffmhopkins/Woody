@@ -25568,9 +25568,9 @@
 			(uuid "c7491c12-2762-4e53-acb3-340d13b974ec")
 		)
 		(embedded_fonts no)
-		(model "${KICAD9_3DMODEL_DIR}/Connector_JST.3dshapes/JST_PH_B3B-PH-SM4-TB_1x03-1MP_P2.00mm_Vertical.step"
+		(model "${KICAD9_3DMODEL_DIR}/Connector_JST.3dshapes/JST_PH_B3B-PH-K_1x03_P2.00mm_Vertical.step"
 			(offset
-				(xyz 0 0 0)
+				(xyz -2 -0.5 0)
 			)
 			(scale
 				(xyz 1 1 1)
