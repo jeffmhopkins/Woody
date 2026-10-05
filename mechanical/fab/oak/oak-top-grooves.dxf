@@ -1,0 +1,128 @@
+999
+Woody controller body rev A - Oak top (oak_top)
+999
+Material: hardwood, the owner's choice (the parts are named oak); stained a very dark ebony, the grain still showing, under a satin oil finish
+999
+Thickness: 6 mm (the flush rule: switch.keycap_top_above_seat - switch.total_travel)
+999
+Quantity per instrument: 1
+999
+Units mm. Cut every closed outline. cad 96228d093ce4; verify: python3 tools/cad.py explain fab-dxf-oak-top-grooves
+  0
+SECTION
+  2
+BLOCKS
+  0
+ENDSEC
+  0
+SECTION
+  2
+ENTITIES
+  0
+LINE
+  8
+0
+ 10
+313.8
+ 20
+55.2
+ 11
+0
+ 21
+55.2
+  0
+LINE
+  8
+0
+ 10
+0
+ 20
+55.2
+ 11
+0
+ 21
+50.8
+  0
+LINE
+  8
+0
+ 10
+0
+ 20
+50.8
+ 11
+313.8
+ 21
+50.8
+  0
+LINE
+  8
+0
+ 10
+313.8
+ 20
+50.8
+ 11
+313.8
+ 21
+55.2
+  0
+LINE
+  8
+0
+ 10
+313.8
+ 20
+6.2
+ 11
+0
+ 21
+6.2
+  0
+LINE
+  8
+0
+ 10
+0
+ 20
+6.2
+ 11
+0
+ 21
+1.79999
+  0
+LINE
+  8
+0
+ 10
+0
+ 20
+1.79999
+ 11
+313.8
+ 21
+1.79999
+  0
+LINE
+  8
+0
+ 10
+313.8
+ 20
+1.79999
+ 11
+313.8
+ 21
+6.2
+  0
+ENDSEC
+  0
+SECTION
+  2
+OBJECTS
+  0
+DICTIONARY
+  0
+ENDSEC
+  0
+EOF

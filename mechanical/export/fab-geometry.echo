@@ -1,0 +1,75 @@
+ECHO: "FAB", "oak_top", "stock", 6, 313.8, 57, ["underside", "playing face"]
+ECHO: "FAB", "oak_top", "layer", "oak-top", "", "through", "outline, cap slots, matrix window"
+ECHO: "FAB", "oak_top", "layer", "oak-grooves", "underside", 3, "side grooves"
+ECHO: "FAB", "oak_top", "layer", "oak-pockets", "underside", 2, "column screw head pockets and the recovery USB-C pocket"
+ECHO: "FAB", "oak_top", "layer", "oak-inserts", "underside", 4, "Matrix carrier insert holes"
+ECHO: "FAB", "oak_top", "layer", "oak-relief", "underside", 0.6, "relief over the Matrix"
+ECHO: "FAB", "oak_top", "layer", "oak-rebates", "playing face", 3, "matrix window rebate"
+ECHO: "FAB", "oak_top", "layer", "oak-logo", "playing face", 1, "maker's mark etch, filled: epoxy"
+ECHO: "FAB", "oak_top", "hole", "column screw head pocket", 34, 11.1, 6.35, "underside", 2, ""
+ECHO: "FAB", "oak_top", "hole", "column screw head pocket", 34, 45.9, 6.35, "underside", 2, ""
+ECHO: "FAB", "oak_top", "hole", "column screw head pocket", 115.7, 11.1, 6.35, "underside", 2, ""
+ECHO: "FAB", "oak_top", "hole", "column screw head pocket", 115.7, 45.9, 6.35, "underside", 2, ""
+ECHO: "FAB", "oak_top", "hole", "column screw head pocket", 142, 11.1, 6.35, "underside", 2, ""
+ECHO: "FAB", "oak_top", "hole", "column screw head pocket", 142, 45.9, 6.35, "underside", 2, ""
+ECHO: "FAB", "oak_top", "hole", "column screw head pocket", 241.7, 11.1, 6.35, "underside", 2, ""
+ECHO: "FAB", "oak_top", "hole", "column screw head pocket", 241.7, 45.9, 6.35, "underside", 2, ""
+ECHO: "FAB", "oak_top", "hole", "threaded insert hole", 285.7, 11, 4, "underside", 4, "MECH-MX-INSERT"
+ECHO: "FAB", "oak_top", "hole", "threaded insert hole", 271.1, 46, 4, "underside", 4, "MECH-MX-INSERT"
+ECHO: "FAB", "oak_top", "hole", "threaded insert hole", 285.7, 46, 4, "underside", 4, "MECH-MX-INSERT"
+ECHO: "FAB", "oak_bottom", "stock", 6, 313.8, 57, ["outside face", "inside face"]
+ECHO: "FAB", "oak_bottom", "layer", "oak-bottom", "", "through", "outline, thumb recesses, U-bolt and MIDI jack holes"
+ECHO: "FAB", "oak_bottom", "layer", "oak-grooves", "inside face", 3, "side grooves"
+ECHO: "FAB", "oak_bottom", "layer", "oak-bottom-pockets", "inside face", 3.5, "MIDI jack counterbore"
+ECHO: "FAB", "oak_bottom", "hole", "U-bolt leg", 127, 18.5, 3.5, "", "through", "MECH-UBOLT"
+ECHO: "FAB", "oak_bottom", "hole", "U-bolt leg", 127, 38.5, 3.5, "", "through", "MECH-UBOLT"
+ECHO: "FAB", "oak_bottom", "hole", "MIDI jack", 304.65, 42.5, 7.3, "", "through", "J-MIDI-OUT"
+ECHO: "FAB", "oak_bottom", "hole", "MIDI jack counterbore", 304.65, 42.5, 12, "inside face", 3.5, ""
+ECHO: "FAB", "mouth_cap", "stock", 6, 57, 39, ["outer face", "inner face"]
+ECHO: "FAB", "mouth_cap", "layer", "mouth-cap", "", "through", "outline, breath inlet tap drill"
+ECHO: "FAB", "mouth_cap", "hole", "breath inlet insert, tap drill", 28.5, 18.9, 6.9, "", "through", "INLET-INSERT"
+ECHO: "FAB", "tail_cap", "stock", 6, 57, 39, ["inner face", "outer face"]
+ECHO: "FAB", "tail_cap", "layer", "tail-cap", "", "through", "outline, etherCON bore and screw holes"
+ECHO: "FAB", "tail_cap", "layer", "tail-cap-recess", "outer face", 3, "etherCON recess: leaves the connector its panel"
+ECHO: "FAB", "tail_cap", "hole", "etherCON bore", 21.5, 19.05, 22, "", "through", "J-UMBILICAL-INST"
+ECHO: "FAB", "tail_cap", "hole", "etherCON flange screw", 11.6, 28.95, 3.2, "", "through", "MECH-ETHERCON-SCREW"
+ECHO: "FAB", "tail_cap", "hole", "etherCON flange screw", 31.4, 9.15, 3.2, "", "through", "MECH-ETHERCON-SCREW"
+ECHO: "FAB", "plate_top", "stock", 1.2, 255.14, 45, ["underside", "top face"]
+ECHO: "FAB", "plate_top", "layer", "plate-top", "", "through", "outline, switch cutouts, column screw holes"
+ECHO: "FAB", "plate_top", "hole", "column screw clearance", 34, 5.1, 2.9, "", "through", "MECH-COL-SCREW"
+ECHO: "FAB", "plate_top", "hole", "column screw clearance", 34, 39.9, 2.9, "", "through", "MECH-COL-SCREW"
+ECHO: "FAB", "plate_top", "hole", "column screw clearance", 115.7, 5.1, 2.9, "", "through", "MECH-COL-SCREW"
+ECHO: "FAB", "plate_top", "hole", "column screw clearance", 115.7, 39.9, 2.9, "", "through", "MECH-COL-SCREW"
+ECHO: "FAB", "plate_top", "hole", "column screw clearance", 142, 5.1, 2.9, "", "through", "MECH-COL-SCREW"
+ECHO: "FAB", "plate_top", "hole", "column screw clearance", 142, 39.9, 2.9, "", "through", "MECH-COL-SCREW"
+ECHO: "FAB", "plate_top", "hole", "column screw clearance", 241.7, 5.1, 2.9, "", "through", "MECH-COL-SCREW"
+ECHO: "FAB", "plate_top", "hole", "column screw clearance", 241.7, 39.9, 2.9, "", "through", "MECH-COL-SCREW"
+ECHO: "FAB", "plate_bottom", "stock", 1.2, 287.25, 45, ["underside", "top face"]
+ECHO: "FAB", "plate_bottom", "layer", "plate-bottom", "", "through", "outline, thumb switch cutouts, stud and U-bolt holes, windows"
+ECHO: "FAB", "plate_bottom", "hole", "stud, column", 34, 5.1, 2.5, "underside", "through", "MECH-MB-STUD"
+ECHO: "FAB", "plate_bottom", "hole", "stud, column", 34, 39.9, 2.5, "underside", "through", "MECH-MB-STUD"
+ECHO: "FAB", "plate_bottom", "hole", "stud, column", 115.7, 5.1, 2.5, "underside", "through", "MECH-MB-STUD"
+ECHO: "FAB", "plate_bottom", "hole", "stud, column", 115.7, 39.9, 2.5, "underside", "through", "MECH-MB-STUD"
+ECHO: "FAB", "plate_bottom", "hole", "stud, column", 142, 5.1, 2.5, "underside", "through", "MECH-MB-STUD"
+ECHO: "FAB", "plate_bottom", "hole", "stud, column", 142, 39.9, 2.5, "underside", "through", "MECH-MB-STUD"
+ECHO: "FAB", "plate_bottom", "hole", "stud, column", 241.7, 5.1, 2.5, "underside", "through", "MECH-MB-STUD"
+ECHO: "FAB", "plate_bottom", "hole", "stud, column", 241.7, 39.9, 2.5, "underside", "through", "MECH-MB-STUD"
+ECHO: "FAB", "plate_bottom", "hole", "stud, end mount", 5.5, 5.5, 2.5, "underside", "through", "MECH-MB-STUD"
+ECHO: "FAB", "plate_bottom", "hole", "stud, end mount", 272.313, 7, 2.5, "underside", "through", "MECH-MB-STUD"
+ECHO: "FAB", "plate_bottom", "hole", "stud, end mount", 272.313, 24, 2.5, "underside", "through", "MECH-MB-STUD"
+ECHO: "FAB", "plate_bottom", "hole", "U-bolt leg", 127, 12.5, 3.5, "", "through", "MECH-UBOLT"
+ECHO: "FAB", "plate_bottom", "hole", "U-bolt leg", 127, 32.5, 3.5, "", "through", "MECH-UBOLT"
+ECHO: "FAB", "plate_top", "cutouts", 11, 14
+ECHO: "FAB", "plate_bottom", "cutouts", 8, 14
+ECHO: "FAB", "side", "stock", 4, 313.8, 33, ["inside face", "outside face"]
+ECHO: "FAB", "side", "layer", "side", "", "through", "outline"
+ECHO: "FAB", "matrix_window", "stock", 3, 26, 26, ["underside", "top face"]
+ECHO: "FAB", "matrix_window", "layer", "matrix-window", "", "through", "outline, in the oak top's rebate"
+ECHO: "FAB", "plate_top", "qty", 1
+ECHO: "FAB", "plate_bottom", "qty", 1
+ECHO: "FAB", "oak_top", "qty", 1
+ECHO: "FAB", "oak_bottom", "qty", 1
+ECHO: "FAB", "mouth_cap", "qty", 1
+ECHO: "FAB", "tail_cap", "qty", 1
+ECHO: "FAB", "matrix_window", "qty", 1
+ECHO: "FAB", "side", "qty", 2

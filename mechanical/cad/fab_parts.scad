@@ -40,53 +40,65 @@ function fab_id(p) = [for (f = fab_ids) if (f[0] == p) f[1]][0];
 // ---------------------------------------------------------------- echo ----
 function sh(p, o) = [p[0] - o[0], p[1] - o[1]];
 module stock(p, t, sz, faces) echo("FAB", p, "stock", t, sz[0], sz[1], faces);
-// a layer: its cut file, the face it is cut from, its depth ("through" for the outline)
+// a layer: its cut file (its name in mechanical/export/, without .dxf), the face it is cut from, its depth ("through" for the outline)
 module layer(p, dxf, face, depth, what) echo("FAB", p, "layer", dxf, face, depth, what);
 // a hole: what it is, its centre, diameter, depth from a face, and the BOM row that goes in it ("" for none)
 module hole(p, what, c, d, face, depth, bom = "") echo("FAB", p, "hole", what, c[0], c[1], d, face, depth, bom);
 module fab_geom() {
     o = [x_in0, 0];
     stock("oak_top", oak_top_t, [x_in1 - x_in0, W], ["underside", "playing face"]);
-    layer("oak_top", "mechanical/export/oak-top.dxf", "", "through", "outline, cap slots, matrix window");
-    layer("oak_top", "mechanical/export/oak-grooves.dxf", "underside", stack_groove_depth, "side grooves");
-    layer("oak_top", "mechanical/export/oak-pockets.dxf", "underside", col_pocket_depth, "column screw head pockets" + (usb_pocket_need > 0 ? " and the recovery USB-C pocket" : ""));
-    layer("oak_top", "mechanical/export/oak-inserts.dxf", "underside", hardware_mx_insert_l, "Matrix carrier insert holes");
-    layer("oak_top", "mechanical/export/oak-relief.dxf", "underside", openings_matrix_relief_d, "relief over the Matrix");
-    layer("oak_top", "mechanical/export/oak-rebates.dxf", "playing face", openings_matrix_acrylic_t, "matrix window rebate");
-    layer("oak_top", "mechanical/export/oak-logo.dxf", "playing face", logo_depth, str("maker's mark etch, filled: ", logo_fill));
+    layer("oak_top", "oak-top", "", "through", "outline, cap slots, matrix window");
+    layer("oak_top", "oak-grooves", "underside", stack_groove_depth, "side grooves");
+    layer("oak_top", "oak-pockets", "underside", col_pocket_depth, str("column screw head pockets", usb_pocket_need > 0 ? " and the recovery USB-C pocket" : ""));
+    layer("oak_top", "oak-inserts", "underside", hardware_mx_insert_l, "Matrix carrier insert holes");
+    layer("oak_top", "oak-relief", "underside", openings_matrix_relief_d, "relief over the Matrix");
+    layer("oak_top", "oak-rebates", "playing face", openings_matrix_acrylic_t, "matrix window rebate");
+    layer("oak_top", "oak-logo", "playing face", logo_depth, str("maker's mark etch, filled: ", logo_fill));
     for (m = columns()) hole("oak_top", "column screw head pocket", sh(m, o), hardware_col_pocket_d, "underside", col_pocket_depth);
     for (m = mx_mounts) hole("oak_top", "threaded insert hole", sh(m, o), hardware_mx_insert_hole, "underside", hardware_mx_insert_l, "MECH-MX-INSERT");
 
     stock("oak_bottom", oak_bottom_t, [x_in1 - x_in0, W], ["outside face", "inside face"]);
-    layer("oak_bottom", "mechanical/export/oak-bottom.dxf", "", "through", "outline, thumb recesses, U-bolt and MIDI jack holes");
-    layer("oak_bottom", "mechanical/export/oak-grooves.dxf", "inside face", stack_groove_depth, "side grooves");
-    layer("oak_bottom", "mechanical/export/oak-bottom-pockets.dxf", "inside face", midi_cbore_depth, "MIDI jack counterbore");
+    layer("oak_bottom", "oak-bottom", "", "through", "outline, thumb recesses, U-bolt and MIDI jack holes");
+    layer("oak_bottom", "oak-grooves", "inside face", stack_groove_depth, "side grooves");
+    layer("oak_bottom", "oak-bottom-pockets", "inside face", midi_cbore_depth, "MIDI jack counterbore");
     for (u = ubolt_legs()) hole("oak_bottom", "U-bolt leg", sh(u, o), ubolt_hole_d, "", "through", "MECH-UBOLT");
     hole("oak_bottom", "MIDI jack", sh(midi_xy, o), midi_hole_d, "", "through", "J-MIDI-OUT");
     hole("oak_bottom", "MIDI jack counterbore", sh(midi_xy, o), midi_cbore_d, "inside face", midi_cbore_depth);
 
     stock("mouth_cap", ends_mouth_cap_t, [W, T], ["outer face", "inner face"]);
-    layer("mouth_cap", "mechanical/export/mouth-cap.dxf", "", "through", "outline, breath inlet tap drill");
+    layer("mouth_cap", "mouth-cap", "", "through", "outline, breath inlet tap drill");
     hole("mouth_cap", "breath inlet insert, tap drill", tube_yz, inlet_tap_drill_d, "", "through", "INLET-INSERT");
 
     stock("tail_cap", ends_tail_cap_t, [W, T], ["inner face", "outer face"]);
-    layer("tail_cap", "mechanical/export/tail-cap.dxf", "", "through", "outline, etherCON bore and screw holes");
-    layer("tail_cap", "mechanical/fab/tail-cap-recess.dxf", "outer face", ec_recess_d, "etherCON recess: leaves the connector its panel");
+    layer("tail_cap", "tail-cap", "", "through", "outline, etherCON bore and screw holes");
+    layer("tail_cap", "tail-cap-recess", "outer face", ec_recess_d, "etherCON recess: leaves the connector its panel");
     hole("tail_cap", "etherCON bore", ec_c, ethercon_bore_d, "", "through", "J-UMBILICAL-INST");
     for (h = ec_holes) hole("tail_cap", "etherCON flange screw", h, ethercon_hole_d, "", "through", "MECH-ETHERCON-SCREW");
 
     po = [plate_x0, plate_y0];
     stock("plate_top", plate_thickness, [plate_x1 - x_in0, u_w], ["underside", "top face"]);
-    layer("plate_top", "mechanical/export/plate-top.dxf", "", "through", "outline, switch cutouts, column screw holes");
+    layer("plate_top", "plate-top", "", "through", "outline, switch cutouts, column screw holes");
     for (m = columns()) hole("plate_top", "column screw clearance", sh(m, po), hardware_col_plate_hole, "", "through", "MECH-COL-SCREW");
     stock("plate_bottom", plate_thickness, [bplate_x1 - x_in0, u_w], ["underside", "top face"]);
-    layer("plate_bottom", "mechanical/export/plate-bottom.dxf", "", "through", "outline, thumb switch cutouts, stud and U-bolt holes, windows");
+    layer("plate_bottom", "plate-bottom", "", "through", "outline, thumb switch cutouts, stud and U-bolt holes, windows");
     for (i = [0 : len(cb_standoffs) - 1]) hole("plate_bottom", i < n_cols ? "stud, column" : "stud, end mount",
                                                sh(cb_standoffs[i], po), hardware_stud_hole, "underside", "through", "MECH-MB-STUD");
     for (u = ubolt_legs()) hole("plate_bottom", "U-bolt leg", sh(u, po), ubolt_hole_d, "", "through", "MECH-UBOLT");
     // the switch cutouts, every part that has them: count, and the square
     echo("FAB", "plate_top", "cutouts", len(top_keys), plate_cutout);
     echo("FAB", "plate_bottom", "cutouts", len(bottom_keys), plate_cutout);
+
+    // THE ACRYLIC (owner, 2026-10-05). The sides: one sheet each, standing in a
+    // groove in each oak panel (side_2d's frame: X along, Y = model Z from the
+    // side's bottom edge). The window: drops into the oak top's rebate; its
+    // DXF is in the oak panels' frame, so the shop's copy is moved to 0,0.
+    stock("side", stack_side_t, [x_in1 - x_in0, z_side1 - z_side0], ["inside face", "outside face"]);
+    layer("side", "side", "", "through", "outline");
+    stock("matrix_window", openings_matrix_acrylic_t, [matrix_rebate, matrix_rebate], ["underside", "top face"]);
+    layer("matrix_window", "matrix-window", "", "through", "outline, in the oak top's rebate");
+    // how many of each part one instrument takes
+    for (p = ["plate_top", "plate_bottom", "oak_top", "oak_bottom", "mouth_cap", "tail_cap", "matrix_window"]) echo("FAB", p, "qty", 1);
+    echo("FAB", "side", "qty", len(side_y));
 }
 
 if (fab == "geom") fab_geom();

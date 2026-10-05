@@ -253,6 +253,17 @@ exports:
   - {name: dxf-key-board-rh, src: mechanical/cad/woody_body.scad, out: mechanical/export/key-board-rh.dxf, defines: {part: "key_board_right_hand"}}
   - {name: dxf-matrix-carrier, src: mechanical/cad/woody_body.scad, out: mechanical/export/matrix-carrier.dxf, defines: {part: "matrix_carrier"}}
   - {name: pcb-geometry, src: mechanical/cad/woody_body.scad, out: mechanical/export/pcb-geometry.echo, defines: {part: "pcb_geom"}}
+# THE FABRICATION FILES (issue #42; mechanical/fab/README.md), one folder per
+# material so each goes to one shop as it is: each oak part's own solid, from
+# mechanical/cad/fab_parts.scad, in its part frame; the tail cap's router pass,
+# which tail-cap.dxf (through-cuts only) does not carry; and the numbers every
+# drawing prints, echoed from the model.
+  - {name: fab-geometry, src: mechanical/cad/fab_parts.scad, out: mechanical/export/fab-geometry.echo, defines: {fab: "geom"}}
+  - {name: fab-tail-cap-recess, src: mechanical/cad/fab_parts.scad, out: mechanical/export/tail-cap-recess.dxf, defines: {fab: "tail_cap_recess"}}
+  - {name: fab-stl-oak-top, src: mechanical/cad/fab_parts.scad, out: mechanical/fab/oak/oak-top.stl, defines: {fab: "oak_top", only: "oak top"}}
+  - {name: fab-stl-oak-bottom, src: mechanical/cad/fab_parts.scad, out: mechanical/fab/oak/oak-bottom.stl, defines: {fab: "oak_bottom", only: "oak bottom"}}
+  - {name: fab-stl-mouth-cap, src: mechanical/cad/fab_parts.scad, out: mechanical/fab/oak/mouth-cap.stl, defines: {fab: "mouth_cap", only: "mouth cap"}}
+  - {name: fab-stl-tail-cap, src: mechanical/cad/fab_parts.scad, out: mechanical/fab/oak/tail-cap.stl, defines: {fab: "tail_cap", only: "tail cap"}}
 
 # The interference check: every named solid against every other, and its
 # and clearance check (issue #34): `check` fails on an unexcused clash or a pair
@@ -343,3 +354,139 @@ scripts:
     stamp: Woody body
     note: "Sides rendered clear (config/render.yaml side_glass) to show the inside; the instrument's sides are frosted (ADR 0009)."
     layout_sensitive: true
+
+# THE FABRICATION FILES, continued (issue #42): tools/fab.py makes each folder's
+# cut files (the model's DXFs, headed with the part, material, thickness and
+# quantity), each oak part's STEP from its STL (OpenCASCADE: sewn, made a
+# solid, coplanar faces merged), the list of tbd and nominal config/body.yaml
+# figures each part depends on (a walk of the model's source), and a one-page
+# drawing per part, stamped with its fingerprint.
+  - name: fab-open
+    title: Every tbd and nominal config/body.yaml figure each part to be ordered depends on, and whether it blocks the order
+    cmd: [tools/fab.py, open, --name, fab-open]
+    inputs: [tools/cad.py, mechanical/outputs.yaml, mechanical/cad/woody_body.scad, mechanical/cad/fab_parts.scad, mechanical/cad/generated/params.scad, config/body.yaml]
+    out: mechanical/fab/open-figures.csv
+  - name: fab-dxf-plate-top
+    cmd: [tools/fab.py, dxf, --from, mechanical/export/plate-top.dxf, --part, plate_top, --name, fab-dxf-plate-top]
+    inputs: [mechanical/export/plate-top.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
+    out: mechanical/fab/aluminium/plate-top.dxf
+  - name: fab-dxf-plate-bottom
+    cmd: [tools/fab.py, dxf, --from, mechanical/export/plate-bottom.dxf, --part, plate_bottom, --name, fab-dxf-plate-bottom]
+    inputs: [mechanical/export/plate-bottom.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
+    out: mechanical/fab/aluminium/plate-bottom.dxf
+  - name: fab-dxf-oak-top
+    cmd: [tools/fab.py, dxf, --from, mechanical/export/oak-top.dxf, --part, oak_top, --name, fab-dxf-oak-top]
+    inputs: [mechanical/export/oak-top.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
+    out: mechanical/fab/oak/oak-top.dxf
+  - name: fab-dxf-oak-top-grooves
+    cmd: [tools/fab.py, dxf, --from, mechanical/export/oak-grooves.dxf, --part, oak_top, --name, fab-dxf-oak-top-grooves]
+    inputs: [mechanical/export/oak-grooves.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
+    out: mechanical/fab/oak/oak-top-grooves.dxf
+  - name: fab-dxf-oak-top-pockets
+    cmd: [tools/fab.py, dxf, --from, mechanical/export/oak-pockets.dxf, --part, oak_top, --name, fab-dxf-oak-top-pockets]
+    inputs: [mechanical/export/oak-pockets.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
+    out: mechanical/fab/oak/oak-top-pockets.dxf
+  - name: fab-dxf-oak-top-inserts
+    cmd: [tools/fab.py, dxf, --from, mechanical/export/oak-inserts.dxf, --part, oak_top, --name, fab-dxf-oak-top-inserts]
+    inputs: [mechanical/export/oak-inserts.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
+    out: mechanical/fab/oak/oak-top-inserts.dxf
+  - name: fab-dxf-oak-top-relief
+    cmd: [tools/fab.py, dxf, --from, mechanical/export/oak-relief.dxf, --part, oak_top, --name, fab-dxf-oak-top-relief]
+    inputs: [mechanical/export/oak-relief.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
+    out: mechanical/fab/oak/oak-top-relief.dxf
+  - name: fab-dxf-oak-top-rebate
+    cmd: [tools/fab.py, dxf, --from, mechanical/export/oak-rebates.dxf, --part, oak_top, --name, fab-dxf-oak-top-rebate]
+    inputs: [mechanical/export/oak-rebates.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
+    out: mechanical/fab/oak/oak-top-rebate.dxf
+  - name: fab-dxf-oak-top-logo
+    cmd: [tools/fab.py, dxf, --from, mechanical/export/oak-logo.dxf, --part, oak_top, --name, fab-dxf-oak-top-logo]
+    inputs: [mechanical/export/oak-logo.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
+    out: mechanical/fab/oak/oak-top-logo.dxf
+  - name: fab-dxf-oak-bottom
+    cmd: [tools/fab.py, dxf, --from, mechanical/export/oak-bottom.dxf, --part, oak_bottom, --name, fab-dxf-oak-bottom]
+    inputs: [mechanical/export/oak-bottom.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
+    out: mechanical/fab/oak/oak-bottom.dxf
+  - name: fab-dxf-oak-bottom-grooves
+    cmd: [tools/fab.py, dxf, --from, mechanical/export/oak-grooves.dxf, --part, oak_bottom, --name, fab-dxf-oak-bottom-grooves]
+    inputs: [mechanical/export/oak-grooves.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
+    out: mechanical/fab/oak/oak-bottom-grooves.dxf
+  - name: fab-dxf-oak-bottom-counterbore
+    cmd: [tools/fab.py, dxf, --from, mechanical/export/oak-bottom-pockets.dxf, --part, oak_bottom, --name, fab-dxf-oak-bottom-counterbore]
+    inputs: [mechanical/export/oak-bottom-pockets.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
+    out: mechanical/fab/oak/oak-bottom-counterbore.dxf
+  - name: fab-dxf-mouth-cap
+    cmd: [tools/fab.py, dxf, --from, mechanical/export/mouth-cap.dxf, --part, mouth_cap, --name, fab-dxf-mouth-cap]
+    inputs: [mechanical/export/mouth-cap.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
+    out: mechanical/fab/oak/mouth-cap.dxf
+  - name: fab-dxf-tail-cap
+    cmd: [tools/fab.py, dxf, --from, mechanical/export/tail-cap.dxf, --part, tail_cap, --name, fab-dxf-tail-cap]
+    inputs: [mechanical/export/tail-cap.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
+    out: mechanical/fab/oak/tail-cap.dxf
+  - name: fab-dxf-tail-cap-recess
+    cmd: [tools/fab.py, dxf, --from, mechanical/export/tail-cap-recess.dxf, --part, tail_cap, --name, fab-dxf-tail-cap-recess]
+    inputs: [mechanical/export/tail-cap-recess.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
+    out: mechanical/fab/oak/tail-cap-recess.dxf
+  - name: fab-dxf-side
+    cmd: [tools/fab.py, dxf, --from, mechanical/export/side.dxf, --part, side, --name, fab-dxf-side]
+    inputs: [mechanical/export/side.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
+    out: mechanical/fab/acrylic/side.dxf
+  - name: fab-dxf-matrix-window
+    cmd: [tools/fab.py, dxf, --from, mechanical/export/matrix-window.dxf, --part, matrix_window, --to-origin, --name, fab-dxf-matrix-window]
+    inputs: [mechanical/export/matrix-window.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
+    out: mechanical/fab/acrylic/matrix-window.dxf
+  - name: fab-step-oak-top
+    cmd: [tools/fab.py, step, --stl, mechanical/fab/oak/oak-top.stl, --name, fab-step-oak-top]
+    inputs: [mechanical/fab/oak/oak-top.stl]
+    out: mechanical/fab/oak/oak-top.step
+  - name: fab-step-oak-bottom
+    cmd: [tools/fab.py, step, --stl, mechanical/fab/oak/oak-bottom.stl, --name, fab-step-oak-bottom]
+    inputs: [mechanical/fab/oak/oak-bottom.stl]
+    out: mechanical/fab/oak/oak-bottom.step
+  - name: fab-step-mouth-cap
+    cmd: [tools/fab.py, step, --stl, mechanical/fab/oak/mouth-cap.stl, --name, fab-step-mouth-cap]
+    inputs: [mechanical/fab/oak/mouth-cap.stl]
+    out: mechanical/fab/oak/mouth-cap.step
+  - name: fab-step-tail-cap
+    cmd: [tools/fab.py, step, --stl, mechanical/fab/oak/tail-cap.stl, --name, fab-step-tail-cap]
+    inputs: [mechanical/fab/oak/tail-cap.stl]
+    out: mechanical/fab/oak/tail-cap.step
+  - name: fab-pdf-plate-top
+    title: The plate top's one-page drawing for the shop
+    cmd: [tools/fab.py, drawing, --part, plate_top, --name, fab-pdf-plate-top]
+    inputs: [mechanical/export/fab-geometry.echo, config/key-layout.yaml, hardware/bom.csv, mechanical/export/plate-top.dxf, tools/cad.py, mechanical/outputs.yaml, mechanical/cad/woody_body.scad, mechanical/cad/fab_parts.scad, mechanical/cad/generated/params.scad, config/body.yaml]
+    out: mechanical/fab/aluminium/plate-top.pdf
+  - name: fab-pdf-plate-bottom
+    title: The plate bottom's one-page drawing for the shop
+    cmd: [tools/fab.py, drawing, --part, plate_bottom, --name, fab-pdf-plate-bottom]
+    inputs: [mechanical/export/fab-geometry.echo, config/key-layout.yaml, hardware/bom.csv, mechanical/export/plate-bottom.dxf, tools/cad.py, mechanical/outputs.yaml, mechanical/cad/woody_body.scad, mechanical/cad/fab_parts.scad, mechanical/cad/generated/params.scad, config/body.yaml]
+    out: mechanical/fab/aluminium/plate-bottom.pdf
+  - name: fab-pdf-oak-top
+    title: The oak top's one-page drawing for the shop
+    cmd: [tools/fab.py, drawing, --part, oak_top, --name, fab-pdf-oak-top]
+    inputs: [mechanical/export/fab-geometry.echo, config/key-layout.yaml, hardware/bom.csv, mechanical/export/oak-grooves.dxf, mechanical/export/oak-inserts.dxf, mechanical/export/oak-logo.dxf, mechanical/export/oak-pockets.dxf, mechanical/export/oak-rebates.dxf, mechanical/export/oak-relief.dxf, mechanical/export/oak-top.dxf, tools/cad.py, mechanical/outputs.yaml, mechanical/cad/woody_body.scad, mechanical/cad/fab_parts.scad, mechanical/cad/generated/params.scad, config/body.yaml]
+    out: mechanical/fab/oak/oak-top.pdf
+  - name: fab-pdf-oak-bottom
+    title: The oak bottom's one-page drawing for the shop
+    cmd: [tools/fab.py, drawing, --part, oak_bottom, --name, fab-pdf-oak-bottom]
+    inputs: [mechanical/export/fab-geometry.echo, config/key-layout.yaml, hardware/bom.csv, mechanical/export/oak-bottom-pockets.dxf, mechanical/export/oak-bottom.dxf, mechanical/export/oak-grooves.dxf, tools/cad.py, mechanical/outputs.yaml, mechanical/cad/woody_body.scad, mechanical/cad/fab_parts.scad, mechanical/cad/generated/params.scad, config/body.yaml]
+    out: mechanical/fab/oak/oak-bottom.pdf
+  - name: fab-pdf-mouth-cap
+    title: The mouth cap's one-page drawing for the shop
+    cmd: [tools/fab.py, drawing, --part, mouth_cap, --name, fab-pdf-mouth-cap]
+    inputs: [mechanical/export/fab-geometry.echo, config/key-layout.yaml, hardware/bom.csv, mechanical/export/mouth-cap.dxf, tools/cad.py, mechanical/outputs.yaml, mechanical/cad/woody_body.scad, mechanical/cad/fab_parts.scad, mechanical/cad/generated/params.scad, config/body.yaml]
+    out: mechanical/fab/oak/mouth-cap.pdf
+  - name: fab-pdf-tail-cap
+    title: The tail cap's one-page drawing for the shop
+    cmd: [tools/fab.py, drawing, --part, tail_cap, --name, fab-pdf-tail-cap]
+    inputs: [mechanical/export/fab-geometry.echo, config/key-layout.yaml, hardware/bom.csv, mechanical/export/tail-cap-recess.dxf, mechanical/export/tail-cap.dxf, tools/cad.py, mechanical/outputs.yaml, mechanical/cad/woody_body.scad, mechanical/cad/fab_parts.scad, mechanical/cad/generated/params.scad, config/body.yaml]
+    out: mechanical/fab/oak/tail-cap.pdf
+  - name: fab-pdf-side
+    title: The side's one-page drawing for the shop
+    cmd: [tools/fab.py, drawing, --part, side, --name, fab-pdf-side]
+    inputs: [mechanical/export/fab-geometry.echo, config/key-layout.yaml, hardware/bom.csv, mechanical/export/side.dxf, tools/cad.py, mechanical/outputs.yaml, mechanical/cad/woody_body.scad, mechanical/cad/fab_parts.scad, mechanical/cad/generated/params.scad, config/body.yaml]
+    out: mechanical/fab/acrylic/side.pdf
+  - name: fab-pdf-matrix-window
+    title: The matrix window's one-page drawing for the shop
+    cmd: [tools/fab.py, drawing, --part, matrix_window, --name, fab-pdf-matrix-window]
+    inputs: [mechanical/export/fab-geometry.echo, config/key-layout.yaml, hardware/bom.csv, mechanical/export/matrix-window.dxf, tools/cad.py, mechanical/outputs.yaml, mechanical/cad/woody_body.scad, mechanical/cad/fab_parts.scad, mechanical/cad/generated/params.scad, config/body.yaml]
+    out: mechanical/fab/acrylic/matrix-window.pdf

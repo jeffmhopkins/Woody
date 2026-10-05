@@ -1,22 +1,31 @@
 #!/usr/bin/env python3
 """
 The controller body's FABRICATION FILES (issue #42): what goes to a laser or
-waterjet shop for the aluminium plates and to a CNC shop for the oak parts.
+waterjet shop for the aluminium plates, to a CNC shop for the oak parts, and
+to a laser shop for the acrylic. One folder per material, each sent as it is:
+mechanical/fab/aluminium/, oak/, acrylic/ (owner, 2026-10-05: "acrylic needs
+to have its own files when cut").
 
+    python3 tools/fab.py dxf     --from <export.dxf> --part <part> [--to-origin] --name <output> --out <x.dxf> --fingerprint <fp>
     python3 tools/fab.py step    --stl <part.stl> --name <output> --out <part.step> --fingerprint <fp>
     python3 tools/fab.py drawing --part <part>    --name <output> --out <part.pdf>  --fingerprint <fp>
     python3 tools/fab.py open    --name <output>  --out <open-figures.csv> --fingerprint <fp>
     python3 tools/fab.py open --print            # the same list, to the terminal; writes nothing
 
-tools/cad.py runs the first three (`scripts:` in mechanical/outputs.yaml).
+tools/cad.py runs all of them (`scripts:` in mechanical/outputs.yaml).
+
+DXF. The shop's copy of one of the model's cut files, in the part's folder:
+the same geometry (moved to 0,0 with --to-origin, for a part whose DXF is in
+another part's frame), headed by DXF comments (group 999, which no cutter
+reads as geometry) naming the part, its material, thickness, quantity per
+instrument, revision and fingerprint.
 Never write into mechanical/fab/ by hand: those files are ledgered, and
 `cad.py check` fails on a file the ledger did not see built.
 
 WHERE EACH THING COMES FROM - nothing is restated here:
   * the solids: mechanical/fab/*.stl, the body model's own solids, one per
     part, moved into the part's frame by mechanical/cad/fab_parts.scad;
-  * every outline and cut: the part's DXFs (mechanical/export/*.dxf, and
-    mechanical/fab/tail-cap-recess.dxf);
+  * every outline and cut: the part's DXFs (mechanical/export/*.dxf);
   * every thickness, depth, face and hole position: mechanical/export/
     fab-geometry.echo, which fab_parts.scad prints from the model's variables;
   * material, finish, revision and tolerances: config/body.yaml `fabrication`;
@@ -68,23 +77,38 @@ PARAMS = "mechanical/cad/generated/params.scad"
 
 # Each part: its title, what it is cut from, its BOM row, and the 3D finish
 # module its solid adds to its layers (the walk's extra root).
+# `thickness`: the figure the drawing names for the part's thickness.
+# `to_origin`: its DXF is in another part's frame, so the shop's copy moves.
 PARTS = {
-    "plate_top":    dict(title="Key plate", stock="metal", bom="PLATE-TOP", finish_root=None),
-    "plate_bottom": dict(title="Bottom plate", stock="metal", bom="PLATE-BOTTOM", finish_root=None),
-    "oak_top":      dict(title="Oak top", stock="wood", bom="BODY-OAK", finish_root="sanded_panel"),
-    "oak_bottom":   dict(title="Oak bottom", stock="wood", bom="BODY-OAK", finish_root="sanded_panel"),
-    "mouth_cap":    dict(title="Mouth cap", stock="wood", bom="ENDCAP-MOUTH", finish_root="sanded_cap"),
-    "tail_cap":     dict(title="Tail cap", stock="wood", bom="ENDCAP-TAIL", finish_root="sanded_cap"),
+    "plate_top":     dict(title="Key plate", stock="metal", bom="PLATE-TOP", finish_root=None),
+    "plate_bottom":  dict(title="Bottom plate", stock="metal", bom="PLATE-BOTTOM", finish_root=None),
+    "oak_top":       dict(title="Oak top", stock="wood", bom="BODY-OAK", finish_root="sanded_panel",
+                          thickness="the flush rule: switch.keycap_top_above_seat - switch.total_travel"),
+    "oak_bottom":    dict(title="Oak bottom", stock="wood", bom="BODY-OAK", finish_root="sanded_panel",
+                          thickness="the flush rule: switch.keycap_top_above_seat - switch.total_travel"),
+    "mouth_cap":     dict(title="Mouth cap", stock="wood", bom="ENDCAP-MOUTH", finish_root="sanded_cap",
+                          thickness="ends.mouth_cap_t"),
+    "tail_cap":      dict(title="Tail cap", stock="wood", bom="ENDCAP-TAIL", finish_root="sanded_cap",
+                          thickness="ends.tail_cap_t"),
+    "side":          dict(title="Acrylic side", stock="acrylic", bom="SIDE-ACRYLIC", finish_root=None,
+                          thickness="stack.side_t", tint="side_tint", surface="side_surface", face="side_frosted_face"),
+    "matrix_window": dict(title="Matrix window", stock="acrylic", bom="MECH-WINDOW", finish_root=None, to_origin=True,
+                          thickness="openings.matrix_acrylic_t", tint="window_tint", surface="window_surface",
+                          face="window_frosted_face"),
 }
+# The folder each material goes to the shop in.
+FOLDER = {"metal": "aluminium", "wood": "oak", "acrylic": "acrylic"}
 
-# What each kind of part's drawing reads from config/body.yaml `fabrication`,
-# besides its geometry - so the open-figure list counts them too.
-FAB_LEAVES = {
-    "metal": ["fabrication.revision", "fabrication.plate_alloy", "fabrication.plate_finish",
-              "fabrication.plate_profile_tol", "fabrication.cutout_tol", "fabrication.stud_hole_tol"],
-    "wood": ["fabrication.revision", "fabrication.wood_species", "fabrication.wood_finish",
-             "fabrication.wood_profile_tol", "fabrication.wood_depth_tol"],
-}
+
+def fab_leaves(part):
+    """What a part's drawing and cut files read from config/body.yaml
+    `fabrication`, besides its geometry - so the open-figure list counts them."""
+    P = PARTS[part]
+    own = {"metal": ["plate_alloy", "plate_finish", "plate_profile_tol", "cutout_tol", "stud_hole_tol"],
+           "wood": ["wood_species", "wood_finish", "wood_profile_tol", "wood_depth_tol"],
+           "acrylic": ["acrylic_material", "acrylic_edge", "acrylic_profile_tol"]}[P["stock"]]
+    own += [P[k] for k in ("tint", "surface", "face") if k in P]
+    return ["fabrication.revision"] + ["fabrication." + k for k in own]
 
 # tbd figures a part can be ordered without, and why. Anything not here that
 # is tbd blocks the part it reaches.
@@ -115,13 +139,15 @@ def geom():
         if kind == "stock":
             g["stock"] = dict(t=rest[0], x=rest[1], y=rest[2], faces=rest[3])
         elif kind == "layer":
-            g["layers"].append(dict(dxf=rest[0], face=rest[1], depth=rest[2], what=rest[3]))
+            g["layers"].append(dict(dxf=f"mechanical/export/{rest[0]}.dxf", face=rest[1], depth=rest[2], what=rest[3]))
         elif kind == "hole":
             g["holes"].append(dict(what=rest[0], x=rest[1], y=rest[2], d=rest[3], face=rest[4], depth=rest[5], bom=rest[6]))
         elif kind == "cutouts":
             g["cutouts"] = dict(n=rest[0], s=rest[1])
+        elif kind == "qty":
+            g["qty"] = rest[0]
     for p, g in out.items():
-        if "stock" not in g:
+        if "stock" not in g or "qty" not in g:
             raise SystemExit(f"fab.py: {GEOM} has no stock for {p} - rebuild it (cad.py build fab-geometry)")
     return out
 
@@ -225,6 +251,7 @@ def part_roots(part, model_src, fab_src, geom_src):
             for n in ids & set(local):
                 roots.update(local[n])
     for l in re.findall(r'layer\("' + part + r'", "([^"]+)"', geom_src):
+        l = f"mechanical/export/{l}.dxf"
         e = by_out.get(l)
         if e is None:
             raise SystemExit(f"fab.py: {part}'s layer {l} is no export in {SPEC}")
@@ -274,7 +301,7 @@ def open_figures():
     for part in PARTS:
         reach = walk(part_roots(part, model_src, fab_src, fab_body.group(1)), defs)
         # and what its drawing tells the shop (config/body.yaml `fabrication`)
-        reach |= {n for n, d in paths.items() if d in FAB_LEAVES[PARTS[part]["stock"]]}
+        reach |= {n for n, d in paths.items() if d in fab_leaves(part)}
         for name, spec in leaves:
             st = spec.get("status")
             if name not in reach or st not in ("tbd", "nominal"):
@@ -359,6 +386,81 @@ def cmd_open(a):
     print("TOOL: fab.py open")
 
 
+# ------------------------------------------------------------- dxf copy ----
+
+def shop_files(part):
+    """{export DXF the model wrote: the shop's copy in the part's folder}, and
+    every file in the part's folder that names it, from the spec."""
+    spec = yaml.safe_load(read(SPEC))
+    stem = part.replace("_", "-")
+    folder = f"mechanical/fab/{FOLDER[PARTS[part]['stock']]}/"
+    copies, files = {}, []
+    for e in (spec.get("exports") or []) + (spec.get("scripts") or []):
+        if not e["out"].startswith(folder):
+            continue
+        cmd = e.get("cmd") or []
+        if "--part" in cmd:
+            if cmd[cmd.index("--part") + 1] != part:
+                continue
+        elif not re.search(rf"-{re.escape(stem)}(-|$)", e["name"]):
+            continue
+        files.append(e["out"])
+        if len(cmd) > 1 and cmd[1] == "dxf":
+            copies[cmd[cmd.index("--from") + 1]] = e["out"]
+    return copies, sorted(files)
+
+
+def thickness(part, G, b):
+    """(value, the figure it is) - the plates' is the register's."""
+    P = PARTS[part]
+    if P["stock"] == "metal":
+        return plate_thickness(), "config/key-layout.yaml plate_thickness, the register's `plate-thickness`"
+    return G["stock"]["t"], P["thickness"]
+
+
+def material(part, b):
+    fb, P = b["fabrication"], PARTS[part]
+    if P["stock"] == "metal":
+        return f"{fb['plate_alloy']['value']}, {fb['plate_finish']['value']}"
+    if P["stock"] == "wood":
+        return f"{fb['wood_species']['value']}; {fb['wood_finish']['value']}"
+    return (f"{fb['acrylic_material']['value']}, {fb[P['tint']]['value']}, {fb[P['surface']]['value']} "
+            f"on the {fb[P['face']]['value']}")
+
+
+def cmd_dxf(a):
+    part = a.part
+    G = geom()[part]
+    b = body()
+    t, tfig = thickness(part, G, b)
+    print(f"READ: {getattr(a, 'from')}")
+    lines = open(os.path.join(ROOT, getattr(a, "from")), encoding="utf-8").read().split("\n")
+    if a.to_origin:
+        # OpenSCAD writes LINE entities, group code then value: 10/20 the start, 11/21 the end
+        pairs = list(zip(lines[0::2], lines[1::2]))
+        xs = [float(v) for c, v in pairs if c.strip() in ("10", "11")]
+        ys = [float(v) for c, v in pairs if c.strip() in ("20", "21")]
+        dx, dy = min(xs), min(ys)
+        out = []
+        for c, v in pairs:
+            k = c.strip()
+            if k in ("10", "11"):
+                v = f"{float(v) - dx:g}"
+            elif k in ("20", "21"):
+                v = f"{float(v) - dy:g}"
+            out += [c, v]
+        lines = out + lines[2 * len(pairs):]
+    rev = b["fabrication"]["revision"]["value"]
+    head = [f"Woody controller body rev {rev} - {PARTS[part]['title']} ({part})",
+            f"Material: {material(part, b)}",
+            f"Thickness: {fmt(t)} mm ({tfig})",
+            f"Quantity per instrument: {G['qty']}",
+            f"Units mm. Cut every closed outline. cad {a.fingerprint[:12]}; verify: python3 tools/cad.py explain {a.name}"]
+    txt = "".join(f"999\n{h}\n" for h in head) + "\n".join(lines)
+    open(a.out, "w", encoding="utf-8", newline="\n").write(txt)
+    print("TOOL: fab.py dxf")
+
+
 # --------------------------------------------------------------- drawing ----
 
 def dxf_lines(path):
@@ -390,11 +492,22 @@ def tol(v):
     return f"+/-{fmt(hi)}" if -lo == hi else f"+{fmt(hi)} / {fmt(lo)}"
 
 
+VIEW = {"plate_top": "seen from above (top face up); X along the body from the mouth end, Y across",
+        "plate_bottom": "seen from above (top face up, the studs' heads in the underside, away from the viewer)",
+        "oak_top": "seen from above (playing face up); dashed = cut from the underside",
+        "oak_bottom": "seen from above (inside face up, outside face away); dashed = cut from the outside face",
+        "mouth_cap": "seen from outside the body; X across the body, Y up",
+        "tail_cap": "seen from INSIDE the body (the DXF's frame); X across the body, Y up; the recess is cut from the outer face",
+        "side": "seen from outside the body; X along the body from the mouth end, Y up from the bottom edge (in the oak bottom's groove)",
+        "matrix_window": "seen from above, top face up; X along the body, Y across"}
+
+
 def cmd_drawing(a):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     from matplotlib.collections import LineCollection
+    import textwrap
     part = a.part
     P = PARTS[part]
     G = geom()[part]
@@ -402,8 +515,10 @@ def cmd_drawing(a):
     fb = b["fabrication"]
     B = bom()
     opens = [r for r in open_figures() if r[0] == part]
+    copies, files = shop_files(part)
     st = G["stock"]
-    metal = P["stock"] == "metal"
+    kind = P["stock"]
+    t, tfig = thickness(part, G, b)
 
     fig = plt.figure(figsize=(16.54, 11.69))   # A3 landscape, inches
     fig.patch.set_facecolor("white")
@@ -414,22 +529,24 @@ def cmd_drawing(a):
     colours = ["#1f4e9c", "#b5651d", "#2e8b57", "#8b2e8b", "#c0392b", "#7f8c8d"]
     through = [l for l in G["layers"] if l["depth"] == "through"]
     feats = [l for l in G["layers"] if l["depth"] != "through"]
-    outline = []
+    outline = [sg for l in through for sg in dxf_lines(l["dxf"])]
+    # a part drawn in another part's frame is drawn, as its shop file is, at 0,0
+    sx = min(p[0] for sg in outline for p in sg) if P.get("to_origin") else 0
+    sy = min(p[1] for sg in outline for p in sg) if P.get("to_origin") else 0
+    shift = lambda segs: [((p[0] - sx, p[1] - sy), (q[0] - sx, q[1] - sy)) for p, q in segs]
+    outline = shift(outline)
     for l in through:
-        segs = dxf_lines(l["dxf"])
-        outline += segs
         l["colour"] = "black"
-        ax.add_collection(LineCollection(segs, colors="black", linewidths=0.8))
+    ax.add_collection(LineCollection(outline, colors="black", linewidths=0.8))
     for i, l in enumerate(feats):
         l["colour"] = colours[i % len(colours)]
-        ax.add_collection(LineCollection(dxf_lines(l["dxf"]), colors=l["colour"], linewidths=0.7,
+        ax.add_collection(LineCollection(shift(dxf_lines(l["dxf"])), colors=l["colour"], linewidths=0.7,
                                          linestyles="--" if l["face"] == st["faces"][0] else "-"))
     # overall dimensions: the cut outline's extent, and where it sits in the frame
     xs = [p[0] for sg in outline for p in sg]
     ys = [p[1] for sg in outline for p in sg]
     x0_, x1_, y0_, y1_ = min(xs), max(xs), min(ys), max(ys)
-    X, Y = x1_, y1_
-    off = max(X, Y) * 0.04
+    off = max(x1_, y1_) * 0.04
     ax.annotate("", (x0_, y0_ - off), (x1_, y0_ - off), arrowprops=dict(arrowstyle="<->", lw=0.7))
     ax.text((x0_ + x1_) / 2, y0_ - off * 1.25, f"{fmt(x1_ - x0_)}" + (f"  (X {fmt(x0_)} to {fmt(x1_)})" if x0_ else ""),
             ha="center", va="top", fontsize=9)
@@ -442,16 +559,11 @@ def cmd_drawing(a):
     for n, h in enumerate(holes, 1):
         h["id"] = f"H{n}"
         ax.text(h["x"] + h["d"] / 2 + 0.6, h["y"] + h["d"] / 2 + 0.3, h["id"], fontsize=6.5, color="#c0392b")
-    ax.set_xlim(-off * 3, X + off)
-    ax.set_ylim(-off * 3, Y + off)
-    view = {"plate_top": "seen from above (top face up); X along the body from the mouth end, Y across",
-            "plate_bottom": "seen from above (top face up, the studs' heads in the underside, away from the viewer)",
-            "oak_top": "seen from above (playing face up); dashed = cut from the underside",
-            "oak_bottom": "seen from above (inside face up, outside face away); dashed = cut from the outside face",
-            "mouth_cap": "seen from outside the body; X across the body, Y up",
-            "tail_cap": "seen from INSIDE the body (the DXF's frame); X across the body, Y up; the recess is cut from the outer face"}[part]
-    fig.text(0.03, 0.955, f"{P['title']} - plan, {view}", fontsize=10)
-    fig.text(0.03, 0.975, f"WOODY CONTROLLER BODY  |  {P['title'].upper()}  |  rev {fb['revision']['value']}",
+    ax.set_xlim(-off * 3, x1_ + off)
+    ax.set_ylim(-off * 3, y1_ + off)
+    fig.text(0.03, 0.955, f"{P['title']} - plan, {VIEW[part]}", fontsize=10)
+    fig.text(0.03, 0.975, f"WOODY CONTROLLER BODY  |  {P['title'].upper()}  |  rev {fb['revision']['value']}"
+                          f"  |  {G['qty']} per instrument  |  {fmt(t)} mm {FOLDER[kind]}",
              fontsize=15, weight="bold")
 
     # ---- tables
@@ -472,21 +584,23 @@ def cmd_drawing(a):
         return y - 0.02
 
     y = 0.43
-    rows = [(h["id"], h["what"], fmt(h["x"]), fmt(h["y"]), fmt(h["d"]),
-             "through" if h["depth"] == "through" else f"{fmt(h['depth'])} from {h['face']}",
-             (h["bom"] + ": " + B[h["bom"]]["part"])[:60] if h["bom"] else "") for h in holes]
-    y = table(0.03, y, "HOLES (part frame, mm)", ["id", "what", "X", "Y", "dia", "depth", "goes in it (hardware/bom.csv)"],
-              rows, [0.03, 0.12, 0.04, 0.035, 0.035, 0.09, 0.2])
-    drows = [(l["face"] or "-", fmt(l["depth"]) if l["depth"] != "through" else "through", l["what"], l["dxf"]) for l in G["layers"]]
-    y = table(0.03, y, "CUTS AND DEPTH (one file per layer; depths from the face named)", ["face", "depth", "what", "file"],
+    if holes:
+        rows = [(h["id"], h["what"], fmt(h["x"]), fmt(h["y"]), fmt(h["d"]),
+                 "through" if h["depth"] == "through" else f"{fmt(h['depth'])} from {h['face']}",
+                 (h["bom"] + ": " + B[h["bom"]]["part"])[:60] if h["bom"] else "") for h in holes]
+        y = table(0.03, y, "HOLES (part frame, mm)", ["id", "what", "X", "Y", "dia", "depth", "goes in it (hardware/bom.csv)"],
+                  rows, [0.03, 0.12, 0.04, 0.035, 0.035, 0.09, 0.2])
+    drows = [(l["face"] or "-", fmt(l["depth"]) if l["depth"] != "through" else "through", l["what"],
+              os.path.basename(copies.get(l["dxf"], l["dxf"]))) for l in G["layers"]]
+    y = table(0.03, y, "CUTS AND DEPTH (one file per layer, all in one frame; depths from the face named)",
+              ["face", "depth", "what", "file (in this folder)"],
               drows, [0.07, 0.05, 0.17, 0.25], colours=[l["colour"] for l in G["layers"]])
 
     # ---- notes, right column
     x0 = 0.60
     notes = []
-    if metal:
-        notes.append(f"MATERIAL: {fb['plate_alloy']['value']}, {fmt(plate_thickness())} thick "
-                     f"(config/key-layout.yaml plate_thickness = register `plate-thickness`)")
+    if kind == "metal":
+        notes.append(f"MATERIAL: {fb['plate_alloy']['value']}, {fmt(t)} thick ({tfig})")
         notes.append(f"FINISH: {fb['plate_finish']['value']} (config/body.yaml fabrication.plate_finish)")
         notes.append(f"PROFILE TOL {tol(fb['plate_profile_tol']['value'])}; SWITCH CUTOUTS "
                      f"{fmt(G['cutouts']['n'])} x {fmt(G['cutouts']['s'])} square {tol(fb['cutout_tol']['value'])} "
@@ -502,12 +616,10 @@ def cmd_drawing(a):
             notes.append("NO PRESSED HARDWARE in this plate. The column screws' heads bear on its top face (BOM MECH-COL-SCREW)")
         notes.append("COUNTERSINKS: none. Every hole is a plain through-hole")
         notes.append("GROUND: bare metal round every hole that carries a screw head or a stud (ADR 0025)")
-    else:
+    elif kind == "wood":
         notes.append(f"MATERIAL: {fb['wood_species']['value']} - status {fb['wood_species']['status']} "
                      f"(config/body.yaml fabrication.wood_species)")
-        notes.append(f"STOCK THICKNESS: {fmt(st['t'])}, finished (fab-geometry.echo; "
-                     + ("the flush rule: switch.keycap_top_above_seat - switch.total_travel" if part.startswith("oak")
-                        else f"ends.{part}_t") + ")")
+        notes.append(f"STOCK THICKNESS: {fmt(t)}, finished (fab-geometry.echo; {tfig})")
         notes.append(f"FINISH: {fb['wood_finish']['value']} (fabrication.wood_finish)")
         notes.append(f"TOL: profile {tol(fb['wood_profile_tol']['value'])}, depths {tol(fb['wood_depth_tol']['value'])} "
                      f"(fabrication.wood_*_tol); holes for hardware to the hardware's own fit, below")
@@ -526,9 +638,27 @@ def cmd_drawing(a):
         notes.append("COUNTERSINKS: none. Pockets and counterbores are flat-bottomed")
         notes.append(f"EDGES: the model's sanded roundover, stack.edge_r = {fmt(b['stack']['edge_r']['value'])} "
                      f"({b['stack']['edge_r']['status']}), is in the STEP; it may be left for sanding by hand")
-    notes.append(f"QTY PER INSTRUMENT: 1  |  BOM {P['bom']}: {B[P['bom']]['part']} ({B[P['bom']]['status']})")
+    else:
+        th = b
+        for k in P["thickness"].split("."):
+            th = th[k]
+        notes.append(f"MATERIAL: {fb['acrylic_material']['value']} ({fb['acrylic_material']['status']}), "
+                     f"{fmt(t)} thick ({tfig}, {th['status']})")
+        notes.append(f"TINT: {fb[P['tint']]['value']} ({fb[P['tint']]['status']}, fabrication.{P['tint']})")
+        notes.append(f"SURFACE: {fb[P['surface']]['value']}, on the {fb[P['face']]['value']} "
+                     f"(fabrication.{P['surface']}, {P['face']}: {fb[P['face']]['status']})")
+        notes.append(f"EDGES: {fb['acrylic_edge']['value']} (fabrication.acrylic_edge)")
+        notes.append(f"TOL: profile {tol(fb['acrylic_profile_tol']['value'])} (fabrication.acrylic_profile_tol)")
+        notes.append("HOLES: none. One closed outline, cut through")
+        if part == "side":
+            notes.append("FIT: stands in a groove in the oak top and the oak bottom (stack.groove_depth, groove_clear): "
+                         "the sheet's own thickness tolerance must stay inside the groove (fabrication.acrylic_profile_tol "
+                         "covers the profile only)")
+        else:
+            notes.append("FIT: drops into the oak top's rebate, flush with its playing face (oak-top-rebate.dxf in the "
+                         "oak folder): its thickness is the rebate's depth")
+    notes.append(f"QTY PER INSTRUMENT: {G['qty']}  |  BOM {P['bom']}: {B[P['bom']]['part']} ({B[P['bom']]['status']})")
     fig.text(x0, 0.43, "NOTES", fontsize=9, weight="bold")
-    import textwrap
     yy = 0.413
     for n_ in notes:
         for k, ln in enumerate(textwrap.wrap(n_, 92)):
@@ -549,11 +679,8 @@ def cmd_drawing(a):
 
     # ---- title block
     fp = a.fingerprint
-    files = sorted({l["dxf"] for l in G["layers"]})
-    stem = os.path.splitext(os.path.basename(a.out))[0]
-    fig.text(0.03, 0.035, f"Files: {', '.join(os.path.basename(f) for f in files)}"
-                          + ("" if metal else f"; 3D: mechanical/fab/{stem}.step (and .stl)"),
-             fontsize=7.5)
+    fig.text(0.03, 0.035, f"Files in mechanical/fab/{FOLDER[kind]}/ for this part: "
+                          + ", ".join(os.path.basename(f) for f in files), fontsize=7.5)
     fig.text(0.03, 0.02, f"Units mm. Not to scale: the cut files govern. Woody body · {a.name} · cad {fp[:12]} · "
                          f"verify: python3 tools/cad.py explain {a.name}", fontsize=7.5, color="#444")
     fig.text(0.03, 0.006, f"Generated by tools/fab.py from {GEOM}, the DXFs, {BODY} and {BOM}; never edit by hand.",
@@ -566,13 +693,17 @@ def cmd_drawing(a):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[1])
     sub = ap.add_subparsers(dest="cmd", required=True)
+    x = sub.add_parser("dxf")
+    x.add_argument("--from", required=True)
+    x.add_argument("--part", required=True, choices=sorted(PARTS))
+    x.add_argument("--to-origin", action="store_true")
     s = sub.add_parser("step")
     s.add_argument("--stl", required=True)
     d = sub.add_parser("drawing")
     d.add_argument("--part", required=True, choices=sorted(PARTS))
     o = sub.add_parser("open")
     o.add_argument("--print", action="store_true")
-    for p in (s, d, o):
+    for p in (x, s, d, o):
         p.add_argument("--name", default="")
         p.add_argument("--out")
         p.add_argument("--fingerprint", default="")
@@ -580,7 +711,7 @@ def main():
     if a.cmd != "open" or not a.print:
         if not a.out:
             ap.error("--out is required")
-    {"step": cmd_step, "drawing": cmd_drawing, "open": cmd_open}[a.cmd](a)
+    {"dxf": cmd_dxf, "step": cmd_step, "drawing": cmd_drawing, "open": cmd_open}[a.cmd](a)
 
 
 if __name__ == "__main__":

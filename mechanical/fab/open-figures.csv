@@ -1,0 +1,216 @@
+part,figure,status,value,decided_by,blocking,why
+plate_top,stack.cap_clear,tbd,0.75,"M2 - the mule, with a real cap in a real oak hole",yes,"M2 - the mule, with a real cap in a real oak hole"
+plate_top,stack.side_t,nominal,4.0,,no,a working estimate the part can be cut to
+plate_top,stack.side_inset,tbd,2.0,M4 - the thinnest lip the oak and the saw will hold,yes,M4 - the thinnest lip the oak and the saw will hold
+plate_top,stack.plate_side_clear,nominal,0.8,"M4, with the oak's grain direction and the plates as cut",no,a working estimate the part can be cut to
+plate_top,ends.mouth_cap_t,tbd,6.0,M4,yes,M4
+plate_top,ends.tail_cap_t,tbd,6.0,"M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md",yes,"M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md"
+plate_top,layout.mouth_extra,tbd,10.0,M2 - where the lips and the mouthpiece mount land,yes,M2 - where the lips and the mouthpiece mount land
+plate_top,layout.tail_clear,tbd,3.0,"M4, with the connector's real rear envelope",yes,"M4, with the connector's real rear envelope"
+plate_top,layout.underside_clear,tbd,3.0,M4,yes,M4
+plate_top,layout.gap,nominal,50.0,,no,a working estimate the part can be cut to
+plate_top,switch.keycap_top_above_seat,nominal,9.0,"calipers on a cap on its switch (M1) would make it settled; a visual match at scale cannot resolve a few tenths, which is the oak top's thickness tolerance. It SETS BOTH oak panel thicknesses (flush rule, stack above)",no,a working estimate the part can be cut to
+plate_top,boards.sensor_lead_row,tbd,10.2,M4 footprint,yes,M4 footprint
+plate_top,boards.umb_adapter_t,tbd,1.6,"M4, with the board ordered",yes,"M4, with the board ordered"
+plate_top,boards.kb_end_margin,tbd,6.6,"M4, with the boards laid out",yes,"M4, with the boards laid out"
+plate_top,boards.kb_tail_margin,nominal,10.3,"M3, with the key positions; hardware.col_pocket_wall, which sets it",no,a working estimate the part can be cut to
+plate_top,boards.board_clear,tbd,1.5,"M4, with the boards laid out",yes,"M4, with the boards laid out"
+plate_top,boards.matrix_usb,nominal,"[0.76, 7.5, 9.5, 1.6]",calipers on the Matrix in hand,no,a working estimate the part can be cut to
+plate_top,openings.matrix_window,nominal,22.0,,no,a working estimate the part can be cut to
+plate_top,openings.usb_plug_l,tbd,15.0,the recovery cable kept with the instrument,yes,the recovery cable kept with the instrument
+plate_top,openings.usb_plug_turn,nominal,down,the recovery cable kept with the instrument,no,a working estimate the part can be cut to
+plate_top,openings.usb_overmold,tbd,"[15.0, 9.0]","M4, against the extension bought",yes,"M4, against the extension bought"
+plate_top,hardware.col_plate_hole,nominal,2.9,,no,a working estimate the part can be cut to
+plate_top,hardware.kb_mount_inset,tbd,3.6,"M4, with the board's first fit",yes,"M4, with the board's first fit"
+plate_top,fabrication.plate_alloy,nominal,"aluminium, 5052 or 6061",,no,a working estimate the part can be cut to
+plate_top,fabrication.plate_profile_tol,nominal,"[-0.13, 0.13]",,no,a working estimate the part can be cut to
+plate_bottom,stack.cap_clear,tbd,0.75,"M2 - the mule, with a real cap in a real oak hole",yes,"M2 - the mule, with a real cap in a real oak hole"
+plate_bottom,stack.side_t,nominal,4.0,,no,a working estimate the part can be cut to
+plate_bottom,stack.side_inset,tbd,2.0,M4 - the thinnest lip the oak and the saw will hold,yes,M4 - the thinnest lip the oak and the saw will hold
+plate_bottom,stack.plate_side_clear,nominal,0.8,"M4, with the oak's grain direction and the plates as cut",no,a working estimate the part can be cut to
+plate_bottom,ends.mouth_cap_t,tbd,6.0,M4,yes,M4
+plate_bottom,ends.tail_cap_t,tbd,6.0,"M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md",yes,"M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md"
+plate_bottom,layout.mouth_extra,tbd,10.0,M2 - where the lips and the mouthpiece mount land,yes,M2 - where the lips and the mouthpiece mount land
+plate_bottom,layout.tail_clear,tbd,3.0,"M4, with the connector's real rear envelope",yes,"M4, with the connector's real rear envelope"
+plate_bottom,layout.underside_clear,tbd,3.0,M4,yes,M4
+plate_bottom,layout.gap,nominal,50.0,,no,a working estimate the part can be cut to
+plate_bottom,switch.thumb_pcb_below_seat,nominal,2.5,,no,a working estimate the part can be cut to
+plate_bottom,switch.pcb_below_seat,nominal,2.5,,no,a working estimate the part can be cut to
+plate_bottom,switch.keycap_top_above_seat,nominal,9.0,"calipers on a cap on its switch (M1) would make it settled; a visual match at scale cannot resolve a few tenths, which is the oak top's thickness tolerance. It SETS BOTH oak panel thicknesses (flush rule, stack above)",no,a working estimate the part can be cut to
+plate_bottom,switch.pcb_t,nominal,1.6,,no,a working estimate the part can be cut to
+plate_bottom,boards.tall_l,tbd,10.0,M4 main board layout,yes,M4 main board layout
+plate_bottom,boards.tall_w,tbd,15.0,M4 main board layout,yes,M4 main board layout
+plate_bottom,boards.sensor_port_offset,tbd,2.1,the part in hand at M4,yes,the part in hand at M4
+plate_bottom,boards.sensor_lead_row,tbd,10.2,M4 footprint,yes,M4 footprint
+plate_bottom,boards.chain_hdr_l,nominal,13.97,"M4, with J-CHAIN's part",no,a working estimate the part can be cut to
+plate_bottom,boards.chain_hdr_pin_back,nominal,7.86,"M4, with J-CHAIN's part",no,a working estimate the part can be cut to
+plate_bottom,boards.chain_plug_proud,tbd,1.4,"M4, on the first mated pair",yes,"M4, on the first mated pair"
+plate_bottom,boards.chain_hdr_tail,nominal,2.15,M4,no,a working estimate the part can be cut to
+plate_bottom,boards.chain_hdr_mouth_z,nominal,3.05,M4,no,a working estimate the part can be cut to
+plate_bottom,boards.chain_plug_t,nominal,3.05,M4,no,a working estimate the part can be cut to
+plate_bottom,boards.umb_adapter_t,tbd,1.6,"M4, with the board ordered",yes,"M4, with the board ordered"
+plate_bottom,boards.umb_parts_d,nominal,14,"M4 main board layout, routed",no,a working estimate the part can be cut to
+plate_bottom,boards.mcu_conn_at,nominal,"[262.27, 14.9, 90]",the main board's layout; the Matrix carrier's J-MCU-C stands straight above it,no,a working estimate the part can be cut to
+plate_bottom,boards.tall_at_x,nominal,225.0,,no,a working estimate the part can be cut to
+plate_bottom,boards.tall_side,nominal,near,,no,a working estimate the part can be cut to
+plate_bottom,boards.service_hdr_at,nominal,"[284.0, 9.3]",M4 main board layout,no,a working estimate the part can be cut to
+plate_bottom,boards.tht_trim,nominal,1.5,the first board assembled,no,a working estimate the part can be cut to
+plate_bottom,boards.plate_web_min,nominal,2.0,,no,a working estimate the part can be cut to
+plate_bottom,boards.key_board_t,nominal,1.6,"owner, 2026-09-29 (ADR 0020 Amendment 6); confirmed with the first board order",no,a working estimate the part can be cut to
+plate_bottom,boards.kb_end_margin,tbd,6.6,"M4, with the boards laid out",yes,"M4, with the boards laid out"
+plate_bottom,boards.kb_tail_margin,nominal,10.3,"M3, with the key positions; hardware.col_pocket_wall, which sets it",no,a working estimate the part can be cut to
+plate_bottom,boards.board_clear,tbd,1.5,"M4, with the boards laid out",yes,"M4, with the boards laid out"
+plate_bottom,openings.matrix_window,nominal,22.0,,no,a working estimate the part can be cut to
+plate_bottom,ethercon.offset_y,tbd,-7.0,M4 tail-face paper check (ADR 0009),yes,M4 tail-face paper check (ADR 0009)
+plate_bottom,ethercon.floor_clear,nominal,0.55,,no,a working estimate the part can be cut to
+plate_bottom,hardware.kb_spacer_od,nominal,4.5,,no,a working estimate the part can be cut to
+plate_bottom,hardware.mb_nut_e,nominal,5.77,,no,a working estimate the part can be cut to
+plate_bottom,hardware.kb_mount_float,nominal,0.2,,no,a working estimate the part can be cut to
+plate_bottom,hardware.kb_mount_inset,tbd,3.6,"M4, with the board's first fit",yes,"M4, with the board's first fit"
+plate_bottom,hardware.ubolt_rod_d,tbd,3.0,"M4, from the strap hardware chosen - small M3 U-bolts are sold for model and tube clamps [from memory]; a bent M3 rod or a stainless M3 threaded rod does the same job",yes,"M4, from the strap hardware chosen - small M3 U-bolts are sold for model and tube clamps [from memory]; a bent M3 rod or a stainless M3 threaded rod does the same job"
+plate_bottom,hardware.ubolt_hole_clear,tbd,0.5,"M4, with the U-bolt bought",yes,"M4, with the U-bolt bought"
+plate_bottom,hardware.ubolt_span,tbd,20.0,M4,yes,M4
+plate_bottom,hardware.ubolt_nut_af,tbd,5.5,"M4, with the U-bolt bought",yes,"M4, with the U-bolt bought"
+plate_bottom,hardware.ubolt_washer_od,tbd,6.0,"M4, with the washers bought",yes,"M4, with the washers bought"
+plate_bottom,routing.tube_lane,tbd,left,M4,yes,M4
+plate_bottom,routing.chain_ribbon_w,nominal,7.62,"M4, with the cable",no,a working estimate the part can be cut to
+plate_bottom,routing.chain_ribbon_t,tbd,0.8,"M4, with the cable",yes,"M4, with the cable"
+plate_bottom,routing.chain_bend_r,tbd,1.0,"M4, on the first cable",yes,"M4, on the first cable"
+plate_bottom,routing.chain_raise,tbd,30.0,"M4, on the first assembly",yes,"M4, on the first assembly"
+plate_bottom,routing.chain_slack,tbd,10.0,"M4, on the first assembly",yes,"M4, on the first assembly"
+plate_bottom,routing.chain_fold,nominal,"[1, 1]",the clash check,no,a working estimate the part can be cut to
+plate_bottom,fabrication.plate_alloy,nominal,"aluminium, 5052 or 6061",,no,a working estimate the part can be cut to
+plate_bottom,fabrication.plate_profile_tol,nominal,"[-0.13, 0.13]",,no,a working estimate the part can be cut to
+oak_top,stack.cap_clear,tbd,0.75,"M2 - the mule, with a real cap in a real oak hole",yes,"M2 - the mule, with a real cap in a real oak hole"
+oak_top,stack.cap_holes,tbd,slot,"the pitch chosen - at 18 mm an individual-hole web is zero, so the tightened layout needs slots (drc.echo); revisit if M2 widens it",yes,"the pitch chosen - at 18 mm an individual-hole web is zero, so the tightened layout needs slots (drc.echo); revisit if M2 widens it"
+oak_top,stack.side_t,nominal,4.0,,no,a working estimate the part can be cut to
+oak_top,stack.edge_r,tbd,1.5,"M5, on the first cut parts",no,"the sanded roundover: the STEP shows it, but it goes on by hand after the parts are cut (config/body.yaml), so a shop may leave the edges square"
+oak_top,stack.side_inset,tbd,2.0,M4 - the thinnest lip the oak and the saw will hold,yes,M4 - the thinnest lip the oak and the saw will hold
+oak_top,stack.groove_depth,tbd,3.0,"M4, with the oak panel thickness (which the flush rule sets)",yes,"M4, with the oak panel thickness (which the flush rule sets)"
+oak_top,stack.groove_clear,tbd,0.2,"M4, against the sheet actually bought",yes,"M4, against the sheet actually bought"
+oak_top,ends.mouth_cap_t,tbd,6.0,M4,yes,M4
+oak_top,ends.tail_cap_t,tbd,6.0,"M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md",yes,"M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md"
+oak_top,layout.mouth_extra,tbd,10.0,M2 - where the lips and the mouthpiece mount land,yes,M2 - where the lips and the mouthpiece mount land
+oak_top,layout.tail_clear,tbd,3.0,"M4, with the connector's real rear envelope",yes,"M4, with the connector's real rear envelope"
+oak_top,layout.underside_clear,tbd,3.0,M4,yes,M4
+oak_top,layout.gap,nominal,50.0,,no,a working estimate the part can be cut to
+oak_top,switch.keycap_top_above_seat,nominal,9.0,"calipers on a cap on its switch (M1) would make it settled; a visual match at scale cannot resolve a few tenths, which is the oak top's thickness tolerance. It SETS BOTH oak panel thicknesses (flush rule, stack above)",no,a working estimate the part can be cut to
+oak_top,boards.sensor_lead_row,tbd,10.2,M4 footprint,yes,M4 footprint
+oak_top,boards.umb_adapter_t,tbd,1.6,"M4, with the board ordered",yes,"M4, with the board ordered"
+oak_top,boards.kb_end_margin,tbd,6.6,"M4, with the boards laid out",yes,"M4, with the boards laid out"
+oak_top,boards.kb_tail_margin,nominal,10.3,"M3, with the key positions; hardware.col_pocket_wall, which sets it",no,a working estimate the part can be cut to
+oak_top,boards.board_clear,tbd,1.5,"M4, with the boards laid out",yes,"M4, with the boards laid out"
+oak_top,boards.matrix_mount_dxy,nominal,"[7.3, 17.5]",,no,a working estimate the part can be cut to
+oak_top,boards.matrix_mount_corners,nominal,"[[1, -1], [-1, 1], [1, 1]]",,no,a working estimate the part can be cut to
+oak_top,boards.matrix_usb,nominal,"[0.76, 7.5, 9.5, 1.6]",calipers on the Matrix in hand,no,a working estimate the part can be cut to
+oak_top,openings.matrix_window,nominal,22.0,,no,a working estimate the part can be cut to
+oak_top,openings.matrix_lip,tbd,2.0,"M4, with the acrylic's cut size",yes,"M4, with the acrylic's cut size"
+oak_top,openings.matrix_relief_d,nominal,0.6,,no,a working estimate the part can be cut to
+oak_top,openings.matrix_acrylic_t,tbd,3.0,"M6, with the diffusion prototype",yes,"M6, with the diffusion prototype"
+oak_top,openings.usb_plug_l,tbd,15.0,the recovery cable kept with the instrument,yes,the recovery cable kept with the instrument
+oak_top,openings.usb_plug_turn,nominal,down,the recovery cable kept with the instrument,no,a working estimate the part can be cut to
+oak_top,openings.matrix_usb_to_tail,tbd,false,"M4, the Matrix's orientation under its window",yes,"M4, the Matrix's orientation under its window"
+oak_top,openings.usb_ext_overmold_w,tbd,13.0,calipers on the recovery cable,yes,calipers on the recovery cable
+oak_top,openings.usb_pocket_clear,nominal,0.55,,no,a working estimate the part can be cut to
+oak_top,openings.usb_overmold,tbd,"[15.0, 9.0]","M4, against the extension bought",yes,"M4, against the extension bought"
+oak_top,hardware.col_screw_head_h,tbd,1.5,as col_screw_head_d,yes,as col_screw_head_d
+oak_top,hardware.col_pocket_d,nominal,6.35,,no,a working estimate the part can be cut to
+oak_top,hardware.col_pocket_clear,nominal,0.5,,no,a working estimate the part can be cut to
+oak_top,hardware.mx_insert_l,nominal,4.0,an insert set in a scrap of the chosen oak and pulled,no,a working estimate the part can be cut to
+oak_top,hardware.mx_insert_hole,nominal,4.0,an insert set in a scrap of the chosen oak,no,a working estimate the part can be cut to
+oak_top,hardware.kb_mount_inset,tbd,3.6,"M4, with the board's first fit",yes,"M4, with the board's first fit"
+oak_top,fabrication.wood_species,tbd,"hardwood, the owner's choice (the parts are named oak)","the owner, before the wood is ordered",yes,"the owner, before the wood is ordered"
+oak_top,fabrication.wood_profile_tol,nominal,"[-0.2, 0.2]",,no,a working estimate the part can be cut to
+oak_top,fabrication.wood_depth_tol,nominal,"[-0.1, 0.1]",,no,a working estimate the part can be cut to
+oak_top,logo.rotation,nominal,90,,no,a working estimate the part can be cut to
+oak_top,logo.offset,nominal,"[0.0, 0.0]",,no,a working estimate the part can be cut to
+oak_top,logo.depth,nominal,1.0,"the etch test on an offcut (ROADMAP open item), which sets the depth the shop's laser gives",no,a working estimate the part can be cut to
+oak_top,logo.fill,nominal,epoxy,,no,a working estimate the part can be cut to
+oak_bottom,stack.cap_clear,tbd,0.75,"M2 - the mule, with a real cap in a real oak hole",yes,"M2 - the mule, with a real cap in a real oak hole"
+oak_bottom,stack.cap_holes,tbd,slot,"the pitch chosen - at 18 mm an individual-hole web is zero, so the tightened layout needs slots (drc.echo); revisit if M2 widens it",yes,"the pitch chosen - at 18 mm an individual-hole web is zero, so the tightened layout needs slots (drc.echo); revisit if M2 widens it"
+oak_bottom,stack.side_t,nominal,4.0,,no,a working estimate the part can be cut to
+oak_bottom,stack.edge_r,tbd,1.5,"M5, on the first cut parts",no,"the sanded roundover: the STEP shows it, but it goes on by hand after the parts are cut (config/body.yaml), so a shop may leave the edges square"
+oak_bottom,stack.side_inset,tbd,2.0,M4 - the thinnest lip the oak and the saw will hold,yes,M4 - the thinnest lip the oak and the saw will hold
+oak_bottom,stack.groove_depth,tbd,3.0,"M4, with the oak panel thickness (which the flush rule sets)",yes,"M4, with the oak panel thickness (which the flush rule sets)"
+oak_bottom,stack.groove_clear,tbd,0.2,"M4, against the sheet actually bought",yes,"M4, against the sheet actually bought"
+oak_bottom,ends.mouth_cap_t,tbd,6.0,M4,yes,M4
+oak_bottom,ends.tail_cap_t,tbd,6.0,"M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md",yes,"M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md"
+oak_bottom,layout.mouth_extra,tbd,10.0,M2 - where the lips and the mouthpiece mount land,yes,M2 - where the lips and the mouthpiece mount land
+oak_bottom,layout.tail_clear,tbd,3.0,"M4, with the connector's real rear envelope",yes,"M4, with the connector's real rear envelope"
+oak_bottom,layout.underside_clear,tbd,3.0,M4,yes,M4
+oak_bottom,layout.gap,nominal,50.0,,no,a working estimate the part can be cut to
+oak_bottom,switch.keycap_top_above_seat,nominal,9.0,"calipers on a cap on its switch (M1) would make it settled; a visual match at scale cannot resolve a few tenths, which is the oak top's thickness tolerance. It SETS BOTH oak panel thicknesses (flush rule, stack above)",no,a working estimate the part can be cut to
+oak_bottom,boards.sensor_lead_row,tbd,10.2,M4 footprint,yes,M4 footprint
+oak_bottom,boards.umb_adapter_t,tbd,1.6,"M4, with the board ordered",yes,"M4, with the board ordered"
+oak_bottom,boards.kb_tail_margin,nominal,10.3,"M3, with the key positions; hardware.col_pocket_wall, which sets it",no,a working estimate the part can be cut to
+oak_bottom,boards.board_clear,tbd,1.5,"M4, with the boards laid out",yes,"M4, with the boards laid out"
+oak_bottom,openings.matrix_window,nominal,22.0,,no,a working estimate the part can be cut to
+oak_bottom,midi.jack_thread,nominal,"[7.0, 4.5]",,no,a working estimate the part can be cut to
+oak_bottom,midi.jack_nut_t,nominal,2.0,,no,a working estimate the part can be cut to
+oak_bottom,midi.jack_collar,nominal,"[10.0, 1.5]",,no,a working estimate the part can be cut to
+oak_bottom,midi.hole_d,tbd,7.3,"a test hole in an offcut of the chosen oak, with the part in hand",yes,"a test hole in an offcut of the chosen oak, with the part in hand"
+oak_bottom,midi.cbore_clear,tbd,1.0,the part in hand,yes,the part in hand
+oak_bottom,ethercon.offset_y,tbd,-7.0,M4 tail-face paper check (ADR 0009),yes,M4 tail-face paper check (ADR 0009)
+oak_bottom,ethercon.floor_clear,nominal,0.55,,no,a working estimate the part can be cut to
+oak_bottom,hardware.ubolt_rod_d,tbd,3.0,"M4, from the strap hardware chosen - small M3 U-bolts are sold for model and tube clamps [from memory]; a bent M3 rod or a stainless M3 threaded rod does the same job",yes,"M4, from the strap hardware chosen - small M3 U-bolts are sold for model and tube clamps [from memory]; a bent M3 rod or a stainless M3 threaded rod does the same job"
+oak_bottom,hardware.ubolt_hole_clear,tbd,0.5,"M4, with the U-bolt bought",yes,"M4, with the U-bolt bought"
+oak_bottom,hardware.ubolt_span,tbd,20.0,M4,yes,M4
+oak_bottom,fabrication.wood_species,tbd,"hardwood, the owner's choice (the parts are named oak)","the owner, before the wood is ordered",yes,"the owner, before the wood is ordered"
+oak_bottom,fabrication.wood_profile_tol,nominal,"[-0.2, 0.2]",,no,a working estimate the part can be cut to
+oak_bottom,fabrication.wood_depth_tol,nominal,"[-0.1, 0.1]",,no,a working estimate the part can be cut to
+mouth_cap,stack.edge_r,tbd,1.5,"M5, on the first cut parts",no,"the sanded roundover: the STEP shows it, but it goes on by hand after the parts are cut (config/body.yaml), so a shop may leave the edges square"
+mouth_cap,ends.mouth_cap_t,tbd,6.0,M4,yes,M4
+mouth_cap,switch.keycap_top_above_seat,nominal,9.0,"calipers on a cap on its switch (M1) would make it settled; a visual match at scale cannot resolve a few tenths, which is the oak top's thickness tolerance. It SETS BOTH oak panel thicknesses (flush rule, stack above)",no,a working estimate the part can be cut to
+mouth_cap,fabrication.wood_species,tbd,"hardwood, the owner's choice (the parts are named oak)","the owner, before the wood is ordered",yes,"the owner, before the wood is ordered"
+mouth_cap,fabrication.wood_profile_tol,nominal,"[-0.2, 0.2]",,no,a working estimate the part can be cut to
+mouth_cap,fabrication.wood_depth_tol,nominal,"[-0.1, 0.1]",,no,a working estimate the part can be cut to
+tail_cap,stack.edge_r,tbd,1.5,"M5, on the first cut parts",no,"the sanded roundover: the STEP shows it, but it goes on by hand after the parts are cut (config/body.yaml), so a shop may leave the edges square"
+tail_cap,ends.tail_cap_t,tbd,6.0,"M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md",yes,"M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md"
+tail_cap,switch.keycap_top_above_seat,nominal,9.0,"calipers on a cap on its switch (M1) would make it settled; a visual match at scale cannot resolve a few tenths, which is the oak top's thickness tolerance. It SETS BOTH oak panel thicknesses (flush rule, stack above)",no,a working estimate the part can be cut to
+tail_cap,ethercon.recess_margin,tbd,1.0,"M4, with the cable connector (J-UMBILICAL-CABLE) in hand: its shell has to enter the recess and a thumb has to reach the tab",yes,"M4, with the cable connector (J-UMBILICAL-CABLE) in hand: its shell has to enter the recess and a thumb has to reach the tab"
+tail_cap,ethercon.offset_y,tbd,-7.0,M4 tail-face paper check (ADR 0009),yes,M4 tail-face paper check (ADR 0009)
+tail_cap,ethercon.floor_clear,nominal,0.55,,no,a working estimate the part can be cut to
+tail_cap,fabrication.wood_species,tbd,"hardwood, the owner's choice (the parts are named oak)","the owner, before the wood is ordered",yes,"the owner, before the wood is ordered"
+tail_cap,fabrication.wood_profile_tol,nominal,"[-0.2, 0.2]",,no,a working estimate the part can be cut to
+tail_cap,fabrication.wood_depth_tol,nominal,"[-0.1, 0.1]",,no,a working estimate the part can be cut to
+side,stack.cap_clear,tbd,0.75,"M2 - the mule, with a real cap in a real oak hole",yes,"M2 - the mule, with a real cap in a real oak hole"
+side,stack.side_t,nominal,4.0,,no,a working estimate the part can be cut to
+side,stack.side_inset,tbd,2.0,M4 - the thinnest lip the oak and the saw will hold,yes,M4 - the thinnest lip the oak and the saw will hold
+side,stack.groove_depth,tbd,3.0,"M4, with the oak panel thickness (which the flush rule sets)",yes,"M4, with the oak panel thickness (which the flush rule sets)"
+side,ends.mouth_cap_t,tbd,6.0,M4,yes,M4
+side,ends.tail_cap_t,tbd,6.0,"M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md",yes,"M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md"
+side,layout.mouth_extra,tbd,10.0,M2 - where the lips and the mouthpiece mount land,yes,M2 - where the lips and the mouthpiece mount land
+side,layout.tail_clear,tbd,3.0,"M4, with the connector's real rear envelope",yes,"M4, with the connector's real rear envelope"
+side,layout.underside_clear,tbd,3.0,M4,yes,M4
+side,layout.gap,nominal,50.0,,no,a working estimate the part can be cut to
+side,switch.keycap_top_above_seat,nominal,9.0,"calipers on a cap on its switch (M1) would make it settled; a visual match at scale cannot resolve a few tenths, which is the oak top's thickness tolerance. It SETS BOTH oak panel thicknesses (flush rule, stack above)",no,a working estimate the part can be cut to
+side,boards.sensor_lead_row,tbd,10.2,M4 footprint,yes,M4 footprint
+side,boards.umb_adapter_t,tbd,1.6,"M4, with the board ordered",yes,"M4, with the board ordered"
+side,boards.kb_tail_margin,nominal,10.3,"M3, with the key positions; hardware.col_pocket_wall, which sets it",no,a working estimate the part can be cut to
+side,boards.board_clear,tbd,1.5,"M4, with the boards laid out",yes,"M4, with the boards laid out"
+side,openings.matrix_window,nominal,22.0,,no,a working estimate the part can be cut to
+side,fabrication.acrylic_material,nominal,acrylic (PMMA) sheet,,no,a working estimate the part can be cut to
+side,fabrication.side_frosted_face,tbd,outside face,"the tint sample under the chosen LEDs, before the sheet is ordered (SIDE-ACRYLIC; ADR 0009 'Finishes')",yes,"the tint sample under the chosen LEDs, before the sheet is ordered (SIDE-ACRYLIC; ADR 0009 'Finishes')"
+side,fabrication.acrylic_edge,nominal,as laser cut,,no,a working estimate the part can be cut to
+side,fabrication.acrylic_profile_tol,nominal,"[-0.1, 0.1]",,no,a working estimate the part can be cut to
+matrix_window,stack.cap_clear,tbd,0.75,"M2 - the mule, with a real cap in a real oak hole",yes,"M2 - the mule, with a real cap in a real oak hole"
+matrix_window,stack.side_t,nominal,4.0,,no,a working estimate the part can be cut to
+matrix_window,stack.side_inset,tbd,2.0,M4 - the thinnest lip the oak and the saw will hold,yes,M4 - the thinnest lip the oak and the saw will hold
+matrix_window,ends.mouth_cap_t,tbd,6.0,M4,yes,M4
+matrix_window,ends.tail_cap_t,tbd,6.0,"M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md",yes,"M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md"
+matrix_window,layout.mouth_extra,tbd,10.0,M2 - where the lips and the mouthpiece mount land,yes,M2 - where the lips and the mouthpiece mount land
+matrix_window,layout.tail_clear,tbd,3.0,"M4, with the connector's real rear envelope",yes,"M4, with the connector's real rear envelope"
+matrix_window,layout.underside_clear,tbd,3.0,M4,yes,M4
+matrix_window,layout.gap,nominal,50.0,,no,a working estimate the part can be cut to
+matrix_window,boards.sensor_lead_row,tbd,10.2,M4 footprint,yes,M4 footprint
+matrix_window,boards.umb_adapter_t,tbd,1.6,"M4, with the board ordered",yes,"M4, with the board ordered"
+matrix_window,boards.kb_tail_margin,nominal,10.3,"M3, with the key positions; hardware.col_pocket_wall, which sets it",no,a working estimate the part can be cut to
+matrix_window,boards.board_clear,tbd,1.5,"M4, with the boards laid out",yes,"M4, with the boards laid out"
+matrix_window,openings.matrix_window,nominal,22.0,,no,a working estimate the part can be cut to
+matrix_window,openings.matrix_lip,tbd,2.0,"M4, with the acrylic's cut size",yes,"M4, with the acrylic's cut size"
+matrix_window,openings.matrix_acrylic_t,tbd,3.0,"M6, with the diffusion prototype",yes,"M6, with the diffusion prototype"
+matrix_window,fabrication.acrylic_material,nominal,acrylic (PMMA) sheet,,no,a working estimate the part can be cut to
+matrix_window,fabrication.window_tint,tbd,colourless,"M6, the diffusion prototype (MECH-WINDOW)",yes,"M6, the diffusion prototype (MECH-WINDOW)"
+matrix_window,fabrication.window_frosted_face,tbd,top face,"M6, the diffusion prototype (MECH-WINDOW)",yes,"M6, the diffusion prototype (MECH-WINDOW)"
+matrix_window,fabrication.acrylic_edge,nominal,as laser cut,,no,a working estimate the part can be cut to
+matrix_window,fabrication.acrylic_profile_tol,nominal,"[-0.1, 0.1]",,no,a working estimate the part can be cut to

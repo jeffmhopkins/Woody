@@ -1443,6 +1443,48 @@ fabrication:
     status: nominal
     source: "the oak parts' pocket, groove and rebate depths from the face named [drawing convention]; drc.echo 'column screw pockets leave wood over them' has margin over it"
 
+  # THE ACRYLIC (owner, 2026-10-05: "acrylic needs to have its own files when
+  # cut"): the two sides (SIDE-ACRYLIC) and the Matrix window (MECH-WINDOW).
+  # Their thicknesses are stack.side_t and openings.matrix_acrylic_t.
+  acrylic_material:
+    value: "acrylic (PMMA) sheet"
+    status: nominal
+    source: "SIDE-ACRYLIC and MECH-WINDOW are 'frosted acrylic' and name no grade; cast or extruded both laser-cut cleanly [from memory]"
+  side_tint:
+    value: "dark grey"
+    status: settled
+    source: "owner, 2026-09-28 (ADR 0009, 'Finishes'; SIDE-ACRYLIC). How much of the side LEDs' light it passes sets their drive (ADR 0014)"
+  side_surface:
+    value: "frosted"
+    status: settled
+    source: "ADR 0009: the sides are frosted, edge-lit by the LED row (ADR 0014); SIDE-ACRYLIC"
+  side_frosted_face:
+    value: "outside face"
+    status: tbd
+    source: "which face of a sheet frosted on one face goes outward; no document chooses [from memory: matte outward hides handling marks, matte inward diffuses the same]"
+    decided_by: "the tint sample under the chosen LEDs, before the sheet is ordered (SIDE-ACRYLIC; ADR 0009 'Finishes')"
+  window_tint:
+    value: "colourless"
+    status: tbd
+    source: "MECH-WINDOW is 'frosted acrylic' and names no tint; the sides' dark grey would dim the Matrix [from memory]"
+    decided_by: "M6, the diffusion prototype (MECH-WINDOW)"
+  window_surface:
+    value: "frosted"
+    status: settled
+    source: "owner, 2026-09-26: frosted, knowing it softens the pixels at this distance from the LEDs (ADR 0009; MECH-WINDOW)"
+  window_frosted_face:
+    value: "top face"
+    status: tbd
+    source: "which face of a sheet frosted on one face is up, flush with the oak; no document chooses"
+    decided_by: "M6, the diffusion prototype (MECH-WINDOW)"
+  acrylic_edge:
+    value: "as laser cut"
+    status: nominal
+    source: "[drawing convention] no acrylic edge is seen: the sides' long edges stand in the oak grooves and their ends against the caps, and the window's edges sit in its rebate"
+  acrylic_profile_tol:
+    value: [-0.1, 0.1]
+    status: nominal
+    source: "a laser cut in acrylic [from memory]; inside stack.groove_clear for the sides and the window's clearance in its rebate"
 # ---------------------------------------------------------------- logo ----
 logo:
   # THE MAKER'S MARK ON THE OAK TOP (owner, 2026-10-01: "Logo should be here,
