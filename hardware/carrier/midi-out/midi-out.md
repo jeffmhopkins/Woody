@@ -100,7 +100,11 @@ must. **Recorded, not asserted, because it does not pass:** the worst corner
 is below CA-033's own 5 V transmitter at *its* worst corner (3.75 mA, above)
 and below the PC900V's 4 mA worst-case need `[ds p.4]`. The nominal is above
 both. CA-033 states no minimum for a transmitter, only that a receiver must
-turn on with under 5 mA `[ds p.2]`; the E-test above decides it.
+turn on with under 5 mA `[ds p.2]`; the E-test above decides it. **Accepted
+by the owner** (2026-10-05, chat), asked whether to add a stronger driver:
+"Agreed" — no buffer; the two-receiver E-test stands, and a failure there is a
+part swap on the main board (a lower-impedance driver with TTL inputs and the
+resistors re-sized against its short-circuit rating), not a redesign.
 
 **Why not lower resistors.** At 150 Ω each the worst case is 3.78 mA, but a
 line shorted to the sleeve then draws 5.0 / 142.5 = 35 mA `[calc]`, past the
