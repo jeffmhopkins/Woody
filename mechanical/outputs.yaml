@@ -91,7 +91,7 @@ renders:
               highlight: ["main board*", "parts *", "tall parts*", "breath sensor", "LED row", "ribbon *", "J-CHAIN *", "IDC plug *", "board *",
                           "switch *", "Matrix*", "etherCON", "MIDI*", "J-MIDI", "umbilical adapter", "J-UMB", "J-MCU"]}
   - name: breakdown-breath
-    title: "Breakdown: the breath path - mouth cap, tube, trap, sensor, at the mouth end"
+    title: "Breakdown: the breath path - the inlet in the mouth cap, the clear tube, the sensor, at the mouth end"
     src: mechanical/cad/woody_body.scad
     out: mechanical/renders/breakdown-breath.png
     imgsize: [1400, 900]

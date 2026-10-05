@@ -6,7 +6,7 @@ inputs:
   tools/sim.py: 0312a1077b9afa80
   hardware/carrier/breath-excitation-reference/sim/sims.yaml: 753190052498805c
   hardware/carrier/breath-excitation-reference/netlist.yaml: 2d5ee10b223dc95d
-  hardware/interfaces/breath-sense-link/netlist.yaml: 3174b77569cdaf62
+  hardware/interfaces/breath-sense-link/netlist.yaml: 589dc991272a7d9c
   hardware/carrier/breath-excitation-reference/sim/ref-loop.cir: 3b87404585d82f14
   hardware/carrier/breath-excitation-reference/sim/ref-zout.cir: 49f8b6ee13de7653
   hardware/carrier/breath-excitation-reference/sim/ref-step.cir: 7be2e362873a4619

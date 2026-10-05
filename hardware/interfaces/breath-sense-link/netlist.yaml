@@ -102,9 +102,10 @@ components:
     - VOUT
     - GND
     note: SOLDERED TO THE MAIN BOARD, no socket (case 1351-01 is surface mount). Pin 2 VS, pin 3 GND, pin 4 VOUT;
-      pins 1 and 5-8 are N/C and carry no net (Style 2 - breath-sense-link.md, Mounting). P1 takes the breath tube
-      with its PTFE plug and its <=1 mL trap; P2 IS OPEN TO THE CAVITY AND MUST NEVER BE BLOCKED. Neither is a net,
-      so neither is here - which is exactly the kind of fact a netlist cannot carry and the page must
+      pins 1 and 5-8 are N/C and carry no net (Style 2 - breath-sense-link.md, Mounting). P1 takes the clear breath
+      tube with its PTFE plug (no trap, ADR 0003 2026-10-05); P2 IS OPEN TO THE CAVITY AND MUST NEVER BE BLOCKED.
+      Neither is a net, so neither is here - which is exactly the kind of fact a netlist cannot carry and the page
+      must
 nets:
   AGND_INST:
   - port: AGND_INST

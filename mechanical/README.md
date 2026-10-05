@@ -82,6 +82,35 @@ Where each number lives, so none is restated here:
 so an **etch test on an offcut** of the top's own board comes first (ROADMAP,
 *Bench measurements*).
 
+## The breath inlet
+
+The breath enters through **a short black metal barb at the centre of the
+mouth cap**, which the player's own tube pushes onto (owner, 2026-10-04, issue
+#36: *"just a Barb or something at the top"*; ADR 0003, *Amendment,
+2026-10-04 — the inlet*). The parts:
+
+- A Clippard 12842 flush barb screwed into an E-Z LOK 550-1032 brass insert.
+  The insert is tapped and epoxied through the oak, flush with its outer face.
+- A Clippard 12843 inside, onto which one clear silicone tube runs to the
+  sensor: no trap (owner, 2026-10-05; ADR 0003). It may loop, and it crosses
+  the LED row, which a clear tube does not shade.
+
+BOM rows `INLET-*`, `TUBE`, `ADH-INLET` and `SEAL-INLET`.
+
+Where each number lives, so none is restated here:
+
+- **The insert, the barbs and the tap drill**: `config/body.yaml` `inlet`,
+  each with its source.
+- **How far the barb stands proud, and the insert's clearance to the breath
+  sensor**: [`drc.echo`](drc.echo), *"breath inlet barb proud of the oak"* and
+  *"breath inlet insert clear of U-BREATH"*.
+- **The tube's route**: [`drc.echo`](drc.echo), *"breath tube bends no
+  tighter than routing.tube_bend_r"* (its radius, and its length) and
+  *"breath tube clear of the columns"*; the figures are `config/body.yaml`
+  `routing.tube_*`.
+- **The hole**: [`export/mouth-cap.dxf`](export/mouth-cap.dxf), the tap drill,
+  tapped M8×1.25 by hand.
+
 ## The one rule
 
 **Change the YAML, run the build, commit what it produced.** Never draw a

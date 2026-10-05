@@ -55,7 +55,7 @@ one big long board?")
 - **The breath sensor moves to the mouth end** (owner's choice between the
   mouth end, the middle with the strip jumpered around it, and keeping
   separate boards): on the far side from the tube, ports towards the tail,
-  beside the breath trap. The thumb switches' pins stand through the board in
+  beside the breath trap *(Amended 2026-10-05, ADR 0003: there is no trap; one clear tube runs from the inlet to the sensor.)*. The thumb switches' pins stand through the board in
   two bands along the body, the LED strip takes the band between them, and
   the sensor is too wide to sit beside the strip anywhere along it.
 - **The Matrix and the umbilical plug into its tail end** (owner, same day):
@@ -94,7 +94,7 @@ one big long board?")
   the chain's clock. **E11's "breath output clean while the matrix and LEDs
   are exercised" is the test**, and it matters more than it did.
 - **The breath tube gets short.** Mouth cap, trap, sensor, all within the
-  mouth band. ADR 0003's pipe-mode and delay arguments were written for a long
+  mouth band. *(Amended 2026-10-05, ADR 0003: there is no trap; one clear tube runs from the inlet to the sensor.)* ADR 0003's pipe-mode and delay arguments were written for a long
   tube and get easier; the ROADMAP re-derivation item stands.
 - **Four cluster boards become two key boards plus the main board.**
   `PCB-CLUSTER` drops to two and `PCB-CARRIER` is the main board. The key
