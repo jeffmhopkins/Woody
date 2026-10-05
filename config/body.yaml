@@ -319,6 +319,11 @@ switch:
     value: 0.45
     status: settled
     source: "[ds] Gateron KS-33H10B050NN-Y24 sheet 6, side elevation: the 15.0 x 15.0 collar's thickness, from the seat"
+  cutout_r:
+    value: 0.5
+    status: nominal
+    source: "the switch cutouts' inside corner radius, in both plates (owner, 2026-10-05: 'down for having a clean rounded corner as long as it doesn't interfere with the keys'; issue #43). Gateron's drawing gives no radius (datasheets/mechanical/GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf, sheet 6, the cutout only as the 14.00 body). The banked footprint draws the cutout with R0.5 corners (datasheets/mechanical/GATERON-KS-33-SW_KS33_1u.kicad_mod, Eco2.User arcs); and the banked STEP solid (datasheets/mechanical/GATERON-KS-33-3D.step, meshed to mechanical/cad/vendor/ks33.stl), cut across through the plate's thickness below the seat, stands 0.5 back from each corner of the 14 mm square and overlaps nothing an R0.5 corner leaves, where an R0.75 corner meets it [calc: the housing's section at 0.1 to 2.0 below the seat against the square less the rounded square, 0.000 mm2 at R0.5, 0.007 at R0.75, 0.043 at R1.0]. Two third-party sources and no vendor figure, so nominal"
+    decided_by: "M1, the kerf coupon that settles the cutout (config/key-layout.yaml): a switch clipped into it"
   housing_top_above_seat:
     value: 3.35
     status: settled
@@ -682,9 +687,9 @@ boards:
     status: settled
     source: "a finished 1.6 mm board's thickness tolerance, key boards and main board: +/-10 % at 1.0 mm and over [datasheets/fab/JLCPCB-PCB-CAPABILITIES.pdf, 'Thickness Tolerance']. A board's top face is set by its spacer, so this moves only its other face - and so the gap the column standoff fills (drc.echo 'cassette height at the hardware's tolerance limits')"
   kb_end_margin:
-    value: 6.6
+    value: 7.9
     status: tbd
-    source: "a key board's MOUTH end past its first switch cutout, along the body. The mouth corners' columns stand over the first thumb row, and a column cannot lean (ADR 0025), so the key board's mount must be where its stud in the bottom plate keeps hardware.stud_edge, and its spacer 0.5, from a thumb switch's cutout: 0.6 more than the 6.0 the key board alone needed (drc.echo 'columns vertical: the main board's mounts under the key boards'', 'bottom-plate studs clear of the plate's edges and cutouts', 'bottom-plate spacers clear of the thumb switch cutouts')"
+    source: "a key board's MOUTH end past its first switch cutout, along the body. The mouth corners' columns stand over the first thumb row, and a column cannot lean (ADR 0025), so its stud hole in the bottom plate must keep hardware.col_web_min of metal from that thumb switch's cutout (owner, 2026-10-05, issue #43: 'make the keyboards longer so that the standoffs are further away') [calc: the column is hardware.kb_mount_inset in from the board's end and 0.4 outside the cutout's side across the body, so the web is hypot(m - 3.6 + 0.5, 0.4 + 0.5) - 0.5 - 1.25 for the cutout's R0.5 corner (switch.cutout_r) and the stud hole's radius: 7.8 gives 3.03, and 7.9 holds 3.0 even against the square corner, hypot(4.3, 0.4) - 1.25 = 3.07]. drc.echo 'column holes: plate web to the switch cutouts', 'columns vertical: the main board's mounts under the key boards'', 'bottom-plate studs clear of the plate's edges and cutouts'"
     decided_by: "M4, with the boards laid out"
   kb_tail_margin:
     value: 10.3
@@ -1129,6 +1134,11 @@ hardware:
     value: 2.9
     status: nominal
     source: "M2.5 clearance through the key plate, ISO 273 medium [from memory]: the key plate and the key boards are one part once the switches are soldered, and each board locates on its columns by the fine hole (kb_board_hole), so the plate takes the medium one; the screw's head (col_screw_head_d) bears on the plate round it"
+  col_web_min:
+    value: 3.0
+    status: nominal
+    source: "the least aluminium between a column's hole and the nearest switch cutout, in both plates: the key plate's screw hole (col_plate_hole) and the bottom plate's stud hole (stud_hole), against the cutout as cut, its corners rounded (switch.cutout_r). Owner, 2026-10-05, on the plates' rigidity at the columns (issue #43; ADR 0025, Amendment 2026-10-05 (2)). 2.5 plate thicknesses (`plate-thickness`, config/figures.yaml): over the usual sheet-metal rule of a hole at least two thicknesses from an edge [from memory - no banked figure], and on the bottom plate it keeps the spacer's bearing circle (kb_spacer_od, off its axis by kb_mount_float) more than a plate thickness inside the metal [calc: stud_hole / 2 + 3.0 - (kb_spacer_od / 2 + kb_mount_float) = 1.25 + 3.0 - 2.45 = 1.8]. drc.echo 'column holes: plate web to the switch cutouts'; boards.kb_end_margin is set by it"
+    decided_by: "M4, on the first plates cut: a column screw torqued down beside a cutout"
   col_pocket_d:
     value: 6.35
     status: nominal

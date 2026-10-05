@@ -350,9 +350,13 @@ module sanded_cap(t) {
         }
     }
 }
+// A switch cutout, its inside corners rounded to switch.cutout_r: clear of the
+// KS-33's housing at that radius (owner, 2026-10-05, issue #43).
 module cutout_at(xy, rot, s) {
-    translate(xy) rotate(rot) square([s, s], center = true);
+    translate(xy) rotate(rot) offset(r = switch_cutout_r) offset(delta = -switch_cutout_r) square([s, s], center = true);
 }
+// From a point to a switch cutout as cut, its corners rounded.
+function cutout_gap_r(p, k) = rect_gap(p, key_xy(k), [1, 1] * (plate_cutout - 2 * switch_cutout_r), key_rot(k)) - switch_cutout_r;
 
 // Key plate: the cassette's top, in the plate's own frame = model XY minus
 // origin. A clearance hole at each column, for the screw that ties the plate
@@ -2231,6 +2235,15 @@ module drc_report() {
     sp = min([for (m = mounts) cutout_gap(m)]) - hardware_kb_spacer_od / 2 - hardware_kb_mount_float;
     drc(sp >= 0.5, "key-board spacers clear of the switch cutouts", sp,
         "mm from a spacer's edge, off its axis by hardware.kb_mount_float, to the nearest switch cutout, worst case");
+    // THE WEB ROUND A COLUMN (owner, 2026-10-05, issue #43; ADR 0025,
+    // Amendment 2026-10-05 (2)): the metal left between a column's hole and the
+    // nearest switch cutout as cut, in the key plate (the screw's clearance
+    // hole) and in the bottom plate (the stud's hole, under the main board's
+    // mount - a column is vertical, so the same place)
+    let(top = min([for (m = mounts, k = top_keys) cutout_gap_r(m, k)]) - hardware_col_plate_hole / 2,
+        bot = min([for (i = [0 : n_cols - 1], k = bottom_keys) cutout_gap_r(cb_standoffs[i], k)]) - hardware_stud_hole / 2)
+        drc(min(top, bot) >= hardware_col_web_min, "column holes: plate web to the switch cutouts", [top, bot],
+            str("mm of aluminium from a column's hole to the nearest switch cutout (corners rounded to switch.cutout_r), worst case: the key plate's screw hole, the bottom plate's stud hole; against hardware.col_web_min = ", hardware_col_web_min));
     // the oak top: a blind pocket over each head, wood left round it and over it
     function pocket_gap(m) = min(cap_gap(m), m[1] - (u_y0 + stack_groove_clear), (W - u_y0 - stack_groove_clear) - m[1],
                                  rect_gap(m, matrix_xy, [matrix_rebate, matrix_rebate], 0)) - hardware_col_pocket_d / 2;
