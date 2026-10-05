@@ -762,6 +762,15 @@ families:
 - **`route_first:`** leads as a family of that name, before the listed ones,
   unless a family is itself called `route_first`. **`connect_first:`** is
   unchanged: `prepare` routes and locks it before any family.
+- **`route_fence: [x0, y0, x1, y1]`** (top level, board mm): a run that re-routes
+  one section changes copper only inside it. Every track and via outside it is
+  fixed as locked copper is: `complete`'s rip-up never takes up a net with
+  copper outside it, `pcb.rescue` takes up nothing outside it, and `tidy` never
+  deletes, moves, splits or merges it (#40: without it, the tail trial's rescue
+  re-routed chain lines from x 123, and `tidy` ate failed nets' runs back to
+  their pads). **`tidy` never touches locked copper** either way - before #40 its
+  doubled-track and overlap merges, `square_joins` and `merge_tracks` could split,
+  move or merge a locked track away.
 - **Unchanged:** locked copper is an obstacle to every family and never taken
   up; per-class layers, layer costs and via sizes; 45° moves and turn costs;
   the planes, `prepare` and `tidy`. Each family's copper is fixed for the

@@ -988,6 +988,7 @@ def rescue(path, bdir, radii=(1.5, 3.0, 5.0)):
     from shapely.geometry import Point, box
     lay = layout_yaml(bdir)
     planes = set(lay.get("fanout") or []) | {pl["net"] for pl in lay.get("planes") or []}
+    fence = pcb_route.fence_of(lay)         # layout.yaml route_fence: nothing outside it is taken up
     score = lambda p: (lambda d: len(d.get("unconnected_items", [])) + len(d.get("violations", [])))(drc(p))
     base, kept, tried = score(path), 0, set()
     # the trial board beside its own project file, so DRC reads the same rules
@@ -1014,7 +1015,7 @@ def rescue(path, bdir, radii=(1.5, 3.0, 5.0)):
                         region = region.union(box(min(pa[0], pb[0]), min(pa[1], pb[1]), max(pa[0], pb[0]), max(pa[1], pb[1])).buffer(r))
                     victims = []
                     for t in board.GetTracks():
-                        if t.IsLocked() or t.GetNetname() in planes or t.GetNetname() == net:
+                        if pcb_route.is_fixed(t, fence) or t.GetNetname() in planes or t.GetNetname() == net:
                             continue
                         bb = t.GetBoundingBox()
                         if region.intersects(box(bb.GetLeft() / 1e6, bb.GetTop() / 1e6, bb.GetRight() / 1e6, bb.GetBottom() / 1e6)):

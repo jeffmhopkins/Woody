@@ -62,6 +62,32 @@ LAYERS = [pcbnew.F_Cu, pcbnew.B_Cu]
 MM, TO = pcbnew.FromMM, pcbnew.ToMM
 
 
+def fence_of(lay):
+    """layout.yaml `route_fence: [x0, y0, x1, y1]` (board mm, KiCad's frame) as a sorted
+    rectangle, or None: a run that may change copper only inside it (#40, a section
+    re-routed on its own). Copper outside it is fixed, as locked copper is."""
+    f = lay.get("route_fence")
+    if not f:
+        return None
+    x0, y0, x1, y1 = (float(v) for v in f)
+    return (min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1))
+
+
+def in_fence(t, f):
+    """Every point of track or via t inside fence f (board mm)."""
+    if isinstance(t, pcbnew.PCB_VIA):
+        pts = [t.GetPosition()]
+    else:
+        pts = [t.GetStart(), t.GetEnd()] + ([t.GetMid()] if type(t) is pcbnew.PCB_ARC else [])
+    return all(f[0] <= TO(q.x) <= f[2] and f[1] <= TO(q.y) <= f[3] for q in pts)
+
+
+def is_fixed(t, f):
+    """Copper no routing step may delete, move, split or merge away: locked, or outside
+    the run's fence."""
+    return t.IsLocked() or (f is not None and not in_fence(t, f))
+
+
 def steps45(a, b):
     """The angle between two grid moves, in 45-degree steps (0-4)."""
     d = math.degrees(math.atan2(b[1], b[0]) - math.atan2(a[1], a[0])) % 360
@@ -108,6 +134,7 @@ def board_outline(board):
 
 
 class Router:
+    fence = None            # tidy sets the run's fence (fence_of) before square_joins
     def __init__(self, board, lay):
         self.board, self.lay = board, lay
         r = lay["rules"]
@@ -502,6 +529,7 @@ class Router:
         t2.SetWidth(t.GetWidth())
         t2.SetLayer(t.GetLayer())
         t2.SetNet(t.GetNet())
+        t2.SetLocked(t.IsLocked())
         t.SetEnd(pcbnew.VECTOR2I(X.x, X.y))
         net = t.GetNetname()
         self.own(net, t2, None)
@@ -530,7 +558,8 @@ class Router:
             for t in tracks:
                 for e in (t.GetStart(), t.GetEnd()):
                     for u in tracks:
-                        if u is t or u.GetNetname() != t.GetNetname() or u.GetLayer() != t.GetLayer():
+                        if u is t or u.GetNetname() != t.GetNetname() or u.GetLayer() != t.GetLayer() \
+                                or is_fixed(u, self.fence):
                             continue
                         a, b = u.GetStart(), u.GetEnd()
                         dx, dy = b.x - a.x, b.y - a.y
@@ -560,6 +589,8 @@ class Router:
                         if i == j:
                             continue
                         (ta, fa), (tb, fb) = vs[i], vs[j]
+                        if is_fixed(ta, self.fence) or is_fixed(tb, self.fence):
+                            continue            # locked, or outside the run's fence: left as it is
                         ax, ay, bx, by = fa.x - px, fa.y - py, fb.x - px, fb.y - py
                         la, lb = math.hypot(ax, ay), math.hypot(bx, by)
                         if not la or not lb or (ax * bx + ay * by) / (la * lb) <= math.cos(math.radians(89.5)):
@@ -780,7 +811,7 @@ def route(board, lay):
     return failed
 
 
-def merge_tracks(board, delete=False):
+def merge_tracks(board, delete=False, fence=None):
     """Join two tracks of one net and layer that meet head to tail in a straight
     line, so the board is edited in KiCad as runs, not grid steps. Never at a
     via, a third track, or inside a pad: KiCad connects a track to a pad by its
@@ -799,6 +830,8 @@ def merge_tracks(board, delete=False):
         for (net, layer, pt), ts in ends.items():
             if len(ts) != 2 or ts[0] is ts[1] or pt in vias or ts[0].GetWidth() != ts[1].GetWidth():
                 continue
+            if is_fixed(ts[0], fence) or is_fixed(ts[1], fence):
+                continue            # locked or outside the fence: never merged away
             a, b = ts
             far = lambda t: t.GetEnd() if key(t.GetStart()) == pt else t.GetStart()
             pa, pb = far(a), far(b)
@@ -1757,13 +1790,16 @@ def tidy(board, lay):
     """After an autorouter: what it leaves that the checks fail - zero-length and
     duplicated tracks, tracks with an end that reaches nothing of their net (dangling),
     two tracks of a net meeting at under 90 degrees (square_joins, as on a key board),
-    and collinear runs in pieces (merge_tracks)."""
+    and collinear runs in pieces (merge_tracks). Locked copper, and with layout.yaml
+    `route_fence:` everything outside it, is never deleted, moved, split or merged."""
+    fence = fence_of(lay)
+    fixed = lambda t: is_fixed(t, fence)
     key = lambda v: (v.x, v.y)
     n0 = n1 = n2 = 0
     seen = set()
     for t in [t for t in board.GetTracks() if type(t) is pcbnew.PCB_TRACK]:
         k = (t.GetNetname(), t.GetLayer(), t.GetWidth()) + tuple(sorted([key(t.GetStart()), key(t.GetEnd())]))
-        if t.GetStart() == t.GetEnd() or k in seen:
+        if (t.GetStart() == t.GetEnd() or k in seen) and not fixed(t):
             board.Delete(t)         # Delete, not Remove: a Remove from a LOADED board crashes the next walk of it
             n0 += 1
             continue
@@ -1781,6 +1817,8 @@ def tidy(board, lay):
             for i in range(len(alive)):
                 for j in range(i + 1, len(alive)):
                     a, b = alive[i], alive[j]
+                    if fixed(a) or fixed(b):
+                        continue
                     p0, p1 = a.GetStart(), a.GetEnd()
                     dx, dy = p1.x - p0.x, p1.y - p0.y
                     l2 = dx * dx + dy * dy
@@ -1811,7 +1849,7 @@ def tidy(board, lay):
     pads = [(p, p.GetNetname()) for fp in board.GetFootprints() for p in fp.Pads()]
     planes = set(lay.get("fanout") or [])
     while True:
-        for v in [v for v in board.GetTracks() if isinstance(v, pcbnew.PCB_VIA) and v.GetNetname() not in planes]:
+        for v in [v for v in board.GetTracks() if isinstance(v, pcbnew.PCB_VIA) and v.GetNetname() not in planes and not fixed(v)]:
             c, net = v.GetPosition(), v.GetNetname()
             on = {t.GetLayer() for t in board.GetTracks() if type(t) in (pcbnew.PCB_TRACK, pcbnew.PCB_ARC) and t.GetNetname() == net
                   and (t.GetStart() == c or t.GetEnd() == c or t.HitTest(c, 1000))}
@@ -1824,7 +1862,7 @@ def tidy(board, lay):
         vias = [v for v in board.GetTracks() if isinstance(v, pcbnew.PCB_VIA)]
         gone = []
         for t in tracks:
-            if t.IsLocked():
+            if fixed(t):
                 continue
             for e in (t.GetStart(), t.GetEnd()):
                 net, L = t.GetNetname(), t.GetLayer()
@@ -1844,14 +1882,15 @@ def tidy(board, lay):
     # connectivity, which in one process does not follow tracks added or deleted
     # (it took hundreds of live tracks, 2026-10-01)
     while True:
-        gone = [t for t in board.GetTracks() if (type(t) is pcbnew.PCB_TRACK and t.GetLength() < 1000)
-                or one_sided(board, t, lay)]
+        gone = [t for t in board.GetTracks() if not fixed(t) and ((type(t) is pcbnew.PCB_TRACK and t.GetLength() < 1000)
+                or one_sided(board, t, lay))]
         for t in gone:
             board.Delete(t)
         n1 += len(gone)
         if not gone:
             break
     r = Router(board, lay)
+    r.fence = fence
     for t in board.GetTracks():
         if isinstance(t, pcbnew.PCB_VIA):
             c = Point(TO(t.GetPosition().x), TO(t.GetPosition().y))
@@ -1860,7 +1899,7 @@ def tidy(board, lay):
             g = track_line(t).buffer(TO(t.GetWidth()) / 2)
             r.copper.append((t.GetNetname(), {LAYERS.index(t.GetLayer())}, g, "track"))
     n2 = r.square_joins()
-    n3 = merge_tracks(board, delete=True)
+    n3 = merge_tracks(board, delete=True, fence=fence)
     c = float((lay.get("directions") or {}).get("chamfer", 0))
     n4 = chamfer(board, lay, c) if c else 0
     print(f"route: tidy - {n0} empty or doubled track(s), {n1} dangling, {n2} acute join(s) squared, "
@@ -1883,7 +1922,7 @@ def chamfer(board, lay, size):
     pads = [(p, p.GetNetname()) for f in board.GetFootprints() for p in f.Pads()]
     n = 0
     for (net, layer, x, y), ts in ends.items():
-        if len(ts) != 2 or (net, x, y) in holes or ts[0].IsLocked() or ts[1].IsLocked():
+        if len(ts) != 2 or (net, x, y) in holes or is_fixed(ts[0], fence_of(lay)) or is_fixed(ts[1], fence_of(lay)):
             continue
         P = pcbnew.VECTOR2I(x, y)
         if any(nn == net and p.IsOnLayer(layer) and p.HitTest(P) for p, nn in pads):
@@ -1940,6 +1979,11 @@ def complete(board, lay, unconnected, max_nodes=250000, per_mm=2500, frozen=(), 
     failed = []
     fixed = set(lay.get("fanout") or []) | {pl["net"] for pl in lay.get("planes") or []} | \
         {s_["net"] for s_ in lay.get("islands") or []} | {n for pr in lay.get("pairs") or [] for n in pr["nets"]} | set(frozen)
+    fence = fence_of(lay)
+    if fence is not None:
+        # layout.yaml route_fence: a net with any copper outside it is not taken up (its
+        # rip-up is the whole net), and neither is a net with locked copper
+        fixed |= {t.GetNetname() for t in board.GetTracks() if is_fixed(t, fence)}
     limit, rips = int(lay.get("rip_up", 0)), {}
     queue = list(unconnected)
     # the layers it routes: the outer two, and layer 3 where layout.yaml directions: names it
