@@ -1077,8 +1077,11 @@ def cmd_route(bdir, chunk=30):
     _fill(path)
     tried = set()
     if lay.get("families"):
-        # family by family (pcb_route.route_families), each saved, tidied and filled before
-        # the next: a killed run resumes at the first family with a connection still missing
+        # family by family (pcb_route.route_families), each saved and filled before the
+        # next: a killed run resumes at the first family with a connection still missing.
+        # tidy waits for the last family: it takes up every unlocked track with a dangling
+        # end, and a later family's half-routed net (a run cut at a region's edge for #40)
+        # dangles until that family routes it
         allnets = sorted(str(n) for n in pcbnew.LoadBoard(path).GetNetsByName().keys())
         done = set()
         for spec, nets in pcb_route.family_plan(lay, allnets):
@@ -1089,11 +1092,12 @@ def cmd_route(bdir, chunk=30):
             if not miss:
                 continue
             pcbnew.SaveBoard(path, board)
-            board = pcbnew.LoadBoard(path)          # tidy on a fresh load (post_route says why)
-            pcb_route.tidy(board, lay)
-            pcbnew.SaveBoard(path, board)
             _fill(path)
             print(f"route: family {spec['name']} - {rec['routed']} of {rec['connections']} routed; saved", flush=True)
+        board = pcbnew.LoadBoard(path)              # tidy on a fresh load (post_route says why)
+        pcb_route.tidy(board, lay)
+        pcbnew.SaveBoard(path, board)
+        _fill(path)
     while not lay.get("families"):
         # route_first: nets a crowded corner needs before its neighbours take the room
         first = {n.lstrip("/") for n in lay.get("route_first") or []}
