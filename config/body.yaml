@@ -639,7 +639,7 @@ boards:
   service_hdr_at:
     value: [284.0, 9.3]
     status: nominal
-    source: "HDR-SERVICE's pin 1, body frame, its three pins running toward the tail (+x): on the tongue between the right-hand key board's end and the tongue's end mounts, where the lid comes off over it - the first layout's place (hardware/boards/main-board/layout.yaml J2, 2026-10-01), taken here so the bottom plate's window under its tails is cut where it stands. The layout keeps it here or moves this"
+    source: "HDR-SERVICE's pin 1, body frame, its three pins running toward the tail (+x): on the tail end past the right-hand key board, beside the tail end mounts, where the lid comes off over it - the first layout's place (hardware/boards/main-board/layout.yaml J2, 2026-10-01), taken here so the bottom plate's window under its tails is cut where it stands. The layout keeps it here or moves this"
     decided_by: "M4 main board layout"
   service_hdr_h:
     value: 8.5
@@ -1495,6 +1495,21 @@ fabrication:
     value: [-0.1, 0.1]
     status: nominal
     source: "a laser cut in acrylic [from memory]; inside stack.groove_clear for the sides and the window's clearance in its rebate"
+  # ROUNDED CORNERS (owner, 2026-10-05, issue #43: "round all corners that we
+  # can, not drastically but enough to enable them to not be a hazard and to be
+  # more structurally sound"). Every cut part's outline and through-cut, except
+  # where a corner mates with something; ADR 0025, Amendment 2026-10-05 (2),
+  # lists which.
+  corner_r_outer:
+    value: 1.0
+    status: nominal
+    source: "the radius on every outside corner of a cut part - the plates' outlines and the corners where a window opens to a plate's edge, the acrylic sides, the points of oak between a cap slot's holes - owner, 2026-10-05: 'round all corners that we can, not drastically but enough to enable them to not be a hazard and to be more structurally sound' (issue #43). 1 mm takes the point off a sheet's corner [from memory: the usual deburr-and-break-corners note on a sheet-metal drawing is 0.5 to 1], is the key boards' own corner (kb_corner_r in woody_body.scad)"
+    decided_by: "M4, on the first parts cut"
+  corner_r_inner:
+    value: 1.6
+    status: nominal
+    source: "the radius in every inside corner of a through-cut or a cut a part fits into - the bottom plate's windows and notches, the oak top's cap slots and window opening, the oak bottom's thumb recesses, the window's rebate - owner, 2026-10-05, as fabrication.corner_r_outer (issue #43). The oak is cut on a CNC router (wood_profile_tol), which cannot cut an inside corner tighter than its bit's radius: 1.6 takes a 1/8 in (3.175 mm) end mill, the usual small bit for hardwood profiles [from memory]. The laser or waterjet that cuts the aluminium and the acrylic does any radius over its kerf, so one figure serves every material. The switch cutouts are the exception: their radius is switch.cutout_r, which the switch's fit sets"
+    decided_by: "M4, the oak shop's smallest bit"
 # ---------------------------------------------------------------- logo ----
 logo:
   # THE MAKER'S MARK ON THE OAK TOP (owner, 2026-10-01: "Logo should be here,

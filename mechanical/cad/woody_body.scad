@@ -335,6 +335,15 @@ module section_2d() {
 module rrect(x, y, r = 0.5) {
     offset(r) offset(-r) square([x, y]);
 }
+// ROUNDED CORNERS (owner, 2026-10-05, issue #43: "round all corners that we
+// can"; fabrication.corner_r_outer, corner_r_inner). round_out rounds a
+// solid's outside corners; round_hole rounds a through-cut's own corners to
+// the inner radius (the part's inside corners) and the points of material
+// between its lobes to the outer one.
+corner_ro = fabrication_corner_r_outer;
+corner_ri = fabrication_corner_r_inner;
+module round_out(r = corner_ro) { offset(r = r) offset(delta = -r) children(); }
+module round_hole() { offset(r = corner_ri) offset(delta = -corner_ri) offset(r = -corner_ro) offset(delta = corner_ro) children(); }
 // SANDED EDGES (stack.edge_r). A panel's long edges: its (y, z) section
 // with every corner rounded, run the panel's length. A cap's outer face:
 // rounded all round, the inner face square where it meets the body.
@@ -363,7 +372,7 @@ function cutout_gap_r(p, k) = rect_gap(p, key_xy(k), [1, 1] * (plate_cutout - 2 
 // to its standoff (ADR 0025).
 module plate_top_2d() {
     difference() {
-        translate([0, stack_plate_side_clear]) square([plate_x1 - x_in0, u_w - 2 * stack_plate_side_clear]);
+        round_out() translate([0, stack_plate_side_clear]) square([plate_x1 - x_in0, u_w - 2 * stack_plate_side_clear]);
         translate([-plate_x0, -plate_y0]) {
             for (k = top_keys) cutout_at(key_xy(k), key_rot(k), plate_cutout);
             for (m = columns()) translate(m) circle(d = hardware_col_plate_hole);
@@ -383,11 +392,11 @@ module oak_top_2d() {
         square([x_in1 - x_in0, W]);
         translate([-x_in0, 0])
             if (stack_cap_holes == "slot")
-                for (cl = ["left_hand", "right_hand"]) keys_2d(cluster_keys(cl), switch_keycap + 2 * stack_cap_clear);
+                for (cl = ["left_hand", "right_hand"]) round_hole() keys_2d(cluster_keys(cl), switch_keycap + 2 * stack_cap_clear);
             else
-                for (k = top_keys) translate(key_xy(k)) rotate(key_rot(k))
+                for (k = top_keys) round_hole() translate(key_xy(k)) rotate(key_rot(k))
                     square(switch_keycap + 2 * stack_cap_clear, center = true);
-        translate([-x_in0, 0]) translate(matrix_xy) square(openings_matrix_window, center = true);
+        translate([-x_in0, 0]) translate(matrix_xy) round_hole() square(openings_matrix_window, center = true);
     }
 }
 
@@ -399,10 +408,10 @@ module oak_bottom_2d() {
         square([x_in1 - x_in0, W]);
         translate([-x_in0, 0]) {
             if (stack_cap_holes == "slot")
-                for (g = thumb_slots()) keys_2d(g, rc);
+                for (g = thumb_slots()) round_hole() keys_2d(g, rc);
             else
-                for (k = bottom_keys) translate(key_xy(k)) rotate(key_rot(k)) square(rc, center = true);
-            for (s = spare_xy) translate(s) square(switch_keycap + 2 * thumb_recess_clear, center = true);
+                for (k = bottom_keys) round_hole() translate(key_xy(k)) rotate(key_rot(k)) square(rc, center = true);
+            for (s = spare_xy) round_hole() translate(s) square(switch_keycap + 2 * thumb_recess_clear, center = true);
             for (u = ubolt_legs()) translate(u) circle(d = ubolt_hole_d);
             translate(midi_xy) circle(d = midi_hole_d);
         }
@@ -425,23 +434,36 @@ function thumb_pts(cl) = [for (k = cluster_keys(cl)) key_xy(k)];
 // adapter stands on the oak (the connector stands on the floor, ec_clear
 // above it). Frame: as the key plate's, model XY minus [x_in0, u_y0].
 // Its extent, bplate_x1 and bplate_y, is set below the etherCON's placement.
+// A window that opens to an edge is a notch: its own corners past the edge
+// are pushed well clear (so its inner radius lands only inside the plate),
+// and the corners it leaves on the plate's edge are outside corners, rounded
+// with the outline.
+function bplate_notch(w) = w[0] < x_in0 || w[1] < bplate_y[0] || w[2] > bplate_x1 || w[3] > bplate_y[1];
+function bplate_win_cut(w) = let(e = 2 * corner_ri + 1)
+    [w[0] < x_in0 ? w[0] - e : w[0], w[1] < bplate_y[0] ? w[1] - e : w[1], w[2] > bplate_x1 ? w[2] + e : w[2], w[3] > bplate_y[1] ? w[3] + e : w[3]];
+module bplate_win_2d(w) { let(c = bplate_win_cut(w)) offset(r = corner_ri) offset(delta = -corner_ri) translate([c[0], c[1]]) square([c[2] - c[0], c[3] - c[1]]); }
 module plate_bottom_2d() {
     difference() {
-        translate([0, stack_plate_side_clear]) square([bplate_x1 - x_in0, u_w - 2 * stack_plate_side_clear]);
+        round_out() difference() {
+            translate([0, stack_plate_side_clear]) square([bplate_x1 - x_in0, u_w - 2 * stack_plate_side_clear]);
+            translate([-plate_x0, -plate_y0]) for (w = bplate_windows) if (bplate_notch(w)) bplate_win_2d(w);
+        }
         translate([-plate_x0, -plate_y0]) {
             for (k = bottom_keys) cutout_at(key_xy(k), key_rot(k), plate_cutout);
             for (u = ubolt_legs()) translate(u) circle(d = ubolt_hole_d);
             // the main board's studs, pressed in from the plate's underside
             for (c = cb_standoffs) translate(c) circle(d = hardware_stud_hole);
             // a window under each through-hole part whose tails would reach the plate
-            for (w = bplate_windows) translate([w[0], w[1]]) square([w[2] - w[0], w[3] - w[1]]);
+            for (w = bplate_windows) if (!bplate_notch(w)) bplate_win_2d(w);
         }
     }
 }
 
 // The acrylic side: one sheet, standing in a groove in each oak panel.
 // Frame: X along, Y = model Z from the side's bottom edge.
-module side_2d() { square([x_in1 - x_in0, z_side1 - z_side0]); }
+// Its corners are rounded to fabrication.corner_r_outer, which is inside
+// the groove's depth, so the rounding hides in the groove at each end cap.
+module side_2d() { round_out() square([x_in1 - x_in0, z_side1 - z_side0]); }
 
 // The grooves, for the shop: one line pair per side, groove_depth deep, cut
 // along each oak panel's inner face. A saw or router pass - the ONE operation
@@ -522,10 +544,13 @@ module tail_cap_2d() {
 // The matrix window: frosted acrylic, flush with the oak top, on an oak lip
 // (owner, 2026-09-26). The acrylic is the rebate's size less a fit clearance.
 matrix_rebate = openings_matrix_window + 2 * openings_matrix_lip;
-module matrix_window_2d() { translate(matrix_xy) offset(r = 0.5) offset(delta = -0.6) square(matrix_rebate, center = true); }
+// The rebate is routed, so its corners are fabrication.corner_r_inner; the
+// acrylic is the rebate less 0.1 a side, its corners concentric with the
+// rebate's, so it drops in (issue #43).
+module matrix_window_2d() { translate(matrix_xy) offset(r = corner_ri - 0.1) offset(delta = -corner_ri) square(matrix_rebate, center = true); }
 // Rebates in the oak top's upper face - a router pass, like the grooves, so
 // exported on their own. Frame: as the oak panels.
-module oak_rebates_2d() { translate([-x_in0, 0]) translate(matrix_xy) square(matrix_rebate, center = true); }
+module oak_rebates_2d() { translate([-x_in0, 0]) translate(matrix_xy) offset(r = corner_ri) offset(delta = -corner_ri) square(matrix_rebate, center = true); }
 // THE COLUMN SCREWS' POCKETS (ADR 0025): blind, drilled up into the oak top's
 // underside over each column screw's head, which bears on the key plate. A
 // drill, not a through-cut, so exported on their own, like the grooves and
@@ -1600,11 +1625,26 @@ function first_clear(cs) = let(ok = [for (c = cs) if (so_clear(c)) c]) len(ok) >
 // nudge the main board's mount instead; a column cannot lean).
 cb_cols = [for (m = columns()) [m, first_clear([for (i = [0 : 20]) m + [(i % 2 == 0 ? 1 : -1) * ceil(i / 2) / 10, 0]])]];
 n_cols = len(cb_cols);
-// And a pair tried at each end (one may be dropped beside a column, below): at the mouth, and on the tongue before J-UMB, which
-// takes the umbilical's mating push - behind the parts that sit at J-UMB.
-// The U-bolt's clamp holds the middle (ADR 0022 point 7).
+// And a pair tried at each end (one may be dropped beside a column, below): at the mouth, and at the tail end, which
+// takes the umbilical's mating push at J-UMB. The U-bolt's clamp holds the middle (ADR 0022 point 7).
+// THE TAIL PAIR MATCHES THE COLUMNS (owner, 2026-10-05, issue #43: "these far
+// end standoffs I think were here when the tail section had to cut out, I think
+// they should match the other standoffs now"): since the board runs full width
+// to the adapter (boards.main_tail), each stands on a column's line across the
+// body, as far toward the tail as the bottom plate's end allows (a stud keeps
+// hardware.stud_edge from it, and from HDR-SERVICE's window), and is walked
+// toward the mouth until it is clear of what so_clear names - J-UMB's band
+// among them, which still binds the near-side one: J-UMB spans that line.
+col_line_y = [min([for (m = columns()) m[1]]), max([for (m = columns()) m[1]])];
+tail_mount_x0 = min(ua_x0 - 4, bplate_x1 - hardware_stud_edge);
+function tail_clear(p) = so_clear(p) && p[0] <= bplate_x1 - hardware_stud_edge
+    && min([for (w = bplate_windows) rect_gap(p, [(w[0] + w[2]) / 2, (w[1] + w[3]) / 2], [w[2] - w[0], w[3] - w[1]], 0)])
+       >= max(hardware_stud_edge, hardware_kb_spacer_od / 2 + hardware_kb_mount_float + 0.5)
+    && rect_gap(p, [(svc_at[0] + svc_end[0]) / 2, svc_at[1]], [svc_end[0] - svc_at[0] + boards_pin_pad, boards_pin_pad], 0) >= mb_keep_d / 2 + boards_board_clear
+    // and J-MIDI with its plug, in the far corner (midi.hdr_at, issue #37)
+    && rect_gap(p, midi_hdr_at, [midi_hdr_sz[0], midi_hdr_sz[1]], 0) >= mb_keep_d / 2 + boards_board_clear;
 cb_ends = concat([for (y = [cb_y[0] + end_mount_in, cb_y[1] - end_mount_in]) first_clear([for (d = [0 : 1 : 30]) [cb_x[0] + 4 + d, y]])],
-                 [for (y = [tongue_y[0] + end_mount_in, tongue_y[1] - end_mount_in]) first_clear([for (d = [0 : 1 : 20]) [ua_x0 - umb_band_d - mb_keep_d / 2 - 2 - d, y]])]);
+                 [for (y = col_line_y) let(ok = [for (d = [0 : 0.5 : 40]) let(p = [tail_mount_x0 - d, y]) if (tail_clear(p)) p]) len(ok) > 0 ? ok[0] : undef]);
 // An end mount with a column's mount within hardware.end_mount_merge_d is
 // dropped: the column already holds the board there (owner, 2026-09-30).
 function near_col(p) = min([for (c = cb_cols) norm(p - c[0])]);
@@ -2238,12 +2278,13 @@ module drc_report() {
     // THE WEB ROUND A COLUMN (owner, 2026-10-05, issue #43; ADR 0025,
     // Amendment 2026-10-05 (2)): the metal left between a column's hole and the
     // nearest switch cutout as cut, in the key plate (the screw's clearance
-    // hole) and in the bottom plate (the stud's hole, under the main board's
-    // mount - a column is vertical, so the same place)
+    // hole) and in the bottom plate (every stud's hole: a column's, under the
+    // main board's mount - a column is vertical, so the same place - and the
+    // end mounts')
     let(top = min([for (m = mounts, k = top_keys) cutout_gap_r(m, k)]) - hardware_col_plate_hole / 2,
-        bot = min([for (i = [0 : n_cols - 1], k = bottom_keys) cutout_gap_r(cb_standoffs[i], k)]) - hardware_stud_hole / 2)
+        bot = min([for (c = cb_standoffs, k = bottom_keys) cutout_gap_r(c, k)]) - hardware_stud_hole / 2)
         drc(min(top, bot) >= hardware_col_web_min, "column holes: plate web to the switch cutouts", [top, bot],
-            str("mm of aluminium from a column's hole to the nearest switch cutout (corners rounded to switch.cutout_r), worst case: the key plate's screw hole, the bottom plate's stud hole; against hardware.col_web_min = ", hardware_col_web_min));
+            str("mm of aluminium from a column's hole to the nearest switch cutout (corners rounded to switch.cutout_r), worst case: the key plate's screw hole, the bottom plate's stud hole (columns and end mounts); against hardware.col_web_min = ", hardware_col_web_min));
     // the oak top: a blind pocket over each head, wood left round it and over it
     function pocket_gap(m) = min(cap_gap(m), m[1] - (u_y0 + stack_groove_clear), (W - u_y0 - stack_groove_clear) - m[1],
                                  rect_gap(m, matrix_xy, [matrix_rebate, matrix_rebate], 0)) - hardware_col_pocket_d / 2;
@@ -2269,6 +2310,13 @@ module drc_report() {
     drc(mw >= 3, "key plate beyond the last key cutout", mw, "mm of aluminium; the plate stops short of the Matrix");
     lip_t = oak_top_t - openings_matrix_acrylic_t - openings_matrix_relief_d;
     drc(lip_t >= 2, "oak lip under the frosted window", lip_t, str("mm thick, ", openings_matrix_lip, " mm wide; the acrylic sits flush on it"));
+    // ROUNDED CORNERS (issue #43): a routed slot's inside corner, round, still
+    // clears a cap's corner drawn square; and the Matrix's LED array clears
+    // the window opening's rounded corners
+    let(cap = corner_ri - sqrt(2) * max(corner_ri - stack_cap_clear, 0),
+        led = corner_ri - sqrt(2) * max(corner_ri - (openings_matrix_window - boards_matrix_emitters) / 2, 0))
+        drc(cap > 0 && led > 0, "rounded inside corners clear the caps and the LED array", [cap, led],
+            "mm: a cap's corner, drawn square, to its slot's or recess's corner rounded to fabrication.corner_r_inner (stack.cap_clear a side; an MT165's own corner is rounded, so more); the LED array's corner to the window opening's");
     rw = min([for (k = top_keys) sq_gap(key_xy(k), matrix_xy, (switch_keycap + 2 * stack_cap_clear + matrix_rebate) / 2)]);
     drc(rw >= 3, "oak between the last cap slot and the window rebate", rw, "mm on the top face");
     drc(undef, "LED tops to the frosted window's top face", T - matrix_top_z,
