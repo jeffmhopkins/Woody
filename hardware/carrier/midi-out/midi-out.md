@@ -262,7 +262,7 @@ key board and beside the etherCON adapter. It is outside both key boards'
 outlines, and nothing stands over it but the Matrix carrier
 (`pcb-geometry.echo`, *main*, `J-MIDI`):
 
-- **`J-MIDI` at about (293.5, 43), its pins along the body**, facing the lane,
+- **`J-MIDI` at `midi.hdr_at`, its pins along the body**, facing the lane,
   so the lead leaves toward the jack (`config/body.yaml` `midi.hdr_at`). A
   surface-mount PH, because the corner is over the bottom plate's end, where
   a through-hole header's tails would need a plate window.
@@ -281,7 +281,7 @@ outlines, and nothing stands over it but the Matrix carrier
 | `R-MIDI-T`, `R-MIDI-R` | 182 Ω 1 % 0.25 W, 1206 (UNI-ROYAL 1206W4F1820T5E, LCSC C247358) | RA/RC, either way round; **1 %, never 5 %** | `[ds CA-033 p.3]`, `[calc]`, `[sim]` |
 | `FB-MIDI-T`, `FB-MIDI-R` | 600 Ω @ 100 MHz | CA-033's optional RF beads | `FB-CHAIN`'s part |
 | `U-TVS-MIDI` | SP0504BAHTG | ESD at the header | `U-TVS-CHAIN`'s part |
-| `J-MIDI` | JST B3B-PH-SM4-TB | The lead's header, surface mount: no tails over the bottom plate | `[from memory]` until JST's drawing is banked; LCSC code open |
+| `J-MIDI` | JST B3B-PH-SM4-TB | The lead's header, surface mount: no tails over the bottom plate | LCSC C160353; size `[ds datasheets/connectors/JST-PH-SERIES.pdf p.4]`, mated height `[calc]` (`config/body.yaml` `midi.hdr_sz`, `midi.hdr_mated_h`) |
 | `J-MIDI-OUT` | SJ5-43502PM | The jack, panel-mounted | `[ds SAMESKY-SJ5-43502PM.pdf]`; panel thickness to confirm in hand |
 | `CBL-MIDI` | PHR-3 lead | Jack to header | hand-built |
 

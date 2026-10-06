@@ -69,7 +69,7 @@ ECHO: "PCB", "main", "keepout", "under key board right_hand", 142.2, 7.5, 251.3,
 ECHO: "PCB", "main", "keepout", "elsewhere", 7.5, 7.5, 299.9, 49.5, 20.2
 ECHO: "PCB", "main", "keepout", "ribbon left_hand", 70.64, 35.03, 80.9, 49, 0
 ECHO: "PCB", "main", "keepout", "ribbon right_hand", 181.64, 35.03, 191.9, 49, 0
-ECHO: "PCB", "main", "keepout", "J-MIDI and CBL-MIDI's plug (proposed)", 288, 39.1, 299, 46.9, 10
+ECHO: "PCB", "main", "keepout", "J-MIDI and CBL-MIDI's plug (proposed)", 286.925, 38, 299.875, 48, 11.6
 ECHO: "PCB", "main", "keepout", "Matrix ribbon", 251.5, 19.385, 273.04, 21.525, 0
 ECHO: "PCB", "main", "keepout", "Matrix ribbon fold", 252.55, 21.525, 271.99, 23.95, 7.30333
 ECHO: "PCB", "main", "board", "thickness", 1.6, "smt_height_max", 2.62, "side", "parts on top; the thumb switches from below, their footprints on the underside"
