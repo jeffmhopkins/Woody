@@ -45,10 +45,18 @@ deliberately differs from its library copy, and the board's DRC test
 | `woody.pretty/Neutrik_NE8FAV_etherCON_Vertical` | Drawn here, from Neutrik's PCB layout on ST-NE8FAV rev B (`datasheets/connectors/NEUTRIK-NE8FAV-DRAWING.pdf`). **Neutrik draws it from the solder side ("contact arrangement seen from backside"); this footprint is mirrored to KiCad's top view**, looking from the panel | J-UMBILICAL-INST on the umbilical adapter (ADR 0021). Origin on the connector's axis, latch up. Contacts Ø0.8 in two rows 2.11 and 4.65 above the axis, pin 1 at 4.445 from it; the G tab Ø1.2, 10.55 below and 6.6 across, left unconnected (the housing is isolated); four Ø1.7 non-plated holes for the housing's posts; the latch's R1 slot, 6.6 between centres, 10.05 above. Flange 25 × 25 and the PUSH tab on F.Fab; courtyard round both. No 3D model in the footprint (the body CAD places the banked STEP) |
 | `woody.pretty/LED_WS2815B-V1_PLCC6_5.4x5.0mm_P1.6mm`, and the symbol `WS2815B-V1` in `woody.kicad_sym` | Drawn here, from Worldsemi's WS2815B-V1 sheet (`datasheets/led/WS2815B-V1.pdf` p.2: Solder Pad, PIN Configuration, PIN Function). KiCad's `LED_SMD:LED_WS2812_PLCC6_5.0x5.0mm_P1.6mm` has the same pads but numbers them from the other corner and marks pin 1; the symbol is KiCad's `LED:WS2813` graphics | `D-LED`, the main board's LED row (ADR 0028). Pads 1.5 × 1.0 at 1.6 pitch, columns 4.9 apart centre to centre (3.4 between their inner edges); top view: left column 4 `DIN1`, 5 `GND`, 6 `DIN2`, right column 3 `DO`, 2 `VDD`, 1 NC, top to bottom. **The body's chamfer (C0.9) is at pin 1 (NC)**, bottom right as the sheet's numbered PIN Configuration drawing places it (p.2), so the F.Fab outline and the silk mark are at pin 1. (Until 2026-10-01 this footprint put them at pin 4, read off the unnumbered mechanical view; an assembler following that mark would have turned every LED 180°, VDD onto GND. Found by the pre-layout review, A6-3.) Body 5.4 × 5.0 × 1.65. Symbol pin 1 is `no_connect`. 3D model: the banked community STEP (`datasheets/led/WS2815B-5050-3D.step`) at rotation 180°, which puts its chamfer (the top face's missing corner) at pin 1. **A filled silk triangle outside the body marks the chamfer corner** (courtyard widened to take it in), so an assembler's placement preview shows which way round the part is. **JLCPCB's own footprint for C5446699 agrees**: its pin 1 is the chamfered corner, bottom right at 0° (`datasheets/led/EASYEDA-C5446699-WS2815B-V1-FOOTPRINT.json`), the same place as this footprint's pad 1, so no rotation offset is expected. Pass the placement preview only when the part's chamfer lands on the silk triangle. **Confirm on the first parts in hand** with a meter's diode test across pins 2 (VDD) and 5 (GND) before the first order |
 
-**`J-MIDI` (J7)'s render stand-in is wrong, and noted here, not fixed.** The part is
-JST's surface-mount B3B-PH-SM4-TB and its footprint is KiCad's, but KiCad 9 ships no
-model for it (`kicad-packages3D`, `Connector_JST.3dshapes/JST_PH_B3B-PH-SM4-TB_1x03-1MP_P2.00mm_Vertical.step`:
-404 at tag 9.0.0 and on master, 2026-10-06). So the main board names the through-hole
-B3B-PH-K's model (`tools/setup-env.sh` fetches it), and the renders show three pins through
-the board where the real part has none. A model drawn from JST's PH drawing, as the
-`woody.3dshapes` ones are, would fix it.
+**`J-MIDI` (J7)'s model is a banked one, set on the board, not in a library footprint.**
+The part is JST's surface-mount B3B-PH-SM4-TB and its footprint is KiCad's, but KiCad 9
+ships no model for it (`kicad-packages3D`, `Connector_JST.3dshapes/JST_PH_B3B-PH-SM4-TB_1x03-1MP_P2.00mm_Vertical.step`:
+404 at tag 9.0.0 and on master, 2026-10-06), and JST's own STEP is e-mailed against a
+licence form (`datasheets/MANIFEST.csv`, BLOCKED rows). The main board names
+`datasheets/connectors/JST-B3B-PH-SM4-TB-3D.step`, the EasyEDA/LCSC library model for
+C160353 — **a generic PH 2.00 SMD 3P, not JST's geometry** — at offset (−2, 2.35, 0),
+rotation 0: its posts on the footprint's post line (1.9 from the housing's back, JST's
+drawing, `datasheets/connectors/JST-PH-SERIES-LCSC-C160353.pdf` p.3), feet on the pads,
+tabs on the MP pads. It is 0.5 deeper and 0.45 lower than JST's drawing (the MANIFEST
+row gives both), so it is for renders and nothing else. Because the footprint is KiCad's,
+refreshing J7 from the library (`pcb.py` footprint update) puts back KiCad's missing model
+name, and `pcb.py render` then refuses on it: set the path again on the board. Until
+2026-10-06 the board named the through-hole B3B-PH-K's model as a stand-in, and the bottom
+render showed three pins through the board.
