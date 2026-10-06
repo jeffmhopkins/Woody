@@ -637,9 +637,9 @@ boards:
     status: nominal
     source: "the edge the regulator block stands against: near (2026-10-03, the far edge carries the breath pair, owner: 'the analog path should just be routed along the top')"
   service_hdr_at:
-    value: [284.0, 9.3]
+    value: [284.0, 11.0]
     status: nominal
-    source: "HDR-SERVICE's pin 1, body frame, its three pins running toward the tail (+x): on the tail end past the right-hand key board, beside the tail end mounts, where the lid comes off over it - the first layout's place (hardware/boards/main-board/layout.yaml J2, 2026-10-01). Surface mount since 2026-10-06 (owner: 'I think I would prefer to have it a surface mount part if that's easy to do'; hanxia HX PZ2.54-1x3P TP-YQ), so it has no tails and the bottom plate no window under it. The layout keeps it here or moves this"
+    source: "HDR-SERVICE's pin 1, body frame, its three pins running toward the tail (+x): on the tail end past the right-hand key board, beside the tail end mounts, where the lid comes off over it - the first layout's place (hardware/boards/main-board/layout.yaml J2, 2026-10-01). Surface mount since 2026-10-06 (owner: 'I think I would prefer to have it a surface mount part if that's easy to do'; hanxia HX PZ2.54-1x3P TP-YQ), so it has no tails and the bottom plate no window under it. Its feet stand 3.20 either side of the pins' line, alternately [ds connectors/HANXIA-HX-PZ2.54-1x3P-TP-YQ.pdf, recommended layout 6.40 outside], so the line is 1.7 further in from the near edge than the through-hole header's was [calc: the near edge 7.5, the main board's edge clearance 0.3 (layout.yaml rules.edge_clearance), pin 2's foot 3.20 off the line: 7.5 + 0.3 + 3.20 = 11.0]. The layout keeps it here or moves this"
     decided_by: "M4 main board layout"
   service_hdr_h:
     value: 6.0

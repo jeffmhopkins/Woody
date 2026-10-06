@@ -7,7 +7,7 @@ Thickness: 1.2 mm (config/key-layout.yaml plate_thickness, the register's `plate
 999
 Quantity per instrument: 1
 999
-Units mm. Cut every closed outline. cad e70061e15440; verify: python3 tools/cad.py explain fab-dxf-plate-bottom
+Units mm. Cut every closed outline. cad bcfe22a4aba0; verify: python3 tools/cad.py explain fab-dxf-plate-bottom
   0
 SECTION
   2
