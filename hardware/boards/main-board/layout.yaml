@@ -559,10 +559,10 @@ parts:
   FB2: [167.3, 41.5, 90]    # FB-CHAIN, the RH ribbon's 3V3
   U11: [175.6, 44.2, 0]     # U-TVS-CHAIN at J5 (key-chain-loom.md): SCK, SH/LD, HOP_LT_RH, HOP_RH_RT; pin 2 its own via
   # #37, MIDI out (midi-out.md, Placement): J-MIDI in the freed tail corner (config/body.yaml
-  # midi.hdr_at, nominal [293.5, 43.0]; here 0.5 mm toward the tail so its fixing pad clears
-  # the breath pair's stitching via), the TVS and beads at it, R-MIDI by U-LVLSHIFT's side
-  # of the board, R-MIDI-PU on the DEV_3V3 run above U6
-  J7:  [294.0, 43.0, 0]     # J-MIDI B3B-PH-SM4-TB, pins along the body
+  # midi.hdr_at, exactly: its tail end boards.board_clear inside the board's end; the breath
+  # pair's two guard vias its pads reached moved aside, owner option 1, 2026-10-06), the TVS
+  # and beads at it, R-MIDI by U-LVLSHIFT's side of the board, R-MIDI-PU on the DEV_3V3 run above U6
+  J7:  [293.4, 43.0, 0]     # J-MIDI B3B-PH-SM4-TB, pins along the body
   U12: [296.9, 36.6, 90]    # U-TVS-MIDI at the header pins
   FB3: [291.95, 36.6, 90]   # FB-MIDI-T
   FB4: [294.05, 36.6, 90]   # FB-MIDI-R
