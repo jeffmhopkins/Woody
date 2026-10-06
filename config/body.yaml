@@ -602,7 +602,7 @@ boards:
   # THE THROUGH-HOLE TAILS UNDER THE MAIN BOARD (ADR 0025): every part on the
   # main board with plated through-hole pins pokes its tails out of the
   # underside, toward the grounded bottom plate, hardware.kb_spacer_l below.
-  # They are J-CHAIN x2, J-MCU, J-UMB, HDR-SERVICE and U-BUCK - every footprint
+  # They are J-CHAIN x2, J-MCU, J-UMB and U-BUCK - every footprint
   # with a PTH pad on main-board.kicad_sch but the thumb switches, which enter
   # from below, and the mounts. drc.echo 'through-hole tails under the main
   # board clear of the bottom plate' tests each against what is under it (the
@@ -618,7 +618,7 @@ boards:
   pin_pad:
     value: 1.7
     status: settled
-    source: "the 2.54 mm headers' pads, J-UMB and HDR-SERVICE, 1.70 round/square [repo hardware/lib/woody.pretty/PinHeader_1x08_P2.54mm_Horizontal_Hanxia_PZ2.54-WZ.kicad_mod; KiCad Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical]"
+    source: "the 2.54 mm headers' pads, J-UMB's (and HDR-SERVICE's row, for its envelope), 1.70 round/square [repo hardware/lib/woody.pretty/PinHeader_1x08_P2.54mm_Horizontal_Hanxia_PZ2.54-WZ.kicad_mod; KiCad Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical]"
   mcu_conn_tail:
     value: 2.1
     status: settled
@@ -639,20 +639,16 @@ boards:
   service_hdr_at:
     value: [284.0, 9.3]
     status: nominal
-    source: "HDR-SERVICE's pin 1, body frame, its three pins running toward the tail (+x): on the tail end past the right-hand key board, beside the tail end mounts, where the lid comes off over it - the first layout's place (hardware/boards/main-board/layout.yaml J2, 2026-10-01), taken here so the bottom plate's window under its tails is cut where it stands. The layout keeps it here or moves this"
+    source: "HDR-SERVICE's pin 1, body frame, its three pins running toward the tail (+x): on the tail end past the right-hand key board, beside the tail end mounts, where the lid comes off over it - the first layout's place (hardware/boards/main-board/layout.yaml J2, 2026-10-01). Surface mount since 2026-10-06 (owner: 'I think I would prefer to have it a surface mount part if that's easy to do'; hanxia HX PZ2.54-1x3P TP-YQ), so it has no tails and the bottom plate no window under it. The layout keeps it here or moves this"
     decided_by: "M4 main board layout"
   service_hdr_h:
-    value: 8.5
-    status: nominal
-    source: "HDR-SERVICE's pins above the board, the 2.54 mm header's [from memory]; the service lead's plug goes on with the lid off. For the LEDs' cone NOTE (drc.echo 'tall parts in the LEDs' cone')"
+    value: 6.0
+    status: settled
+    source: "HDR-SERVICE's posts above the board, 6.00 +/-0.2 [ds connectors/HANXIA-HX-PZ2.54-1x3P-TP-YQ.pdf, side view]; the service lead's plug goes on with the lid off. For the LEDs' cone NOTE (drc.echo 'tall parts in the LEDs' cone')"
   service_hdr_pins:
     value: 3
     status: settled
     source: "HDR-SERVICE, a 1x3 2.54 mm header: TXD, RXD, GND (hardware/carrier/service-uart/service-uart.md). Five pins until the owner chose to program the Matrix over its own USB-C only (2026-10-03), which took EN and IO0 off it"
-  service_hdr_tail:
-    value: 3.0
-    status: settled
-    source: "HDR-SERVICE's tails below its seating plane, 3.00 +/-0.2 [ds HANXIA-HX-PZ2.54-1x5P-ZZ.pdf, drawing - the same family; the 1x3, C32713269: 'Length of End Connection Pin=3mm', web: JLC parts listing 2026-10-03, its own drawing datasheets/connectors/HANXIA-HX-PZ2.54-1x3P-ZZ.pdf]"
   buck_tail:
     value: 4.1
     status: settled

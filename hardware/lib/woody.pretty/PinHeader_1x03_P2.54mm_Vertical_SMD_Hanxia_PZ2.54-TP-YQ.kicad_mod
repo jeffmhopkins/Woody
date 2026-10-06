@@ -1,0 +1,183 @@
+(footprint "PinHeader_1x03_P2.54mm_Vertical_SMD_Hanxia_PZ2.54-TP-YQ"
+	(version 20241229)
+	(generator "woody")
+	(layer "F.Cu")
+	(descr "hanxia HX PZ2.54-1x3P TP-YQ (LCSC C41417360): 1x3 2.54 mm vertical pin header, surface mount, staggered feet, Type A (YQ: odd pins' feet one side, even pins' the other), the 1x10's family (HDR-MATRIX). From the banked drawing (datasheets/connectors/HANXIA-HX-PZ2.54-1x3P-TP-YQ.pdf): insulator 2.50 high and 2.54 a pin wide, posts 6.00 from the board, feet 5.00 +/- 0.25 across; its recommended pads, 1.02 x 3.20 at 6.40 outside, as drawn")
+	(tags "pin header 2.54mm SMD vertical staggered hanxia PZ2.54 1x3")
+	(property "Reference" "REF**"
+		(at 0 -3 0)
+		(layer "F.SilkS")
+		(uuid "98248df0-0111-57c9-8e14-a7ea392377d4")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "HX PZ2.54-1x3P TP-YQ"
+		(at 0 8.08 0)
+		(layer "F.Fab")
+		(uuid "8badd0e8-80c1-54d4-8a40-0ecd9dab21af")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "526e49ab-06bc-5751-bfc5-87557bf56108")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "9dd030cb-4d16-54cc-83ee-03454fa30d42")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_line
+		(start -1.27 -1.27)
+		(end 1.27 -1.27)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "9bc05f83-f82b-51f6-aef4-10b7f158b66e")
+	)
+	(fp_line
+		(start 1.27 -1.27)
+		(end 1.27 6.35)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "918385f0-3539-5e3b-921a-2efe292fcc65")
+	)
+	(fp_line
+		(start 1.27 6.35)
+		(end -1.27 6.35)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "508fec26-427b-59f0-bc69-ff22c5e79f07")
+	)
+	(fp_line
+		(start -1.27 6.35)
+		(end -1.27 -1.27)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "be22fb21-269c-5926-9683-0638fcfe1949")
+	)
+	(fp_line
+		(start -3.45 -1.52)
+		(end 3.45 -1.52)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "5590513f-e1be-5fc3-a066-861c0096c6c0")
+	)
+	(fp_line
+		(start 3.45 -1.52)
+		(end 3.45 6.6)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "fdc2325b-4a41-52ca-aca8-26752593b175")
+	)
+	(fp_line
+		(start 3.45 6.6)
+		(end -3.45 6.6)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "319e9e7a-b99b-594e-be13-de467584dfb0")
+	)
+	(fp_line
+		(start -3.45 6.6)
+		(end -3.45 -1.52)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "67fe2d9a-3694-5756-ae63-696ae8616656")
+	)
+	(fp_line
+		(start -1.33 -1.33)
+		(end 1.33 -1.33)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "95909754-6948-5847-9458-84d3a718b6df")
+	)
+	(fp_line
+		(start -1.33 6.41)
+		(end 1.33 6.41)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "6f80f03a-e17b-5be7-808c-b08e733dc3b4")
+	)
+	(fp_line
+		(start 3.4 -0.8)
+		(end 3.4 0.8)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "7c898306-dab3-5121-8ca0-2f992c9c3f70")
+	)
+	(pad "1" smd rect
+		(at 1.6 0)
+		(size 3.2 1.02)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "9a46f848-83ba-5b0f-801a-4b9408cfc5d3")
+	)
+	(pad "2" smd rect
+		(at -1.6 2.54)
+		(size 3.2 1.02)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "856a28ff-2028-59d1-bd04-bf77509d97bc")
+	)
+	(pad "3" smd rect
+		(at 1.6 5.08)
+		(size 3.2 1.02)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "a673ff67-b264-5a1c-9c17-1b55f3bb78d3")
+	)
+	(embedded_fonts no)
+)

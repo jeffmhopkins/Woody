@@ -35,7 +35,6 @@ ECHO: "PCB", "main", "connector", "J-MCU", 251.5, 273.04, 14.9, 8.97, 1, 90
 ECHO: "PCB", "main", "connector", "J-UMB", 297.4, 299.9, 21.5, 8, 2.54, 1.25
 ECHO: "PCB", "main", "part", "U-BREATH", 14.15, 39.6, 0, 12.3, 17.8, 18.8
 ECHO: "PCB", "main", "part", "HDR-SERVICE", 284, 9.3, 0, 3, 2.54
-ECHO: "PCB", "main", "plate", "window HDR-SERVICE", 281.65, 5.8, 294.25, 11.65
 ECHO: "PCB", "main", "plate", "window U-BUCK", 216, 5.8, 234, 19.5
 ECHO: "PCB", "main", "plate", "end", 293.25
 ECHO: "PCB", "main", "part", "REGULATOR-BLOCK", 225, 13, 0, 15, 10, 10.5
