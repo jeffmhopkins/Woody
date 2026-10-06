@@ -262,7 +262,7 @@ key board and beside the etherCON adapter. It is outside both key boards'
 outlines, and nothing stands over it but the Matrix carrier
 (`pcb-geometry.echo`, *main*, `J-MIDI`):
 
-- **`J-MIDI` at about (293.5, 43), its pins along the body**, facing the lane,
+- **`J-MIDI` at `midi.hdr_at`, its pins along the body**, facing the lane,
   so the lead leaves toward the jack (`config/body.yaml` `midi.hdr_at`). A
   surface-mount PH, because the corner is over the bottom plate's end, where
   a through-hole header's tails would need a plate window.

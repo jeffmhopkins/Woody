@@ -898,9 +898,9 @@ midi:
   # layout places it; this is the body CAD's nominal, for the clash and the
   # lead's run.
   hdr_at:
-    value: [293.5, 43.0]
+    value: [293.4, 43.0]
     status: nominal
-    source: "J-MIDI's centre, [along the body, across], body frame: in the corner the USB-C receptacle's keep-out held (pcb-geometry.echo), past HDR-SERVICE's plate window and the carrier's mounts"
+    source: "J-MIDI's centre, [along the body, across], body frame: in the corner the USB-C receptacle's keep-out held (pcb-geometry.echo), past HDR-SERVICE's plate window and the carrier's mounts. Along: as near the tail as leaves the header's end boards.board_clear inside the board's end (drc.echo 'J-MIDI and its plug under the Matrix carrier'), at hdr_sz's length; the main board's J7 stands here, x + 60 in the board's frame (owner, 2026-10-06, option 1: move J7 toward the mouth)"
     decided_by: "the main board's layout after #35"
   hdr_sz:
     value: [9.95, 7.0, 6.6]
