@@ -414,7 +414,7 @@ heights:
   L_0805: 1.0                  # [from memory]
   NetTie: 0.05                 # copper only
   NXP_Case1351: 9.9            # [ds MPXV4006DP p.7, with its ports]
-  PinHeader_1x03_P2.54mm_Vertical: 8.5   # [from memory: the header's pins above the board; the service lead's plug goes on with the lid off]
+  PinHeader_1x03_P2.54mm_Vertical: 6.0   # [ds connectors/HANXIA-HX-PZ2.54-1x3P-TP-YQ.pdf: posts 6.00 +/-0.2 from the board; config/body.yaml boards.service_hdr_h] the service lead goes on with the lid off
   # the two 1.27 mm IDC headers by name - the lookup takes the FIRST key a footprint's name
   # contains, so the specific ones come before anything they would also match (#19 F5: a bare
   # IDC-Header key gave both 4.9, under the Samtec's real height)
@@ -493,7 +493,7 @@ parts:
   R38: [288.95, 30.39, 0]   # R-SER-BREATH-INST in BREATH, at J-UMB pin 1, where the pair comes down from the far edge
   R39: [288.95, 27.85, 0]   # R-SER-BREATH-INST in AGND_SENSE, at pin 2
   NT1: [293.0, 13.4, 90]    # NT-DIG at J-UMB pin 8 (ADR 0018)
-  D2:  [286.4, 18.7, 90]    # D-REVSHUNT, across pins 3 / 6, ahead of L-BUCK-IN
+  D2:  [286.4, 19.4, 90]    # D-REVSHUNT, across pins 3 / 6, ahead of L-BUCK-IN; 0.7 toward the row since J2 went surface mount (its feet reach 3.2 in from the edge)
   D3:  [291.6, 21.8, 270]   # D-TVS-PWR at J-UMB's pins 3 (+12 V, its cathode) and 6 (PWR_GND), #8-9
   # --- Q-INRUSH and its gate network (power-entry-instrument.md §1a) in the tail strip
   # above the LED row, between LED2 and LED1 (the full-width tail's corner, which the
@@ -521,7 +521,7 @@ parts:
   R34: [232.5, 36.5, 90]   # R-CHAIN-SER SCK, on the far side of the LED row where the block used to stand
   R35: [235.1, 36.5, 90]   # R-CHAIN-SER SH/LD
   R36: [237.7, 36.5, 90]   # R-CHAIN-SER SER (the chain's end)
-  J2:  [284.0, 9.3, 90]   # HDR-SERVICE at config/body.yaml boards.service_hdr_at (pin 1), in the tail corner by J-UMB, off the LEDs' cone; reached with the lid off
+  J2:  [284.0, 11.0, 90]   # HDR-SERVICE at config/body.yaml boards.service_hdr_at (pin 1), in the tail corner by J-UMB, off the LEDs' cone; reached with the lid off; surface mount since 2026-10-06
   # --- the regulator block (the echo's REGULATOR-BLOCK) holds U-BUCK alone; the
   # buck's input LC and C-STRIP-BULK where their height fits (README, Open)
   U5:  [226.1, 14.75, 180]   # U-BUCK in the block against the near edge (boards.tall_side), its pins ALONG the body
@@ -583,8 +583,9 @@ parts:
 # is the limit on what the solder and an uncut tail add after it. Applies to the three
 # hand parts whose tails are over the plate: J-MCU (J1) and J-CHAIN x2 (J4, J5). U-BUCK
 # (U5) is cut to boards.tht_trim, its own figure (over a window to the oak). J-UMB (J6,
-# past the plate's end) and HDR-SERVICE (J2, over a window) stand over oak, not the
-# grounded plate, and clear it as supplied (drc.echo, the same line): no trim. The
+# past the plate's end) stands over oak, not the grounded plate, and clears it as
+# supplied (drc.echo, the same line): no trim. HDR-SERVICE (J2) is surface mount since
+# 2026-10-06 (owner): no tails. The
 # thumb switches enter from below, so their tails are on the top face.
 hand_trim:
   J1: {max: "hardware.kb_spacer_l - boards.tail_clear", why: "J-MCU, over the grounded bottom plate (#8-11)"}

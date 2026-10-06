@@ -1552,7 +1552,6 @@ tht_tails = concat(
     [for (cl = chain_ribbon_cls) [str("J-CHAIN-", cl == "left_hand" ? "LH" : "RH"), chain_tail_rect(cl), boards_chain_hdr_tail - switch_pcb_t, "plate"]],
     [["J-MCU", [jm_x0, jm_y - jm_sz[1] / 2, jm_x1, jm_y + jm_sz[1] / 2], boards_mcu_conn_tail - switch_pcb_t, "plate"],
      ["J-UMB", pad_row([ju_tail_x, ec_c[0] - ju_l / 2 + 1.27], [ju_tail_x, ec_c[0] + ju_l / 2 - 1.27]), boards_umb_joint_tail - switch_pcb_t, "end"],
-     ["HDR-SERVICE", pad_row(svc_at, svc_end), boards_service_hdr_tail - switch_pcb_t, "window"],
      // U-BUCK stands in the regulator block (the layout keeps it there): the
      // window is the block's; its tails are cut to boards.tht_trim
      ["U-BUCK", [tall_c[0][0] - tall_sz[0] / 2, tall_c[0][1] - tall_sz[1] / 2, tall_c[0][0] + tall_sz[0] / 2, tall_c[0][1] + tall_sz[1] / 2],

@@ -44,6 +44,11 @@ two agree.*
   U0TXD(IO43) ──[R-TXD-SER 499R 1%]── TXD_HDR ── pin 1     (at J-MCU pin 22)
 ```
 
+**The part is surface mount** (owner, 2026-10-06: *"I think I would prefer to have it a surface
+mount part if that's easy to do"*): `hanxia HX PZ2.54-1x3P TP-YQ`, the staggered-foot family
+the Matrix carrier's `HDR-MATRIX` uses, its part number and pads on its BOM row and the
+sheet. It has no tails under the board, so the bottom plate needs no window under it.
+
 **`R-TXD-SER` is Espressif's ask**: *"connect a 499 Ω series resistor
 to the U0TXD line to suppress harmonics"*
 `[ds logic/ESP-HARDWARE-DESIGN-GUIDELINES-ESP32S3.pdf p.16, UART]`. It is
