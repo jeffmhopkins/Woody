@@ -421,7 +421,7 @@ heights:
   IDC-Header_2x06_P1.27mm_Samtec: 5.59   # [repo config/body.yaml boards.chain_hdr_h; ds SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf sheet 1, .220 REF]
   IDC-Header_2x12_P1.27mm_XKB: 5.1       # [repo config/body.yaml boards.mcu_conn_h; ds XKB-X1270WR-2x12A-9TV01.pdf]
   LED_WS2815B: 1.65            # [repo pcb-geometry.echo led height]
-  JST_PH_B3B-PH-SM4-TB: 10.0   # [repo config/body.yaml midi.hdr_mated_h: J-MIDI with CBL-MIDI's plug mated, what stands over the corner]
+  JST_PH_B3B-PH-SM4-TB: 11.6   # [repo config/body.yaml midi.hdr_mated_h: J-MIDI with CBL-MIDI's plug mated, what stands over the corner]
   PinHeader_1x08: 2.5          # [repo config/body.yaml boards.umb_joint_h]
 
 # The only parts the UNDERSIDE may carry (pcb_main.check_heights, #19 F2): it faces the
