@@ -5,7 +5,7 @@
 inputs:
   tools/sim.py: 0312a1077b9afa80
   hardware/carrier/midi-out/sim/sims.yaml: e48712898bfb62b3
-  hardware/carrier/midi-out/netlist.yaml: 19915f9a9ed41460
+  hardware/carrier/midi-out/netlist.yaml: bff575e4751cde0c
   hardware/carrier/led-strip-drive/netlist.yaml: e4c3ffbbe5c48f52
   hardware/carrier/midi-out/sim/loop-a.cir: aff2c845cbfc661b
   hardware/carrier/midi-out/sim/loop-b.cir: 6253d59c6fa9f8bb

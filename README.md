@@ -49,8 +49,8 @@ Six CV channels from the module:
   in the instrument's configuration mode, over Wi-Fi from a phone (ADR 0015,
   *Amendment, 2026-10-04*; the firmware is deferred)
 
-And **MIDI out** on a 3.5 mm TRS jack in the oak bottom, Type A or B by a
-setting (`hardware/carrier/midi-out/`).
+And **MIDI out** on a 3.5 mm TRS jack in the tail cap, beside the etherCON,
+Type A or B by a setting (`hardware/carrier/midi-out/`).
 
 ## Design scope
 

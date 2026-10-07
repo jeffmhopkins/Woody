@@ -365,7 +365,7 @@ What stands now:
 
 ## MIDI out
 
-**MIDI 1.0 out on a 3.5 mm TRS jack in the oak bottom** (issue #37; the
+**MIDI 1.0 out on a 3.5 mm TRS jack in the tail cap** (issues #37, #45; the
 circuit is `hardware/carrier/midi-out/`). It replaces USB MIDI, which was
 a bring-up tool. Milestone E5 plays into a DAW through any USB-MIDI interface,
 with a TRS-to-DIN adapter of the jack's type. The instrument is a tethered rack

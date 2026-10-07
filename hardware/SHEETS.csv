@@ -198,7 +198,7 @@ hardware/carrier/breath-adc/breath-adc.sch.png,d952e897cf801d58c352e095d8820b8b3
 hardware/carrier/breath-excitation-reference/breath-excitation-reference.sch.png,b184de98da510ebb5870350bf7b8056224ea3ef5,hardware/carrier/breath-excitation-reference/breath-excitation-reference.kicad_sch@0034a8025c5a02b62f00c5b1215dbc688f4791df
 hardware/carrier/carrier.sch.png,d966c179ada9dde9defbfa99042b07255bbdcfec,hardware/carrier/carrier.kicad_sch@0240206b0d88569f715b36b70592383980d32bf7
 hardware/carrier/led-strip-drive/led-strip-drive.sch.png,ce922252649fd8ce1f40254a0a742f630f88d32c,hardware/carrier/led-strip-drive/led-strip-drive.kicad_sch@94945d42ef999864d7a00a8eb556b421c3c57615
-hardware/carrier/midi-out/midi-out.sch.png,693bcf9b343b7176fbf566c99ee897c5161ad62f,hardware/carrier/midi-out/midi-out.kicad_sch@f706d513099ed9bf5927eec7ac4153caf587782b
+hardware/carrier/midi-out/midi-out.sch.png,6ca7d943fed533d5586ccda7d21ea93a761a88c2,hardware/carrier/midi-out/midi-out.kicad_sch@e151f52a8ba47d49f441b2afdaa6888f0c59b83d
 hardware/carrier/power-entry-instrument/power-entry-instrument.sch.png,33b094832695f8a67b89f7baf59fb4ede7b9e953,hardware/carrier/power-entry-instrument/power-entry-instrument.kicad_sch@b5848e7a9c59d8eb88f17e6a6a393e876bc7ace7
 hardware/carrier/service-uart/service-uart.sch.png,556f5ba2b7bfb1cce96a5f0ede63c49269a20977,hardware/carrier/service-uart/service-uart.kicad_sch@c8b373c38977befdbd14a3fe3157269b9cc80275
 hardware/cluster/key-marker-and-bits/key-marker-and-bits.sch.png,1be9aaec14462b9f73e2b99333a7eeba83eee071,hardware/cluster/key-marker-and-bits/key-marker-and-bits.kicad_sch@dfc1e97924bfce7eec481d62d257e8b1f18bd5a1
