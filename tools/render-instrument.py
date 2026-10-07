@@ -87,7 +87,7 @@ EXPORT_RECIPE = "1"           # bump when how the solids or boards are exported 
 
 # The CAD solids a board's own export replaces (fnmatch patterns on the solid id).
 BOARD_OWNS = ["main board", "board left_hand", "board right_hand", "parts *", "tall parts main board",
-              "tails *", "LED row", "breath sensor", "switch *", "J-CHAIN *", "J-MCU", "J-UMB"]
+              "tails *", "LED row", "breath sensor", "switch *", "J-CHAIN *", "J-MCU", "J-UMB", "J-MIDI"]
 # Never drawn: a volume, not a part (the switch's travel envelope).
 NOT_PARTS = ["travel *"]
 
@@ -322,7 +322,7 @@ GROUPS = {
     "side left": ["side left"],
     "side right": ["side right"],
     "mouth cap": ["mouth cap", "breath inlet insert", "breath inlet barb", "breath inner barb"],
-    "tail cap": ["tail cap", "USB-C receptacle"],
+    "tail cap": ["tail cap", "USB-C receptacle", "MIDI jack"],
     "key plate": ["key plate"],
     "bottom plate": ["bottom plate", "main board stud *"],
     "main board spacers": ["main board spacer *", "U-bolt spacer *"],
@@ -341,7 +341,7 @@ GROUPS = {
                "IDC plug Matrix carrier"],
     "tail equipment": ["etherCON", "umbilical adapter"],
     # flexible runs between groups: drawn assembled, left out of an explode
-    "ribbons": ["ribbon *", "Matrix ribbon", "USB-C lead"],
+    "ribbons": ["ribbon *", "Matrix ribbon", "USB-C lead", "MIDI lead"],
 }
 SHELL = ["oak top", "oak bottom", "side left", "side right", "mouth cap", "tail cap"]
 
