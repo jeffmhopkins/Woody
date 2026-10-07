@@ -211,7 +211,7 @@ renders:
     projection: o
     camera: [8, 18, 0, 0, 0, 0, 205]
   - name: tail-face
-    title: The tail face - the etherCON in its recess
+    title: The tail face - the etherCON centred in its recess, the MIDI jack in a corner
     src: mechanical/cad/fig_tail_face.scad
     out: mechanical/renders/tail-face.png
     imgsize: [1200, 900]
@@ -236,7 +236,7 @@ exports:
   - {name: dxf-plate-top, src: mechanical/cad/woody_body.scad, out: mechanical/export/plate-top.dxf, defines: {part: "plate_top"}}
   - {name: dxf-oak-top, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-top.dxf, defines: {part: "oak_top"}}
   - {name: dxf-oak-bottom, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-bottom.dxf, defines: {part: "oak_bottom"}}
-  - {name: dxf-oak-bottom-pockets, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-bottom-pockets.dxf, defines: {part: "oak_bottom_pockets"}}
+  - {name: dxf-tail-cap-jack, src: mechanical/cad/woody_body.scad, out: mechanical/export/tail-cap-jack.dxf, defines: {part: "tail_cap_jack"}}
   - {name: dxf-plate-bottom, src: mechanical/cad/woody_body.scad, out: mechanical/export/plate-bottom.dxf, defines: {part: "plate_bottom"}}
   - {name: dxf-side, src: mechanical/cad/woody_body.scad, out: mechanical/export/side.dxf, defines: {part: "side"}}
   - {name: dxf-oak-grooves, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-grooves.dxf, defines: {part: "oak_grooves"}}
@@ -410,10 +410,10 @@ scripts:
     cmd: [tools/fab.py, dxf, --from, mechanical/export/oak-grooves.dxf, --part, oak_bottom, --name, fab-dxf-oak-bottom-grooves]
     inputs: [mechanical/export/oak-grooves.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
     out: mechanical/fab/oak/oak-bottom-grooves.dxf
-  - name: fab-dxf-oak-bottom-counterbore
-    cmd: [tools/fab.py, dxf, --from, mechanical/export/oak-bottom-pockets.dxf, --part, oak_bottom, --name, fab-dxf-oak-bottom-counterbore]
-    inputs: [mechanical/export/oak-bottom-pockets.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
-    out: mechanical/fab/oak/oak-bottom-counterbore.dxf
+  - name: fab-dxf-tail-cap-jack
+    cmd: [tools/fab.py, dxf, --from, mechanical/export/tail-cap-jack.dxf, --part, tail_cap, --name, fab-dxf-tail-cap-jack]
+    inputs: [mechanical/export/tail-cap-jack.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
+    out: mechanical/fab/oak/tail-cap-jack.dxf
   - name: fab-dxf-mouth-cap
     cmd: [tools/fab.py, dxf, --from, mechanical/export/mouth-cap.dxf, --part, mouth_cap, --name, fab-dxf-mouth-cap]
     inputs: [mechanical/export/mouth-cap.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
@@ -468,7 +468,7 @@ scripts:
   - name: fab-pdf-oak-bottom
     title: The oak bottom's one-page drawing for the shop
     cmd: [tools/fab.py, drawing, --part, oak_bottom, --name, fab-pdf-oak-bottom]
-    inputs: [mechanical/export/fab-geometry.echo, config/key-layout.yaml, hardware/bom.csv, mechanical/export/oak-bottom-pockets.dxf, mechanical/export/oak-bottom.dxf, mechanical/export/oak-grooves.dxf, tools/cad.py, mechanical/outputs.yaml, mechanical/cad/woody_body.scad, mechanical/cad/fab_parts.scad, mechanical/cad/generated/params.scad, config/body.yaml]
+    inputs: [mechanical/export/fab-geometry.echo, config/key-layout.yaml, hardware/bom.csv, mechanical/export/oak-bottom.dxf, mechanical/export/oak-grooves.dxf, tools/cad.py, mechanical/outputs.yaml, mechanical/cad/woody_body.scad, mechanical/cad/fab_parts.scad, mechanical/cad/generated/params.scad, config/body.yaml]
     out: mechanical/fab/oak/oak-bottom.pdf
   - name: fab-pdf-mouth-cap
     title: The mouth cap's one-page drawing for the shop
@@ -478,7 +478,7 @@ scripts:
   - name: fab-pdf-tail-cap
     title: The tail cap's one-page drawing for the shop
     cmd: [tools/fab.py, drawing, --part, tail_cap, --name, fab-pdf-tail-cap]
-    inputs: [mechanical/export/fab-geometry.echo, config/key-layout.yaml, hardware/bom.csv, mechanical/export/tail-cap-recess.dxf, mechanical/export/tail-cap.dxf, tools/cad.py, mechanical/outputs.yaml, mechanical/cad/woody_body.scad, mechanical/cad/fab_parts.scad, mechanical/cad/generated/params.scad, config/body.yaml]
+    inputs: [mechanical/export/fab-geometry.echo, config/key-layout.yaml, hardware/bom.csv, mechanical/export/tail-cap-jack.dxf, mechanical/export/tail-cap-recess.dxf, mechanical/export/tail-cap.dxf, tools/cad.py, mechanical/outputs.yaml, mechanical/cad/woody_body.scad, mechanical/cad/fab_parts.scad, mechanical/cad/generated/params.scad, config/body.yaml]
     out: mechanical/fab/oak/tail-cap.pdf
   - name: fab-pdf-side
     title: The side's one-page drawing for the shop

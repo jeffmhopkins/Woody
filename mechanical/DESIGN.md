@@ -258,21 +258,24 @@ decision, not a correction.
    (`body-thickness`, 2026-09-26).
    *Rules: "etherCON body inside the cavity height", "body thickness takes
    the etherCON on the floor".*
-3. **The lane beside the etherCON takes the MIDI jack** (issue #37; owner,
-   2026-10-04: "on the bottom face, and then just do a connector to the main
-   board"). Until then a panel-mount USB-C extension's receptacle (`CBL-USB-EXT`)
-   stood there, on end, behind an overmould pocket in the tail face; all of
-   that is gone (ADR 0015, *Amendment, 2026-10-04*). The jack (`J-MIDI-OUT`, a
-   Same Sky SJ5-43502PM, `config/body.yaml` `midi`) goes through the **oak
-   bottom**, centred in the lane: a counterbore from inside takes its collar and
-   leaves the oak its nut can clamp, and its nut stands under the bottom face. It
-   is fitted from inside before the cassette drops in, and its lead (`CBL-MIDI`)
-   plugs into J-MIDI on the main board with the lid off. The counterbore is a
-   router pass, exported on its own (`export/oak-bottom-pockets.dxf`); the
-   through-hole is in `export/oak-bottom.dxf`.
-   *Rules: "MIDI jack in the oak bottom", "MIDI jack lead to J-MIDI", "J-MIDI
-   and its plug under the Matrix carrier", "oak-bottom cuts at least 3 mm
-   apart".*
+3. **The MIDI jack is in a corner of the tail face, beside the centred
+   etherCON** (issue #45; owner, 2026-10-07: "TRS connector should be on the
+   same side as the ethercon on the controller", "TRS can go in corner"; ADR
+   0021, *Amendment, 2026-10-07*). The jack (`J-MIDI-OUT`, a Same Sky
+   SJ5-43502PM, `config/body.yaml` `midi`) goes through the **tail cap**: its
+   collar bears on the cap's inside face, its body stands in the lane between
+   the flange and the side, and a counterbore from outside, round its nut,
+   leaves the oak the thread can clamp. Which corner is `midi.corner`: the
+   etherCON's panel screws take the other two. It is fitted from inside before
+   the cassette drops in, and its lead (`CBL-MIDI`) plugs into J-MIDI, a
+   side-entry header facing the tail on the main board, with the lid off. The
+   counterbore is a router pass, exported on its own (`export/tail-cap-jack.dxf`);
+   the hole is in `export/tail-cap.dxf`. Until 2026-10-07 the jack went through
+   the oak bottom (`hardware/carrier/midi-out/notes.md`).
+   *Rules: "MIDI jack in the tail cap", "tail cap web between the etherCON bore
+   and the MIDI jack", "MIDI jack behind the tail cap", "J-MIDI beside J-UMB,
+   facing the tail", "MIDI jack lead to J-MIDI", "J-MIDI and its plug under the
+   Matrix carrier".*
 4. **The display set the mouth end — resolved by the owner.** It is gone
    (ADR 0015), and the mouth end is now the equal band. *Rule: "what the
    mouth end needs".*

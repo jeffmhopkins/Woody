@@ -635,6 +635,8 @@ def cmd_drawing(a):
         if part == "tail_cap":
             notes.append("etherCON recess: a router pass from the outer face, tail-cap-recess.dxf, leaving the "
                          "connector its panel (config/body.yaml ethercon.panel_max)")
+            notes.append("MIDI jack counterbore: a router pass from the outer face, tail-cap-jack.dxf, round the "
+                         "jack's nut, leaving the jack its panel (config/body.yaml midi.jack_thread less midi.jack_nut_t)")
         notes.append("COUNTERSINKS: none. Pockets and counterbores are flat-bottomed")
         notes.append(f"EDGES: the model's sanded roundover, stack.edge_r = {fmt(b['stack']['edge_r']['value'])} "
                      f"({b['stack']['edge_r']['status']}), is in the STEP; it may be left for sanding by hand")
