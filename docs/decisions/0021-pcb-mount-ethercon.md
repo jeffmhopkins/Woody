@@ -2,7 +2,7 @@
 
 **Status:** Accepted. Decided by the owner, 2026-09-29. It settles ADR 0004's
 open question *which etherCON variant at each end* **for the instrument's end
-only**; the module's end is [ADR 0023](0023-module-ethercon-and-two-boards.md). **Amended twice on 2026-10-02**: the main board's tail end runs full width (*Amendment* below), and the Matrix moves onto the right-hand key board, with no ESD protection added to the USB (*Amendment, 2026-10-02 (2)*). **Amended again on 2026-10-03**: the Matrix moves onto a carrier board of its own, hung from the oak top, the right-hand key board goes back to its original length, and the Matrix is programmed over its own USB-C only (*Amendment, 2026-10-03*).
+only**; the module's end is [ADR 0023](0023-module-ethercon-and-two-boards.md). **Amended twice on 2026-10-02**: the main board's tail end runs full width (*Amendment* below), and the Matrix moves onto the right-hand key board, with no ESD protection added to the USB (*Amendment, 2026-10-02 (2)*). **Amended again on 2026-10-03**: the Matrix moves onto a carrier board of its own, hung from the oak top, the right-hand key board goes back to its original length, and the Matrix is programmed over its own USB-C only (*Amendment, 2026-10-03*). **Amended on 2026-10-07**: the etherCON is centred on the tail face, the MIDI jack moves from the oak bottom to a corner of the tail face beside it, and `J-MIDI` becomes a side-entry header facing the tail (*Amendment, 2026-10-07*).
 
 ## Context
 
@@ -586,3 +586,77 @@ pins between the carrier and service-uart sheets.
 | The inserts in oak: they are sold for heat-setting in plastic | one set and pulled in a scrap of the chosen oak, before the lid is drilled |
 | `EN`'s start-up with no C (#14 A2) | the power-cycle E-test above |
 | Reaching the Matrix's BOOT and RESET buttons, on its underside over the carrier, for recovery (item 5) | the carrier's final outline (2026-10-03: the owner asked for no cut-out, which the plug and the ribbon's fold constrain); with the Matrix in hand, a probe through the gap or an access hole |
+
+## Amendment, 2026-10-07 — the etherCON centred, the MIDI jack beside it on the tail face (issue #45)
+
+The owner, 2026-10-07, verbatim:
+
+> "TRS connector should be on the same side as the ethercon on the controller. The connector on the main PCB should be a 90deg facing the rear. Ethercon should be moved to be center of the bottom/back side as well (same face, just centered, TRS of midi to the side of that)"
+
+and, after a first fit study reported that the jack could not stand beside the centred flange (wrongly; *The first study*, below):
+
+> "TRS can go in corner"
+
+### What is decided
+
+1. **The NE8FAV is centred across the tail face** (`config/body.yaml`
+   `ethercon.offset_y`, now settled). It still stands on the floor, latch up.
+   J-UMB, the adapter and the main board's tongue follow it across.
+2. **The MIDI jack (`J-MIDI-OUT`) goes through the tail cap, in a corner of the
+   face** (`midi.corner`), not through the oak bottom. The NE8FAV's two panel
+   screws take the upper-near and lower-far corners, so the jack has the other
+   two; it is in the upper far one, because `J-MIDI` then sits on the main
+   board's far side, where `HDR-SERVICE` is not. Its collar bears on the cap's
+   inside face, its body stands in the lane between the flange and the side,
+   and a counterbore from outside, round its nut and merging with the
+   etherCON's recess, leaves the oak the thread can clamp. The oak bottom carries no jack.
+3. **`J-MIDI` is a side-entry JST PH, S3B-PH-SM4-TB, its mouth facing the
+   tail** (`midi.hdr_at`, `hdr_sz`), mouthward of J-UMB's pad row, so CBL-MIDI
+   runs straight back past J-UMB's insulator and the adapter to the jack.
+
+The fit is proved by `mechanical/drc.echo`: *"MIDI jack in the tail cap"* (the
+panel, the counterbore and its oak to the face's edges, the etherCON's bore and
+screw holes), *"tail cap web between the etherCON bore and the MIDI jack"*,
+*"MIDI jack behind the tail cap"* (the collar to the flange, the side and the
+oak top; the jack to the adapter, the main board and J-UMB) and *"J-MIDI
+beside J-UMB, facing the tail"*.
+
+### The first study, and why the corner
+
+The first fit study (2026-10-07, before *"TRS can go in corner"*) reported
+that the jack did not fit beside the centred flange. **That was wrong, on two
+counts.** It read the jack's drawing as the config then did, a 10.0 collar
+across its corners and a body as wide as the collar; the drawing's hex is the
+nut, 10.0 across its flats, and the collar behind the thread is round
+(`midi.jack_nut_af`, `jack_collar`, `jack_body`;
+`hardware/carrier/midi-out/notes.md`). And it kept the oak minimum between the
+jack's outside cut and the etherCON's recess, though both are cut from the
+outer face and the jack's is the deeper, so they merge into one pocket and
+the jack's hole is measured to the bore and the screw holes instead. With
+both corrected, what binds is the collar in the lane behind the face, which
+is the same at any height: the jack would also have fitted at the lane's
+middle height.
+
+**The corner is the owner's choice, and it is kept for what it buys outside
+the face:** the jack sits further from the etherCON's axis than at the lane's
+middle height, which leaves the most room between the TRS plug's overmould and
+the cable connector's shell (*Open*, below).
+
+### What this changes for the main board
+
+`J-UMB` and the adapter's joint move with the etherCON's axis, and so do
+`J-UMB`'s band of parts (`boards.umb_parts_d`) and the tongue's pads.
+`J7` becomes the side-entry footprint
+(`woody:JST_PH_S3B-PH-SM4-TB_1x03-1MP_P2.00mm_Horizontal`) at `midi.hdr_at`,
+facing the tail, with `U-TVS-MIDI` and the two beads re-placed at it. The
+routes into `J-UMB` and `J7` follow. The board is laid out separately, from
+`mechanical/export/pcb-geometry.echo`.
+
+### Open, and what decides each
+
+| Open | What decides it |
+|---|---|
+| The jack's collar clears the flange, the side and the oak top by `midi.jack_clear` exactly, with nothing spare | the jack in hand in a test cap: a collar over its drawing's size meets the flange or the side |
+| The TRS plug's overmould beside the etherCON cable connector's shell, both outside the face; and a thumb reaching the PUSH tab past the plug | `ethercon.recess_margin`'s decision, with J-UMBILICAL-CABLE and a TRS lead in hand |
+| How far CBL-MIDI's housing stands past J-MIDI's face (`midi.hdr_plug_l`, from the through-hole header's mated drawing) | the SMT header's own mated drawing, or the parts in hand |
+| The jack's hole and its counterbore round the nut (`midi.hole_d`, `cbore_clear`) | a test hole in an offcut of the tail cap's oak, with the part and the socket that turns its nut |

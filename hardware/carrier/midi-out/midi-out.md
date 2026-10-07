@@ -2,14 +2,18 @@
 
 **Status:** New 2026-10-04, issue #37 ([ADR 0015](../../../docs/decisions/0015-one-mcu-no-display.md),
 *Amendment, 2026-10-04*). The instrument's external USB is gone, and MIDI
-leaves on a 3.5 mm TRS jack in the oak bottom instead (owner: *"The only
-requirement then would be a TRS connector on the bottom for midiout, and
-adding a midi circuit to the main board"*; *"TRS should be able to be swapped
-from TRS a to b, ideally just in firmware"*; *"I think you need it on the
-bottom face, and then just do a connector to the main board instead of
-actually mounting it to PCB"*). **The parts are on the sheet, in the BOM and
-placed and routed on `main-board.kicad_pcb`** (issue #35 pass 2; *Placement*,
-below, and the board's `layout.yaml` `parts:`). **Amended 2026-10-05 (#39):** `R-MIDI` is
+leaves on a 3.5 mm TRS jack instead (owner: *"TRS should be able to be swapped
+from TRS a to b, ideally just in firmware"*; *"just do a connector to the main
+board instead of actually mounting it to PCB"*). **Moved 2026-10-07 (#45)**
+from the oak bottom to the tail cap, in a corner of the face beside the
+centred etherCON, and `J-MIDI` turned to a side-entry header facing the tail
+(owner: *"TRS connector should be on the same side as the ethercon on the
+controller. The connector on the main PCB should be a 90deg facing the
+rear"*; *"TRS can go in corner"*; [ADR 0021](../../../docs/decisions/0021-pcb-mount-ethercon.md),
+*Amendment, 2026-10-07*). The oak-bottom arrangement is in [`notes.md`](notes.md).
+**The parts are on the sheet and in the BOM; `main-board.kicad_pcb` still has
+the top-entry `J7` where the oak-bottom design put it**, and moves with the
+board's half of #45 (*Placement*, below). **Amended 2026-10-05 (#39):** `R-MIDI` is
 182 Ω 1 % and the rail comes through an ideal-diode OR (*Amendment*, below).
 
 **The sheet:** [`midi-out.sch.png`](midi-out.sch.png) (KiCad:
@@ -37,7 +41,7 @@ The `Dir` and `Peer` columns are defined once in
 *Connectivity is **[`netlist.yaml`](netlist.yaml)**, not the drawing below.*
 
 ```
-  ON THE MAIN BOARD                                                 IN THE OAK BOTTOM
+  ON THE MAIN BOARD                                                 IN THE TAIL CAP  
   U-LVLSHIFT gate B (5 V) MIDI_TIP_DRV ──[R-MIDI-T 182R 1%]──[FB-MIDI-T 600R@100MHz]──┬── J-MIDI 1 ═╗
   U-LVLSHIFT gate C (5 V) MIDI_RING_DRV ─[R-MIDI-R 182R 1%]──[FB-MIDI-R 600R@100MHz]──┼── J-MIDI 2 ═╬═ CBL-MIDI ═ [J-MIDI-OUT SJ5-43502PM]
                                                                          [U-TVS-MIDI SP0504BAHTG]    ║    T = tip, R1 = ring,
@@ -245,27 +249,28 @@ confirm that playing in Type B produces no marker errors.**
 
 `J-MIDI-OUT` is a Same Sky SJ5-43502PM: M7 × 0.75 thread, 4.5 long, with a
 2.00 nut `[ds connectors/SAMESKY-SJ5-43502PM.pdf p.2]`. It mounts **through
-the oak bottom**, from inside, in the lane beside the etherCON that the USB-C
-receptacle used to stand in (config/body.yaml `midi`; mechanical/drc.echo
-*"MIDI jack in the oak bottom"*). A counterbore from inside leaves the panel
-the thread can clamp. Its four tabs take a three-conductor plug: the plug's
+the tail cap**, from inside, in a corner of the tail face beside the etherCON
+(`config/body.yaml` `midi.corner`; `mechanical/drc.echo` *"MIDI jack in the
+tail cap"*). Its collar bears on the cap's inside face and its body stands in
+the lane between the etherCON's flange and the side (*"MIDI jack behind the
+tail cap"*); a counterbore from outside, round the nut, leaves the panel the
+thread can clamp. Its four tabs take a three-conductor plug: the plug's
 sleeve spans ring 2 and the sleeve, so both go to `PWR_GND`. It is wired to
 **`CBL-MIDI`**, a three-way JST PH lead with tip and ring twisted, which plugs
 into **`J-MIDI`** on the main board (drc.echo *"MIDI jack lead to J-MIDI"*
 gives its run). It is fitted before the cassette drops in, and the lead is
-plugged with the lid off, as `HDR-SERVICE` is reached.
+plugged with the lid off, as `HDR-SERVICE` is.
 
-## Placement (for the main board's layout, after #35)
+## Placement (for the main board's layout)
 
-The corner the USB-C receptacle's keep-out used to hold, past the right-hand
-key board and beside the etherCON adapter. It is outside both key boards'
-outlines, and nothing stands over it but the Matrix carrier
-(`pcb-geometry.echo`, *main*, `J-MIDI`):
+On the main board's far side, mouthward of `J-UMB`'s pad row and under the
+Matrix carrier (`pcb-geometry.echo`, *main*, `J-MIDI`):
 
-- **`J-MIDI` at `midi.hdr_at`, its pins along the body**, facing the lane,
-  so the lead leaves toward the jack (`config/body.yaml` `midi.hdr_at`). A
-  surface-mount PH, because the corner is over the bottom plate's end, where
-  a through-hole header's tails would need a plate window.
+- **`J-MIDI` at `midi.hdr_at`, side entry, its mouth facing the tail**, so the
+  lead runs straight back past `J-UMB`'s insulator and the etherCON's adapter
+  to the jack (`config/body.yaml` `midi.hdr_at`; drc.echo *"J-MIDI beside
+  J-UMB, facing the tail"*). Surface mount, because the corner is over the
+  bottom plate, where a through-hole header's tails would need a plate window.
 - **`U-TVS-MIDI` beside it**, at the header pins, with its ground via in the
   `PWR_GND` pour.
 - **`FB-MIDI-T` and `FB-MIDI-R` at the header**, `R-MIDI-T` and `R-MIDI-R`
@@ -281,8 +286,8 @@ outlines, and nothing stands over it but the Matrix carrier
 | `R-MIDI-T`, `R-MIDI-R` | 182 Ω 1 % 0.25 W, 1206 (UNI-ROYAL 1206W4F1820T5E, LCSC C247358) | RA/RC, either way round; **1 %, never 5 %** | `[ds CA-033 p.3]`, `[calc]`, `[sim]` |
 | `FB-MIDI-T`, `FB-MIDI-R` | 600 Ω @ 100 MHz | CA-033's optional RF beads | `FB-CHAIN`'s part |
 | `U-TVS-MIDI` | SP0504BAHTG | ESD at the header | `U-TVS-CHAIN`'s part |
-| `J-MIDI` | JST B3B-PH-SM4-TB | The lead's header, surface mount: no tails over the bottom plate | LCSC C160353; size `[ds datasheets/connectors/JST-PH-SERIES.pdf p.4]`, mated height `[calc]` (`config/body.yaml` `midi.hdr_sz`, `midi.hdr_mated_h`) |
-| `J-MIDI-OUT` | SJ5-43502PM | The jack, panel-mounted | `[ds SAMESKY-SJ5-43502PM.pdf]`; panel thickness to confirm in hand |
+| `J-MIDI` | JST S3B-PH-SM4-TB | The lead's header, surface mount, side entry facing the tail: no tails over the bottom plate | LCSC C265101; size `[ds datasheets/connectors/JST-PH-SERIES.pdf p.4]`, the plug's reach `[calc]` (`config/body.yaml` `midi.hdr_sz`, `midi.hdr_plug_l`) |
+| `J-MIDI-OUT` | SJ5-43502PM | The jack, panel-mounted in the tail cap | `[ds SAMESKY-SJ5-43502PM.pdf]`; panel thickness to confirm in hand |
 | `CBL-MIDI` | PHR-3 lead | Jack to header | hand-built |
 
 `R-MIDI-PU-T` and `R-MIDI-PU-R` are

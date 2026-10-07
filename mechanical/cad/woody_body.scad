@@ -413,14 +413,9 @@ module oak_bottom_2d() {
                 for (k = bottom_keys) round_hole() translate(key_xy(k)) rotate(key_rot(k)) square(rc, center = true);
             for (s = spare_xy) round_hole() translate(s) square(switch_keycap + 2 * thumb_recess_clear, center = true);
             for (u = ubolt_legs()) translate(u) circle(d = ubolt_hole_d);
-            translate(midi_xy) circle(d = midi_hole_d);
         }
     }
 }
-// The MIDI jack's counterbore, from the oak bottom's inside face (a router
-// pass, like the oak top's pockets, so a layer of its own): it takes the
-// jack's collar and leaves midi_panel of oak for the nut to clamp.
-module oak_bottom_pockets_2d() { translate([-x_in0, 0]) translate(midi_xy) circle(d = midi_cbore_d); }
 
 // Where a thumb cluster's switches are.
 function thumb_pts(cl) = [for (k = cluster_keys(cl)) key_xy(k)];
@@ -523,22 +518,34 @@ module ec_recess_2d() {
         for (s = [-1, 1]) translate(ec_pt([s * ethercon_tab_w / 2, ethercon_tab_top])) circle(d = EPS * 10);
     }
 }
-// THE LANE BESIDE THE ETHERCON: from the flange's edge to the side's inside
-// face, the adapter's front face to the tail cap. The USB-C extension's
-// receptacle stood in it until issue #37; since then the MIDI jack does, through
-// the oak bottom (config/body.yaml midi; owner, 2026-10-04: "on the bottom face").
+// THE LANES BESIDE THE ETHERCON: from each flange edge to the side's inside
+// face, the adapter's front face to the tail cap. Since issue #45 the MIDI jack
+// stands in one, through the tail cap, in a corner of the face (config/body.yaml
+// midi.corner; owner, 2026-10-07: "TRS can go in corner").
 tail_web_min = 2;   // drawing convention: oak between two cutouts in a face
-ec_lane = [ec_c[0] + ec_fl[0] / 2, W - u_y0];   // across: flange edge to the side's inside face
-midi_xy = [(ec_pcb_x1 + x_in1) / 2, (ec_lane[0] + ec_lane[1]) / 2];
+ec_lane = [ec_c[0] + ec_fl[0] / 2, W - u_y0];   // the far lane, across: flange edge to the side's inside face
+ec_lane_near = [u_y0, ec_c[0] - ec_fl[0] / 2];  // the near lane
+midi_far = len(search("far", midi_corner)) > 0;
+midi_upper = len(search("upper", midi_corner)) > 0;
+midi_lane = midi_far ? ec_lane : ec_lane_near;
+// THE JACK'S AXIS on the tail face, (Y, Z): the middle of its lane across, and
+// midi.jack_clear from the oak top's underside or the floor by its collar.
+midi_c = [(midi_lane[0] + midi_lane[1]) / 2,
+          midi_upper ? z_oak_top_bot - midi_jack_clear - midi_jack_collar[0] / 2 : z_floor + midi_jack_clear + midi_jack_collar[0] / 2];
 midi_panel = midi_jack_thread[1] - midi_jack_nut_t;   // the thickest panel the nut still clamps [calc from the drawing]
-midi_cbore_d = midi_jack_collar[0] + 2 * midi_cbore_clear;
-midi_cbore_depth = oak_bottom_t - midi_panel;   // from the inside face, leaving midi_panel of oak
+midi_nut_e = midi_jack_nut_af / cos(30);              // the nut across its corners
+midi_cbore_d = midi_nut_e + 2 * midi_cbore_clear;     // from OUTSIDE, round the nut
+midi_cbore_depth = ends_tail_cap_t - midi_panel;      // from the outer face, leaving midi_panel of oak
+// Along the body: the collar on the cap's inside face, the body and the tabs behind it.
+midi_tab_x = x_in1 - midi_jack_collar[1] - midi_jack_body[1] - midi_jack_body[2];
+module midi_cbore_2d() { translate(midi_c) circle(d = midi_cbore_d); }
 
 module tail_cap_2d() {
     difference() {
         rrect(W, T, stack_edge_r);
         translate(ec_c) circle(d = ethercon_bore_d);
         for (h = ec_holes) translate(h) circle(d = ethercon_hole_d);
+        translate(midi_c) circle(d = midi_hole_d);   // the MIDI jack (issue #45)
     }
 }
 // The matrix window: frosted acrylic, flush with the oak top, on an oak lip
@@ -717,7 +724,6 @@ module u_channel() {
     P(C_OAK, true, "oak bottom") translate([x_in0, 0, -explode]) intersection() { sanded_panel(x_in1 - x_in0, oak_bottom_t); difference() {
         linear_extrude(oak_bottom_t) oak_bottom_2d();
         translate([0, 0, oak_bottom_t - stack_groove_depth]) linear_extrude(stack_groove_depth + EPS) oak_grooves_2d();
-        translate([0, 0, midi_panel]) linear_extrude(midi_cbore_depth + EPS) oak_bottom_pockets_2d();
     } }
     // Each side: one sheet, bottom edge in the bottom groove, top edge in the top.
     // Exploded, the sides move out and down so the boards between them show.
@@ -758,6 +764,7 @@ module caps() {
         render() difference() {
             intersection() { linear_extrude(ends_tail_cap_t) tail_cap_2d(); sanded_cap(ends_tail_cap_t); }
             if (ec_recess_d > 0) translate([0, 0, ec_panel_t]) linear_extrude(ec_recess_d + EPS) ec_recess_2d();
+            translate([0, 0, midi_panel]) linear_extrude(midi_cbore_depth + EPS) midi_cbore_2d();
         }
 }
 
@@ -1004,12 +1011,12 @@ module pcb_geometry() {
     echo("PCB", "main", "keepout", "elsewhere", cb_x[0], cb_y[0], ua_x0, cb_y[1], gap_room);
     for (cl = chain_ribbon_cls) let(sp = chain_span(chain_x(cl), chain_dir(cl)))
         echo("PCB", "main", "keepout", str("ribbon ", cl), sp[0], chain_y - boards_chain_hdr_l / 2, sp[1], chain_y + boards_chain_hdr_l / 2, 0);
-    // The corner the USB-C extension's receptacle and lead held until issue #37
-    // is the main board's again; J-MIDI is proposed in it (config/body.yaml
-    // midi.hdr_at, placed by the layout): nothing taller than its mated plug there.
+    // J-MIDI (config/body.yaml midi.hdr_at, placed by the layout), a side-entry
+    // header facing the tail (issue #45), and its plug's reach past its face:
+    // nothing taller than the header there.
     echo("PCB", "main", "keepout", "J-MIDI and CBL-MIDI's plug (proposed)", midi_hdr_at[0] - midi_hdr_sz[0] / 2 - boards_board_clear,
-         midi_hdr_at[1] - midi_hdr_sz[1] / 2 - boards_board_clear, midi_hdr_at[0] + midi_hdr_sz[0] / 2 + boards_board_clear,
-         midi_hdr_at[1] + midi_hdr_sz[1] / 2 + boards_board_clear, midi_hdr_mated_h);
+         midi_hdr_at[1] - midi_hdr_sz[1] / 2 - boards_board_clear, midi_hdr_front + midi_hdr_plug_l,
+         midi_hdr_at[1] + midi_hdr_sz[1] / 2 + boards_board_clear, midi_hdr_sz[2]);
     // The Matrix ribbon (since 2026-10-02 an IDC ribbon up to the right-hand
     // key board): nothing in J-MCU's mated socket and the ribbon's rise off its
     // back (height 0); past it, parts under the closed fold's lowest leg there.
@@ -1075,18 +1082,20 @@ module tail_equipment() {
     }
     // The umbilical adapter: the flange's outline, parallel to the tail cap.
     P(C_PCB, false, "umbilical adapter") translate([ua_x0, ec_c[0] - ec_fl[0] / 2, ec_c[1] - ec_fl[1] / 2]) cube([boards_umb_adapter_t, ec_fl[0], ec_fl[1]]);
-    // THE MIDI JACK (issue #37): through the oak bottom in the lane, its collar in
-    // the counterbore, its nut under the bottom face, its body and tabs up into
-    // the lane; CBL-MIDI from the tabs to J-MIDI on the main board.
-    P(C_CONN, false, "MIDI jack") translate([midi_xy[0], midi_xy[1], z_floor - oak_bottom_t - explode]) {
-        translate([0, 0, -midi_jack_nut_t]) cylinder(d = midi_jack_collar[0], h = midi_jack_nut_t, $fn = 6);
-        translate([0, 0, -midi_jack_nut_t]) cylinder(d = midi_jack_thread[0], h = midi_jack_thread[1] + midi_jack_nut_t);
-        translate([0, 0, midi_panel]) cylinder(d = midi_jack_collar[0], h = midi_jack_collar[1], $fn = 6);
-        translate([0, 0, midi_panel + midi_jack_collar[1]]) cylinder(d = midi_jack_body[0], h = midi_jack_body[1]);
-        translate([-0.5, -2, midi_panel + midi_jack_collar[1] + midi_jack_body[1]]) cube([1, 4, midi_jack_body[2]]);
+    // THE MIDI JACK (issue #45): through the tail cap in a corner of the face,
+    // its collar on the cap's inside face, its nut in the counterbore from
+    // outside, its body and tabs in the lane; CBL-MIDI from the tabs to J-MIDI.
+    // Local +Z runs into the body (-X), from the cap's inside face.
+    P(C_CONN, false, "MIDI jack") translate([x_in1 + explode / 3, midi_c[0], midi_c[1]]) rotate([0, -90, 0]) {
+        translate([0, 0, -midi_panel - midi_jack_nut_t]) rotate([0, 0, 30]) cylinder(d = midi_nut_e, h = midi_jack_nut_t, $fn = 6);
+        translate([0, 0, -midi_jack_thread[1]]) cylinder(d = midi_jack_thread[0], h = midi_jack_thread[1]);
+        cylinder(d = midi_jack_collar[0], h = midi_jack_collar[1]);
+        translate([0, 0, midi_jack_collar[1]]) cylinder(d = midi_jack_body[0], h = midi_jack_body[1]);
+        translate([-0.5, -2, midi_jack_collar[1] + midi_jack_body[1]]) cube([1, 4, midi_jack_body[2]]);
     }
+    // J-MIDI: a side-entry header facing the tail (issue #45), its feet behind it.
     P(C_CONN, false, "J-MIDI") translate([midi_hdr_at[0] - midi_hdr_sz[0] / 2, midi_hdr_at[1] - midi_hdr_sz[1] / 2, cb_top])
-        cube([midi_hdr_sz[0], midi_hdr_sz[1], midi_hdr_mated_h]);
+        cube([midi_hdr_sz[0], midi_hdr_sz[1], midi_hdr_sz[2]]);
     P([0.15, 0.15, 0.15], false, "MIDI lead") run(midi_lead, 3);
 }
 
@@ -1323,6 +1332,8 @@ function chain_path(cl) = let(xe = chain_exit(cl), dr = chain_dir(cl), zl = chai
            [for (a = [-90 : 10 : 90]) [xf + dr * r * cos(a), zc + r * sin(a)]],
            [[xe + dr * routing_chain_bend_r, zu], [xe, chain_zk + e_kb - boards_chain_plug_t / 2]]);
 function path_len(p) = sum([for (i = [0 : len(p) - 2]) norm(p[i + 1] - p[i])]);
+// The gap between two boxes [x0, y0, z0, x1, y1, z1]: the largest of the per-axis gaps (negative = overlap).
+function box_gap(a, b) = max([for (i = [0 : 2]) max(b[i] - a[i + 3], a[i] - b[i + 3])]);
 module chain_header(cl, z0, up) {
     x = chain_x(cl); d = chain_dir(cl);
     // the shroud, its mouth at x facing d; hanging (up = false) or standing
@@ -1517,14 +1528,17 @@ module matrix_carrier_2d() {
     }
 }
 function half_turn(c, r, a0, a1) = [for (i = [0 : 8]) let(a = a0 + (a1 - a0) * i / 8) [c[0] + r * cos(a), c[1] + r * sin(a)]];
-// CBL-MIDI (3 mm, drawn straight between its bends): up off the jack's tabs,
-// across the lane beside the adapter and over the main board's end to J-MIDI's
-// mated plug, beside the etherCON's footprint (the lane is clear of it).
-midi_tab_top = z_floor - oak_bottom_t + midi_panel + midi_jack_collar[1] + midi_jack_body[1] + midi_jack_body[2];
-midi_lead_z = max(midi_tab_top, cb_top + midi_hdr_mated_h) + 2;
-midi_lead = [[midi_xy[0], midi_xy[1], midi_tab_top], [midi_xy[0], midi_xy[1], midi_lead_z],
-             [midi_hdr_at[0], midi_hdr_at[1], midi_lead_z], [midi_hdr_at[0], midi_hdr_at[1], cb_top + midi_hdr_mated_h]];
-midi_run = path_len([for (p = midi_lead) [p[0], p[2]]]) + norm([midi_xy[1] - midi_hdr_at[1], 0]);
+// CBL-MIDI (3 mm, drawn straight between its bends): out of J-MIDI's plug
+// toward the tail at the header's mid-height, past J-UMB's insulator and the
+// main board's end into the lane beside the adapter, up to the jack's axis
+// short of its tabs, and onto them.
+midi_hdr_front = midi_hdr_at[0] + midi_hdr_sz[0] / 2;   // J-MIDI's face, toward the tail
+midi_lead_z0 = cb_top + midi_hdr_sz[2] / 2;
+midi_lead = [[midi_hdr_front + midi_hdr_plug_l, midi_hdr_at[1], midi_lead_z0],
+             [midi_tab_x - midi_hdr_plug_l, midi_hdr_at[1], midi_lead_z0],
+             [midi_tab_x - midi_hdr_plug_l, midi_c[0], midi_c[1]],
+             [midi_tab_x, midi_c[0], midi_c[1]]];
+midi_run = midi_hdr_plug_l + path_len(midi_lead);
 // in (u, z): up off J-MCU's socket, the four legs, and up into J-MCU-C's
 mcu_path = concat([[mcu_us[0], jm_z + boards_mcu_plug_t / 2], [mcu_us[0], mcu_zs[0]]],
                   half_turn([mcu_us[0] - mcu_reach[0], (mcu_zs[0] + mcu_zs[1]) / 2], mcu_fr, 270, 90),
@@ -1981,13 +1995,12 @@ module drc_report() {
                            [(min(x) + max(x)) / 2, (min(y) + max(y)) / 2], [max(x) - min(x) + rc, max(y) - min(y) + rc]]]
                        : [for (k = bottom_keys) [k[0], key_xy(k), [rc, rc]]],
                    [for (i = [0 : 1 : len(spare_xy) - 1]) [str("spare ", i + 1), spare_xy[i], [rc, rc]]],
-                   [for (u = ubolt_legs()) ["U-bolt leg", u, [ubolt_hole_d, ubolt_hole_d]]],
-                   [["MIDI jack", midi_xy, [midi_cbore_d, midi_cbore_d]]]);
+                   [for (u = ubolt_legs()) ["U-bolt leg", u, [ubolt_hole_d, ubolt_hole_d]]]);
     function gap(a, b) = max(abs(a[1][0] - b[1][0]) - (a[2][0] + b[2][0]) / 2,
                              abs(a[1][1] - b[1][1]) - (a[2][1] + b[2][1]) / 2);
     clashes = [for (i = [0 : len(feats) - 1], j = [i + 1 : 1 : len(feats) - 1])
                if (gap(feats[i], feats[j]) < 3) str(feats[i][0], " / ", feats[j][0], " ", gap(feats[i], feats[j]))];
-    drc(len(clashes) == 0, "oak-bottom cuts at least 3 mm apart (thumb recesses, U-bolt, MIDI jack)",
+    drc(len(clashes) == 0, "oak-bottom cuts at least 3 mm apart (thumb recesses, U-bolt)",
         clashes, "pairs closer than 3 mm, with the web between them (negative = overlap)");
     // Through-cuts only. The oak ends at the groove's wall, groove_clear
     // outside the acrylic - the same edge the key plate rules measure to.
@@ -2171,15 +2184,15 @@ module drc_report() {
         drc(usb_pocket_need <= col_pocket_depth && q[2] <= rebate_x0 + 0.01,
             "recovery USB-C plug clear of the oak top", [usb_plug_top, usb_pocket_need, col_pocket_depth],
             "mm: a recovery plug's overmould top (openings.usb_overmold, centred on boards.matrix_usb); the oak pocket over it the overmould needs (openings.usb_pocket_clear of air) and the depth it is cut, the column pockets' (oak-pockets.dxf), ending at the window's rebate");
-    // J-MIDI (issue #37) in the main board's freed corner, under the Matrix
-    // carrier: its mated plug clear of the carrier's underside and its mounting
-    // screws' heads, and on the board.
-    let(top = cb_top + midi_hdr_mated_h,
+    // J-MIDI (issue #45: side entry, facing the tail) under the Matrix
+    // carrier: the header, which its plug's housing does not rise past, clear
+    // of the carrier's underside and its mounting screws' heads, and on the board.
+    let(top = cb_top + midi_hdr_sz[2],
         under = mx_carrier_bot - hardware_col_screw_head_h,
         r = [midi_hdr_at[0] - midi_hdr_sz[0] / 2, midi_hdr_at[1] - midi_hdr_sz[1] / 2, midi_hdr_at[0] + midi_hdr_sz[0] / 2, midi_hdr_at[1] + midi_hdr_sz[1] / 2],
         on = min(r[0] - cb_x[0], ua_x0 - r[2], r[1] - cb_y[0], cb_y[1] - r[3]))
         drc(under - top >= boards_board_clear && on >= boards_board_clear, "J-MIDI and its plug under the Matrix carrier", [under - top, on],
-            "mm: the mated plug's top (midi.hdr_mated_h) under the carrier's mounting screws' heads, the lowest thing over the corner (against boards.board_clear); the header inside the board's edges (against board_clear)");
+            "mm: the header's top (midi.hdr_sz) under the carrier's mounting screws' heads, the lowest thing over the corner (against boards.board_clear); the header inside the board's edges (against board_clear)");
     // THE KEY CHAIN'S RIBBONS (ADR 0017, amended 2026-09-27): long enough to
     // plug in with the lid laid beside the body; closed, a flat hairpin.
     drc(undef, "key-chain ribbon length (derived)", chain_len,
@@ -2343,23 +2356,52 @@ module drc_report() {
     // The bore is what is cut from the cap; the flange only clamps against it.
     drc(undef, "tail cap material below and above the etherCON bore",
         [ec_c[1] - ethercon_bore_d / 2, T - (ec_c[1] + ethercon_bore_d / 2)], "mm - the connector stands on the floor, so it is not centred");
-    // THE MIDI JACK (issue #37) through the oak bottom in the lane beside the
-    // etherCON: the panel its nut clamps, its counterbore's webs to the
-    // etherCON's footprint on the floor, the side's groove, the adapter and the
-    // tail cap, and its body's top in the cavity.
-    let(panel = oak_bottom_t - midi_cbore_depth,
-        proud = midi_jack_thread[1] - panel,
-        r = midi_cbore_d / 2,
-        w_ec = (midi_xy[1] - r) - ec_lane[0],
-        w_side = (W - u_y0 - stack_groove_clear) - (midi_xy[1] + r),
-        w_ad = (midi_xy[0] - r) - ec_pcb_x1,
-        w_cap = x_in1 - (midi_xy[0] + r),
-        w_plate = (midi_xy[0] - r) - bplate_x1,
-        head = z_oak_top_bot - (midi_tab_top))
-        drc(panel <= midi_panel + 0.01 && panel >= tail_web_min && min(w_ec, w_side, w_ad, w_cap) >= 1 && w_plate >= 0 && head >= 2,
-            "MIDI jack in the oak bottom", [panel, midi_cbore_d, midi_cbore_depth, proud, [w_ec, w_side, w_ad, w_cap, w_plate], head],
-            str("mm: the oak the nut clamps (at most the thread past the collar less the nut, ", midi_panel, " [ds SAMESKY-SJ5-43502PM.pdf p.2]; at least ",
-                tail_web_min, "); the counterbore from inside, across and deep; the thread and nut standing proud of the bottom face; the counterbore's oak to the etherCON's footprint, to the side's groove, to the adapter's front face and to the tail cap (against 1), and its edge past the bottom plate's end (against 0); the tabs' top under the oak top's underside (against 2)"));
+    // THE MIDI JACK (issue #45) through the tail cap, in a corner of the face.
+    // On the face: the panel its nut clamps, the counterbore from outside round
+    // the nut and its oak to the face's edges, the oak between its hole and
+    // the etherCON's bore and screw holes, and the counterbore's to the screws.
+    let(panel = ends_tail_cap_t - midi_cbore_depth,
+        rh = midi_hole_d / 2, rc = midi_cbore_d / 2,
+        w_edge = min(midi_c[0] - rc, W - (midi_c[0] + rc), midi_c[1] - rc, T - (midi_c[1] + rc)),
+        w_bore = norm(midi_c - ec_c) - ethercon_bore_d / 2 - rh,
+        w_hole = min([for (h = ec_holes) norm(midi_c - h)]) - ethercon_hole_d / 2 - rh,
+        w_screw = min([for (h = ec_holes) norm(midi_c - h)]) - ethercon_hole_d / 2 - rc,
+        sunk = midi_cbore_depth - (midi_jack_thread[1] - panel))
+        drc(panel <= midi_panel + 0.01 && panel >= tail_web_min && min(w_edge, w_bore, w_hole, w_screw) >= tail_web_min,
+            "MIDI jack in the tail cap", [midi_c, panel, midi_cbore_d, midi_cbore_depth, [w_edge, w_bore, w_hole, w_screw], sunk],
+            str("mm: the jack's axis on the face (across, up; midi.corner \"", midi_corner, "\"); the oak the nut clamps (at most the thread past the collar less the nut, ",
+                midi_panel, " [ds SAMESKY-SJ5-43502PM.pdf p.2]; at least ", tail_web_min, "); the counterbore from outside round the nut's corners, across and deep; the oak from the counterbore to the face's nearest edge, from the hole to the etherCON's bore and to its nearest panel screw hole, and from the counterbore to that screw hole (each against ",
+                tail_web_min, "); and how far the thread's end, and the nut on it, sit below the outer face"));
+    drc(undef, "tail cap web between the etherCON bore and the MIDI jack", norm(midi_c - ec_c) - ethercon_bore_d / 2 - midi_hole_d / 2,
+        str("mm of oak between the two through-holes (against ", tail_web_min, ", 'MIDI jack in the tail cap')"));
+    // Behind the cap: the collar (the widest part behind the cap) and the body
+    // in the lane, clear of the flange, the side, the oak top or floor; and the
+    // whole jack, tabs included, clear of the adapter, the main board and J-UMB.
+    let(r = midi_jack_collar[0] / 2,
+        g_flange = midi_far ? (midi_c[0] - r) - midi_lane[0] : midi_lane[1] - (midi_c[0] + r),
+        g_side = midi_far ? midi_lane[1] - (midi_c[0] + r) : (midi_c[0] - r) - midi_lane[0],
+        g_oak = midi_upper ? z_oak_top_bot - (midi_c[1] + r) : (midi_c[1] - r) - z_floor,
+        jk = [midi_tab_x, midi_c[0] - r, midi_c[1] - r, x_in1, midi_c[0] + r, midi_c[1] + r],
+        g_ad = box_gap(jk, [ua_x0, ec_c[0] - ec_fl[0] / 2, ec_c[1] - ec_fl[1] / 2, ec_pcb_x1, ec_c[0] + ec_fl[0] / 2, ec_c[1] + ec_fl[1] / 2]),
+        g_mb = box_gap(jk, [cb_x[0], cb_y[0], cb_z, ua_x0, cb_y[1], cb_top]),
+        g_ju = box_gap(jk, [ua_x0 - boards_umb_joint_d, ec_c[0] - ju_l / 2, cb_top, ua_x0, ec_c[0] + ju_l / 2, cb_top + boards_umb_joint_h]))
+        drc(min(g_flange, g_side, g_oak, g_ad, g_mb, g_ju) >= midi_jack_clear - 0.001, "MIDI jack behind the tail cap", [g_flange, g_side, g_oak, g_ad, g_mb, g_ju],
+            str("mm: the collar (", midi_jack_collar[0], " across, the body ", midi_jack_body[0], " behind it) to the etherCON's flange, to the side's inside face, to the ",
+                midi_upper ? "oak top's underside" : "floor", "; the jack, tabs included, to the umbilical adapter, to the main board and to J-UMB (each against midi.jack_clear ", midi_jack_clear, ")"));
+    // J-MIDI, side entry, facing the tail: on the board, its face clear of
+    // J-UMB's pad row, and its plug's lead clear of J-UMB's insulator and the
+    // adapter as it passes them into the lane.
+    let(r = [midi_hdr_at[0] - midi_hdr_sz[0] / 2, midi_hdr_at[1] - midi_hdr_sz[1] / 2, midi_hdr_front, midi_hdr_at[1] + midi_hdr_sz[1] / 2],
+        on = min(r[0] - cb_x[0], ua_x0 - r[2], r[1] - cb_y[0], cb_y[1] - r[3]),
+        pads = [ju_tail_x - boards_pin_pad / 2, ec_c[0] - 3.5 * 2.54 - boards_pin_pad / 2, ju_tail_x + boards_pin_pad / 2, ec_c[0] + 3.5 * 2.54 + boards_pin_pad / 2],
+        g_pads = max(pads[0] - r[2], r[1] - pads[3], pads[1] - r[3]),
+        lead_r = 1.5,
+        lane_lo = midi_hdr_at[1] > ec_c[0],
+        g_ju = lane_lo ? (midi_hdr_at[1] - lead_r) - (ec_c[0] + ju_l / 2) : (ec_c[0] - ju_l / 2) - (midi_hdr_at[1] + lead_r),
+        g_ad = lane_lo ? (midi_hdr_at[1] - lead_r) - (ec_c[0] + ec_fl[0] / 2) : (ec_c[0] - ec_fl[0] / 2) - (midi_hdr_at[1] + lead_r))
+        drc(on >= boards_board_clear && g_pads >= boards_board_clear && g_ju >= 0 && g_ad >= midi_jack_clear - 0.001, "J-MIDI beside J-UMB, facing the tail", [on, g_pads, g_ju, g_ad],
+            str("mm: the header and its feet inside the main board's edges, and its face to J-UMB's pad row (each against boards.board_clear ", boards_board_clear,
+                "); CBL-MIDI (drawn 3 mm) past J-UMB's insulator (against 0, a lead may rest on it) and past the adapter's edge (against midi.jack_clear)"));
     drc(undef, "MIDI jack lead to J-MIDI", midi_run + midi_lead_slack,
         str("mm of CBL-MIDI from the jack's tabs to J-MIDI: the run through its bends, ", midi_run, ", plus midi.lead_slack"));
     // The recess (ADR 0021): the NE8FAV's panel limit, met by a pocket from
@@ -2405,7 +2447,7 @@ module part_2d(p) {
     if (p == "plate_top") plate_top_2d();
     else if (p == "oak_top") oak_top_2d();
     else if (p == "oak_bottom") oak_bottom_2d();
-    else if (p == "oak_bottom_pockets") oak_bottom_pockets_2d();
+    else if (p == "tail_cap_jack") midi_cbore_2d();
     else if (p == "plate_bottom") plate_bottom_2d();
     else if (p == "oak_grooves") oak_grooves_2d();
     else if (p == "side") side_2d();

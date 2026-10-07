@@ -56,7 +56,7 @@ plate_bottom,boards.umb_parts_d,nominal,14,"M4 main board layout, routed",no,a w
 plate_bottom,boards.mcu_conn_at,nominal,"[262.27, 14.9, 90]",the main board's layout; the Matrix carrier's J-MCU-C stands straight above it,no,a working estimate the part can be cut to
 plate_bottom,boards.tall_at_x,nominal,225.0,,no,a working estimate the part can be cut to
 plate_bottom,boards.tall_side,nominal,near,,no,a working estimate the part can be cut to
-plate_bottom,boards.service_hdr_at,nominal,"[284.0, 9.3]",M4 main board layout,no,a working estimate the part can be cut to
+plate_bottom,boards.service_hdr_at,nominal,"[284.0, 11.0]",M4 main board layout,no,a working estimate the part can be cut to
 plate_bottom,boards.tht_trim,nominal,1.5,the first board assembled,no,a working estimate the part can be cut to
 plate_bottom,boards.plate_web_min,nominal,2.0,,no,a working estimate the part can be cut to
 plate_bottom,boards.key_board_t,nominal,1.6,"owner, 2026-09-29 (ADR 0020 Amendment 6); confirmed with the first board order",no,a working estimate the part can be cut to
@@ -64,9 +64,7 @@ plate_bottom,boards.kb_end_margin,tbd,8.8,"M4, with the boards laid out",yes,"M4
 plate_bottom,boards.kb_tail_margin,nominal,10.3,"M3, with the key positions; hardware.col_pocket_wall, which sets it",no,a working estimate the part can be cut to
 plate_bottom,boards.board_clear,tbd,1.5,"M4, with the boards laid out",yes,"M4, with the boards laid out"
 plate_bottom,openings.matrix_window,nominal,22.0,,no,a working estimate the part can be cut to
-plate_bottom,midi.hdr_at,nominal,"[293.5, 43.0]",the main board's layout after #35,no,a working estimate the part can be cut to
-plate_bottom,midi.hdr_sz,tbd,"[8.0, 4.8, 6.0]","JST's drawing, banked with the part",yes,"JST's drawing, banked with the part"
-plate_bottom,ethercon.offset_y,tbd,-7.0,M4 tail-face paper check (ADR 0009),yes,M4 tail-face paper check (ADR 0009)
+plate_bottom,midi.hdr_at,nominal,"[288.9, 43.0]",the main board's layout,no,a working estimate the part can be cut to
 plate_bottom,ethercon.floor_clear,nominal,0.55,,no,a working estimate the part can be cut to
 plate_bottom,hardware.kb_spacer_od,nominal,4.5,,no,a working estimate the part can be cut to
 plate_bottom,hardware.mb_nut_e,nominal,5.77,,no,a working estimate the part can be cut to
@@ -154,13 +152,6 @@ oak_bottom,boards.umb_adapter_t,tbd,1.6,"M4, with the board ordered",yes,"M4, wi
 oak_bottom,boards.kb_tail_margin,nominal,10.3,"M3, with the key positions; hardware.col_pocket_wall, which sets it",no,a working estimate the part can be cut to
 oak_bottom,boards.board_clear,tbd,1.5,"M4, with the boards laid out",yes,"M4, with the boards laid out"
 oak_bottom,openings.matrix_window,nominal,22.0,,no,a working estimate the part can be cut to
-oak_bottom,midi.jack_thread,nominal,"[7.0, 4.5]",,no,a working estimate the part can be cut to
-oak_bottom,midi.jack_nut_t,nominal,2.0,,no,a working estimate the part can be cut to
-oak_bottom,midi.jack_collar,nominal,"[10.0, 1.5]",,no,a working estimate the part can be cut to
-oak_bottom,midi.hole_d,tbd,7.3,"a test hole in an offcut of the chosen oak, with the part in hand",yes,"a test hole in an offcut of the chosen oak, with the part in hand"
-oak_bottom,midi.cbore_clear,tbd,1.0,the part in hand,yes,the part in hand
-oak_bottom,ethercon.offset_y,tbd,-7.0,M4 tail-face paper check (ADR 0009),yes,M4 tail-face paper check (ADR 0009)
-oak_bottom,ethercon.floor_clear,nominal,0.55,,no,a working estimate the part can be cut to
 oak_bottom,hardware.ubolt_rod_d,tbd,3.0,"M4, from the strap hardware chosen - small M3 U-bolts are sold for model and tube clamps [from memory]; a bent M3 rod or a stainless M3 threaded rod does the same job",yes,"M4, from the strap hardware chosen - small M3 U-bolts are sold for model and tube clamps [from memory]; a bent M3 rod or a stainless M3 threaded rod does the same job"
 oak_bottom,hardware.ubolt_hole_clear,tbd,0.5,"M4, with the U-bolt bought",yes,"M4, with the U-bolt bought"
 oak_bottom,hardware.ubolt_span,tbd,20.0,M4,yes,M4
@@ -175,11 +166,20 @@ mouth_cap,switch.keycap_top_above_seat,nominal,9.0,"calipers on a cap on its swi
 mouth_cap,fabrication.wood_species,tbd,"hardwood, the owner's choice (the parts are named oak)","the owner, before the wood is ordered",yes,"the owner, before the wood is ordered"
 mouth_cap,fabrication.wood_profile_tol,nominal,"[-0.2, 0.2]",,no,a working estimate the part can be cut to
 mouth_cap,fabrication.wood_depth_tol,nominal,"[-0.1, 0.1]",,no,a working estimate the part can be cut to
+tail_cap,stack.side_t,nominal,4.0,,no,a working estimate the part can be cut to
 tail_cap,stack.edge_r,tbd,1.5,"M5, on the first cut parts",no,"the sanded roundover: the STEP shows it, but it goes on by hand after the parts are cut (config/body.yaml), so a shop may leave the edges square"
+tail_cap,stack.side_inset,tbd,2.0,M4 - the thinnest lip the oak and the saw will hold,yes,M4 - the thinnest lip the oak and the saw will hold
 tail_cap,ends.tail_cap_t,tbd,6.0,"M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md",yes,"M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md"
 tail_cap,switch.keycap_top_above_seat,nominal,9.0,"calipers on a cap on its switch (M1) would make it settled; a visual match at scale cannot resolve a few tenths, which is the oak top's thickness tolerance. It SETS BOTH oak panel thicknesses (flush rule, stack above)",no,a working estimate the part can be cut to
+tail_cap,midi.jack_thread,nominal,"[7.0, 4.5]",,no,a working estimate the part can be cut to
+tail_cap,midi.jack_nut_t,nominal,2.0,,no,a working estimate the part can be cut to
+tail_cap,midi.jack_nut_af,nominal,10.0,,no,a working estimate the part can be cut to
+tail_cap,midi.jack_collar,nominal,"[9.0, 1.5]",,no,a working estimate the part can be cut to
+tail_cap,midi.hole_d,tbd,7.3,"a test hole in an offcut of the chosen oak, with the part in hand",yes,"a test hole in an offcut of the chosen oak, with the part in hand"
+tail_cap,midi.cbore_clear,tbd,1.0,"the part in hand, and the socket that turns its nut",yes,"the part in hand, and the socket that turns its nut"
+tail_cap,midi.corner,nominal,upper far,,no,a working estimate the part can be cut to
+tail_cap,midi.jack_clear,nominal,0.5,,no,a working estimate the part can be cut to
 tail_cap,ethercon.recess_margin,tbd,1.0,"M4, with the cable connector (J-UMBILICAL-CABLE) in hand: its shell has to enter the recess and a thumb has to reach the tab",yes,"M4, with the cable connector (J-UMBILICAL-CABLE) in hand: its shell has to enter the recess and a thumb has to reach the tab"
-tail_cap,ethercon.offset_y,tbd,-7.0,M4 tail-face paper check (ADR 0009),yes,M4 tail-face paper check (ADR 0009)
 tail_cap,ethercon.floor_clear,nominal,0.55,,no,a working estimate the part can be cut to
 tail_cap,fabrication.wood_species,tbd,"hardwood, the owner's choice (the parts are named oak)","the owner, before the wood is ordered",yes,"the owner, before the wood is ordered"
 tail_cap,fabrication.wood_profile_tol,nominal,"[-0.2, 0.2]",,no,a working estimate the part can be cut to

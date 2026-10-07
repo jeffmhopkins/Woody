@@ -679,7 +679,7 @@ components:
     - 8
   J7:
     of: J-MIDI
-    value: B3B-PH-SM4-TB
+    value: S3B-PH-SM4-TB
     pins:
     - 1
     - 2

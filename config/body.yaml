@@ -854,18 +854,19 @@ openings:
     decided_by: "M4, against the extension bought"
 
 
-# THE MIDI OUT JACK (issue #37; owner, 2026-10-04: "on the bottom face, and
-# then just do a connector to the main board instead of actually mounting it
-# to PCB"). A panel-mount 3.5 mm jack (J-MIDI-OUT, Same Sky SJ5-43502PM)
-# through the oak bottom, in the lane beside the etherCON that the tail-face
-# USB-C receptacle stood in: centred in the lane across, and between the
-# adapter's front face and the tail cap along. It is fitted from inside: a
-# counterbore takes its collar and leaves the oak the thread can clamp, and
-# its nut goes on from outside. Its tabs are soldered to CBL-MIDI, which plugs
-# into J-MIDI on the main board's freed tail corner
-# (hardware/carrier/midi-out/midi-out.md). drc.echo 'MIDI jack in the oak
-# bottom', 'MIDI jack clear of the etherCON and its adapter', 'MIDI jack lead
-# to J-MIDI', 'J-MIDI and its plug under the Matrix carrier'.
+# THE MIDI OUT JACK (issue #37; moved to the tail face by issue #45). A
+# panel-mount 3.5 mm jack (J-MIDI-OUT, Same Sky SJ5-43502PM) through the TAIL
+# CAP, on the face the etherCON is on (owner, 2026-10-07: "TRS connector should
+# be on the same side as the ethercon on the controller"), in a corner of it
+# beside the centred flange (owner, 2026-10-07: "TRS can go in corner";
+# ADR 0021, Amendment, 2026-10-07). It is fitted from inside: its collar
+# against the cap's inside face, its body in the lane between the flange and
+# the side, its thread through the cap, and a counterbore from OUTSIDE, inside
+# the etherCON's recess, takes its nut and leaves the oak the thread can clamp.
+# Its tabs are soldered to CBL-MIDI, which plugs into J-MIDI, a side-entry
+# header facing the tail on the main board. drc.echo 'MIDI jack in the tail
+# cap', 'MIDI jack behind the tail cap', 'MIDI jack lead to J-MIDI', 'J-MIDI
+# beside J-UMB, facing the tail'.
 midi:
   jack_thread:
     value: [7.0, 4.5]
@@ -875,14 +876,18 @@ midi:
     value: 2.0
     status: nominal
     source: "the nut's thickness, the 2.00 on the drawing [ds datasheets/connectors/SAMESKY-SJ5-43502PM.pdf p.2]"
+  jack_nut_af:
+    value: 10.0
+    status: nominal
+    source: "the nut's hex across its flats: the front view's 10.0 spans the hex's two flat edges (its corners point sideways), and the side view draws the same hex as the 2.00-thick part on the thread [ds datasheets/connectors/SAMESKY-SJ5-43502PM.pdf p.2, item 1 nut]"
   jack_collar:
-    value: [10.0, 1.5]
+    value: [9.0, 1.5]
     status: nominal
-    source: "the collar behind the thread, [across its corners, thick]: hex 10.0 as drawn, 1.5 [ds datasheets/connectors/SAMESKY-SJ5-43502PM.pdf p.2]"
+    source: "the round collar behind the thread, [diameter, thick]: the side view's 9.0 spans it, 1.5 thick [ds datasheets/connectors/SAMESKY-SJ5-43502PM.pdf p.2]. It bears on the cap's inside face"
   jack_body:
-    value: [9.0, 10.2, 4.0]
+    value: [8.0, 10.2, 4.0]
     status: nominal
-    source: "[diameter, length behind the collar, the solder tabs past it] [ds datasheets/connectors/SAMESKY-SJ5-43502PM.pdf p.2]"
+    source: "[diameter, length behind the collar, the solder tabs past it]: the body is the 8.0 dimensioned on the right of the side view, narrower than the collar [ds datasheets/connectors/SAMESKY-SJ5-43502PM.pdf p.2]"
   hole_d:
     value: 7.3
     status: tbd
@@ -891,26 +896,35 @@ midi:
   cbore_clear:
     value: 1.0
     status: tbd
-    source: "the counterbore's radius past the collar's corners, for the hex to turn in as the nut is tightened [drawing convention]"
-    decided_by: "the part in hand"
-  # Where the lead plugs in on the main board: the freed tail corner, outside
-  # both key boards' outlines, toward the lane (midi-out.md, Placement). The
-  # layout places it; this is the body CAD's nominal, for the clash and the
-  # lead's run.
+    source: "the outside counterbore's radius past the nut's corners, for a socket on the nut [drawing convention]"
+    decided_by: "the part in hand, and the socket that turns its nut"
+  corner:
+    value: "upper far"
+    status: nominal
+    source: "the tail-face corner the jack is in, seen from outside: upper or lower, near (-Y, the left) or far (+Y, the right). The NE8FAV's two panel screws take the upper-near and lower-far corners [ds ST-NE8FAV], so upper far or lower near; upper far because J-MIDI then sits on the far side, where HDR-SERVICE is not (owner, 2026-10-07: 'TRS can go in corner')"
+  jack_clear:
+    value: 0.5
+    status: nominal
+    source: "the jack's collar and body to the flange, the side and the oak top: config/clearance.yaml body classes default and against-oak, by name"
+  # Where the lead plugs in on the main board: a side-entry header facing the
+  # tail, on the jack's side, mouthward of J-UMB's pad row (issue #45; owner,
+  # 2026-10-07: "The connector on the main PCB should be a 90deg facing the
+  # rear"). The layout places it; this is the body CAD's nominal, for the
+  # clash and the lead's run.
   hdr_at:
-    value: [293.4, 43.0]
+    value: [288.9, 43.0]
     status: nominal
-    source: "J-MIDI's centre, [along the body, across], body frame: in the corner the USB-C receptacle's keep-out held (pcb-geometry.echo), past HDR-SERVICE's plate window and the carrier's mounts. Along: as near the tail as leaves the header's end boards.board_clear inside the board's end (drc.echo 'J-MIDI and its plug under the Matrix carrier'), at hdr_sz's length; the main board's J7 stands here, x + 60 in the board's frame (owner, 2026-10-06, option 1: move J7 toward the mouth)"
-    decided_by: "the main board's layout after #35"
+    source: "J-MIDI's centre, header and SMT feet together, [along the body, across], body frame. Across: boards.board_clear inside the main board's far edge at hdr_sz's width. Along: its face boards.board_clear short of J-UMB's pad row, whose last pad it overlaps across (drc.echo 'J-MIDI beside J-UMB, facing the tail'); its plug and lead then pass beside J-UMB's insulator and the adapter, in the lane"
+    decided_by: "the main board's layout"
   hdr_sz:
-    value: [9.95, 7.0, 6.6]
+    value: [8.6, 9.9, 5.5]
     status: settled
-    source: "JST B3B-PH-SM4-TB(LF)(SN) (LCSC C160353), surface mount, top entry, [along its row over the fixing tabs, across with the posts' SMT feet, height over the board]: B 9.95 for 3 circuits; depth 5 plus the feet (2) past its front [calc: 5 + 2 = 7.0]; height 6.6 [ds datasheets/connectors/JST-PH-SERIES.pdf p.4, Header (SMT type), top entry drawing and table; same figures on connectors/JST-PH-SERIES-LCSC-C160353.pdf p.3, SMT type shrouded header]. The body alone is 9.95 x 5; the feet are solder leads at the board, so they count for the footprint and the keep-out, not for the plug over it. Surface mount so that no tails stand over the bottom plate"
-  hdr_mated_h:
-    value: 11.6
+    source: "JST S3B-PH-SM4-TB(LF)(SN), surface mount, SIDE entry, [along the body - its depth with the SMT feet behind it, across - along its row over the fixing tabs, height over the board]: depth 6 plus the feet (2.6) [calc: 6 + 2.6 = 8.6]; B 9.9 for 3 circuits; height 5.5 [ds datasheets/connectors/JST-PH-SERIES.pdf p.4, Header (SMT type), side entry drawing and table]. Surface mount so that no tails stand over the bottom plate"
+  hdr_plug_l:
+    value: 5.0
     status: nominal
-    source: "J-MIDI with CBL-MIDI's PHR-3 housing mated, over the board, and the wires' turn. [calc: 6.6 + 2.0 + 3.0 = 11.6] - the header 6.6 over the board (hdr_sz); the housing's top 2.0 past the shroud's, as the through-hole top entry header mates: (8) over the board against its 6 [calc: 8 - 6 = 2.0] [ds datasheets/connectors/JST-PH-SERIES.pdf p.1, Assembly layout (Through-hole type) top entry, and p.3, Header (Through-hole type)]; the PHR-3 housing itself 6.85 tall, B 7.8 long, 4.5 deep [ds same, p.3, Housing]; the wires leaving its top turned flat at an inside radius of one diameter, r + d = 2 x 1.5 [calc: 3.0], 1.5 the SPH-002T-P0.5S crimp's largest insulation [ds same, p.2, Contact; drawing convention for the radius]"
-    decided_by: "the SMT header's own mated drawing (the banked catalogue gives the 2.0 seat for the through-hole header only, and the SMT one is 0.6 taller), or the parts in hand"
+    source: "how far CBL-MIDI's PHR-3 housing and its wires' turn reach past J-MIDI's face, toward the tail. [calc: 2.0 + 3.0 = 5.0] - the housing 2.0 past the header's face, as the through-hole side entry header mates: (9.6) over its 7.6 [calc: 9.6 - 7.6 = 2.0] [ds datasheets/connectors/JST-PH-SERIES.pdf p.1, Assembly layout (Through-hole type) side entry, and p.3, Header (Through-hole type) side entry]; the wires leaving it turned at an inside radius of one diameter, r + d = 2 x 1.5 [calc: 3.0], 1.5 the SPH-002T-P0.5S crimp's largest insulation [ds same, p.2, Contact; drawing convention for the radius]. The housing lies inside the header's 5.5 height (the through-hole side entry mates at (4.8), its own header's height)"
+    decided_by: "the SMT header's own mated drawing (the banked catalogue gives it for the through-hole header only), or the parts in hand"
   lead_slack:
     value: 15.0
     status: nominal
@@ -999,10 +1013,9 @@ ethercon:
     status: settled
     source: "[adr] ADR 0021 - the NE8FAV's flange is square, so ADR 0009's reason to turn the NE8FDP is gone; latch up, the PUSH tab on top"
   offset_y:
-    value: -7.0
-    status: tbd
-    source: "placeholder - off-centre, so the lane beside it takes the MIDI jack (midi; it was the USB-C receptacle's until issue #37)"
-    decided_by: "M4 tail-face paper check (ADR 0009)"
+    value: 0.0
+    status: settled
+    source: "[owner] centred across the tail face (owner, 2026-10-07: 'Ethercon should be moved to be center of the bottom/back side as well'; ADR 0021, Amendment, 2026-10-07). The MIDI jack is in a corner beside it (midi.corner)"
   floor_clear:
     value: 0.55
     status: nominal

@@ -36,14 +36,15 @@ components:
       FB-CHAIN''s part, so the main board carries one bead part number. Fitted: costs nothing and the jack is a
       hole in the body. A 0R is the fallback if a receiver ever disagrees'
   J-MIDI:
-    value: B3B-PH-SM4-TB
+    value: S3B-PH-SM4-TB
     pins:
     - 1
     - 2
     - 3
-    note: 'The MIDI jack''s lead plugs in here, on the main board''s freed tail corner (issue #37): pin 1 MIDI_TIP,
-      pin 2 MIDI_RING, pin 3 PWR_GND. A JST PH, surface mount and top entry, so no tails stand under the board over
-      the bottom plate. Polarised; reached with the lid off after the cassette drops in, as HDR-SERVICE is'
+    note: 'The MIDI jack''s lead plugs in here (issue #45): pin 1 MIDI_TIP, pin 2 MIDI_RING, pin 3 PWR_GND. A JST
+      PH, surface mount and SIDE entry, its mouth facing the tail (owner, 2026-10-07: ''a 90deg facing the rear''),
+      so the lead runs straight back to the jack in the tail cap and no tails stand under the board over the bottom
+      plate. Polarised; reached with the lid off after the cassette drops in, as HDR-SERVICE is'
   J-MIDI-OUT:
     value: SJ5-43502PM
     pins:
@@ -51,10 +52,11 @@ components:
     - R1
     - R2
     - S
-    note: 'PANEL-MOUNTED THROUGH THE OAK BOTTOM, NO FOOTPRINT (owner, 2026-10-04: "on the bottom face, and then
-      just do a connector to the main board"): its tabs are soldered to CBL-MIDI, which plugs into J-MIDI. A 4-conductor
-      jack taking a 3-conductor plug: the plug''s sleeve spans R2 and S, so both are PWR_GND (MIDI pin 2, grounded
-      at the transmitter only) [ds connectors/SAMESKY-SJ5-43502PM.pdf p.2]'
+    note: 'PANEL-MOUNTED THROUGH THE TAIL CAP, NO FOOTPRINT (owner, 2026-10-07: "TRS connector should be on the
+      same side as the ethercon on the controller"; issue #45): in a corner of the tail face beside the etherCON,
+      its tabs are soldered to CBL-MIDI, which plugs into J-MIDI. A 4-conductor jack taking a 3-conductor plug:
+      the plug''s sleeve spans R2 and S, so both are PWR_GND (MIDI pin 2, grounded at the transmitter only) [ds
+      connectors/SAMESKY-SJ5-43502PM.pdf p.2]'
   R-MIDI-R:
     of: R-MIDI
     value: 182R 1%

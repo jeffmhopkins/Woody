@@ -58,22 +58,22 @@ module fab_geom() {
     for (m = mx_mounts) hole("oak_top", "threaded insert hole", sh(m, o), hardware_mx_insert_hole, "underside", hardware_mx_insert_l, "MECH-MX-INSERT");
 
     stock("oak_bottom", oak_bottom_t, [x_in1 - x_in0, W], ["outside face", "inside face"]);
-    layer("oak_bottom", "oak-bottom", "", "through", "outline, thumb recesses, U-bolt and MIDI jack holes");
+    layer("oak_bottom", "oak-bottom", "", "through", "outline, thumb recesses, U-bolt holes");
     layer("oak_bottom", "oak-grooves", "inside face", stack_groove_depth, "side grooves");
-    layer("oak_bottom", "oak-bottom-pockets", "inside face", midi_cbore_depth, "MIDI jack counterbore");
     for (u = ubolt_legs()) hole("oak_bottom", "U-bolt leg", sh(u, o), ubolt_hole_d, "", "through", "MECH-UBOLT");
-    hole("oak_bottom", "MIDI jack", sh(midi_xy, o), midi_hole_d, "", "through", "J-MIDI-OUT");
-    hole("oak_bottom", "MIDI jack counterbore", sh(midi_xy, o), midi_cbore_d, "inside face", midi_cbore_depth);
 
     stock("mouth_cap", ends_mouth_cap_t, [W, T], ["outer face", "inner face"]);
     layer("mouth_cap", "mouth-cap", "", "through", "outline, breath inlet tap drill");
     hole("mouth_cap", "breath inlet insert, tap drill", tube_yz, inlet_tap_drill_d, "", "through", "INLET-INSERT");
 
     stock("tail_cap", ends_tail_cap_t, [W, T], ["inner face", "outer face"]);
-    layer("tail_cap", "tail-cap", "", "through", "outline, etherCON bore and screw holes");
+    layer("tail_cap", "tail-cap", "", "through", "outline, etherCON bore and screw holes, MIDI jack hole");
     layer("tail_cap", "tail-cap-recess", "outer face", ec_recess_d, "etherCON recess: leaves the connector its panel");
+    layer("tail_cap", "tail-cap-jack", "outer face", midi_cbore_depth, "MIDI jack counterbore round its nut: leaves the jack its panel");
     hole("tail_cap", "etherCON bore", ec_c, ethercon_bore_d, "", "through", "J-UMBILICAL-INST");
     for (h = ec_holes) hole("tail_cap", "etherCON flange screw", h, ethercon_hole_d, "", "through", "MECH-ETHERCON-SCREW");
+    hole("tail_cap", "MIDI jack", midi_c, midi_hole_d, "", "through", "J-MIDI-OUT");
+    hole("tail_cap", "MIDI jack counterbore", midi_c, midi_cbore_d, "outer face", midi_cbore_depth);
 
     po = [plate_x0, plate_y0];
     stock("plate_top", plate_thickness, [plate_x1 - x_in0, u_w], ["underside", "top face"]);

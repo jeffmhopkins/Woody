@@ -4,7 +4,7 @@ J2,1x3,hanxia,HX PZ2.54-1x3P TP-YQ,
 J4,12-way,Samtec,SHF-106-01-L-D-RA,"cut its tails and their solder to at most 0.8 mm below the board's bottom face [calc: hardware.kb_spacer_l 1.3 - boards.tail_clear 0.5]: J-CHAIN (LH), over the grounded bottom plate (#8-11)"
 J5,12-way,Samtec,SHF-106-01-L-D-RA,"cut its tails and their solder to at most 0.8 mm below the board's bottom face [calc: hardware.kb_spacer_l 1.3 - boards.tail_clear 0.5]: J-CHAIN (RH), over the grounded bottom plate (#8-11)"
 J6,8-way 2.54mm right-angle pin header,hanxia,HX PZ2.54-1x8P WZ,
-J7,B3B-PH-SM4-TB,JST,B3B-PH-SM4-TB(LF)(SN),
+J7,S3B-PH-SM4-TB,JST,S3B-PH-SM4-TB(LF)(SN),
 SW1,KS-33,Gateron,KS-33H10B050NN-Y24,
 SW2,KS-33,Gateron,KS-33H10B050NN-Y24,
 SW3,KS-33,Gateron,KS-33H10B050NN-Y24,
