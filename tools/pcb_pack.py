@@ -99,6 +99,13 @@ class Board:
         # iron room: [(ref, face, zone, min)] - a hand-soldered part's pads on the face it is
         # soldered on, grown 0.25 mm; every other courtyard on that face keeps `min` off it
         self.iron = list(iron)
+        # the LEDs' cone, a COST not a rule (no seat on a narrow board takes a tall part out of
+        # a wide cone): (LED courtyards, LED height, tan(half angle), mm of airwire per mm into
+        # it) - a part h tall is in it by (h - LED height) - d / tan, d its gap to the LEDs
+        self.cone = None
+        # power nets (the layer-limited rails): attract as signals do, but a part on nothing
+        # else is a bulk or decoupling part for the cone's purposes
+        self.power = set()
         # ground and power nets: they do not attract (a pour or a rail reaches every pad), so
         # no airwire of theirs is scored
         self.rails = set(rails)
@@ -303,7 +310,19 @@ def score(bd, cluster, placed):
         if any(l.intersects(k) for k in bd.keepouts) or any(l.intersection(poly).length > 0.5 for poly in bd.islands.values()):
             bad += 1
     length = sum(l.length for l in ls if l is not None)
+    if bd.cone is not None:
+        length += bd.cone[3] * sum(cone_depth(bd, placed[r]) for r in cluster)
     return (bad, x, round(length, 3))
+
+
+def cone_depth(bd, part):
+    """How far (mm) a top part's top rises into the LEDs' cone (Board.cone); 0 if not."""
+    if bd.cone is None or part.height is None or part.side != "F":
+        return 0.0
+    leds, led_h, t, _ = bd.cone
+    if part.height <= led_h or part.court.intersects(leds):
+        return 0.0
+    return max(0.0, (part.height - led_h) - part.court.distance(leds) / t)
 
 
 # ------------------------------------------------------------------ the search
@@ -745,6 +764,38 @@ class Packer:
                         break
                 rep.append((f"round {cand[0]}", [r], res["result"]))
                 progress |= res["result"] == "packed"
+        # the tall rail-only passives, where the LEDs' cone is a cost: each on its own, tried round every
+        # placed part on its own sheet or sharing its nets (the nearest eight), kept where it
+        # rises least into the cone, then by the score - a row round its group's anchor
+        # would hold it beside that anchor whatever the cone
+        if self.bd.cone is not None:
+            led_h = self.bd.cone[1]
+            # rail-only parts (bulk and decoupling): a part on a signal net, or on a connector's
+            # net - a clamp across its pins - is held by its loop, not moved off for the light
+            conn = {n for q in self.placed if q.startswith("J") and q not in self.bd.unplaced for n in signal(q)}
+            for r in sorted(x for x in self.bd.unplaced if not big(x) and not (signal(x) - self.bd.power)
+                            and not signal(x) & conn and (self.placed[x].height or 0) > led_h):
+                own = all_nets(r) - rails
+                cands = [q for q in self.placed if q not in self.bd.unplaced and q != r and not q.startswith("H")
+                         and (own & all_nets(q) or sheets.get(r) and sheets.get(q) == sheets.get(r))]
+                cands = sorted(cands, key=lambda q: (-len(own & all_nets(q)), -len(self.placed[q].pads), q))[:8]
+                best = None
+                for q in cands:
+                    state = (dict(self.placed), set(self.frozen), set(self.bd.unplaced), len(self.log))
+                    res = self.pack(q, [r], rotations=(0, 90), grow=reaches[-1])
+                    if res["result"] == "packed":
+                        key = (round(cone_depth(self.bd, self.placed[r]), 2), res["after"])
+                        if best is None or key < best[0]:
+                            best = (key, q, self.placed[r])
+                    self.placed, self.frozen, self.bd.unplaced = state[0], state[1], state[2]
+                    del self.log[state[3]:]
+                if best is not None:
+                    self.placed[r] = best[2]
+                    self.frozen.add(r)
+                    self.bd.unplaced.discard(r)
+                    rep.append((f"round {best[1]} (least into the LEDs' cone, {best[0][0]:g} mm)", [r], "packed"))
+                else:
+                    self.log.append(f"cold: {r} (tall) found no seat round any of {len(cands)} anchor(s)")
         # the passives, grouped by their anchor
         groups = {}
         for r in sorted(self.bd.unplaced):
@@ -752,7 +803,10 @@ class Packer:
                 continue
             placed = [q for q in self.placed if q not in self.bd.unplaced]
             if signal(r):
-                key = lambda q: (-len(signal(r) & signal(q)), sheets.get(q) != sheets.get(r), -len(self.placed[q].pads), q)
+                # a connector its net enters by beats a part on its own sheet: a clamp or a
+                # series part belongs at the pin it guards
+                key = lambda q: (-len(signal(r) & signal(q)), not q.startswith("J"), sheets.get(q) != sheets.get(r),
+                                 -len(self.placed[q].pads), q)
             else:
                 key = lambda q: (sheets.get(q) != sheets.get(r), -len(all_nets(r) & all_nets(q)), -len(self.placed[q].pads), q)
             a = min(placed, key=key)

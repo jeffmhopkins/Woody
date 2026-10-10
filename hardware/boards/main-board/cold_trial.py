@@ -10,12 +10,14 @@ source.
 
 FIXED (the owner, 2026-10-10: "Body CAD + analog block"): every part the body CAD places
 (the switches, the mounts, the connectors, U-BREATH, the LED row and each LED's cap by
-its rule, U-BUCK and the one part the regulator block lets in beside it) and the analog
+its rule, U-BUCK and the one part the regulator block lets in beside it), J-UMB's three
+protection parts, whose places a rule sets at its pins (#8-9, ADR 0018), and the analog
 block - every part on the AGND_INST island, its tie, and the breath pair's far ends with
 their clamps, which the pair's locked copper reaches. Everything else starts unplaced and
 is seated by pcb_pack's cold planner: one key network stamped at every switch, then each
 IC round the placed part it shares most nets with, then the passives round theirs - under
-the body CAD's height rooms, the iron room and the island rule.
+the body CAD's height rooms, the iron room and the island rule, with the LEDs' cone a
+cost (a tall bulk part goes where it rises least into it).
 
 COPPER: every unlocked track and via goes; a locked one stays only if every pad its copper
 reaches is a fixed part's (the pair and its guards, the analog block's hand routes, the
@@ -26,6 +28,7 @@ the key chain, the keys, the SPI and the Matrix's lines, MIDI, then the rest. Th
 fanout comes first, as it always does.
 """
 import json
+import math
 import os
 import subprocess
 import sys
@@ -37,6 +40,7 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 import pcbnew       # noqa: E402
 import yaml         # noqa: E402
 from shapely.geometry import LineString, Point, Polygon, box   # noqa: E402
+from shapely.ops import unary_union                             # noqa: E402
 from shapely.strtree import STRtree                            # noqa: E402
 import pcb          # noqa: E402
 import pcb_main     # noqa: E402
@@ -94,6 +98,11 @@ def fixed_parts(board, lay, comps):
             for r in fps:
                 if rows[r] == row and r not in why:
                     why[r] = "the regulator block's own (keepouts: except_rows)"
+    # the power entry's protection, placed by a rule at J-UMB's pins, not by taste: the
+    # packer seats ICs first and J-UMB's side fills, which put them 16-30 mm off the pins
+    for r, rule in (("D3", "D-TVS-PWR at J-UMB pins 3 and 6 (#8-9)"), ("D2", "D-REVSHUNT across J-UMB pins 3 and 6"),
+                    ("NT1", "NT-DIG at J-UMB pin 8 (ADR 0018)")):
+        why[r] = f"J-UMB's protection: {rule}"
     # the analog block: every part whose courtyard is on the In1 island, and its tie
     isl = next(i for i in lay["islands"] if i.get("layer") == "In1.Cu")
     ip = to_pcb_poly(isl["outline"]).buffer(0.3)
@@ -205,6 +214,16 @@ def place(board, lay, comps, fixed, log):
     for r, p in bd.parts.items():
         name = p.item.GetFPID().GetLibItemName().wx_str()
         p.height = next((v for key, v in heights.items() if key in name), None)
+    # the LEDs' cone as a cost (pcb_main.check_heights reports the same depth as a note;
+    # the owner, 2026-10-03: tall parts "still away from leds"): 40 mm of airwire per mm into it
+    lb = yaml.safe_load(open(os.path.join(ROOT, "config", "body.yaml")))
+    t = math.tan(math.radians(float(lb["lighting"]["led_view_angle"]["value"]) / 2))
+    leds = []
+    for (x, y, r_, a, c, lh) in geo["leds"].values():
+        (x0, y0), (x1, y1) = pcb.to_pcb(x - a / 2, y - c / 2), pcb.to_pcb(x + a / 2, y + c / 2)
+        leds.append(box(min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1)))
+    bd.power = {n for c in (lay.get("net_classes") or {}).values() if c.get("via") for n in c.get("nets") or []}
+    bd.cone = (unary_union(leds), max(v[5] for v in geo["leds"].values()), t, 40.0)
     # the iron room round the hand-soldered pads
     rowref = {}
     for r in bd.parts:
