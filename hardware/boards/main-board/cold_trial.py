@@ -78,6 +78,18 @@ FAMILIES = [
 # THE REVIEWER'S MOVES, by family, each with why (Router.edit: reroute / through / clear).
 # The record of every review of this trial; replayed by every run from that family on.
 EDITS = {
+    "power": [
+        # Review of family 1, 2026-10-10: U13 (U-USBOR) pin 3 left open, "budget". INST_5V_A
+        # leaves pin 4 over the part's top and down its right side, and pin 2's locked plane
+        # via stands in the one lane left on the front: pin 3 is boxed in, and the back, at the
+        # power class's layer cost, is a search that runs out. Pins 3 and 6 are EN and ANODE,
+        # tied (power-entry-instrument.md, the 5 V OR; [ds TI-LM74700-Q1.pdf]): the load
+        # current runs in Q-USBOR, not here - this link carries the controller's bias only. So
+        # it is joined under the part's body, between its rows of pads (0.94 mm apart: the
+        # rail's 0.5 mm does not fit), at signal width.
+        {"connect": ["U13.3", "U13.6"], "points": [[298.4, 129.9], [298.4, 131.0]], "width": 0.3, "track": 0.25,
+         "why": "EN tied to ANODE under U13's body; no load current in it"},
+    ],
 }
 
 
@@ -398,7 +410,8 @@ def finish(board, lay, rep):
 
 
 def main():
-    """--start K: go on from the checkpoint of family K-1 in --out (K=1: place from the source).
+    """--start K: go on from the checkpoint of family K-1 in --out (K=1: the placement saved
+    there as checkpoint 0, or placed from the source with --place or when there is none).
     --stop K: stop after family K. --pause: stop after the first family that asks for review.
     The reviewer's moves are EDITS, above, each with why."""
     arg = lambda k, d=None: sys.argv[sys.argv.index(k) + 1] if k in sys.argv else d
@@ -411,7 +424,10 @@ def main():
 
     def checkpoint(k, name):
         return os.path.join(out, f"main-board.cold.{k}-{name}.kicad_pcb")
-    if start == 1:
+    if start == 1 and os.path.exists(checkpoint(0, "placed")) and "--place" not in sys.argv:
+        board = pcbnew.LoadBoard(checkpoint(0, "placed"))
+        print(f"cold: the placement of {checkpoint(0, 'placed')} (--place to place again)")
+    elif start == 1:
         board = place_board(lay, comps_of())
         if "--place-only" in sys.argv:
             pcbnew.SaveBoard(OUT, board)

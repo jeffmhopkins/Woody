@@ -79,6 +79,9 @@ acid traps (check_tracks: KiCad's DRC has no such test), unless it says why not.
                45 until replace() refused it), H untouched, D's copper clear of S's box
   partialpush  the same bus family with the rip-up rescue off: CLK is PUSHED in, shoving B -
                copper the board came with, adopted - and the family asks for review
+  connect      the reviewer's `connect`: on the partial board, C's open third pad joined to
+               C1 through a named point at signal width, then the rest of C onto it - the
+               join passes within the corridor, has the width asked, and C is whole
   rescue       a net walled out by an earlier one: rescue takes that one up and both route
   minikey      a three-key board: packed (pcb_pack) then routed, liquid pass, DRC clean
 """
@@ -98,7 +101,7 @@ CELLS = ["fanout", "pinch", "updown", "bus", "nonplanar", "locked", "offgrid", "
          "fold", "jogs", "equalise", "fillet", "ground", "enclosed", "stitch", "pourcut", "rescue", "minikey",
          "planes4", "island4", "optin4", "orphan4", "fragments", "lockedvia", "guard", "stages", "push",
          "stagepush", "edits", "resume", "resume4",
-         "partial", "partialpush"]
+         "partial", "partialpush", "connect"]
 
 
 def _setup():
@@ -1026,6 +1029,31 @@ def cell_partialpush(out, plot):
     res["bus_open"] = open_
     res["pass"] = not rep[0]["failed"] and [x[0] for x in rep[0]["pushed"]] == ["CLK"] and "B" in rep[0]["pushed"][0][2] \
         and any(w.startswith("pushed in: CLK") for w in rep[0]["review"]) and not open_ and not acid
+    return res
+
+
+def cell_connect(out, plot):
+    pcbnew, R2, T = _setup()
+    from shapely.geometry import LineString, Point
+    b = T.partial()
+    m = R2.model_from_board(b, _partial_lay())
+    r = R2.Router(m, flow=0.3)
+    r.adopt()
+    rep = r.edit({"connect": ["C3.1", "C1.1"], "points": [[47.0, 28.0]], "width": 0.5, "track": 0.2})
+    joins = [x for x in r.runs_of("C") if not getattr(x, "adopted", False)]
+    by = min(LineString([p[:2] for p in x.pts]).distance(Point(47.0, 28.0)) for x in joins) if joins else None
+    widths = sorted({round(x.width, 3) for x in joins})
+    whole = (lambda o: o[0] and not o[1])(r.route_net("C"))
+    for items in r._adopted_items.values():        # as Router.stage does: the originals go
+        for it in items:
+            b.Delete(it)
+    res = finish("connect", b, m, r, out, plot)
+    res.update(edit=rep, by_point=None if by is None else round(by, 2), widths=widths, C_whole=whole)
+    # the other nets are left unrouted here on purpose: KiCad's count is theirs; C's own
+    # wholeness is route_net's (a whole net routes to nothing new). The corridor is cheap
+    # inside, not a wall: by the point within its width and one grid step
+    res["pass"] = rep["ok"] and by is not None and by <= 0.5 + r.pitch + 1e-6 and 0.2 in widths and whole \
+        and res["drc_errors"] == 0 and res["acid_traps"] == 0
     return res
 
 

@@ -1693,6 +1693,53 @@ class Router:
                 write(board, self.m, [r_ for r_ in self.runs if id(r_) not in before])
         return report
 
+    def _connect(self, spec):
+        """{connect: ["REF.NUM", "REF.NUM"], points?: [[x, y]..], width?: mm} - two pads of
+        one net joined, by those points if given (a corridor `width` either side of the
+        pad-points-pad line, as `through`), then whatever else of the net is still apart
+        joined to it. For a tree whose one pad the router could not reach: the reviewer
+        names the way (the main board's U13 pin 3, boxed in on the front: under the part's
+        body, between its rows of pads)."""
+        names = list(spec["connect"])
+        pa, pb = (next((p for p in self.m.pads if p.name == n), None) for n in names)
+        out = {"edit": "connect", "net": pa.net if pa else None, "pads": names, "ok": False}
+        if pa is None or pb is None or pa.net != pb.net:
+            out["why"] = "not two pads of one net"
+            return out
+        saved = list(self.fields)
+        saved_cls = self.R.of.get(pa.net)
+        if spec.get("track"):
+            # this join's own track width - the reviewer's call, said why in the edit: a link
+            # that carries no current of the rail it belongs to (an enable pin tied to its
+            # supply) may run at signal width where the rail's width does not fit
+            self.R.of[pa.net] = dict(self.R.cls(pa.net), track=float(spec["track"]))
+        try:
+            if spec.get("points"):
+                w = float(spec.get("width", 1.0))
+                line = [pa.centre] + [tuple(p) for p in spec["points"]] + [pb.centre]
+                xs = [x for x, _ in line]
+                ys = [y for _, y in line]
+                self.fields.append(Field((min(xs) - 50, min(ys) - 50, max(xs) + 50, max(ys) + 50), weight=6.0, nets=[pa.net]))
+                self.fields.append(Field(None, weight=1.0 / 6.0, nets=[pa.net], geom=LineString(line).buffer(w)))
+            ok, runs, why = self.route_net(pa.net, pads=[pa, pb])
+        finally:
+            self.fields = saved
+            if spec.get("track"):
+                if saved_cls is None:
+                    self.R.of.pop(pa.net, None)
+                else:
+                    self.R.of[pa.net] = saved_cls
+        out["mode"] = "joined" if ok else f"failed: {why}"
+        if ok:
+            ok2, more, why2 = self.route_net(pa.net)        # the rest of the net, onto it
+            out["ok"] = bool(ok2)
+            if not ok2:
+                out["why"] = f"joined the two, but the net is still apart: {why2}"
+            out["after"] = round(sum(r.length() for r in self.runs_of(pa.net)), 2)
+        else:
+            out["why"] = str(why)
+        return out
+
     def adopt(self, nets=None):
         """The board's UNLOCKED copper made this router's own: each track segment and via a
         Run of its own, laid in its place, its board item deleted at write. A partly routed
@@ -1743,7 +1790,11 @@ class Router:
                                                 corridor `width` either side of the
                                                 pad-points-pad line, dear outside it
           {clear: net, rect: [x0, y0, x1, y1]} - out of that rectangle (dear inside it)
+          {connect: [pad, pad], points?, width?, track?} - two pads joined, that way, at
+                                                that track width (Router._connect)
         Returns {edit, net, ok, mode, shoved, before, after, why?}."""
+        if "connect" in spec:
+            return self._connect(spec)
         net = spec.get("reroute") or spec.get("through") or spec.get("clear")
         kind = "reroute" if "reroute" in spec else "through" if "through" in spec else "clear" if "clear" in spec else None
         out = {"edit": kind, "net": net, "ok": False}
