@@ -387,6 +387,36 @@ def via(b, n, x, y, d=0.7, drill=0.3, locked=False):
     return v
 
 
+def channel(gap=1.2, yc=7.2):
+    """THE PUSH: a 60 x 16 board whose only way from end to end is a channel `gap` mm wide
+    round y `yc` (keep-outs on both faces above and below it; the nets kept to the front).
+    Room for two tracks side by side - on the router's 0.2 mm grid, lanes 0.6 apart - but
+    A, the shorter, routed first, runs down the channel's middle, and CLK cannot pass it.
+    CLK gets through only if A is shoved to one side (Router.reroute), or if CLK goes
+    first."""
+    b = new_board(60.0, 16.0)
+    y0, y1 = yc - gap / 2, yc + gap / 2
+    for ys in ((0.0, y0), (y1, 16.0)):
+        keepout(b, 15.0, ys[0], 45.0, ys[1], layers=("F", "B"))
+    tp(b, "A1", "A", 10.0, yc)
+    tp(b, "A2", "A", 50.0, yc)
+    tp(b, "K1", "CLK", 4.0, 3.0)
+    tp(b, "K2", "CLK", 56.0, 13.0)
+    tp(b, "K3", "CLK", 56.0, 3.0)
+    return b
+
+
+def open_board():
+    """THE EDITS: a 50 x 24 board, three two-pad nets straight across it - L (an earlier
+    family's, locked by then), N and M - for a reviewer's moves: N through a point well off
+    its line, M out of a rectangle on its line, L refused."""
+    b = new_board(50.0, 24.0)
+    for n, y in (("L", 3.0), ("N", 12.0), ("M", 18.0)):
+        tp(b, n + "1", n, 5.0, y)
+        tp(b, n + "2", n, 45.0, y)
+    return b
+
+
 # ------------------------------------------------------------------ four layers
 
 def net_tie(b, ref, a, c, x, y, rot=0.0):

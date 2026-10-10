@@ -158,7 +158,7 @@ class Rules:
 
 class Entry:
     __slots__ = ("id", "net", "layers", "geom", "kind", "locked", "run", "family", "drill", "smd",
-                 "tracks", "vias", "item", "ref")
+                 "tracks", "vias", "item", "ref", "line")
 
     def __init__(self, **kw):
         for k in self.__slots__:
@@ -217,7 +217,12 @@ class Field:
     """A rectangle (board mm) that steers the search and sets lay values inside it."""
 
     def __init__(self, rect, heading=None, weight=1.0, spread=0.0, clearance=None, track=None, taper=0.0,
-                 power=False, nets=None, k=1.5):
+                 power=False, nets=None, k=1.5, geom=None):
+        # `geom`: a shape (shapely) the field covers instead of its rectangle - a corridor
+        # along a polyline (Router.edit through:), whose bounding box would take in far more
+        self.geom = geom
+        if geom is not None:
+            rect = geom.bounds
         x0, y0, x1, y1 = (float(v) for v in rect)
         self.rect = (min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1))
         self.heading = None if heading is None else float(heading)
@@ -748,6 +753,9 @@ class Router:
         self.m, self.R = model, model.rules
         self.pitch = pitch
         self.fields = [f if isinstance(f, Field) else Field.from_spec(f) for f in fields]
+        # SOFT copper: [(geometry, layers, weight)] - not an obstacle, but dear to cross (a
+        # push's ideal path keeps off what it is about to shove, where it can)
+        self.soft = []
         self.flow_w = flow
         self.budget, self.time_s = budget, time_s
         self.fence = fence if fence is not None else model.fence
@@ -876,7 +884,11 @@ class Router:
             if not f.applies(net):
                 continue
             x0, y0, x1, y1 = f.rect
-            mask = (self.X >= x0) & (self.X <= x1) & (self.Y >= y0) & (self.Y <= y1)
+            if f.geom is not None:
+                mask = np.zeros((self.nx, self.ny), dtype=bool)
+                self._mark(mask, f.geom, 0.0)
+            else:
+                mask = (self.X >= x0) & (self.X <= x1) & (self.Y >= y0) & (self.Y <= y1)
             if f.heading is None:
                 M[:, mask] *= f.weight
             else:
@@ -891,6 +903,11 @@ class Router:
                             m2 = np.zeros((self.nx, self.ny), dtype=bool)
                             self._mark(m2, e.geom, width / 2 + self.R.gap(net, e.net) + f.spread)
                             halo[L][m2 & mask] = 1.0
+        for g, layers, w in self.soft:
+            m2 = np.zeros((self.nx, self.ny), dtype=bool)
+            self._mark(m2, g, width / 2 + self.R.clear(net))
+            for L in layers:
+                M[L][m2] *= w
         return M, H, halo
 
     # ---- the search
@@ -1518,24 +1535,28 @@ class Router:
 
     # ---- family by family, with a review between
     def stage(self, families, board=None, checkpoint=None, ground=None, connect_first=(), first=(),
-              detour=1.8, pull=1.0, fillet=0.0, liquid=True, plot=None, repair=True):
+              detour=1.8, pull=1.0, fillet=0.0, liquid=True, plot=None, edits=None, start=1, stop=None):
         """Route a board in FAMILIES, one at a time, each reviewed and adjusted before the next
         is let near it (the owner, 2026-10-05 and 2026-10-10: "do families of traces... then
         the next ones", "review it and push the traces around with the liquid tools, then hand
         it off to the next family"). Each family:
           1. routed alone - every earlier family is LOCKED, so neither its rip-up nor its
              rescue can touch them;
-          2. reviewed: each net routed longer than `detour` x its airwires is routed again
-             with a `pull` corridor, shoving only this family's copper, kept only if shorter;
-             then the liquid pass (rubber band, fold, slide, equalise, fillet) over this
-             family's runs alone;
-          3. locked, written to `board` and saved as a checkpoint (checkpoint(k, name) ->
-             path), with a plot of its nets if `plot(k, name, nets) -> png` is given.
-        After every family, a REPAIR: each net a family left open is rescued with that
-        family's own copper unlocked, and only that family's (`repair`).
-        `families`: [{name, nets: [names or fnmatch globs], first?, layers?}] - a net claimed by an
-        earlier family is not routed again; whatever no family names goes last, as "rest".
-        Returns [{family, nets, failed, rerouted, liquid, runs, length_mm, vias}]."""
+          2. a net still open is PUSHED in: routed again past this family's copper, which is
+             shoved aside (Router.reroute), before anything is given up;
+          3. reviewed: each net longer than `detour` x its airwires routed again with a `pull`
+             corridor, kept only if shorter;
+          4. EDITED: `edits[family]`, the reviewer's own moves (Router.edit), in order;
+          5. the liquid pass (rubber band, fold, slide, equalise, fillet) over this family;
+          6. locked, written to `board` and saved as a checkpoint (checkpoint(k, name) ->
+             path), with a plot if `plot(k, name, nets, path) -> png` is given.
+        `start`/`stop`: route families start..stop only (1-based) - to stop at a family for
+        review, and to go on from its checkpoint in a later run (the model built from the
+        checkpoint board, whose families' copper it reads as locked).
+        `families`: [{name, nets: [names or fnmatch globs], first?, layers?}] - a net claimed
+        by an earlier family is not routed again; whatever no family names goes last, as
+        "rest". Returns [{family, nets, failed, pushed, rerouted, edits, liquid, runs,
+        length_mm, vias}] for the families routed."""
         import fnmatch
         P = self.m.planes
         allnets = [n for n in self.m.nets() if n != ground and not (P and n in P.plane_nets)]
@@ -1549,7 +1570,7 @@ class Router:
         if rest:
             plan.append(({"name": "rest"}, rest))
         if P is not None and P.fanout_nets:
-            self.fanout()
+            self.fanout()               # a pad that has its via already (a checkpoint's) is skipped
         for spec in connect_first:
             pa, pb = (next((p for p in self.m.pads if p.name == n), None) for n in spec["pads"])
             if pa is not None and pb is not None and pa.net == pb.net:
@@ -1559,14 +1580,17 @@ class Router:
                 self.log.append(f"connect_first {pa.name} - {pb.name}: {'ok' if ok else 'FAILED'}")
         # what came before the families - the plane fanout, the connect_first runs - is fixed
         # and written first
-        self._written = {}
         pre = list(self.runs)
         for r_ in pre:
             self._lock(r_)
         if board is not None and pre:
             write(board, self.m, pre)
         report = []
+        edits = edits or {}
         for k, (fam, nets) in enumerate(plan, 1):
+            name = fam.get("name", f"family {k}")
+            if k < start or (stop is not None and k > stop):
+                continue
             before = set(id(r_) for r_ in self.runs)
             saved_cls = {}
             if fam.get("layers"):           # a family's layers narrow its nets' own
@@ -1577,7 +1601,15 @@ class Router:
             # laid last, the longest tree found its corridor taken - the main board, run 3)
             lead = [n for p_ in fam.get("first") or [] for n in nets if n == p_ or fnmatch.fnmatch(n, p_)]
             failed = self.route(nets, first=lead + [n for n in first if n in nets and n not in lead], rescue=True)
-            # the review: detours routed again with a pull, then the liquid pass
+            # 2. pushed in: past this family's copper, shoved aside (earlier families are locked)
+            pushed = []
+            for n in list(failed):
+                rep = self.reroute(n)
+                if rep["mode"] in ("shove", "direct", "walkaround"):
+                    failed.pop(n)
+                    pushed.append((n, rep["mode"], rep["shoved"]))
+                self.log.append(f"stage {name}: {n} pushed in - {rep['mode']}" + (f", shoved {rep['shoved']}" if rep["shoved"] else ""))
+            # 3. the review: detours routed again with a pull
             rerouted = []
             for n in nets:
                 if n in failed:
@@ -1588,6 +1620,20 @@ class Router:
                     rep = self.reroute(n, pull=pull)
                     after = sum(r_.length() for r_ in self.runs_of(n))
                     rerouted.append((n, round(ln, 1), round(after, 1), rep.get("mode")))
+            # 4. the reviewer's own moves
+            done_edits = []
+            for spec in edits.get(name, []):
+                rep = self.edit(spec)
+                done_edits.append(rep)
+                self.log.append(f"stage {name}: edit {rep}")
+                if rep.get("ok"):
+                    # the reviewer's move stands: pinned now, so the liquid pass that follows
+                    # cannot straighten it back (it took M back through the rectangle it had
+                    # been moved out of - the edits test board)
+                    for r_ in self.runs_of(rep["net"]):
+                        self._lock(r_)
+                    failed.pop(rep["net"], None)
+            # 5. the liquid pass, over this family alone (everything earlier is locked)
             liq = self.liquid(fillet) if liquid else None
             for n, saved in saved_cls.items():
                 if saved is None:
@@ -1597,63 +1643,87 @@ class Router:
             mine = [r_ for r_ in self.runs if id(r_) not in before]
             for r_ in mine:
                 self._lock(r_)
-            rec = {"family": fam.get("name", f"family {k}"), "nets": len(nets), "failed": dict(failed),
-                   "rerouted": rerouted, "liquid": liq, "runs": len(mine),
+            rec = {"family": name, "nets": len(nets), "failed": dict(failed), "pushed": pushed, "rerouted": rerouted,
+                   "edits": done_edits, "liquid": liq, "runs": len(mine),
                    "length_mm": round(sum(r_.length() for r_ in mine), 1), "vias": sum(len(r_.vias()) for r_ in mine)}
             report.append(rec)
-            self.log.append(f"stage {k} {rec['family']}: {rec['nets']} net(s), {rec['runs']} run(s), {rec['length_mm']} mm, "
-                            f"{rec['vias']} via(s); failed {list(failed) or 'none'}; detours re-routed {len(rerouted)}")
+            self.log.append(f"stage {k} {name}: {rec['nets']} net(s), {rec['runs']} run(s), {rec['length_mm']} mm, "
+                            f"{rec['vias']} via(s); failed {list(failed) or 'none'}; pushed in {len(pushed)}; "
+                            f"detours re-routed {len(rerouted)}; edits {len(done_edits)}; liquid {liq}")
             if board is not None:
-                self._written[rec["family"]] = write(board, self.m, mine)
+                write(board, self.m, mine)
                 if checkpoint:
-                    path = checkpoint(k, rec["family"])
+                    path = checkpoint(k, name)
                     _kicad().SaveBoard(path, board)
                     rec["checkpoint"] = path
                     if plot:
-                        rec["plot"] = plot(k, rec["family"], nets, path)
-        # THE REPAIR: a net its family left open is tried again with that family's copper -
-        # only that family's - unlocked for its rescue to take up and lay again; every other
-        # family stays locked. Then that family is locked again.
-        if repair:
-            fam_of = {n: rec["family"] for (fam, nets), rec in zip(plan, report) for n in nets}
-            for rec in report:
-                for n in list(rec["failed"]):
-                    own = [r_ for r_ in self.runs if fam_of.get(r_.net) == rec["family"] and r_.net != n and r_ not in pre]
-                    for r_ in own:
-                        self._unlock(r_)
-                    gone = set(id(r_) for r_ in self.runs)
-                    ok = self.rescue(n)
-                    for r_ in self.runs:
-                        if fam_of.get(r_.net) == rec["family"]:
-                            self._lock(r_)
-                    if ok:
-                        rec["failed"].pop(n)
-                        rec.setdefault("repaired", []).append(n)
-                        if board is not None:
-                            # the family's copper as it now stands: what the rescue took up goes
-                            fresh = [r_ for r_ in self.runs if id(r_) not in gone or fam_of.get(r_.net) == rec["family"]]
-                            self._rewrite(board, rec["family"], fam_of, fresh)
-                    self.log.append(f"repair {n} ({rec['family']}): {'routed' if ok else 'still open'}")
-        if ground:
+                        rec["plot"] = plot(k, name, nets, path)
+        if ground and (stop is None or stop >= len(plan)):
             before = set(id(r_) for r_ in self.runs)
             self.route_ground(ground)
             if board is not None:
                 write(board, self.m, [r_ for r_ in self.runs if id(r_) not in before])
         return report
 
+    def edit(self, spec):
+        """One reviewer's move on an unlocked net - the liquid tools by hand. Each re-routes
+        the net with a shove (Router.reroute: what stands in its way is laid again near its
+        old path), all or nothing; a failed edit leaves the board as it was.
+          {reroute: net, pull?: mm}           - again, kept to a corridor `pull` wide
+          {through: net, points: [[x, y]..], width?: mm}
+                                              - by those points in order: cheap inside a
+                                                corridor `width` either side of the
+                                                pad-points-pad line, dear outside it
+          {clear: net, rect: [x0, y0, x1, y1]} - out of that rectangle (dear inside it)
+        Returns {edit, net, ok, mode, shoved, before, after, why?}."""
+        net = spec.get("reroute") or spec.get("through") or spec.get("clear")
+        kind = "reroute" if "reroute" in spec else "through" if "through" in spec else "clear" if "clear" in spec else None
+        out = {"edit": kind, "net": net, "ok": False}
+        if kind is None or net not in self.m.nets():
+            out["why"] = "no such edit or net"
+            return out
+        if any(r.locked for r in self.runs_of(net)):
+            out["why"] = "locked"
+            return out
+        saved = list(self.fields)
+        try:
+            if kind == "through":
+                w = float(spec.get("width", 1.0))
+                ps = self.m.pads_of(net)
+                pts = [tuple(p) for p in spec["points"]]
+                a = min(ps, key=lambda p: math.dist(p.centre, pts[0])).centre
+                b = min(ps, key=lambda p: math.dist(p.centre, pts[-1])).centre
+                line = [a] + pts + [b]
+                xs = [x for x, _ in line]
+                ys = [y for _, y in line]
+                self.fields.append(Field((min(xs) - 50, min(ys) - 50, max(xs) + 50, max(ys) + 50), weight=6.0, nets=[net]))
+                # the corridor: the pad-points-pad line, `w` either side (not each leg's
+                # bounding box: a diagonal leg's box takes in the straight way it is to leave)
+                self.fields.append(Field(None, weight=1.0 / 6.0, nets=[net], geom=LineString(line).buffer(w)))
+            elif kind == "clear":
+                self.fields.append(Field(spec["rect"], weight=40.0, nets=[net]))
+            rep = self.reroute(net, pull=spec.get("pull"))
+        finally:
+            self.fields = saved
+        out.update(mode=rep["mode"], shoved=rep["shoved"], before=round(rep.get("before", 0.0), 2),
+                   after=round(rep.get("after", 0.0), 2))
+        ok = rep["mode"] in ("shove", "direct", "walkaround")
+        geo = [LineString([(x, y) for x, y, _ in r.pts]) if len(r.pts) > 1 else Point(r.pts[0][:2]) for r in self.runs_of(net)]
+        if ok and kind == "through":
+            far = [p for p in spec["points"] if min(g.distance(Point(p)) for g in geo) > float(spec.get("width", 1.0)) + 1e-6]
+            if far:
+                ok, out["why"] = False, f"routed, but not by {far}"
+        if ok and kind == "clear":
+            if any(g.intersects(box(*spec["rect"])) for g in geo):
+                ok, out["why"] = False, "routed, but still in the rectangle"
+        out["ok"] = ok
+        return out
+
     def _unlock(self, run):
         run.locked = False
         for eid in run.entries:
             if eid in self.m.index.e:
                 self.m.index.e[eid].locked = False
-
-    def _rewrite(self, board, family, fam_of, runs):
-        """A family's copper written again after a repair: what the stage wrote for it
-        deleted (never copper it found on the board), its runs as they now stand added."""
-        nets = {n for n, f in fam_of.items() if f == family}
-        for t in self._written.get(family, []):
-            board.Delete(t)
-        self._written[family] = write(board, self.m, [r_ for r_ in runs if r_.net in nets])
 
     def _lock(self, run):
         """A run made fixed: no later rip-up, rescue, shove or liquid pass moves it."""
@@ -1827,6 +1897,13 @@ class Router:
                 s = LineString([a, b])
                 if s.intersects(u):
                     n += sum(1 for m_ in mine if m_.crosses(s))
+        # and the copper that came with the board (a hand route, an earlier family read back
+        # from its checkpoint): no Run of this router's, but crossed all the same - without it
+        # a resumed family's liquid pass judged crossings against less than one run would
+        # (the resume test board)
+        for e in self.m.index.query(u.bounds):
+            if e.kind == "track" and getattr(e, "run", None) is None and e.net != run.net and hasattr(e, "line"):
+                n += sum(1 for m_ in mine if m_.crosses(e.line))
         return n
 
     def replace(self, old, new_pts, keep_crossings=True):
@@ -1842,10 +1919,32 @@ class Router:
         if keep_crossings and self.cross_count(new) > self.cross_count(old):
             self.stats["crossing_refused"] += 1
             return None
+        # what the old run touched of its own net - another run's tee, a via, a pad, locked
+        # copper - the new one must still touch: a liquid move that straightens a run off the
+        # point where a branch tees into it leaves the branch hanging (the channel board:
+        # the rubber band took CLK's trunk off its branch's tee, and DRC found it open)
+        before = self._touching(old)
         unlay(old, self.m)
         lay(new, self.m)
+        if not before <= self._touching(new):
+            unlay(new, self.m)
+            lay(old, self.m)
+            self.stats["tee_refused"] += 1
+            return None
         self.runs[self.runs.index(old)] = new
         return new
+
+    def _touching(self, run):
+        """The entries of the run's own net, not its own, that its copper touches."""
+        mine = [self.m.index.e[eid] for eid in run.entries if eid in self.m.index.e]
+        out = set()
+        for oe in mine:
+            for e in self.m.index.query(oe.geom.bounds):
+                if e.id in run.entries or e.net != run.net or not (e.layers & oe.layers):
+                    continue
+                if e.kind in ("track", "via", "pad") and oe.geom.intersects(e.geom):
+                    out.add(e.id)
+        return out
 
     def reroute(self, net, pull=None, shove_depth=2):
         """The net routed again. With `pull` (mm), inside a corridor that wide either side of
@@ -1903,6 +2002,11 @@ class Router:
                 hidden.append(self.m.index.remove(eid))
             r._hidden = r.entries
             r.entries = []
+        # what is hidden is SOFT, not gone: the ideal path pays to cross it, so it leaves the
+        # shoved copper room beside it where there is room (a channel: hug the far wall, not
+        # its middle - the channel test board)
+        saved_soft = list(self.soft)
+        self.soft += [(e.geom, e.layers, 4.0) for e in hidden if e.kind in ("track", "via")]
         try:
             ok, runs, _ = self.route_net(net)
             for r in runs:
@@ -1910,6 +2014,7 @@ class Router:
                 self.runs.remove(r)
             return runs if ok else None
         finally:
+            self.soft = saved_soft
             for r in movable:
                 r.entries = []
                 lay(r, self.m)
@@ -2367,7 +2472,7 @@ def model_from_board(board, lay, fence=None, via_off_silk=True):
         net = t.GetNetname()
         if isinstance(t, pcbnew.PCB_VIA):
             c = t.GetPosition()
-            m.index.add(net=net, layers=range(m.nl), geom=Point(pcbnew.ToMM(c.x), pcbnew.ToMM(c.y)).buffer(pcbnew.ToMM(t.GetWidth(lids[0])) / 2),
+            m.index.add(net=net, layers=range(m.nl), geom=Point(pcbnew.ToMM(c.x), pcbnew.ToMM(c.y)).buffer(pcbnew.ToMM(t.GetWidth(lids[0])) / 2, quad_segs=8),
                         kind="via", locked=t.IsLocked(), drill=pcbnew.ToMM(t.GetDrillValue()), item=t)
         else:
             if t.GetLayer() not in lids:
@@ -2379,8 +2484,9 @@ def model_from_board(board, lay, fence=None, via_off_silk=True):
                                              (pcbnew.ToMM(b.x), pcbnew.ToMM(b.y))))
             else:
                 line = LineString([(pcbnew.ToMM(a.x), pcbnew.ToMM(a.y)), (pcbnew.ToMM(b.x), pcbnew.ToMM(b.y))])
-            m.index.add(net=net, layers=[lids.index(t.GetLayer())], geom=line.buffer(pcbnew.ToMM(t.GetWidth()) / 2),
-                        kind="track", locked=t.IsLocked(), item=t)
+            e = m.index.add(net=net, layers=[lids.index(t.GetLayer())], geom=line.buffer(pcbnew.ToMM(t.GetWidth()) / 2, quad_segs=8),
+                            kind="track", locked=t.IsLocked(), item=t)
+            e.line = line           # its centreline: Router.cross_count counts crossings of it
     return m
 
 

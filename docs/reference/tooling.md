@@ -953,6 +953,29 @@ prove nothing about themselves.
   fillets). No tool move may raise the plan-view crossing count.
   **`pcb.py check` does not yet audit arcs** (`check_tracks` reads straight
   tracks only), so a filleted board is checked by KiCad's DRC alone until it does.
+  No liquid move may leave a same-net contact behind either: a replacement run
+  must still touch every tee, via, pad and locked track the old one touched.
+- **`Router.stage`, routing in families with a review between them** (the
+  owner, 2026-10-10: *"autoroute a family, review it, push the traces around
+  with the liquid tools, then hand it off to the next family"*). Each family is
+  routed with every earlier one locked; a net it leaves open is **pushed in**
+  (`reroute` with a shove of this family's own copper, whose ideal path treats
+  that copper as dear rather than absent, so it leaves it room) before it is
+  given up; its detours are re-routed with a pull; then **the reviewer's own
+  moves**, `edits[family]`, in order: `reroute` (optionally kept to a `pull`
+  corridor), `through` (by given points: cheap inside a corridor along the
+  pad-points-pad line, dear outside it) and `clear` (out of a rectangle) —
+  each verified on the copper, refused on a locked net, and pinned once made so
+  the liquid pass that follows cannot undo it; then the liquid pass over this
+  family alone; then it is locked, written and checkpointed. `stop` and `start`
+  stop at a family for review and go on from its checkpoint board: the bench
+  proves a stopped-and-resumed run lays **the same copper** as one run, on two
+  and four layers.
+
+  The loop, in practice: run to `stop=k`; plot the family's nets
+  (`pcb_plot.py --nets`); write the moves it needs into the trial script's
+  edits, each with why; run again from `start=k` on checkpoint k−1; repeat. The
+  edits are the record of the review, replayable with the script.
 - **`tools/pcb_pack.py`** — seats passives in rows round an anchor someone
   already placed, one row per side the parts' far ends leave on; `pattern`
   searches one arrangement and stamps it at every anchor (a key board's T). Its
@@ -1294,7 +1317,7 @@ re-described here.
 | `pcb.py`, `pcb_route.py`, `pcb_main.py`, `pcb_freeroute.py` | Board layout, routing, the main board's kind, the Freerouting round trip | §4 |
 | `pcb_plot.py` | A board's routing in 2D, nets by name, glob or family (read-only) | §4, *The router: families* |
 | `pcb_families_test.py` | The families stage on a constructed boxing-in board; `--identity <board>`: no `families:` routes byte for byte as before | its docstring; §4, *The router: families* |
-| `pcb_route2.py` | The centreline router and its tools (fields, reroute and shove, via slide, liquid pass), into a copy only | §4, *The centreline router and the cluster packer* |
+| `pcb_route2.py` | The centreline router and its tools (fields, reroute and shove, via slide, liquid pass, staged families with push, edits and resume), into a copy only | §4, *The centreline router and the cluster packer* |
 | `pcb_pack.py` | The cluster packer and the place report, into a copy only | §4, *The centreline router and the cluster packer* |
 | `pcb_route2_test.py`, `pcb_pack_test.py` | Their benches on constructed boards, each case in its own process, proved by KiCad's DRC | their docstrings; §4, *The centreline router and the cluster packer* |
 | `pcb_testboards.py` | The constructed boards and synthetic footprints those benches use | its docstring |

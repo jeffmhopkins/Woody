@@ -56,6 +56,19 @@ acid traps (check_tracks: KiCad's DRC has no such test), unless it says why not.
   stages       the three-key board routed in three families (rail, key lines, the rest), each
                reviewed and locked before the next: no later family moves an earlier one's
                copper, every family has its checkpoint, the board is clean
+  push         the channel board (pcb_testboards.channel): A down the middle of a channel with
+               room for two, CLK walled out - Router.reroute pushes CLK in and shoves A to
+               one side; both whole, the board clean
+  stagepush    the same board through Router.stage with the rip-up rescue disabled: the
+               family's own push routes CLK (the main board's CHAIN_SCK, run 3)
+  edits        the open board: family "first" (L) locked, then family "mine" with the
+               reviewer's edits - N `through` a point 8 mm off its line, M `clear` of a
+               rectangle on its line, L `reroute` refused (locked); each verified on the
+               copper, L untouched, the board clean
+  resume       the three-key board staged in one run, and again stopped after family 1 and
+               resumed from its checkpoint board in a fresh model: the same copper, clean
+  resume4      the four-layer board staged with a stop and resume: no plane pad fanned out
+               twice, check_planes clean, the same copper as one run
   rescue       a net walled out by an earlier one: rescue takes that one up and both route
   minikey      a three-key board: packed (pcb_pack) then routed, liquid pass, DRC clean
 """
@@ -73,7 +86,8 @@ LAY = {"rules": {"track": 0.25, "track_min": 0.2, "clearance": 0.2, "via": 0.7, 
                  "power_track": 0.4}, "fab": {"hole_to_hole": 0.25, "hole_clearance": 0.25}}
 CELLS = ["fanout", "pinch", "updown", "bus", "nonplanar", "locked", "offgrid", "via_ratio", "field", "shove", "slide",
          "fold", "jogs", "equalise", "fillet", "ground", "enclosed", "stitch", "pourcut", "rescue", "minikey",
-         "planes4", "island4", "optin4", "orphan4", "fragments", "lockedvia", "guard", "stages"]
+         "planes4", "island4", "optin4", "orphan4", "fragments", "lockedvia", "guard", "stages", "push",
+         "stagepush", "edits", "resume", "resume4"]
 
 
 def _setup():
@@ -785,6 +799,141 @@ def cell_stages(out, plot):
                checkpoints=[os.path.exists(x.get("checkpoint", "")) for x in rep], earlier_copper_kept=kept)
     res["pass"] = clean(res) and kept and all(res["checkpoints"]) and [x["family"] for x in rep] == ["rail", "keys", "rest"] \
         and not any(x["failed"] for x in rep)
+    return res
+
+
+def _chan_lay():
+    return dict(LAY, net_classes={"front": {"nets": ["A", "CLK"], "layers": ["F.Cu"]}})
+
+
+def cell_push(out, plot):
+    pcbnew, R2, T = _setup()
+    b = T.channel()
+    m = R2.model_from_board(b, _chan_lay())
+    r = R2.Router(m)
+    blocked = r.route(["A", "CLK"], rescue=False)
+    a_before = [tuple(p[:2]) for x in r.runs_of("A") for p in x.pts]
+    rep = r.reroute("CLK")
+    a_after = [tuple(p[:2]) for x in r.runs_of("A") for p in x.pts]
+    res = finish("push", b, m, r, out, plot)
+    res.update(blocked=sorted(blocked), report={k: v for k, v in rep.items() if k != "before"}, A_moved=a_before != a_after)
+    res["pass"] = blocked == {"CLK": "none"} and rep["mode"] == "shove" and rep["shoved"] == ["A"] and a_before != a_after \
+        and clean(res)
+    return res
+
+
+def cell_stagepush(out, plot):
+    pcbnew, R2, T = _setup()
+    b = T.channel()
+    m = R2.model_from_board(b, _chan_lay())
+    r = R2.Router(m)
+    r.rescue = lambda net, *a, **k: False          # the rip-up rescue off: only the push is left
+    rep = r.stage([{"name": "bus", "nets": ["A", "CLK"]}], board=b)
+    res = finish("stagepush", b, m, r, out, plot, written=True)
+    res.update(failed=rep[0]["failed"], pushed=rep[0]["pushed"], liquid=rep[0]["liquid"])
+    res["pass"] = not rep[0]["failed"] and [p[0] for p in rep[0]["pushed"]] == ["CLK"] and clean(res)
+    return res
+
+
+def cell_edits(out, plot):
+    pcbnew, R2, T = _setup()
+    from shapely.geometry import LineString, Point, box
+    b = T.open_board()
+    lay = dict(LAY, net_classes={"front": {"nets": ["L", "N", "M"], "layers": ["F.Cu"]}})
+    m = R2.model_from_board(b, lay)
+    r = R2.Router(m)
+    edits = {"mine": [{"through": "N", "points": [[25.0, 4.5]], "width": 1.0},
+                      {"clear": "M", "rect": [20.0, 15.0, 30.0, 21.0]},
+                      {"reroute": "L"}]}
+    snaps = []
+    rep = r.stage([{"name": "first", "nets": ["L"]}, {"name": "mine", "nets": ["N", "M"]}], board=b, edits=edits,
+                  checkpoint=lambda k, n: snaps.append(sorted(tuple(p[:2]) for x in r.runs_of("L") for p in x.pts))
+                  or os.path.join(out, f"edits-{k}.kicad_pcb"))
+    ed = {e["net"]: e for e in rep[1]["edits"]}
+    geo = lambda n: [LineString([p[:2] for p in x.pts]) for x in r.runs_of(n)]
+    n_by = min(g.distance(Point(25.0, 4.5)) for g in geo("N"))
+    m_in = any(g.intersects(box(20.0, 15.0, 30.0, 21.0)) for g in geo("M"))
+    l_same = sorted(tuple(p[:2]) for x in r.runs_of("L") for p in x.pts) == snaps[0]
+    res = finish("edits", b, m, r, out, plot, written=True)
+    res.update(edits=rep[1]["edits"], N_to_point=round(n_by, 2), M_in_rect=m_in, L_untouched=l_same)
+    res["pass"] = ed["N"]["ok"] and ed["M"]["ok"] and not ed["L"]["ok"] and ed["L"].get("why") == "locked" \
+        and n_by <= 1.0 and not m_in and l_same and clean(res)
+    return res
+
+
+def _copper(path):
+    import pcbnew
+    b = pcbnew.LoadBoard(path)
+    out = []
+    for t in b.GetTracks():
+        a, c = (t.GetStart(), t.GetEnd()) if not isinstance(t, pcbnew.PCB_VIA) else (t.GetPosition(), t.GetPosition())
+        out.append((t.GetNetname(), type(t).__name__, tuple(sorted([(a.x, a.y), (c.x, c.y)]))))
+    return sorted(out)
+
+
+def _resume(out, tag, make, lay, fams, ground=None, pour=None):
+    """One staged run; then the same stopped after family 1, its checkpoint loaded into a
+    fresh model and the rest routed from it. Returns (one-run path, resumed path, reports)."""
+    pcbnew, R2, _ = _setup()
+    b = make()
+    m = R2.model_from_board(b, lay)
+    r = R2.Router(m, flow=0.3)
+    rep1 = r.stage(fams, board=b, ground=ground)
+    one = os.path.join(out, f"{tag}-one.kicad_pcb")
+    R2.write(b, m, [], pour=pour)
+    pcbnew.SaveBoard(one, b)
+    b = make()
+    m = R2.model_from_board(b, lay)
+    r = R2.Router(m, flow=0.3)
+    cp = os.path.join(out, f"{tag}-cp1.kicad_pcb")
+    r.stage(fams, board=b, stop=1, checkpoint=lambda k, n: cp, ground=ground)
+    b2 = pcbnew.LoadBoard(cp)
+    m2 = R2.model_from_board(b2, lay)
+    r2 = R2.Router(m2, flow=0.3)
+    rep2 = r2.stage(fams, board=b2, start=2, ground=ground)
+    two = os.path.join(out, f"{tag}-resumed.kicad_pcb")
+    R2.write(b2, m2, [], pour=pour)
+    pcbnew.SaveBoard(two, b2)
+    return one, two, rep1, rep2
+
+
+def cell_resume(out, plot):
+    pcbnew, R2, T = _setup()
+    import pcb_pack as P
+
+    def make():
+        b = T.minikey()
+        pk = P.Packer(P.board_of(b), ["SW1", "SW2", "SW3", "J1", "H1", "H2", "H3", "H4"])
+        pk.pack("U1", ["C6", "R11"])
+        pk.pack("J1", ["C7"])
+        pk.pattern(["SW1", "SW2", "SW3"], {f"SW{k}": list(T.MINIKEY["keys"][k]) for k in (1, 2, 3)})
+        pk.apply(b)
+        return b
+    fams = [{"name": "rail", "nets": ["V3V3"]}, {"name": "keys", "nets": ["KEY*", "SWL*", "FREE"]}]
+    one, two, rep1, rep2 = _resume(out, "resume", make, dict(LAY, power_nets=["V3V3"]), fams, ground="GND", pour="GND")
+    e1, u1 = R2.drc(one)
+    e2, u2 = R2.drc(two)
+    same = _copper(one) == _copper(two)
+    res = {"one_run": {"drc_errors": len(e1), "unconnected": u1}, "resumed": {"drc_errors": len(e2), "unconnected": u2},
+           "same_copper": same, "families_resumed": [x["family"] for x in rep2],
+           "failed": [x["failed"] for x in rep1 + rep2]}
+    res["pass"] = not e1 and not e2 and u1 == 0 and u2 == 0 and same and [x["family"] for x in rep2] == ["keys", "rest"]
+    return res
+
+
+def cell_resume4(out, plot):
+    pcbnew, R2, T = _setup()
+    lay = T.four_layer(False)[1]
+    fams = [{"name": "low", "nets": ["S1", "S2"]}, {"name": "high", "nets": ["S3", "S4"]}]
+    one, two, rep1, rep2 = _resume(out, "resume4", lambda: T.four_layer(False)[0], lay, fams)
+    res = {}
+    for tag, p in (("one_run", one), ("resumed", two)):
+        bad, on_plane, vias = _four_checks(R2, pcbnew.LoadBoard(p), lay, p)
+        e, u = R2.drc(p)
+        res[tag] = {"drc_errors": len(e), "unconnected": u, "check_planes": bad[:3], "plane_vias": {n: len(vias.get(n, [])) for n in ("GND", "POS")}}
+    res["same_copper"] = _copper(one) == _copper(two)
+    res["pass"] = all(not res[t]["drc_errors"] and res[t]["unconnected"] == 0 and not res[t]["check_planes"] for t in ("one_run", "resumed")) \
+        and res["one_run"]["plane_vias"] == res["resumed"]["plane_vias"] and res["same_copper"]
     return res
 
 
