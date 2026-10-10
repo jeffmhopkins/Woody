@@ -926,6 +926,50 @@ Each render is generated; what it is rendered from is the source.
 | the module circuits' `.sch.png` (`hardware/module/**`; a two-page circuit renders `.p2`/`.p3` too) | each circuit's `.kicad_sch` beside it (**source**) |
 | the three interfaces' `.sch.png` (`hardware/interfaces/**`) | each circuit's `.kicad_sch` beside it (**source**). No board places them: each spans boards, and each page's *The sheet, and which board places what* says which board draws which part |
 
+### The centreline router and the cluster packer (issue #46) — not yet on any board
+
+Two tools that route and place **only when asked and only into a copy**: no
+`layout.yaml` key selects them yet, `pcb.py` never calls them, and both refuse
+an output path that is their source board. They are proved on constructed
+boards (`tools/pcb_testboards.py`), each case in its own process, every routed
+result checked by KiCad's own DRC after a zone fill — the tools' own models
+prove nothing about themselves.
+
+- **`tools/pcb_route2.py`** — one copper model (`CopperIndex`; a locked entry
+  has no remove and no move), routes kept as centrelines (`Run`), and **one lay
+  predicate, `fits`**: the search may be optimistic, nothing is laid that fails
+  it. Widths, clearances, class layers and via sizes come from one `Rules`
+  parse of `layout.yaml`. The search carries its heading through a via, costs
+  sharp turns rather than banning them, takes a via-free path within
+  `via_first_ratio` of the best one with vias, and reports an exhausted search
+  as *no path* — an answer — and a stopped one as *budget*. Families with
+  `bus: true` reserve one corridor and lay each member on its own lane. Ground
+  is routed as a net, stitched (each group, and the main group too when nothing
+  else joins the two faces' pours), then poured. The tools: `Field`s (a heading
+  only penalises, so a lane is a heading with `weight` under 1; `--avoid` /
+  `--prefer` are fields with no heading), `reroute --pull` with a shove at most
+  two deep that never moves locked copper, via slide, folding a short
+  up-then-down pair, and the liquid pass (rubber band, gap equalising, arc
+  fillets). No tool move may raise the plan-view crossing count.
+  **`pcb.py check` does not yet audit arcs** (`check_tracks` reads straight
+  tracks only), so a filleted board is checked by KiCad's DRC alone until it does.
+- **`tools/pcb_pack.py`** — seats passives in rows round an anchor someone
+  already placed, one row per side the parts' far ends leave on; `pattern`
+  searches one arrangement and stamps it at every anchor (a key board's T). Its
+  placement rules are one list (`RULES`): courtyards, the edge, footprint
+  keep-outs, unplated holes, island containment (a part on the island's net
+  wholly inside the island, any other part off it). Body-owned parts are
+  refused; naming a locked part releases its lock and says so. A failure names
+  the side, the parts, and what refused the nearest row. `report` is the place
+  report, with an exit code. **`check`'s own placement predicates are not yet
+  extracted into that list** — the packer's list is its own, and KiCad's DRC on
+  the written copy is what the tests hold it to.
+
+```
+python3 tools/pcb_route2_test.py [cell ...] [--plot DIR]   # the router's bench
+python3 tools/pcb_pack_test.py   [cell ...] [--plot DIR]   # the packer's
+```
+
 ### Not yet
 
 - **The module's layout** is under way (2026-10-02, `kind: module`, above);
@@ -1250,6 +1294,10 @@ re-described here.
 | `pcb.py`, `pcb_route.py`, `pcb_main.py`, `pcb_freeroute.py` | Board layout, routing, the main board's kind, the Freerouting round trip | §4 |
 | `pcb_plot.py` | A board's routing in 2D, nets by name, glob or family (read-only) | §4, *The router: families* |
 | `pcb_families_test.py` | The families stage on a constructed boxing-in board; `--identity <board>`: no `families:` routes byte for byte as before | its docstring; §4, *The router: families* |
+| `pcb_route2.py` | The centreline router and its tools (fields, reroute and shove, via slide, liquid pass), into a copy only | §4, *The centreline router and the cluster packer* |
+| `pcb_pack.py` | The cluster packer and the place report, into a copy only | §4, *The centreline router and the cluster packer* |
+| `pcb_route2_test.py`, `pcb_pack_test.py` | Their benches on constructed boards, each case in its own process, proved by KiCad's DRC | their docstrings; §4, *The centreline router and the cluster packer* |
+| `pcb_testboards.py` | The constructed boards and synthetic footprints those benches use | its docstring |
 | `lib-models.py` | 3D models drawn from banked drawings | §4 |
 | `sim.py`, `sim_coverage.py` | Circuit simulation and its coverage table | §5 |
 | `check-staleness.py` | The commit gate: figures, links and their anchors, generated files, CAD, sims | `repo-maintenance.md` §2 |
