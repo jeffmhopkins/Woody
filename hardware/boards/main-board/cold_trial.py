@@ -30,6 +30,7 @@ FAMILIES (the pcb-routing skill's order): power and rails, the analog block's ow
 the key chain, the keys, the SPI and the Matrix's lines, MIDI, then the rest. The plane
 fanout comes first, as it always does.
 """
+import glob
 import json
 import math
 import os
@@ -72,6 +73,12 @@ FAMILIES = [
     {"name": "mcu", "nets": ["/IO*", "/SPI*", "*TXD*", "*RXD*", "/led-strip-drive/*", "/LED_*"]},
     {"name": "midi", "nets": ["*MIDI*"]},
 ]
+
+
+# THE REVIEWER'S MOVES, by family, each with why (Router.edit: reroute / through / clear).
+# The record of every review of this trial; replayed by every run from that family on.
+EDITS = {
+}
 
 
 def comps_of():
@@ -340,13 +347,8 @@ def measure(path):
             "drc_errors": len(errs), "unconnected": unc}
 
 
-def main():
-    arg = lambda k, d=None: sys.argv[sys.argv.index(k) + 1] if k in sys.argv else d
-    out = os.path.abspath(arg("--out", HERE))
-    plotdir = arg("--plot")
-    os.makedirs(out, exist_ok=True)
-    lay = yaml.safe_load(open(os.path.join(HERE, "layout.yaml")))
-    comps = comps_of()
+def place_board(lay, comps):
+    """The source board stripped and placed cold, gated on its airwires. Returns the board."""
     board = pcbnew.LoadBoard(SRC)
     fixed = fixed_parts(board, lay, comps)
     n, kept = strip(board, fixed)
@@ -371,32 +373,13 @@ def main():
     if bad and "--force" not in sys.argv:
         raise SystemExit("cold: placement regressions (x3 and +20 mm over the source) - fix the placement, or "
                          "--force: " + ", ".join(n for _, n, _, _ in bad))
-    if "--place-only" in sys.argv:
-        pcbnew.SaveBoard(OUT, board)
-        errs, _ = pcb_route2.drc(OUT, fill=False)
-        pe = [e[:3] for e in errs if e[0] in ("courtyards_overlap", "items_not_allowed")]
-        print(f"cold: placed only - wrote {os.path.relpath(OUT, ROOT)}; KiCad placement findings: {pe or 'none'}")
-        return 1 if pe else 0
-    m = pcb_route2.model_from_board(board, lay)
-    r = pcb_route2.Router(m, flow=0.3, budget=3_000_000)
+    return board
 
-    def checkpoint(k, name):
-        return os.path.join(out, f"main-board.cold.{k}-{name}.kicad_pcb")
 
-    def plot(k, name, nets, path):
-        if not plotdir:
-            return None
-        import pcb_plot
-        png = os.path.join(plotdir, f"cold-{k}-{name}.png")
-        pcb_plot.plot(path, png, nets=nets, title=f"main board cold: family {k} {name}")
-        return png
-    rep = r.stage(FAMILIES, board=board, checkpoint=checkpoint, first=lay.get("route_first") or [], plot=plot)
-    for line in r.log:
-        print("cold: route " + line)
-    for x in rep:
-        print("cold: family " + json.dumps({k_: v for k_, v in x.items() if k_ != "liquid"}, default=str))
-    failed = {n_: v for x in rep for n_, v in x["failed"].items()}
+def finish(board, lay, rep):
+    """After the last family: tidy, the plane orphan pass, the numbers against the source."""
     import pcb_route
+    failed = {n_: v for x in rep for n_, v in x["failed"].items()}
     pcbnew.SaveBoard(OUT, board)
     board = pcbnew.LoadBoard(OUT)
     pcb_route.tidy(board, lay)
@@ -412,6 +395,60 @@ def main():
     print(f"cold: source {measure(SRC)}")
     print(f"cold: trial  {measure(OUT)}")
     return 1 if failed else 0
+
+
+def main():
+    """--start K: go on from the checkpoint of family K-1 in --out (K=1: place from the source).
+    --stop K: stop after family K. --pause: stop after the first family that asks for review.
+    The reviewer's moves are EDITS, above, each with why."""
+    arg = lambda k, d=None: sys.argv[sys.argv.index(k) + 1] if k in sys.argv else d
+    out = os.path.abspath(arg("--out", HERE))
+    plotdir = arg("--plot")
+    start = int(arg("--start", 1))
+    stop = int(arg("--stop")) if arg("--stop") else None
+    os.makedirs(out, exist_ok=True)
+    lay = yaml.safe_load(open(os.path.join(HERE, "layout.yaml")))
+
+    def checkpoint(k, name):
+        return os.path.join(out, f"main-board.cold.{k}-{name}.kicad_pcb")
+    if start == 1:
+        board = place_board(lay, comps_of())
+        if "--place-only" in sys.argv:
+            pcbnew.SaveBoard(OUT, board)
+            errs, _ = pcb_route2.drc(OUT, fill=False)
+            pe = [e[:3] for e in errs if e[0] in ("courtyards_overlap", "items_not_allowed")]
+            print(f"cold: placed only - wrote {os.path.relpath(OUT, ROOT)}; KiCad placement findings: {pe or 'none'}")
+            return 1 if pe else 0
+        pcbnew.SaveBoard(checkpoint(0, "placed"), board)
+    else:
+        prev = sorted(glob.glob(os.path.join(out, f"main-board.cold.{start - 1}-*.kicad_pcb")))
+        if not prev:
+            raise SystemExit(f"cold: no checkpoint of family {start - 1} in {out}")
+        board = pcbnew.LoadBoard(prev[0])
+        print(f"cold: going on from {prev[0]}")
+    m = pcb_route2.model_from_board(board, lay)
+    r = pcb_route2.Router(m, flow=0.3, budget=3_000_000)
+
+    def plot(k, name, nets, path):
+        if not plotdir:
+            return None
+        import pcb_plot
+        png = os.path.join(plotdir, f"cold-{k}-{name}.png")
+        pcb_plot.plot(path, png, nets=nets, title=f"main board cold: family {k} {name}")
+        return png
+    rep = r.stage(FAMILIES, board=board, checkpoint=checkpoint, first=lay.get("route_first") or [], plot=plot,
+                  start=start, stop=stop, pause="--pause" in sys.argv, edits=EDITS)
+    for line in r.log:
+        if not line.startswith(("route:", "rescue ")):
+            print("cold: route " + line)
+    for x in rep:
+        print("cold: family " + json.dumps({k_: v for k_, v in x.items() if k_ not in ("checkpoint",)}, default=str))
+    last = len(FAMILIES) + 1                   # the families and "rest"
+    done = rep and not rep[-1].get("paused") and (stop is None or stop >= last)
+    if not done:
+        print(f"cold: stopped after family {start + len(rep) - 1} - review its plot, then --start {start + len(rep)}")
+        return 0
+    return finish(board, lay, rep)
 
 
 if __name__ == "__main__":
