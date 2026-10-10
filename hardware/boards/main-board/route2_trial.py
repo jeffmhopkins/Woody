@@ -54,7 +54,8 @@ def main():
         fb = box(*fence)
         nets = {e.net for e in m.index.e.values() if e.kind in ("track", "via") and not e.locked and e.geom.within(fb)}
     took = pcb_route2.take_up(m, nets)
-    print(f"route2: took up {took} unlocked track(s) and via(s) of {len(nets)} net(s)" + (f" inside {fence}" if fence else ""))
+    print(f"route2: took up {took} unlocked track(s) and via(s) of {len(nets)} net(s)" + (f" inside {fence}" if fence else "")
+          + f"; kept {m.kept_for_locked} unlocked item(s) a locked route depends on")
     r = pcb_route2.Router(m, flow=0.3, budget=3_000_000, fence=fence)
     route_nets = [n for n in m.nets() if n in nets and n not in m.planes.plane_nets]
     failed = r.route(route_nets, first=lay.get("route_first") or [], connect_first=lay.get("connect_first") or [])

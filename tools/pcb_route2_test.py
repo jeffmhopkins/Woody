@@ -43,6 +43,13 @@ acid traps (check_tracks: KiCad's DRC has no such test), unless it says why not.
                through In2.Cu; no other net uses it
   orphan4      a locked loop of another net in In1.Cu cuts a GND pad's via off the plane: the
                orphan pass finds it after the fill and fans the pad out again into the body
+  fragments    a net whose pads each carry a LOCKED stub (an escape, a hand route): two
+               fragments, each touching a pad, joined to nothing - the router must join them
+               (found on the main board: 28 connections left open by treating "touches the
+               net's copper" as "joined")
+  lockedvia    a hand route locked track by track with its via left unlocked (#45's /IO2 on
+               the main board): taking up "the unlocked copper" keeps that via - it is the
+               locked route's own - and the route stays whole
   rescue       a net walled out by an earlier one: rescue takes that one up and both route
   minikey      a three-key board: packed (pcb_pack) then routed, liquid pass, DRC clean
 """
@@ -60,7 +67,7 @@ LAY = {"rules": {"track": 0.25, "track_min": 0.2, "clearance": 0.2, "via": 0.7, 
                  "power_track": 0.4}, "fab": {"hole_to_hole": 0.25, "hole_clearance": 0.25}}
 CELLS = ["fanout", "pinch", "updown", "bus", "nonplanar", "locked", "offgrid", "via_ratio", "field", "shove", "slide",
          "fold", "jogs", "equalise", "fillet", "ground", "enclosed", "stitch", "pourcut", "rescue", "minikey",
-         "planes4", "island4", "optin4", "orphan4"]
+         "planes4", "island4", "optin4", "orphan4", "fragments", "lockedvia"]
 
 
 def _setup():
@@ -675,6 +682,46 @@ def cell_orphan4(out, plot):
         pcb_plot.plot(p, os.path.join(plot, "route2-orphan4.png"), nets=["*"], title="route2 bench: orphan4")
     res = {"unconnected_before": before, "fix": fix[0] if fix else t_.stderr[-600:], "drc_errors": len(errs), "unconnected": unc}
     res["pass"] = before >= 1 and bool(fix) and fix[0][0] >= 1 and not fix[0][1] and not errs and unc == 0
+    return res
+
+
+def cell_fragments(out, plot):
+    pcbnew, R2, T = _setup()
+    b = T.new_board(40.0, 20.0)
+    T.tp(b, "P1", "N", 5.0, 10.0)
+    T.tp(b, "P2", "N", 35.0, 10.0)
+    T.tp(b, "P3", "N", 20.0, 16.0)
+    T.track(b, "N", [(5.0, 10.0), (8.0, 10.0)], locked=True)          # P1's escape
+    T.track(b, "N", [(35.0, 10.0), (32.0, 10.0)], locked=True)        # P2's
+    m = R2.model_from_board(b, LAY)
+    r = R2.Router(m)
+    failed = r.route()
+    res = finish("fragments", b, m, r, out, plot)
+    res.update(failed=sorted(failed), **r.summary())
+    res["pass"] = not failed and clean(res) and res["runs"] >= 2
+    return res
+
+
+def cell_lockedvia(out, plot):
+    pcbnew, R2, T = _setup()
+    b = T.new_board(40.0, 20.0)
+    T.tp(b, "P1", "N", 5.0, 10.0)
+    T.tp(b, "P2", "N", 35.0, 10.0, back=True)
+    T.track(b, "N", [(5.0, 10.0), (20.0, 10.0)], locked=True)
+    T.via(b, "N", 20.0, 10.0, locked=False)                     # the hand route's via, left unlocked
+    T.track(b, "N", [(20.0, 10.0), (35.0, 10.0)], layer="B", locked=True)
+    T.tp(b, "Q1", "M", 5.0, 4.0)
+    T.tp(b, "Q2", "M", 35.0, 4.0)
+    T.track(b, "M", [(5.0, 4.0), (35.0, 4.0)])                   # plain unlocked copper: taken up
+    m = R2.model_from_board(b, LAY)
+    took = R2.take_up(m, {"N", "M"})
+    r = R2.Router(m)
+    failed = r.route()
+    res = finish("lockedvia", b, m, r, out, plot)
+    vias_n = sum(1 for t in pcbnew.LoadBoard(os.path.join(out, "lockedvia.kicad_pcb")).GetTracks()
+                 if isinstance(t, pcbnew.PCB_VIA) and t.GetNetname() == "N")
+    res.update(failed=sorted(failed), taken_up=took, kept_for_locked=m.kept_for_locked, n_vias=vias_n)
+    res["pass"] = not failed and clean(res) and took == 1 and m.kept_for_locked == 1 and vias_n == 1
     return res
 
 

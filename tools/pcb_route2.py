@@ -1049,6 +1049,21 @@ class Router:
                 out.add((L, i, j))
         return out
 
+    def open_pad(self, pad, grids):
+        """A pad's cells a route may end in: those inside its copper that the obstacle map
+        leaves free - a cell inside the pad can still be too near a neighbour's pad for this
+        net's track (a 0.5 mm rail between the pins of a 1.27 mm header). Only if none is
+        free is the cell nearest its centre opened, so the pad can be reached at all."""
+        cs = self.pad_cells(pad, grids)
+        free = {c for c in cs if not grids[c[0]][c[1], c[2]]}
+        if free:
+            return free
+        c = min(cs, key=lambda q: math.dist(self.xy(q[1], q[2]), pad.centre))
+        near = {q for q in cs if (q[1], q[2]) == (c[1], c[2])}
+        for q in near:
+            grids[q[0]][q[1], q[2]] = False
+        return near
+
     def _stub(self, pad, cell_xy, L):
         """Off-grid points from the pad's centre to the path's end cell: straight if that
         is octilinear, else along the pad's longer axis and then octilinear."""
@@ -1135,7 +1150,9 @@ class Router:
 
     def route_net(self, net, pads=None, partial=False):
         """A net as a tree: from the pad nearest the middle, each time the nearest pad not
-        yet joined. Returns (ok, [runs], reason)."""
+        yet joined. Returns (ok, [runs], reason). With `pads`, only those are joined (a
+        connect_first pair); without, every pad AND every fragment of the net's copper."""
+        whole = pads is None
         pads = pads if pads is not None else self.m.pads_of(net)
         if len(pads) < 2:
             return True, [], None
@@ -1145,47 +1162,71 @@ class Router:
         cells = {}
         pad_of = {}
         for p in pads:
-            cs = self.pad_cells(p, grids)
+            cs = self.open_pad(p, grids)
             cells[p.name] = cs
             for c in cs:
                 pad_of[c] = p
-                grids[c[0]][c[1], c[2]] = False
-        # the net's own copper already on the board (a connect_first run, locked copper): the
-        # pads it touches start joined, and its cells seed the tree
+        # the net's copper already on the board (a connect_first run, a locked hand route, an
+        # escape stub) and its pads, in GROUPS of what really touches - a via, or a plated
+        # pad, joining its layers. Two fragments of a net are two groups even when each
+        # touches a pad: they are joined only by a route between them.
         own = self.m.index.of_net(net)
+        items = [("pad", p, set(p.layers), p.geom) for p in pads] + [("cu", e, set(e.layers), e.geom) for e in own]
+        parent = list(range(len(items)))
+
+        def find(i):
+            while parent[i] != i:
+                parent[i] = parent[parent[i]]
+                i = parent[i]
+            return i
+        for i in range(len(items)):
+            for j in range(i + 1, len(items)):
+                if items[i][2] & items[j][2] and items[i][3].intersects(items[j][3]):
+                    parent[find(i)] = find(j)
+        bunch = {}
+        for i in range(len(items)):
+            bunch.setdefault(find(i), []).append(i)
+        groups_ = []                    # [(pads, cells)]: a fragment with no pad is a group too -
+        for idx in bunch.values():      # left unjoined it is a dangling piece of the net
+            gp = [items[i][1] for i in idx if items[i][0] == "pad"]
+            gc = set().union(*(cells[p.name] for p in gp)) if gp else set()
+            cu = [items[i][1] for i in idx if items[i][0] == "cu"]
+            if cu:
+                gc |= self._cells_of(cu)
+            groups_.append((gp, gc))
+        groups_ = [g for g in groups_ if g[1] and (g[0] or whole)]
         cx = sum(p.centre[0] for p in pads) / len(pads)
         cy = sum(p.centre[1] for p in pads) / len(pads)
-        order = sorted(pads, key=lambda p: math.hypot(p.centre[0] - cx, p.centre[1] - cy))
-        on_own = [p for p in order if any(self._touches(e, p) for e in own)]
-        if on_own:
-            joined = list(on_own)
-            tree = set().union(*(cells[p.name] for p in on_own)) | self._cells_of(own)
-        else:
-            joined = [order[0]]
-            tree = set(cells[order[0].name])
-        todo = [p for p in order if p not in joined]
+        groups_.sort(key=lambda g: (-len(g[0]), min((math.hypot(p.centre[0] - cx, p.centre[1] - cy) for p in g[0]), default=1e9)))
+        joined, tree = list(groups_[0][0]), set(groups_[0][1])
+        todo = groups_[1:]
         runs, groups = [], []
         while todo:
             targets = set()
-            for p in todo:
-                targets |= cells[p.name]
+            owner = {}
+            for k, (gp, gc) in enumerate(todo):
+                targets |= gc
+                for c in gc:
+                    owner[c] = k
             run, why = self.connect(net, tree, targets, pad_of, width, grids, vgrid, costs)
             if run is None:
                 if not partial:
                     return False, runs, why
                 groups.append(joined)
-                nxt = todo.pop(0)
-                joined, tree = [nxt], set(cells[nxt.name])
+                gp, gc = todo.pop(0)
+                joined, tree = list(gp), set(gc)
                 continue
             lay(run, self.m)
             runs.append(run)
             self.runs.append(run)
-            # which pad it reached
+            # the group it reached: the one owning the cell the path ended in
             end = run.pts[-1]
-            reached = min(todo, key=lambda p: math.dist(p.centre, end[:2]))
-            todo.remove(reached)
-            joined.append(reached)
-            tree |= cells[reached.name] | self._run_cells(run)
+            k = owner.get((end[2], *self.ij(end[0], end[1])))
+            if k is None:
+                k = min(range(len(todo)), key=lambda q: min((math.dist(self.xy(c[1], c[2]), end[:2]) for c in todo[q][1]), default=1e9))
+            gp, gc = todo.pop(k)
+            joined += gp
+            tree |= gc | self._run_cells(run)
             # the new copper is this net's own: unblock its cells
             for c in self._run_cells(run):
                 grids[c[0]][c[1], c[2]] = False
@@ -1278,11 +1319,6 @@ class Router:
         width = len(nets) * pitch
         tag = "family:" + fam.get("name", "bus")
         grids, vgrid = self.blocked(tag, width)
-        # the members' own pads do not block their corridor
-        for n in nets:
-            for p in self.m.pads_of(n):
-                for c in self.pad_cells(p, grids):
-                    pass
         layer = self.m.layer_names.index(fam.get("layer", self.m.layer_names[0]))
         costs = self.costs(tag, width)
         # the corridor runs between the two pad groups' fronts: start and end just outside them
@@ -1402,9 +1438,8 @@ class Router:
         costs = self.costs(net, w)
         pad_of = {}
         for p in (pa, pb):
-            for c in self.pad_cells(p, grids):
+            for c in self.open_pad(p, grids):
                 pad_of[c] = p
-                grids[c[0]][c[1], c[2]] = False
         pieces = []
         for pad, end in ((pa, lpts[0]), (pb, lpts[-1])):
             i, j = self.ij(*end)
@@ -2169,13 +2204,41 @@ def model_from_board(board, lay, fence=None, via_off_silk=True):
 
 def take_up(model, nets):
     """Take up the unlocked existing copper of `nets` (entries carrying a board item);
-    write() deletes the items. Locked copper stays and stays an obstacle."""
-    n = 0
+    write() deletes the items. Locked copper stays and stays an obstacle - and so does
+    what locked copper DEPENDS on, though KiCad holds it unlocked: a via that meets its
+    net's locked tracks (a hand route locked track by track, its layer changes not), or a
+    track both of whose ends meet locked copper. Taking those up would cut a locked route
+    in two (found on the main board: #45's /IO2 route). They are marked locked here."""
+    pcbnew = _kicad()
+    locked = {}
+    for e in model.index.e.values():
+        if e.kind in ("track", "via") and e.locked:
+            locked.setdefault(e.net, []).append(e)
+
+    def ends(e):
+        t = e.item
+        if t is None or isinstance(t, pcbnew.PCB_VIA):
+            return []
+        return [Point(pcbnew.ToMM(v.x), pcbnew.ToMM(v.y)) for v in (t.GetStart(), t.GetEnd())]
+    n, kept = 0, 0
     for e in list(model.index.e.values()):
-        if e.net in nets and e.kind in ("track", "via") and e.item is not None and not e.locked:
-            model.index.remove(e.id)
-            model.removed_items.append(e.item)
-            n += 1
+        if e.net not in nets or e.kind not in ("track", "via") or e.item is None or e.locked:
+            continue
+        mine = locked.get(e.net, [])
+        if e.kind == "via" and any(l.kind == "track" and e.geom.intersects(l.geom) for l in mine):
+            e.locked = True
+            kept += 1
+            continue
+        if e.kind == "track":
+            pe = ends(e)
+            if pe and all(any(l.geom.buffer(1e-3).contains(q) and l.layers & e.layers for l in mine) for q in pe):
+                e.locked = True
+                kept += 1
+                continue
+        model.index.remove(e.id)
+        model.removed_items.append(e.item)
+        n += 1
+    model.kept_for_locked = kept
     return n
 
 
