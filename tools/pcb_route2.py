@@ -959,25 +959,20 @@ class Router:
             for c in cs:
                 pad_of[c] = p
                 grids[c[0]][c[1], c[2]] = False
-        # own existing copper joins the tree: cells under it are sources
-        own = [e for e in self.m.index.of_net(net)]
+        # the net's own copper already on the board (a connect_first run, locked copper): the
+        # pads it touches start joined, and its cells seed the tree
+        own = self.m.index.of_net(net)
         cx = sum(p.centre[0] for p in pads) / len(pads)
         cy = sum(p.centre[1] for p in pads) / len(pads)
         order = sorted(pads, key=lambda p: math.hypot(p.centre[0] - cx, p.centre[1] - cy))
-        joined = [order[0]]
-        tree = set(cells[order[0].name])
-        todo = order[1:]
-        # pads already joined by existing copper of the net
-        if own:
-            ocells = self._cells_of(own)
-            for p in list(todo):
-                if any(self._touches(e, p) for e in own) and any(self._touches(e, q) for e in own for q in joined):
-                    todo.remove(p)
-                    joined.append(p)
-                    tree |= cells[p.name]
-            for c in ocells:
-                if not any(grids[L][c[1], c[2]] for L in [c[0]]):
-                    tree.add(c)
+        on_own = [p for p in order if any(self._touches(e, p) for e in own)]
+        if on_own:
+            joined = list(on_own)
+            tree = set().union(*(cells[p.name] for p in on_own)) | self._cells_of(own)
+        else:
+            joined = [order[0]]
+            tree = set(cells[order[0].name])
+        todo = [p for p in order if p not in joined]
         runs, groups = [], []
         while todo:
             targets = set()
@@ -1125,12 +1120,21 @@ class Router:
         return e
 
     # ---- whole boards
-    def route(self, nets=None, first=(), families=(), ground=None):
+    def route(self, nets=None, first=(), families=(), ground=None, connect_first=()):
         """Route every net (or `nets`): families first, then the rest in crossing-aware
         order, then ground. Returns {net: reason} for every net that failed."""
         nets = list(nets) if nets is not None else [n for n in self.m.nets() if n != ground]
         failed = {}
         done = set()
+        # layout.yaml connect_first: pad-to-pad connections laid before anything else, each in
+        # its own track (pcb.py check holds each to its max_mm); the net's own route joins them
+        for spec in connect_first:
+            pa, pb = (next((p for p in self.m.pads if p.name == n), None) for n in spec["pads"])
+            if pa is None or pb is None or pa.net != pb.net:
+                self.log.append(f"connect_first {spec['pads']}: not two pads of one net")
+                continue
+            ok, _, why = self.route_net(pa.net, pads=[pa, pb])
+            self.log.append(f"connect_first {pa.name} - {pb.name}: {'ok' if ok else 'FAILED ' + str(why)}")
         for fam in families:
             res = None
             fields_before = list(self.fields)
@@ -1917,6 +1921,98 @@ def fill_zones(path):
     pcbnew.SaveBoard(path, board)
 
 
+def tie_pour_islands(path, lay, net, rounds=3, step=0.25):
+    """`fits` cannot see a pour: a legal route can cut a zone of `net` into pieces, and a
+    piece kept alive by one pad of the net is still cut off from the rest. On a SAVED board,
+    in its own load: fill; join every filled piece, pad, track and via of the net that touch
+    on a layer (a via or a plated pad joins its layers) into groups; for each group but the
+    main one (the most pads), put a via inside one of its pieces over the main group's fill
+    on another layer, where `fits` passes; refill; repeat. Saves the board. Returns
+    (vias added, groups still apart as [(layer, point)])."""
+    pcbnew = _kicad()
+    added, left = 0, []
+    for _ in range(rounds):
+        board = pcbnew.LoadBoard(path)
+        board.BuildConnectivity()
+        pcbnew.ZONE_FILLER(board).Fill(board.Zones())
+        m = model_from_board(board, lay)
+        nodes = []             # (layers, geom, kind)
+        for z in board.Zones():
+            if z.GetIsRuleArea() or z.GetNetname() != net:
+                continue
+            for k, lid in enumerate(m.lids):
+                if z.IsOnLayer(lid):
+                    ps = pcbnew.SHAPE_POLY_SET(z.GetFilledPolysList(lid))
+                    ps.Unfracture()
+                    g = _poly_of(ps)
+                    for piece in (list(g.geoms) if g.geom_type == "MultiPolygon" else [g]):
+                        if not piece.is_empty:
+                            nodes.append(({k}, piece, "fill"))
+        for e in m.index.e.values():
+            if e.net == net and e.kind in ("pad", "track", "via"):
+                nodes.append((set(e.layers), e.geom, e.kind))
+        parent = list(range(len(nodes)))
+
+        def find(i):
+            while parent[i] != i:
+                parent[i] = parent[parent[i]]
+                i = parent[i]
+            return i
+        for i in range(len(nodes)):
+            for j in range(i + 1, len(nodes)):
+                if nodes[i][0] & nodes[j][0] and nodes[i][1].intersects(nodes[j][1]):
+                    parent[find(i)] = find(j)
+        groups = {}
+        for i in range(len(nodes)):
+            groups.setdefault(find(i), []).append(i)
+        if len(groups) <= 1:
+            break
+        main = max(groups.values(), key=lambda g: (sum(1 for i in g if nodes[i][2] == "pad"), len(g)))
+        d, drill = m.rules.via_size(net)
+        new, left = 0, []
+        for g in groups.values():
+            if g is main:
+                continue
+            fills = sorted((i for i in g if nodes[i][2] == "fill"), key=lambda i: -nodes[i][1].area)
+            done = False
+            for i in fills:
+                k = next(iter(nodes[i][0]))
+                over = unary_union([nodes[j][1] for j in main if nodes[j][2] == "fill" and k not in nodes[j][0]])
+                if over.is_empty:
+                    continue
+                room = nodes[i][1].buffer(-(d / 2 + 0.05)).intersection(over.buffer(-(d / 2 + 0.05)))
+                if room.is_empty:
+                    continue
+                x0, y0, x1, y1 = room.bounds
+                c = room.representative_point()
+                pts = [(snap(x0 + a * step), snap(y0 + b_ * step)) for a in range(int((x1 - x0) / step) + 1)
+                       for b_ in range(int((y1 - y0) / step) + 1)]
+                pts = sorted((p for p in pts if room.contains(Point(p))), key=lambda p: math.dist(p, (c.x, c.y)))
+                for x, y in pts[:400]:
+                    run = Run(net, [(x, y, k), (x, y, (k + 1) % m.nl)], m.rules.width(net), (d, drill))
+                    if not fits(run, m):
+                        v = pcbnew.PCB_VIA(board)
+                        v.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(x), pcbnew.FromMM(y)))
+                        v.SetWidth(pcbnew.FromMM(d))
+                        v.SetDrill(pcbnew.FromMM(drill))
+                        v.SetNet(board.FindNet(net))
+                        board.Add(v)
+                        new += 1
+                        done = True
+                        break
+                if done:
+                    break
+            if not done:
+                i = g[0]
+                left.append((sorted(nodes[i][0])[0], tuple(round(v, 2) for v in nodes[i][1].representative_point().coords[0])))
+        pcbnew.ZONE_FILLER(board).Fill(board.Zones())
+        pcbnew.SaveBoard(path, board)
+        added += new
+        if not new:
+            break
+    return added, left
+
+
 def drc(path, fill=True):
     """KiCad's own DRC on a saved board: (errors [(type, description, items)], unconnected
     count). With `fill`, on a copy whose zones were filled in a fresh process first (KiCad
@@ -1981,7 +2077,8 @@ def main(argv=None):
     if a.cmd == "route":
         nets = a.nets.split(",") if a.nets else [n for n in m.nets() if n != a.ground]
         take_up(m, set(nets) | ({a.ground} if a.ground else set()))
-        failed = r.route(nets, first=lay.get("route_first") or [], families=lay.get("families") or [], ground=a.ground)
+        failed = r.route(nets, first=lay.get("route_first") or [], families=lay.get("families") or [], ground=a.ground,
+                         connect_first=lay.get("connect_first") or [])
         for n in list(failed):
             if r.rescue(n):
                 failed.pop(n)

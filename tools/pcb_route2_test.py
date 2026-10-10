@@ -30,6 +30,9 @@ writes a board also requires 0 DRC errors and 0 unconnected items, unless it say
   stitch       a ground pad no track can reach (walled in on the front, the back closed to
                tracks but not to the pour): a stitching via beside it, and one in the main group
                so the two faces' pours are one net - every pad met after the fill
+  pourcut      a locked loop on the back cuts off a piece of the back pour holding one ground
+               pad - legal to fits, which cannot see a pour: the pour pass finds that group
+               after the fill and ties it to the main one with a via; 0 unconnected
   rescue       a net walled out by an earlier one: rescue takes that one up and both route
   minikey      a three-key board: packed (pcb_pack) then routed, liquid pass, DRC clean
 """
@@ -46,7 +49,7 @@ sys.path.insert(0, HERE)
 LAY = {"rules": {"track": 0.25, "track_min": 0.2, "clearance": 0.2, "via": 0.7, "via_drill": 0.3, "edge_clearance": 0.3,
                  "power_track": 0.4}, "fab": {"hole_to_hole": 0.25, "hole_clearance": 0.25}}
 CELLS = ["fanout", "pinch", "updown", "bus", "nonplanar", "locked", "offgrid", "via_ratio", "field", "shove", "slide",
-         "fold", "jogs", "equalise", "fillet", "ground", "enclosed", "stitch", "rescue", "minikey"]
+         "fold", "jogs", "equalise", "fillet", "ground", "enclosed", "stitch", "pourcut", "rescue", "minikey"]
 
 
 def _setup():
@@ -481,6 +484,41 @@ def cell_stitch(out, plot):
     import re
     stitched = sum(int(m_) for l in r.log for m_ in re.findall(r"(\d+) stitching via", l))
     res["pass"] = clean(res) and stitched >= 1
+    return res
+
+
+def cell_pourcut(out, plot):
+    pcbnew, R2, T = _setup()
+    b = T.new_board(40.0, 24.0)
+    T.tp(b, "G1", "GND", 5.0, 5.0)
+    T.tp(b, "G2", "GND", 35.0, 19.0)
+    T.tp(b, "G3", "GND", 20.0, 12.0, back=True)      # inside the loop: it keeps that piece alive, and alone
+    T.tp(b, "L1", "LOOP", 14.0, 6.0, back=True)
+    T.tp(b, "L2", "LOOP", 26.0, 18.0, back=True)
+    T.track(b, "LOOP", [(14.0, 6.0), (26.0, 6.0), (26.0, 18.0), (14.0, 18.0), (14.0, 6.0)], layer="B", locked=True)
+    m = R2.model_from_board(b, LAY)
+    r = R2.Router(m)
+    # G3 is reached by no track (the loop walls it in on the back): the ground step leaves
+    # it to the pour, as a key board's does
+    failed = r.route([], ground="GND")
+    for run in [x for x in r.runs if x.net == "GND" and any(abs(p[0] - 20.0) < 3 and abs(p[1] - 12.0) < 3 for p in x.pts)]:
+        R2.unlay(run, m)
+        r.runs.remove(run)
+    R2.write(b, m, r.runs, pour="GND")
+    p = os.path.join(out, "pourcut.kicad_pcb")
+    pcbnew.SaveBoard(p, b)
+    before = R2.drc(p)
+    code = (f"import sys, json; sys.path.insert(0, {HERE!r}); import pcb_route2; "
+            f"print('TIE ' + json.dumps(pcb_route2.tie_pour_islands({p!r}, {LAY!r}, 'GND')))")
+    t = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+    tie = [json.loads(l[4:]) for l in t.stdout.splitlines() if l.startswith("TIE ")]
+    errs, unc = R2.drc(p)
+    if plot:
+        import pcb_plot
+        pcb_plot.plot(p, os.path.join(plot, "route2-pourcut.png"), nets=["*"], title="route2 bench: pourcut")
+    res = {"failed": sorted(failed), "unconnected_before": before[1], "tie": tie[0] if tie else t.stderr[-500:],
+           "drc_errors": len(errs), "unconnected": unc}
+    res["pass"] = before[1] >= 1 and bool(tie) and tie[0][0] >= 1 and not tie[0][1] and not errs and unc == 0
     return res
 
 
