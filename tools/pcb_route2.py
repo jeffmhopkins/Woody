@@ -1516,6 +1516,109 @@ class Router:
                     return run
         return None
 
+    # ---- family by family, with a review between
+    def stage(self, families, board=None, checkpoint=None, ground=None, connect_first=(), first=(),
+              detour=1.8, pull=1.0, fillet=0.0, liquid=True, plot=None):
+        """Route a board in FAMILIES, one at a time, each reviewed and adjusted before the next
+        is let near it (the owner, 2026-10-05 and 2026-10-10: "do families of traces... then
+        the next ones", "review it and push the traces around with the liquid tools, then hand
+        it off to the next family"). Each family:
+          1. routed alone - every earlier family is LOCKED, so neither its rip-up nor its
+             rescue can touch them;
+          2. reviewed: each net routed longer than `detour` x its airwires is routed again
+             with a `pull` corridor, shoving only this family's copper, kept only if shorter;
+             then the liquid pass (rubber band, fold, slide, equalise, fillet) over this
+             family's runs alone;
+          3. locked, written to `board` and saved as a checkpoint (checkpoint(k, name) ->
+             path), with a plot of its nets if `plot(k, name, nets) -> png` is given.
+        `families`: [{name, nets: [names or fnmatch globs], layers?}] - a net claimed by an
+        earlier family is not routed again; whatever no family names goes last, as "rest".
+        Returns [{family, nets, failed, rerouted, liquid, runs, length_mm, vias}]."""
+        import fnmatch
+        P = self.m.planes
+        allnets = [n for n in self.m.nets() if n != ground and not (P and n in P.plane_nets)]
+        claimed, plan = set(), []
+        for fam in families:
+            pats = fam["nets"]
+            mine = [n for n in allnets if n not in claimed and any(n == p_ or fnmatch.fnmatch(n, p_) for p_ in pats)]
+            claimed |= set(mine)
+            plan.append((fam, mine))
+        rest = [n for n in allnets if n not in claimed]
+        if rest:
+            plan.append(({"name": "rest"}, rest))
+        if P is not None and P.fanout_nets:
+            self.fanout()
+        for spec in connect_first:
+            pa, pb = (next((p for p in self.m.pads if p.name == n), None) for n in spec["pads"])
+            if pa is not None and pb is not None and pa.net == pb.net:
+                ok, runs, _ = self.route_net(pa.net, pads=[pa, pb])
+                for r_ in runs:
+                    self._lock(r_)
+                self.log.append(f"connect_first {pa.name} - {pb.name}: {'ok' if ok else 'FAILED'}")
+        # what came before the families - the plane fanout, the connect_first runs - is fixed
+        # and written first
+        pre = list(self.runs)
+        for r_ in pre:
+            self._lock(r_)
+        if board is not None and pre:
+            write(board, self.m, pre)
+        report = []
+        for k, (fam, nets) in enumerate(plan, 1):
+            before = set(id(r_) for r_ in self.runs)
+            saved_cls = {}
+            if fam.get("layers"):           # a family's layers narrow its nets' own
+                for n in nets:
+                    saved_cls[n] = self.R.of.get(n)
+                    self.R.of[n] = dict(self.R.cls(n), layers=list(fam["layers"]))
+            failed = self.route(nets, first=[n for n in first if n in nets], rescue=True)
+            # the review: detours routed again with a pull, then the liquid pass
+            rerouted = []
+            for n in nets:
+                if n in failed:
+                    continue
+                aw = sum(math.dist(a, b) for _, a, b in self.airwires([n]))
+                ln = sum(r_.length() for r_ in self.runs_of(n))
+                if aw > 0 and ln > detour * aw:
+                    rep = self.reroute(n, pull=pull)
+                    after = sum(r_.length() for r_ in self.runs_of(n))
+                    rerouted.append((n, round(ln, 1), round(after, 1), rep.get("mode")))
+            liq = self.liquid(fillet) if liquid else None
+            for n, saved in saved_cls.items():
+                if saved is None:
+                    self.R.of.pop(n, None)
+                else:
+                    self.R.of[n] = saved
+            mine = [r_ for r_ in self.runs if id(r_) not in before]
+            for r_ in mine:
+                self._lock(r_)
+            rec = {"family": fam.get("name", f"family {k}"), "nets": len(nets), "failed": dict(failed),
+                   "rerouted": rerouted, "liquid": liq, "runs": len(mine),
+                   "length_mm": round(sum(r_.length() for r_ in mine), 1), "vias": sum(len(r_.vias()) for r_ in mine)}
+            report.append(rec)
+            self.log.append(f"stage {k} {rec['family']}: {rec['nets']} net(s), {rec['runs']} run(s), {rec['length_mm']} mm, "
+                            f"{rec['vias']} via(s); failed {list(failed) or 'none'}; detours re-routed {len(rerouted)}")
+            if board is not None:
+                write(board, self.m, mine)
+                if checkpoint:
+                    path = checkpoint(k, rec["family"])
+                    _kicad().SaveBoard(path, board)
+                    rec["checkpoint"] = path
+                    if plot:
+                        rec["plot"] = plot(k, rec["family"], nets, path)
+        if ground:
+            before = set(id(r_) for r_ in self.runs)
+            self.route_ground(ground)
+            if board is not None:
+                write(board, self.m, [r_ for r_ in self.runs if id(r_) not in before])
+        return report
+
+    def _lock(self, run):
+        """A run made fixed: no later rip-up, rescue, shove or liquid pass moves it."""
+        run.locked = True
+        for eid in run.entries:
+            if eid in self.m.index.e:
+                self.m.index.e[eid].locked = True
+
     # ---- four layers: each plane pad's own via
     def fanout(self, only=None, region=None):
         """Every SMD pad of a layout.yaml `fanout:` net gets its own via into its plane on a

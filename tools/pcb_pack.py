@@ -363,10 +363,27 @@ class Packer:
                 fx = sum(q[0] for _, _, q in fe) / len(fe)
                 fy = sum(q[1] for _, _, q in fe) / len(fe)
             else:
-                fx, fy = ax + 1, ay
+                # nothing placed to reach: toward the board's interior (a part at an edge
+                # connector has nowhere else to go)
+                c = self.bd.outline.representative_point() if not self.bd.outline.contains(self.bd.outline.centroid) \
+                    else self.bd.outline.centroid
+                fx, fy = (c.x, c.y) if math.dist((c.x, c.y), (ax, ay)) > 1e-6 else (ax + 1, ay)
             # the pad on the anchor this part joins sets where it sits along the side
             out[r] = max(SIDES, key=lambda s: SIDES[s][0] * (fx - ax) + SIDES[s][1] * (fy - ay))
         return out
+
+    def _side_order(self, anchor, refs):
+        """The four sides of the anchor, best first for these parts: toward their far ends
+        (or the board's interior), then the two across, then away."""
+        a = self.placed[anchor]
+        ax, ay = a.court.centroid.x, a.court.centroid.y
+        s0 = self.sides_for(anchor, refs)
+        ux, uy = 0.0, 0.0
+        for r in refs:
+            ux, uy = ux + SIDES[s0[r]][0], uy + SIDES[s0[r]][1]
+        c = self.bd.outline.centroid
+        return sorted(SIDES, key=lambda s: (-(SIDES[s][0] * ux + SIDES[s][1] * uy),
+                                            -(SIDES[s][0] * (c.x - ax) + SIDES[s][1] * (c.y - ay))))
 
     def anchor_pin(self, anchor, part):
         """Where along the anchor the part joins it: the anchor pad on its nets (or None)."""
@@ -492,8 +509,13 @@ class Packer:
         reach = grow if grow else 12.0
         chosen = {}
         rep = {"anchor": anchor, "parts": cluster, "sides": sides, "before": before}
-        for s in sorted(groups, key=lambda s: (-len(groups[s]), s)):
-            refs = groups[s]
+        tried = {}
+        queue = sorted(groups, key=lambda s: (-len(groups[s]), s))
+        failure = None
+        while queue:
+            s = queue.pop(0)
+            refs = groups.pop(s)
+            tried.setdefault(s, set()).update(refs)
             ux, uy = SIDES[s]
             vx, vy = -uy, ux
             def along(r):
@@ -534,8 +556,18 @@ class Packer:
                     reason = f"; the nearest row's {why[0]}: " + "; ".join(m for _, m in v)
                 else:
                     reason = ""
-                rep["result"] = f"no legal row on side {s} for {', '.join(refs)} within {reach} mm of {anchor}{reason}"
-                return rep
+                failure = failure or f"no legal row on side {s} for {', '.join(refs)} within {reach} mm of {anchor}{reason}"
+                # the other sides, in the order the anchor's own side preference gives (not
+                # with side=: the caller pinned it)
+                nxt = [t for t in self._side_order(anchor, refs) if refs[0] not in tried.get(t, set())] if not side else []
+                if not nxt:
+                    rep["result"] = failure
+                    return rep
+                self.log.append(f"pack: {', '.join(refs)} - no row on side {s} of {anchor}, trying side {nxt[0]}")
+                groups.setdefault(nxt[0], []).extend(refs)
+                if nxt[0] not in queue:
+                    queue.append(nxt[0])
+                continue
             chosen.update(best[1])
         trial = dict(self.placed)
         trial.update(chosen)
@@ -677,10 +709,23 @@ class Packer:
         def all_nets(r):
             return {n for n, _ in self.placed[r].pads if n and not n.startswith("unconnected")}
         for anchors, roles in patterns:
-            r_ = self.pattern(list(anchors), roles, rotations=(0, 90))
-            rep.append(("pattern", [x for a in anchors for x in roles[a]], r_.get("result")))
-            if r_.get("result") != "packed":
-                self.log.append(f"cold: the pattern at {', '.join(anchors)} - {r_.get('result')}")
+            # one arrangement at every anchor if it fits; else one per set of anchors at the
+            # same turn; else each anchor its own - the same T where the board allows it,
+            # the nearest legal one where it does not, each step logged
+            sets = [list(anchors)]
+            while sets:
+                grp = sets.pop(0)
+                r_ = self.pattern(grp, roles, rotations=(0, 90))
+                rep.append((f"pattern at {', '.join(grp)}", [x for a in grp for x in roles[a]], r_.get("result")))
+                if r_.get("result") == "packed":
+                    continue
+                self.log.append(f"cold: the pattern at {', '.join(grp)} - {r_.get('result')}")
+                if len(grp) == 1:
+                    continue
+                turns_ = {}
+                for a in grp:
+                    turns_.setdefault(round(self.placed[a].rot) % 360, []).append(a)
+                sets = (list(turns_.values()) if len(turns_) > 1 else [[a] for a in grp]) + sets
         big = lambda r: len(self.placed[r].pads) > 3 or re.match(r"^(U|Q|L|NT)\d", r) is not None
         progress = True
         while progress:

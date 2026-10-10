@@ -27,6 +27,9 @@ packer's rule list.
   cold         the three-key board from nothing: only the switches, the header and the mounts
                where they are, everything else seated by cold() - legal by the rules and by
                KiCad's DRC
+  edge         a part with nothing placed to reach but its anchor, which stands at the board's
+               east edge: it goes to the board's interior side, not off the edge; and a
+               part whose preferred side is walled tries the next side
 """
 import json
 import os
@@ -37,7 +40,7 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-CELLS = ["minikey", "density", "moat", "contain", "refuse", "nofit", "report", "route", "turns", "rooms", "pattern180", "cold"]
+CELLS = ["minikey", "density", "moat", "contain", "refuse", "nofit", "report", "route", "turns", "rooms", "pattern180", "cold", "edge"]
 MINIBODY = ["SW1", "SW2", "SW3", "J1", "H1", "H2", "H3", "H4"]
 ISLBODY = ["J7", "H11", "H1", "H2", "H3", "H4", "TP1"]
 
@@ -336,6 +339,28 @@ def cell_cold(out, plot):
     res = {"steps": [(w, refs, r_) for w, refs, r_ in rep], "unplaced": sorted(bd.unplaced), "rule_breaks": rules,
            "drc_placement": kd[:3], "log": pk.log}
     res["pass"] = not bd.unplaced and not rules and not kd
+    return res
+
+
+def cell_edge(out, plot):
+    pcbnew, P, R2, T = _setup()
+    b = T.new_board(40, 20)
+    T.tp(b, "TPA", "A", 38.6, 10.0)                 # the anchor, 0.9 mm off the east edge
+    T.passive(b, "R1", "A", "N1", 20, 4)             # N1 reaches nothing placed
+    T.tp(b, "TPB", "B", 6.0, 10.0)
+    T.tp(b, "WALL", "W", 14.0, 10.0, w=12.0, h=19.0)  # walls TPB's whole east side within reach
+    T.passive(b, "R2", "B", "Z", 20, 16)
+    T.tp(b, "TPZ", "Z", 30.0, 3.0)                   # R2's far end, east of TPB, past the wall
+    bd = P.board_of(b)
+    bd.unplaced = {"R1", "R2"}
+    pk = P.Packer(bd, ["TPA", "TPB", "WALL", "TPZ"])
+    r1 = pk.pack("TPA", ["R1"])
+    r2 = pk.pack("TPB", ["R2"])
+    res = {"R1": r1["result"], "R1_x": round(pk.placed["R1"].centroid[0], 2), "R2": r2["result"],
+           "R2_side": r2.get("sides"), "log": pk.log}
+    res["pass"] = r1["result"] == r2["result"] == "packed" and res["R1_x"] < 38.6 and pk.placed["R2"].centroid[0] < 8.0 \
+        and any("trying side" in x for x in pk.log) and \
+        not any(P.violations(bd, pk.placed[r], pk.placed) for r in ("R1", "R2"))
     return res
 
 

@@ -53,6 +53,9 @@ acid traps (check_tracks: KiCad's DRC has no such test), unless it says why not.
   guard        a locked pair leg (layout.yaml pairs: guard) and a net whose straight way runs
                inside its guard: routed off it by the clearance plus the guard - pcb.py's own
                check_pair_guard clean
+  stages       the three-key board routed in three families (rail, key lines, the rest), each
+               reviewed and locked before the next: no later family moves an earlier one's
+               copper, every family has its checkpoint, the board is clean
   rescue       a net walled out by an earlier one: rescue takes that one up and both route
   minikey      a three-key board: packed (pcb_pack) then routed, liquid pass, DRC clean
 """
@@ -70,7 +73,7 @@ LAY = {"rules": {"track": 0.25, "track_min": 0.2, "clearance": 0.2, "via": 0.7, 
                  "power_track": 0.4}, "fab": {"hole_to_hole": 0.25, "hole_clearance": 0.25}}
 CELLS = ["fanout", "pinch", "updown", "bus", "nonplanar", "locked", "offgrid", "via_ratio", "field", "shove", "slide",
          "fold", "jogs", "equalise", "fillet", "ground", "enclosed", "stitch", "pourcut", "rescue", "minikey",
-         "planes4", "island4", "optin4", "orphan4", "fragments", "lockedvia", "guard"]
+         "planes4", "island4", "optin4", "orphan4", "fragments", "lockedvia", "guard", "stages"]
 
 
 def _setup():
@@ -80,10 +83,11 @@ def _setup():
     return pcbnew, R2, T
 
 
-def finish(name, b, m, r, out, plot=None, pour=None, nets=None, drc=True):
-    """Write the router's runs to the board, save it, DRC it, plot it."""
+def finish(name, b, m, r, out, plot=None, pour=None, nets=None, drc=True, written=False):
+    """Write the router's runs to the board (unless Router.stage already has), save it, DRC
+    it, plot it."""
     pcbnew, R2, _ = _setup()
-    R2.write(b, m, r.runs, pour=pour)
+    R2.write(b, m, [] if written else r.runs, pour=pour)
     p = os.path.join(out, f"{name}.kicad_pcb")
     pcbnew.SaveBoard(p, b)
     res = {}
@@ -750,6 +754,37 @@ def cell_guard(out, plot):
     low = min((p[1] for run in r.runs_of("N") for p in run.pts), default=None)
     res.update(failed=sorted(failed), check_pair_guard=bad, lowest_y=low, **r.summary())
     res["pass"] = not failed and clean(res) and not bad and low is not None and low >= 11.0 - 1e-6
+    return res
+
+
+def cell_stages(out, plot):
+    pcbnew, R2, T = _setup()
+    import pcb_pack as P
+    b = T.minikey()
+    bd = P.board_of(b)
+    pk = P.Packer(bd, ["SW1", "SW2", "SW3", "J1", "H1", "H2", "H3", "H4"])
+    pk.pack("U1", ["C6", "R11"])
+    pk.pack("J1", ["C7"])
+    pk.pattern(["SW1", "SW2", "SW3"], {f"SW{k}": list(T.MINIKEY["keys"][k]) for k in (1, 2, 3)})
+    pk.apply(b)
+    lay = dict(LAY, power_nets=["V3V3"])
+    m = R2.model_from_board(b, lay)
+    r = R2.Router(m, flow=0.3)
+    snaps = []
+
+    def checkpoint(k, name):
+        snaps.append(sorted((tuple(x.pts), x.net) for x in r.runs if x.locked))
+        return os.path.join(out, f"stages-{k}-{name}.kicad_pcb")
+    fams = [{"name": "rail", "nets": ["V3V3"]}, {"name": "keys", "nets": ["KEY*", "SWL*", "FREE"]}]
+    rep = r.stage(fams, board=b, checkpoint=checkpoint, ground="GND")
+    # each family's copper, as it stood at its checkpoint, still there unchanged at the end
+    final = set((tuple(x.pts), x.net) for x in r.runs)
+    kept = all(set(sn) <= final for sn in snaps)
+    res = finish("stages", b, m, r, out, plot, pour="GND", written=True)
+    res.update(families=[(x["family"], x["nets"], x["runs"], x["failed"], len(x["rerouted"])) for x in rep],
+               checkpoints=[os.path.exists(x.get("checkpoint", "")) for x in rep], earlier_copper_kept=kept)
+    res["pass"] = clean(res) and kept and all(res["checkpoints"]) and [x["family"] for x in rep] == ["rail", "keys", "rest"] \
+        and not any(x["failed"] for x in rep)
     return res
 
 
