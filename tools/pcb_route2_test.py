@@ -34,6 +34,15 @@ acid traps (check_tracks: KiCad's DRC has no such test), unless it says why not.
   pourcut      a locked loop on the back cuts off a piece of the back pour holding one ground
                pad - legal to fits, which cannot see a pour: the pour pass finds that group
                after the fill and ties it to the main one with a via; 0 unconnected
+  planes4      four layers, GND the plane on In1.Cu and POS on In2.Cu: no other net's track on a
+               plane layer, every plane pad its own locked via, pcb_main.check_planes clean
+  island4      ...with an AGND island in In1.Cu, its moat and tie NT1: the island's vias on it,
+               GND's off it and its moat, the signal leaving the island crosses the moat only
+               in the tie's window - check_planes clean
+  optin4       a net whose class names [F.Cu, In2.Cu] routes under a wall on both outer layers
+               through In2.Cu; no other net uses it
+  orphan4      a locked loop of another net in In1.Cu cuts a GND pad's via off the plane: the
+               orphan pass finds it after the fill and fans the pad out again into the body
   rescue       a net walled out by an earlier one: rescue takes that one up and both route
   minikey      a three-key board: packed (pcb_pack) then routed, liquid pass, DRC clean
 """
@@ -50,7 +59,8 @@ sys.path.insert(0, HERE)
 LAY = {"rules": {"track": 0.25, "track_min": 0.2, "clearance": 0.2, "via": 0.7, "via_drill": 0.3, "edge_clearance": 0.3,
                  "power_track": 0.4}, "fab": {"hole_to_hole": 0.25, "hole_clearance": 0.25}}
 CELLS = ["fanout", "pinch", "updown", "bus", "nonplanar", "locked", "offgrid", "via_ratio", "field", "shove", "slide",
-         "fold", "jogs", "equalise", "fillet", "ground", "enclosed", "stitch", "pourcut", "rescue", "minikey"]
+         "fold", "jogs", "equalise", "fillet", "ground", "enclosed", "stitch", "pourcut", "rescue", "minikey",
+         "planes4", "island4", "optin4", "orphan4"]
 
 
 def _setup():
@@ -529,6 +539,142 @@ def cell_pourcut(out, plot):
     res = {"failed": sorted(failed), "unconnected_before": before[1], "tie": tie[0] if tie else t.stderr[-500:],
            "drc_errors": len(errs), "unconnected": unc}
     res["pass"] = before[1] >= 1 and bool(tie) and tie[0][0] >= 1 and not tie[0][1] and not errs and unc == 0
+    return res
+
+
+def _four_checks(R2, b, lay, p):
+    """check_planes (pcb_main, the repository's own) and the plane-layer rule on a saved board."""
+    import pcbnew
+    import pcb_main
+    bb = pcbnew.LoadBoard(p)
+    planes_bad = pcb_main.check_planes(bb, lay)
+    plane_layers = {pl["layer"]: pl["net"] for pl in lay["planes"]}
+    named = {n for c in (lay.get("net_classes") or {}).values() for n in c.get("nets", []) if c.get("layers")}
+    on_plane = sorted({t.GetNetname() for t in bb.GetTracks() if type(t) is pcbnew.PCB_TRACK
+                       and bb.GetLayerName(t.GetLayer()) in plane_layers and t.GetNetname() not in named})
+    vias = {}
+    for t in bb.GetTracks():
+        if isinstance(t, pcbnew.PCB_VIA):
+            vias.setdefault(t.GetNetname(), []).append(t)
+    return planes_bad, on_plane, vias
+
+
+def cell_planes4(out, plot):
+    pcbnew, R2, T = _setup()
+    b, lay = T.four_layer(False)
+    m = R2.model_from_board(b, lay)
+    r = R2.Router(m)
+    failed = r.route()
+    res = finish("planes4", b, m, r, out, plot)
+    p = os.path.join(out, "planes4.kicad_pcb")
+    bad, on_plane, vias = _four_checks(R2, b, lay, p)
+    smd_plane_pads = [q for q in m.pads if q.net in ("GND", "POS") and q.smd]
+    locked = all(v.IsLocked() for n in ("GND", "POS") for v in vias.get(n, []))
+    res.update(failed=sorted(failed), check_planes=bad[:5], tracks_on_plane_layers=on_plane, plane_pads=len(smd_plane_pads),
+               plane_vias=sum(len(vias.get(n, [])) for n in ("GND", "POS")), fanout_locked=locked, log=r.log[:3], **r.summary())
+    res["pass"] = not failed and clean(res) and not bad and not on_plane and res["plane_vias"] >= len(smd_plane_pads) and locked
+    return res
+
+
+def cell_island4(out, plot):
+    pcbnew, R2, T = _setup()
+    b, lay = T.four_layer(True)
+    m = R2.model_from_board(b, lay)
+    r = R2.Router(m)
+    failed = r.route()
+    res = finish("island4", b, m, r, out, plot)
+    p = os.path.join(out, "island4.kicad_pcb")
+    bad, on_plane, vias = _four_checks(R2, b, lay, p)
+    isl = m.planes.islands[0]
+    agnd_on = all(isl["poly"].contains(Point_(v)) for v in vias.get("AGND", []))
+    gnd_off = not any(isl["moat"].contains(Point_(v)) for v in vias.get("GND", []))
+    # where SIG_A crosses the moat on the front: inside the tie's window
+    from shapely.geometry import LineString
+    cross = [LineString([(pcbnew.ToMM(t.GetStart().x), pcbnew.ToMM(t.GetStart().y)), (pcbnew.ToMM(t.GetEnd().x), pcbnew.ToMM(t.GetEnd().y))])
+             for t in pcbnew.LoadBoard(p).GetTracks() if type(t) is pcbnew.PCB_TRACK and t.GetNetname() == "SIG_A"]
+    over = [c.intersection(isl["ring"]) for c in cross if c.intersects(isl["ring"])]
+    in_window = all(o.within(isl["windows"].buffer(0.3)) for o in over) if over else None
+    res.update(failed=sorted(failed), check_planes=bad[:5], tracks_on_plane_layers=on_plane, agnd_vias_on_island=agnd_on,
+               gnd_vias_off_moat=gnd_off, sig_crosses_moat_in_window=in_window, **r.summary())
+    res["pass"] = not failed and clean(res) and not bad and not on_plane and agnd_on and gnd_off and in_window is True
+    return res
+
+
+def Point_(v):
+    import pcbnew
+    from shapely.geometry import Point
+    return Point(pcbnew.ToMM(v.GetPosition().x), pcbnew.ToMM(v.GetPosition().y))
+
+
+def cell_optin4(out, plot):
+    pcbnew, R2, T = _setup()
+    b = T.new_board(40.0, 20.0, layers=4)
+    rect = [(0.3, 0.3), (39.7, 0.3), (39.7, 19.7), (0.3, 19.7)]
+    T.zone(b, "GND", pcbnew.In1_Cu, rect)
+    T.zone(b, "POS", pcbnew.In2_Cu, rect)
+    T.keepout(b, 18.0, 0.0, 22.0, 20.0, layers=("F", "B"), vias=False)
+    T.tp(b, "C1", "CH", 5.0, 7.0)
+    T.tp(b, "C2", "CH", 35.0, 7.0)
+    T.tp(b, "O1", "OTHER", 5.0, 13.0)
+    T.tp(b, "O2", "OTHER", 15.0, 13.0)
+    lay = {"rules": {"track": 0.25, "clearance": 0.2, "via": 0.7, "via_drill": 0.3, "edge_clearance": 0.3},
+           "planes": [{"layer": "In1.Cu", "net": "GND"}, {"layer": "In2.Cu", "net": "POS"}],
+           "net_classes": {"channel": {"nets": ["CH"], "layers": ["F.Cu", "In2.Cu"]}}}
+    m = R2.model_from_board(b, lay)
+    r = R2.Router(m)
+    failed = r.route()
+    res = finish("optin4", b, m, r, out, plot, drc=False)
+    used = {n: sorted({m.layer_names[L] for run in r.runs_of(n) for L, *_ in run.segments()}) for n in ("CH", "OTHER")}
+    errs, _ = R2.drc(os.path.join(out, "optin4.kicad_pcb"))
+    res.update(failed=sorted(failed), layers_used=used, drc_errors=len(errs))
+    res["pass"] = not failed and "In2.Cu" in used["CH"] and not set(used["OTHER"]) & {"In1.Cu", "In2.Cu"} and not errs
+    return res
+
+
+def cell_orphan4(out, plot):
+    pcbnew, R2, T = _setup()
+    b = T.new_board(40.0, 20.0, layers=4)
+    rect = [(0.3, 0.3), (39.7, 0.3), (39.7, 19.7), (0.3, 19.7)]
+    T.zone(b, "GND", pcbnew.In1_Cu, rect)
+    T.zone(b, "POS", pcbnew.In2_Cu, rect)
+    T.tp(b, "G1", "GND", 20.0, 10.0)
+    T.tp(b, "G2", "GND", 5.0, 5.0)
+    T.tp(b, "L1", "LOOP", 16.5, 7.5)
+    T.tp(b, "L2", "LOOP", 23.5, 12.5)
+    lay = {"rules": {"track": 0.25, "clearance": 0.2, "via": 0.7, "via_drill": 0.3, "edge_clearance": 0.3},
+           "planes": [{"layer": "In1.Cu", "net": "GND"}, {"layer": "In2.Cu", "net": "POS"}], "fanout": ["GND", "POS"],
+           "net_classes": {"inner": {"nets": ["LOOP"], "layers": ["F.Cu", "In1.Cu"]}}}
+    m = R2.model_from_board(b, lay)
+    r = R2.Router(m)
+    r.route()                               # G1 and G2 fanned out
+    R2.write(b, m, r.runs)
+    # then a locked loop of LOOP in In1.Cu round G1's via - the plane inside it a fragment
+    # (within fanout's 4 mm reach of G1, so the pad can be fanned out past it)
+    T.via(b, "LOOP", 16.5, 7.5, locked=True)
+    T.via(b, "LOOP", 23.5, 12.5, locked=True)
+    loop = [(16.5, 7.5), (23.5, 7.5), (23.5, 12.5), (16.5, 12.5), (16.5, 7.5)]
+    for (x0, y0), (x1, y1) in zip(loop, loop[1:]):
+        t = pcbnew.PCB_TRACK(b)
+        t.SetStart(T.V(x0, y0))
+        t.SetEnd(T.V(x1, y1))
+        t.SetWidth(pcbnew.FromMM(0.25))
+        t.SetLayer(pcbnew.In1_Cu)
+        t.SetNet(T.net(b, "LOOP"))
+        t.SetLocked(True)
+        b.Add(t)
+    p = os.path.join(out, "orphan4.kicad_pcb")
+    pcbnew.SaveBoard(p, b)
+    before = R2.drc(p)[1]
+    code = (f"import sys, json; sys.path.insert(0, {HERE!r}); import pcb_route2; "
+            f"print('ORPH ' + json.dumps(pcb_route2.fix_plane_orphans({p!r}, {lay!r})))")
+    t_ = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+    fix = [json.loads(l[5:]) for l in t_.stdout.splitlines() if l.startswith("ORPH ")]
+    errs, unc = R2.drc(p)
+    if plot:
+        import pcb_plot
+        pcb_plot.plot(p, os.path.join(plot, "route2-orphan4.png"), nets=["*"], title="route2 bench: orphan4")
+    res = {"unconnected_before": before, "fix": fix[0] if fix else t_.stderr[-600:], "drc_errors": len(errs), "unconnected": unc}
+    res["pass"] = before >= 1 and bool(fix) and fix[0][0] >= 1 and not fix[0][1] and not errs and unc == 0
     return res
 
 

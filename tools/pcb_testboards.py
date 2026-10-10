@@ -385,3 +385,75 @@ def via(b, n, x, y, d=0.7, drill=0.3, locked=False):
     v.SetLocked(locked)
     b.Add(v)
     return v
+
+
+# ------------------------------------------------------------------ four layers
+
+def net_tie(b, ref, a, c, x, y, rot=0.0):
+    """A two-pad net tie joining nets a and c: two 0.6 mm pads touching, one tie group."""
+    fp = _fp(b, ref, "NETTIE")
+    _smd(b, fp, 1, -0.3, 0, 0.6, 0.6, a)
+    _smd(b, fp, 2, 0.3, 0, 0.6, 0.6, c)
+    fp.AddNetTiePadGroup("1,2")
+    _court_rect(fp, 1.6, 1.0)
+    return _place(b, fp, x, y, rot, True)
+
+
+FOUR = {
+    "size": (50.0, 30.0),
+    # the analog island on In1.Cu (board mm), its moat, and the tie at its east edge: its AGND
+    # pad wholly on the island, its GND pad over the moat (pcb_main.check_planes: every pad
+    # of the island's net on the island), as the main board's NT2 under U-ADC
+    "island": [(6.0, 6.0), (22.0, 6.0), (22.0, 24.0), (6.0, 24.0)],
+    "moat": 0.5,
+    "tie_at": (21.65, 15.0),
+}
+
+
+def four_layer(island=False):
+    """A four-layer board: GND the plane on In1.Cu, POS the plane on In2.Cu; U1 (an SOIC-8)
+    with its decoupler, signals out to test points on both faces. With `island`: an AGND
+    island in In1.Cu under U2 and its filter, a moat round it, tied to GND at NT1 on the
+    island's east edge; GND's plane is drawn with the moat cut out. Returns (board, lay)
+    with the layout.yaml keys the router and pcb_main.check_planes read - island outlines
+    in the BODY frame, as every real board writes them."""
+    S = FOUR
+    w, h = S["size"]
+    b = new_board(w, h, layers=4)
+    rect = [(0.3, 0.3), (w - 0.3, 0.3), (w - 0.3, h - 0.3), (0.3, h - 0.3)]
+    lay = {"rules": {"track": 0.25, "track_min": 0.2, "clearance": 0.2, "via": 0.7, "via_drill": 0.3, "edge_clearance": 0.3},
+           "fab": {"hole_to_hole": 0.25, "hole_clearance": 0.25},
+           "planes": [{"layer": "In1.Cu", "net": "GND"}, {"layer": "In2.Cu", "net": "POS"}],
+           "fanout": ["GND", "POS"]}
+    holes = []
+    if island:
+        from shapely.geometry import Polygon
+        P = Polygon(S["island"])
+        M = P.buffer(S["moat"], join_style=2)
+        holes = [list(M.exterior.coords)[:-1]]
+        zone(b, "AGND", pcbnew.In1_Cu, S["island"])
+        lay["islands"] = [{"net": "AGND", "layer": "In1.Cu", "tie": "NT1", "moat": S["moat"], "tie_window": 2.0,
+                           "outline": [list(pcb_main_to_body(x, y)) for x, y in S["island"]]}]
+        lay["fanout"].append("AGND")
+        soic(b, "U2", ["AIN", "", "", "AGND", "SIG_A", "", "", "A3V3"], 14.0, 15.0, 0, True)
+        passive(b, "C2", "A3V3", "AGND", 10.0, 10.0, locked=True)
+        passive(b, "R2", "AIN", "AGND", 10.0, 20.0, locked=True)
+        tp(b, "TPA", "A3V3", 18.0, 9.0)
+        tp(b, "TPI", "AIN", 8.0, 15.0)
+        tp(b, "TPS", "SIG_A", 44.0, 15.0)
+        net_tie(b, "NT1", "AGND", "GND", *S["tie_at"])
+    zone(b, "GND", pcbnew.In1_Cu, rect, holes=holes)
+    zone(b, "POS", pcbnew.In2_Cu, rect)
+    soic(b, "U1", ["S1", "S2", "S3", "GND", "S4", "", "", "POS"], 32.0, 15.0, 0, True)
+    passive(b, "C1", "POS", "GND", 36.0, 9.0, locked=True)
+    passive(b, "C3", "POS", "GND", 28.0, 21.0, locked=True)
+    for k, (x, y, back) in enumerate([(44.0, 4.0, False), (44.0, 8.0, True), (44.0, 22.0, False), (44.0, 26.0, True)]):
+        tp(b, f"TP{k + 1}", f"S{k + 1}", x, y, back=back)
+    tp(b, "TPG", "GND", 26.0, 4.0)
+    tp(b, "TPP", "POS", 26.0, 26.0, back=True)
+    return b, lay
+
+
+def pcb_main_to_body(px, py):
+    import pcb
+    return (px - pcb.OX, pcb.OY - py)

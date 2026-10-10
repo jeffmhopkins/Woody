@@ -405,11 +405,12 @@ def prim_line(p):
 # ------------------------------------------------------------------ the board model
 
 class Pad:
-    __slots__ = ("ref", "num", "net", "layers", "geom", "centre", "smd", "drill", "item")
+    __slots__ = ("ref", "num", "net", "layers", "geom", "centre", "smd", "drill", "item", "tie", "face_of_hole")
 
     def __init__(self, **kw):
         for k in self.__slots__:
             setattr(self, k, kw.get(k))
+        self.tie = bool(self.tie)
 
     @property
     def name(self):
@@ -436,11 +437,152 @@ class Model:
         for g, layers, tracks, vias in keepouts:
             self.index.add(net=None, layers=layers, geom=g, kind="keepout", locked=True, tracks=tracks, vias=vias)
 
+    planes = None                       # a Planes, on a board with layout.yaml planes: / islands:
+
+    def track_layers(self, net):
+        """The layers `net` may run a track on: its class's `layers:` when it names them
+        (an opt-in, a plane layer included - the main board's In2.Cu channels); else every
+        layer that is no net's plane."""
+        named = self.rules.cls(net).get("layers")
+        if named:
+            return [i for i, n in enumerate(self.layer_names) if n in named]
+        closed = set(self.planes.layer_net) if self.planes else set()
+        return [i for i in range(self.nl) if i not in closed]
+
+    def via_ok_for(self, net):
+        """A through via joins every layer; a net whose class pins it to one layer has none."""
+        named = self.rules.cls(net).get("layers")
+        return not named or len(named) > 1
+
     def pads_of(self, net):
         return [p for p in self.pads if p.net == net]
 
     def nets(self):
         return sorted({p.net for p in self.pads if p.net and not p.net.startswith("unconnected")})
+
+
+class Planes:
+    """A multi-layer board's planes as layout.yaml gives them, in board mm - the same reading
+    pcb_main.check_planes makes, so what the router lays is what the check accepts.
+
+      planes:  [{layer, net}]   a layer that is one net's plane: closed to every other net's
+                                tracks (a class `layers:` may open it), and the reference of
+                                the outer layer beside it (F.Cu over In1.Cu, B.Cu over In2.Cu)
+      islands: [{net, layer, outline (BODY mm, as pcb_main), moat, tie / ties, tie_window,
+                 windows, off_island, strip, foreign_ok}]
+                                a net's island in another's plane, a moat round it. An island
+                                net's via stands on its islands; another plane net's via on
+                                that layer stands off the island and its moat
+      fanout:  [nets]           each SMD pad of these nets gets its own via into its plane
+                                (fanout_count: {pad: n}, fanout_through: [pads])
+
+    The SPLITS - where a signal on an outer layer would cross a gap in its reference plane -
+    are reservations on that outer layer: the moat round each island on the reference layer
+    (but at its ties' windows; a declared pair may cross it), and wherever the reference
+    layer has no plane copper drawn. Plane nets are exempt, as check_planes has them."""
+
+    REF = {"F.Cu": "In1.Cu", "B.Cu": "In2.Cu"}
+
+    def __init__(self, lay, model, board=None, to_pcb=None):
+        if to_pcb is None:
+            import pcb
+            to_pcb = pcb.to_pcb
+        names = model.layer_names
+        self.layer_net = {names.index(p["layer"]): p["net"] for p in lay.get("planes") or [] if p["layer"] in names}
+        self.pair_nets = {n for pr in lay.get("pairs") or [] for n in pr["nets"]}
+        self.fanout_nets = list(lay.get("fanout") or [])
+        self.fanout_count = dict(lay.get("fanout_count") or {})
+        self.fanout_through = set(lay.get("fanout_through") or [])
+        self.islands = []
+        outline = model.outline
+        for spec in lay.get("islands") or []:
+            if spec["layer"] not in names:
+                continue
+            body = Polygon(spec["outline"])
+            poly = Polygon([to_pcb(x, y) for x, y in spec["outline"]]).intersection(outline)
+            moat = Polygon([to_pcb(x, y) for x, y in body.buffer(spec["moat"], join_style=2).exterior.coords])
+            windows = []
+            ties = spec["ties"] if "ties" in spec else ([spec["tie"]] if spec.get("tie") else [])
+            if board is not None:
+                for t in ties:
+                    fp = board.FindFootprintByReference(t)
+                    if fp:
+                        c = fp.GetPosition()
+                        windows.append(Point(_kicad().ToMM(c.x), _kicad().ToMM(c.y)).buffer(float(spec.get("tie_window", 0.0))))
+            for x, y, r in spec.get("windows") or []:
+                windows.append(Point(*to_pcb(x, y)).buffer(r))
+            self.islands.append({"net": spec["net"], "layer": names.index(spec["layer"]), "poly": poly, "moat": moat,
+                                 "ring": moat.difference(poly.buffer(-0.05, join_style=2)),
+                                 "windows": unary_union(windows) if windows else None, "strip": bool(spec.get("strip")),
+                                 "off_island": set(spec.get("off_island") or [])})
+        self.plane_nets = set(self.layer_net.values()) | {i["net"] for i in self.islands}
+        # where each plane net's copper is: its layer less the moats of the islands on it;
+        # an island net's, its islands
+        self.region = {}
+        for L, net in self.layer_net.items():
+            reg = outline
+            for i in self.islands:
+                if i["layer"] == L:
+                    reg = reg.difference(i["moat"])
+            self.region[net] = unary_union([self.region[net], reg]) if net in self.region else reg
+        for i in self.islands:
+            n = i["net"]
+            if n in self.layer_net.values():
+                continue            # a net that is a plane AND has islands: the plane region already holds it
+            self.region[n] = unary_union([self.region[n], i["poly"]]) if n in self.region else i["poly"]
+        self.island_union = {}
+        for i in self.islands:
+            if not i["strip"]:
+                n = i["net"]
+                self.island_union[n] = unary_union([self.island_union[n], i["poly"]]) if n in self.island_union else i["poly"]
+        for i in self.islands:          # a net's strips count as its islands for its vias, as the check has it
+            n = i["net"]
+            if i["strip"] and n in self.island_union:
+                self.island_union[n] = unary_union([self.island_union[n], i["poly"]])
+
+    def splits(self, model, zones):
+        """[(outer layer index, geometry, exempt nets)]: the reservations an outer layer's
+        signals keep off. `zones`: [(layer index, outline polygon)] of the copper zones."""
+        out = []
+        for outer, ref in self.REF.items():
+            if outer not in model.layer_names or ref not in model.layer_names:
+                continue
+            Lo, Lr = model.layer_names.index(outer), model.layer_names.index(ref)
+            drawn = [g for L, g in zones if L == Lr]
+            if not drawn:
+                continue            # no plane beside it: nothing to cross
+            bare = model.inside.difference(unary_union(drawn))
+            if not bare.is_empty and bare.area > 1e-3:
+                out.append((Lo, bare, set(self.plane_nets)))
+            for i in self.islands:
+                if i["layer"] != Lr:
+                    continue
+                ring = i["ring"] if i["windows"] is None else i["ring"].difference(i["windows"])
+                if not ring.is_empty:
+                    out.append((Lo, ring, set(self.plane_nets) | self.pair_nets))
+        return out
+
+    def via_zones(self, net, d):
+        """[(geometry, inside)]: an island net's via must stand INSIDE its islands (shrunk by
+        its radius); another plane net sharing an island's layer must stand OUTSIDE that
+        island's moat (grown by its radius)."""
+        out = []
+        if net in self.island_union:
+            out.append((self.island_union[net].buffer(-d / 2), True))
+        for i in self.islands:
+            if net != i["net"] and self.layer_net.get(i["layer"]) == net:
+                out.append((i["moat"].buffer(d / 2), False))
+        return out
+
+    def via_faults(self, net, x, y, d):
+        out = []
+        c = Point(x, y)
+        for geom, inside in self.via_zones(net, d):
+            if inside and not geom.contains(c):
+                out.append("off-island")
+            if not inside and geom.contains(c):
+                out.append("on-moat")
+        return out
 
 
 def fits(run, model, fields=(), fence=None, ignore=()):
@@ -449,7 +591,7 @@ def fits(run, model, fields=(), fence=None, ignore=()):
     R, net, idx = model.rules, run.net, model.index
     fence = fence if fence is not None else model.fence
     fbox = box(*fence) if fence else None
-    allowed = set(R.layers(net, model.layer_names))
+    allowed = set(model.track_layers(net))
     bad = []
     maxgap = max([R.clearance, R.hole_clearance, R.hole_to_hole] + [float(c.get("clearance", 0)) for c in R.classes.values()]
                  + [float(f.clearance or 0) for f in fields]) + 1.0
@@ -489,8 +631,10 @@ def fits(run, model, fields=(), fence=None, ignore=()):
             disc = Point(x, y).buffer(d / 2, quad_segs=8)
             hole = Point(x, y).buffer(drill / 2, quad_segs=8)
             where = (x, y)
-            if len(allowed) < model.nl:
+            if not model.via_ok_for(net):
                 bad.append(("via-layer", where, None))
+            if model.planes is not None:
+                bad += [(w_, where, None) for w_ in model.planes.via_faults(net, x, y, d)]
             if not model.inside.contains(disc):
                 bad.append(("edge", where, None))
             if fbox is not None and not fbox.contains(disc):
@@ -656,7 +800,7 @@ class Router:
         g = np.zeros((nl, self.nx, self.ny), dtype=bool)
         v = np.zeros((self.nx, self.ny), dtype=bool)
         d, drill = R.via_size(net)
-        allowed = set(R.layers(net, self.m.layer_names))
+        allowed = set(self.m.track_layers(net))
         for L in range(nl):
             if L not in allowed:
                 g[L] |= True
@@ -707,8 +851,16 @@ class Router:
             g |= ~fin[None, :, :]
             vfin = (self.X >= fx0 + d / 2) & (self.X <= fx1 - d / 2) & (self.Y >= fy0 + d / 2) & (self.Y <= fy1 - d / 2)
             v |= ~vfin
-        if len(allowed) < nl:
+        if not self.m.via_ok_for(net):
             v[:] = True
+        if self.m.planes is not None:
+            # where this net's via may not stand: an island net's off its islands, another plane
+            # net's on an island of its own layer or that island's moat
+            for geom, inside in self.m.planes.via_zones(net, d):
+                if inside:
+                    v |= ~shapely.contains_xy(geom, self.X, self.Y)
+                else:
+                    self._mark(v, geom, 0.0)
         return g, v
 
     def costs(self, net, width):
@@ -1162,9 +1314,14 @@ class Router:
     def route(self, nets=None, first=(), families=(), ground=None, connect_first=(), rescue=True):
         """Route every net (or `nets`): families first, then the rest in crossing-aware
         order, then ground. Returns {net: reason} for every net that failed."""
-        nets = list(nets) if nets is not None else [n for n in self.m.nets() if n != ground]
+        P = self.m.planes
+        # a plane net is joined by its plane: its pads get their vias (fanout), not tracks
+        nets = list(nets) if nets is not None else [n for n in self.m.nets() if n != ground
+                                                    and not (P and n in P.plane_nets)]
         failed = {}
         done = set()
+        if P is not None and P.fanout_nets:
+            self.fanout()
         # layout.yaml connect_first: pad-to-pad connections laid before anything else, each in
         # its own track (pcb.py check holds each to its max_mm); the net's own route joins them
         for spec in connect_first:
@@ -1323,6 +1480,84 @@ class Router:
                     self.runs.append(run)
                     return run
         return None
+
+    # ---- four layers: each plane pad's own via
+    def fanout(self, only=None, region=None):
+        """Every SMD pad of a layout.yaml `fanout:` net gets its own via into its plane on a
+        short straight stub from the pad's centre: the nearest spot, searching away from the
+        part first, where the via stands inside the net's plane region (by its radius and
+        0.3 mm), keeps every via rule of the Planes, and the stub and via pass `fits`. A
+        through-hole pad meets the plane itself (unless `fanout_through:` names it), and so
+        does a plated hole's face pad; an island's `off_island:` pad is left to the route
+        that serves it. The vias and stubs are LOCKED: nothing after moves them. `only`:
+        these pads ("REF.NUM"); `region`: {net: geometry} to stand in instead (the orphan
+        pass: the body of the fill). Returns the pads no via fits by."""
+        P = self.m.planes
+        if P is None:
+            return []
+        skip = {n for i in P.islands for n in i["off_island"]}
+        missed, n = [], 0
+        for pad in sorted(self.m.pads, key=lambda p: (p.ref, p.num)):
+            name = pad.name
+            if pad.net not in P.fanout_nets or (only is not None and name not in only) or name in skip:
+                continue
+            through = name in P.fanout_through or (only is not None and not pad.smd)
+            if (not pad.smd and not through) or pad.face_of_hole or len(pad.layers) != 1:
+                continue
+            if only is None and any(e.net == pad.net and e.kind in ("track", "via") and e.geom.intersects(pad.geom)
+                                    for e in self.m.index.query(pad.geom.bounds)):
+                continue            # already has its copper (a locked fanout, a hand route)
+            L = next(iter(pad.layers))
+            reg = (region or {}).get(pad.net, P.region.get(pad.net))
+            if reg is None:
+                missed.append(f"{name} ({pad.net}): no plane region")
+                continue
+            d, drill = self.R.via_size(pad.net)
+            room = reg.buffer(-(d / 2 + 0.3))
+            w = self.R.width(pad.net)
+            plane_L = next((k for k, v in P.layer_net.items() if v == pad.net), None)
+            if plane_L is None:
+                plane_L = next((i["layer"] for i in P.islands if i["net"] == pad.net), (L + 1) % self.m.nl)
+            c = (snap(pad.centre[0]), snap(pad.centre[1]))
+            fp = [q for q in self.m.pads if q.ref == pad.ref]
+            fx, fy = (sum(q.centre[0] for q in fp) / len(fp), sum(q.centre[1] for q in fp) / len(fp))
+            away = math.atan2(c[1] - fy, c[0] - fx) if math.dist(c, (fx, fy)) > 0.05 else 0.0
+            # where the stub may start: the pad's centre, else inside it on the side away from
+            # its part (a net tie's two pads touch: a stub from the centre passes too near the
+            # other's copper for KiCad's DRC, which grants a tie no clearance exemption)
+            x0, y0, x1, y1 = pad.geom.bounds
+            ext = max(0.0, min(x1 - x0, y1 - y0) / 2 - w / 2 - 0.02)
+            starts = [c] + ([(snap(c[0] + math.cos(away) * ext), snap(c[1] + math.sin(away) * ext))] if ext > 0.05 else [])
+            for _ in range(int(P.fanout_count.get(name, 1))):
+                found = None
+                for k in range(3, 41):
+                    r = k * 0.1
+                    for da in range(0, 181, 15):
+                        for sgn in ((1,) if da in (0, 180) else (1, -1)):
+                            a = away + sgn * math.radians(da)
+                            x, y = snap(c[0] + r * math.cos(a)), snap(c[1] + r * math.sin(a))
+                            pt = Point(x, y)
+                            if pad.geom.buffer(d / 2 + OWN_PAD_GAP).contains(pt) or not room.contains(pt):
+                                continue
+                            for s0 in starts:
+                                run = Run(pad.net, [(s0[0], s0[1], L), (x, y, L), (x, y, plane_L)], w, (d, drill), locked=True)
+                                if not fits(run, self.m, self.fields, self.fence):
+                                    found = run
+                                    break
+                            if found:
+                                break
+                        if found:
+                            break
+                    if found:
+                        break
+                if not found:
+                    missed.append(f"{name} ({pad.net}): no legal via within 4 mm")
+                    break
+                lay(found, self.m)
+                self.runs.append(found)
+                n += 1
+        self.log.append(f"fanout: {n} plane via(s); {len(missed)} pad(s) without one" + ("".join("\n  " + m_ for m_ in missed)))
+        return missed
 
     # ---- rescue
     def rescue(self, net, radii=(1.5, 3.0, 5.0)):
@@ -1847,6 +2082,14 @@ def _poly_of(ps):
     return unary_union(out)
 
 
+def _frame(lay):
+    """How layout.yaml's island outlines and windows are written: the body frame (every real
+    board, as pcb_main reads them) unless `outline_frame: board` (a constructed board)."""
+    if lay.get("outline_frame") == "board":
+        return lambda x, y: (x, y)
+    return None
+
+
 def model_from_board(board, lay, fence=None, via_off_silk=True):
     """The Model of a KiCad board, with its existing tracks and vias as copper entries
     (locked as KiCad has them) and Run-less: rip-up of existing copper is by entry. With
@@ -1870,7 +2113,10 @@ def model_from_board(board, lay, fence=None, via_off_silk=True):
             c = pad.GetPosition()
             pads.append(Pad(ref=fp.GetReference(), num=pad.GetNumber(), net=pad.GetNetname(), layers=set(on), geom=g,
                             centre=(pcbnew.ToMM(c.x), pcbnew.ToMM(c.y)), smd=not pad.HasHole(),
-                            drill=pcbnew.ToMM(pad.GetDrillSize().x) if pad.HasHole() else None, item=pad))
+                            drill=pcbnew.ToMM(pad.GetDrillSize().x) if pad.HasHole() else None, item=pad,
+                            tie=fp.IsNetTie(),
+                            face_of_hole=not pad.HasHole() and any(q.HasHole() and q.GetNumber() == pad.GetNumber()
+                                                                   for q in fp.Pads())))
     for z in board.Zones():
         if z.GetIsRuleArea():
             g = _poly_of(z.Outline())
@@ -1889,6 +2135,17 @@ def model_from_board(board, lay, fence=None, via_off_silk=True):
     m = Model(outline_of(board), names, rules, pads, holes, keeps, fence)
     m.lids = lids
     m.board = board
+    if lay.get("planes") or lay.get("islands"):
+        m.planes = Planes(lay, m, board, to_pcb=_frame(lay))
+        zones = []
+        for z in board.Zones():
+            if z.GetIsRuleArea():
+                continue
+            for k, lid in enumerate(lids):
+                if z.IsOnLayer(lid):
+                    zones.append((k, _poly_of(z.Outline())))
+        for L, geom, exempt in m.planes.splits(m, zones):
+            m.index.add(net=None, layers=[L], geom=geom, kind="reserve", locked=True, family=exempt)
     for t in board.GetTracks():
         net = t.GetNetname()
         if isinstance(t, pcbnew.PCB_VIA):
@@ -2090,6 +2347,89 @@ def tie_pour_islands(path, lay, net, rounds=3, step=0.25):
             if not done:
                 i = g[0]
                 left.append((sorted(nodes[i][0])[0], tuple(round(v, 2) for v in nodes[i][1].representative_point().coords[0])))
+        pcbnew.ZONE_FILLER(board).Fill(board.Zones())
+        pcbnew.SaveBoard(path, board)
+        added += new
+        if not new:
+            break
+    return added, left
+
+
+def fix_plane_orphans(path, lay, rounds=3):
+    """A plane is one piece only until vias and pins of other nets cut it: antipads in a row
+    can leave a FRAGMENT holding some of the net's pads and vias, joined to nothing else.
+    On a SAVED board, in its own load: fill; for each `fanout:` net, group its fill pieces,
+    pads, tracks and vias by contact (a via or a plated pad joins its layers); for each
+    group but the main one (the most pads), give one of its SMD pads a new fanout via into
+    the main group's fill on the plane layer (the main group: the one holding the most of
+    the net's fill); refill; repeat. Saves the board. Returns
+    (vias added, [pads still apart])."""
+    pcbnew = _kicad()
+    added, left = 0, []
+    for _ in range(rounds):
+        board = pcbnew.LoadBoard(path)
+        board.BuildConnectivity()
+        pcbnew.ZONE_FILLER(board).Fill(board.Zones())
+        m = model_from_board(board, lay)
+        if m.planes is None:
+            return 0, []
+        r = Router(m)
+        new, left = 0, []
+        for net in m.planes.fanout_nets:
+            nodes = []
+            for z in board.Zones():
+                if z.GetIsRuleArea() or z.GetNetname() != net:
+                    continue
+                for k, lid in enumerate(m.lids):
+                    if z.IsOnLayer(lid):
+                        ps = pcbnew.SHAPE_POLY_SET(z.GetFilledPolysList(lid))
+                        ps.Unfracture()
+                        g = _poly_of(ps)
+                        for piece in (list(g.geoms) if g.geom_type == "MultiPolygon" else [g]):
+                            if not piece.is_empty:
+                                nodes.append(({k}, piece, "fill", None))
+            if not nodes:
+                continue
+            for e in m.index.e.values():
+                if e.net == net and e.kind in ("pad", "track", "via"):
+                    nodes.append((set(e.layers), e.geom, e.kind, e.ref))
+            parent = list(range(len(nodes)))
+
+            def find(i):
+                while parent[i] != i:
+                    parent[i] = parent[parent[i]]
+                    i = parent[i]
+                return i
+            for i in range(len(nodes)):
+                for j in range(i + 1, len(nodes)):
+                    if nodes[i][0] & nodes[j][0] and nodes[i][1].intersects(nodes[j][1]):
+                        parent[find(i)] = find(j)
+            groups = {}
+            for i in range(len(nodes)):
+                groups.setdefault(find(i), []).append(i)
+            if len(groups) <= 1:
+                continue
+            # the plane's BODY is the group holding the most of its fill - not the most pads: a
+            # fragment cut off round one pad has as many pads as a sparse plane's body
+            main = max(groups.values(), key=lambda g: (sum(nodes[i][1].area for i in g if nodes[i][2] == "fill"),
+                                                       sum(1 for i in g if nodes[i][2] == "pad")))
+            body = unary_union([nodes[i][1] for i in main if nodes[i][2] == "fill"])
+            for g in groups.values():
+                if g is main:
+                    continue
+                pads = [nodes[i][3] for i in g if nodes[i][2] == "pad" and nodes[i][3]]
+                smd = [p for p in pads if any(q.name == p and q.smd for q in m.pads)]
+                if not smd:
+                    if pads:
+                        left.append(f"{net}: {', '.join(pads)} - no SMD pad to fan out again")
+                    continue
+                miss = r.fanout(only=[smd[0]], region={net: body.intersection(m.planes.region.get(net, body))})
+                if miss:
+                    left.append(f"{net}: {smd[0]} - {miss[0]}")
+                else:
+                    new += 1
+        if new:
+            write(board, m, r.runs)
         pcbnew.ZONE_FILLER(board).Fill(board.Zones())
         pcbnew.SaveBoard(path, board)
         added += new
