@@ -63,6 +63,14 @@ def main():
         print("route2: " + line)
     print(f"route2: {r.summary()}; failed {failed or 'none'}")
     pcb_route2.write(board, m, r.runs)
+    # the old router's own finishing pass (tools/pcb_route.tidy), as post_route runs it: empty
+    # and doubled tracks, dangling ends, acute joins squared, collinear joints merged, the
+    # chamfer - never on locked copper. Where new copper meets the hand routes it is what
+    # squares the joins between them
+    import pcb_route
+    pcbnew.SaveBoard(OUT, board)
+    board = pcbnew.LoadBoard(OUT)
+    pcb_route.tidy(board, lay)
     pcbnew.SaveBoard(OUT, board)
     code = (f"import sys, json, yaml; sys.path.insert(0, {os.path.join(ROOT, 'tools')!r}); import pcb_route2; "
             f"print('ORPH ' + json.dumps(pcb_route2.fix_plane_orphans({OUT!r}, yaml.safe_load(open({os.path.join(HERE, 'layout.yaml')!r})))))")

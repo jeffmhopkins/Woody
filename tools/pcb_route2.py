@@ -1595,10 +1595,12 @@ class Router:
         return missed
 
     # ---- rescue
-    def rescue(self, net, radii=(1.5, 3.0, 5.0)):
-        """Take up the unlocked copper of other nets in a box round the failed net's pads,
-        route the failed net first and then the taken-up ones; keep it only if fewer nets
-        fail. Never locked copper, never a net with copper outside the fence."""
+    def rescue(self, net, radii=(1.5, 3.0, 5.0), orders=4):
+        """Take up the unlocked copper of other nets in a box round the failed net's pads and
+        lay the set again: the failed net first, then the taken-up ones, and whatever fails
+        moves to the front for the next order, up to `orders` orders. Kept only if every net
+        of the set routes; else all put back. Never locked copper, never a net with copper
+        outside the fence, never the ground."""
         ps = self.m.pads_of(net)
         xs = [p.centre[0] for p in ps]
         ys = [p.centre[1] for p in ps]
@@ -1616,30 +1618,39 @@ class Router:
                 for r_ in saved[v]:
                     unlay(r_, self.m)
                     self.runs.remove(r_)
-            ok, runs, why0 = self.route_net(net)
-            fails = 0 if ok else 1
-            redone, whys = {}, ([f"{net}: {why0}"] if not ok else [])
-            for v in victims:
-                okv, rv, whyv = self.route_net(v)
-                redone[v] = rv
-                fails += 0 if okv else 1
-                if not okv:
-                    whys.append(f"{v}: {whyv}")
-            self.log.append(f"rescue {net}, {r} mm box: took up {', '.join(victims)}; "
-                            + ("all routed" if ok and fails == 0 else "then failed " + "; ".join(whys) + " - put back"))
-            if ok and fails == 0:
-                self.log.append(f"rescue: {net} routed after taking up {', '.join(victims)} in a {r} mm box")
-                return True
+            # the failed net first, then the taken-up ones; whatever fails moves to the front
+            # and the set is laid again - up to `orders` orders (the rip-up's negotiation)
+            order = [net] + victims
+            for attempt in range(orders):
+                laid, failed_now, whys = [], [], []
+                for n_ in order:
+                    ok_, rv, why_ = self.route_net(n_)
+                    laid += rv
+                    if not ok_:
+                        failed_now.append(n_)
+                        whys.append(f"{n_}: {why_}")
+                if not failed_now:
+                    self.log.append(f"rescue {net}, {r} mm box: took up {', '.join(victims)}; all routed"
+                                    + (f" in order {attempt + 1}" if attempt else ""))
+                    self.log.append(f"rescue: {net} routed after taking up {', '.join(victims)} in a {r} mm box")
+                    return True
+                self.log.append(f"rescue {net}, {r} mm box, order {attempt + 1}: took up {', '.join(victims)}; "
+                                f"then failed {'; '.join(whys)}")
+                for rr in laid:
+                    if rr.entries:
+                        unlay(rr, self.m)
+                    if rr in self.runs:
+                        self.runs.remove(rr)
+                promoted = [n_ for n_ in failed_now if n_ not in order[:len(failed_now)]]
+                if not promoted and attempt:
+                    break                   # the same nets fail in front: another order changes nothing
+                order = failed_now + [n_ for n_ in order if n_ not in failed_now]
             # put everything back
-            for rr in runs + [x for v in victims for x in redone[v]]:
-                if rr.entries:
-                    unlay(rr, self.m)
-                if rr in self.runs:
-                    self.runs.remove(rr)
             for v in victims:
                 for r_ in saved[v]:
                     lay(r_, self.m)
                     self.runs.append(r_)
+            self.log.append(f"rescue {net}, {r} mm box: put back")
         return False
 
     def _fixed(self, net):
@@ -2170,6 +2181,31 @@ def model_from_board(board, lay, fence=None, via_off_silk=True):
     m = Model(outline_of(board), names, rules, pads, holes, keeps, fence)
     m.lids = lids
     m.board = board
+    # layout.yaml pairs: guard - no other net's track on the pair's layer, and no other net's
+    # via anywhere, within the clearance plus the guard of a locked pair leg (#8-4; held by
+    # pcb.py check_pair_guard, whose reading this is): a reservation round the legs
+    for pr in lay.get("pairs") or []:
+        if not pr.get("guard") or pr.get("layer", "F.Cu") not in names:
+            continue
+        g, w = float(pr["guard"]), float(pr["width"])
+        own = set(pr["nets"]) | {(pr.get("guard_traces") or {}).get("net")}
+        Lid = board.GetLayerID(pr.get("layer", "F.Cu"))
+        legs = []
+        for t in board.GetTracks():
+            if type(t) in (pcbnew.PCB_TRACK, pcbnew.PCB_ARC) and t.IsLocked() and t.GetNetname() in pr["nets"] \
+                    and t.GetLayer() == Lid and abs(pcbnew.ToMM(t.GetWidth()) - w) < 1e-3 and t.GetStart() != t.GetEnd():
+                a, b = t.GetStart(), t.GetEnd()
+                if type(t) is pcbnew.PCB_ARC:
+                    mm = t.GetMid()
+                    line = LineString(arc_points((pcbnew.ToMM(a.x), pcbnew.ToMM(a.y)), (pcbnew.ToMM(mm.x), pcbnew.ToMM(mm.y)),
+                                                 (pcbnew.ToMM(b.x), pcbnew.ToMM(b.y))))
+                else:
+                    line = LineString([(pcbnew.ToMM(a.x), pcbnew.ToMM(a.y)), (pcbnew.ToMM(b.x), pcbnew.ToMM(b.y))])
+                legs.append(line.buffer(w / 2))
+        if legs:
+            zone_ = unary_union(legs).buffer(rules.clearance + g - EPS)
+            m.index.add(net=None, layers=[lids.index(Lid)], geom=zone_, kind="reserve", locked=True,
+                        family={n for n in own if n})
     if lay.get("planes") or lay.get("islands"):
         m.planes = Planes(lay, m, board, to_pcb=_frame(lay))
         zones = []

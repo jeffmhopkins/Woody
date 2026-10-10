@@ -50,6 +50,9 @@ acid traps (check_tracks: KiCad's DRC has no such test), unless it says why not.
   lockedvia    a hand route locked track by track with its via left unlocked (#45's /IO2 on
                the main board): taking up "the unlocked copper" keeps that via - it is the
                locked route's own - and the route stays whole
+  guard        a locked pair leg (layout.yaml pairs: guard) and a net whose straight way runs
+               inside its guard: routed off it by the clearance plus the guard - pcb.py's own
+               check_pair_guard clean
   rescue       a net walled out by an earlier one: rescue takes that one up and both route
   minikey      a three-key board: packed (pcb_pack) then routed, liquid pass, DRC clean
 """
@@ -67,7 +70,7 @@ LAY = {"rules": {"track": 0.25, "track_min": 0.2, "clearance": 0.2, "via": 0.7, 
                  "power_track": 0.4}, "fab": {"hole_to_hole": 0.25, "hole_clearance": 0.25}}
 CELLS = ["fanout", "pinch", "updown", "bus", "nonplanar", "locked", "offgrid", "via_ratio", "field", "shove", "slide",
          "fold", "jogs", "equalise", "fillet", "ground", "enclosed", "stitch", "pourcut", "rescue", "minikey",
-         "planes4", "island4", "optin4", "orphan4", "fragments", "lockedvia"]
+         "planes4", "island4", "optin4", "orphan4", "fragments", "lockedvia", "guard"]
 
 
 def _setup():
@@ -722,6 +725,31 @@ def cell_lockedvia(out, plot):
                  if isinstance(t, pcbnew.PCB_VIA) and t.GetNetname() == "N")
     res.update(failed=sorted(failed), taken_up=took, kept_for_locked=m.kept_for_locked, n_vias=vias_n)
     res["pass"] = not failed and clean(res) and took == 1 and m.kept_for_locked == 1 and vias_n == 1
+    return res
+
+
+def cell_guard(out, plot):
+    pcbnew, R2, T = _setup()
+    import pcb
+    b = T.new_board(40.0, 20.0)
+    T.tp(b, "S1", "SENS", 4.0, 10.0, 0.6, 0.6)
+    T.tp(b, "S2", "SENS", 36.0, 10.0, 0.6, 0.6)
+    T.track(b, "SENS", [(4.0, 10.0), (36.0, 10.0)], locked=True)
+    # N's pads clear of the guard; a hole on their straight line. The short way round is
+    # under it, between the hole and the leg - inside the guard; the legal way is over it
+    T.tp(b, "N1", "N", 6.0, 12.0, 0.6, 0.6)
+    T.tp(b, "N2", "N", 34.0, 12.0, 0.6, 0.6)
+    T.hole(b, "H1", 20.0, 12.4, 2.4)        # under it: room by the clearance, not by the guard
+    lay = dict(LAY, pairs=[{"nets": ["SENS", "AG"], "layer": "F.Cu", "width": 0.25, "gap": 0.25, "guard": 0.55}],
+               net_classes={"front": {"nets": ["N"], "layers": ["F.Cu"]}})
+    m = R2.model_from_board(b, lay)
+    r = R2.Router(m)
+    failed = r.route(["N"])
+    res = finish("guard", b, m, r, out, plot)
+    bad = pcb.check_pair_guard(pcbnew.LoadBoard(os.path.join(out, "guard.kicad_pcb")), lay)
+    low = min((p[1] for run in r.runs_of("N") for p in run.pts), default=None)
+    res.update(failed=sorted(failed), check_pair_guard=bad, lowest_y=low, **r.summary())
+    res["pass"] = not failed and clean(res) and not bad and low is not None and low >= 11.0 - 1e-6
     return res
 
 
