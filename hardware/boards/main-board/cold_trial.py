@@ -89,6 +89,13 @@ EDITS = {
         # rail's 0.5 mm does not fit), at signal width.
         {"connect": ["U13.3", "U13.6"], "points": [[298.4, 129.9], [298.4, 131.0]], "width": 0.3, "track": 0.25,
          "why": "EN tied to ANODE under U13's body; no load current in it"},
+        # Review of family 2 (analog), 2026-10-10: DEV_3V3 rose from R45 to R47's top pad
+        # BETWEEN R47 and C2 - the digital rail through the ADC supply filter, between its
+        # output (R47.2, ADC_VDD) and its capacitor (C2) - and ADC_VDD hooked round it. The
+        # rail goes round R47's west end instead; ADC_VDD then runs straight along its bus
+        # (layout.yaml parts: R47 "into the ADC_VDD bus", C2/C42/C3 on it).
+        {"clear": "DEV_3V3", "rect": [91.5, 124.9, 93.1, 126.3],
+         "why": "keep the digital 3V3 out from between R-ADC-VDD and C-ADC-BULK"},
     ],
 }
 
