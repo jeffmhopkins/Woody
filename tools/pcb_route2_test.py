@@ -69,6 +69,16 @@ acid traps (check_tracks: KiCad's DRC has no such test), unless it says why not.
                resumed from its checkpoint board in a fresh model: the same copper, clean
   resume4      the four-layer board staged with a stop and resume: no plane pad fanned out
                twice, check_planes clean, the same copper as one run
+  partial      the partly routed board (pcb_testboards.partial) through the whole staged
+               process as a reviewer drives it: its unlocked copper adopted; the bus family
+               PAUSES for review (CLK's rescue moved B, board copper); resumed from that
+               checkpoint with the reviewer's move on the west family (D runs 0.4 mm from
+               the sensitive S - legal, and not acceptable: `clear` it); resumed again for
+               the east (C's open branch onto its old trunk, E across it). Then KiCad's DRC,
+               pcb.py's check_tracks (acid traps: the rubber band cut C's square tee into a
+               45 until replace() refused it), H untouched, D's copper clear of S's box
+  partialpush  the same bus family with the rip-up rescue off: CLK is PUSHED in, shoving B -
+               copper the board came with, adopted - and the family asks for review
   rescue       a net walled out by an earlier one: rescue takes that one up and both route
   minikey      a three-key board: packed (pcb_pack) then routed, liquid pass, DRC clean
 """
@@ -87,7 +97,8 @@ LAY = {"rules": {"track": 0.25, "track_min": 0.2, "clearance": 0.2, "via": 0.7, 
 CELLS = ["fanout", "pinch", "updown", "bus", "nonplanar", "locked", "offgrid", "via_ratio", "field", "shove", "slide",
          "fold", "jogs", "equalise", "fillet", "ground", "enclosed", "stitch", "pourcut", "rescue", "minikey",
          "planes4", "island4", "optin4", "orphan4", "fragments", "lockedvia", "guard", "stages", "push",
-         "stagepush", "edits", "resume", "resume4"]
+         "stagepush", "edits", "resume", "resume4",
+         "partial", "partialpush"]
 
 
 def _setup():
@@ -934,6 +945,87 @@ def cell_resume4(out, plot):
     res["same_copper"] = _copper(one) == _copper(two)
     res["pass"] = all(not res[t]["drc_errors"] and res[t]["unconnected"] == 0 and not res[t]["check_planes"] for t in ("one_run", "resumed")) \
         and res["one_run"]["plane_vias"] == res["resumed"]["plane_vias"] and res["same_copper"]
+    return res
+
+
+PARTIAL_FAMS = [{"name": "bus", "nets": ["B", "CLK"]}, {"name": "west", "nets": ["D", "S", "H"]}, {"name": "east", "nets": ["C", "E"]}]
+PARTIAL_EDITS = {"west": [{"clear": "D", "rect": [18.5, 22.0, 25.5, 27.0]}]}     # the reviewer's move, 2026-10-10
+
+
+def _partial_lay():
+    return dict(LAY, net_classes={"front": {"nets": ["B", "CLK"], "layers": ["F.Cu"]}})
+
+
+def cell_partial(out, plot):
+    pcbnew, R2, T = _setup()
+    import pcb
+    from shapely.geometry import LineString, box
+    b0 = T.partial()
+    p0 = os.path.join(out, "partial-0.kicad_pcb")
+    pcbnew.SaveBoard(p0, b0)
+    cps, steps = {}, []
+
+    def leg(path, start):
+        b = pcbnew.LoadBoard(path)
+        m = R2.model_from_board(b, _partial_lay())
+        r = R2.Router(m, flow=0.3)
+        n = r.adopt()
+        rep = r.stage(PARTIAL_FAMS, board=b, start=start, pause=True, edits=PARTIAL_EDITS,
+                      checkpoint=lambda k, nm: cps.setdefault(k, os.path.join(out, f"partial-{k}.kicad_pcb")))
+        steps.append({"start": start, "adopted": n, "families": [(x["family"], x["review"], x.get("paused", False),
+                                                                    [(e["edit"], e["net"], e["ok"]) for e in x["edits"]]) for x in rep]})
+        return rep, r
+    rep, _ = leg(p0, 1)                                 # pauses at the bus: the rescue moved B
+    paused = rep[-1].get("paused") and rep[-1]["family"] == "bus" and any(w.startswith("rescued: CLK") for w in rep[-1]["review"])
+    rep, _ = leg(cps[1], 2)                             # the reviewer accepted the bus; on, with the west's edit
+    while rep and rep[-1].get("paused"):
+        k = len(cps) + 1
+        rep, _ = leg(cps[k - 1], k)
+    final = cps[max(cps)]
+    errs, unc = R2.drc(final)
+    bf = pcbnew.LoadBoard(final)
+    acid = pcb.check_tracks(bf)
+    H = lambda bb: sorted((t.GetStart().x, t.GetStart().y, t.GetEnd().x, t.GetEnd().y, t.IsLocked()) for t in bb.GetTracks()
+                          if t.GetNetname() == "H")
+    d_cu = [LineString([(pcbnew.ToMM(t.GetStart().x), pcbnew.ToMM(t.GetStart().y)), (pcbnew.ToMM(t.GetEnd().x),
+                                                                                     pcbnew.ToMM(t.GetEnd().y))]).buffer(pcbnew.ToMM(t.GetWidth()) / 2)
+            for t in bf.GetTracks() if t.GetNetname() == "D" and type(t) is pcbnew.PCB_TRACK]
+    d_clear = not any(g.intersects(box(18.5, 22.0, 25.5, 27.0)) for g in d_cu)
+    res = {"steps": steps, "drc_errors": len(errs), "drc": [e[:2] for e in errs[:3]], "unconnected": unc, "acid_traps": acid[:3],
+           "H_untouched": H(b0) == H(bf), "D_clear_of_S": d_clear, "paused_at_bus_for_the_rescue": bool(paused),
+           "unlocked_left": sum(1 for t in bf.GetTracks() if not t.IsLocked()), "families_done": sorted(cps)}
+    if plot:
+        import pcb_plot
+        pcb_plot.plot(final, os.path.join(plot, "route2-partial.png"), nets=["*"], title="route2 bench: partial")
+    res["pass"] = not errs and unc == 0 and not acid and res["H_untouched"] and d_clear and bool(paused) \
+        and res["unlocked_left"] == 0 and sorted(cps) == [1, 2, 3]
+    return res
+
+
+def cell_partialpush(out, plot):
+    pcbnew, R2, T = _setup()
+    b = T.partial()
+    m = R2.model_from_board(b, _partial_lay())
+    r = R2.Router(m, flow=0.3)
+    n = r.adopt()
+    r.rescue = lambda net, *a, **k: False
+    rep = r.stage(PARTIAL_FAMS[:1], board=b, stop=1, pause=True)
+    res = finish("partialpush", b, m, r, out, plot, written=True, drc=False)
+    p = os.path.join(out, "partialpush.kicad_pcb")
+    import pcb
+    acid = pcb.check_tracks(pcbnew.LoadBoard(p))
+    res.update(adopted=n, pushed=rep[0]["pushed"], review=rep[0]["review"], failed=rep[0]["failed"], acid_traps=acid[:3])
+    # only the bus family is routed: KiCad's unconnected count would name the others, so the
+    # bus nets' own connection is what is checked - B and CLK each one piece
+    import pcb_route2
+    bb = pcbnew.LoadBoard(p)
+    mm = pcb_route2.model_from_board(bb, _partial_lay())
+    rr = pcb_route2.Router(mm)
+    # a net already whole routes to nothing new
+    open_ = [nn for nn in ("B", "CLK") if (lambda o: not o[0] or o[1])(rr.route_net(nn))]
+    res["bus_open"] = open_
+    res["pass"] = not rep[0]["failed"] and [x[0] for x in rep[0]["pushed"]] == ["CLK"] and "B" in rep[0]["pushed"][0][2] \
+        and any(w.startswith("pushed in: CLK") for w in rep[0]["review"]) and not open_ and not acid
     return res
 
 

@@ -954,7 +954,10 @@ prove nothing about themselves.
   **`pcb.py check` does not yet audit arcs** (`check_tracks` reads straight
   tracks only), so a filleted board is checked by KiCad's DRC alone until it does.
   No liquid move may leave a same-net contact behind either: a replacement run
-  must still touch every tee, via, pad and locked track the old one touched.
+  must still touch every tee, via, pad and locked track the old one touched,
+  and may not meet its own net's copper under 90° where the old run did not
+  (the rubber band used to cut a square tee into a 45: `pcb.py check`'s acid
+  trap, which KiCad's DRC does not see).
 - **`Router.stage`, routing in families with a review between them** (the
   owner, 2026-10-10: *"autoroute a family, review it, push the traces around
   with the liquid tools, then hand it off to the next family"*). Each family is
@@ -972,10 +975,25 @@ prove nothing about themselves.
   proves a stopped-and-resumed run lays **the same copper** as one run, on two
   and four layers.
 
-  The loop, in practice: run to `stop=k`; plot the family's nets
+  **A partly routed board** keeps its unlocked copper with `Router.adopt`: each
+  piece becomes the router's own, laid where it is, so a push or a rescue may
+  move it; it is written, whole per net, by the family that writes that net.
+  Locked copper stays an obstacle nothing moves.
+
+  **When a reviewer is wanted**: each family's `review` lists what it could not
+  settle by itself — a net still open, a net pushed in or rescued (copper moved
+  for it: the board's own included), a detour the pull did not cure, an edit
+  that failed. `pause=True` stops after the first family with any. What no
+  check can know — a line run legally but too near a sensitive net — is the
+  reviewer's own look at the plot, so on a real board every family is reviewed,
+  not only the paused ones.
+
+  The loop, in practice: run to `stop=k` (or `pause`); plot the family's nets
   (`pcb_plot.py --nets`); write the moves it needs into the trial script's
   edits, each with why; run again from `start=k` on checkpoint k−1; repeat. The
-  edits are the record of the review, replayable with the script.
+  edits are the record of the review, replayable with the script. The bench's
+  `partial` cell is that loop on a constructed partly routed board, the
+  reviewer's move recorded in it.
 - **`tools/pcb_pack.py`** — seats passives in rows round an anchor someone
   already placed, one row per side the parts' far ends leave on; `pattern`
   searches one arrangement and stamps it at every anchor (a key board's T). Its

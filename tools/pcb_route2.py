@@ -1535,7 +1535,7 @@ class Router:
 
     # ---- family by family, with a review between
     def stage(self, families, board=None, checkpoint=None, ground=None, connect_first=(), first=(),
-              detour=1.8, pull=1.0, fillet=0.0, liquid=True, plot=None, edits=None, start=1, stop=None):
+              detour=1.8, pull=1.0, fillet=0.0, liquid=True, plot=None, edits=None, start=1, stop=None, pause=False):
         """Route a board in FAMILIES, one at a time, each reviewed and adjusted before the next
         is let near it (the owner, 2026-10-05 and 2026-10-10: "do families of traces... then
         the next ones", "review it and push the traces around with the liquid tools, then hand
@@ -1552,11 +1552,16 @@ class Router:
              path), with a plot if `plot(k, name, nets, path) -> png` is given.
         `start`/`stop`: route families start..stop only (1-based) - to stop at a family for
         review, and to go on from its checkpoint in a later run (the model built from the
-        checkpoint board, whose families' copper it reads as locked).
+        checkpoint board, whose families' copper it reads as locked). `pause`: stop after the
+        first family whose `review` is not empty - what it could not settle itself (a net
+        open, a net pushed in or rescued - other copper moved for it -, a detour not cured,
+        an edit that failed): the point to hand
+        the board to a reviewer. Unlocked copper the board came with (Router.adopt) is
+        routed, liquid-passed and written with the family that owns its net.
         `families`: [{name, nets: [names or fnmatch globs], first?, layers?}] - a net claimed
         by an earlier family is not routed again; whatever no family names goes last, as
         "rest". Returns [{family, nets, failed, pushed, rerouted, edits, liquid, runs,
-        length_mm, vias}] for the families routed."""
+        length_mm, vias, review, paused?}] for the families routed."""
         import fnmatch
         P = self.m.planes
         allnets = [n for n in self.m.nets() if n != ground and not (P and n in P.plane_nets)]
@@ -1580,7 +1585,7 @@ class Router:
                 self.log.append(f"connect_first {pa.name} - {pb.name}: {'ok' if ok else 'FAILED'}")
         # what came before the families - the plane fanout, the connect_first runs - is fixed
         # and written first
-        pre = list(self.runs)
+        pre = [r_ for r_ in self.runs if not getattr(r_, "adopted", False)]
         for r_ in pre:
             self._lock(r_)
         if board is not None and pre:
@@ -1600,7 +1605,9 @@ class Router:
             # a family's own `first:` leads it (the chain's clock before the lines beside it:
             # laid last, the longest tree found its corridor taken - the main board, run 3)
             lead = [n for p_ in fam.get("first") or [] for n in nets if n == p_ or fnmatch.fnmatch(n, p_)]
+            log0 = len(self.log)
             failed = self.route(nets, first=lead + [n for n in first if n in nets and n not in lead], rescue=True)
+            rescued = [l_[len("rescue: "):] for l_ in self.log[log0:] if l_.startswith("rescue: ")]
             # 2. pushed in: past this family's copper, shoved aside (earlier families are locked)
             pushed = []
             for n in list(failed):
@@ -1640,17 +1647,34 @@ class Router:
                     self.R.of.pop(n, None)
                 else:
                     self.R.of[n] = saved
-            mine = [r_ for r_ in self.runs if id(r_) not in before]
+            # this family's copper: what it laid (a later family's net it shoved included), and
+            # every adopted piece of each of those nets - a net's board copper is replaced whole,
+            # by the family that writes it
+            new = [r_ for r_ in self.runs if id(r_) not in before]
+            wnets = set(nets) | {r_.net for r_ in new}
+            mine = new + [r_ for r_ in self.runs if id(r_) in before and getattr(r_, "adopted", False) and r_.net in wnets]
             for r_ in mine:
                 self._lock(r_)
+                r_.adopted = False
+            gone_items = [it for n in sorted(wnets) for it in getattr(self, "_adopted_items", {}).pop(n, [])]
             rec = {"family": name, "nets": len(nets), "failed": dict(failed), "pushed": pushed, "rerouted": rerouted,
                    "edits": done_edits, "liquid": liq, "runs": len(mine),
                    "length_mm": round(sum(r_.length() for r_ in mine), 1), "vias": sum(len(r_.vias()) for r_ in mine)}
+            # WHEN A REVIEWER IS WANTED: what the family could not settle itself - a net still
+            # open, a net pushed in (others moved for it), a detour the pull did not cure,
+            # an edit that failed. Empty: the family needs no one.
+            why = [f"open: {n}" for n in failed] + [f"pushed in: {n} (shoved {', '.join(sh) or 'nothing'})" for n, _, sh in pushed]
+            why += [f"rescued: {x}" for x in rescued]          # copper ripped up and laid again
+            why += [f"still long: {n} {a} mm" for n, b_, a, _ in rerouted if a > b_ - 1e-6]
+            why += [f"edit failed: {e['edit']} {e['net']} - {e.get('why') or e.get('mode')}" for e in done_edits if not e["ok"]]
+            rec["review"] = why
             report.append(rec)
             self.log.append(f"stage {k} {name}: {rec['nets']} net(s), {rec['runs']} run(s), {rec['length_mm']} mm, "
                             f"{rec['vias']} via(s); failed {list(failed) or 'none'}; pushed in {len(pushed)}; "
                             f"detours re-routed {len(rerouted)}; edits {len(done_edits)}; liquid {liq}")
             if board is not None:
+                for it in gone_items:
+                    board.Delete(it)
                 write(board, self.m, mine)
                 if checkpoint:
                     path = checkpoint(k, name)
@@ -1658,12 +1682,56 @@ class Router:
                     rec["checkpoint"] = path
                     if plot:
                         rec["plot"] = plot(k, name, nets, path)
+            if pause and rec["review"]:
+                rec["paused"] = True
+                self.log.append(f"stage {k} {name}: paused for review - {'; '.join(rec['review'])}")
+                return report
         if ground and (stop is None or stop >= len(plan)):
             before = set(id(r_) for r_ in self.runs)
             self.route_ground(ground)
             if board is not None:
                 write(board, self.m, [r_ for r_ in self.runs if id(r_) not in before])
         return report
+
+    def adopt(self, nets=None):
+        """The board's UNLOCKED copper made this router's own: each track segment and via a
+        Run of its own, laid in its place, its board item deleted at write. A partly routed
+        board keeps what it has, yet a push may shove it - board copper the router did not
+        lay was an obstacle nothing could move (the partial test board). A piece that does
+        not fit as a Run (off the lattice into a clearance) stays as it was. Returns how
+        many pieces were adopted."""
+        pcbnew = _kicad()
+        n = 0
+        if not hasattr(self, "_adopted_items"):
+            self._adopted_items = {}
+        for e in sorted(self.m.index.e.values(), key=lambda e: e.id):
+            if e.kind not in ("track", "via") or e.locked or e.run is not None or e.item is None:
+                continue
+            if nets is not None and e.net not in nets:
+                continue
+            t = e.item
+            if e.kind == "via":
+                c = e.geom.centroid
+                run = Run(e.net, [(c.x, c.y, 0), (c.x, c.y, self.m.nl - 1)], self.R.width(e.net),
+                          via=(pcbnew.ToMM(t.GetWidth(pcbnew.F_Cu)), e.drill))
+            else:
+                (x0, y0), (x1, y1) = list(e.line.coords)[0], list(e.line.coords)[-1]
+                L = next(iter(e.layers))
+                run = Run(e.net, [(x0, y0, L), (x1, y1, L)], pcbnew.ToMM(t.GetWidth()), via=self.R.via_size(e.net))
+            self.m.index.remove(e.id)
+            if fits(run, self.m, self.fields, self.fence):
+                self.m.index.add(net=e.net, layers=e.layers, geom=e.geom, kind=e.kind, locked=False, drill=e.drill,
+                                 item=t, line=e.line)
+                continue
+            lay(run, self.m)
+            run.adopted = True
+            self.runs.append(run)
+            # its board item goes when the family that writes this net's copper writes it -
+            # not at the first write, or a run stopped before that family would lose it
+            self._adopted_items.setdefault(e.net, []).append(t)
+            n += 1
+        self.log.append(f"adopt: {n} piece(s) of the board's unlocked copper")
+        return n
 
     def edit(self, spec):
         """One reviewer's move on an unlocked net - the liquid tools by hand. Each re-routes
@@ -1708,7 +1776,10 @@ class Router:
         out.update(mode=rep["mode"], shoved=rep["shoved"], before=round(rep.get("before", 0.0), 2),
                    after=round(rep.get("after", 0.0), 2))
         ok = rep["mode"] in ("shove", "direct", "walkaround")
-        geo = [LineString([(x, y) for x, y, _ in r.pts]) if len(r.pts) > 1 else Point(r.pts[0][:2]) for r in self.runs_of(net)]
+        # verified on the COPPER, not the centreline: a track half its width into the
+        # rectangle is in it
+        geo = [(LineString([(x, y) for x, y, _ in r.pts]) if len(r.pts) > 1 else Point(r.pts[0][:2])).buffer(r.width / 2)
+               for r in self.runs_of(net)]
         if ok and kind == "through":
             far = [p for p in spec["points"] if min(g.distance(Point(p)) for g in geo) > float(spec.get("width", 1.0)) + 1e-6]
             if far:
@@ -1931,8 +2002,46 @@ class Router:
             lay(old, self.m)
             self.stats["tee_refused"] += 1
             return None
+        # nor may it meet its own net's copper under 90 degrees where the old run did not -
+        # pcb.py check's acid trap: the rubber band cut the corner of a square tee into a 45
+        # (the partial board's C, a branch onto an adopted trunk)
+        if self._acute_ends(new, skip=old) > self._acute_ends(old):
+            unlay(new, self.m)
+            lay(old, self.m)
+            self.stats["acid_refused"] += 1
+            return None
         self.runs[self.runs.index(old)] = new
         return new
+
+    def _acute_ends(self, run, skip=None):
+        """How many of the run's two ends meet a same-net track of its layer under 90
+        degrees: its end segment, from the junction, against each way the other track
+        leaves the junction. `skip`: a run not to count (the one `run` would replace)."""
+        segs = run.segments()
+        if not segs:
+            return 0
+        others = [(L, a, b) for r in self.runs if r.net == run.net and r is not run and r is not skip
+                  for (L, a, b, _) in r.segments()]
+        n = 0
+        for (L, a, b, _), at in ((segs[0], 0), (segs[-1], 1)):
+            j, far = (a, b) if at == 0 else (b, a)
+            u = _unit(far[0] - j[0], far[1] - j[1])
+            if u == (0.0, 0.0):
+                continue
+            cands = others + [(next(iter(e.layers)), *list(e.line.coords)[::max(1, len(e.line.coords) - 1)][:2])
+                              for e in self.m.index.query((j[0] - 0.01, j[1] - 0.01, j[0] + 0.01, j[1] + 0.01))
+                              if e.kind == "track" and e.net == run.net and e.run is None and e.line is not None]
+            for (L2, p, q) in cands:
+                if L2 != L or LineString([p, q]).distance(Point(j)) > 1e-3:
+                    continue
+                for o in (p, q):
+                    if math.dist(o, j) < 1e-3:
+                        continue
+                    v = _unit(o[0] - j[0], o[1] - j[1])
+                    if u[0] * v[0] + u[1] * v[1] > 1e-6:        # under 90 degrees
+                        n += 1
+                        break
+        return n
 
     def _touching(self, run):
         """The entries of the run's own net, not its own, that its copper touches."""

@@ -417,6 +417,43 @@ def open_board():
     return b
 
 
+def partial():
+    """A PARTLY ROUTED board for the whole staged process (Router.adopt, push, review,
+    edits, resume): 70 x 34, two layers, three regions.
+      bus  - a wall (keep-outs, both faces) at x 30-40 with one channel, 1.2 mm round y
+             7.2. B is ALREADY ROUTED down the channel's middle, unlocked; CLK (three pads,
+             unrouted) must pass it - only by shoving B aside. Both kept to the front.
+      west - H, a LOCKED hand route at y 20, which nothing may move; D unrouted from the
+             board's lower left to above H, so it must cross it; S, a short "sensitive"
+             net beside D's natural way - the router cannot know it matters, a reviewer
+             can.
+      east - C half routed: its trunk laid (unlocked), its third pad open; E unrouted
+             across C's trunk."""
+    b = new_board(70.0, 34.0)
+    for ys in ((0.0, 6.6), (7.8, 34.0)):
+        keepout(b, 30.0, ys[0], 40.0, ys[1], layers=("F", "B"))
+    tp(b, "B1", "B", 24.0, 7.2)
+    tp(b, "B2", "B", 46.0, 7.2)
+    track(b, "B", [(24.0, 7.2), (46.0, 7.2)])
+    tp(b, "K1", "CLK", 4.0, 3.0)
+    tp(b, "K2", "CLK", 66.0, 3.0)
+    tp(b, "K3", "CLK", 66.0, 12.0)
+    tp(b, "H1", "H", 4.0, 20.0)
+    tp(b, "H2", "H", 27.0, 20.0)
+    track(b, "H", [(4.0, 20.0), (27.0, 20.0)], locked=True)
+    tp(b, "D1", "D", 5.0, 30.0)
+    tp(b, "D2", "D", 26.0, 13.0)
+    tp(b, "S1", "S", 20.5, 24.5, w=0.8, h=0.8)
+    tp(b, "S2", "S", 23.5, 24.5, w=0.8, h=0.8)
+    tp(b, "C1", "C", 45.0, 20.0)
+    tp(b, "C2", "C", 65.0, 20.0)
+    tp(b, "C3", "C", 55.0, 30.0)
+    track(b, "C", [(45.0, 20.0), (65.0, 20.0)])
+    tp(b, "E1", "E", 52.0, 13.0)
+    tp(b, "E2", "E", 58.0, 27.0)
+    return b
+
+
 # ------------------------------------------------------------------ four layers
 
 def net_tie(b, ref, a, c, x, y, rot=0.0):
