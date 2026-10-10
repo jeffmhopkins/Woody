@@ -29,6 +29,7 @@ INVARIANTS
 import itertools
 import math
 import os
+import re
 import sys
 
 from shapely.geometry import LineString, Point, Polygon, box
@@ -47,9 +48,10 @@ def snap(v, q=LATTICE):
 # ------------------------------------------------------------------ the board as the packer sees it
 
 class Part:
-    def __init__(self, ref, pads, court, rot, locked, item=None, side="F", copper=None):
+    def __init__(self, ref, pads, court, rot, locked, item=None, side="F", copper=None, height=None):
         self.ref, self.pads, self.court, self.rot, self.locked = ref, pads, court, rot, locked
         self.item, self.side = item, side
+        self.height = height
         # {"F": polygon, "B": polygon}: the part's pad copper on each face. A through-hole
         # pin is on both, so a switch drawn on the top still blocks the bottom under its pins
         self.copper = copper or {}
@@ -67,24 +69,36 @@ class Part:
         from shapely import affinity
         return Part(self.ref, [(n, (x + dx, y + dy)) for n, (x, y) in self.pads], affinity.translate(self.court, dx, dy),
                     self.rot, self.locked, self.item, self.side,
-                    {k: affinity.translate(g, dx, dy) for k, g in self.copper.items()})
+                    {k: affinity.translate(g, dx, dy) for k, g in self.copper.items()}, self.height)
 
     def turned(self, deg):
+        """The part turned by `deg` as KiCad turns it: a positive orientation is
+        counter-clockwise ON SCREEN, where y grows downward - so in these coordinates the
+        geometry turns by -deg. (It turned by +deg until the main board's work: a 90 or 270
+        degree turn scored the mirror of the real pin layout. Legality was unaffected - a
+        courtyard is symmetric under a half turn - the scores were not.)"""
         from shapely import affinity
         cx, cy = self.centroid
-        a = math.radians(deg)
+        a = math.radians(-deg)
         pads = [(n, (cx + (x - cx) * math.cos(a) - (y - cy) * math.sin(a), cy + (x - cx) * math.sin(a) + (y - cy) * math.cos(a)))
                 for n, (x, y) in self.pads]
-        return Part(self.ref, pads, affinity.rotate(self.court, deg, origin=(cx, cy)), (self.rot + deg) % 360,
+        return Part(self.ref, pads, affinity.rotate(self.court, -deg, origin=(cx, cy)), (self.rot + deg) % 360,
                     self.locked, self.item, self.side,
-                    {k: affinity.rotate(g, deg, origin=(cx, cy)) for k, g in self.copper.items()})
+                    {k: affinity.rotate(g, -deg, origin=(cx, cy)) for k, g in self.copper.items()}, self.height)
 
 
 class Board:
     """Outline, parts, rule-area keep-outs (no footprints), holes, and islands (net -> polygon)."""
 
-    def __init__(self, outline, parts, keepouts=(), holes=(), islands=None, edge=0.3, rails=()):
+    def __init__(self, outline, parts, keepouts=(), holes=(), islands=None, edge=0.3, rails=(), rooms=(), room_default=None,
+                 iron=()):
         self.outline, self.parts, self.keepouts, self.holes = outline, {p.ref: p for p in parts}, list(keepouts), list(holes)
+        # height rooms: [(rectangle, height, name)] - a part stands no taller than the lowest
+        # room its courtyard reaches into (else room_default); a part's height is Part.height
+        self.rooms, self.room_default = list(rooms), room_default
+        # iron room: [(ref, face, zone, min)] - a hand-soldered part's pads on the face it is
+        # soldered on, grown 0.25 mm; every other courtyard on that face keeps `min` off it
+        self.iron = list(iron)
         # ground and power nets: they do not attract (a pour or a rail reaches every pad), so
         # no airwire of theirs is scored
         self.rails = set(rails)
@@ -197,6 +211,30 @@ def _r_holes(bd, part, placed):
         getattr(bd, "hole_owners", set()) else []
 
 
+def room_of(bd, part):
+    """(the room's height, its name) for a part's courtyard: the lowest it reaches into."""
+    room, where = bd.room_default, "where no room is lower"
+    for rect, h, name in bd.rooms:
+        if part.court.intersects(rect) and part.court.intersection(rect).area > 1e-3 and (room is None or h < room):
+            room, where = h, name
+    return room, where
+
+
+def _r_height(bd, part, placed):
+    if part.height is None or part.side != "F":
+        return []
+    room, where = room_of(bd, part)
+    return [f"stands {part.height:g} mm; its room ({where}) is {room:g}"] if room is not None and part.height > room + 1e-6 else []
+
+
+def _r_iron(bd, part, placed):
+    out = []
+    for ref, face, zone, mn in bd.iron:
+        if ref != part.ref and face == part.side and part.court.distance(zone) < mn - 1e-3:
+            out.append(f"within {mn:g} mm of {ref}'s pads (iron room)")
+    return out
+
+
 def _r_island(bd, part, placed):
     out = []
     for net, poly in bd.islands.items():
@@ -217,7 +255,7 @@ def _r_pads(bd, part, placed):
 
 
 RULES = [("courtyard", _r_courtyard), ("edge", _r_edge), ("keepout", _r_keepout), ("hole", _r_holes), ("pads", _r_pads),
-         ("island", _r_island)]
+         ("height", _r_height), ("iron", _r_iron), ("island", _r_island)]
 
 
 def violations(bd, part, placed):
@@ -378,6 +416,13 @@ class Packer:
                     return False
             elif part.court.intersection(poly).area > 1e-6:
                 return False
+        if part.height is not None and part.side == "F" and (self.bd.rooms or self.bd.room_default is not None):
+            room, _ = room_of(self.bd, part)
+            if room is not None and part.height > room + 1e-6:
+                return False
+        for ref, face, zone, mn in self.bd.iron:
+            if ref != part.ref and face == part.side and part.court.distance(zone) < mn - 1e-3:
+                return False
         return True
 
     def _row(self, anchor, o, protos, side, off, start, pitch, fixed, chosen):
@@ -537,8 +582,13 @@ class Packer:
         n = len(roles[anchors[0]])
         orders = orders or list(itertools.permutations(range(n)))
         tried = 0
+        # each anchor's turn against the first's: the arrangement turns with its anchor (a
+        # switch at 180 degrees carries the same T turned 180 - the main board's networks:)
+        a0 = self.placed[anchors[0]].rot
+        dturn = {a: round(((self.placed[a].rot - a0) % 360) / 90) * 90 % 360 for a in anchors}
         for ax_, rot in itertools.product(axis, rotations):
-            turned = {r: (self.placed[r].turned(rot) if rot else self.placed[r]) for r in allp}
+            turned = {r: self.placed[r].turned((rot + dturn[a]) % 360) if (rot + dturn[a]) % 360 else self.placed[r]
+                      for a in anchors for r in roles[a]}
             for order in orders:
                 for dx in _frange2(xr[0], xr[1], step):
                     for dy in _frange2(yr[0], yr[1], step):
@@ -549,13 +599,18 @@ class Packer:
                                 A = self.placed[a]
                                 acx, acy = A.court.centroid.x, A.court.centroid.y
                                 parts = [turned[roles[a][k]] for k in order]
+                                # the pitch from the first anchor's parts: one spacing for every
+                                # instance, whatever its turn
+                                p0 = [turned[roles[anchors[0]][k]] for k in order]
                                 ws = [(p.court.bounds[2] - p.court.bounds[0]) if ax_ == "x" else (p.court.bounds[3] - p.court.bounds[1])
-                                      for p in parts]
+                                      for p in p0]
                                 pitch = max(ws) + self.spacing + extra
                                 span = pitch * (len(parts) - 1)
                                 for k, p in enumerate(parts):
                                     t = -span / 2 + k * pitch
-                                    cx, cy = (acx + dx + t, acy + dy) if ax_ == "x" else (acx + dx, acy + dy + t)
+                                    ox, oy = (dx + t, dy) if ax_ == "x" else (dx, dy + t)
+                                    ox, oy = _kturn(ox, oy, dturn[a])
+                                    cx, cy = acx + ox, acy + oy
                                     px, py = p.centroid
                                     cand = p.moved(snap(cx - px), snap(cy - py))
                                     if not self.seat_ok(cand, fixed, seats):
@@ -602,6 +657,77 @@ class Packer:
                    score=best[0][:3], seats={r: (round(best[1][r].centroid[0], 3), round(best[1][r].centroid[1], 3)) for r in allp})
         return rep
 
+    def cold(self, sheets, patterns=(), turns=(0, 90, 180, 270), reaches=(12.0, 20.0)):
+        """Seat every part still in self.bd.unplaced, in the order each has an anchor:
+          1. `patterns`: [(anchors, roles)] - one arrangement stamped at every anchor;
+          2. each unplaced IC or semiconductor (more than three pads, or U/Q/L/NT): round the
+             placed part it shares the most signal nets with (its own sheet first), any of
+             `turns`;
+          3. the passives: each round the placed part it shares the most signal nets with,
+             a rail-only part (a decoupler) round the part on its own sheet with the most pads
+             on its nets - grouped by anchor, a group that cannot be seated tried part by part.
+        `sheets`: {ref: sheet name}. A part with no seat within the last of `reaches` stays
+        unplaced and is reported by name. Returns [(what, refs, result)]."""
+        rep = []
+        rails = self.bd.rails
+
+        def signal(r):
+            return {n for n, _ in self.placed[r].pads if n and not n.startswith("unconnected") and n not in rails}
+
+        def all_nets(r):
+            return {n for n, _ in self.placed[r].pads if n and not n.startswith("unconnected")}
+        for anchors, roles in patterns:
+            r_ = self.pattern(list(anchors), roles, rotations=(0, 90))
+            rep.append(("pattern", [x for a in anchors for x in roles[a]], r_.get("result")))
+            if r_.get("result") != "packed":
+                self.log.append(f"cold: the pattern at {', '.join(anchors)} - {r_.get('result')}")
+        big = lambda r: len(self.placed[r].pads) > 3 or re.match(r"^(U|Q|L|NT)\d", r) is not None
+        progress = True
+        while progress:
+            progress = False
+            todo = sorted((r for r in self.bd.unplaced if big(r)),
+                          key=lambda r: -max([len(signal(r) & signal(q)) for q in self.placed if q not in self.bd.unplaced] + [0]))
+            for r in todo:
+                placed = [q for q in self.placed if q not in self.bd.unplaced and q != r]
+                cand = sorted(placed, key=lambda q: (-len(signal(r) & signal(q)), sheets.get(q) != sheets.get(r),
+                                                     -len(self.placed[q].pads), q))
+                if not cand or (not signal(r) & signal(cand[0]) and sheets.get(cand[0]) != sheets.get(r)):
+                    continue            # no anchor yet: a later round, once its neighbours are seated
+                res = None
+                for reach in reaches:
+                    res = self.pack(cand[0], [r], rotations=turns, grow=reach)
+                    if res["result"] == "packed":
+                        break
+                rep.append((f"round {cand[0]}", [r], res["result"]))
+                progress |= res["result"] == "packed"
+        # the passives, grouped by their anchor
+        groups = {}
+        for r in sorted(self.bd.unplaced):
+            if big(r):
+                continue
+            placed = [q for q in self.placed if q not in self.bd.unplaced]
+            if signal(r):
+                key = lambda q: (-len(signal(r) & signal(q)), sheets.get(q) != sheets.get(r), -len(self.placed[q].pads), q)
+            else:
+                key = lambda q: (sheets.get(q) != sheets.get(r), -len(all_nets(r) & all_nets(q)), -len(self.placed[q].pads), q)
+            a = min(placed, key=key)
+            groups.setdefault(a, []).append(r)
+        for a, refs in sorted(groups.items()):
+            res = self.pack(a, refs, rotations=(0, 90), grow=reaches[0])
+            if res["result"] == "packed":
+                rep.append((f"round {a}", refs, "packed"))
+                continue
+            for r in refs:              # the group did not fit as rows: one by one, further out
+                res1 = None
+                for reach in reaches:
+                    res1 = self.pack(a, [r], rotations=(0, 90), grow=reach)
+                    if res1["result"] == "packed":
+                        break
+                rep.append((f"round {a}", [r], res1["result"]))
+        if self.bd.unplaced:
+            self.log.append(f"cold: NOT placed - {', '.join(sorted(self.bd.unplaced))}")
+        return rep
+
     def apply(self, kboard):
         """Move each footprint by its pad centroid to its seat (and turn it), on `kboard`."""
         import pcbnew
@@ -621,6 +747,14 @@ class Packer:
             fp.SetPosition(pcbnew.VECTOR2I(pos.x + pcbnew.FromMM(tx - cx), pos.y + pcbnew.FromMM(ty - cy)))
             n += 1
         return n
+
+
+def _kturn(x, y, deg):
+    """A vector turned as KiCad turns a part by `deg` (counter-clockwise on screen, y down)."""
+    if not deg:
+        return x, y
+    a = math.radians(-deg)
+    return x * math.cos(a) - y * math.sin(a), x * math.sin(a) + y * math.cos(a)
 
 
 def _frange2(a, b, s):

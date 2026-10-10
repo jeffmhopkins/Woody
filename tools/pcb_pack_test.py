@@ -18,6 +18,15 @@ packer's rule list.
   nofit        a box too tight for the row: refused with the side and the parts named
   report       the place report: problems before the pack, none after (its exit code)
   route        the packed island board routed by pcb_route2: DRC clean
+  turns        a part turned 90, 180 and 270 degrees: the packer's pads land where KiCad's do
+               (they were mirrored at 90 and 270 until the main board's work)
+  rooms        a 7.7 mm part kept out of a 2 mm room; a part kept the iron room off a hand-
+               soldered switch's pads
+  pattern180   a key network stamped at two switches, one turned 180 degrees: the same T,
+               turned with it
+  cold         the three-key board from nothing: only the switches, the header and the mounts
+               where they are, everything else seated by cold() - legal by the rules and by
+               KiCad's DRC
 """
 import json
 import os
@@ -28,7 +37,7 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-CELLS = ["minikey", "density", "moat", "contain", "refuse", "nofit", "report", "route"]
+CELLS = ["minikey", "density", "moat", "contain", "refuse", "nofit", "report", "route", "turns", "rooms", "pattern180", "cold"]
 MINIBODY = ["SW1", "SW2", "SW3", "J1", "H1", "H2", "H3", "H4"]
 ISLBODY = ["J7", "H11", "H1", "H2", "H3", "H4", "TP1"]
 
@@ -227,6 +236,106 @@ def cell_route(out, plot):
     res = {"packed": [a["result"], c["result"]], "failed": failed, "drc_errors": len(errs), "unconnected": unc,
            "drc": [e[:2] for e in errs[:5]], **r.summary()}
     res["pass"] = a["result"] == c["result"] == "packed" and not failed and not errs and unc == 0
+    return res
+
+
+def cell_turns(out, plot):
+    pcbnew, P, R2, T = _setup()
+    res = {}
+    for deg in (90, 180, 270):
+        b = T.new_board(20, 20)
+        fp = T.soic(b, "U1", ["A", "B", "", "", "", "", "", "C"], 10, 10, 0)
+        t = P.board_of(b).parts["U1"].turned(deg)
+        fp.SetOrientationDegrees(deg)
+        k = {p.GetNetname(): (round(pcbnew.ToMM(p.GetPosition().x), 3), round(pcbnew.ToMM(p.GetPosition().y), 3)) for p in fp.Pads() if p.GetNetname()}
+        m = {n: (round(q[0], 3), round(q[1], 3)) for n, q in t.pads if n}
+        res[deg] = k == m
+    res["pass"] = all(res.values())
+    return res
+
+
+def cell_rooms(out, plot):
+    pcbnew, P, R2, T = _setup()
+    from shapely.geometry import box
+    b = T.new_board(40, 20)
+    T.passive(b, "C1", "A", "B", 30, 10, value="C")                  # the tall one, 7.7 mm
+    T.passive(b, "R1", "A", "N", 30, 15, value="R")                  # to be kept off SW1's pads
+    T.switch(b, "SW1", "LEG", "GND", 12.0, 12.0)
+    T.tp(b, "TPA", "A", 20.0, 10.0)
+    T.tp(b, "TPN", "N", 8.0, 9.0)
+    bd = P.board_of(b)
+    bd.parts["C1"].height = 7.7
+    bd.rooms = [(box(0, 0, 25, 20), 2.0, "under the key board")]
+    bd.room_default = 10.0
+    sw = bd.parts["SW1"]
+    bd.iron = [("SW1", "F", sw.copper["F"].buffer(0.25), 2.0)]
+    pk = P.Packer(bd, ["SW1", "TPA", "TPN"])
+    r1 = pk.pack("TPA", ["C1"], grow=20.0)
+    r2 = pk.pack("TPN", ["R1"], grow=12.0)
+    c1 = pk.placed["C1"]
+    room_ok = not c1.court.intersects(box(0, 0, 25, 20)) or c1.court.intersection(box(0, 0, 25, 20)).area < 1e-3
+    iron_gap = round(pk.placed["R1"].court.distance(bd.iron[0][2]), 3)
+    res = {"C1": r1["result"], "R1": r2["result"], "C1_out_of_low_room": room_ok, "R1_gap_to_switch_pads": iron_gap,
+           "rules": {r: P.violations(bd, pk.placed[r], pk.placed) for r in ("C1", "R1")}}
+    res["pass"] = r1["result"] == r2["result"] == "packed" and room_ok and iron_gap >= 2.0 - 1e-3 and not any(res["rules"].values())
+    return res
+
+
+def cell_pattern180(out, plot):
+    pcbnew, P, R2, T = _setup()
+    b = T.new_board(70, 36)
+    T.switch(b, "SW1", "SWL1", "GND", 18.0, 12.0)
+    sw2 = T.switch(b, "SW2", "SWL2", "GND", 50.0, 24.0)
+    sw2.SetOrientationDegrees(180)
+    for k, (rs, rp, c) in {1: ("R1", "R2", "C1"), 2: ("R3", "R4", "C2")}.items():
+        T.passive(b, rs, f"SWL{k}", f"KEY{k}", 5.0 + 3 * k, 32.0, value="R")
+        T.passive(b, rp, f"KEY{k}", "V3V3", 5.0 + 3 * k, 32.0, value="R")
+        T.passive(b, c, f"KEY{k}", "GND", 5.0 + 3 * k, 32.0, value="C")
+    bd = P.board_of(b, rails=["GND", "V3V3"])
+    bd.unplaced = {"R1", "R2", "C1", "R3", "R4", "C2"}
+    pk = P.Packer(bd, ["SW1", "SW2"])
+    roles = {"SW1": ["R1", "R2", "C1"], "SW2": ["R3", "R4", "C2"]}
+    rep = pk.pattern(["SW1", "SW2"], roles)
+    # each role's offset from its switch, turned back by its switch's turn, is the same T
+    import pcb_pack
+    same, turn = [], []
+    for k in range(3):
+        o = []
+        for a in roles:
+            A = pk.placed[a]
+            px, py = pk.placed[roles[a][k]].centroid
+            ox, oy = px - A.court.centroid.x, py - A.court.centroid.y
+            ox, oy = pcb_pack._kturn(ox, oy, -A.rot)
+            o.append((round(ox, 2), round(oy, 2)))
+        same.append(o[0] == o[1])
+        turn.append(round((pk.placed[roles["SW2"][k]].rot - pk.placed[roles["SW1"][k]].rot) % 360))
+    pk.apply(b)
+    p = os.path.join(out, "pattern180.kicad_pcb")
+    pcbnew.SaveBoard(p, b)
+    kd = drc_place(R2, p)
+    res = {"result": rep["result"], "same_T_in_switch_frame": same, "part_turn_vs_first": turn, "drc_placement": kd[:3]}
+    res["pass"] = rep["result"] == "packed" and all(same) and all(t == 180 for t in turn) and not kd
+    return res
+
+
+def cell_cold(out, plot):
+    pcbnew, P, R2, T = _setup()
+    b = T.minikey()
+    bd = P.board_of(b, rails=["GND", "V3V3"])
+    bd.unplaced = {r for r in bd.parts if r not in MINIBODY}
+    pk = P.Packer(bd, MINIBODY)
+    roles = {f"SW{k}": list(T.MINIKEY["keys"][k]) for k in (1, 2, 3)}
+    sheets = {r: ("REG" if r in ("U1", "C6", "R11") else "HDR" if r in ("J1", "C7") else "") for r in bd.parts}
+    rep = pk.cold(sheets, patterns=[(list(roles), roles)])
+    rules = {r: P.violations(bd, pk.placed[r], pk.placed) for r in bd.parts if r not in MINIBODY}
+    rules = {r: v for r, v in rules.items() if v}
+    pk.apply(b)
+    p = os.path.join(out, "cold.kicad_pcb")
+    pcbnew.SaveBoard(p, b)
+    kd = drc_place(R2, p)
+    res = {"steps": [(w, refs, r_) for w, refs, r_ in rep], "unplaced": sorted(bd.unplaced), "rule_breaks": rules,
+           "drc_placement": kd[:3], "log": pk.log}
+    res["pass"] = not bd.unplaced and not rules and not kd
     return res
 
 
