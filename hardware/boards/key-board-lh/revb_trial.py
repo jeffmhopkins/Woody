@@ -86,7 +86,9 @@ def place(board, lay, log):
 
 def route(board, lay, liquid=False, fillet=0.0):
     m = pcb_route2.model_from_board(board, lay)
-    r = pcb_route2.Router(m, flow=0.3)
+    # the search's node budget: the bench's default is sized for small boards; this one has
+    # ~1.6 million states (cells x 8 headings x 2 layers), and a rail's tree can need more
+    r = pcb_route2.Router(m, flow=0.3, budget=4_000_000)
     failed = r.route(first=lay.get("route_first") or [], ground=lay["ground_net"],
                      connect_first=lay.get("connect_first") or [])
     for n in list(failed):

@@ -8,6 +8,8 @@ packer's rule list.
 
   minikey      the three-key board's heap: register cluster, header cluster, one key T stamped
                at all three switches - every seat legal, the same T at every switch
+  density      the same board at spacing 0.4 and 1.5 mm, J1 with a 3 mm escape band: the least
+               gap between packed courtyards is at least the spacing, nothing in the band
   moat         J7's series parts and ferrites dropped on the moat and in the island's mouth:
                packed clear of both, airwires no longer crossing the keep-out
   contain      the island ADC's filter, dumped off the island: packed wholly inside it
@@ -26,7 +28,7 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-CELLS = ["minikey", "moat", "contain", "refuse", "nofit", "report", "route"]
+CELLS = ["minikey", "density", "moat", "contain", "refuse", "nofit", "report", "route"]
 MINIBODY = ["SW1", "SW2", "SW3", "J1", "H1", "H2", "H3", "H4"]
 ISLBODY = ["J7", "H11", "H1", "H2", "H3", "H4", "TP1"]
 
@@ -72,6 +74,26 @@ def cell_minikey(out, plot):
     res = {"results": [r["result"] for r in reps], "rule_breaks": rules, "drc_placement": kd[:5], "same_T": offs,
            "arrangement": reps[2].get("arrangement"), "configurations": reps[2].get("configurations")}
     res["pass"] = all(r["result"] == "packed" for r in reps) and not rules and not kd and offs == [1, 1, 1]
+    return res
+
+
+def cell_density(out, plot):
+    pcbnew, P, R2, T = _setup()
+    res = {}
+    for spacing in (0.4, 1.5):
+        b = T.minikey()
+        bd = P.board_of(b, rails=["GND", "V3V3"])
+        pk = P.Packer(bd, MINIBODY, spacing=spacing, escape={"J1": ("W", 3.0)})
+        roles = {f"SW{k}": list(T.MINIKEY["keys"][k]) for k in (1, 2, 3)}
+        reps = [pk.pack("U1", ["C6", "R11"]), pk.pack("J1", ["C7"]), pk.pattern(["SW1", "SW2", "SW3"], roles)]
+        moved = ["C6", "R11", "C7"] + [r for a in roles for r in roles[a]]
+        others = [r for r in pk.placed if r not in moved and pk.placed[r].side == "F"]
+        gap = min(pk.placed[a].court.distance(pk.placed[c].court) for a in moved for c in moved + others if a != c)
+        band = pk.escape_bands()[0]
+        inband = [r for r in moved if pk.placed[r].court.intersection(band).area > 1e-6]
+        res[spacing] = {"results": [r["result"] for r in reps], "least_gap": round(gap, 3), "in_escape_band": inband}
+    res["pass"] = all(all(x == "packed" for x in res[s_]["results"]) and res[s_]["least_gap"] >= s_ - 0.01
+                      and not res[s_]["in_escape_band"] for s_ in (0.4, 1.5))
     return res
 
 

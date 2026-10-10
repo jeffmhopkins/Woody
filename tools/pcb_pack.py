@@ -271,12 +271,28 @@ def score(bd, cluster, placed):
 # ------------------------------------------------------------------ the search
 
 class Packer:
-    def __init__(self, bd, body=(), log=None):
+    def __init__(self, bd, body=(), log=None, spacing=IRON, escape=None):
+        """spacing: the DENSITY knob - the least air (mm) between a seated part's courtyard and
+        any other's, and between neighbours in a row. Raising it spreads every cluster
+        deterministically; it is a minimum gap, never a force. escape: {ref: (side, depth)} -
+        a band `depth` mm deep along that side of that part's courtyard where no part may sit,
+        left for its pins' tracks to fan out (a 1.27 mm header's)."""
         self.bd = bd
         self.body = set(body)
         self.placed = dict(bd.parts)
         self.log = log if log is not None else []
         self.frozen = set()
+        self.spacing = float(spacing)
+        self.escape = dict(escape or {})
+
+    def escape_bands(self):
+        out = []
+        for ref, (side, depth) in self.escape.items():
+            x0, y0, x1, y1 = self.placed[ref].court.bounds
+            d = float(depth)
+            out.append({"E": box(x1, y0, x1 + d, y1), "W": box(x0 - d, y0, x0, y1),
+                        "S": box(x0, y1, x1, y1 + d), "N": box(x0, y0 - d, x1, y0)}[side])
+        return out
 
     def movable(self, anchor, parts=None):
         a = self.placed[anchor]
@@ -332,8 +348,13 @@ class Packer:
                 for face, g in p.copper.items():          # pads on each face, through-hole pins on both
                     if face != p.side:
                         per.setdefault(face, []).append(g)
-        side = {k: (unary_union(v), prep(unary_union(v))) for k, v in per.items()}
-        hard = unary_union(self.bd.keepouts + self.bd.holes) if (self.bd.keepouts or self.bd.holes) else None
+        # the density knob: other parts' courtyards grown by the spacing (less a hair, so a seat
+        # exactly `spacing` away is legal)
+        grow = max(0.0, self.spacing - 1e-3)
+        side = {k: (unary_union(v).buffer(grow, join_style="mitre"), None) for k, v in per.items()}
+        side = {k: (g, prep(g)) for k, (g, _) in side.items()}
+        bands = self.escape_bands()
+        hard = unary_union(self.bd.keepouts + self.bd.holes + bands) if (self.bd.keepouts or self.bd.holes or bands) else None
         return {"side": side, "hard": (hard, prep(hard)) if hard is not None else None}
 
     def seat_ok(self, part, fixed, row):
@@ -348,7 +369,8 @@ class Packer:
                                                               or any(part.court.intersects(x) for x in self.bd.holes)):
             return False
         for q in row.values():
-            if q.ref != part.ref and q.side == part.side and part.court.intersection(q.court).area > 1e-6:
+            if q.ref != part.ref and q.side == part.side and \
+                    part.court.intersection(q.court.buffer(max(0.0, self.spacing - 1e-3), join_style="mitre")).area > 1e-6:
                 return False
         for net, poly in self.bd.islands.items():
             if net in part.nets():
@@ -441,7 +463,7 @@ class Packer:
                 protos = {r: (self.placed[r].turned(rot) if rot else self.placed[r]) for r in refs}
                 widths = [(p.court.bounds[3] - p.court.bounds[1]) if ux else (p.court.bounds[2] - p.court.bounds[0])
                           for p in protos.values()]
-                pitch0 = max(widths) + IRON
+                pitch0 = max(widths) + self.spacing
                 pitches = (pitch0, pitch0 + 0.5, pitch0 + 1.0)
                 b1 = self._search_side(anchor, cluster, refs, s, protos, orders, _frange(0.0, reach, coarse),
                                        _frange2(-reach, reach, coarse), pitches, fixed, chosen)
@@ -457,7 +479,7 @@ class Packer:
                 # the failure path: the nearest row, and what refused its first part
                 protos = {r: self.placed[r] for r in refs}
                 pitch0 = max((p.court.bounds[3] - p.court.bounds[1]) if ux else (p.court.bounds[2] - p.court.bounds[0])
-                             for p in protos.values()) + IRON
+                             for p in protos.values()) + self.spacing
                 _, why = self._row(anchor, base, protos, s, 0.0, 0.0, pitch0, fixed, chosen)
                 trial = dict(self.placed)
                 trial.update(chosen)
@@ -529,7 +551,7 @@ class Packer:
                                 parts = [turned[roles[a][k]] for k in order]
                                 ws = [(p.court.bounds[2] - p.court.bounds[0]) if ax_ == "x" else (p.court.bounds[3] - p.court.bounds[1])
                                       for p in parts]
-                                pitch = max(ws) + IRON + extra
+                                pitch = max(ws) + self.spacing + extra
                                 span = pitch * (len(parts) - 1)
                                 for k, p in enumerate(parts):
                                     t = -span / 2 + k * pitch
@@ -659,6 +681,8 @@ def main(argv=None):
     ap.add_argument("--rotations", default="0")
     ap.add_argument("--body", default="")
     ap.add_argument("--rails", default="", help="ground and power nets: not scored")
+    ap.add_argument("--spacing", type=float, default=IRON, help="density: least air between courtyards, mm")
+    ap.add_argument("--escape", default="", help="REF:SIDE:MM[,...] - a fan-out band no part may sit in")
     a = ap.parse_args(argv)
     kb = pcbnew.LoadBoard(a.board)
     isl = [x for x in (a.outside, a.island) if x]
@@ -671,7 +695,8 @@ def main(argv=None):
         return 1 if n else 0
     if not a.out or os.path.abspath(a.out) == os.path.abspath(a.board):
         raise SystemExit("pack: -o is required and must not be the source board")
-    pk = Packer(bd, body)
+    esc = {e.split(":")[0]: (e.split(":")[1], float(e.split(":")[2])) for e in a.escape.split(",") if e}
+    pk = Packer(bd, body, spacing=a.spacing, escape=esc)
     rep = pk.pack(a.anchor, a.parts.split(",") if a.parts else None, a.side.split(",") if a.side else None, a.grow,
                   tuple(int(r) for r in a.rotations.split(",")))
     for k, v in rep.items():

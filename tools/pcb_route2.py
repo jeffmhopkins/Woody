@@ -756,32 +756,50 @@ class Router:
 
     def search(self, net, sources, targets, grids, vgrid, costs, allow_vias=True, bound=None):
         """A*: (path, cost, reason). reason: None on success, 'none' when the search was
-        exhausted (no path exists on this grid), 'budget' when it was stopped."""
+        exhausted (no path exists on this grid), 'budget' when it was stopped.
+
+        The grids are read as flat Python lists and a state is one int,
+        ((L * nx + i) * ny + j) * 9 + heading: numpy's per-element access was most of the
+        time. The arithmetic is the same, term for term, so the result is too."""
         M, H, halo = costs
-        nl = self.m.nl
+        nl, nx, ny = self.m.nl, self.nx, self.ny
         free_any = ~np.all(grids, axis=0)
         for (L, i, j) in targets:
             free_any[i, j] = True
-        dist = self._distance(targets, free_any)
+        dist = self._distance(targets, free_any).ravel().tolist()
         minm = float(M.min()) if M.size else 1.0
         minm = max(0.05, min(minm, 1.0))
-        targ = set(targets)
+        blk = [grids[L].ravel().tolist() for L in range(nl)]
+        vblk = vgrid.ravel().tolist()
+        mul = [M[L].ravel().tolist() for L in range(nl)]
+        hal = [halo[L].ravel().tolist() for L in range(nl)]
+        flo = self.flow.ravel().tolist()
+        hm = [(mask.ravel().tolist(), ux, uy, k) for (mask, ux, uy, k) in H]
+        targ = {(L * nx + i) * ny + j for (L, i, j) in targets}
         via_mm = self.R.via_cost
-        flow = self.flow
+        flow_w = self.flow_w
+        pitch = self.pitch
+        nxy = nx * ny
+        moves = []
+        for nd, (di, dj) in enumerate(DIRS):
+            diag = bool(di and dj)
+            moves.append((nd, di, dj, di * ny + dj, pitch * (SQ2 if diag else 1.0), diag, math.hypot(di, dj)))
+        INF = float("inf")
         cnt = itertools.count()
         openq, best, came = [], {}, {}
-        for s in sources:
-            L, i, j = s
-            st = (L, i, j, 8)
+        for (L, i, j) in sources:
+            st = ((L * nx + i) * ny + j) * 9 + 8
             best[st] = 0.0
-            h = dist[i, j] * minm
-            if np.isfinite(h):
+            h = dist[i * ny + j] * minm
+            if h != INF:
                 heapq.heappush(openq, (h, 0.0, next(cnt), st))
         t0 = time.monotonic()
         nodes = 0
         closed = set()
+        push = heapq.heappush
+        pop = heapq.heappop
         while openq:
-            f, g, _, st = heapq.heappop(openq)
+            f, g, _, st = pop(openq)
             if st in closed:
                 continue
             closed.add(st)
@@ -789,54 +807,64 @@ class Router:
             if nodes > self.budget or (self.time_s and nodes % 2000 == 0 and time.monotonic() - t0 > self.time_s):
                 self.stats["nodes"] += nodes
                 return None, None, "budget"
-            L, i, j, d = st
-            if (L, i, j) in targ:
-                path = [(L, i, j)]
+            cell, d = divmod(st, 9)
+            L, ij = divmod(cell, nxy)
+            if cell in targ:
+                path = []
                 k = st
-                while k in came:
+                while True:
+                    c_ = k // 9
+                    LL, ij_ = divmod(c_, nxy)
+                    q = (LL, ij_ // ny, ij_ % ny)
+                    if not path or path[-1] != q:
+                        path.append(q)
+                    if k not in came:
+                        break
                     k = came[k]
-                    if (k[0], k[1], k[2]) != path[-1]:
-                        path.append((k[0], k[1], k[2]))
                 self.stats["nodes"] += nodes
                 return path[::-1], g, None
-            for nd, (di, dj) in enumerate(DIRS):
+            i, j = divmod(ij, ny)
+            bl = blk[L]
+            ml = mul[L]
+            hl = hal[L]
+            for nd, di, dj, off, step, diag, ln in moves:
                 a, b = i + di, j + dj
-                if not (0 <= a < self.nx and 0 <= b < self.ny) or grids[L][a, b]:
+                if not (0 <= a < nx and 0 <= b < ny):
                     continue
-                if di and dj and (grids[L][i + di, j] or grids[L][i, j + dj]):
+                n2 = ij + off
+                if bl[n2]:
                     continue
-                step = self.pitch * (SQ2 if di and dj else 1.0)
-                mult = M[L][a, b]
-                for (mask, ux, uy, k) in H:
-                    if mask[a, b]:
-                        ln = math.hypot(di, dj)
+                if diag and (bl[ij + di * ny] or bl[ij + dj]):
+                    continue
+                mult = ml[n2]
+                for (mask, ux, uy, k) in hm:
+                    if mask[n2]:
                         cos = (di * ux + dj * uy) / ln
                         mult *= 1.0 + k * (1.0 - cos * cos)
-                c = step * mult + step * 2.0 * halo[L][a, b] + step * self.flow_w * flow[a, b]
+                c = step * mult + step * 2.0 * hl[n2] + step * flow_w * flo[n2]
                 if d != 8:
                     t = abs(nd - d)
                     c += TURN_MM[min(t, 8 - t)]
                 ng = g + c
                 if bound is not None and ng > bound:
                     continue
-                ns = (L, a, b, nd)
+                ns = ((L * nxy) + n2) * 9 + nd
                 if ng < best.get(ns, 1e18):
                     best[ns] = ng
                     came[ns] = st
-                    h = dist[a, b] * minm
-                    heapq.heappush(openq, (ng + h, ng, next(cnt), ns))
-            if allow_vias and not vgrid[i, j]:
+                    push(openq, (ng + dist[n2] * minm, ng, next(cnt), ns))
+            if allow_vias and not vblk[ij]:
                 for O in range(nl):
-                    if O == L or grids[O][i, j]:
+                    if O == L or blk[O][ij]:
                         continue
                     ng = g + via_mm
                     if bound is not None and ng > bound:
                         continue
-                    ns = (O, i, j, d)            # the heading carries through the via
+                    ns = ((O * nxy) + ij) * 9 + d            # the heading carries through the via
                     if ng < best.get(ns, 1e18):
                         best[ns] = ng
                         came[ns] = st
-                        heapq.heappush(openq, (ng + dist[i, j] * minm, ng, next(cnt), ns))
+                        push(openq, (ng + dist[ij] * minm, ng, next(cnt), ns))
         self.stats["nodes"] += nodes
         return None, None, "none"
 
