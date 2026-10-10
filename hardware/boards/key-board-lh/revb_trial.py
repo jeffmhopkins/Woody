@@ -23,6 +23,7 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 
 import pcbnew       # noqa: E402
 import yaml         # noqa: E402
+import pcb          # noqa: E402  (the board's own silkscreen steps: add_silk, add_top_silk, silk_off_vias)
 import pcb_pack     # noqa: E402
 import pcb_route2   # noqa: E402
 
@@ -84,6 +85,20 @@ def place(board, lay, log):
     return reps
 
 
+def silk(board, lay):
+    """The silkscreen made again for the parts where they now stand, by pcb.py's own
+    add_silk_generic (every reference beside its part, off every courtyard, pad and label;
+    the title block at layout.yaml silk: at). Not add_silk: that one draws each key's
+    labels round the T layout.yaml networks: describes, and the packer's arrangement is
+    its own. Before routing, so the router keeps its vias off it."""
+    gone = [d for d in board.GetDrawings() if d.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS)]
+    for d in gone:
+        board.Delete(d)
+    comps, _ = pcb.sheet_netlist(os.path.join(HERE, "key-board-lh.kicad_sch"))
+    pcb.add_silk_generic(board, lay, comps)
+    return len(gone)
+
+
 def route(board, lay, liquid=False, fillet=0.0):
     m = pcb_route2.model_from_board(board, lay)
     # the search's node budget: the bench's default is sized for small boards; this one has
@@ -91,11 +106,9 @@ def route(board, lay, liquid=False, fillet=0.0):
     r = pcb_route2.Router(m, flow=0.3, budget=4_000_000)
     failed = r.route(first=lay.get("route_first") or [], ground=lay["ground_net"],
                      connect_first=lay.get("connect_first") or [])
-    for n in list(failed):
-        if r.rescue(n):
-            failed.pop(n)
     liq = r.liquid(fillet) if liquid else None
     pcb_route2.write(board, m, r.runs)
+    pcb.silk_off_vias(board)            # any stroke of a footprint's own silk still on a via, as post_route does
     return r, failed, liq
 
 
@@ -121,6 +134,7 @@ def main():
           f"C7 {reps[2]['seats']}; key network {reps[3]['arrangement']}")
     for line in log:
         print("revb: " + line)
+    print(f"revb: silkscreen made again for the new places ({silk(board, lay)} old drawing(s) cleared)")
     if "--place-only" in sys.argv:
         pcbnew.SaveBoard(OUT, board)
         errs, _ = pcb_route2.drc(OUT, fill=False)

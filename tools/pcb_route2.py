@@ -79,7 +79,13 @@ from shapely.geometry import LineString, Point, Polygon, box
 from shapely.ops import unary_union
 
 LATTICE = 0.05                # every laid coordinate is on it
-EPS = 1e-4                    # mm: geometric tolerance in fits
+# mm: what fits adds to every clearance it tests. Shapely draws a circle (a via, a round
+# track end) as a polygon INSIDE it - 32 sides here, short of the true radius by up to
+# r (1 - cos(pi / 32)), 1.7 um on a 0.7 mm via - and KiCad's own pad polygons are drawn
+# the same way, so a gap that fits passed at exactly the clearance could be 0.2 um to
+# 2 um short in KiCad's DRC (the left key board's trial: 0.1988 against 0.2000). The
+# margin makes the approximation err on the safe side.
+EPS = -0.003
 OWN_PAD_GAP = 0.05            # a via's ring to its own net's SMD pad: off it
 DIRS = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)]
 TURN_MM = [0.0, 0.15, 0.6, 2.5, 6.0]      # by the turn, in 45-degree steps: cost, never a ban
@@ -558,8 +564,13 @@ def simplify(pts):
             a, b, c = out[-3], out[-2], out[-1]
             cross = (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0])
             dot = (b[0] - a[0]) * (c[0] - b[0]) + (b[1] - a[1]) * (c[1] - b[1])
-            if abs(cross) < 1e-9 and dot >= 0:
+            if abs(cross) < 1e-9:
+                # straight on, or a spike - a run that doubles back along itself (a pad stub
+                # returning over the cell it came from): one segment either way, never two
+                # tracks meeting at 0 degrees (pcb.py check's acid trap)
                 out.pop(-2)
+                if dot < 0 and (out[-1][0], out[-1][1]) == (out[-2][0], out[-2][1]):
+                    out.pop()
             else:
                 break
     return out
@@ -1148,7 +1159,7 @@ class Router:
         return e
 
     # ---- whole boards
-    def route(self, nets=None, first=(), families=(), ground=None, connect_first=()):
+    def route(self, nets=None, first=(), families=(), ground=None, connect_first=(), rescue=True):
         """Route every net (or `nets`): families first, then the rest in crossing-aware
         order, then ground. Returns {net: reason} for every net that failed."""
         nets = list(nets) if nets is not None else [n for n in self.m.nets() if n != ground]
@@ -1200,6 +1211,13 @@ class Router:
             if not ok:
                 failed[n] = why
                 self.log.append(f"route: {n} failed - {why}")
+        # rescue BEFORE the ground: ground is routed last, may stay in groups and is stitched -
+        # a rescue that took it up and laid it again as a plain net would wall the rest in
+        if rescue:
+            self.ground = ground
+            for n in list(failed):
+                if self.rescue(n):
+                    failed.pop(n)
         if ground:
             self.route_ground(ground)
         return failed
@@ -1318,21 +1336,27 @@ class Router:
             bx = box(min(xs) - r, min(ys) - r, max(xs) + r, max(ys) + r)
             victims = sorted({e.run.net for e in self.m.index.query(bx.bounds) if e.kind in ("track", "via") and e.run
                               and e.net != net and not e.locked and e.geom.intersects(bx)})
-            victims = [v for v in victims if not self._fixed(v)]
+            victims = [v for v in victims if not self._fixed(v) and v != getattr(self, "ground", None)]
+            victims = self.order(victims)           # laid again in the router's own order: power first
             if not victims:
+                self.log.append(f"rescue {net}, {r} mm box: nothing that may be taken up")
                 continue
             saved = {v: [r_ for r_ in self.runs if r_.net == v] for v in victims}
             for v in victims:
                 for r_ in saved[v]:
                     unlay(r_, self.m)
                     self.runs.remove(r_)
-            ok, runs, _ = self.route_net(net)
+            ok, runs, why0 = self.route_net(net)
             fails = 0 if ok else 1
-            redone = {}
+            redone, whys = {}, ([f"{net}: {why0}"] if not ok else [])
             for v in victims:
-                okv, rv, _ = self.route_net(v)
+                okv, rv, whyv = self.route_net(v)
                 redone[v] = rv
                 fails += 0 if okv else 1
+                if not okv:
+                    whys.append(f"{v}: {whyv}")
+            self.log.append(f"rescue {net}, {r} mm box: took up {', '.join(victims)}; "
+                            + ("all routed" if ok and fails == 0 else "then failed " + "; ".join(whys) + " - put back"))
             if ok and fails == 0:
                 self.log.append(f"rescue: {net} routed after taking up {', '.join(victims)} in a {r} mm box")
                 return True
@@ -1823,9 +1847,11 @@ def _poly_of(ps):
     return unary_union(out)
 
 
-def model_from_board(board, lay, fence=None):
+def model_from_board(board, lay, fence=None, via_off_silk=True):
     """The Model of a KiCad board, with its existing tracks and vias as copper entries
-    (locked as KiCad has them) and Run-less: rip-up of existing copper is by entry."""
+    (locked as KiCad has them) and Run-less: rip-up of existing copper is by entry. With
+    via_off_silk, every silkscreen item's box is a keep-out for vias, as tools/pcb_route.py
+    has it: a via under a legend prints it onto a tented hole, and pcb.py check fails it."""
     pcbnew = _kicad()
     rules = Rules(lay)
     names = [board.GetLayerName(l) for l in board.GetEnabledLayers().CuStack()]
@@ -1850,6 +1876,16 @@ def model_from_board(board, lay, fence=None):
             g = _poly_of(z.Outline())
             ls = [k for k, l in enumerate(lids) if z.IsOnLayer(l)]
             keeps.append((g, ls, z.GetDoNotAllowTracks(), z.GetDoNotAllowVias()))
+    if via_off_silk:
+        silk = (pcbnew.F_SilkS, pcbnew.B_SilkS)
+        items = [d for d in board.GetDrawings() if d.GetLayer() in silk]
+        for fp in board.GetFootprints():
+            items += [g for g in fp.GraphicalItems() if g.GetLayer() in silk]
+            items += [f for f in fp.GetFields() if f.GetLayer() in silk and f.IsVisible()]
+        for it in items:
+            bb = it.GetBoundingBox()
+            keeps.append((box(pcbnew.ToMM(bb.GetLeft()), pcbnew.ToMM(bb.GetTop()), pcbnew.ToMM(bb.GetRight()),
+                              pcbnew.ToMM(bb.GetBottom())), list(range(len(lids))), False, True))
     m = Model(outline_of(board), names, rules, pads, holes, keeps, fence)
     m.lids = lids
     m.board = board
@@ -1895,31 +1931,52 @@ def write(board, model, runs, pour=None):
     model.removed_items = []
     lids = model.lids
     V = lambda p: pcbnew.VECTOR2I(pcbnew.FromMM(p[0]), pcbnew.FromMM(p[1]))
+
+    def add(t, net, locked):
+        t.SetNet(board.FindNet(net))
+        t.SetLocked(locked)
+        board.Add(t)
+        return t
+    # straight copper, merged per net, layer and width: two runs of one net that overlap
+    # (a pad stub in, the next branch of the tree out along the same line) would meet at
+    # 0 degrees - pcb.py check's acid trap. The union covers exactly the same copper.
+    from shapely.ops import linemerge
+    straight = {}
     for run in runs:
-        ni = board.FindNet(run.net)
         for p in run.prims():
             if p[0] == "S":
+                straight.setdefault((run.net, p[1], round(p[4], 4), run.locked), []).append(LineString([p[2], p[3]]))
+    for (net, L, w, locked), lines in sorted(straight.items(), key=lambda kv: (kv[0][0], kv[0][1], kv[0][2])):
+        u = unary_union(lines)
+        merged = linemerge(u) if u.geom_type == "MultiLineString" else u      # one line: nothing to merge
+        for ls in (list(merged.geoms) if hasattr(merged, "geoms") else [merged]):
+            pts = [(snap(x), snap(y), L) for x, y in ls.coords]
+            pts = simplify(pts)
+            for q0, q1 in zip(pts, pts[1:]):
+                if (q0[0], q0[1]) == (q1[0], q1[1]):
+                    continue
                 t = pcbnew.PCB_TRACK(board)
-                t.SetStart(V(p[2]))
-                t.SetEnd(V(p[3]))
-                t.SetWidth(pcbnew.FromMM(p[4]))
-                t.SetLayer(lids[p[1]])
-            elif p[0] == "A":
+                t.SetStart(V(q0))
+                t.SetEnd(V(q1))
+                t.SetWidth(pcbnew.FromMM(w))
+                t.SetLayer(lids[L])
+                add(t, net, locked)
+    for run in runs:
+        for p in run.prims():
+            if p[0] == "A":
                 t = pcbnew.PCB_ARC(board)
                 t.SetStart(V(p[2]))
                 t.SetMid(V(p[3]))
                 t.SetEnd(V(p[4]))
                 t.SetWidth(pcbnew.FromMM(p[5]))
                 t.SetLayer(lids[p[1]])
-            else:
+                run.items.append(add(t, run.net, run.locked))
+            elif p[0] == "V":
                 t = pcbnew.PCB_VIA(board)
                 t.SetPosition(V((p[1], p[2])))
                 t.SetWidth(pcbnew.FromMM(run.via[0]))
                 t.SetDrill(pcbnew.FromMM(run.via[1]))
-            t.SetNet(ni)
-            t.SetLocked(run.locked)
-            board.Add(t)
-            run.items.append(t)
+                run.items.append(add(t, run.net, run.locked))
     if pour:
         for L in lids:
             z = pcbnew.ZONE(board)
@@ -2107,9 +2164,6 @@ def main(argv=None):
         take_up(m, set(nets) | ({a.ground} if a.ground else set()))
         failed = r.route(nets, first=lay.get("route_first") or [], families=lay.get("families") or [], ground=a.ground,
                          connect_first=lay.get("connect_first") or [])
-        for n in list(failed):
-            if r.rescue(n):
-                failed.pop(n)
         print(f"route2: {len(failed)} net(s) failed" + (": " + ", ".join(f"{n} ({w})" for n, w in failed.items()) if failed else ""))
     else:
         # the board's own unlocked copper becomes runs the tools can move: it is taken up

@@ -8,10 +8,11 @@ the router's own model proves nothing about itself.
     python3 tools/pcb_route2_test.py --plot DIR      # ...and a 2D plot of each result
 
 Each cell prints what it measured and PASS or FAIL against what it declares. A cell that
-writes a board also requires 0 DRC errors and 0 unconnected items, unless it says why not.
+writes a board also requires 0 DRC errors, 0 unconnected items and 0 of pcb.py check's
+acid traps (check_tracks: KiCad's DRC has no such test), unless it says why not.
 
   fanout       a 2 x 5, 1.27 mm header fanned out to ten pads: all route
-  pinch        three nets through a 1.25 mm gap on one layer: all route at pitch 0.15
+  pinch        three nets through a 1.30 mm gap on one layer: all route at pitch 0.1
   updown       a wall across the front: the net goes under it, exactly two vias
   bus          a four-net bus family: one reserved corridor, members at an even pitch
   nonplanar    two nets that must cross on one layer: "no path", fast, not "budget"
@@ -68,7 +69,11 @@ def finish(name, b, m, r, out, plot=None, pour=None, nets=None, drc=True):
     res = {}
     if drc:
         errs, unc = R2.drc(p)
-        res = {"drc_errors": len(errs), "unconnected": unc, "drc": [e[:2] for e in errs[:5]]}
+        # and pcb.py check's own track test, which KiCad's DRC has no form of: two tracks of
+        # a net meeting under 90 degrees, at 0 degrees included (an overlap doubling back)
+        import pcb
+        acid = pcb.check_tracks(pcbnew.LoadBoard(p))
+        res = {"drc_errors": len(errs), "unconnected": unc, "drc": [e[:2] for e in errs[:5]], "acid_traps": len(acid)}
     if plot:
         import pcb_plot
         pcb_plot.plot(p, os.path.join(plot, f"route2-{name}.png"), nets=nets or ["*"], title=f"route2 bench: {name}")
@@ -76,7 +81,7 @@ def finish(name, b, m, r, out, plot=None, pour=None, nets=None, drc=True):
 
 
 def clean(res):
-    return res.get("drc_errors") == 0 and res.get("unconnected") == 0
+    return res.get("drc_errors") == 0 and res.get("unconnected") == 0 and res.get("acid_traps", 0) == 0
 
 
 # ------------------------------------------------------------------ cells
@@ -100,19 +105,24 @@ def cell_fanout(out, plot):
 def cell_pinch(out, plot):
     pcbnew, R2, T = _setup()
     b = T.new_board(40.0, 20.0)
-    # a wall across the board at x 18-22, both layers, but for a gap y 8.40-9.65 (1.25 mm)
-    T.keepout(b, 18.0, 0.0, 22.0, 8.40, layers=("F", "B"))
+    # a wall across the board at x 18-22, both layers, but for a gap y 8.35-9.65 (1.30 mm)
+    T.keepout(b, 18.0, 0.0, 22.0, 8.35, layers=("F", "B"))
     T.keepout(b, 18.0, 9.65, 22.0, 20.0, layers=("F", "B"))
     for k, n in enumerate(["A", "B", "C"]):
         T.tp(b, f"TPL{k}", n, 4.0, 5.0 + 4.0 * k)
         T.tp(b, f"TPR{k}", n, 36.0, 5.0 + 4.0 * k)
     lay = dict(LAY, net_classes={"front": {"nets": ["A", "B", "C"], "layers": ["F.Cu"]}})
     m = R2.model_from_board(b, lay)
-    r = R2.Router(m, pitch=0.15)
-    failed = r.route()
+    r = R2.Router(m, pitch=0.1)
+    failed = r.route(rescue=False)       # rescue called by hand below, to show it
+    first = sorted(failed)
+    for n in list(failed):              # the router's own pipeline: route, then rescue
+        if r.rescue(n):
+            failed.pop(n)
     res = finish("pinch", b, m, r, out, plot)
-    res.update(failed=sorted(failed), **r.summary())
-    # three tracks of 0.25 at 0.2 clearance need 1.15 mm: the gap leaves 0.1 mm to spare
+    res.update(failed_first=first, failed=sorted(failed), log=r.log, **r.summary())
+    # three tracks of 0.25 at 0.2 clearance need 1.15 mm, and fits keeps its few microns'
+    # margin past each clearance: at pitch 0.1 the lanes stand 0.5 apart, in a 1.30 mm gap
     res["pass"] = not failed and clean(res)
     return res
 
@@ -537,7 +547,7 @@ def cell_rescue(out, plot):
     lay = dict(LAY, net_classes={"front": {"nets": ["Y"], "layers": ["F.Cu"]}})
     m = R2.model_from_board(b, lay)
     r = R2.Router(m, pitch=0.1)
-    failed = r.route(first=["X"])
+    failed = r.route(first=["X"], rescue=False)       # rescue called by hand below, to show it
     first = dict(failed)
     for n in list(failed):
         if r.rescue(n):
