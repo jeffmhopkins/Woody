@@ -63,8 +63,9 @@ FAMILIES = [
     # the analog block's own nets, over their island (the pair is already laid and locked)
     {"name": "analog", "nets": ["/SENSOR_RAW", "/breath-adc/*", "/breath-excitation-reference/*", "REF_VIN", "VS",
                                 "BREATH_SENSE", "AGND_SENSE", "*BREATH*"]},
-    # the key chain: SCK, SH/LD and the hops run the board's length together
-    {"name": "chain", "nets": ["/CHAIN_*", "/HOP_*"]},
+    # the key chain: SCK, SH/LD and the hops run the board's length together. The clock leads
+    # and SH/LD beside it - laid last (shortest first), SCK found the corridor taken (run 3)
+    {"name": "chain", "nets": ["/CHAIN_*", "/HOP_*"], "first": ["/CHAIN_SCK", "/CHAIN_SHLD", "/CHAIN_SER_LH"]},
     # each key's T into its register
     {"name": "keys", "nets": ["/KEY_*", "*/SWITCH_LEG"]},
     # the Matrix's lines from J-MCU: SPI, the LED data, the service UART

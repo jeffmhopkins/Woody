@@ -1518,7 +1518,7 @@ class Router:
 
     # ---- family by family, with a review between
     def stage(self, families, board=None, checkpoint=None, ground=None, connect_first=(), first=(),
-              detour=1.8, pull=1.0, fillet=0.0, liquid=True, plot=None):
+              detour=1.8, pull=1.0, fillet=0.0, liquid=True, plot=None, repair=True):
         """Route a board in FAMILIES, one at a time, each reviewed and adjusted before the next
         is let near it (the owner, 2026-10-05 and 2026-10-10: "do families of traces... then
         the next ones", "review it and push the traces around with the liquid tools, then hand
@@ -1531,7 +1531,9 @@ class Router:
              family's runs alone;
           3. locked, written to `board` and saved as a checkpoint (checkpoint(k, name) ->
              path), with a plot of its nets if `plot(k, name, nets) -> png` is given.
-        `families`: [{name, nets: [names or fnmatch globs], layers?}] - a net claimed by an
+        After every family, a REPAIR: each net a family left open is rescued with that
+        family's own copper unlocked, and only that family's (`repair`).
+        `families`: [{name, nets: [names or fnmatch globs], first?, layers?}] - a net claimed by an
         earlier family is not routed again; whatever no family names goes last, as "rest".
         Returns [{family, nets, failed, rerouted, liquid, runs, length_mm, vias}]."""
         import fnmatch
@@ -1557,6 +1559,7 @@ class Router:
                 self.log.append(f"connect_first {pa.name} - {pb.name}: {'ok' if ok else 'FAILED'}")
         # what came before the families - the plane fanout, the connect_first runs - is fixed
         # and written first
+        self._written = {}
         pre = list(self.runs)
         for r_ in pre:
             self._lock(r_)
@@ -1570,7 +1573,10 @@ class Router:
                 for n in nets:
                     saved_cls[n] = self.R.of.get(n)
                     self.R.of[n] = dict(self.R.cls(n), layers=list(fam["layers"]))
-            failed = self.route(nets, first=[n for n in first if n in nets], rescue=True)
+            # a family's own `first:` leads it (the chain's clock before the lines beside it:
+            # laid last, the longest tree found its corridor taken - the main board, run 3)
+            lead = [n for p_ in fam.get("first") or [] for n in nets if n == p_ or fnmatch.fnmatch(n, p_)]
+            failed = self.route(nets, first=lead + [n for n in first if n in nets and n not in lead], rescue=True)
             # the review: detours routed again with a pull, then the liquid pass
             rerouted = []
             for n in nets:
@@ -1598,19 +1604,56 @@ class Router:
             self.log.append(f"stage {k} {rec['family']}: {rec['nets']} net(s), {rec['runs']} run(s), {rec['length_mm']} mm, "
                             f"{rec['vias']} via(s); failed {list(failed) or 'none'}; detours re-routed {len(rerouted)}")
             if board is not None:
-                write(board, self.m, mine)
+                self._written[rec["family"]] = write(board, self.m, mine)
                 if checkpoint:
                     path = checkpoint(k, rec["family"])
                     _kicad().SaveBoard(path, board)
                     rec["checkpoint"] = path
                     if plot:
                         rec["plot"] = plot(k, rec["family"], nets, path)
+        # THE REPAIR: a net its family left open is tried again with that family's copper -
+        # only that family's - unlocked for its rescue to take up and lay again; every other
+        # family stays locked. Then that family is locked again.
+        if repair:
+            fam_of = {n: rec["family"] for (fam, nets), rec in zip(plan, report) for n in nets}
+            for rec in report:
+                for n in list(rec["failed"]):
+                    own = [r_ for r_ in self.runs if fam_of.get(r_.net) == rec["family"] and r_.net != n and r_ not in pre]
+                    for r_ in own:
+                        self._unlock(r_)
+                    gone = set(id(r_) for r_ in self.runs)
+                    ok = self.rescue(n)
+                    for r_ in self.runs:
+                        if fam_of.get(r_.net) == rec["family"]:
+                            self._lock(r_)
+                    if ok:
+                        rec["failed"].pop(n)
+                        rec.setdefault("repaired", []).append(n)
+                        if board is not None:
+                            # the family's copper as it now stands: what the rescue took up goes
+                            fresh = [r_ for r_ in self.runs if id(r_) not in gone or fam_of.get(r_.net) == rec["family"]]
+                            self._rewrite(board, rec["family"], fam_of, fresh)
+                    self.log.append(f"repair {n} ({rec['family']}): {'routed' if ok else 'still open'}")
         if ground:
             before = set(id(r_) for r_ in self.runs)
             self.route_ground(ground)
             if board is not None:
                 write(board, self.m, [r_ for r_ in self.runs if id(r_) not in before])
         return report
+
+    def _unlock(self, run):
+        run.locked = False
+        for eid in run.entries:
+            if eid in self.m.index.e:
+                self.m.index.e[eid].locked = False
+
+    def _rewrite(self, board, family, fam_of, runs):
+        """A family's copper written again after a repair: what the stage wrote for it
+        deleted (never copper it found on the board), its runs as they now stand added."""
+        nets = {n for n, f in fam_of.items() if f == family}
+        for t in self._written.get(family, []):
+            board.Delete(t)
+        self._written[family] = write(board, self.m, [r_ for r_ in runs if r_.net in nets])
 
     def _lock(self, run):
         """A run made fixed: no later rip-up, rescue, shove or liquid pass moves it."""
@@ -2391,10 +2434,13 @@ def write(board, model, runs, pour=None):
     lids = model.lids
     V = lambda p: pcbnew.VECTOR2I(pcbnew.FromMM(p[0]), pcbnew.FromMM(p[1]))
 
+    added = []
+
     def add(t, net, locked):
         t.SetNet(board.FindNet(net))
         t.SetLocked(locked)
         board.Add(t)
+        added.append(t)
         return t
     # straight copper, merged per net, layer and width: two runs of one net that overlap
     # (a pad stub in, the next branch of the tree out along the same line) would meet at
@@ -2453,6 +2499,7 @@ def write(board, model, runs, pour=None):
                 ol.Append(pcbnew.FromMM(x), pcbnew.FromMM(y))
             z.SetIsFilled(False)
             board.Add(z)
+    return added
 
 
 def fill_zones(path):
