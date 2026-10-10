@@ -27,6 +27,10 @@ packer's rule list.
   cold         the three-key board from nothing: only the switches, the header and the mounts
                where they are, everything else seated by cold() - legal by the rules and by
                KiCad's DRC
+  wires        a locked track of another net runs right where a part's best seat would be: the
+               part is seated clear of it (pcb_pack's `wires` rule), and KiCad's DRC on the
+               placed board finds no short or clearance - the main board's U8, seated on an
+               IO39 hand route, six shorts no courtyard rule could see
   edge         a part with nothing placed to reach but its anchor, which stands at the board's
                east edge: it goes to the board's interior side, not off the edge; and a
                part whose preferred side is walled tries the next side
@@ -40,7 +44,7 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-CELLS = ["minikey", "density", "moat", "contain", "refuse", "nofit", "report", "route", "turns", "rooms", "pattern180", "cold", "edge"]
+CELLS = ["minikey", "density", "moat", "contain", "refuse", "nofit", "report", "route", "turns", "rooms", "pattern180", "cold", "edge", "wires"]
 MINIBODY = ["SW1", "SW2", "SW3", "J1", "H1", "H2", "H3", "H4"]
 ISLBODY = ["J7", "H11", "H1", "H2", "H3", "H4", "TP1"]
 
@@ -361,6 +365,40 @@ def cell_edge(out, plot):
     res["pass"] = r1["result"] == r2["result"] == "packed" and res["R1_x"] < 38.6 and pk.placed["R2"].centroid[0] < 8.0 \
         and any("trying side" in x for x in pk.log) and \
         not any(P.violations(bd, pk.placed[r], pk.placed) for r in ("R1", "R2"))
+    return res
+
+
+def cell_wires(out, plot):
+    pcbnew, P, R2, T = _setup()
+    b = T.new_board(40, 20)
+    T.tp(b, "TPA", "A", 20.0, 10.0)
+    T.passive(b, "R1", "A", "N", 30, 15)
+    T.tp(b, "TPN", "N", 26.0, 10.0)
+    # a locked track of X along the line from TPA to TPN - where R1's best seat is
+    T.tp(b, "X1", "X", 21.5, 4.0)
+    T.tp(b, "X2", "X", 24.5, 4.0)
+    T.track(b, "X", [(21.5, 4.0), (21.5, 10.0), (24.5, 10.0), (24.5, 4.0)], locked=True)
+    # without the rule, the seat it would take: on the track
+    bd0 = P.board_of(b)
+    wires0, bd0.wires = bd0.wires, []
+    bd0.unplaced = {"R1"}
+    pk0 = P.Packer(bd0, ["TPA", "TPN", "X1", "X2"])
+    pk0.pack("TPA", ["R1"], grow=12.0)
+    bd0.wires = wires0
+    hits0 = P.wire_hits(bd0, pk0.placed["R1"])
+    bd = P.board_of(b)
+    bd.unplaced = {"R1"}
+    pk = P.Packer(bd, ["TPA", "TPN", "X1", "X2"])
+    r1 = pk.pack("TPA", ["R1"], grow=12.0)
+    hits = P.wire_hits(bd, pk.placed["R1"])
+    pk.apply(b)
+    p = os.path.join(out, "wires.kicad_pcb")
+    pcbnew.SaveBoard(p, b)
+    errs, _ = R2.drc(p, fill=False)
+    bad = [e[:2] for e in errs if e[0] in ("shorting_items", "clearance", "hole_clearance", "solder_mask_bridge")]
+    res = {"R1": r1["result"], "seat": r1.get("seats"), "wire_hits": hits, "kicad": bad, "wires_read": len(bd.wires),
+           "without_the_rule": {"seat": pk0.placed["R1"].centroid, "hits": hits0[:2]}}
+    res["pass"] = r1["result"] == "packed" and not hits and not bad and len(bd.wires) == 3 and bool(hits0)
     return res
 
 

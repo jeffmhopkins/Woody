@@ -82,6 +82,10 @@ acid traps (check_tracks: KiCad's DRC has no such test), unless it says why not.
   connect      the reviewer's `connect`: on the partial board, C's open third pad joined to
                C1 through a named point at signal width, then the rest of C onto it - the
                join passes within the corridor, has the width asked, and C is whole
+  moatpin      a through-hole pin half under a no-tracks keep-out on B.Cu (the main board's J5
+               pin 2, on the AGND strip's moat), its net kept to B.Cu: routed from the pin's
+               free half - no stub from its centre across the keep-out, which the lay refused
+               every time (CHAIN_SCK open through push and rescue) - and KiCad clean
   rescue       a net walled out by an earlier one: rescue takes that one up and both route
   minikey      a three-key board: packed (pcb_pack) then routed, liquid pass, DRC clean
 """
@@ -101,7 +105,7 @@ CELLS = ["fanout", "pinch", "updown", "bus", "nonplanar", "locked", "offgrid", "
          "fold", "jogs", "equalise", "fillet", "ground", "enclosed", "stitch", "pourcut", "rescue", "minikey",
          "planes4", "island4", "optin4", "orphan4", "fragments", "lockedvia", "guard", "stages", "push",
          "stagepush", "edits", "resume", "resume4",
-         "partial", "partialpush", "connect"]
+         "partial", "partialpush", "connect", "moatpin"]
 
 
 def _setup():
@@ -1054,6 +1058,27 @@ def cell_connect(out, plot):
     # inside, not a wall: by the point within its width and one grid step
     res["pass"] = rep["ok"] and by is not None and by <= 0.5 + r.pitch + 1e-6 and 0.2 in widths and whole \
         and res["drc_errors"] == 0 and res["acid_traps"] == 0
+    return res
+
+
+def cell_moatpin(out, plot):
+    pcbnew, R2, T = _setup()
+    b = T.new_board(30.0, 16.0)
+    fp = T._fp(b, "J1", "PIN")                  # one through-hole pin, 1.0 mm round
+    T._tht(b, fp, 1, 0.0, 0.0, 1.0, 0.6, "P")
+    T._court_rect(fp, 2.0, 2.0)
+    T._place(b, fp, 10.0, 8.0, 0.0, True)
+    px, py = 10.0, 8.0
+    # the keep-out on B.Cu from the west up to just past the pin's centre
+    T.keepout(b, 0.5, py - 3.0, px + 0.15, py + 3.0, layers=("B",))
+    T.tp(b, "TP1", "P", 24.0, py, back=True)
+    lay = dict(LAY, net_classes={"back": {"nets": ["P"], "layers": ["B.Cu"]}})
+    m = R2.model_from_board(b, lay)
+    r = R2.Router(m)
+    failed = r.route(["P"], rescue=False)
+    res = finish("moatpin", b, m, r, out, plot)
+    res.update(failed=failed, pin=(px, py))
+    res["pass"] = not failed and res["drc_errors"] == 0 and res.get("acid_traps", 0) == 0 and res["unconnected"] <= 1
     return res
 
 

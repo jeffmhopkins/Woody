@@ -48,13 +48,16 @@ def snap(v, q=LATTICE):
 # ------------------------------------------------------------------ the board as the packer sees it
 
 class Part:
-    def __init__(self, ref, pads, court, rot, locked, item=None, side="F", copper=None, height=None):
+    def __init__(self, ref, pads, court, rot, locked, item=None, side="F", copper=None, height=None, padgeo=None):
         self.ref, self.pads, self.court, self.rot, self.locked = ref, pads, court, rot, locked
         self.item, self.side = item, side
         self.height = height
         # {"F": polygon, "B": polygon}: the part's pad copper on each face. A through-hole
         # pin is on both, so a switch drawn on the top still blocks the bottom under its pins
         self.copper = copper or {}
+        # [(net, face, polygon)]: each pad's copper with its net - what keeps clear of the
+        # tracks and vias already on the board (Board.wires)
+        self.padgeo = padgeo or []
 
     @property
     def centroid(self):
@@ -69,7 +72,8 @@ class Part:
         from shapely import affinity
         return Part(self.ref, [(n, (x + dx, y + dy)) for n, (x, y) in self.pads], affinity.translate(self.court, dx, dy),
                     self.rot, self.locked, self.item, self.side,
-                    {k: affinity.translate(g, dx, dy) for k, g in self.copper.items()}, self.height)
+                    {k: affinity.translate(g, dx, dy) for k, g in self.copper.items()}, self.height,
+                    [(n, f, affinity.translate(g, dx, dy)) for n, f, g in self.padgeo])
 
     def turned(self, deg):
         """The part turned by `deg` as KiCad turns it: a positive orientation is
@@ -84,7 +88,8 @@ class Part:
                 for n, (x, y) in self.pads]
         return Part(self.ref, pads, affinity.rotate(self.court, -deg, origin=(cx, cy)), (self.rot + deg) % 360,
                     self.locked, self.item, self.side,
-                    {k: affinity.rotate(g, -deg, origin=(cx, cy)) for k, g in self.copper.items()}, self.height)
+                    {k: affinity.rotate(g, -deg, origin=(cx, cy)) for k, g in self.copper.items()}, self.height,
+                    [(n, f, affinity.rotate(g, -deg, origin=(cx, cy))) for n, f, g in self.padgeo])
 
 
 class Board:
@@ -99,6 +104,12 @@ class Board:
         # iron room: [(ref, face, zone, min)] - a hand-soldered part's pads on the face it is
         # soldered on, grown 0.25 mm; every other courtyard on that face keeps `min` off it
         self.iron = list(iron)
+        # the tracks and vias already on the board (a cold placement keeps the locked hand
+        # routes between fixed parts): [(net, faces, polygon)], and the clearance a pad of
+        # another net keeps from them. Without them the packer seated U8 on an IO39 hand route
+        # - six shorts the courtyard rules could not see
+        self.wires, self.wire_gap = [], 0.2
+        self._wire_tree = None
         # the LEDs' cone, a COST not a rule (no seat on a narrow board takes a tall part out of
         # a wide cone): (LED courtyards, LED height, tan(half angle), mm of airwire per mm into
         # it) - a part h tall is in it by (h - LED height) - d / tan, d its gap to the LEDs
@@ -168,7 +179,7 @@ def board_of(kboard, islands=(), edge=0.3, rails=()):
     import pcb_route2
     parts = []
     for fp in kboard.GetFootprints():
-        pads = []
+        pads, geo = [], []
         cop = {"F": [], "B": []}
         for pad in fp.Pads():
             c = pad.GetPosition()
@@ -177,9 +188,11 @@ def board_of(kboard, islands=(), edge=0.3, rails=()):
             pads.append((pad.GetNetname(), (pcbnew.ToMM(c.x), pcbnew.ToMM(c.y))))
             for face, lid in (("F", pcbnew.F_Cu), ("B", pcbnew.B_Cu)):
                 if pad.IsOnLayer(lid):
-                    cop[face].append(pcb_route2._poly_of(pad.GetEffectivePolygon(lid)))
+                    g = pcb_route2._poly_of(pad.GetEffectivePolygon(lid))
+                    cop[face].append(g)
+                    geo.append((pad.GetNetname(), face, g))
         parts.append(Part(fp.GetReference(), pads, courtyard_of(fp, pcbnew), fp.GetOrientationDegrees(), fp.IsLocked(), fp,
-                          "B" if fp.IsFlipped() else "F", {k: unary_union(v) for k, v in cop.items() if v}))
+                          "B" if fp.IsFlipped() else "F", {k: unary_union(v) for k, v in cop.items() if v}, padgeo=geo))
     keep, holes, isl = [], [], {}
     for z in kboard.Zones():
         g = pcb_route2._poly_of(z.Outline())
@@ -192,7 +205,16 @@ def board_of(kboard, islands=(), edge=0.3, rails=()):
             if pad.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH:
                 c = pad.GetPosition()
                 holes.append(Point(pcbnew.ToMM(c.x), pcbnew.ToMM(c.y)).buffer(pcbnew.ToMM(pad.GetDrillSize().x) / 2))
-    return Board(pcb_route2.outline_of(kboard), parts, keep, holes, isl, edge, rails)
+    bd = Board(pcb_route2.outline_of(kboard), parts, keep, holes, isl, edge, rails)
+    for t in kboard.GetTracks():
+        if isinstance(t, pcbnew.PCB_VIA):
+            c = t.GetPosition()
+            bd.wires.append((t.GetNetname(), {"F", "B"}, Point(pcbnew.ToMM(c.x), pcbnew.ToMM(c.y)).buffer(pcbnew.ToMM(t.GetWidth(pcbnew.F_Cu)) / 2)))
+        elif t.GetLayer() in (pcbnew.F_Cu, pcbnew.B_Cu):
+            a, b = t.GetStart(), t.GetEnd()
+            ln = LineString([(pcbnew.ToMM(a.x), pcbnew.ToMM(a.y)), (pcbnew.ToMM(b.x), pcbnew.ToMM(b.y))])
+            bd.wires.append((t.GetNetname(), {"F" if t.GetLayer() == pcbnew.F_Cu else "B"}, ln.buffer(pcbnew.ToMM(t.GetWidth()) / 2)))
+    return bd
 
 
 # ------------------------------------------------------------------ the rules: one list
@@ -261,8 +283,32 @@ def _r_pads(bd, part, placed):
     return [f"courtyard over a pad of {', '.join(hit)}"] if hit else []
 
 
+def wire_hits(bd, part):
+    """Each pad of the part within Board.wire_gap of another net's track or via on its face:
+    [(pad net, wire net, gap)]."""
+    if not bd.wires:
+        return []
+    if bd._wire_tree is None:
+        from shapely.strtree import STRtree
+        bd._wire_tree = STRtree([g for _, _, g in bd.wires])
+    out = []
+    for net, face, g in part.padgeo:
+        for j in bd._wire_tree.query(g.buffer(bd.wire_gap)):
+            wn, faces, wg = bd.wires[int(j)]
+            if face in faces and wn != net:
+                d = g.distance(wg)
+                if d < bd.wire_gap - 1e-6:
+                    out.append((net, wn, round(d, 3)))
+    return out
+
+
+def _r_wires(bd, part, placed):
+    return [f"pad of {n} {d:g} mm from a {w} track or via (under {bd.wire_gap:g})" for n, w, d in wire_hits(bd, part)[:3]]
+
+
 RULES = [("courtyard", _r_courtyard), ("edge", _r_edge), ("keepout", _r_keepout), ("hole", _r_holes), ("pads", _r_pads),
-         ("height", _r_height), ("iron", _r_iron), ("island", _r_island)]
+         ("height", _r_height), ("iron", _r_iron), ("island", _r_island),
+         ("wires", _r_wires)]
 
 
 def violations(bd, part, placed):
@@ -459,6 +505,8 @@ class Packer:
         for ref, face, zone, mn in self.bd.iron:
             if ref != part.ref and face == part.side and part.court.distance(zone) < mn - 1e-3:
                 return False
+        if wire_hits(self.bd, part):
+            return False
         return True
 
     def _row(self, anchor, o, protos, side, off, start, pitch, fixed, chosen):

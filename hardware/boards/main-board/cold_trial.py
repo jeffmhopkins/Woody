@@ -75,6 +75,11 @@ FAMILIES = [
 ]
 
 
+# KiCad's findings a placement may not have (pcb_route2.drc on the placed board, before a fill)
+PLACE_FINDINGS = ("courtyards_overlap", "items_not_allowed", "shorting_items", "clearance", "hole_clearance",
+                  "solder_mask_bridge", "tracks_crossing")
+
+
 # THE REVIEWER'S MOVES, by family, each with why (Router.edit: reroute / through / clear).
 # The record of every review of this trial; replayed by every run from that family on.
 EDITS = {
@@ -87,7 +92,10 @@ EDITS = {
         # current runs in Q-USBOR, not here - this link carries the controller's bias only. So
         # it is joined under the part's body, between its rows of pads (0.94 mm apart: the
         # rail's 0.5 mm does not fit), at signal width.
-        {"connect": ["U13.3", "U13.6"], "points": [[298.4, 129.9], [298.4, 131.0]], "width": 0.3, "track": 0.25,
+        # No points: at signal width the way under the body is the shortest, and points in
+        # board millimetres go stale the moment a placement moves the part (it moved 0.25 mm
+        # when the packer learned to keep off kept copper)
+        {"connect": ["U13.3", "U13.6"], "track": 0.25,
          "why": "EN tied to ANODE under U13's body; no load current in it"},
         # Review of family 2 (analog), 2026-10-10: DEV_3V3 rose from R45 to R47's top pad
         # BETWEEN R47 and C2 - the digital rail through the ADC supply filter, between its
@@ -436,13 +444,21 @@ def main():
         print(f"cold: the placement of {checkpoint(0, 'placed')} (--place to place again)")
     elif start == 1:
         board = place_board(lay, comps_of())
+        # the placement's own gate, by KiCad: a part on a part, on a keep-out, or on the copper
+        # kept from the source (a pad on a hand route was six shorts the courtyard findings
+        # alone did not show - the 2026-10-10 run's U8)
+        cp0 = checkpoint(0, "placed")
+        pcbnew.SaveBoard(cp0, board)
+        errs, _ = pcb_route2.drc(cp0, fill=False)
+        pe = [e[:3] for e in errs if e[0] in PLACE_FINDINGS]
+        print(f"cold: KiCad placement findings: {pe or 'none'}")
         if "--place-only" in sys.argv:
             pcbnew.SaveBoard(OUT, board)
-            errs, _ = pcb_route2.drc(OUT, fill=False)
-            pe = [e[:3] for e in errs if e[0] in ("courtyards_overlap", "items_not_allowed")]
-            print(f"cold: placed only - wrote {os.path.relpath(OUT, ROOT)}; KiCad placement findings: {pe or 'none'}")
+            print(f"cold: placed only - wrote {os.path.relpath(OUT, ROOT)}")
             return 1 if pe else 0
-        pcbnew.SaveBoard(checkpoint(0, "placed"), board)
+        if pe and "--force" not in sys.argv:
+            os.remove(cp0)
+            raise SystemExit("cold: the placement has KiCad findings - fix the placement, or --force")
     else:
         prev = sorted(glob.glob(os.path.join(out, f"main-board.cold.{start - 1}-*.kicad_pcb")))
         if not prev:

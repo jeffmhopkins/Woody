@@ -1077,6 +1077,18 @@ class Router:
             return free
         c = min(cs, key=lambda q: math.dist(self.xy(q[1], q[2]), pad.centre))
         near = {q for q in cs if (q[1], q[2]) == (c[1], c[2])}
+        # not on a layer where a hard area covers the pad - a no-tracks keep-out, another
+        # net's reservation: the search would end there and the lay refuse it every time (the
+        # main board's J5 pin 2, a through-hole pin on the AGND strip's moat on B.Cu: CHAIN_SCK
+        # failed at the lay, push and rescue alike). Unless every layer is covered.
+        pt = Point(pad.centre)
+        hard = set()
+        for e in self.m.index.query((pt.x - 0.01, pt.y - 0.01, pt.x + 0.01, pt.y + 0.01)):
+            if (e.kind == "keepout" and e.tracks) or (e.kind == "reserve" and pad.net not in (e.family or ())):
+                if e.geom.intersects(pt):
+                    hard |= set(e.layers)
+        ok = {q for q in near if q[0] not in hard}
+        near = ok or near
         for q in near:
             grids[q[0]][q[1], q[2]] = False
         return near
@@ -1087,6 +1099,12 @@ class Router:
         c = (snap(pad.centre[0]), snap(pad.centre[1]))
         if c == cell_xy:
             return [(c[0], c[1], L)]
+        # a stub across a hard area of its layer - a no-tracks keep-out, another net's
+        # reservation - is no stub: the run starts at the cell, inside the pad's copper (a
+        # through-hole pin half on a moat: the main board's J5 pin 2 on B.Cu, where the stub
+        # from the pin's centre crossed the AGND strip's moat and the lay refused it)
+        if pad.geom.buffer(1e-6).contains(Point(cell_xy)) and self._hard_on(LineString([c, cell_xy]), L, pad.net):
+            return []
         if octilinear(c, cell_xy):
             return [(c[0], c[1], L)]
         x0, y0, x1, y1 = pad.geom.bounds
@@ -1105,6 +1123,14 @@ class Router:
             if octilinear(c, k) and octilinear(k, cell_xy):
                 return [(c[0], c[1], L), (k[0], k[1], L)]
         return [(c[0], c[1], L)]
+
+    def _hard_on(self, geom, L, net):
+        """Whether `geom` crosses a no-tracks keep-out or another net's reservation on L."""
+        for e in self.m.index.query(geom.bounds):
+            if L in e.layers and ((e.kind == "keepout" and e.tracks) or (e.kind == "reserve" and net not in (e.family or ()))):
+                if e.geom.intersects(geom):
+                    return True
+        return False
 
     def build_run(self, net, path, width, pad_of):
         pts = [(*self.xy(i, j), L) for (L, i, j) in path]
