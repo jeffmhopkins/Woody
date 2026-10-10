@@ -6,7 +6,10 @@ it. It READS main-board.kicad_pcb and WRITES main-board.cold.kicad_pcb beside it
 checkpoint per family, main-board.cold.<k>-<family>.kicad_pcb, in --out): a trial, not the
 source.
 
-    python3 hardware/boards/main-board/cold_trial.py [--place-only] [--out DIR] [--plot DIR]
+    python3 hardware/boards/main-board/cold_trial.py [--place-only] [--force] [--out DIR] [--plot DIR]
+
+After placement each net's airwires are compared with the source's; a net more than three
+times as long and 20 mm longer stops the run before routing (--force routes anyway).
 
 FIXED (the owner, 2026-10-10: "Body CAD + analog block"): every part the body CAD places
 (the switches, the mounts, the connectors, U-BREATH, the LED row and each LED's cap by
@@ -30,6 +33,7 @@ fanout comes first, as it always does.
 import json
 import math
 import os
+import re
 import subprocess
 import sys
 
@@ -54,7 +58,7 @@ OUT = os.path.join(HERE, "main-board.cold.kicad_pcb")
 FAMILIES = [
     # power and rails: the layer-limited power classes cannot hop a signal via, so they go
     # before anything can wall them in (layout.yaml route_first: says the same)
-    {"name": "power", "nets": ["INST_5V_A", "BUCK_IN", "/power-entry-instrument/*", "UMBILICAL_POS12", "DEV_3V3",
+    {"name": "power", "nets": ["INST_5V_A", "BUCK_IN", "/power-entry-instrument/BUCK_A_OUT", "UMBILICAL_POS12", "DEV_3V3",
                                "/V3V3_CHAIN_*"]},
     # the analog block's own nets, over their island (the pair is already laid and locked)
     {"name": "analog", "nets": ["/SENSOR_RAW", "/breath-adc/*", "/breath-excitation-reference/*", "REF_VIN", "VS",
@@ -195,6 +199,25 @@ def key_roles(board):
     return roles
 
 
+def drivers(board, comps, rails):
+    """Each series termination (a row R-*-SER) round its DRIVING end, as the board places them
+    (layout.yaml parts: "the SPI and chain series resistors at their driving end", R-HOP-SER
+    "at U7's QH"): J-MCU, the Matrix's connector, where it is on the part's nets; else the IC
+    on them with the most pins (U7, not the TVS U11 beside J5). The nets alone cannot say which end drives - both ends give one airwire length."""
+    nets = {f.GetReference(): {p.GetNetname() for p in f.Pads()} - set(rails) - {""} for f in board.GetFootprints()}
+    mcu = next((r for r in nets if comps.get(r, {}).get("row") == "J-MCU"), None)
+    out = {}
+    for r, ns in nets.items():
+        if not re.match(r"^R-.*-SER$", comps.get(r, {}).get("row", "")):
+            continue
+        ends = [q for q in nets if q != r and ns & nets[q]]
+        ics = sorted((q for q in ends if q.startswith("U")), key=lambda q: (-len(list(board.FindFootprintByReference(q).Pads())), q))
+        d = mcu if mcu in ends else (ics[0] if ics else None)       # the IC with the most pins: not a clamp
+        if d:
+            out[r] = d
+    return out
+
+
 def place(board, lay, comps, fixed, log):
     geo = pcb_main.geometry()
     rails = [p["net"] for p in lay["planes"]] + [i["net"] for i in lay["islands"]] + ["DEV_3V3"]
@@ -239,9 +262,64 @@ def place(board, lay, comps, fixed, log):
     pk = pcb_pack.Packer(bd, body, log)
     roles = key_roles(board)
     sheets = {r: comps.get(r, {}).get("sheet", "") for r in bd.parts}
-    rep = pk.cold(sheets, patterns=[(list(roles), roles)])
+    rep = pk.cold(sheets, patterns=[(list(roles), roles)], prefer=drivers(board, comps, rails))
     pk.apply(board)
     return rep, sorted(bd.unplaced), pk
+
+
+def airwires(board, skip):
+    """Each net's airwire length: the minimum spanning tree over its pads' centres."""
+    pads = {}
+    for f in board.GetFootprints():
+        for p in f.Pads():
+            n = p.GetNetname()
+            if n and n not in skip and not n.startswith("unconnected"):
+                c = p.GetPosition()
+                pads.setdefault(n, []).append((pcbnew.ToMM(c.x), pcbnew.ToMM(c.y)))
+    out = {}
+    for n, pts in pads.items():
+        seen, total = {0}, 0.0
+        best = {j: math.dist(pts[0], pts[j]) for j in range(1, len(pts))}
+        while best:
+            j = min(best, key=best.get)
+            total += best.pop(j)
+            seen.add(j)
+            for k in best:
+                best[k] = min(best[k], math.dist(pts[j], pts[k]))
+        out[n] = total
+    return out
+
+
+def placement_regressions(src, board, lay, ratio=3.0, over=20.0):
+    """Nets whose airwires the cold placement made much longer than the source's: more than
+    `ratio` times AND `over` mm longer. Planes and islands are skipped - their pads meet a
+    plane, not each other. A regression found here is a placement fault, and routing over it
+    only hides it (the power family of 2026-10-10: a 1 mm Miller leg routed as 76 mm)."""
+    skip = {p["net"] for p in lay["planes"]} | {i["net"] for i in lay["islands"]} | {"DEV_3V3"}
+    a, b = airwires(src, skip), airwires(board, skip)
+    # a PATH through a two-pad part between two signal nets (a series R, a bead) is measured
+    # as one: which end the part sits at moves length from one net to the other, not more
+    parent = {n: n for n in a}
+
+    def find(n):
+        while parent[n] != n:
+            n = parent[n]
+        return n
+    for f in src.GetFootprints():
+        ns = [p.GetNetname() for p in f.Pads()]
+        if len(ns) == 2 and all(n in parent for n in ns) and ns[0] != ns[1]:
+            parent[find(ns[0])] = find(ns[1])
+    ga, gb = {}, {}
+    for n in a:
+        if n in b:
+            g = find(n)
+            ga[g] = ga.get(g, 0.0) + a[n]
+            gb[g] = gb.get(g, 0.0) + b[n]
+    names = {}
+    for n in a:
+        names.setdefault(find(n), []).append(n)
+    rows = sorted(((gb[g] / max(ga[g], 1.0), " + ".join(sorted(names[g])), ga[g], gb[g]) for g in ga), reverse=True)
+    return [r for r in rows if r[0] > ratio and r[3] - r[2] > over], rows
 
 
 def silk(board, lay, comps):
@@ -284,6 +362,14 @@ def main():
     if left:
         raise SystemExit(f"cold: still unplaced: {left}")
     print(f"cold: silkscreen made again ({silk(board, lay, comps)} old drawing(s) cleared)")
+    bad, rows = placement_regressions(pcbnew.LoadBoard(SRC), board, lay)
+    for x, n, a, b in rows[:12]:
+        print(f"cold: airwire {n}: source {a:.1f} mm, cold {b:.1f} mm (x{x:.1f})")
+    tot_a, tot_b = sum(r[2] for r in rows), sum(r[3] for r in rows)
+    print(f"cold: airwires in all: source {tot_a:.0f} mm, cold {tot_b:.0f} mm")
+    if bad and "--force" not in sys.argv:
+        raise SystemExit("cold: placement regressions (x3 and +20 mm over the source) - fix the placement, or "
+                         "--force: " + ", ".join(n for _, n, _, _ in bad))
     if "--place-only" in sys.argv:
         pcbnew.SaveBoard(OUT, board)
         errs, _ = pcb_route2.drc(OUT, fill=False)

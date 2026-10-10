@@ -708,7 +708,7 @@ class Packer:
                    score=best[0][:3], seats={r: (round(best[1][r].centroid[0], 3), round(best[1][r].centroid[1], 3)) for r in allp})
         return rep
 
-    def cold(self, sheets, patterns=(), turns=(0, 90, 180, 270), reaches=(12.0, 20.0)):
+    def cold(self, sheets, patterns=(), turns=(0, 90, 180, 270), reaches=(12.0, 20.0), prefer=None):
         """Seat every part still in self.bd.unplaced, in the order each has an anchor:
           1. `patterns`: [(anchors, roles)] - one arrangement stamped at every anchor;
           2. each unplaced IC or semiconductor (more than three pads, or U/Q/L/NT): round the
@@ -717,6 +717,8 @@ class Packer:
           3. the passives: each round the placed part it shares the most signal nets with,
              a rail-only part (a decoupler) round the part on its own sheet with the most pads
              on its nets - grouped by anchor, a group that cannot be seated tried part by part.
+        `prefer`: {ref: anchor} - the anchor a part must sit round, where the board's own
+        convention decides it and the nets cannot (a series termination at its driving end).
         `sheets`: {ref: sheet name}. A part with no seat within the last of `reaches` stays
         unplaced and is reported by name. Returns [(what, refs, result)]."""
         rep = []
@@ -775,16 +777,20 @@ class Packer:
             conn = {n for q in self.placed if q.startswith("J") and q not in self.bd.unplaced for n in signal(q)}
             for r in sorted(x for x in self.bd.unplaced if not big(x) and not (signal(x) - self.bd.power)
                             and not signal(x) & conn and (self.placed[x].height or 0) > led_h):
+                # only the parts on its own nets: a bulk or input cap belongs to the pin it
+                # serves, and the cone moves it round that part, never to another
                 own = all_nets(r) - rails
+                # (a rail-only part - bulk on a plane - has none: the parts on its own sheet)
                 cands = [q for q in self.placed if q not in self.bd.unplaced and q != r and not q.startswith("H")
-                         and (own & all_nets(q) or sheets.get(r) and sheets.get(q) == sheets.get(r))]
+                         and (own & all_nets(q) if own else sheets.get(r) and sheets.get(q) == sheets.get(r))]
                 cands = sorted(cands, key=lambda q: (-len(own & all_nets(q)), -len(self.placed[q].pads), q))[:8]
                 best = None
                 for q in cands:
                     state = (dict(self.placed), set(self.frozen), set(self.bd.unplaced), len(self.log))
                     res = self.pack(q, [r], rotations=(0, 90), grow=reaches[-1])
                     if res["result"] == "packed":
-                        key = (round(cone_depth(self.bd, self.placed[r]), 2), res["after"])
+                        # the score carries the cone as a cost: depth and distance weighed together
+                        key = (res["after"], round(cone_depth(self.bd, self.placed[r]), 2))
                         if best is None or key < best[0]:
                             best = (key, q, self.placed[r])
                     self.placed, self.frozen, self.bd.unplaced = state[0], state[1], state[2]
@@ -793,36 +799,54 @@ class Packer:
                     self.placed[r] = best[2]
                     self.frozen.add(r)
                     self.bd.unplaced.discard(r)
-                    rep.append((f"round {best[1]} (least into the LEDs' cone, {best[0][0]:g} mm)", [r], "packed"))
+                    rep.append((f"round {best[1]} (cone and airwire weighed: {best[0][1]:g} mm into the cone)", [r], "packed"))
                 else:
                     self.log.append(f"cold: {r} (tall) found no seat round any of {len(cands)} anchor(s)")
-        # the passives, grouped by their anchor
-        groups = {}
-        for r in sorted(self.bd.unplaced):
-            if big(r):
-                continue
-            placed = [q for q in self.placed if q not in self.bd.unplaced]
-            if signal(r):
-                # a connector its net enters by beats a part on its own sheet: a clamp or a
-                # series part belongs at the pin it guards
-                key = lambda q: (-len(signal(r) & signal(q)), not q.startswith("J"), sheets.get(q) != sheets.get(r),
-                                 -len(self.placed[q].pads), q)
-            else:
-                key = lambda q: (sheets.get(q) != sheets.get(r), -len(all_nets(r) & all_nets(q)), -len(self.placed[q].pads), q)
-            a = min(placed, key=key)
-            groups.setdefault(a, []).append(r)
-        for a, refs in sorted(groups.items()):
-            res = self.pack(a, refs, rotations=(0, 90), grow=reaches[0])
-            if res["result"] == "packed":
-                rep.append((f"round {a}", refs, "packed"))
-                continue
-            for r in refs:              # the group did not fit as rows: one by one, further out
-                res1 = None
-                for reach in reaches:
-                    res1 = self.pack(a, [r], rotations=(0, 90), grow=reach)
-                    if res1["result"] == "packed":
-                        break
-                rep.append((f"round {a}", [r], res1["result"]))
+        # the passives, grouped by their anchor, in ROUNDS: a part whose signal nets reach no
+        # seated part yet waits for the round after its partner is seated (a Miller leg's R
+        # waits for its C), else it would anchor on whatever the tiebreak names
+        while True:
+            todo = sorted(r for r in self.bd.unplaced if not big(r))
+            if not todo:
+                break
+            seated = [q for q in self.placed if q not in self.bd.unplaced]
+            ready = [r for r in todo if not signal(r) or any(signal(r) & signal(q) for q in seated)]
+            if not ready:
+                ready = todo            # nothing left can wait for anything: as they are
+            groups = {}
+            prefer = prefer or {}
+            ready = [r for r in ready if r not in prefer or prefer[r] not in self.bd.unplaced] or ready
+            for r in ready:
+                if r in prefer and prefer[r] in seated:
+                    groups.setdefault(prefer[r], []).append(r)
+                    continue
+                if signal(r):
+                    # a connector its net enters by beats a part on its own sheet: a clamp or
+                    # a series part belongs at the pin it guards
+                    # (one signal net only: a part bridging two is a series part, whose end is
+                    # its driver's - `prefer` - or its sheet's; and not a capacitor, which
+                    # decouples its IC)
+                    key = lambda q: (-len(signal(r) & signal(q)), not (q.startswith("J") and len(signal(r)) == 1 and not r.startswith("C")),
+                                     sheets.get(q) != sheets.get(r),
+                                     -len(self.placed[q].pads), q)
+                else:
+                    key = lambda q: (sheets.get(q) != sheets.get(r), -len(all_nets(r) & all_nets(q)), -len(self.placed[q].pads), q)
+                groups.setdefault(min(seated, key=key), []).append(r)
+            before = len(self.bd.unplaced)
+            for a, refs in sorted(groups.items()):
+                res = self.pack(a, refs, rotations=(0, 90), grow=reaches[0])
+                if res["result"] == "packed":
+                    rep.append((f"round {a}", refs, "packed"))
+                    continue
+                for r in refs:          # the group did not fit as rows: one by one, further out
+                    res1 = None
+                    for reach in reaches:
+                        res1 = self.pack(a, [r], rotations=(0, 90), grow=reach)
+                        if res1["result"] == "packed":
+                            break
+                    rep.append((f"round {a}", [r], res1["result"]))
+            if len(self.bd.unplaced) == before:
+                break
         if self.bd.unplaced:
             self.log.append(f"cold: NOT placed - {', '.join(sorted(self.bd.unplaced))}")
         return rep
