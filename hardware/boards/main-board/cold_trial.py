@@ -70,10 +70,13 @@ FAMILIES = [
     # each key's T into its register
     {"name": "keys", "nets": ["/KEY_*", "*/SWITCH_LEG"]},
     # the Matrix's lines from J-MCU: SPI, the LED data, the service UART
-    # IO36 leads: on 2026-10-11 (3dfb6b8f) IO2 threaded U1's pads on F.Cu and closed a loop
-    # round U1 pin 3, IO36's own, and a 1627 s rescue did not undo it
-    {"name": "mcu", "nets": ["/IO*", "/SPI*", "*TXD*", "*RXD*", "/led-strip-drive/*", "/LED_*"],
-     "first": ["/IO36"]},
+    # J-MCU's top row and U1 by place, before the rest of the mcu lines (the owner,
+    # 2026-10-11: "breaking up families geographically"). Routed as one family the crowd
+    # walled in one of its own each time: IO2 looped round U1 pin 3 (IO36), and with IO36
+    # leading, J1.4 (IO1) - each a pad-to-pad hop of a few mm that a long line crossed first
+    {"name": "mcu-fanin", "nets": ["/IO*", "*TXD*", "*RXD*"], "near": [300.0, 124.0, 332.0, 138.0],
+     "first": ["/IO36", "/IO1"]},
+    {"name": "mcu", "nets": ["/IO*", "/SPI*", "*TXD*", "*RXD*", "/led-strip-drive/*", "/LED_*"]},
     {"name": "midi", "nets": ["*MIDI*"]},
 ]
 
