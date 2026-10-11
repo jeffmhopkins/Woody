@@ -14,7 +14,7 @@ import tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
-CELLS = ["squeeze", "middle", "fan", "around", "cross", "grid", "scramble", "triad"]
+CELLS = ["squeeze", "middle", "fan", "around", "cross", "grid", "scramble", "triad", "channel", "tree"]
 
 
 def _setup():
@@ -211,6 +211,41 @@ def cell_triad(out, plot):
         T.tp(b, f"{n}2", n, 20.0 - 14 * math.cos(a + 0.35), 20.0 - 14 * math.sin(a + 0.35))
     m, runs, failed, bad, rep = _board2(b, ["P", "Q", "W"])
     return _result2("triad", b, m, runs, failed, bad, rep, out, plot)
+
+
+def cell_channel(out, plot):
+    """The grid router's push board (pcb_testboards.channel): A, and CLK of three pads,
+    through a channel two tracks wide. The grid router needed a shove; here CLK's tree takes
+    the lane beside A in the plan."""
+    _, _, T, _, _ = _setup()
+    b = T.channel()
+    _, R2, _, TP, B = _setup()
+    lay = dict(B.LAY, net_classes={"front": {"nets": ["A", "CLK"], "layers": ["F.Cu"]}})
+    m = R2.model_from_board(b, lay)
+    runs, failed, rep = TP.route_board(m, ["A", "CLK"])
+    bad = {}
+    for r in runs:
+        f = R2.fits(r, m)
+        if f:
+            bad[r.net] = f[:2]
+        R2.lay(r, m)
+    return _result2("channel", b, m, runs, failed, bad, rep, out, plot)
+
+
+def cell_tree(out, plot):
+    """A five-pad clock (a source and four loads round the board) and four two-pad data
+    lines across its branches: the trees, the layers and the vias together."""
+    _, _, T, _, _ = _setup()
+    b = T.new_board(40.0, 40.0)
+    T.tp(b, "C0", "CLK", 20.0, 20.0)
+    for k, (x, y) in enumerate(((6.0, 6.0), (34.0, 6.0), (6.0, 34.0), (34.0, 34.0))):
+        T.tp(b, f"C{k + 1}", "CLK", x, y)
+    for k, (a, c) in enumerate((((4.0, 14.0), (36.0, 14.0)), ((4.0, 26.0), (36.0, 26.0)),
+                                ((14.0, 4.0), (14.0, 36.0)), ((26.0, 4.0), (26.0, 36.0)))):
+        T.tp(b, f"D{k}a", f"D{k}", *a)
+        T.tp(b, f"D{k}b", f"D{k}", *c)
+    m, runs, failed, bad, rep = _board2(b, ["CLK", "D0", "D1", "D2", "D3"])
+    return _result2("tree", b, m, runs, failed, bad, rep, out, plot)
 
 
 def run_cell(name, out, plot):

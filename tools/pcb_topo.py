@@ -184,7 +184,7 @@ class Map:
     def capacity(self, k, own=()):
         """How many lines edge k takes. An edge inside a pad takes its own net's line only."""
         if k in self.inpad:
-            return 1 if self.inpad[k] in own else 0
+            return 8 if self.inpad[k] in own else 0     # a pad of several lines of its net
         t0, t1, _ = self.edges[k]
         if t1 < t0:
             return 0
@@ -227,7 +227,9 @@ class Map:
         p1, p2 = self._bpos(ti, e1, new=True), self._bpos(ti, e2, new=True)
         lo, hi = min(p1, p2), max(p1, p2)
         n = 0
-        for _, q1, q2 in self.chords[ti]:
+        for lid_, q1, q2 in self.chords[ti]:
+            if self.lines[lid_]["net"] == getattr(self, "_cur", None):
+                continue        # the same net's copper: lines of one net may meet and cross
             a, b = self._bpos(ti, q1), self._bpos(ti, q2)
             if min(abs(a - lo), abs(a - hi), abs(b - lo), abs(b - hi)) < 1e-9:
                 continue        # a shared end (a vertex both lines leave from)
@@ -237,7 +239,7 @@ class Map:
 
     # ---------------------------------------------------------------- the search
 
-    def route(self, net, ia, ib, pending=(), toll=None):
+    def route(self, net, ia, ib, pending=(), toll=None, tee=False):
         """Plan one line from pad ia's centre to pad ib's (indices into self.pads). Returns
         the line id, or None. `pending`: [(a, b)] the straight airwires of nets still to be
         routed; each one this line's way crosses costs `toll` mm (default: a few pitches) -
@@ -247,6 +249,7 @@ class Map:
         toll = 4.0 if toll is None else toll
         if ia not in self.centre or ib not in self.centre:
             return None
+        self._cur = net
         pa, pb = self.centre[ia], self.centre[ib]
         own = {ia, ib}
         P, Q = self.xy[pa], self.xy[pb]
@@ -284,6 +287,11 @@ class Map:
             if g > best.get(st, math.inf) + 1e-12:
                 continue
             k1, s1, ti = st
+            if tee:
+                lids = self.order[k1]
+                for nb in (s1 - 1, s1):
+                    if 0 <= nb < len(lids) and self.lines[lids[nb]]["net"] == net and g < goal_cost:
+                        goal, goal_cost = ("tee", st, lids[nb]), g
             if pb in self.tris[ti] and self._crossings(ti, ("e", k1, s1), ("v", pb)) == 0:
                 c = g + math.dist(pt, Q) + tolls(pt, Q)
                 if c < goal_cost:
@@ -298,10 +306,13 @@ class Map:
         if goal is None:
             return None
         steps = []
+        host = None
         if goal[0] == "direct":
             last_t = goal[1]
         else:
             _, st, last_t = goal
+            if goal[0] == "tee":
+                host, last_t = goal[2], None
             while True:
                 prev = came[st]
                 if prev[0] == "start":
@@ -311,7 +322,7 @@ class Map:
                 steps.append((st[0], st[1], ti))
                 st = pst
             steps.reverse()
-        return self._commit(net, pa, pb, steps, last_t)
+        return self._commit(net, pa, None if host is not None else pb, steps, last_t, host)
 
     def _tri_edges(self, ti):
         a, b, c = self.tris[ti]
@@ -321,17 +332,19 @@ class Map:
         ts = self.etris[k]
         return ts[0] if ts[1] == ti else ts[1]
 
-    def _commit(self, net, pa, pb, steps, last_t):
+    def _commit(self, net, pa, pb, steps, last_t, host=None):
         """Write a planned line into the orders and the triangles' chords. Each slot was read
-        against the orders as they stood; an edge is crossed once, so each is still right."""
+        against the orders as they stood; an edge is crossed once, so each is still right.
+        A tee (host set) ends on its last edge, beside the host, and has no last chord."""
         lid = len(self.lines)
-        ends = [("v", pa)] + [("e", k, s) for k, s, _ in steps] + [("v", pb)]
-        tris = [t for _, _, t in steps] + [last_t]
+        ends = [("v", pa)] + [("e", k, s) for k, s, _ in steps] + ([("v", pb)] if host is None else [])
+        tris = [t for _, _, t in steps] + ([last_t] if host is None else [])
         for k, s, _ in steps:
             self.order[k].insert(s, lid)
         for i, ti in enumerate(tris):
             self.chords[ti].append((lid, self._ref(ends[i], lid), self._ref(ends[i + 1], lid)))
-        self.lines[lid] = {"net": net, "pa": pa, "pb": pb, "edges": [k for k, _, _ in steps], "tris": tris}
+        self.lines[lid] = {"net": net, "pa": pa, "pb": pb, "edges": [k for k, _, _ in steps],
+                           "tris": [t for _, _, t in steps] + ([last_t] if host is None else []), "host": host}
         return lid
 
     def _ref(self, end, lid):
@@ -354,10 +367,18 @@ class Map:
                     self._settle(lid, pts)
             paths = {lid: self._inflate(lid, self._band(lid)[0]) for lid in self.lines}
             for lid in self.lines:
-                others = [LineString(p) for l2, p in paths.items() if l2 != lid and len(p) > 1]
+                net = self.lines[lid]["net"]
+                others = [LineString(p) for l2, p in paths.items()
+                          if l2 != lid and len(p) > 1 and self.lines[l2]["net"] != net]
                 paths[lid] = self._ends(lid, paths[lid], unary_union(others) if others else None)
             if not self._widen(paths):
                 break
+        for lid, ln in self.lines.items():
+            if ln["host"] is not None and len(paths[lid]) >= 2 and len(paths.get(ln["host"], [])) >= 2:
+                h = LineString(paths[ln["host"]])
+                prev = Point(paths[lid][-2])
+                foot = h.interpolate(h.project(prev))
+                paths[lid] = paths[lid][:-1] + [(foot.x, foot.y)]
         return paths
 
     def _pack(self):
@@ -401,7 +422,12 @@ class Map:
         """The funnel through the line's portals: (points, bends) - bends[j] is the vertex the
         j-th point bends round (None at the two ends)."""
         ln = self.lines[lid]
-        P, Q = self.xy[ln["pa"]], self.xy[ln["pb"]]
+        P = self.xy[ln["pa"]]
+        if ln["host"] is not None:
+            k = ln["edges"][-1]
+            Q = self._at(k, self.pos.get((k, ln["host"]), sum(self.edges[k][:2]) / 2))
+        else:
+            Q = self.xy[ln["pb"]]
         portals, verts = [(P, P)], [(None, None)]
         for k, ti in zip(ln["edges"], ln["tris"]):
             lo, hi = self._portal(k, lid)
@@ -505,6 +531,8 @@ class Map:
         for end in (0, 1):
             seq = pts if end == 0 else pts[::-1]
             v = self.lines[lid]["pa" if end == 0 else "pb"]
+            if v is None:
+                continue            # a tee's end, on its host
             via = self.pads[self.vpad[v]].ref == VIA_REF
             # a via: the line on the other layer meets this one at its centre, so the end
             # stays there and only what follows it is pulled tight (a hook back into a via
@@ -593,6 +621,8 @@ class Map:
         seen = set()
         for k, lids in self.order.items():
             for a, b in zip(lids, lids[1:]):
+                if self.lines[a]["net"] == self.lines[b]["net"]:
+                    continue
                 pair = (min(a, b), max(a, b))
                 if pair in seen:
                     continue
@@ -798,30 +828,45 @@ def _place_via(model, net, near, toward, placed, layers, rmin=None):
     return None
 
 
+def _mst(points):
+    """Prim's tree over points [(key, (x, y))]: [(key, key)], each edge joining a point to
+    the nearest one already in the tree."""
+    if len(points) < 2:
+        return []
+    inn, rest, out = [points[0]], list(points[1:]), []
+    while rest:
+        a, b = min(((a, b) for a in inn for b in rest), key=lambda ab: math.dist(ab[0][1], ab[1][1]))
+        out.append((a[0], b[0]))
+        inn.append(b)
+        rest.remove(b)
+    return out
+
+
 def route_board(model, nets, layers=None, rounds=4, log=None):
-    """Two-pad nets on the board's signal layers (T2): each net to a layer - fewest crossings
-    of straight airwires with nets on the same layer, then fewest vias - a via beside each
-    pad not on its layer, a net that crosses on both layers split by a via in the middle;
-    then each layer routed by the T1 planner. A piece that fails moves its net to another
-    layer and the board is planned again, up to `rounds`. Returns (runs, failed, report)."""
+    """Nets on the board's signal layers (T2, T3): each net to one layer - fewest crossings
+    of its tree's straight airwires with nets on the same layer, then fewest vias - a via
+    beside each pad not on that layer, the net's pads (or their vias) joined by a tree of
+    two-pad lines; then each layer planned by the T1 planner. A net that fails moves to
+    another layer and the board is planned again, up to `rounds`. Returns (runs, failed,
+    report): one Run per line, and one per via (its two layers at one point)."""
     import copy
     log = log if log is not None else []
     R = model.rules
     pads = {n: model.pads_of(n) for n in nets}
-    two = [n for n in nets if len(pads[n]) == 2]
+    many = [n for n in nets if len(pads[n]) >= 2]
     if layers is None:
-        layers = sorted({L for n in two for L in model.track_layers(n)})
-    allowed = {n: [L for L in model.track_layers(n) if L in layers] for n in two}
-    aw = {n: (pads[n][0].centre, pads[n][1].centre) for n in two}
-    adj = {n: {m_ for m_ in two if m_ != n and _cross(*aw[n], *aw[m_])} for n in two}
-    forced = {}                     # net -> layer, from earlier rounds' failures
-    split = set()
-    failed = list(nets)
-    runs = []
+        layers = sorted({L for n in many for L in model.track_layers(n)})
+    allowed = {n: [L for L in model.track_layers(n) if L in layers] for n in many}
+    aw = {n: [(pads[n][i].centre, pads[n][j].centre)
+              for i, j in _mst([(k, p.centre) for k, p in enumerate(pads[n])])] for n in many}
+    adj = {n: {m_ for m_ in many if m_ != n and any(_cross(*e, *f) for e in aw[n] for f in aw[m_])}
+           for n in many}
+    forced = {}
+    failed, runs = list(nets), []
     for rnd in range(rounds):
-        # 1. layers: most-crossed first; a layer both pads are on saves two vias
+        # 1. layers: most-crossed first; a layer its pads are on saves vias
         assign = {}
-        for n in sorted(two, key=lambda n: (-len(adj[n]), n)):
+        for n in sorted(many, key=lambda n: (-len(adj[n]), n)):
             if n in forced:
                 assign[n] = forced[n]
                 continue
@@ -830,67 +875,52 @@ def route_board(model, nets, layers=None, rounds=4, log=None):
                 vias = sum(1 for p in pads[n] if L not in p.layers)
                 return (same * 10 + vias * 3, L)
             assign[n] = min(allowed[n], key=cost) if allowed[n] else None
-        for n in two:
-            if assign[n] is not None and any(assign.get(m_) == assign[n] for m_ in adj[n]) and len(allowed[n]) > 1:
-                split.add(n) if rnd > 0 else None
-        # 2. pieces and vias
-        placed, pieces = [], {}      # net -> [(layer, pad, pad)] in order from pad a to pad b
-        for n in two:
+        # 2. vias, then each net's tree
+        placed, pieces, stubs = [], {}, {}
+        for n in many:
             L = assign[n]
             if L is None:
                 continue
-            a, b = pads[n]
-            seq = []
-            ends = []
-            for p, other in ((a, b), (b, a)):
+            centre = (sum(p.centre[0] for p in pads[n]) / len(pads[n]), sum(p.centre[1] for p in pads[n]) / len(pads[n]))
+            ends, ok = [], True
+            for p in pads[n]:
                 if L in p.layers:
                     ends.append(p)
-                else:
-                    pl = next((x for x in sorted(p.layers) if x in allowed[n]), None)
-                    xy = _place_via(model, n, p.centre, other.centre, placed, layers) if pl is not None else None
-                    if xy is None:
-                        ends.append(None)
-                        continue
-                    v = _via_pad(model, n, xy)
-                    placed.append(v)
-                    seq.append(("stub", pl, p, v))
-                    ends.append(v)
-            if None in ends:
+                    continue
+                pl = next((x for x in sorted(p.layers) if x in allowed[n]), None)
+                xy = _place_via(model, n, p.centre, centre, placed, layers) if pl is not None else None
+                if xy is None:
+                    ok = False
+                    break
+                v = _via_pad(model, n, xy)
+                placed.append(v)
+                stubs.setdefault(n, []).append((pl, p, v))
+                ends.append(v)
+            if not ok:
                 continue
-            ea, eb = ends
-            if n in split and len(allowed[n]) > 1:
-                mid = ((ea.centre[0] + eb.centre[0]) / 2, (ea.centre[1] + eb.centre[1]) / 2)
-                xy = _place_via(model, n, mid, eb.centre, placed, layers, rmin=0.0)
-                L2 = next(x for x in allowed[n] if x != L)
-                if xy is not None:
-                    v = _via_pad(model, n, xy)
-                    placed.append(v)
-                    main = [(L, ea, v), (L2, v, eb)]
-                else:
-                    main = [(L, ea, eb)]
-            else:
-                main = [(L, ea, eb)]
-            # order: pad a's stub, the main pieces, pad b's stub
-            st_a = [(pl, p, v) for k_, pl, p, v in seq if p is a]
-            st_b = [(pl, v, p) for k_, pl, p, v in seq if p is b]
-            pieces[n] = st_a + main + st_b
+            # the tree in Prim's order: its first line pad to pad, then each new pad's line
+            # from that pad, ending on the tree where it first comes beside it (a tee) or at
+            # its nearest pad
+            tree = _mst([(k, e.centre) for k, e in enumerate(ends)])
+            pieces[n] = [(L, ends[j], ends[i], q > 0) for q, (i, j) in enumerate(tree)] + \
+                [(pl, p, v, False) for (pl, p, v) in stubs.get(n, [])]
         m2 = copy.copy(model)
         m2.pads = list(model.pads) + placed
         # 3. each layer
-        got = {}
-        bad = set()
+        got, bad = {}, set()
         for L in layers:
-            pairs = [(n, x, y) for n, ps in pieces.items() for (Lp, x, y) in ps if Lp == L]
+            # net by net, the longest first; each net's pieces in their tree order
+            span = {n: sum(math.dist(x.centre, y.centre) for (_, x, y, _) in ps) for n, ps in pieces.items()}
+            pairs = [(n, x, y, t) for n in sorted(pieces, key=lambda n: (-span[n], n))
+                     for (Lp, x, y, t) in pieces[n] if Lp == L]
             if not pairs:
                 continue
-            # the longest first: short stubs find room round them
-            pairs.sort(key=lambda t: -math.dist(t[1].centre, t[2].centre))
-            mp = Map(m2, L, sorted({n for n, _, _ in pairs}))
+            mp = Map(m2, L, sorted({n for n, _, _, _ in pairs}))
             idx = {id(p): i for i, p in enumerate(mp.pads)}
             lids = {}
-            for j, (n, x, y) in enumerate(pairs):
-                pending = [(u.centre, w.centre) for _, u, w in pairs[j + 1:]]
-                lid = mp.route(n, idx[id(x)], idx[id(y)], pending=pending)
+            for j, (n, x, y, t) in enumerate(pairs):
+                pending = [(u.centre, w.centre) for n2, u, w, _ in pairs[j + 1:] if n2 != n]
+                lid = mp.route(n, idx[id(x)], idx[id(y)], pending=pending, tee=t)
                 if lid is None:
                     bad.add(n)
                 else:
@@ -899,34 +929,28 @@ def route_board(model, nets, layers=None, rounds=4, log=None):
             for lid, (n, x, y) in lids.items():
                 got[(n, L, id(x), id(y))] = paths[lid]
         failed = sorted(set(nets) - set(pieces)) + sorted(bad)
-        log.append(f"topo round {rnd + 1}: layers {dict(sorted(assign.items()))}; vias {len(placed)}; "
-                   f"split {sorted(split)}; failed {failed}")
+        log.append(f"topo round {rnd + 1}: layers {dict(sorted(assign.items()))}; vias {len(placed)}; failed {failed}")
         if not failed or rnd == rounds - 1:
             break
-        # 4. what failed: another layer, then a split
         for n in failed:
-            if n not in two or not allowed[n]:
-                continue
-            others = [x for x in allowed[n] if x != assign.get(n)]
-            if n in forced and n not in split:
-                split.add(n)
-            elif others:
-                forced[n] = others[0]
-    # the runs: each net's pieces joined at its vias
+            if n in many and allowed[n]:
+                others = [x for x in allowed[n] if x != assign.get(n)]
+                if others:
+                    forced[n] = others[(rnd // 1) % len(others)]
     for n, ps in pieces.items():
         if n in failed:
             continue
-        pts = []
-        for (L, x, y) in ps:
-            path = got.get((n, L, id(x), id(y)))
-            if path is None:
-                pts = None
-                break
-            seg = [(round(float(px), 4), round(float(py), 4), L) for px, py in path]
-            pts += seg
-        if not pts:
+        for (L, x, y, _) in ps:
+            path = got[(n, L, id(x), id(y))]
+            r = R2.Run(n, [(0, 0, 0)], R.width(n), via=R.via_size(n))
+            pts = [(round(float(px), 4), round(float(py), 4), L) for px, py in path]
+            r.pts = [q for i, q in enumerate(pts) if i == 0 or q != pts[i - 1]]
+            runs.append(r)
+    for v in placed:
+        if v.net in failed or v.net not in pieces:
             continue
-        r = R2.Run(n, [(0, 0, 0)], R.width(n), via=R.via_size(n))
-        r.pts = [q for i, q in enumerate(pts) if i == 0 or q != pts[i - 1]]
+        r = R2.Run(v.net, [(0, 0, 0)], R.width(v.net), via=R.via_size(v.net))
+        x, y = round(float(v.centre[0]), 4), round(float(v.centre[1]), 4)
+        r.pts = [(x, y, min(layers)), (x, y, max(layers))]
         runs.append(r)
-    return runs, failed, {"assign": assign, "vias": len(placed), "split": sorted(split), "log": log}
+    return runs, failed, {"assign": assign, "vias": len(placed), "split": [], "log": log}
