@@ -262,6 +262,27 @@ def drivers(board, comps, rails):
     return out
 
 
+ESCAPE_DEPTH = 1.2            # mm: Router.reserve_escapes' bands, and the packer's room for them
+
+
+def escape_rows(bd, depth, min_pins=8, pitch_max=1.3):
+    """{ref: ("pins", depth)} for each fine-pitch part (as Router.reserve_escapes picks them):
+    the packer keeps parts out of a band `depth` deep along each side its pins leave by,
+    read from the part as it stands once it is seated (Packer.escape_bands)."""
+    out = {}
+    for r, p in bd.parts.items():
+        geo = [g for n, f, g in p.padgeo if f == p.side and n and not n.startswith("unconnected")]
+        allp = [g for n, f, g in p.padgeo if f == p.side]
+        if len(allp) < min_pins or not geo:
+            continue
+        cs = [g.centroid for g in allp]
+        gaps = sorted(math.dist((a.x, a.y), (b.x, b.y)) for a in cs for b in cs if a is not b)
+        if not gaps or gaps[0] > pitch_max:
+            continue
+        out[r] = ("pins", depth)        # its sides read as it stands when the band is drawn
+    return out
+
+
 def place(board, lay, comps, fixed, log):
     geo = pcb_main.geometry()
     rails = [p["net"] for p in lay["planes"]] + [i["net"] for i in lay["islands"]] + ["DEV_3V3"]
@@ -303,7 +324,10 @@ def place(board, lay, comps, fixed, log):
                     bd.iron.append((r, "F", cop.buffer(0.25), rule["min"]))
     bd.unplaced = {r for r in bd.parts if r not in fixed}
     body = sorted(fixed)
-    pk = pcb_pack.Packer(bd, body, log)
+    # every fine-pitch part's pin rows keep a band clear of parts as deep as the router's
+    # escape bands (Router.reserve_escapes) and a margin: a pull-up seated against U7's pin
+    # ends left its own line no way past the neighbouring pins' bands to U7 pin 11 (R33)
+    pk = pcb_pack.Packer(bd, body, log, escape=escape_rows(bd, ESCAPE_DEPTH + 0.4))
     roles = key_roles(board)
     sheets = {r: comps.get(r, {}).get("sheet", "") for r in bd.parts}
     rep = pk.cold(sheets, patterns=[(list(roles), roles)], prefer=drivers(board, comps, rails))
@@ -488,7 +512,7 @@ def main():
                   start=start, stop=stop, pause="--pause" in sys.argv, edits=EDITS, accept=ACCEPT,
                   # every fine-pitch pin's escape band kept for its own net (Router.reserve_escapes):
                   # without them power and the chain walled in U8's pins 14 and 6 before the keys
-                  escape={"depth": 1.2})
+                  escape={"depth": ESCAPE_DEPTH})
     for line in r.log:
         if not line.startswith(("route:", "rescue ")):
             print("cold: route " + line)

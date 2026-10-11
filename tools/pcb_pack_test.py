@@ -31,6 +31,10 @@ packer's rule list.
                part is seated clear of it (pcb_pack's `wires` rule), and KiCad's DRC on the
                placed board finds no short or clearance - the main board's U8, seated on an
                IO39 hand route, six shorts no courtyard rule could see
+  pinroom      an SOIC's pull-up, whose best seat is against the SOIC's pin ends: with the
+               SOIC's pin rows given escape room ("pins": the sides read from its pads as
+               it stands) the pull-up is seated beyond it - the main board's R33, against
+               U7's pins, walled in by U7's own pins' escape bands
   edge         a part with nothing placed to reach but its anchor, which stands at the board's
                east edge: it goes to the board's interior side, not off the edge; and a
                part whose preferred side is walled tries the next side
@@ -44,7 +48,7 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-CELLS = ["minikey", "density", "moat", "contain", "refuse", "nofit", "report", "route", "turns", "rooms", "pattern180", "cold", "edge", "wires"]
+CELLS = ["minikey", "density", "moat", "contain", "refuse", "nofit", "report", "route", "turns", "rooms", "pattern180", "cold", "edge", "wires", "pinroom"]
 MINIBODY = ["SW1", "SW2", "SW3", "J1", "H1", "H2", "H3", "H4"]
 ISLBODY = ["J7", "H11", "H1", "H2", "H3", "H4", "TP1"]
 
@@ -399,6 +403,32 @@ def cell_wires(out, plot):
     res = {"R1": r1["result"], "seat": r1.get("seats"), "wire_hits": hits, "kicad": bad, "wires_read": len(bd.wires),
            "without_the_rule": {"seat": pk0.placed["R1"].centroid, "hits": hits0[:2]}}
     res["pass"] = r1["result"] == "packed" and not hits and not bad and len(bd.wires) == 3 and bool(hits0)
+    return res
+
+
+def cell_pinroom(out, plot):
+    pcbnew, P, R2, T = _setup()
+
+    def run(escape):
+        b = T.new_board(40, 24)
+        T.soic(b, "U1", ["A", "B", "C", "D", "E", "F", "G", "H"], 20.0, 12.0, 0, True)
+        T.passive(b, "R1", "B", "VCC", 30, 20)
+        T.tp(b, "TV", "VCC", 12.0, 12.0)
+        bd = P.board_of(b, rails=["VCC"])
+        bd.unplaced = {"R1"}
+        pk = P.Packer(bd, ["U1", "TV"], escape={"U1": ("pins", 1.6)} if escape else None)
+        r = pk.pack("U1", ["R1"], grow=12.0)
+        # the pin rows' room: 1.6 mm out from U1's courtyard on the sides its pins leave by
+        x0, y0, x1, y1 = pk.placed["U1"].court.bounds
+        room = unary_union([box(x1, y0, x1 + 1.6, y1), box(x0 - 1.6, y0, x0, y1)])
+        inside = pk.placed["R1"].court.intersection(room).area
+        return r["result"], round(inside, 3), [round(v, 2) for v in pk.placed["R1"].centroid]
+    from shapely.geometry import box
+    from shapely.ops import unary_union
+    without, with_ = run(False), run(True)
+    res = {"without": without, "with": with_}
+    # without the room R1 sits in it (its best seat); with it, R1 keeps out of it
+    res["pass"] = without[0] == with_[0] == "packed" and without[1] > 0 and with_[1] < 1e-6
     return res
 
 

@@ -393,10 +393,23 @@ class Packer:
     def escape_bands(self):
         out = []
         for ref, (side, depth) in self.escape.items():
-            x0, y0, x1, y1 = self.placed[ref].court.bounds
+            if ref in self.bd.unplaced or ref not in self.placed:
+                continue            # not seated yet: no band where it used to be
+            part = self.placed[ref]
+            x0, y0, x1, y1 = part.court.bounds
             d = float(depth)
-            out.append({"E": box(x1, y0, x1 + d, y1), "W": box(x0 - d, y0, x0, y1),
-                        "S": box(x0, y1, x1, y1 + d), "N": box(x0, y0 - d, x1, y0)}[side])
+            if side == "pins":
+                # the sides its pins leave by, read from the pads as the part now stands (a
+                # packed part may have been turned): pads long in x leave E and W
+                g = next((g_ for n, f, g_ in part.padgeo if f == part.side), None)
+                if g is None:
+                    continue
+                gx0, gy0, gx1, gy1 = g.bounds
+                side = "EW" if (gx1 - gx0) >= (gy1 - gy0) else "NS"
+            # `side`: one of E W N S, or several ("EW": both pin rows of an SOIC)
+            for s_ in side:
+                out.append({"E": box(x1, y0, x1 + d, y1), "W": box(x0 - d, y0, x0, y1),
+                            "S": box(x0, y1, x1, y1 + d), "N": box(x0, y0 - d, x1, y0)}[s_])
         return out
 
     def movable(self, anchor, parts=None):
