@@ -70,7 +70,10 @@ FAMILIES = [
     # each key's T into its register
     {"name": "keys", "nets": ["/KEY_*", "*/SWITCH_LEG"]},
     # the Matrix's lines from J-MCU: SPI, the LED data, the service UART
-    {"name": "mcu", "nets": ["/IO*", "/SPI*", "*TXD*", "*RXD*", "/led-strip-drive/*", "/LED_*"]},
+    # IO36 leads: on 2026-10-11 (3dfb6b8f) IO2 threaded U1's pads on F.Cu and closed a loop
+    # round U1 pin 3, IO36's own, and a 1627 s rescue did not undo it
+    {"name": "mcu", "nets": ["/IO*", "/SPI*", "*TXD*", "*RXD*", "/led-strip-drive/*", "/LED_*"],
+     "first": ["/IO36"]},
     {"name": "midi", "nets": ["*MIDI*"]},
 ]
 
