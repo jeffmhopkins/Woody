@@ -139,20 +139,9 @@ PLACE_FINDINGS = ("courtyards_overlap", "items_not_allowed", "shorting_items", "
 # THE REVIEWER'S MOVES, by family, each with why (Router.edit: reroute / through / clear).
 # The record of every review of this trial; replayed by every run from that family on.
 EDITS = {
-    "mcu-fanin": [
-        # Review of family 5 (mcu-fanin), 2026-10-11 (3dfb6b8f): IO35 open at J1.10. IO1 left
-        # J1.4, the westmost of these pins, up and EAST on F.Cu to R10 across pins 6, 8 and 10;
-        # IO7 and IO38, both bound west, were forced east between diagonals and doubled back,
-        # over pin 10's way out. A first try clearing IO38 alone failed: "still in the
-        # rectangle" - IO1 had closed the west. J-MCU is THT: IO1 can take the back at its pad
-        {"clear": "/IO1", "rect": [317.2, 128.8, 323.0, 136.8],
-         "why": "IO1 bound east across the row's westbound exits"},
-        {"clear": "/IO7", "rect": [318.4, 128.8, 325.0, 136.8],
-         "why": "IO7's detour east over J1.10; R35 is west"},
-        {"clear": "/IO38", "rect": [319.7, 128.8, 325.0, 136.8],
-         "why": "IO38's detour east over J1.10; R34 is west"},
-        {"reroute": "/IO35", "why": "J1.10, free once IO38 is out"},
-    ],
+    # mcu-fanin's edits (2026-10-11: clear IO1, IO7, IO38 off J-MCU's top row, reroute IO35)
+    # were moves on the 3dfb6b8f placement's copper; withdrawn with the header band, which
+    # moved the parts they worked round. In git, 22edb841..907418bb
     "chain": [
         # Review of family 5 (mcu), 2026-10-11 (3dfb6b8f): IO1 and IO36 open - J-MCU pins 4 and
         # 12, and U1 pin 3, walled in above J-MCU's top row (y 131-138). The mcu family's own
@@ -332,17 +321,25 @@ def drivers(board, comps, rails):
     return out
 
 
+HEADER_ESCAPE = 3.5           # mm: the packer's room in front of a fine-pitch header's rows
 ESCAPE_DEPTH = 1.2            # mm: Router.reserve_escapes' bands, and the packer's room for them
 
 
-def escape_rows(bd, depth, min_pins=8, pitch_max=1.3):
+def escape_rows(bd, depth, min_pins=8, pitch_max=1.3, header_depth=None):
     """{ref: ("pins", depth)} for each fine-pitch part (as Router.reserve_escapes picks them):
     the packer keeps parts out of a band `depth` deep along each side its pins leave by,
-    read from the part as it stands once it is seated (Packer.escape_bands)."""
+    read from the part as it stands once it is seated (Packer.escape_bands). A fine-pitch
+    through-hole CONNECTOR (J*) gets `header_depth` instead: a whole row of lines leaves it,
+    not one pin's stub, and they need room to fan before anything stands in front of them."""
     out = {}
     for r, p in bd.parts.items():
-        # surface-mount parts only, as the router's bands (Router.reserve_escapes smd_only)
-        if p.item is not None and any(q.GetAttribute() != pcbnew.PAD_ATTRIB_SMD for q in p.item.Pads()):
+        tht = p.item is not None and any(q.GetAttribute() != pcbnew.PAD_ATTRIB_SMD for q in p.item.Pads())
+        # surface-mount parts, as the router's bands (Router.reserve_escapes smd_only); and the
+        # fine-pitch headers, for the packer only. The 3dfb6b8f placement seated R10, R48 and
+        # R49 (U6's pull resistors) in a row 1-2 mm off J-MCU's top row - across the exits
+        # of its 1.27 mm pins - and five re-runs of the mcu families, each with hand edits,
+        # walled in a different one of those pins every time (2026-10-11)
+        if tht and not (header_depth and r.startswith("J")):
             continue
         geo = [g for n, f, g in p.padgeo if f == p.side and n and not n.startswith("unconnected")]
         allp = [g for n, f, g in p.padgeo if f == p.side]          # a through-hole pin is on its face too
@@ -352,7 +349,7 @@ def escape_rows(bd, depth, min_pins=8, pitch_max=1.3):
         gaps = sorted(math.dist((a.x, a.y), (b.x, b.y)) for a in cs for b in cs if a is not b)
         if not gaps or gaps[0] > pitch_max:
             continue
-        out[r] = ("pins", depth)        # its sides read as it stands when the band is drawn
+        out[r] = ("pins", header_depth if tht else depth)   # its sides read as it stands when drawn
     return out
 
 
@@ -400,7 +397,7 @@ def place(board, lay, comps, fixed, log):
     # every fine-pitch part's pin rows keep a band clear of parts as deep as the router's
     # escape bands (Router.reserve_escapes) and a margin: a pull-up seated against U7's pin
     # ends left its own line no way past the neighbouring pins' bands to U7 pin 11 (R33)
-    pk = pcb_pack.Packer(bd, body, log, escape=escape_rows(bd, ESCAPE_DEPTH + 0.4))
+    pk = pcb_pack.Packer(bd, body, log, escape=escape_rows(bd, ESCAPE_DEPTH + 0.4, header_depth=HEADER_ESCAPE))
     roles = key_roles(board)
     sheets = {r: comps.get(r, {}).get("sheet", "") for r in bd.parts}
     rep = pk.cold(sheets, patterns=[(list(roles), roles)], prefer=drivers(board, comps, rails))
@@ -559,8 +556,11 @@ def main():
         pe = [e[:3] for e in errs if e[0] in PLACE_FINDINGS]
         print(f"cold: KiCad placement findings: {pe or 'none'}")
         if "--place-only" in sys.argv:
-            pcbnew.SaveBoard(OUT, board)
-            print(f"cold: placed only - wrote {os.path.relpath(OUT, ROOT)}")
+            # into --out when one is given: the checkpoint already is the placement, and the
+            # committed trial board is not a scratch file (it was overwritten twice, 2026-10-11)
+            if "--out" not in sys.argv:
+                pcbnew.SaveBoard(OUT, board)
+            print(f"cold: placed only - wrote {cp0 if '--out' in sys.argv else os.path.relpath(OUT, ROOT)}")
             return 1 if pe else 0
         if pe and "--force" not in sys.argv:
             os.remove(cp0)
