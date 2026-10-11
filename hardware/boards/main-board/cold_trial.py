@@ -80,7 +80,10 @@ FAMILIES = [
 ACCEPT = {
     # 2026-10-10: J5 pin 10 can only leave its 1.27 mm header round the end; 9.6 mm for a
     # 3.4 mm airwire is the way round (the source's run was 23.5 mm)
-    "power": ["still long: /V3V3_CHAIN_RH"],
+    "power": ["still long: /V3V3_CHAIN_RH",
+              # 2026-10-11: 39.4 mm (the source's 28.5; this placement's buck corner has given
+              # 35-54 in every run) - C207 and C43 at U13 and U5, the rail between them
+              "still long: /power-entry-instrument/BUCK_A_OUT"],
     "keys": [
         # 2026-10-11: 9.1 mm for a 4.5 mm airwire - U7's pin rows' room puts R33 that far off;
         # the source's run was 10.5 mm
