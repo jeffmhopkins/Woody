@@ -1824,7 +1824,7 @@ class Router:
             out["why"] = str(why)
         return out
 
-    def reserve_escapes(self, depth=1.2, min_pins=8, pitch_max=1.3):
+    def reserve_escapes(self, depth=1.2, min_pins=8, pitch_max=1.3, field_cost=3.0):
         """ESCAPE BANDS: each SMD pin of a fine-pitch part (at least `min_pins` SMD pads, its
         rows' pitch at most `pitch_max`) gets a band `depth` mm out from its pad's outer
         end, as wide as the pad, reserved for that pin's own net on the pad's layer: room
@@ -1837,6 +1837,7 @@ class Router:
             if p.smd and p.net and not p.net.startswith("unconnected"):
                 byref.setdefault(p.ref, []).append(p)
         n = 0
+        every = list(range(self.m.nl))
         for ref, ps in sorted(byref.items()):
             allp = [p for p in self.m.pads if p.ref == ref and p.smd]
             if len(allp) < min_pins:
@@ -1853,10 +1854,18 @@ class Router:
                     band = box(x1, y0, x1 + depth, y1) if p.centre[0] > cx else box(x0 - depth, y0, x0, y1)
                 else:
                     band = box(x0, y1, x1, y1 + depth) if p.centre[1] > cy else box(x0, y0 - depth, x1, y0)
-                self.m.index.add(net=None, layers=list(p.layers), geom=band, kind="reserve", locked=True,
-                                 family={p.net})
+                # on every layer: the via a pin escapes by stands on all of them, and a run on
+                # the back under the pin closed its way as surely as one on its own face (U8
+                # pin 14: KEY_SWM 0.34 mm under it on B.Cu)
+                self.m.index.add(net=None, layers=every, geom=band, kind="reserve", locked=True, family={p.net})
                 n += 1
-        self.log.append(f"escape bands: {n}, {depth} mm out from each pin of each fine-pitch part")
+            # and the part's whole pin field - its pads, their bands, the body between - DEAR to
+            # every net: one entering for its own pin pays a millimetre or two, a rail run through
+            # it pays its length (DEV_3V3 ran 22.8 mm through U8's)
+            field = unary_union([q.geom for q in allp]).convex_hull.buffer(depth, join_style="mitre")
+            self.soft.append((field, every, field_cost))
+        self.log.append(f"escape bands: {n}, {depth} mm out from each pin of each fine-pitch part, on every layer;"
+                        f" their fields {field_cost:g}x")
         return n
 
     def adopt(self, nets=None):
