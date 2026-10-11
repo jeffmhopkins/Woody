@@ -1182,14 +1182,15 @@ def plan_layers(model, nets, pads, layers, allowed, start, rounds=6, log=None, l
         order = sorted(nets, key=lambda n: (-sum(c for m_, c in xg.get(n, {}).items() if col.get(m_) == col.get(n)), n))
     # the guides: the best round's lines drawn (in the plan map, every layer's copper in the
     # way) - one MultiLineString of each net's lines
-    _, col, mp, lids = best
+    key, col, mp, lids = best
     paths = mp.geometry(passes=3, rounds=1)
     from shapely.geometry import MultiLineString
     guides = {n: MultiLineString([paths[l] for l in ls if len(paths[l]) > 1]) for n, ls in lids.items()}
+    plan_layers.last = {"same": key[0], "unplanned": key[1]}
     return col, guides
 
 
-def plan(model, nets, layers=None, log=None, later=()):
+def plan(model, nets, layers=None, log=None, later=(), rounds=6):
     """THE PLAN alone (ADR 0029 as amended 2026-10-11): every net of `nets` planned together,
     crossings negotiated, a layer chosen for each net. Returns {"layer": {net: layer index},
     "guide": {net: MultiLineString}} - the grid router lays the copper along it
@@ -1201,7 +1202,7 @@ def plan(model, nets, layers=None, log=None, later=()):
         layers = sorted({L for n in many for L in model.track_layers(n)})
     allowed = {n: [L for L in model.track_layers(n) if L in layers] for n in many}
     if not many:
-        return {"layer": {}, "guide": {}}
+        return {"layer": {}, "guide": {}, "same": 0, "unplanned": 0, "length": 0.0, "score": 0.0}
     aw = {n: [(pads[n][i].centre, pads[n][j].centre)
               for i, j in _mst([(k, p.centre) for k, p in enumerate(pads[n])])] for n in many}
     adj = {n: {m_ for m_ in many if m_ != n and any(_cross(*e, *f) for e in aw[n] for f in aw[m_])}
@@ -1226,9 +1227,15 @@ def plan(model, nets, layers=None, log=None, later=()):
         paths = mp.geometry(passes=3, rounds=1)
         from shapely.geometry import MultiLineString
         guides = {n: MultiLineString([paths[l] for l in ls if len(paths[l]) > 1]) for n, ls in lids.items()}
-        return {"layer": col, "guide": guides}
-    col, guides = plan_layers(model, many, pads, layers, allowed, start, log=log, later=later)
-    return {"layer": col, "guide": guides}
+        un = len(set(many) - set(guides))
+        length = sum(g.length for g in guides.values())
+        return {"layer": col, "guide": guides, "same": 0, "unplanned": un, "length": length,
+                "score": un * 100.0 + length}
+    col, guides = plan_layers(model, many, pads, layers, allowed, start, rounds=rounds, log=log, later=later)
+    last = getattr(plan_layers, "last", {"same": 0, "unplanned": 0})
+    length = sum(g.length for g in guides.values())
+    return {"layer": col, "guide": guides, "same": last["same"], "unplanned": last["unplanned"] + len(set(many) - set(guides)),
+            "length": length, "score": last["same"] * 10.0 + (last["unplanned"] + len(set(many) - set(guides))) * 100.0 + length}
 
 
 def route_board(model, nets, layers=None, rounds=4, log=None, later=()):

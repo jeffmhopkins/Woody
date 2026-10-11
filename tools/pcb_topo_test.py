@@ -16,7 +16,7 @@ sys.path.insert(0, HERE)
 
 CELLS = ["squeeze", "middle", "fan", "around", "cross", "grid", "scramble", "triad", "channel", "tree",
          "stagemix", "stacked", "stage4", "island4", "crowd",
-         "widths", "clear", "layercost", "guard", "part", "mixed"]
+         "widths", "clear", "layercost", "guard", "part", "mixed", "float", "floatcrowd"]
 
 
 def _setup():
@@ -327,7 +327,7 @@ def cell_island4(out, plot):
     return res
 
 
-def crowd_board():
+def crowd_board(misplace=False):
     """The main board's J-MCU crowd, small: a 2 x 10, 1.27 mm through-hole header (J1) with
     a 14-pin driver (U6) and a 6-pin protection array (U1) beside it, series and pull
     resistors, and the far ends at the board's edges - the nets that walled each other in
@@ -365,6 +365,12 @@ def crowd_board():
     T.passive(b, "R11", "GATE", "LEDDI", 33.0, 14.0)
     T.passive(b, "R35", "IO7", "SHLD", 16.0, 30.0)
     T.passive(b, "R34", "IO38", "SCK", 12.0, 34.0)
+    if misplace:
+        # the main board's 3dfb6b8f placement, small: the pull and series resistors in a row
+        # just in front of J1's top row, across its pins' way out (#47 T7's test)
+        for ref, x in (("R10", 31.0), ("R48", 35.0), ("R35", 39.0), ("R34", 43.0)):
+            fp_ = b.FindFootprintByReference(ref)
+            fp_.SetPosition(T.V(x, 33.0))
     T.passive(b, "R1", "IO35", "SCLK", 54.0, 24.0, rot=90.0)
     T.passive(b, "R2", "IO36", "MOSI", 57.0, 24.0, rot=90.0)
     # the far ends, at the edges
@@ -393,6 +399,83 @@ def cell_crowd(out, plot):
     res["pushed"] = [p[0] for x in rep for p in x["pushed"]]
     res["topo_log"] = [l_ for l_ in r.log if l_.startswith("topo")]
     res["pass"] = res["pass"] and not res["pushed"]
+    return res
+
+
+# ------------------------------------------------------------------ T7: floating passives
+
+def _plan_score(lay, nets, rounds=6):
+    _, R2, _, TP, _ = _setup()
+
+    def score(board):
+        m = R2.model_from_board(board, lay)
+        return TP.plan(m, nets, rounds=rounds)["score"]
+    return score
+
+
+def _plan_of(lay, nets):
+    _, R2, _, TP, _ = _setup()
+
+    def plan(board):
+        m = R2.model_from_board(board, lay)
+        return TP.plan(m, nets)
+    return plan
+
+
+def cell_float(out, plot):
+    """R1 stands across A's way (A front-only), its own nets' far ends above it: floating, R1
+    drifts up toward them - out of A's way - and A runs straight."""
+    pcbnew, R2, T, _, B = _setup()
+    import pcb_pack as P
+    b = _t6_board(40.0, 24.0)
+    T.tp(b, "A1", "A", 4.0, 12.0)
+    T.tp(b, "A2", "A", 36.0, 12.0)
+    T.passive(b, "R1", "P", "Q", 20.0, 12.0, rot=90.0)
+    T.tp(b, "TP", "P", 18.0, 2.0)
+    T.tp(b, "TQ", "Q", 22.0, 2.0)
+    lay = dict(B.LAY, net_classes={"front": {"nets": ["A"], "layers": ["F.Cu"]}})
+    nets = ["A", "P", "Q"]
+    rep = P.float_parts(b, score=_plan_score(lay, nets))
+    res, m, r, srep = _stage("float", b, lay, [{"name": "all", "nets": nets, "engine": "topo"}], out, plot)
+    a_len = sum(x.length() for x in r.runs_of("A"))
+    res.update(moved=rep["moved"], score=rep["score"], a_mm=round(a_len, 2))
+    dy = rep["moved"].get("R1", (0, 0))[1]
+    res["pass"] = res["pass"] and dy < -3.0 and a_len < 32.0 + 0.6
+    return res
+
+
+def _pc_pt(b, ref):
+    import pcbnew as _pc
+    from shapely.geometry import Point
+    p = b.FindFootprintByReference(ref).GetPosition()
+    return Point(_pc.ToMM(p.x), _pc.ToMM(p.y))
+
+
+def cell_floatcrowd(out, plot):
+    """The crowd board with its pull and series resistors misplaced in a row in front of J1's
+    pins - the mistake the main board's placement made - floated, then routed: the plan's
+    score falls, they leave the header's front, and every net routes clean."""
+    pcbnew, R2, _, _, B = _setup()
+    import pcb_pack as P
+    b = crowd_board(misplace=True)
+    nets = ["IO1", "IO2", "IO6", "IO7", "IO38", "IO35", "IO36", "IO34", "TXD", "IO37", "GATE", "LEDDI", "MTIP",
+            "MRING", "SHLD", "SCK", "SCLK", "MOSI"]
+    lay = dict(B.LAY, planes=[{"layer": "In1.Cu", "net": "GND"}, {"layer": "In2.Cu", "net": "V3"}], fanout=["GND", "V3"])
+    refs = ["R10", "R48", "R35", "R34"]
+    rep = P.float_parts(b, refs=refs, rails=["GND", "V3"], score=_plan_score(lay, nets, rounds=2), accept="search")
+    # how far each now stands from J1's top row's way out (the band in front of its pins)
+    import pcbnew as _pc
+    j1 = b.FindFootprintByReference("J1")
+    from shapely.geometry import box as _bx
+    bx0 = _pc.ToMM(j1.GetPosition().x) - 7.0
+    band = _bx(bx0, 31.0, bx0 + 14.0, 36.0)
+    left = [r_ for r_ in refs if not band.contains(_pc_pt(b, r_))]
+    res, m, r, srep = _stage("floatcrowd", b, lay, [{"name": "crowd", "nets": nets, "engine": "topo"}], out, plot)
+    res.update(moved=rep["moved"], score=rep["score"], out_of_the_way=left)
+    # the misplaced board routes clean without floating too (the cell float is the one where
+    # floating is needed); here the claim is that the search finds a better plan and moves
+    # resistors out of the header's front, and the board still routes clean
+    res["pass"] = res["pass"] and rep["score"][1] < rep["score"][0] and len(left) >= 2
     return res
 
 

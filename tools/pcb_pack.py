@@ -1113,6 +1113,190 @@ def reseat(kboard, open_pads, rails=(), body=(), escape=None, reach=1.5, log=Non
     return rep
 
 
+def float_parts(kboard, refs=None, rails=(), body=(), score=None, rounds=8, step=1.5, log=None, plan=None,
+                push=2.0, reach=3.0, accept="final"):
+    """FLOATING PASSIVES (#47 T7; the owner, 2026-10-11: "have the passive components auto
+    align based on the weights of the nets pulling on them while we route"). Each part that
+    may move - a passive (three pads at most), not locked, not the body CAD's (`body`), no
+    copper on its pads yet, and in `refs` if given - is pulled by each of its signal nets
+    toward the middle of that net's other pads (a rail or plane net - `rails` - pulls
+    nothing: its pour reaches everywhere). Round by round every part steps toward its pull,
+    at most `step` mm, to the nearest legal seat on the way (the packer's whole rule list);
+    the moves are kept only if `score(kboard)` (lower is better - the topological plan's
+    same-layer crossings, nets unplanned and length) goes down, else they are put back and
+    the step halved. With `plan(kboard)` -> the topological plan ({"score", "guide": {net:
+    geometry}}) in place of `score`, each part is also PUSHED away from the planned ways of
+    other nets passing within `reach` mm of it, `push` times as strong as the pull at the
+    closest - a part where the plan's lines crowd is in their way, whatever its own nets
+    say (the crowd board: R10's pull is between U6 and J1, which is where it stood, in front
+    of J1's pins). `accept`: "each" judges every round by the score (put back if worse);
+    "final" lets the parts follow the forces for every round, the step shrinking by a fifth
+    each, and judges only the end - all put back if the plan is worse than it began. The
+    plan's score is rugged (a half-millimetre step adds or takes away whole crossings), so
+    judged round by round the crowd board's resistors never left J1's front.
+    Returns {"moved": {ref: (dx, dy)}, "score": (before, after), "rounds": n}.""" 
+    if plan is not None:
+        score = lambda kb: _float_plan(plan, kb)["score"]
+    import pcbnew
+    log = log if log is not None else []
+    rails = set(rails)
+    tracks = list(kboard.GetTracks())
+
+    def has_copper(fp):
+        for pad in fp.Pads():
+            for t in tracks:
+                if t.GetNetCode() != pad.GetNetCode():
+                    continue
+                ends = [t.GetPosition()] if isinstance(t, pcbnew.PCB_VIA) else [t.GetStart(), t.GetEnd()]
+                if any(pad.HitTest(e) for e in ends):
+                    return True
+        return False
+    bd = board_of(kboard, rails=sorted(rails))
+    movable = sorted(r for r, p in bd.parts.items() if (refs is None or r in refs) and not p.locked
+                     and r not in body and len(p.pads) <= 3 and not has_copper(p.item))
+    start_xy = {r: kboard.FindFootprintByReference(r).GetPosition() for r in movable}
+    best = score(kboard) if score else 0.0
+    first = best
+    guides = _float_plan.last.get("guide", {}) if plan is not None else {}
+    rnd = 0
+    for rnd in range(rounds if accept != "search" else 0):
+        bd = board_of(kboard, rails=sorted(rails))
+        pk = Packer(bd, body, log)
+        placed = pk.placed
+        props = {}
+        for r in movable:
+            p = placed[r]
+            pulls = []
+            for n in sorted(p.nets() - rails):
+                if n.startswith("unconnected"):
+                    continue
+                qs = [xy for r2, p2 in bd.parts.items() if r2 != r for (m, xy) in p2.pads if m == n]
+                if qs:
+                    pulls.append((sum(x for x, _ in qs) / len(qs), sum(y for _, y in qs) / len(qs)))
+            if not pulls:
+                continue
+            tx, ty = sum(x for x, _ in pulls) / len(pulls), sum(y for _, y in pulls) / len(pulls)
+            cx, cy = p.centroid
+            d = math.hypot(tx - cx, ty - cy)
+            fx, fy = ((tx - cx) / d, (ty - cy) / d) if d > 1e-9 else (0.0, 0.0)
+            # the push: away from every other net's planned way within reach
+            c0 = Point(cx, cy)
+            for n2, g in guides.items():
+                if n2 in p.nets() or g is None or g.is_empty:
+                    continue
+                dd = g.distance(p.court)
+                if dd >= reach:
+                    continue
+                from shapely.ops import nearest_points
+                q = nearest_points(g, c0)[0]
+                vx, vy = cx - q.x, cy - q.y
+                vn = math.hypot(vx, vy)
+                if vn < 1e-9:
+                    continue
+                k = push * (reach - dd) / reach
+                fx, fy = fx + k * vx / vn, fy + k * vy / vn
+            fn = math.hypot(fx, fy)
+            if fn < 0.05 or (d < 0.3 and fn < 0.5):
+                continue
+            ux, uy = fx / fn, fy / fn
+            d = max(d, 2.0 * step)
+            s = min(step, d * 0.5)
+            for f in (1.0, 0.66, 0.33):
+                done = False
+                for side in (0.0, 0.5, -0.5, 1.0, -1.0):
+                    dx, dy = ux * s * f - uy * s * side, uy * s * f + ux * s * side
+                    q = p.moved(dx, dy)
+                    trial = dict(placed)
+                    trial[r] = q
+                    if not violations(bd, q, trial):
+                        props[r] = q
+                        placed[r] = q
+                        done = True
+                        break
+                if done:
+                    break
+        if not props:
+            break
+        before_xy = {r: kboard.FindFootprintByReference(r).GetPosition() for r in props}
+        pk.apply(kboard)
+        if accept == "final":
+            step *= 0.8
+            if plan is not None:
+                guides = _float_plan(plan, kboard).get("guide", {})
+            log.append(f"float round {rnd + 1}: moved {sorted(props)} (judged at the end)")
+            continue
+        now = score(kboard) if score else best - 1.0
+        if now < best - 1e-6:
+            best = now
+            if plan is not None:
+                guides = _float_plan.last.get("guide", {})
+            log.append(f"float round {rnd + 1}: moved {sorted(props)}; score {round(now, 2)}")
+        else:
+            for r, xy in before_xy.items():
+                kboard.FindFootprintByReference(r).SetPosition(xy)
+            step *= 0.5
+            log.append(f"float round {rnd + 1}: no better ({round(now, 2)} >= {round(best, 2)}) - put back, step {step:g}")
+            if step < 0.3:
+                break
+    if accept == "search" and score:
+        best = first
+        for pass_ in range(2):
+            better = False
+            for r in movable:
+                bd = board_of(kboard, rails=sorted(rails))
+                pk = Packer(bd, body, log)
+                p = pk.placed[r]
+                fp = kboard.FindFootprintByReference(r)
+                home = fp.GetPosition()
+                cands = []
+                for ang in range(0, 360, 45):
+                    for dist in (2.0, 3.5):
+                        cands.append((dist * math.cos(math.radians(ang)), dist * math.sin(math.radians(ang))))
+                tried = []
+                for dx, dy in cands:
+                    q = p.moved(dx, dy)
+                    trial = dict(pk.placed)
+                    trial[r] = q
+                    if violations(bd, q, trial):
+                        continue
+                    fp.SetPosition(pcbnew.VECTOR2I(home.x + pcbnew.FromMM(dx), home.y + pcbnew.FromMM(dy)))
+                    tried.append((score(kboard), dx, dy))
+                    fp.SetPosition(home)
+                if tried:
+                    sc, dx, dy = min(tried)
+                    if sc < best - 1e-6:
+                        fp.SetPosition(pcbnew.VECTOR2I(home.x + pcbnew.FromMM(dx), home.y + pcbnew.FromMM(dy)))
+                        best, better = sc, True
+                        log.append(f"float search pass {pass_ + 1}: {r} by ({dx:.1f}, {dy:.1f}) - score {round(sc, 2)}")
+            if not better:
+                break
+    if accept == "final" and score:
+        now = score(kboard)
+        if now < first - 1e-6:
+            best = now
+            log.append(f"float: kept, score {round(first, 2)} -> {round(now, 2)}")
+        else:
+            for r in movable:
+                kboard.FindFootprintByReference(r).SetPosition(start_xy[r])
+            best = first
+            log.append(f"float: put back - score {round(now, 2)} not below {round(first, 2)}")
+    moved = {}
+    for r in movable:
+        a, b = start_xy[r], kboard.FindFootprintByReference(r).GetPosition()
+        if a != b:
+            moved[r] = (round(pcbnew.ToMM(b.x - a.x), 3), round(pcbnew.ToMM(b.y - a.y), 3))
+    return {"moved": moved, "score": (round(first, 3), round(best, 3)), "rounds": rnd + 1, "movable": movable}
+
+
+def _float_plan(plan, kb):
+    """plan(kb), kept for its guides (float_parts' push)."""
+    _float_plan.last = plan(kb)
+    return _float_plan.last
+
+
+_float_plan.last = {}
+
+
 def _kturn(x, y, deg):
     """A vector turned as KiCad turns a part by `deg` (counter-clockwise on screen, y down)."""
     if not deg:
