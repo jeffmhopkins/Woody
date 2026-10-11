@@ -772,6 +772,7 @@ class Router:
         self.X, self.Y = np.meshgrid(xs, ys, indexing="ij")
         self.runs = []
         self.stats = defaultdict(int)
+        self.net_time = {}          # seconds per net (and per "rescue NET"), for the family's log
         self.log = []
         self._buf = {}
         self.flow = np.zeros((self.nx, self.ny))
@@ -1510,7 +1511,9 @@ class Router:
         rest = [n for n in self.order(nets, first) if n not in done]
         for n in rest:
             self.set_flow([m for m in nets if m not in done and m != n])
+            t0 = time.monotonic()
             ok, _, why = self.route_net(n)
+            self.net_time[n] = self.net_time.get(n, 0.0) + time.monotonic() - t0
             done.add(n)
             if not ok:
                 failed[n] = why
@@ -1520,7 +1523,10 @@ class Router:
         if rescue:
             self.ground = ground
             for n in list(failed):
-                if self.rescue(n):
+                t0 = time.monotonic()
+                got = self.rescue(n)
+                self.net_time["rescue " + n] = self.net_time.get("rescue " + n, 0.0) + time.monotonic() - t0
+                if got:
                     failed.pop(n)
         if ground:
             self.route_ground(ground)
@@ -1704,9 +1710,12 @@ class Router:
             # laid last, the longest tree found its corridor taken - the main board, run 3)
             lead = [n for p_ in fam.get("first") or [] for n in nets if n == p_ or fnmatch.fnmatch(n, p_)]
             log0 = len(self.log)
+            tt = {"route": time.monotonic()}
             failed = self.route(nets, first=lead + [n for n in first if n in nets and n not in lead], rescue=True)
             rescued = [l_[len("rescue: "):] for l_ in self.log[log0:] if l_.startswith("rescue: ")]
             # 2. pushed in: past this family's copper, shoved aside (earlier families are locked)
+            tt["route"] = round(time.monotonic() - tt["route"], 1)
+            t_ = time.monotonic()
             pushed = []
             for n in list(failed):
                 rep = self.reroute(n)
@@ -1715,6 +1724,8 @@ class Router:
                     pushed.append((n, rep["mode"], rep["shoved"]))
                 self.log.append(f"stage {name}: {n} pushed in - {rep['mode']}" + (f", shoved {rep['shoved']}" if rep["shoved"] else ""))
             # 3. the review: detours routed again with a pull
+            tt["push"] = round(time.monotonic() - t_, 1)
+            t_ = time.monotonic()
             rerouted = []
             for n in nets:
                 if n in failed:
@@ -1726,6 +1737,8 @@ class Router:
                     after = sum(r_.length() for r_ in self.runs_of(n))
                     rerouted.append((n, round(ln, 1), round(after, 1), rep.get("mode")))
             # 4. the reviewer's own moves
+            tt["detours"] = round(time.monotonic() - t_, 1)
+            t_ = time.monotonic()
             done_edits = []
             for spec in edits.get(name, []):
                 rep = self.edit(spec)
@@ -1739,7 +1752,10 @@ class Router:
                         self._lock(r_)
                     failed.pop(rep["net"], None)
             # 5. the liquid pass, over this family alone (everything earlier is locked)
+            tt["edits"] = round(time.monotonic() - t_, 1)
+            t_ = time.monotonic()
             liq = self.liquid(fillet) if liquid else None
+            tt["liquid"] = round(time.monotonic() - t_, 1)
             for n, saved in saved_cls.items():
                 if saved is None:
                     self.R.of.pop(n, None)
@@ -1771,6 +1787,10 @@ class Router:
             rec["accepted"] = [w for w in why if any(w.startswith(a) for a in ok_)]
             rec["review"] = [w for w in why if w not in rec["accepted"]]
             report.append(rec)
+            slow = sorted(((t_, n_) for n_, t_ in self.net_time.items() if n_.split(" ")[-1] in nets), reverse=True)[:5]
+            rec["slowest"] = [(n_, round(t_, 1)) for t_, n_ in slow]
+            rec["seconds"] = tt
+            self.log.append(f"stage {k} {name}: seconds {tt}; slowest nets {rec['slowest']}")
             self.log.append(f"stage {k} {name}: {rec['nets']} net(s), {rec['runs']} run(s), {rec['length_mm']} mm, "
                             f"{rec['vias']} via(s); failed {list(failed) or 'none'}; pushed in {len(pushed)}; "
                             f"detours re-routed {len(rerouted)}; edits {len(done_edits)}; liquid {liq}")

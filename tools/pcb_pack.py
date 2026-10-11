@@ -439,6 +439,8 @@ class Packer:
         for r in cluster:
             p = self.placed[r]
             fe = self.bd.far_ends(p, set(cluster) | {anchor})
+            if not fe:
+                fe = self.far_ends2(p, set(cluster) | {anchor})
             if fe:
                 fx = sum(q[0] for _, _, q in fe) / len(fe)
                 fy = sum(q[1] for _, _, q in fe) / len(fe)
@@ -450,6 +452,30 @@ class Packer:
                 fx, fy = (c.x, c.y) if math.dist((c.x, c.y), (ax, ay)) > 1e-6 else (ax + 1, ay)
             # the pad on the anchor this part joins sets where it sits along the side
             out[r] = max(SIDES, key=lambda s: SIDES[s][0] * (fx - ax) + SIDES[s][1] * (fy - ay))
+        return out
+
+    def far_ends2(self, part, cluster):
+        """Two hops: where the part's nets lead through its UNPLACED neighbours - each such
+        neighbour's other signal nets, to the nearest placed pad on them. For a part seated
+        before its neighbours, whose only placed far end is its anchor: U6 (the LED level
+        shifter) went to J-MCU's far side, away from LED 1 its output reaches through R11,
+        because nothing placed told it which way (the main board, its IO6 247 mm for 33)."""
+        rails = self.bd.rails
+        mine = {n for n, _ in part.pads if n and not n.startswith("unconnected") and n not in rails}
+        out = []
+        for r, q in self.placed.items():
+            if r not in self.bd.unplaced or r == part.ref or r in cluster:
+                continue
+            qn = {n for n, _ in q.pads if n and not n.startswith("unconnected") and n not in rails}
+            via = mine & qn
+            if not via:
+                continue
+            for n in sorted(qn - via):
+                cand = [xy for r2, p2 in self.placed.items() if r2 not in self.bd.unplaced and r2 not in cluster
+                        and r2 != part.ref for (m, xy) in p2.pads if m == n]
+                if cand:
+                    c0 = part.centroid
+                    out.append((n, c0, min(cand, key=lambda xy: math.dist(xy, c0))))
         return out
 
     def _side_order(self, anchor, refs):
@@ -895,6 +921,13 @@ class Packer:
                 # driving pin: in its driver's row it went 8.4 mm off - the main board's R44)
                 if r in prefer and prefer[r] in seated:
                     anchors, priv, mine = {prefer[r]}, [None], [None]
+                elif r.startswith("C") and not mine:
+                    # a decoupler (a capacitor on rails alone): seated alone at the IC on its
+                    # sheet with the most pads - in a row it went 12 mm off (C12, U6's)
+                    ics = sorted((q for q in seated if sheets.get(q) == sheets.get(r) and sheets.get(r)
+                                  and re.match(r"^U\d", q)), key=lambda q: (-len(self.placed[q].pads), q))
+                    if ics:
+                        anchors, priv, mine = {ics[0]}, [None], [None]
                 if mine and len(priv) == len(mine) and len(anchors) == 1 and next(iter(anchors)) in seated:
                     a = next(iter(anchors))
                     res1 = None
@@ -914,9 +947,10 @@ class Packer:
                     # a connector its net enters by beats a part on its own sheet: a clamp or
                     # a series part belongs at the pin it guards
                     # (one signal net only: a part bridging two is a series part, whose end is
-                    # its driver's - `prefer` - or its sheet's; and not a capacitor, which
-                    # decouples its IC)
-                    key = lambda q: (-len(signal(r) & signal(q)), not (q.startswith("J") and len(signal(r)) == 1 and not r.startswith("C")),
+                    # its driver's - `prefer` - or its sheet's; and only a clamp or a bead -
+                    # a pull-up on a line belongs to the IC on its sheet, not the connector:
+                    # R48, R49 went to J-MCU's far side from U6)
+                    key = lambda q: (-len(signal(r) & signal(q)), not (q.startswith("J") and len(signal(r)) == 1 and r.startswith(("D", "FB"))),
                                      sheets.get(q) != sheets.get(r),
                                      -len(self.placed[q].pads), q)
                 else:
