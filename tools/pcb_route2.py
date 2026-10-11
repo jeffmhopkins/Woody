@@ -92,6 +92,11 @@ TURN_MM = [0.0, 0.15, 0.6, 2.5, 6.0]      # by the turn, in 45-degree steps: cos
 SQ2 = math.sqrt(2.0)
 
 
+# mm a hard area (a reservation, a keep-out) is marked wider on the search grid than it is:
+# the grid's buffers are polygons inside the true circles, and the lay measures exactly
+HARD_MARGIN = 0.02
+
+
 def snap(v, q=LATTICE):
     return round(round(v / q) * q, 6)
 
@@ -818,19 +823,23 @@ class Router:
         for e in self.m.index.e.values():
             if e.id in skip:
                 continue
+            # a hard area's edge marked a hair wide (HARD_MARGIN): the grid's buffer is a polygon
+            # inside the true round one, so a cell a few microns too near looked free and the lay
+            # refused the path every time - "lay: reserved at" once the escape bands stood on
+            # every layer (DEV_3V3 by U7, the main board)
             if e.kind == "reserve":
                 if net in e.family:
                     continue
                 for L in e.layers:
-                    self._mark(g[L], e.geom, width / 2)
-                self._mark(v, e.geom, d / 2)
+                    self._mark(g[L], e.geom, width / 2 + HARD_MARGIN)
+                self._mark(v, e.geom, d / 2 + HARD_MARGIN)
                 continue
             if e.kind == "keepout":
                 if e.tracks:
                     for L in e.layers:
-                        self._mark(g[L], e.geom, width / 2)
+                        self._mark(g[L], e.geom, width / 2 + HARD_MARGIN)
                 if e.vias:
-                    self._mark(v, e.geom, d / 2)
+                    self._mark(v, e.geom, d / 2 + HARD_MARGIN)
                 continue
             if e.kind == "hole":
                 for L in e.layers:
@@ -1094,35 +1103,44 @@ class Router:
         return near
 
     def _stub(self, pad, cell_xy, L):
-        """Off-grid points from the pad's centre to the path's end cell: straight if that
-        is octilinear, else along the pad's longer axis and then octilinear."""
+        """Off-grid points from the pad's centre to the path's end cell: straight if that is
+        octilinear, else along the pad's longer axis and then octilinear - the first shape
+        that keeps clear, at the net's half width, of every hard area of its layer (a
+        no-tracks keep-out, another net's reservation). If none does: no stub when the cell
+        is inside the pad's copper (the run starts there), else the first, for the lay to
+        judge. (The main board: J5 pin 2's stub crossed the AGND strip's moat; C13's 45
+        cut the corner of U7's ground pin's escape band - each refused at the lay, each time.)"""
         c = (snap(pad.centre[0]), snap(pad.centre[1]))
         if c == cell_xy:
             return [(c[0], c[1], L)]
-        # a stub across a hard area of its layer - a no-tracks keep-out, another net's
-        # reservation - is no stub: the run starts at the cell, inside the pad's copper (a
-        # through-hole pin half on a moat: the main board's J5 pin 2 on B.Cu, where the stub
-        # from the pin's centre crossed the AGND strip's moat and the lay refused it)
-        if pad.geom.buffer(1e-6).contains(Point(cell_xy)) and self._hard_on(LineString([c, cell_xy]), L, pad.net):
-            return []
-        if octilinear(c, cell_xy):
-            return [(c[0], c[1], L)]
+        hw = self.R.width(pad.net) / 2
         x0, y0, x1, y1 = pad.geom.bounds
         dx, dy = cell_xy[0] - c[0], cell_xy[1] - c[1]
-        cands = []
+        shapes = []
+        if octilinear(c, cell_xy):
+            shapes.append([(c[0], c[1], L)])
         if (x1 - x0) >= (y1 - y0):
             # along x first, then a 45 to the cell
-            cands.append((snap(cell_xy[0] - math.copysign(abs(dy), dx)), c[1]))
-            cands.append((cell_xy[0], c[1]))
-            cands.append((c[0], cell_xy[1]))
+            ks = [(snap(cell_xy[0] - math.copysign(abs(dy), dx)), c[1]), (cell_xy[0], c[1]), (c[0], cell_xy[1])]
         else:
-            cands.append((c[0], snap(cell_xy[1] - math.copysign(abs(dx), dy))))
-            cands.append((c[0], cell_xy[1]))
-            cands.append((cell_xy[0], c[1]))
-        for k in cands:
+            ks = [(c[0], snap(cell_xy[1] - math.copysign(abs(dx), dy))), (c[0], cell_xy[1]), (cell_xy[0], c[1])]
+        for k in ks:
             if octilinear(c, k) and octilinear(k, cell_xy):
-                return [(c[0], c[1], L), (k[0], k[1], L)]
-        return [(c[0], c[1], L)]
+                shapes.append([(c[0], c[1], L), (k[0], k[1], L)])
+        if not shapes:
+            shapes.append([(c[0], c[1], L)])
+
+        def clear(sh):
+            line = [(p_[0], p_[1]) for p_ in sh] + [cell_xy]
+            line = [q for k_, q in enumerate(line) if k_ == 0 or q != line[k_ - 1]]
+            g = (LineString(line) if len(line) > 1 else Point(line[0])).buffer(hw)
+            return not self._hard_on(g, L, pad.net)
+        for sh in shapes:
+            if clear(sh):
+                return sh
+        if pad.geom.buffer(1e-6).contains(Point(cell_xy)):
+            return []
+        return shapes[0]
 
     def _hard_on(self, geom, L, net):
         """Whether `geom` crosses a no-tracks keep-out or another net's reservation on L."""
