@@ -51,6 +51,7 @@ import pcb_route2 as R2     # noqa: E402
 
 TOL = 0.01                  # mm: added to every clearance the plan keeps (rounding, arcs)
 ARC_STEP = math.radians(15) # an arc is drawn in steps of this; its points stand outside the circle
+VIA_REF = "~via"            # the ref of a via the plan places (a pad on every layer, of its net)
 
 
 def _polys(g):
@@ -129,7 +130,7 @@ class Map:
         if holes:
             A["holes"] = np.array(holes, dtype=float)
         T = triangle.triangulate(A, "p")
-        self.xy = [tuple(v) for v in T["vertices"]]
+        self.xy = [(float(v[0]), float(v[1])) for v in T["vertices"]]
         self.tris = [tuple(int(i) for i in t) for t in T["triangles"]]
         self.vtri, self.etris = {}, {}
         for ti, (a, b, c) in enumerate(self.tris):
@@ -504,7 +505,11 @@ class Map:
         for end in (0, 1):
             seq = pts if end == 0 else pts[::-1]
             v = self.lines[lid]["pa" if end == 0 else "pb"]
-            pad = self.pads[self.vpad[v]].geom.buffer(-0.05)
+            via = self.pads[self.vpad[v]].ref == VIA_REF
+            # a via: the line on the other layer meets this one at its centre, so the end
+            # stays there and only what follows it is pulled tight (a hook back into a via
+            # was an acid trap - the scramble board's S3 and S5)
+            pad = Point(self.xy[v]) if via else self.pads[self.vpad[v]].geom.buffer(-0.05)
             if pad.is_empty:
                 continue
             best = None
@@ -731,7 +736,197 @@ def route_layer(model, layer, pairs, **kw):
     runs = []
     for lid, net in lids.items():
         r = R2.Run(net, [(0, 0, layer)], model.rules.width(net), via=model.rules.via_size(net))
-        pts = [(round(x, 4), round(y, 4), layer) for x, y in paths[lid]]
+        pts = [(round(float(x), 4), round(float(y), 4), layer) for x, y in paths[lid]]
         r.pts = [p for i, p in enumerate(pts) if i == 0 or p != pts[i - 1]]
         runs.append(r)
     return runs, failed, mp
+
+
+# ------------------------------------------------------------------ T2: layers and vias
+
+def _via_pad(model, net, xy):
+    d, drill = model.rules.via_size(net)
+    return R2.Pad(ref=VIA_REF, num=str(len(model.pads)), net=net, layers=set(range(model.nl)),
+                  geom=Point(xy).buffer(d / 2, quad_segs=8), centre=xy, smd=False, drill=drill)
+
+
+def _via_ok(model, net, xy, placed, layers):
+    """Whether a via of `net` may stand at xy: inside the board, clear of every other net's
+    copper and every hole and keep-out on the layers it joins, and of the vias placed."""
+    R = model.rules
+    d, _ = R.via_size(net)
+    g = Point(xy).buffer(d / 2)
+    if not model.inside.contains(g):
+        return False
+    for e in model.index.query(g.buffer(1.0).bounds):
+        if e.kind == "keepout" and not (e.vias or e.tracks):
+            continue
+        if e.net == net and e.kind != "keepout":
+            continue
+        gap = R.hole_to_hole if e.kind == "hole" else R.gap(net, e.net)
+        if set(e.layers) & set(layers) and e.geom.distance(g) < gap + TOL:
+            return False
+    for p in model.pads:
+        if p.net != net and p.geom.distance(g) < R.gap(net, p.net) + TOL:
+            return False
+        # and off its own net's SMD pads by pcb_route2's own-pad gap (fits: via-on-pad)
+        if p.net == net and p.smd and p.geom.distance(g) < R2.OWN_PAD_GAP + TOL:
+            return False
+    for q in placed:
+        if q.net != net and q.geom.distance(g) < R.gap(net, q.net) + TOL:
+            return False
+        if q.geom.distance(g) < R.hole_to_hole + TOL:
+            return False
+    return True
+
+
+def _place_via(model, net, near, toward, placed, layers, rmin=None):
+    """A legal via of `net` as near `near` as it can stand, on the side toward `toward`:
+    rings of candidates, nearest first, each ring's best by its distance to `toward`."""
+    d, _ = model.rules.via_size(net)
+    r0 = rmin if rmin is not None else d / 2 + model.rules.clearance + 0.3
+    for ring_ in range(12):
+        r = r0 + ring_ * 0.25
+        cands = []
+        for j in range(24):
+            a = 2 * math.pi * j / 24
+            q = (near[0] + r * math.cos(a), near[1] + r * math.sin(a))
+            if _via_ok(model, net, q, placed, layers):
+                cands.append((math.dist(q, toward), q))
+        if cands:
+            return min(cands)[1]
+    return None
+
+
+def route_board(model, nets, layers=None, rounds=4, log=None):
+    """Two-pad nets on the board's signal layers (T2): each net to a layer - fewest crossings
+    of straight airwires with nets on the same layer, then fewest vias - a via beside each
+    pad not on its layer, a net that crosses on both layers split by a via in the middle;
+    then each layer routed by the T1 planner. A piece that fails moves its net to another
+    layer and the board is planned again, up to `rounds`. Returns (runs, failed, report)."""
+    import copy
+    log = log if log is not None else []
+    R = model.rules
+    pads = {n: model.pads_of(n) for n in nets}
+    two = [n for n in nets if len(pads[n]) == 2]
+    if layers is None:
+        layers = sorted({L for n in two for L in model.track_layers(n)})
+    allowed = {n: [L for L in model.track_layers(n) if L in layers] for n in two}
+    aw = {n: (pads[n][0].centre, pads[n][1].centre) for n in two}
+    adj = {n: {m_ for m_ in two if m_ != n and _cross(*aw[n], *aw[m_])} for n in two}
+    forced = {}                     # net -> layer, from earlier rounds' failures
+    split = set()
+    failed = list(nets)
+    runs = []
+    for rnd in range(rounds):
+        # 1. layers: most-crossed first; a layer both pads are on saves two vias
+        assign = {}
+        for n in sorted(two, key=lambda n: (-len(adj[n]), n)):
+            if n in forced:
+                assign[n] = forced[n]
+                continue
+            def cost(L):
+                same = sum(1 for m_ in adj[n] if assign.get(m_) == L)
+                vias = sum(1 for p in pads[n] if L not in p.layers)
+                return (same * 10 + vias * 3, L)
+            assign[n] = min(allowed[n], key=cost) if allowed[n] else None
+        for n in two:
+            if assign[n] is not None and any(assign.get(m_) == assign[n] for m_ in adj[n]) and len(allowed[n]) > 1:
+                split.add(n) if rnd > 0 else None
+        # 2. pieces and vias
+        placed, pieces = [], {}      # net -> [(layer, pad, pad)] in order from pad a to pad b
+        for n in two:
+            L = assign[n]
+            if L is None:
+                continue
+            a, b = pads[n]
+            seq = []
+            ends = []
+            for p, other in ((a, b), (b, a)):
+                if L in p.layers:
+                    ends.append(p)
+                else:
+                    pl = next((x for x in sorted(p.layers) if x in allowed[n]), None)
+                    xy = _place_via(model, n, p.centre, other.centre, placed, layers) if pl is not None else None
+                    if xy is None:
+                        ends.append(None)
+                        continue
+                    v = _via_pad(model, n, xy)
+                    placed.append(v)
+                    seq.append(("stub", pl, p, v))
+                    ends.append(v)
+            if None in ends:
+                continue
+            ea, eb = ends
+            if n in split and len(allowed[n]) > 1:
+                mid = ((ea.centre[0] + eb.centre[0]) / 2, (ea.centre[1] + eb.centre[1]) / 2)
+                xy = _place_via(model, n, mid, eb.centre, placed, layers, rmin=0.0)
+                L2 = next(x for x in allowed[n] if x != L)
+                if xy is not None:
+                    v = _via_pad(model, n, xy)
+                    placed.append(v)
+                    main = [(L, ea, v), (L2, v, eb)]
+                else:
+                    main = [(L, ea, eb)]
+            else:
+                main = [(L, ea, eb)]
+            # order: pad a's stub, the main pieces, pad b's stub
+            st_a = [(pl, p, v) for k_, pl, p, v in seq if p is a]
+            st_b = [(pl, v, p) for k_, pl, p, v in seq if p is b]
+            pieces[n] = st_a + main + st_b
+        m2 = copy.copy(model)
+        m2.pads = list(model.pads) + placed
+        # 3. each layer
+        got = {}
+        bad = set()
+        for L in layers:
+            pairs = [(n, x, y) for n, ps in pieces.items() for (Lp, x, y) in ps if Lp == L]
+            if not pairs:
+                continue
+            # the longest first: short stubs find room round them
+            pairs.sort(key=lambda t: -math.dist(t[1].centre, t[2].centre))
+            mp = Map(m2, L, sorted({n for n, _, _ in pairs}))
+            idx = {id(p): i for i, p in enumerate(mp.pads)}
+            lids = {}
+            for j, (n, x, y) in enumerate(pairs):
+                pending = [(u.centre, w.centre) for _, u, w in pairs[j + 1:]]
+                lid = mp.route(n, idx[id(x)], idx[id(y)], pending=pending)
+                if lid is None:
+                    bad.add(n)
+                else:
+                    lids[lid] = (n, x, y)
+            paths = mp.geometry()
+            for lid, (n, x, y) in lids.items():
+                got[(n, L, id(x), id(y))] = paths[lid]
+        failed = sorted(set(nets) - set(pieces)) + sorted(bad)
+        log.append(f"topo round {rnd + 1}: layers {dict(sorted(assign.items()))}; vias {len(placed)}; "
+                   f"split {sorted(split)}; failed {failed}")
+        if not failed or rnd == rounds - 1:
+            break
+        # 4. what failed: another layer, then a split
+        for n in failed:
+            if n not in two or not allowed[n]:
+                continue
+            others = [x for x in allowed[n] if x != assign.get(n)]
+            if n in forced and n not in split:
+                split.add(n)
+            elif others:
+                forced[n] = others[0]
+    # the runs: each net's pieces joined at its vias
+    for n, ps in pieces.items():
+        if n in failed:
+            continue
+        pts = []
+        for (L, x, y) in ps:
+            path = got.get((n, L, id(x), id(y)))
+            if path is None:
+                pts = None
+                break
+            seg = [(round(float(px), 4), round(float(py), 4), L) for px, py in path]
+            pts += seg
+        if not pts:
+            continue
+        r = R2.Run(n, [(0, 0, 0)], R.width(n), via=R.via_size(n))
+        r.pts = [q for i, q in enumerate(pts) if i == 0 or q != pts[i - 1]]
+        runs.append(r)
+    return runs, failed, {"assign": assign, "vias": len(placed), "split": sorted(split), "log": log}

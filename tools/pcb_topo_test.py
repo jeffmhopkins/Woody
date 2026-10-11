@@ -14,7 +14,7 @@ import tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
-CELLS = ["squeeze", "middle", "fan", "around"]
+CELLS = ["squeeze", "middle", "fan", "around", "cross", "grid", "scramble", "triad"]
 
 
 def _setup():
@@ -124,6 +124,93 @@ def cell_around(out, plot):
     T.tp(b, "R2", "R", 36.0, 10.0)
     m, runs, failed, bad, _ = _route(b, _front("S", "R"), ["S", "R"])
     return _result("around", b, m, runs, failed, bad, out, plot)
+
+
+def _board2(b, nets):
+    """Route `nets` on both layers (T2) and lay them. Returns (model, runs, failed, bad, rep)."""
+    _, R2, _, TP, B = _setup()
+    m = R2.model_from_board(b, B.LAY)
+    runs, failed, rep = TP.route_board(m, nets)
+    bad = {}
+    for r in runs:
+        f = R2.fits(r, m)
+        if f:
+            bad[r.net] = f[:2]
+        R2.lay(r, m)
+    return m, runs, failed, bad, rep
+
+
+def _result2(name, b, m, runs, failed, bad, rep, out, plot):
+    res = _result(name, b, m, runs, failed, bad, out, plot)
+    res.update(vias=sum(len(r.vias()) for r in runs), split=rep["split"], rounds=len(rep["log"]))
+    return res
+
+
+def cell_cross(out, plot):
+    """Two front pads' nets whose straight lines cross: one goes to the back by a via
+    beside each of its pads."""
+    _, _, T, _, _ = _setup()
+    b = T.new_board(30.0, 20.0)
+    T.tp(b, "A1", "A", 4.0, 4.0)
+    T.tp(b, "A2", "A", 26.0, 16.0)
+    T.tp(b, "B1", "B", 4.0, 16.0)
+    T.tp(b, "B2", "B", 26.0, 4.0)
+    m, runs, failed, bad, rep = _board2(b, ["A", "B"])
+    res = _result2("cross", b, m, runs, failed, bad, rep, out, plot)
+    res["pass"] = res["pass"] and res["vias"] == 2
+    return res
+
+
+def cell_grid(out, plot):
+    """Four nets across and four down, every across net crossing every down one: across on
+    one layer, down on the other, a via at each pad on the wrong side."""
+    _, _, T, _, _ = _setup()
+    b = T.new_board(40.0, 40.0)
+    for i in range(4):
+        y = 10.0 + i * 6.0
+        T.tp(b, f"H{i}a", f"H{i}", 4.0, y)
+        T.tp(b, f"H{i}b", f"H{i}", 36.0, y)
+        x = 10.0 + i * 6.0
+        T.tp(b, f"V{i}a", f"V{i}", x, 4.0)
+        T.tp(b, f"V{i}b", f"V{i}", x, 36.0)
+    nets = [f"H{i}" for i in range(4)] + [f"V{i}" for i in range(4)]
+    m, runs, failed, bad, rep = _board2(b, nets)
+    return _result2("grid", b, m, runs, failed, bad, rep, out, plot)
+
+
+def cell_scramble(out, plot):
+    """A through-hole 2 x 5 header (2.54 mm) whose ten lines go to a row of pads in the
+    REVERSE of the order they leave in - no single layer takes them; both layers do, the
+    header's pins being on both."""
+    pcbnew, _, T, _, _ = _setup()
+    b = T.new_board(40.0, 34.0)
+    fp = T._fp(b, "J1", "HDR-2x5-2.54")
+    nets = [f"S{k}" for k in range(10)]
+    for k, n in enumerate(nets):
+        T._tht(b, fp, k + 1, (-1.27 if k % 2 == 0 else 1.27), ((k // 2) - 2) * 2.54, 1.7, 1.0, n)
+    T._court_rect(fp, 5.2, 13.0)
+    T._place(b, fp, 20.0, 9.0)
+    left = [nets[k] for k in range(0, 10, 2)]
+    right = [nets[k] for k in range(1, 10, 2)]
+    ring = (left + right[::-1])[::-1]
+    for i, n in enumerate(ring):
+        T.tp(b, f"T{i}", n, 4.0 + i * 3.5, 29.0, w=1.2, h=1.2)
+    m, runs, failed, bad, rep = _board2(b, nets)
+    return _result2("scramble", b, m, runs, failed, bad, rep, out, plot)
+
+
+def cell_triad(out, plot):
+    """Three nets each crossing both others: two layers cannot part all three pairs, so one
+    goes round or changes layer partway. It must route, legally."""
+    _, _, T, _, _ = _setup()
+    b = T.new_board(40.0, 40.0)
+    import math
+    for k, n in enumerate(("P", "Q", "W")):
+        a = math.radians(90 + 120 * k)
+        T.tp(b, f"{n}1", n, 20.0 + 14 * math.cos(a), 20.0 + 14 * math.sin(a))
+        T.tp(b, f"{n}2", n, 20.0 - 14 * math.cos(a + 0.35), 20.0 - 14 * math.sin(a + 0.35))
+    m, runs, failed, bad, rep = _board2(b, ["P", "Q", "W"])
+    return _result2("triad", b, m, runs, failed, bad, rep, out, plot)
 
 
 def run_cell(name, out, plot):
