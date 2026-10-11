@@ -2,31 +2,40 @@
 """pcb_topo - the topological router (ADR 0029, #47).
 
 A line is planned before it is drawn. Each copper layer is a constrained Delaunay
-triangulation of the room to route in (Shewchuk's `triangle`): its vertices are the pads'
-centres, the corners of what no track may cross (keep-outs, holes, locked copper, the
-board's edge) and the points the quality refinement adds. A route is the path of triangle
-edges a line crosses and, on each edge, its PLACE IN THAT EDGE'S ORDER of lines. A new line
-takes a place between two lines already on an edge - it squeezes between them - and nothing
-is re-laid, because nothing is laid yet: the lines beyond it are pushed over by one pitch
-when the geometry is drawn. That is the owner's "push traces out of the way and merge
-between traces" (2026-10-11), here a fact of the plan rather than a repair after a failure.
+triangulation (Shewchuk's `triangle`) of the room to route in. Its vertices are the CORNERS
+of everything a track must keep clear of - each pad's polygon, the keep-outs, holes and
+locked copper, the board's edge - and each pad's centre, where its own line starts. A pad's
+outline and a fan from its centre to its corners are constrained edges, so a pad is a little
+wheel of triangles only its own net may enter.
+
+A route is the path of triangle edges a line crosses and, on each edge, its PLACE IN THAT
+EDGE'S ORDER of lines. A new line takes a place between two lines already on an edge - it
+squeezes between them - and nothing is re-laid, because nothing is laid yet: the lines
+beyond it are pushed over by one pitch when the geometry is drawn. That is the owner's "push
+traces out of the way and merge between traces" (2026-10-11), here a fact of the plan
+rather than a repair after a failure.
 
 Inside one triangle every line is a chord between two points of the triangle's boundary,
 and two lines on one layer cross exactly when their chords interleave; the search refuses
 a place whose chord would cross (T1: one layer - T2 prices the crossing and resolves it
 with a via). An edge's CAPACITY is how many centrelines fit along its free part (its length
-less what the obstacles at either end, grown by clearance and half a track, take).
+less what the obstacles at its ends take, grown by clearance and half a track).
 
 Geometry last: each line is the shortest path through its PORTALS - on each edge it crosses,
-the stretch its place in the order leaves it - by the funnel algorithm, a rubber band held
-off each vertex by that vertex's clearance and the lines ordered inside it. Lines that cross
-an edge on the slant are spaced wider along it (pitch / sin of the angle), so they keep a
-pitch apart square to themselves. The result is pcb_route2 Runs: the grid router's fits(),
-write() and KiCad's DRC judge them exactly as they judge its own.
+the stretch between where its neighbours in the order cross, a spacing off each - by the
+funnel algorithm, relaxed in passes (each line taut between its neighbours as they stand).
+Where it bends at a corner it is drawn as an ARC round that corner at the radius the bend
+stands at - a clearance and half a track out, one pitch more for each line nested inside -
+so nested lines are concentric and a bend never cuts a corner. A last pass measures every
+pair of neighbours and widens the spacing where a slant brought them too close.
+
+The result is pcb_route2 Runs, their points exact (not on pcb_route2's lattice): the grid
+router's fits(), write() and KiCad's DRC judge them exactly as they judge its own.
 
 T1 (this file): one layer, two-pad nets. T2 layers and vias, T3 nets of more pads, T4 the
-stage's engine option, T5 the main board (#47).
+stage's engine option, T4b the small test boards, T5 the main board (#47).
 """
+import heapq
 import math
 import os
 import sys
@@ -40,8 +49,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import pcb_route2 as R2     # noqa: E402
 
-MARGIN = 0.08               # mm round a pad: a chord round a vertex sags inside the circle its ends are on
-SNAP = 0.025               # mm round everything: Run puts every point on pcb_route2's 0.05 lattice
+TOL = 0.01                  # mm: added to every clearance the plan keeps (rounding, arcs)
+ARC_STEP = math.radians(15) # an arc is drawn in steps of this; its points stand outside the circle
 
 
 def _polys(g):
@@ -50,63 +59,68 @@ def _polys(g):
     return [p for p in getattr(g, "geoms", [g]) if p.geom_type == "Polygon" and p.area > 1e-6]
 
 
-class Map:
-    """One layer of a pcb_route2 Model, triangulated. `nets`: the nets to be routed here -
-    their pads are terminals; every other pad, hole, keep-out and track on the layer is an
-    obstacle (pads are vertices too: a line passes them on one side or the other)."""
+def _corners(poly, tol=0.02):
+    """A pad's outline as at most a few dozen corners (its convex hull, simplified)."""
+    h = poly.convex_hull.simplify(tol)
+    if h.geom_type != "Polygon":
+        h = poly.buffer(0.01).convex_hull
+    pts = list(h.exterior.coords)[:-1]
+    # counter-clockwise, without repeats
+    if Polygon(pts).exterior.is_ccw is False:
+        pts = pts[::-1]
+    return pts
 
-    def __init__(self, model, layer, nets, pitch=None, width=None, quality=None, max_area=None):
+
+class Map:
+    """One layer of a pcb_route2 Model, triangulated. `nets`: the nets to be routed here.
+    Every pad on the layer is a wheel only its net enters; everything else on the layer -
+    holes, keep-outs, other nets' copper - is an area obstacle, a hole in the map."""
+
+    def __init__(self, model, layer, nets, pitch=None, width=None):
         R = model.rules
         self.m, self.layer = model, layer
         self.nets = set(nets)
         self.width = width or max(R.width(n) for n in nets)
         self.clear = max([R.clear(n) for n in nets] + [R.clearance])
-        self.pitch = pitch or (self.width + self.clear + SNAP)
-        # obstacles that are areas (no line passes through them): keep-outs, holes, locked
-        # copper on this layer, and the outside of the board
+        self.keep = self.clear + self.width / 2 + TOL            # a centreline's distance off copper
+        self.pitch = pitch or (self.width + self.clear + TOL)
         areas = []
         for e in model.index.e.values():
             if layer not in set(e.layers):
                 continue
-            if e.kind == "keepout" and e.tracks:
-                areas.append(e.geom)
-            elif e.kind == "hole":
-                areas.append(e.geom)
-            elif e.kind in ("track", "via") and e.net not in self.nets:
+            if (e.kind == "keepout" and e.tracks) or e.kind == "hole" \
+                    or (e.kind in ("track", "via") and e.net not in self.nets):
                 areas.append(e.geom)
         self.areas = unary_union(areas) if areas else Polygon()
-        self.room = model.inside.difference(self.areas.buffer(self.clear + self.width / 2))
-        # the pads on this layer: every one a vertex
         self.pads = [p for p in model.pads if layer in set(p.layers)]
         verts, segs, holes = [], [], []
-        for p in self.pads:
-            verts.append(p.centre)
-        self.npad = len(verts)
-        # a ring of points round each pad, just outside what it keeps clear and in its own
-        # shape (a circle missed a square pad's corners: a chord between two bends 30 deg
-        # apart cut 0.16 mm into the corner's clearance): the edges from the pad to its
-        # ring are where lines bend round it, every 30 deg of each corner's arc
-        # The pad is joined to every point of its ring by a constrained edge - a fan - so a
-        # line near a pad crosses those edges, and bends where each one's free part starts
-        # (without the fan, Delaunay joined ring points across a corner and a line cut it)
+        self.vpad = {}                  # vertex -> the pad (index) it is the centre or a corner of
+        self.centre = {}                # pad index -> its centre vertex
+        room = model.inside.difference(self.areas)
         for i, p in enumerate(self.pads):
-            grown = p.geom.buffer(self.clear + self.width / 2 + MARGIN + 0.05, quad_segs=3)
-            for q in list(grown.exterior.coords)[:-1]:
-                if model.inside.contains(Point(q)) and not self.areas.contains(Point(q)):
-                    segs.append((i, len(verts)))
-                    verts.append(q)
-        # the outline and the area obstacles as constrained segments (their simplified
-        # boundaries), the area obstacles as holes
+            if not room.contains(Point(p.centre)):
+                continue                # a pad under copper or a keep-out: not reachable here
+            c = len(verts)
+            verts.append(p.centre)
+            self.centre[i] = c
+            self.vpad[c] = i
+            cs = _corners(p.geom)
+            first = len(verts)
+            for q in cs:
+                self.vpad[len(verts)] = i
+                segs.append((c, len(verts)))            # the fan
+                verts.append(q)
+            for k in range(len(cs)):                    # the outline
+                segs.append((first + k, first + (k + 1) % len(cs)))
+
         def ring(coords):
             coords = list(coords)[:-1]
             i0 = len(verts)
             verts.extend(coords)
             segs.extend((i0 + k, i0 + (k + 1) % len(coords)) for k in range(len(coords)))
-        # the free room - the board's inside less the area obstacles - as rings: each
-        # polygon's outside and its holes (a keep-out to the board's edge is a bite out of
-        # the outside, not a hole; one in the middle is a hole)
-        room = model.inside.difference(self.areas).simplify(0.02)
-        for poly in _polys(room):
+        # the free room as rings: a keep-out to the board's edge is a bite out of the
+        # outside, one in the middle a hole
+        for poly in _polys(room.simplify(0.01)):
             ring(poly.exterior.coords)
             for hole in poly.interiors:
                 ring(hole.coords)
@@ -114,78 +128,85 @@ class Map:
         A = {"vertices": np.array(verts, dtype=float), "segments": np.array(segs, dtype=int)}
         if holes:
             A["holes"] = np.array(holes, dtype=float)
-        # no quality refinement by default: its Steiner points went inside the pads' rings
-        # (at a square pad's corners) and walled the pad in - the rings do its work there
-        flags = "p" + (f"q{quality}" if quality else "") + (f"a{max_area}" if max_area else "")
-        T = triangle.triangulate(A, flags)
+        T = triangle.triangulate(A, "p")
         self.xy = [tuple(v) for v in T["vertices"]]
         self.tris = [tuple(int(i) for i in t) for t in T["triangles"]]
-        # the pads keep their index (triangle keeps the input vertices first, in order)
-        self.pad_of = {i: self.pads[i] for i in range(self.npad)}
-        self.vtri = {}
-        self.edges, self.etris = {}, {}
+        self.vtri, self.etris = {}, {}
         for ti, (a, b, c) in enumerate(self.tris):
             for v in (a, b, c):
                 self.vtri.setdefault(v, []).append(ti)
             for u, v in ((a, b), (b, c), (c, a)):
-                k = (min(u, v), max(u, v))
-                self.etris.setdefault(k, []).append(ti)
+                self.etris.setdefault((min(u, v), max(u, v)), []).append(ti)
+        # what copper keeps clear of: every pad, every area, the board's edge
+        pads_g = unary_union([p.geom for p in self.pads]) if self.pads else Polygon()
+        outside = model.outline.buffer(5.0).difference(model.inside)
+        self.blk = unary_union([pads_g.buffer(self.keep), self.areas.buffer(self.keep),
+                                outside.buffer(self.width / 2 + TOL)])
+        self.edges, self.inpad = {}, {}
         for k, ts in self.etris.items():
-            if len(ts) == 2:
+            if len(ts) != 2:
+                continue
+            pa_, pb_ = self.vpad.get(k[0]), self.vpad.get(k[1])
+            L = math.dist(self.xy[k[0]], self.xy[k[1]])
+            if pa_ is not None and pa_ == pb_:
+                # inside one pad (its fan or its outline): its own net's way out, anywhere
+                self.inpad[k] = pa_
+                self.edges[k] = (0.05 * L, 0.95 * L, L)
+            else:
                 self.edges[k] = self._free(k)
-        self.order = {k: [] for k in self.edges}        # line ids, from k[0]'s end to k[1]'s
-        self.chords = {ti: [] for ti in range(len(self.tris))}   # (line, end, end)
-        self.lines = {}                                  # id: {net, ends, path}
+        # every corner a line can bend round: the pads' corners and the room's
+        from shapely.strtree import STRtree
+        cs = [v for v, i in self.vpad.items() if v != self.centre.get(i)]
+        cs += [i for i in range(len(self.xy)) if i not in self.vpad]
+        self.corner_ids = cs
+        self.corner_tree = STRtree([Point(self.xy[i]) for i in cs])
+        self.order = {k: [] for k in self.edges}            # line ids, from k[0]'s end to k[1]'s
+        self.chords = {ti: [] for ti in range(len(self.tris))}
+        self.lines = {}
 
     # ---------------------------------------------------------------- the edges
 
-    def _blockers(self, net=None):
-        if not hasattr(self, "_blk"):
-            pads = unary_union([p.geom for p in self.pads]).buffer(self.clear + self.width / 2 + MARGIN)
-            areas = self.areas.buffer(self.clear + self.width / 2 + SNAP)
-            outside = self.m.outline.buffer(5.0).difference(self.m.inside).buffer(self.width / 2 + SNAP)
-            self._blk = unary_union([pads, areas, outside])
-        return self._blk
-
     def _free(self, k):
-        """(t0, t1, length): the free stretch of edge k, as distances from its first end."""
+        """(t0, t1, length): the longest free stretch of edge k, as distances from k[0]."""
         a, b = self.xy[k[0]], self.xy[k[1]]
         seg = LineString([a, b])
         L = seg.length
-        free = seg.difference(self._blockers())
+        free = seg.difference(self.blk)
         pieces = [g for g in getattr(free, "geoms", [free]) if g.geom_type == "LineString" and g.length > 0] \
             if not free.is_empty else []
         if not pieces:
-            # a single point free (or none): room for nothing unless it is exactly zero long
             return (0.0, -1.0, L)
         g = max(pieces, key=lambda g: g.length)
-        t0 = seg.project(Point(g.coords[0]))
-        t1 = seg.project(Point(g.coords[-1]))
+        t0, t1 = seg.project(Point(g.coords[0])), seg.project(Point(g.coords[-1]))
         return (min(t0, t1), max(t0, t1), L)
 
-    def capacity(self, k, pitch=None):
+    def capacity(self, k, own=()):
+        """How many lines edge k takes. An edge inside a pad takes its own net's line only."""
+        if k in self.inpad:
+            return 1 if self.inpad[k] in own else 0
         t0, t1, _ = self.edges[k]
         if t1 < t0:
             return 0
-        return int(math.floor((t1 - t0) / (pitch or self.pitch) + 1e-9)) + 1
+        return int(math.floor((t1 - t0) / self.pitch + 1e-9)) + 1
 
-    def _at(self, k, frac):
+    def _at(self, k, t):
         a, b = self.xy[k[0]], self.xy[k[1]]
-        return (a[0] + (b[0] - a[0]) * frac, a[1] + (b[1] - a[1]) * frac)
+        L = math.dist(a, b)
+        f = t / L if L else 0.5
+        return (a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f)
 
     def _slot_point(self, k, s):
-        """Where a new line in slot s of edge k (s lines on k[0]'s side of it) would cross."""
         t0, t1, L = self.edges[k]
         n = len(self.order[k]) + 1
-        t = t0 + (t1 - t0) * (s + 0.5) / n if t1 > t0 else (t0 + t1) / 2
-        return self._at(k, t / L if L else 0.5)
+        t = t0 + (t1 - t0) * (s + 0.5) / n if t1 > t0 else L / 2
+        return self._at(k, t)
 
     # ---------------------------------------------------------------- the chords
 
     def _bpos(self, ti, end, new=False):
         """Where `end` - ('v', vertex), ('e', edge, place) or an _EdgeRef - sits on triangle
         ti's boundary, as a number round it (vertex a 0, edge ab (0, 1), b 1, ...). An edge's
-        k lines stand at (i + 1) / (k + 1) along it; a new line's slot s at (s + 0.5) / (k + 1)
+        n lines stand at (i + 1) / (n + 1) along it; a new line's slot s at (s + 0.5) / (n + 1)
         - between the lines either side of it, and never on one."""
         a, b, c = self.tris[ti]
         if isinstance(end, _EdgeRef):
@@ -194,8 +215,7 @@ class Map:
             return float((a, b, c).index(end[1]))
         else:
             _, k, place = end
-        n = len(self.order[k])
-        f = (place + (0.5 if new else 1.0)) / (n + 1)
+        f = (place + (0.5 if new else 1.0)) / (len(self.order[k]) + 1)
         for base, (u, v) in enumerate(((a, b), (b, c), (c, a))):
             if (min(u, v), max(u, v)) == k:
                 return base + (f if u == k[0] else 1.0 - f)
@@ -206,7 +226,7 @@ class Map:
         p1, p2 = self._bpos(ti, e1, new=True), self._bpos(ti, e2, new=True)
         lo, hi = min(p1, p2), max(p1, p2)
         n = 0
-        for lid, q1, q2 in self.chords[ti]:
+        for _, q1, q2 in self.chords[ti]:
             a, b = self._bpos(ti, q1), self._bpos(ti, q2)
             if min(abs(a - lo), abs(a - hi), abs(b - lo), abs(b - hi)) < 1e-9:
                 continue        # a shared end (a vertex both lines leave from)
@@ -216,36 +236,46 @@ class Map:
 
     # ---------------------------------------------------------------- the search
 
-    def route(self, net, pa, pb):
-        """Plan one line from pad vertex pa to pad vertex pb. Returns the line id, or None."""
-        import heapq
+    def route(self, net, ia, ib, pending=(), toll=None):
+        """Plan one line from pad ia's centre to pad ib's (indices into self.pads). Returns
+        the line id, or None. `pending`: [(a, b)] the straight airwires of nets still to be
+        routed; each one this line's way crosses costs `toll` mm (default: a few pitches) -
+        so a line does not take, for being first, the way a later one needs (the fan board:
+        the first line went between the header's columns and round under its own, and the
+        last pad of that column was sealed in)."""
+        toll = 4.0 if toll is None else toll
+        if ia not in self.centre or ib not in self.centre:
+            return None
+        pa, pb = self.centre[ia], self.centre[ib]
+        own = {ia, ib}
         P, Q = self.xy[pa], self.xy[pb]
-        h = lambda pt: math.dist(pt, Q)
         heap, best, came = [], {}, {}
         cnt = 0
-        goal = None
-        goal_cost = math.inf
-        # from the start vertex into each of its triangles
+        goal, goal_cost = None, math.inf
+
+        def ok(k):
+            return k in self.edges and len(self.order[k]) < self.capacity(k, own)
+
+        def tolls(a, b):
+            return toll * sum(1 for (c, d) in pending if _cross(a, b, c, d))
+
+        def push(st, g, pt, frm):
+            nonlocal cnt
+            if g < best.get(st, math.inf) - 1e-12:
+                best[st] = g
+                came[st] = frm
+                cnt += 1
+                heapq.heappush(heap, (g + math.dist(pt, Q), cnt, g, st, pt))
         for ti in self.vtri.get(pa, []):
             if pb in self.tris[ti] and self._crossings(ti, ("v", pa), ("v", pb)) == 0:
-                c = math.dist(P, Q)
-                if c < goal_cost:
-                    goal, goal_cost = ("direct", ti), c
+                goal, goal_cost = ("direct", ti), math.dist(P, Q)
             for k in self._tri_edges(ti):
-                if k not in self.edges or len(self.order[k]) >= self.capacity(k):
+                if not ok(k) or pa in k:
                     continue
                 for s in range(len(self.order[k]) + 1):
-                    if self._crossings(ti, ("v", pa), ("e", k, s)):
-                        continue
-                    pt = self._slot_point(k, s)
-                    g = math.dist(P, pt)
-                    nxt = self._other(k, ti)
-                    st = (k, s, nxt)
-                    if g < best.get(st, math.inf):
-                        best[st] = g
-                        came[st] = ("start", ti)
-                        cnt += 1
-                        heapq.heappush(heap, (g + h(pt), cnt, g, st, pt))
+                    if not self._crossings(ti, ("v", pa), ("e", k, s)):
+                        pt = self._slot_point(k, s)
+                        push((k, s, self._other(k, ti)), math.dist(P, pt) + tolls(P, pt), pt, ("start", ti))
         while heap:
             f, _, g, st, pt = heapq.heappop(heap)
             if f >= goal_cost:
@@ -254,31 +284,23 @@ class Map:
                 continue
             k1, s1, ti = st
             if pb in self.tris[ti] and self._crossings(ti, ("e", k1, s1), ("v", pb)) == 0:
-                c = g + math.dist(pt, Q)
+                c = g + math.dist(pt, Q) + tolls(pt, Q)
                 if c < goal_cost:
                     goal, goal_cost = ("end", st, ti), c
             for k2 in self._tri_edges(ti):
-                if k2 == k1 or k2 not in self.edges or len(self.order[k2]) >= self.capacity(k2):
+                if k2 == k1 or not ok(k2):
                     continue
                 for s2 in range(len(self.order[k2]) + 1):
-                    if self._crossings(ti, ("e", k1, s1), ("e", k2, s2)):
-                        continue
-                    p2 = self._slot_point(k2, s2)
-                    g2 = g + math.dist(pt, p2)
-                    st2 = (k2, s2, self._other(k2, ti))
-                    if g2 < best.get(st2, math.inf) - 1e-12:
-                        best[st2] = g2
-                        came[st2] = (st, ti)
-                        cnt += 1
-                        heapq.heappush(heap, (g2 + h(p2), cnt, g2, st2, p2))
+                    if not self._crossings(ti, ("e", k1, s1), ("e", k2, s2)):
+                        p2 = self._slot_point(k2, s2)
+                        push((k2, s2, self._other(k2, ti)), g + math.dist(pt, p2) + tolls(pt, p2), p2, (st, ti))
         if goal is None:
             return None
-        # the path, start to end: [(edge, slot, triangle before it)]
+        steps = []
         if goal[0] == "direct":
-            steps, last_t = [], goal[1]
+            last_t = goal[1]
         else:
             _, st, last_t = goal
-            steps = []
             while True:
                 prev = came[st]
                 if prev[0] == "start":
@@ -304,107 +326,283 @@ class Map:
         lid = len(self.lines)
         ends = [("v", pa)] + [("e", k, s) for k, s, _ in steps] + [("v", pb)]
         tris = [t for _, _, t in steps] + [last_t]
-        # chords first, with the half-places of the new line, then the orders
         for k, s, _ in steps:
             self.order[k].insert(s, lid)
         for i, ti in enumerate(tris):
-            a_, b_ = ends[i], ends[i + 1]
-            self.chords[ti].append((lid, self._ref(a_, lid), self._ref(b_, lid)))
+            self.chords[ti].append((lid, self._ref(ends[i], lid), self._ref(ends[i + 1], lid)))
         self.lines[lid] = {"net": net, "pa": pa, "pb": pb, "edges": [k for k, _, _ in steps], "tris": tris}
         return lid
 
     def _ref(self, end, lid):
-        """An end as chords keep it: a vertex, or an edge and this line's place in its order
-        (read again each time: places move as lines are inserted beside it)."""
-        if end[0] == "v":
-            return end
-        return _EdgeRef(end[1], lid)
+        return end if end[0] == "v" else _EdgeRef(end[1], lid)
 
     # ---------------------------------------------------------------- the geometry
 
-    def geometry(self, iterations=6):
-        """Each line's centreline, as [(x, y)]: the rubber band through its portals.
+    def geometry(self, passes=6, rounds=8):
+        """Each line's centreline, as [(x, y)]. The bands relax in `passes` (each line taut
+        between where its neighbours cross); then each bend becomes an arc; then every pair
+        of neighbours is measured and, where a slant brought them under a pitch, the spacing
+        on the edges they share is widened and the bands drawn again (up to `rounds`)."""
+        self.spacing = {k: self.pitch for k in self.order}
+        paths = {}
+        for _ in range(rounds):
+            self._pack()
+            for _ in range(passes):
+                for lid in self.lines:
+                    pts, _ = self._band(lid)
+                    self._settle(lid, pts)
+            paths = {lid: self._inflate(lid, self._band(lid)[0]) for lid in self.lines}
+            for lid in self.lines:
+                others = [LineString(p) for l2, p in paths.items() if l2 != lid and len(p) > 1]
+                paths[lid] = self._ends(lid, paths[lid], unary_union(others) if others else None)
+            if not self._widen(paths):
+                break
+        return paths
 
-        Where a line crosses an edge is held a spacing from where the lines beside it in the
-        edge's order cross - the spacing their slant needs (pitch / sin of the angle) - so
-        the bands relax against each other: they start packed in their places, and each pass
-        draws every line taut between its neighbours as they stand (Gauss-Seidel). Every
-        pass is legal, because a line only ever moves inside the room its neighbours leave."""
+    def _pack(self):
+        """Every line where its place puts it, packed round the middle of each edge's free
+        part, a spacing apart - the legal start the passes relax from."""
         self.pos = {}
         for k, lids in self.order.items():
             if not lids:
                 continue
-            t0, t1, _ = self.edges[k]
-            n = len(lids)
-            slack = max(0.0, (t1 - t0) - (n - 1) * self.pitch)
+            t0, t1, L = self.edges[k]
+            sp = self.spacing[k]
+            slack = max(0.0, (t1 - t0) - (len(lids) - 1) * sp)
             for i, lid in enumerate(lids):
-                self.pos[(k, lid)] = t0 + slack / 2 + i * self.pitch
-        spacing = {k: self.pitch for k in self.order}
-        paths = {}
-        for _ in range(iterations):
-            for lid in self.lines:
-                paths[lid] = self._band(lid, spacing)
-                self._settle(lid, paths[lid])
-            # the slant: lines crossing an edge at angle a keep a pitch apart square to
-            # themselves when they are pitch / sin(a) apart along it - as far as the edge's
-            # free part allows
-            for k, lids in self.order.items():
-                if len(lids) < 2:
-                    continue
-                a, b = self.xy[k[0]], self.xy[k[1]]
-                ex, ey = R2._unit(b[0] - a[0], b[1] - a[1])
-                worst = 1.0
-                for lid in lids:
-                    d = _dir_at(paths[lid], LineString([a, b]))
-                    if d is not None:
-                        worst = min(worst, max(0.3, abs(ex * d[1] - ey * d[0])))
-                t0, t1, _ = self.edges[k]
-                spacing[k] = min(self.pitch / worst, max(self.pitch, (t1 - t0) / (len(lids) - 1)))
-        return paths
+                self.pos[(k, lid)] = t0 + slack / 2 + i * sp
 
     def _settle(self, lid, path):
-        """Record where `path` now crosses each of its edges (as a distance along it)."""
         line = LineString(path)
         for k in self.lines[lid]["edges"]:
-            a, b = self.xy[k[0]], self.xy[k[1]]
-            e = LineString([a, b])
+            e = LineString([self.xy[k[0]], self.xy[k[1]]])
             x = line.intersection(e)
             if x.is_empty:
                 continue
-            pt = x if x.geom_type == "Point" else (x.geoms[0] if hasattr(x, "geoms") else x.centroid)
-            if pt.geom_type != "Point":
-                pt = pt.centroid
+            pt = x if x.geom_type == "Point" else x.centroid
             self.pos[(k, lid)] = e.project(pt)
 
-    def _portal(self, k, lid, spacing):
-        """The stretch of edge k line lid may cross on: from a spacing past the line before it
-        in the order to a spacing short of the line after it, inside the edge's free part.
-        (lo point, hi point) along k[0] -> k[1]."""
-        t0, t1, L = self.edges[k]
+    def _portal(self, k, lid):
+        """(lo t, hi t): the stretch of edge k line lid may cross on - a spacing past the line
+        before it in the order, a spacing short of the one after, inside the free part."""
+        t0, t1, _ = self.edges[k]
         lids = self.order[k]
         i = lids.index(lid)
-        p = spacing.get(k, self.pitch)
-        lo = t0 if i == 0 else self.pos[(k, lids[i - 1])] + p
-        hi = t1 if i == len(lids) - 1 else self.pos[(k, lids[i + 1])] - p
+        sp = self.spacing[k]
+        lo = t0 if i == 0 else self.pos[(k, lids[i - 1])] + sp
+        hi = t1 if i == len(lids) - 1 else self.pos[(k, lids[i + 1])] - sp
         lo, hi = max(lo, t0), min(hi, t1)
-        if lo > hi:                     # no room: where it stands
+        if lo > hi:
             lo = hi = min(max(self.pos[(k, lid)], t0), t1)
-        return self._at(k, lo / L), self._at(k, hi / L)
+        return lo, hi
 
-    def _band(self, lid, spacing):
+    def _band(self, lid):
+        """The funnel through the line's portals: (points, bends) - bends[j] is the vertex the
+        j-th point bends round (None at the two ends)."""
         ln = self.lines[lid]
         P, Q = self.xy[ln["pa"]], self.xy[ln["pb"]]
-        portals = [(P, P)]
+        portals, verts = [(P, P)], [(None, None)]
         for k, ti in zip(ln["edges"], ln["tris"]):
-            lo, hi = self._portal(k, lid, spacing)
-            # left and right as seen walking from triangle ti across k
+            lo, hi = self._portal(k, lid)
+            plo, phi = self._at(k, lo), self._at(k, hi)
             ca = _centroid([self.xy[v] for v in self.tris[ti]])
-            mid = ((lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2)
+            mid = ((plo[0] + phi[0]) / 2, (plo[1] + phi[1]) / 2)
             dx, dy = mid[0] - ca[0], mid[1] - ca[1]
-            side = dx * (lo[1] - mid[1]) - dy * (lo[0] - mid[0])
-            portals.append((lo, hi) if side > 0 else (hi, lo))
+            side = dx * (plo[1] - mid[1]) - dy * (plo[0] - mid[0])
+            # an arc only where the line is PRESSED against the corner at that end: packed up
+            # to it (each line nearer the corner a spacing from the next, the nearest at the
+            # free part's start) and that start the corner's own clearance, not a third
+            # obstacle mid-edge. A bend against anything else stays a point (an arc there,
+            # round a far vertex, drew a loop off the board - the fan board, 2026-10-11)
+            vlo = vhi = None
+            if side > 0:
+                portals.append((plo, phi))
+                verts.append((vlo, vhi))
+            else:
+                portals.append((phi, plo))
+                verts.append((vhi, vlo))
         portals.append((Q, Q))
-        return _funnel(portals)
+        verts.append((None, None))
+        return _funnel(portals, verts)
+
+    def _pressed(self, k, lid, lo, hi):
+        """(corner at k[0] or None, corner at k[1] or None): the corner line lid presses on,
+        at each end of its portal on edge k."""
+        if k in self.inpad:
+            return None, None
+        t0, t1, L = self.edges[k]
+        lids = self.order[k]
+        i, n = lids.index(lid), len(lids)
+        sp = self.spacing[k]
+        reach = self.keep + 0.3          # the corner's own clearance, give or take its shape
+        at0 = t0 < reach and lo <= t0 + i * sp + 1e-6
+        at1 = (L - t1) < reach and hi >= t1 - (n - 1 - i) * sp - 1e-6
+        return (k[0] if at0 else None), (k[1] if at1 else None)
+
+    def _copper_for(self, net):
+        """What a line of `net` keeps a centreline's distance (self.keep) off: every other
+        net's pad and every area; and the board's edge, half a track off."""
+        if not hasattr(self, "_cop"):
+            self._cop = {}
+        if net not in self._cop:
+            pads = [p.geom for p in self.pads if p.net != net]
+            g = unary_union(pads + [self.areas]) if pads or not self.areas.is_empty else Polygon()
+            outside = self.m.outline.buffer(5.0).difference(self.m.inside)
+            self._cop[net] = (g, outside)
+        return self._cop[net]
+
+    def _inflate(self, lid, pts, rounds=60):
+        """The band made legal against copper: wherever a segment comes nearer a pad or an
+        area than a centreline may, a point is put in, pushed out to exactly that distance
+        from the nearest point of the copper, and the band checked again - so a bend round a
+        corner becomes an arc of as many points as it needs, whatever the corner's shape (an
+        arc drawn round a corner chosen from the bend's edge, or from the nearest corner,
+        was round the wrong one as often as not - the around and fan boards, 2026-10-11)."""
+        from shapely.ops import nearest_points
+        cop, outside = self._copper_for(self.lines[lid]["net"])
+        need = self.keep - TOL / 2
+        pts = list(pts)
+        for _ in range(rounds):
+            worst, at = need, None
+            for i, (a, b) in enumerate(zip(pts, pts[1:])):
+                seg = LineString([a, b])
+                if seg.length < 1e-9:
+                    continue
+                d = seg.distance(cop) if not cop.is_empty else math.inf
+                if d < worst - 1e-6:
+                    worst, at = d, (i, seg, cop)
+            if at is None:
+                break
+            i, seg, g = at
+            po, ps = nearest_points(g, seg)
+            nx, ny = ps.x - po.x, ps.y - po.y
+            nn = math.hypot(nx, ny)
+            if nn < 1e-9:
+                # the segment runs into the copper: push square to it, away from its middle
+                a, b = pts[i], pts[i + 1]
+                ux, uy = R2._unit(b[0] - a[0], b[1] - a[1])
+                cx, cy = g.centroid.x, g.centroid.y
+                nx, ny = -uy, ux
+                if (ps.x - cx) * nx + (ps.y - cy) * ny < 0:
+                    nx, ny = -nx, -ny
+                nn = 1.0
+            q = (po.x + nx / nn * (self.keep + TOL / 2), po.y + ny / nn * (self.keep + TOL / 2))
+            if q in pts:
+                break
+            pts.insert(i + 1, q)
+        return pts
+
+    def _ends(self, lid, pts, others=None):
+        """Each end pulled tight from its own pad: the line need only reach the pad, not its
+        centre, so it starts at the point of the pad (a hair inside its edge) nearest the
+        furthest point of the band a straight run from there reaches legally. Without this a
+        line that left its pad by the wrong side doubled back round the pad's own corner -
+        an acid trap (the around board, R at R1)."""
+        cop, _ = self._copper_for(self.lines[lid]["net"])
+        need = self.keep - TOL / 2
+        from shapely.ops import nearest_points
+        for end in (0, 1):
+            seq = pts if end == 0 else pts[::-1]
+            v = self.lines[lid]["pa" if end == 0 else "pb"]
+            pad = self.pads[self.vpad[v]].geom.buffer(-0.05)
+            if pad.is_empty:
+                continue
+            best = None
+            for j in range(min(len(seq) - 1, 12), 0, -1):
+                tgt = Point(seq[j])
+                q = nearest_points(pad, tgt)[0]
+                run = LineString([(q.x, q.y), seq[j]])
+                if run.length > 1e-6 and (cop.is_empty or run.distance(cop) >= need) and \
+                        (others is None or run.distance(others) >= self.width + self.clear + TOL / 2):
+                    best = [(q.x, q.y)] + seq[j:]
+                    break
+            if best:
+                seq = best
+            pts = seq if end == 0 else seq[::-1]
+        return pts
+
+    def _corner_at(self, a, b, c):
+        """The corner the path a -> b -> c bends round at b: the nearest corner to b on the
+        inside of the turn, within reach of a pressed bend (a clearance off it, and a pitch
+        for each line that could be nested inside); None if there is none. Read from the
+        geometry, not from the edge the bend stands on - that edge's end is often another
+        corner (the around board: R bent at pad S1's lower corner, the edge ran to R1's, and
+        the line up S1's side cut in)."""
+        turn = _tri2(a, b, c)
+        if abs(turn) < 1e-9:
+            return None
+        reach = self.keep + self.pitch * 8
+        best, bd = None, math.inf
+        for j in self.corner_tree.query(Point(b).buffer(reach)):
+            v = self.corner_ids[int(j)]
+            q = self.xy[v]
+            d = math.dist(q, b)
+            # inside the turn: between the chord a -> c and the bend, on b's side of it
+            if d < bd and d <= reach and _tri2(a, c, q) * _tri2(a, c, b) > 0:
+                best, bd = v, d
+        return best
+
+    def _arcs(self, pts, bends):
+        """Each run of bends round one corner drawn as an arc round it at the radius the bend
+        stands at, from the tangent off the point before to the tangent toward the point after;
+        the arc's points stand just outside the circle, so its chords never cut inside."""
+        bends = [None] + [self._corner_at(pts[i - 1], pts[i], pts[i + 1]) for i in range(1, len(pts) - 1)] + [None]
+        out = [pts[0]]
+        j = 1
+        n = len(pts)
+        while j < n - 1:
+            v = bends[j]
+            if v is None:
+                out.append(pts[j])
+                j += 1
+                continue
+            j2 = j
+            while j2 + 1 < n - 1 and bends[j2 + 1] == v:
+                j2 += 1
+            c = self.xy[v]
+            r = max(math.dist(pts[i], c) for i in range(j, j2 + 1))
+            A, C = out[-1], pts[j2 + 1]
+            if math.dist(A, c) <= r + 1e-6 or math.dist(C, c) <= r + 1e-6:
+                out.extend(pts[j:j2 + 1])
+                j = j2 + 1
+                continue
+            turn = _tri2(A, pts[j], C)          # > 0: a left turn, the vertex on the left
+            t_in = _tangent(A, c, r, turn)
+            t_out = _tangent(C, c, r, -turn)
+            arc = _arc(c, r, t_in, t_out, turn)
+            if arc is None:                     # more than a half turn: not a bend round c
+                out.extend(pts[j:j2 + 1])
+            else:
+                out.extend(arc)
+            j = j2 + 1
+        out.append(pts[-1])
+        return out
+
+    def _widen(self, paths):
+        """Measure each pair of neighbours (adjacent in an edge's order); where one is under a
+        pitch from the other, widen the spacing on every edge they stand adjacent on. True if
+        anything was widened."""
+        need = self.width + self.clear + TOL / 2
+        geo = {lid: LineString(p) for lid, p in paths.items()}
+        widened = False
+        seen = set()
+        for k, lids in self.order.items():
+            for a, b in zip(lids, lids[1:]):
+                pair = (min(a, b), max(a, b))
+                if pair in seen:
+                    continue
+                seen.add(pair)
+                d = geo[a].distance(geo[b])
+                if d < need:
+                    grow = (need - d) + TOL
+                    for k2, l2 in self.order.items():
+                        for x, y in zip(l2, l2[1:]):
+                            if {x, y} == {a, b}:
+                                t0, t1, _ = self.edges[k2]
+                                cap = (t1 - t0) / max(1, len(l2) - 1)
+                                self.spacing[k2] = min(self.spacing[k2] + grow, max(cap, self.spacing[k2]))
+                    widened = True
+        return widened
 
 
 class _EdgeRef:
@@ -416,51 +614,93 @@ class _EdgeRef:
         self.k, self.lid = k, lid
 
 
+def _cross(a, b, c, d):
+    """Whether segments a-b and c-d cross properly (touching ends do not count)."""
+    d1, d2 = _tri2(c, d, a), _tri2(c, d, b)
+    d3, d4 = _tri2(a, b, c), _tri2(a, b, d)
+    return d1 * d2 < 0 and d3 * d4 < 0
+
+
 def _centroid(pts):
     return (sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts))
 
 
-def _dir_at(path, edge):
-    """The unit direction of `path` where it crosses `edge`, or None."""
-    for a, b in zip(path, path[1:]):
-        s = LineString([a, b])
-        if s.length > 1e-9 and s.intersects(edge):
-            return R2._unit(b[0] - a[0], b[1] - a[1])
-    return None
-
-
 def _tri2(a, b, c):
-    """Twice the signed area of a, b, c (positive: c left of a -> b, x right, y up)."""
+    """Twice the signed area of a, b, c."""
     return (b[0] - a[0]) * (c[1] - a[1]) - (c[0] - a[0]) * (b[1] - a[1])
 
 
-def _funnel(portals):
+def _tangent(p, c, r, turn):
+    """The point where a line from p touches the circle (c, r), on the side that keeps the
+    circle on the turn's inside (turn > 0: the circle on the left of p -> tangent)."""
+    d = math.dist(p, c)
+    base = math.atan2(p[1] - c[1], p[0] - c[0])
+    phi = math.acos(max(-1.0, min(1.0, r / d)))
+    cands = [base + phi, base - phi]
+    best = None
+    for a in cands:
+        t = (c[0] + r * math.cos(a), c[1] + r * math.sin(a))
+        side = _tri2(p, t, c)                    # > 0: c on the left of p -> t
+        if (side > 0) == (turn > 0):
+            best = t
+    return best or (c[0] + r * math.cos(cands[0]), c[1] + r * math.sin(cands[0]))
+
+
+def _arc(c, r, t_in, t_out, turn):
+    """Points round (c, r) from t_in to t_out, turning with the path (turn > 0: the path
+    turns left, so round the circle clockwise as seen from c... the short way that keeps c
+    inside the turn). Points stand at r / cos(step / 2), so every chord is outside the circle."""
+    a0 = math.atan2(t_in[1] - c[1], t_in[0] - c[0])
+    a1 = math.atan2(t_out[1] - c[1], t_out[0] - c[0])
+    # the path turns left round a centre on its left: it goes round the circle
+    # counter-clockwise
+    if turn > 0:
+        while a1 < a0:
+            a1 += 2 * math.pi
+    else:
+        while a1 > a0:
+            a1 -= 2 * math.pi
+    span = a1 - a0
+    if abs(span) > math.pi + 1e-6:
+        return None
+    n = max(1, int(math.ceil(abs(span) / ARC_STEP)))
+    ro = r / math.cos(abs(span) / n / 2)
+    out = [t_in]
+    for i in range(1, n):
+        a = a0 + span * i / n
+        out.append((c[0] + ro * math.cos(a), c[1] + ro * math.sin(a)))
+    out.append(t_out)
+    return out
+
+
+def _funnel(portals, verts):
     """The simple stupid funnel algorithm (Mononen): the shortest path through portals given
-    as (left, right) pairs, the first and last a single point each."""
-    pts = [portals[0][0]]
+    as (left, right) pairs, the first and last a single point each. Returns (points, bends):
+    the vertex each point bends round, read from `verts` ((left's, right's) per portal)."""
+    pts, bends = [portals[0][0]], [None]
     apex, left, right = portals[0][0], portals[0][0], portals[0][1]
     ai = li = ri = 0
     i = 1
     n = len(portals)
     while i < n:
         pl, pr = portals[i]
-        # the right side
         if _tri2(apex, right, pr) >= 0:
             if apex == right or _tri2(apex, left, pr) < 0:
                 right, ri = pr, i
             else:
                 pts.append(left)
+                bends.append(verts[li][0])
                 apex, ai = left, li
                 left, right = apex, apex
                 li = ri = ai
                 i = ai + 1
                 continue
-        # the left side
         if _tri2(apex, left, pl) <= 0:
             if apex == left or _tri2(apex, right, pl) > 0:
                 left, li = pl, i
             else:
                 pts.append(right)
+                bends.append(verts[ri][1])
                 apex, ai = right, ri
                 left, right = apex, apex
                 li = ri = ai
@@ -469,18 +709,20 @@ def _funnel(portals):
         i += 1
     if pts[-1] != portals[-1][0]:
         pts.append(portals[-1][0])
-    return pts
+        bends.append(None)
+    return pts, bends
 
 
 def route_layer(model, layer, pairs, **kw):
     """Plan and draw two-pad nets on one layer. pairs: [(net, pad, pad)] (pcb_route2 Pads),
-    routed in the order given. Returns (runs, failed): pcb_route2 Runs, and [net] not placed."""
-    nets = [n for n, _, _ in pairs]
-    mp = Map(model, layer, nets, **kw)
-    vid = {id(p): i for i, p in mp.pad_of.items()}
+    routed in the order given. Returns (runs, failed, map): pcb_route2 Runs with exact points,
+    and [net] not placed."""
+    mp = Map(model, layer, [n for n, _, _ in pairs], **kw)
+    idx = {id(p): i for i, p in enumerate(mp.pads)}
     failed, lids = [], {}
-    for net, a, b in pairs:
-        lid = mp.route(net, vid[id(a)], vid[id(b)])
+    for j, (net, a, b) in enumerate(pairs):
+        pending = [(x.centre, y.centre) for _, x, y in pairs[j + 1:]]
+        lid = mp.route(net, idx[id(a)], idx[id(b)], pending=pending)
         if lid is None:
             failed.append(net)
         else:
@@ -488,6 +730,8 @@ def route_layer(model, layer, pairs, **kw):
     paths = mp.geometry()
     runs = []
     for lid, net in lids.items():
-        pts = [(x, y, layer) for x, y in paths[lid]]
-        runs.append(R2.Run(net, pts, model.rules.width(net), via=model.rules.via_size(net)))
+        r = R2.Run(net, [(0, 0, layer)], model.rules.width(net), via=model.rules.via_size(net))
+        pts = [(round(x, 4), round(y, 4), layer) for x, y in paths[lid]]
+        r.pts = [p for i, p in enumerate(pts) if i == 0 or p != pts[i - 1]]
+        runs.append(r)
     return runs, failed, mp

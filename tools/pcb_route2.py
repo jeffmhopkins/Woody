@@ -2963,7 +2963,10 @@ def write(board, model, runs, pour=None):
         u = unary_union(lines)
         merged = linemerge(u) if u.geom_type == "MultiLineString" else u      # one line: nothing to merge
         for ls in (list(merged.geoms) if hasattr(merged, "geoms") else [merged]):
-            pts = [(snap(x), snap(y), L) for x, y in ls.coords]
+            # to a ten-thousandth, not the lattice: this router's points are on the lattice
+            # already, and the topological router's (pcb_topo) are exact - snapped, a line
+            # an exact clearance off a pad moved up to 0.035 mm into it (#47)
+            pts = [(snap(x, 1e-4), snap(y, 1e-4), L) for x, y in ls.coords]
             pts = simplify(pts)
             for q0, q1 in zip(pts, pts[1:]):
                 if (q0[0], q0[1]) == (q1[0], q1[1]):
