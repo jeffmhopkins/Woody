@@ -118,7 +118,7 @@ CELLS = ["fanout", "pinch", "updown", "bus", "nonplanar", "locked", "offgrid", "
          "planes4", "island4", "optin4", "orphan4", "fragments", "lockedvia", "guard", "stages", "push",
          "stagepush", "edits", "resume", "resume4",
          "partial", "partialpush", "connect", "moatpin", "walled", "escape", "rescuebox",
-         "near", "rescuerepeat"]
+         "near", "rescuerepeat", "reseat"]
 
 
 def _setup():
@@ -1206,6 +1206,35 @@ def cell_rescuerepeat(out, plot):
     said = any("no order settles it" in l_ for l_ in r.log)
     res = {"failed_first": sorted(failed), "rescued": got, "orders_tried": len(tries), "said_so": said}
     res["pass"] = sorted(failed) == ["Y"] and not got and len(tries) == 2 and said
+    return res
+
+
+def cell_reseat(out, plot):
+    pcbnew, R2, T = _setup()
+    import pcb_pack as P
+    b = T.new_board(40.0, 20.0)
+    # S is front-only; its one way is a channel x 15-25, y 9-11, and R1 stands in it, its
+    # pads along the line (no copper on it yet). The rip-up has nothing to take up - the
+    # wall is a part. reseat moves R1 round its own nets' pads and S routes
+    T.keepout(b, 15.0, 0.0, 25.0, 9.0, layers=("F",))
+    T.keepout(b, 15.0, 11.0, 25.0, 20.0, layers=("F",))
+    T.tp(b, "S1", "S", 5.0, 10.0)
+    T.tp(b, "S2", "S", 35.0, 10.0)
+    T.tp(b, "P1", "P", 6.0, 3.0)
+    T.tp(b, "Q1", "Q", 10.0, 3.0)
+    T.passive(b, "R1", "P", "Q", 20.0, 10.0)
+    lay = dict(LAY, net_classes={"front": {"nets": ["S"], "layers": ["F.Cu"]}})
+    m = R2.model_from_board(b, lay)
+    r = R2.Router(m)
+    failed = r.route(["S"], rescue=True)
+    opened = [(p.net, p.centre) for p in r._open_part("S")]
+    rep = P.reseat(b, opened)
+    m2 = R2.model_from_board(b, lay)
+    r2 = R2.Router(m2)
+    after = r2.route(rescue=False)
+    res = finish("reseat", b, m2, r2, out, plot)
+    res.update(failed_first=sorted(failed), moved=rep["moved"], kept=rep["kept"], failed_after=sorted(after))
+    res["pass"] = sorted(failed) == ["S"] and list(rep["moved"]) == ["R1"] and not after and clean(res)
     return res
 
 

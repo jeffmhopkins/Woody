@@ -1012,6 +1012,105 @@ class Packer:
         return n
 
 
+def reseat(kboard, open_pads, rails=(), body=(), escape=None, reach=1.5, log=None):
+    """A placement rescue: the parts in the way of a family's open pads, seated again with the
+    copper already routed as an obstacle (the owner, 2026-10-11: "a partial replacement
+    after each family is routed"). `open_pads`: [(net, (x, y))] - each pad a family could not
+    join, as the board stood BEFORE that family (its checkpoint k-1). THE WAY: from each open
+    pad to the nearest other pad of its net, `reach` mm either side. A part may move if its
+    courtyard is on the way, nothing fixes it (locked, body CAD, `body`), it has at most three
+    pads, and no copper of a signal net touches them - only the plane vias of the fanout,
+    which go with it (the router lays them again where it now stands). It is packed round the
+    placed part it shares the most signal nets with, under every placement rule, the way
+    kept out. Returns {"moved": {ref: (x, y)}, "kept": {ref: why}, "removed": n items}.
+
+    The main board, 2026-10-11, is why: R10, R48 and R49 (U6's pull resistors) sat in a row
+    across J-MCU's top row; five re-runs of the mcu families, each with hand edits, walled in
+    a different pin every time. Nothing had routed to them - they could have moved."""
+    import pcbnew
+    log = log if log is not None else []
+    rails = set(rails)
+    bd = board_of(kboard, rails=sorted(rails))
+    way = []
+    for net, xy in open_pads:
+        others = [q for r, pp in bd.parts.items() for (n, q) in pp.pads if n == net and math.dist(q, xy) > 1e-3]
+        if others:
+            far = min(others, key=lambda q: math.dist(q, xy))
+            way.append(LineString([xy, far]).buffer(reach))
+        else:
+            way.append(Point(xy).buffer(reach))
+    way = unary_union(way)
+    # the copper on each part's pads: a signal net's fixes it; a rail's (the fanout) goes with it
+    tracks = list(kboard.GetTracks())
+    def touching(fp):
+        """The tracks and vias with an end on one of the part's pads (its own net)."""
+        out = []
+        for pad in fp.Pads():
+            for t in tracks:
+                if t.GetNetCode() != pad.GetNetCode():
+                    continue
+                ends = [t.GetPosition()] if isinstance(t, pcbnew.PCB_VIA) else [t.GetStart(), t.GetEnd()]
+                if any(pad.HitTest(e) for e in ends) and t not in out:
+                    out.append(t)
+        return out
+    kept, cands, fanout = {}, [], {}
+    for r, part in sorted(bd.parts.items()):
+        if not part.court.intersects(way):
+            continue
+        fp = part.item
+        if part.locked or r in body:
+            kept[r] = "fixed"
+            continue
+        if len(part.pads) > 3:
+            kept[r] = f"{len(part.pads)} pads"
+            continue
+        cu = touching(fp)
+        sig = sorted({t.GetNetname() for t in cu if t.GetNetname() not in rails})
+        if sig:
+            kept[r] = f"routed: {', '.join(sig)}"
+            continue
+        cands.append(r)
+        fanout[r] = cu
+    rep = {"moved": {}, "kept": kept, "removed": 0, "way": way}
+    if not cands:
+        return rep
+    # the candidates' fanout off the board, and out of the packer's copper (a part that then
+    # finds no seat keeps its place; the router's fanout lays its via again, as it does for
+    # a part that moved)
+    for r in cands:
+        for t in fanout[r]:
+            kboard.Remove(t)
+            rep["removed"] += 1
+    bd = board_of(kboard, rails=sorted(rails))
+    bd.keepouts = list(bd.keepouts) + [way]
+    pk = Packer(bd, body, log, escape=escape)
+    for r in cands:
+        mine = {n for n, _ in bd.parts[r].pads if n and n not in rails and not n.startswith("unconnected")}
+        score_ = {}
+        for a, q in bd.parts.items():
+            if a == r or a in cands:
+                continue
+            k = len(mine & {n for n, _ in q.pads})
+            if k:
+                score_[a] = (k, -bd.parts[r].court.distance(q.court))
+        if not score_:
+            kept[r] = "nothing placed to pack it round"
+            continue
+        anchor = max(sorted(score_), key=lambda a: score_[a])
+        try:
+            res = pk.pack(anchor, [r])
+        except SystemExit as e:
+            res = {"result": str(e)}
+        if res.get("result") == "packed":
+            rep["moved"][r] = res["seats"][r][:2]
+            log.append(f"reseat: {r} round {anchor} -> {res['seats'][r][:2]}")
+        else:
+            kept[r] = f"no seat round {anchor}: {res.get('result')}"
+            log.append(f"reseat: {r} kept - {kept[r]}")
+    pk.apply(kboard)
+    return rep
+
+
 def _kturn(x, y, deg):
     """A vector turned as KiCad turns a part by `deg` (counter-clockwise on screen, y down)."""
     if not deg:

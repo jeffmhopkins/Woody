@@ -527,10 +527,52 @@ def finish(board, lay, rep):
     return 1 if failed else 0
 
 
+def reseat_before(board, path, lay, out, k):
+    """--reseat with --start K: the parts in the way of family K's open pads (read from its
+    checkpoint and its .json, as its last run left them) seated again on checkpoint K-1
+    (pcb_pack.reseat), gated by KiCad as the placement is, and saved over it - the old one
+    kept beside it as .before-reseat. Then K routes again from there."""
+    done = sorted(glob.glob(os.path.join(out, f"main-board.cold.{k}-*.json")))
+    if not done:
+        raise SystemExit(f"cold: --reseat: no record of family {k} in {out} - route it first")
+    rec = json.load(open(done[0]))
+    failed = list(rec.get("failed") or {})
+    if not failed:
+        print(f"cold: reseat: family {k} ({rec['family']}) left nothing open - nothing to move")
+        return board
+    after = pcbnew.LoadBoard(done[0].replace(".json", ".kicad_pcb"))
+    ra = pcb_route2.Router(pcb_route2.model_from_board(after, lay))
+    opened = [(p.net, p.centre) for n in failed for p in ra._open_part(n)]
+    rails = [p_["net"] for p_ in lay["planes"]] + [i["net"] for i in lay["islands"]] + ["DEV_3V3"]
+    fixed = fixed_parts(board, lay, comps_of())
+    esc = escape_rows(pcb_pack.board_of(board, rails=rails), ESCAPE_DEPTH + 0.4, header_depth=HEADER_ESCAPE)
+    log = []
+    rep = pcb_pack.reseat(board, opened, rails=rails, body=set(fixed), escape=esc, log=log)
+    for line in log:
+        print("cold: " + line)
+    print(f"cold: reseat for family {k} ({', '.join(failed)}): moved {rep['moved'] or 'nothing'}; "
+          f"kept {rep['kept']}; {rep['removed']} fanout item(s) taken up")
+    if not rep["moved"]:
+        return board
+    tmp = path.replace(".kicad_pcb", "-reseat.kicad_pcb")
+    pcbnew.SaveBoard(tmp, board)
+    errs, _ = pcb_route2.drc(tmp, fill=False)
+    pe = [e[:3] for e in errs if e[0] in PLACE_FINDINGS]
+    if pe:
+        os.remove(tmp)
+        raise SystemExit(f"cold: reseat: KiCad placement findings {pe} - not kept")
+    os.replace(path, path.replace(".kicad_pcb", ".kicad_pcb.before-reseat"))
+    os.replace(tmp, path)
+    print(f"cold: reseat: wrote {path} (the old one .before-reseat)")
+    return pcbnew.LoadBoard(path)
+
+
 def main():
     """--start K: go on from the checkpoint of family K-1 in --out (K=1: the placement saved
     there as checkpoint 0, or placed from the source with --place or when there is none).
     --stop K: stop after family K. --pause: stop after the first family that asks for review.
+    --reseat (with --start K): first move the parts in the way of family K's open pads, on
+    checkpoint K-1 (reseat_before).
     The reviewer's moves are EDITS, above, each with why."""
     arg = lambda k, d=None: sys.argv[sys.argv.index(k) + 1] if k in sys.argv else d
     out = os.path.abspath(arg("--out", HERE))
@@ -571,6 +613,8 @@ def main():
             raise SystemExit(f"cold: no checkpoint of family {start - 1} in {out}")
         board = pcbnew.LoadBoard(prev[0])
         print(f"cold: going on from {prev[0]}")
+        if "--reseat" in sys.argv:
+            board = reseat_before(board, prev[0], lay, out, start)
     m = pcb_route2.model_from_board(board, lay)
     r = pcb_route2.Router(m, flow=0.3, budget=3_000_000)
 
@@ -589,8 +633,12 @@ def main():
     for line in r.log:
         if not line.startswith(("route:", "rescue ")):
             print("cold: route " + line)
-    for x in rep:
-        print("cold: family " + json.dumps({k_: v for k_, v in x.items() if k_ not in ("checkpoint",)}, default=str))
+    for i, x in enumerate(rep):
+        rec = {k_: v for k_, v in x.items() if k_ not in ("checkpoint",)}
+        print("cold: family " + json.dumps(rec, default=str))
+        # beside its checkpoint: what --reseat reads back (the family's open nets)
+        with open(checkpoint(start + i, x["family"]).replace(".kicad_pcb", ".json"), "w") as f:
+            json.dump(rec, f, default=str, indent=1)
     last = len(FAMILIES) + 1                   # the families and "rest"
     done = rep and not rep[-1].get("paused") and (stop is None or stop >= last)
     if not done:

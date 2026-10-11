@@ -989,6 +989,19 @@ prove nothing about themselves.
   places in every order, and the rescue says so instead of running every
   order (the `rescuerepeat` cell).
 
+  **A placement rescue**, `pcb_pack.reseat` (the owner, 2026-10-11: *"a
+  partial replacement after each family is routed"*). It acts when the wall
+  round an open pad is a part, not copper. Run on the board as it stood
+  before the family, it takes the way from each open pad to the nearest other
+  pad of its net. It seats again every part on that way that nothing fixes:
+  not locked, not the body CAD's, at most three pads, and no signal copper on
+  them. Their plane vias go with them, and the router lays those again. Each
+  part is packed round the part it shares the most nets with, under every
+  placement rule, with the way kept out. The trial script's `--reseat`, with
+  `--start K`, does this on checkpoint K−1 from family K's record. It gates
+  the result with KiCad, as the placement is gated, and keeps the old
+  checkpoint beside it. It is the bench's `reseat` cell.
+
   **When a reviewer is wanted**: each family's `review` lists what it could not
   settle by itself — a net still open, a net pushed in or rescued (copper moved
   for it: the board's own included), a detour the pull did not cure, an edit
