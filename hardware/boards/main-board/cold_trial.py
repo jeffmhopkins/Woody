@@ -74,7 +74,11 @@ FAMILIES = [
     # 2026-10-11: "breaking up families geographically"). Routed as one family the crowd
     # walled in one of its own each time: IO2 looped round U1 pin 3 (IO36), and with IO36
     # leading, J1.4 (IO1) - each a pad-to-pad hop of a few mm that a long line crossed first
-    {"name": "mcu-fanin", "nets": ["/IO*", "*TXD*", "*RXD*"], "near": [300.0, 124.0, 332.0, 138.0],
+    # The box reaches north over U6 too (review of family 6, 2026-10-11): at 124 it took the
+    # long lines with a pad at J-MCU (IO2, IO39, IO35) ahead of U6's own hops, which were
+    # then walled in on both layers - GATE_A_OUT, IO6 and LED_D1 open. U6 shares IO1 and
+    # IO2 with J-MCU: one crowd, not two
+    {"name": "mcu-fanin", "nets": ["/IO*", "*TXD*", "*RXD*", "/led-strip-drive/*"], "near": [300.0, 108.0, 334.0, 138.0],
      "first": ["/IO36", "/IO1"]},
     {"name": "mcu", "nets": ["/IO*", "/SPI*", "*TXD*", "*RXD*", "/led-strip-drive/*", "/LED_*"]},
     {"name": "midi", "nets": ["*MIDI*"]},
