@@ -86,6 +86,10 @@ acid traps (check_tracks: KiCad's DRC has no such test), unless it says why not.
                pin 2, on the AGND strip's moat), its net kept to B.Cu: routed from the pin's
                free half - no stub from its centre across the keep-out, which the lay refused
                every time (CHAIN_SCK open through push and rescue) - and KiCad clean
+  walled       a pad boxed in by a locked ring of another net, its net kept to the front: the
+               router says so at once and names the pad ("walled: P2 ...") - not a search
+               spent to its budget (the main board's U8 pin 1 took minutes per attempt to
+               answer "budget"); and a pad with a way out is not called walled
   rescue       a net walled out by an earlier one: rescue takes that one up and both route
   minikey      a three-key board: packed (pcb_pack) then routed, liquid pass, DRC clean
 """
@@ -105,7 +109,7 @@ CELLS = ["fanout", "pinch", "updown", "bus", "nonplanar", "locked", "offgrid", "
          "fold", "jogs", "equalise", "fillet", "ground", "enclosed", "stitch", "pourcut", "rescue", "minikey",
          "planes4", "island4", "optin4", "orphan4", "fragments", "lockedvia", "guard", "stages", "push",
          "stagepush", "edits", "resume", "resume4",
-         "partial", "partialpush", "connect", "moatpin"]
+         "partial", "partialpush", "connect", "moatpin", "walled"]
 
 
 def _setup():
@@ -1079,6 +1083,33 @@ def cell_moatpin(out, plot):
     res = finish("moatpin", b, m, r, out, plot)
     res.update(failed=failed, pin=(px, py))
     res["pass"] = not failed and res["drc_errors"] == 0 and res.get("acid_traps", 0) == 0 and res["unconnected"] <= 1
+    return res
+
+
+def cell_walled(out, plot):
+    pcbnew, R2, T = _setup()
+    b = T.new_board(40.0, 20.0)
+    T.tp(b, "P1", "P", 5.0, 10.0)
+    T.tp(b, "P2", "P", 30.0, 10.0)
+    T.tp(b, "W1", "W", 26.0, 6.0)
+    T.track(b, "W", [(26.0, 6.0), (34.0, 6.0), (34.0, 14.0), (26.0, 14.0), (26.0, 6.0)], locked=True)
+    lay = dict(LAY, net_classes={"front": {"nets": ["P", "Q"], "layers": ["F.Cu"]}})
+    m = R2.model_from_board(b, lay)
+    r = R2.Router(m, budget=3_000_000)
+    t0 = time.monotonic()
+    ok, runs, why = r.route_net("P")
+    dt = time.monotonic() - t0
+    # the same ring with a gap: a way out, so not walled
+    b2 = T.new_board(40.0, 20.0)
+    T.tp(b2, "P1", "P", 5.0, 10.0)
+    T.tp(b2, "P2", "P", 30.0, 10.0)
+    T.tp(b2, "W1", "W", 26.0, 6.0)
+    T.track(b2, "W", [(26.0, 9.0), (26.0, 6.0), (34.0, 6.0), (34.0, 14.0), (26.0, 14.0), (26.0, 11.5)], locked=True)
+    m2 = R2.model_from_board(b2, lay)
+    r2 = R2.Router(m2)
+    ok2, _, why2 = r2.route_net("P")
+    res = {"boxed": {"ok": ok, "why": why, "seconds": round(dt, 2)}, "gap": {"ok": ok2, "why": why2}}
+    res["pass"] = not ok and str(why).startswith("walled:") and "P2" in str(why) and dt < 5.0 and ok2
     return res
 
 

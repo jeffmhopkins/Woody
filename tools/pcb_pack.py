@@ -876,6 +876,10 @@ class Packer:
                 mine = signal(r) - power
                 priv = [n for n in mine if len(owners.get(n, set()) - {r}) == 1]
                 anchors = {next(iter(owners[n] - {r})) for n in priv}
+                # ...and so is a part `prefer` names a driver for (a series termination at its
+                # driving pin: in its driver's row it went 8.4 mm off - the main board's R44)
+                if r in prefer and prefer[r] in seated:
+                    anchors, priv, mine = {prefer[r]}, [None], [None]
                 if mine and len(priv) == len(mine) and len(anchors) == 1 and next(iter(anchors)) in seated:
                     a = next(iter(anchors))
                     res1 = None
@@ -883,7 +887,7 @@ class Packer:
                         res1 = self.pack(a, [r], rotations=(0, 90), grow=reach)
                         if res1["result"] == "packed":
                             break
-                    rep.append((f"round {a} (its private net)", [r], res1["result"]))
+                    rep.append((f"round {a} ({'its driver' if r in prefer else 'its private net'})", [r], res1["result"]))
                     if res1["result"] == "packed":
                         ready.remove(r)
             groups = {}

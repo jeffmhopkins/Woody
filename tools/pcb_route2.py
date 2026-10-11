@@ -1241,9 +1241,30 @@ class Router:
         cx = sum(p.centre[0] for p in pads) / len(pads)
         cy = sum(p.centre[1] for p in pads) / len(pads)
         groups_.sort(key=lambda g: (-len(g[0]), min((math.hypot(p.centre[0] - cx, p.centre[1] - cy) for p in g[0]), default=1e9)))
+        # WALLED IN: a group whose free space - its own layers, a via where one may stand -
+        # closes round it before reaching any other group is proven unreachable, and said so
+        # by name, at once. Without it the search spent its whole budget to answer "budget"
+        # (the main board's U8 pin 1, sat on by a hand route: minutes per attempt, through
+        # route, push and rescue). The flood is optimistic - no turn or corner rules - so it
+        # only ever proves what no search could do; past `cap` cells it gives up and says
+        # nothing.
+        walled = []
+        if len(groups_) > 1:
+            for k, (gp, gc) in enumerate(groups_):
+                others = set().union(*(c for q, (_, c) in enumerate(groups_) if q != k))
+                n_free = self._enclosed(gc, others, grids, vgrid)
+                if n_free is not None:
+                    walled.append((gp, n_free))
+        if walled and not partial:
+            names = "; ".join(f"{', '.join(p.name for p in gp) or 'a fragment of its copper'} "
+                              f"({n} free cell(s) round it)" for gp, n in walled)
+            return False, [], f"walled: {names} - no way out on its layers"
+        if walled:
+            wl = [id(gp) for gp, _ in walled]
+            groups_ = [g for g in groups_ if id(g[0]) not in wl] or groups_
         joined, tree = list(groups_[0][0]), set(groups_[0][1])
         todo = groups_[1:]
-        runs, groups = [], []
+        runs, groups = [], [gp for gp, _ in walled]
         while todo:
             targets = set()
             owner = {}
@@ -1277,6 +1298,35 @@ class Router:
         self.groups = getattr(self, "groups", {})
         self.groups[net] = groups
         return len(groups) == 1, runs, None if len(groups) == 1 else f"{len(groups)} group(s)"
+
+    def _enclosed(self, start, others, grids, vgrid, cap=4000):
+        """Flood the free cells from `start` - eight ways on a layer, through a via where the
+        via grid is free - and if it closes before `cap` cells without touching `others`,
+        return how many cells it held (proved walled in); else None."""
+        from collections import deque
+        nl = self.m.nl
+        seen = set(start)
+        q = deque(start)
+        while q:
+            if len(seen) > cap:
+                return None
+            L, i, j = q.popleft()
+            nxt = []
+            for di in (-1, 0, 1):
+                for dj in (-1, 0, 1):
+                    if di or dj:
+                        a, b = i + di, j + dj
+                        if 0 <= a < self.nx and 0 <= b < self.ny and not grids[L][a, b]:
+                            nxt.append((L, a, b))
+            if not vgrid[i, j]:
+                nxt += [(L2, i, j) for L2 in range(nl) if L2 != L and not grids[L2][i, j]]
+            for c in nxt:
+                if c in others:
+                    return None
+                if c not in seen:
+                    seen.add(c)
+                    q.append(c)
+        return len(seen)
 
     def _touches(self, e, pad):
         return e.geom.intersects(pad.geom)
