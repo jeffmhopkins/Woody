@@ -51,6 +51,7 @@ import pcb_route2 as R2     # noqa: E402
 
 TOL = 0.01                  # mm: added to every clearance the plan keeps (rounding, arcs)
 ARC_STEP = math.radians(15) # an arc is drawn in steps of this; its points stand outside the circle
+SLACK = 0.05               # mm a gap must spare beyond the clearances to be a lane
 VIA_REF = "~via"            # the ref of a via the plan places (a pad on every layer, of its net)
 
 
@@ -229,9 +230,12 @@ class Map:
         if k in self.inpad:
             return 8 if self.inpad[k] in own else 0     # a pad of several lines of its net
         t0, t1, _ = self.edges[k]
-        if t1 < t0:
+        # a lane wants SLACK more than the bare clearances: a gap of exactly a track between
+        # two of a SOIC's pins (0.67 mm for 0.65) took a line the geometry then could not
+        # draw clear (the crowd board's IO1 and GATE between U6's pins)
+        if t1 - t0 < SLACK:
             return 0
-        return (int(math.floor((t1 - t0) / self.pitch + 1e-9)) + 1) * self.lanes
+        return (int(math.floor((t1 - t0 - SLACK) / self.pitch + 1e-9)) + 1) * self.lanes
 
     def _at(self, k, t):
         a, b = self.xy[k[0]], self.xy[k[1]]
@@ -464,7 +468,7 @@ class Map:
                 # (one ending beside the other, or round a bend) are spaced by nothing else
                 # (the crowd board: IO7 0.1 mm into IO38 and IO36)
                 if og is not None:
-                    paths[lid] = self._inflate(lid, paths[lid], extra=og.buffer(self.width / 2))
+                    paths[lid] = self._inflate(lid, paths[lid], lines=og)
             if not self._widen(paths):
                 break
         for lid, ln in self.lines.items():
@@ -602,7 +606,7 @@ class Map:
             self._cop[net] = (g, outside)
         return self._cop[net]
 
-    def _inflate(self, lid, pts, rounds=60, extra=None):
+    def _inflate(self, lid, pts, rounds=60, lines=None):
         """The band made legal against copper: wherever a segment comes nearer a pad or an
         area than a centreline may, a point is put in, pushed out to exactly that distance
         from the nearest point of the copper, and the band checked again - so a bend round a
@@ -611,27 +615,33 @@ class Map:
         was round the wrong one as often as not - the around and fan boards, 2026-10-11)."""
         from shapely.ops import nearest_points
         cop, outside = self._copper_for(self.lines[lid]["net"])
-        if extra is not None:
-            cop = unary_union([cop, extra]) if not cop.is_empty else extra
         # only the copper near the line: the whole board's, measured every round, made one
         # family on the crowd board take over ten minutes
         from shapely.geometry import box as _box
         x0, y0, x1, y1 = LineString(pts).bounds if len(pts) > 1 else (pts[0][0], pts[0][1], pts[0][0], pts[0][1])
         cop = cop.intersection(_box(x0 - 3.0, y0 - 3.0, x1 + 3.0, y1 + 3.0))
         need = self.keep - TOL / 2
+        # other nets' lines are measured centreline to centreline, a pitch (no buffering:
+        # buffering every neighbour's arcs each pass was the whole of the crowd board's time)
+        need_l = self.width + self.clear + TOL / 2
+        if lines is not None:
+            lines = lines.intersection(_box(x0 - 3.0, y0 - 3.0, x1 + 3.0, y1 + 3.0))
         pts = list(pts)
         for _ in range(rounds):
-            worst, at = need, None
+            worst, at = 0.0, None
             for i, (a, b) in enumerate(zip(pts, pts[1:])):
                 seg = LineString([a, b])
                 if seg.length < 1e-9:
                     continue
-                d = seg.distance(cop) if not cop.is_empty else math.inf
-                if d < worst - 1e-6:
-                    worst, at = d, (i, seg, cop)
+                for g, nd in ((cop, need), (lines, need_l)):
+                    if g is None or g.is_empty:
+                        continue
+                    short = nd - seg.distance(g)
+                    if short > worst + 1e-6:
+                        worst, at = short, (i, seg, g, nd)
             if at is None:
                 break
-            i, seg, g = at
+            i, seg, g, nd = at
             po, ps = nearest_points(g, seg)
             nx, ny = ps.x - po.x, ps.y - po.y
             nn = math.hypot(nx, ny)
@@ -644,7 +654,7 @@ class Map:
                 if (ps.x - cx) * nx + (ps.y - cy) * ny < 0:
                     nx, ny = -nx, -ny
                 nn = 1.0
-            q = (po.x + nx / nn * (self.keep + TOL / 2), po.y + ny / nn * (self.keep + TOL / 2))
+            q = (po.x + nx / nn * (nd + TOL), po.y + ny / nn * (nd + TOL))
             if q in pts:
                 break
             pts.insert(i + 1, q)
@@ -1138,7 +1148,6 @@ def route_board(model, nets, layers=None, rounds=4, log=None, later=()):
     and one per via (its two layers at one point)."""
     import copy
     log = log if log is not None else []
-    R = model.rules
     pads = {n: model.pads_of(n) for n in nets}
     many = [n for n in nets if len(pads[n]) >= 2]
     if layers is None:
@@ -1159,6 +1168,7 @@ def route_board(model, nets, layers=None, rounds=4, log=None, later=()):
                                                           + sum(1 for p in pads[n] if L not in p.layers) * 3, L))
         forced = plan_layers(model, many, pads, layers, allowed, start, log=log, later=later)
     failed, runs = list(nets), []
+    best = None
     for rnd in range(rounds):
         # 1. layers: most-crossed first; a layer its pads are on saves vias
         assign = {}
@@ -1228,7 +1238,19 @@ def route_board(model, nets, layers=None, rounds=4, log=None, later=()):
             for lid, (n, x, y) in lids.items():
                 got[(n, L, id(x), id(y))] = paths[lid]
         failed = sorted(set(nets) - set(pieces)) + sorted(bad)
+        # THE CHECK, in the planner: each net's runs held to fits() against everything laid
+        # before them (earlier families, and this round's nets already passed); a net that
+        # does not fit goes back to be planned again like one that was not planned. The
+        # geometry can only spend the room the plan gave it - where the plan gave too little
+        # a line was pushed off one neighbour into another (the crowd board: IO1 into U6.1)
+        built = _build(model, pieces, got, placed, failed, layers)
+        unfit = _verify(model, built)
+        for n, why in sorted(unfit.items()):
+            log.append(f"topo: {n} drawn but does not fit - {why}")
+        failed = sorted(set(failed) | set(unfit))
         log.append(f"topo round {rnd + 1}: layers {dict(sorted(assign.items()))}; vias {len(placed)}; failed {failed}")
+        if best is None or len(failed) < len(best[1]):
+            best = (built, failed, dict(assign), len(placed))
         if not failed or rnd == rounds - 1:
             break
         for n in failed:
@@ -1236,20 +1258,53 @@ def route_board(model, nets, layers=None, rounds=4, log=None, later=()):
                 others = [x for x in allowed[n] if x != assign.get(n)]
                 if others:
                     forced[n] = others[(rnd // 1) % len(others)]
+    built, failed, assign, nvias = best
+    runs = [r for n, rs in built.items() if n not in failed for r in rs]
+    return runs, failed, {"assign": assign, "vias": nvias, "split": [], "log": log}
+
+
+def _build(model, pieces, got, placed, failed, layers):
+    """{net: [Run]} - each planned line a Run, each via a Run of its two layers at a point."""
+    R = model.rules
+    out = {}
     for n, ps in pieces.items():
         if n in failed:
             continue
         for (L, x, y, _) in ps:
-            path = got[(n, L, id(x), id(y))]
+            path = got.get((n, L, id(x), id(y)))
+            if path is None:
+                continue
             r = R2.Run(n, [(0, 0, 0)], R.width(n), via=R.via_size(n))
             pts = [(round(float(px), 4), round(float(py), 4), L) for px, py in path]
             r.pts = [q for i, q in enumerate(pts) if i == 0 or q != pts[i - 1]]
-            runs.append(r)
+            out.setdefault(n, []).append(r)
     for v in placed:
         if v.net in failed or v.net not in pieces:
             continue
         r = R2.Run(v.net, [(0, 0, 0)], R.width(v.net), via=R.via_size(v.net))
         x, y = round(float(v.centre[0]), 4), round(float(v.centre[1]), 4)
         r.pts = [(x, y, min(layers)), (x, y, max(layers))]
-        runs.append(r)
-    return runs, failed, {"assign": assign, "vias": len(placed), "split": [], "log": log}
+        out.setdefault(v.net, []).append(r)
+    return out
+
+
+def _verify(model, built):
+    """{net: why} for each net whose runs do not fit, laid net by net (longest first) over
+    what is already on the board, then all taken up again - the model is left as it was."""
+    laid, bad = [], {}
+    for n in sorted(built, key=lambda n: -sum(r.length() for r in built[n])):
+        why = None
+        for r in built[n]:
+            f = R2.fits(r, model)
+            if f:
+                why = f"{f[0][0]} at ({f[0][1][0]:.2f}, {f[0][1][1]:.2f})"
+                break
+        if why:
+            bad[n] = why
+            continue
+        for r in built[n]:
+            R2.lay(r, model)
+            laid.append(r)
+    for r in laid:
+        R2.unlay(r, model)
+    return bad
