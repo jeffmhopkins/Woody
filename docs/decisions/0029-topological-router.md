@@ -1,7 +1,9 @@
 # 0029 — A topological router: plan each line's way first, then lay elastic copper
 
 **Status:** Accepted, 2026-10-11. Decided by the owner, in the working chat,
-from four options put to them (below). Tracked in #47, under #46.
+from four options put to them (below). Tracked in #47, under #46. **Amended
+2026-10-11** (the copper is laid by the grid router along the plan: *Amendment*
+below).
 
 ## Context
 
@@ -62,7 +64,9 @@ its neighbours, and on which layer. Its geometry follows from that plan.
    crossing, then layer assignment and rip-up resolve them, dearer each round
    (option 2's negotiation, on topology rather than cells). A via is a
    place in a triangle, with its own capacity.
-4. **Geometry last, as rubber bands.** Each line is the shortest path in its
+4. **Geometry last, as rubber bands.** *(2026-10-11: for a family's copper, superseded
+   by the Amendment below - the grid router lays it along the plan. The bands remain as
+   an engine of their own.)* Each line is the shortest path in its
    sleeve of triangles (the funnel algorithm), held off each vertex by that
    vertex's clearance plus the widths of the lines ordered inside it. Then it
    is cut to 45° and written as tracks. A capacity that holds means the bands
@@ -86,3 +90,39 @@ J-MCU fan-in as its benchmark.
   about the placement and not the engine.
 - If the topological router fails its benchmark, option 1 is the next step.
   Freerouting shows whether the placement is the problem.
+
+## Amendment, 2026-10-11 — the plan guides; the grid router lays the copper
+
+**Decided by the owner, 2026-10-11**, from three options put to them in the
+working chat: exact rubber-band geometry; a hybrid; or the hybrid now and the
+bands later. They chose the hybrid.
+
+**Why.** The planner and the negotiation worked. On the crowd board (the
+J-MCU crowd, small; four layers with planes) the planner alone routed all 18
+nets once each layer was laid along the negotiated plan. The drawing did not
+hold up. Capacity is checked on the triangulation's edges, and the narrowest
+real gap between two obstacles is often not one of them. A planned line was
+then drawn a fraction of a millimetre into a neighbour. Each repair to the
+geometry moved the miss to another net, and between commits 0c576608 and
+09dfb11e the crowd and stagemix cells flipped between passing and failing with
+each change. That is the same whack-a-mole the topological router was built
+to end, moved from the plan into the drawing.
+
+**What changes.** For a family with `engine: topo` the planner does the
+global work:
+- it plans every net together;
+- it negotiates crossings;
+- it chooses each net's layer;
+- it produces a guide, the way each net's line goes.
+
+The grid router (`pcb_route2`) lays the copper. Each net is given a corridor
+along its guide, cheap inside and dear outside, and its other layers are
+made dearer. Rip-up, rescue and push all stay. Legality is the grid
+router's, through `fits()`, as for every other family. Planner and detailed
+router is the split most autorouters make.
+
+**What stays.** Steps 1 to 3 of the Decision (the map, routes as places in
+edge orders, negotiated crossings) stand. The rubber-band drawing stays in
+`pcb_topo` as the engine `topo-bands`, with its bench cells. It may replace
+the grid laying where it proves itself, as a later stage.
+

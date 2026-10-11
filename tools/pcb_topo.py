@@ -1163,6 +1163,48 @@ def plan_layers(model, nets, pads, layers, allowed, start, rounds=6, log=None, l
     return col, guides
 
 
+def plan(model, nets, layers=None, log=None, later=()):
+    """THE PLAN alone (ADR 0029 as amended 2026-10-11): every net of `nets` planned together,
+    crossings negotiated, a layer chosen for each net. Returns {"layer": {net: layer index},
+    "guide": {net: MultiLineString}} - the grid router lays the copper along it
+    (pcb_route2.Router.stage, engine: topo)."""
+    log = log if log is not None else []
+    pads = {n: model.pads_of(n) for n in nets}
+    many = [n for n in nets if len(pads[n]) >= 2]
+    if layers is None:
+        layers = sorted({L for n in many for L in model.track_layers(n)})
+    allowed = {n: [L for L in model.track_layers(n) if L in layers] for n in many}
+    if not many:
+        return {"layer": {}, "guide": {}}
+    aw = {n: [(pads[n][i].centre, pads[n][j].centre)
+              for i, j in _mst([(k, p.centre) for k, p in enumerate(pads[n])])] for n in many}
+    adj = {n: {m_ for m_ in many if m_ != n and any(_cross(*e, *f) for e in aw[n] for f in aw[m_])}
+           for n in many}
+    start = {}
+    for n in sorted(many, key=lambda n: (-len(adj[n]), n)):
+        if allowed[n]:
+            start[n] = min(allowed[n], key=lambda L: (sum(1 for m_ in adj[n] if start.get(m_) == L) * 10
+                                                      + sum(1 for p in pads[n] if L not in p.layers) * 3, L))
+    if len(layers) < 2:
+        col = start
+        mp = Map(model, layers[0], many)
+        idx = {id(p): i for i, p in enumerate(mp.pads)}
+        lids = {}
+        for n in many:
+            tree = _mst([(k, e.centre) for k, e in enumerate(pads[n])])
+            for q, (i, j) in enumerate(tree):
+                if id(pads[n][j]) in idx and id(pads[n][i]) in idx:
+                    lid = mp.route(n, idx[id(pads[n][j])], idx[id(pads[n][i])], tee=q > 0)
+                    if lid is not None:
+                        lids.setdefault(n, []).append(lid)
+        paths = mp.geometry(passes=3, rounds=1)
+        from shapely.geometry import MultiLineString
+        guides = {n: MultiLineString([paths[l] for l in ls if len(paths[l]) > 1]) for n, ls in lids.items()}
+        return {"layer": col, "guide": guides}
+    col, guides = plan_layers(model, many, pads, layers, allowed, start, log=log, later=later)
+    return {"layer": col, "guide": guides}
+
+
 def route_board(model, nets, layers=None, rounds=4, log=None, later=()):
     """Nets on the board's signal layers (T2, T3): each net to one layer - fewest crossings
     of its tree's straight airwires with nets on the same layer, then fewest vias - a via

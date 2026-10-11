@@ -79,6 +79,10 @@ from shapely.geometry import LineString, Point, Polygon, box
 from shapely.ops import unary_union
 
 LATTICE = 0.05                # every laid coordinate is on it
+# engine: topo (ADR 0029 as amended): a net's search costs GUIDE_OUT times as much outside a
+# corridor GUIDE_W mm either side of its planned way, and GUIDE_LAYER times as much on a layer
+# the plan did not give it
+GUIDE_OUT, GUIDE_W, GUIDE_LAYER = 3.0, 0.8, 4.0
 # mm: what fits adds to every clearance it tests. Shapely draws a circle (a via, a round
 # track end) as a polygon INSIDE it - 32 sides here, short of the true radius by up to
 # r (1 - cos(pi / 32)), 1.7 um on a 0.7 mm via - and KiCad's own pad polygons are drawn
@@ -1661,7 +1665,8 @@ class Router:
         the board to a reviewer. Unlocked copper the board came with (Router.adopt) is
         routed, liquid-passed and written with the family that owns its net.
         `families`: [{name, nets: [names or fnmatch globs], first?, layers?, near?, engine?}] -
-        `engine: topo` plans the family with pcb_topo (no detour pass, no liquid pass); `near`
+        `engine: topo` plans the family with pcb_topo and lays it with this router along the
+        plan; `engine: topo-bands` draws pcb_topo's own rubber bands (no detour or liquid pass); `near`
         [x0, y0, x1, y1] keeps only the nets with a pad inside it; a net claimed
         by an earlier family is not routed again; whatever no family names goes last, as
         "rest". Returns [{family, nets, failed, pushed, rerouted, edits, liquid, runs,
@@ -1719,8 +1724,47 @@ class Router:
             lead = [n for p_ in fam.get("first") or [] for n in nets if n == p_ or fnmatch.fnmatch(n, p_)]
             log0 = len(self.log)
             tt = {"route": time.monotonic()}
-            topo = fam.get("engine") == "topo"
-            if topo:
+            topo = fam.get("engine") in ("topo", "topo-bands")
+            if fam.get("engine") == "topo":
+                # THE HYBRID (ADR 0029, amended 2026-10-11): the topological planner plans
+                # the family - crossings negotiated, a layer for each net, a guide for each
+                # net's way - and THIS router lays the copper along it: each net cheap in a
+                # corridor round its guide and dear outside it, its other layers dearer. Rip-up,
+                # rescue and push as for any family; legality is fits()'s, as for any family
+                import pcb_topo
+                later_ = [n_ for _, ns_ in plan[k:] for n_ in ns_]
+                tplan = pcb_topo.plan(self.m, nets, log=self.log, later=later_)
+                fields_before, cls_before = list(self.fields), {}
+                for n in nets:
+                    g_ = tplan["guide"].get(n)
+                    if g_ is not None and not g_.is_empty:
+                        x0, y0, x1, y1 = g_.bounds
+                        self.fields.append(Field((x0 - 50, y0 - 50, x1 + 50, y1 + 50), weight=GUIDE_OUT, nets=[n]))
+                        self.fields.append(Field(None, weight=1.0 / GUIDE_OUT, nets=[n], geom=g_.buffer(GUIDE_W)))
+                    L_ = tplan["layer"].get(n)
+                    if L_ is not None:
+                        cls_before[n] = self.R.of.get(n)
+                        c_ = dict(self.R.cls(n))
+                        lc = dict(c_.get("layer_cost") or {})
+                        for j, nm in enumerate(self.m.layer_names):
+                            if j != L_:
+                                lc[nm] = lc.get(nm, 1.0) * GUIDE_LAYER
+                        c_["layer_cost"] = lc
+                        self.R.of[n] = c_
+                try:
+                    failed = self.route(nets, first=lead + [n for n in first if n in nets and n not in lead], rescue=True)
+                finally:
+                    self.fields = fields_before
+                    for n, c_ in cls_before.items():
+                        if c_ is None:
+                            self.R.of.pop(n, None)
+                        else:
+                            self.R.of[n] = c_
+                rescued = [l_[len("rescue: "):] for l_ in self.log[log0:] if l_.startswith("rescue: ")]
+                self.log.append(f"stage {name}: topo plan - layers {dict(sorted(tplan['layer'].items()))}; "
+                                f"laid by the grid along the guides; open {sorted(failed)}")
+                topo = False            # grid copper: the detour and liquid passes apply
+            elif topo:
                 # the topological planner (pcb_topo, ADR 0029, #47): every net of the family
                 # planned together - places in each edge's order, layers, vias - then drawn as
                 # rubber bands. Each run is held to fits() before it is laid; a net any of whose
@@ -1834,7 +1878,9 @@ class Router:
             if board is not None:
                 for it in gone_items:
                     board.Delete(it)
+                had = {t.m_Uuid.AsString() for t in board.GetTracks()}
                 write(board, self.m, mine)
+                rec["acid_rerouted"] = self._acid_sweep(board, nets, had)
                 if checkpoint:
                     path = checkpoint(k, name)
                     _kicad().SaveBoard(path, board)
@@ -2359,6 +2405,41 @@ class Router:
                 if e.kind in ("track", "via", "pad") and oe.geom.intersects(e.geom):
                     out.add(e.id)
         return out
+
+    def _acid_sweep(self, board, nets, had):
+        """pcb.py check's acid traps (pcb.check_tracks, on the board as written - a run-level
+        test both missed the join the write's merge makes and failed joins a pad fills) among
+        `nets`: each such net's new copper taken off the board, the net routed again (shoved),
+        locked and written again; checked once more. `had`: the board's track ids before this
+        family was written. Returns the nets re-routed. (The crowd board, laid by this router
+        along the topological plan: IO1's tree met itself at 45 deg.)"""
+        import pcb
+        def trapped():
+            out = set()
+            for line in pcb.check_tracks(board):
+                n_ = line.split("[tracks] ", 1)[1].split(" on ", 1)[0]
+                if n_ in nets:
+                    out.add(n_)
+            return out
+        bad = trapped()
+        done = []
+        for n_ in sorted(bad):
+            for t in list(board.GetTracks()):
+                if t.GetNetname() == n_ and t.m_Uuid.AsString() not in had:
+                    board.Delete(t)
+            runs = self.runs_of(n_)
+            for r_ in runs:
+                self._unlock(r_)
+            rep_ = self.reroute(n_)
+            for r_ in self.runs_of(n_):
+                self._lock(r_)
+                r_.items = []
+            write(board, self.m, self.runs_of(n_))
+            done.append((n_, rep_["mode"]))
+        if done:
+            left = trapped()
+            self.log.append(f"stage: acid traps re-routed {done}; still trapped {sorted(left)}")
+        return done
 
     def reroute(self, net, pull=None, shove_depth=2):
         """The net routed again. With `pull` (mm), inside a corridor that wide either side of

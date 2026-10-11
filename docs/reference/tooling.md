@@ -980,6 +980,19 @@ prove nothing about themselves.
   move it; it is written, whole per net, by the family that writes that net.
   Locked copper stays an obstacle nothing moves.
 
+  **A family's engine** (ADR 0029, as amended 2026-10-11): `engine: topo`
+  plans the family with **`tools/pcb_topo.py`**, the topological planner. Every
+  net of the family is planned at once, with crossings negotiated over rounds,
+  a layer chosen for each net from the crossings planned, and a guide for each
+  net's way. This router then lays the copper along those guides, each net
+  cheap in a corridor round its guide and dear on a layer the plan did not
+  give it. Rip-up, rescue and push apply as for any family. `engine:
+  topo-bands` draws `pcb_topo`'s own rubber bands instead. After a family is
+  written, `pcb.check_tracks` is run on the board, and each of the family's
+  nets with an acid trap is routed again. `tools/pcb_topo_test.py` is the
+  bench. Its `crowd` cell is the main board's J-MCU crowd made small, the
+  gate before the main board (#47).
+
   **A family by place**: `near: [x0, y0, x1, y1]` keeps only the family's nets
   with a pad in that box; the rest go to the families after it. Use it for a
   crowded fan-in, a connector's rows or a part's pins, routed as a group
