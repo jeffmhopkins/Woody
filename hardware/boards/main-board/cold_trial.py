@@ -81,6 +81,16 @@ ACCEPT = {
     # 2026-10-10: J5 pin 10 can only leave its 1.27 mm header round the end; 9.6 mm for a
     # 3.4 mm airwire is the way round (the source's run was 23.5 mm)
     "power": ["still long: /V3V3_CHAIN_RH"],
+    "keys": [
+        # 2026-10-11: 9.1 mm for a 4.5 mm airwire - U7's pin rows' room puts R33 that far off;
+        # the source's run was 10.5 mm
+        "still long: /KEY_FREE2",
+        # 2026-10-11: 20.3 mm, 2 vias, for 8.9 mm: H3's bearing keep-out stands between SW4
+        # and R19, and the chain's CHAIN_SER_LH hugs its top edge, 0.5 mm off - no lane over
+        # it. A chain-family `clear` would open one (12 mm, 2 vias on this line); left for the
+        # whole board's review, with the keys' total (446 mm / 44 vias vs the source's 366 / 22)
+        "still long: /LT4/SWITCH_LEG",
+    ],
 }
 
 
