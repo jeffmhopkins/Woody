@@ -1786,7 +1786,11 @@ class Router:
             # an edit that failed. Empty: the family needs no one.
             why = [f"open: {n}" for n in failed] + [f"pushed in: {n} (shoved {', '.join(sh) or 'nothing'})" for n, _, sh in pushed]
             why += [f"rescued: {x}" for x in rescued]          # copper ripped up and laid again
-            why += [f"still long: {n} {a} mm" for n, b_, a, _ in rerouted if a > b_ - 1e-6]
+            # a detour a reviewer's edit has since moved is judged by the edit, not by the length
+            # it had before it (the main board's mcu-fanin: IO38 "still long: 48.2 mm" after
+            # the clear had laid it at 39.6)
+            moved = {e["net"] for e in done_edits if e.get("ok")}
+            why += [f"still long: {n} {a} mm" for n, b_, a, _ in rerouted if a > b_ - 1e-6 and n not in moved]
             why += [f"edit failed: {e['edit']} {e['net']} - {e.get('why') or e.get('mode')}" for e in done_edits if not e["ok"]]
             # what a reviewer has already looked at and accepted (accept[family]: the reason's
             # own words, or its start) asks for no second look
