@@ -332,8 +332,14 @@ def crowd_board():
     resistors, and the far ends at the board's edges - the nets that walled each other in
     on eight grid-router runs (2026-10-11), as the real one has them: header pin to IC pin
     to resistor, three pads a net."""
-    _, _, T, _, _ = _setup()
-    b = T.new_board(64.0, 44.0)
+    pcbnew, _, T, _, _ = _setup()
+    W, H = 64.0, 44.0
+    # four layers as the main board has them: GND the plane on In1.Cu, V3 on In2.Cu, each
+    # pin of theirs down to it by a fanout via; the signals on the two outer layers
+    b = T.new_board(W, H, layers=4)
+    rect = [(0.3, 0.3), (W - 0.3, 0.3), (W - 0.3, H - 0.3), (0.3, H - 0.3)]
+    T.zone(b, "GND", pcbnew.In1_Cu, rect)
+    T.zone(b, "V3", pcbnew.In2_Cu, rect)
     fp = T._fp(b, "J1", "HDR-2x10-1.27")
     pins = {}
     for k in range(20):
@@ -375,9 +381,14 @@ def cell_crowd(out, plot):
     _, _, _, _, B = _setup()
     b = crowd_board()
     nets = ["IO1", "IO2", "IO6", "IO7", "IO38", "IO35", "IO36", "IO34", "TXD", "IO37", "GATE", "LEDDI", "MTIP",
-            "MRING", "SHLD", "SCK", "SCLK", "MOSI", "V3", "GND"]
+            "MRING", "SHLD", "SCK", "SCLK", "MOSI"]
+    lay = dict(B.LAY, planes=[{"layer": "In1.Cu", "net": "GND"}, {"layer": "In2.Cu", "net": "V3"}], fanout=["GND", "V3"])
     fams = [{"name": "crowd", "nets": nets, "engine": "topo"}]
-    res, m, r, rep = _stage("crowd", b, B.LAY, fams, out, plot)
+    res, m, r, rep = _stage("crowd", b, lay, fams, out, plot)
+    p_ = os.path.join(out, "crowd.kicad_pcb")
+    bad, on_plane, _ = B._four_checks(*_setup()[1:2], b, lay, p_)
+    res.update(check_planes=bad[:5], tracks_on_plane_layers=on_plane)
+    res["pass"] = res["pass"] and not bad and not on_plane
     res["pushed"] = [p[0] for x in rep for p in x["pushed"]]
     res["topo_log"] = [l_ for l_ in r.log if l_.startswith("topo")]
     res["pass"] = res["pass"] and not res["pushed"]

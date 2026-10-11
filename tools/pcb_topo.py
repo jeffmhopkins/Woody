@@ -92,9 +92,13 @@ class Map:
     Every pad on the layer is a wheel only its net enters; everything else on the layer -
     holes, keep-outs, other nets' copper - is an area obstacle, a hole in the map."""
 
-    def __init__(self, model, layer, nets, pitch=None, width=None):
+    def __init__(self, model, layer, nets, pitch=None, width=None, lanes=1):
+        """`layer` None: every layer at once - the PLAN map, where a net's way and its
+        crossings are negotiated before it has a layer: all copper on any layer is in the
+        way, and each edge takes `lanes` times the lines (one set per layer)."""
         R = model.rules
-        self.m, self.layer = model, layer
+        self.m, self.layer, self.lanes = model, layer, lanes
+        on = (lambda ls: True) if layer is None else (lambda ls: layer in set(ls))
         self.nets = set(nets)
         self.width = width or max(R.width(n) for n in nets)
         self.clear = max([R.clear(n) for n in nets] + [R.clearance])
@@ -102,13 +106,13 @@ class Map:
         self.pitch = pitch or (self.width + self.clear + TOL)
         areas = []
         for e in model.index.e.values():
-            if layer not in set(e.layers):
+            if not on(e.layers):
                 continue
             if (e.kind == "keepout" and e.tracks) or e.kind == "hole" \
                     or (e.kind in ("track", "via") and e.net not in self.nets):
                 areas.append(e.geom)
         self.areas = unary_union(areas) if areas else Polygon()
-        self.pads = [p for p in model.pads if layer in set(p.layers)]
+        self.pads = [p for p in model.pads if on(p.layers)]
         # a pad whose centre is under copper (a plane pad's own fanout track) is no terminal
         # here, but it is still copper: it joins the areas - left out, the map had no corner
         # of it and a line was planned straight across it (the four-layer board's C1)
@@ -227,7 +231,7 @@ class Map:
         t0, t1, _ = self.edges[k]
         if t1 < t0:
             return 0
-        return int(math.floor((t1 - t0) / self.pitch + 1e-9)) + 1
+        return (int(math.floor((t1 - t0) / self.pitch + 1e-9)) + 1) * self.lanes
 
     def _at(self, k, t):
         a, b = self.xy[k[0]], self.xy[k[1]]
@@ -262,10 +266,10 @@ class Map:
         raise ValueError("edge not on triangle")
 
     def _crossings(self, ti, e1, e2):
-        """How many lines already in triangle ti a new chord e1 - e2 would cross."""
+        """The lines already in triangle ti a new chord e1 - e2 would cross (their ids)."""
         p1, p2 = self._bpos(ti, e1, new=True), self._bpos(ti, e2, new=True)
         lo, hi = min(p1, p2), max(p1, p2)
-        n = 0
+        out = []
         for lid_, q1, q2 in self.chords[ti]:
             if self.lines[lid_]["net"] == getattr(self, "_cur", None):
                 continue        # the same net's copper: lines of one net may meet and cross
@@ -273,12 +277,43 @@ class Map:
             if min(abs(a - lo), abs(a - hi), abs(b - lo), abs(b - hi)) < 1e-9:
                 continue        # a shared end (a vertex both lines leave from)
             if (lo < a < hi) != (lo < b < hi):
-                n += 1
-        return n
+                out.append(lid_)
+        return out
+
+    def crossed(self, lid):
+        """The other nets' lines line lid crosses, as the orders now stand."""
+        out = set()
+        for ti, chords in self.chords.items():
+            mine = [c for c in chords if c[0] == lid]
+            if not mine:
+                continue
+            for _, e1, e2 in mine:
+                p1, p2 = self._bpos(ti, e1), self._bpos(ti, e2)
+                lo, hi = min(p1, p2), max(p1, p2)
+                for l2, q1, q2 in chords:
+                    if l2 == lid or self.lines[l2]["net"] == self.lines[lid]["net"]:
+                        continue
+                    a, b = self._bpos(ti, q1), self._bpos(ti, q2)
+                    if min(abs(a - lo), abs(a - hi), abs(b - lo), abs(b - hi)) < 1e-9:
+                        continue
+                    if (lo < a < hi) != (lo < b < hi):
+                        out.add(l2)
+        return out
 
     # ---------------------------------------------------------------- the search
 
-    def route(self, net, ia, ib, pending=(), toll=None, tee=False):
+    def _xcost(self, ti, e1, e2):
+        """What a chord e1 - e2 in triangle ti costs in crossings: None (refused) when it
+        crosses anything and crossings are not allowed (the per-layer maps); else the price
+        of each line it crosses (the plan map: self.cross(net, other net) -> mm)."""
+        xs = self._crossings(ti, e1, e2)
+        if not xs:
+            return 0.0
+        if self._cross is None:
+            return None
+        return sum(self._cross(self._cur, self.lines[l]["net"]) for l in xs)
+
+    def route(self, net, ia, ib, pending=(), toll=None, tee=False, cross=None):
         """Plan one line from pad ia's centre to pad ib's (indices into self.pads). Returns
         the line id, or None. `pending`: [(a, b)] the straight airwires of nets still to be
         routed; each one this line's way crosses costs `toll` mm (default: a few pitches) -
@@ -289,6 +324,7 @@ class Map:
         if ia not in self.centre or ib not in self.centre:
             return None
         self._cur = net
+        self._cross = cross
         pa, pb = self.centre[ia], self.centre[ib]
         own = {ia, ib}
         P, Q = self.xy[pa], self.xy[pb]
@@ -318,15 +354,16 @@ class Map:
                 cnt += 1
                 heapq.heappush(heap, (g + math.dist(pt, Q), cnt, g, st, pt))
         for ti in self.vtri.get(pa, []):
-            if pb in self.tris[ti] and self._crossings(ti, ("v", pa), ("v", pb)) == 0:
-                goal, goal_cost = ("direct", ti), math.dist(P, Q)
+            if pb in self.tris[ti] and self._xcost(ti, ("v", pa), ("v", pb)) is not None:
+                goal, goal_cost = ("direct", ti), math.dist(P, Q) + self._xcost(ti, ("v", pa), ("v", pb))
             for k in self._tri_edges(ti):
                 if not ok(k) or pa in k:
                     continue
                 for s in range(len(self.order[k]) + 1):
-                    if not self._crossings(ti, ("v", pa), ("e", k, s)):
+                    xc = self._xcost(ti, ("v", pa), ("e", k, s))
+                    if xc is not None:
                         pt = self._slot_point(k, s)
-                        push((k, s, self._other(k, ti)), math.dist(P, pt) + tolls(P, pt), pt, ("start", ti))
+                        push((k, s, self._other(k, ti)), math.dist(P, pt) + tolls(P, pt) + xc, pt, ("start", ti))
         while heap:
             f, _, g, st, pt = heapq.heappop(heap)
             if f >= goal_cost:
@@ -339,17 +376,19 @@ class Map:
                 for nb in (s1 - 1, s1):
                     if 0 <= nb < len(lids) and self.lines[lids[nb]]["net"] == net and g < goal_cost:
                         goal, goal_cost = ("tee", st, lids[nb]), g
-            if pb in self.tris[ti] and self._crossings(ti, ("e", k1, s1), ("v", pb)) == 0:
-                c = g + math.dist(pt, Q) + tolls(pt, Q)
+            xq = self._xcost(ti, ("e", k1, s1), ("v", pb)) if pb in self.tris[ti] else None
+            if xq is not None:
+                c = g + math.dist(pt, Q) + tolls(pt, Q) + xq
                 if c < goal_cost:
                     goal, goal_cost = ("end", st, ti), c
             for k2 in self._tri_edges(ti):
                 if k2 == k1 or not ok(k2):
                     continue
                 for s2 in range(len(self.order[k2]) + 1):
-                    if not self._crossings(ti, ("e", k1, s1), ("e", k2, s2)):
+                    xc = self._xcost(ti, ("e", k1, s1), ("e", k2, s2))
+                    if xc is not None:
                         p2 = self._slot_point(k2, s2)
-                        push((k2, s2, self._other(k2, ti)), g + math.dist(pt, p2) + tolls(pt, p2), p2, (st, ti))
+                        push((k2, s2, self._other(k2, ti)), g + math.dist(pt, p2) + tolls(pt, p2) + xc, p2, (st, ti))
         if goal is None:
             return None
         steps = []
@@ -417,7 +456,15 @@ class Map:
                 net = self.lines[lid]["net"]
                 others = [LineString(p) for l2, p in paths.items()
                           if l2 != lid and len(p) > 1 and self.lines[l2]["net"] != net]
-                paths[lid] = self._ends(lid, paths[lid], unary_union(others) if others else None)
+                mine = LineString(paths[lid]).buffer(3.0) if len(paths[lid]) > 1 else None
+                near_ = [g for g in others if mine is not None and g.intersects(mine)]
+                og = unary_union(near_) if near_ else None
+                paths[lid] = self._ends(lid, paths[lid], og)
+                # and off every other net's line as off copper: neighbours in no edge's order
+                # (one ending beside the other, or round a bend) are spaced by nothing else
+                # (the crowd board: IO7 0.1 mm into IO38 and IO36)
+                if og is not None:
+                    paths[lid] = self._inflate(lid, paths[lid], extra=og.buffer(self.width / 2))
             if not self._widen(paths):
                 break
         for lid, ln in self.lines.items():
@@ -555,7 +602,7 @@ class Map:
             self._cop[net] = (g, outside)
         return self._cop[net]
 
-    def _inflate(self, lid, pts, rounds=60):
+    def _inflate(self, lid, pts, rounds=60, extra=None):
         """The band made legal against copper: wherever a segment comes nearer a pad or an
         area than a centreline may, a point is put in, pushed out to exactly that distance
         from the nearest point of the copper, and the band checked again - so a bend round a
@@ -564,6 +611,13 @@ class Map:
         was round the wrong one as often as not - the around and fan boards, 2026-10-11)."""
         from shapely.ops import nearest_points
         cop, outside = self._copper_for(self.lines[lid]["net"])
+        if extra is not None:
+            cop = unary_union([cop, extra]) if not cop.is_empty else extra
+        # only the copper near the line: the whole board's, measured every round, made one
+        # family on the crowd board take over ten minutes
+        from shapely.geometry import box as _box
+        x0, y0, x1, y1 = LineString(pts).bounds if len(pts) > 1 else (pts[0][0], pts[0][1], pts[0][0], pts[0][1])
+        cop = cop.intersection(_box(x0 - 3.0, y0 - 3.0, x1 + 3.0, y1 + 3.0))
         need = self.keep - TOL / 2
         pts = list(pts)
         for _ in range(rounds):
@@ -991,6 +1045,87 @@ def _mst(points):
     return out
 
 
+def _colour(nets, xg, allowed, vias_on, start, passes=12):
+    """Layers for nets from their crossing graph xg {net: {other: count}}: each net the layer
+    with the fewest crossings with nets on the same layer (ten each), then the fewest vias
+    (three each), passes until nothing changes - a min-conflict 2-colouring that keeps what
+    it was given where that is as good."""
+    col = dict(start)
+    for _ in range(passes):
+        moved = False
+        for n in sorted(nets, key=lambda n: (-sum(xg.get(n, {}).values()), n)):
+            if not allowed[n]:
+                continue
+            def cost(L):
+                same = sum(c for m_, c in xg.get(n, {}).items() if col.get(m_) == L)
+                return (same * 10 + vias_on(n, L) * 3, 0 if L == col.get(n) else 1, L)
+            best = min(allowed[n], key=cost)
+            if best != col.get(n):
+                col[n], moved = best, True
+        if not moved:
+            break
+    return col
+
+
+def plan_layers(model, nets, pads, layers, allowed, start, rounds=6, log=None, later=()):
+    """THE NEGOTIATION (ADR 0029 step 3): every net planned in one map of all layers at once
+    (Map(layer=None)), where a line may cross another net's - cheaply if the two are on
+    different layers as things stand, dearly (and dearer each round they do it again) if on
+    the same - then the layers chosen again from the crossings planned (_colour). Plan and
+    layers settle together. Returns the layers of the round with the fewest same-layer
+    crossings (then the fewest nets unplanned)."""
+    log = log if log is not None else []
+    hist = {}
+    col = dict(start)
+    best = None
+    vias_on = lambda n, L: sum(1 for p in pads[n] if L not in p.layers)
+    future = [(model.pads_of(n)[i].centre, model.pads_of(n)[j].centre) for n in later
+              for i, j in _mst([(k, p.centre) for k, p in enumerate(model.pads_of(n))])]
+    order = sorted(nets, key=lambda n: (-sum(math.dist(a.centre, b.centre) for a in pads[n] for b in pads[n]), n))
+    for rnd in range(rounds):
+        mp = Map(model, None, nets, lanes=len(layers))
+        idx = {id(p): i for i, p in enumerate(mp.pads)}
+
+        def price(a, b):
+            k = frozenset((a, b))
+            return (1.0 if col.get(a) != col.get(b) else 8.0) + hist.get(k, 0.0)
+        lids, unplanned = {}, []
+        for n in order:
+            ends = pads[n]
+            tree = _mst([(k, e.centre) for k, e in enumerate(ends)])
+            for q, (i, j) in enumerate(tree):
+                if id(ends[j]) not in idx or id(ends[i]) not in idx:
+                    unplanned.append(n)
+                    break
+                lid = mp.route(n, idx[id(ends[j])], idx[id(ends[i])], tee=q > 0, cross=price, pending=future)
+                if lid is None:
+                    unplanned.append(n)
+                    break
+                lids.setdefault(n, []).append(lid)
+        xg = {}
+        for n, ls in lids.items():
+            for l in ls:
+                for l2 in mp.crossed(l):
+                    m_ = mp.lines[l2]["net"]
+                    xg.setdefault(n, {})[m_] = xg.get(n, {}).get(m_, 0) + 1
+        col = _colour(nets, xg, allowed, vias_on, col)
+        same = sum(c for n, d in xg.items() for m_, c in d.items() if col.get(n) == col.get(m_)) // 2
+        total = sum(c for d in xg.values() for c in d.values()) // 2
+        log.append(f"topo plan round {rnd + 1}: crossings {total}, on one layer {same}; unplanned {sorted(set(unplanned))}")
+        key = (same, len(set(unplanned)))
+        if best is None or key < best[0]:
+            best = (key, dict(col))
+        if key == (0, 0):
+            break
+        for n, d in xg.items():
+            for m_, c in d.items():
+                if col.get(n) == col.get(m_):
+                    k = frozenset((n, m_))
+                    hist[k] = hist.get(k, 0.0) + 4.0 * c
+        order = sorted(nets, key=lambda n: (-sum(c for m_, c in xg.get(n, {}).items() if col.get(m_) == col.get(n)), n))
+    return best[1]
+
+
 def route_board(model, nets, layers=None, rounds=4, log=None, later=()):
     """Nets on the board's signal layers (T2, T3): each net to one layer - fewest crossings
     of its tree's straight airwires with nets on the same layer, then fewest vias - a via
@@ -1016,6 +1151,13 @@ def route_board(model, nets, layers=None, rounds=4, log=None, later=()):
     future = [(model.pads_of(n)[i].centre, model.pads_of(n)[j].centre) for n in later
               for i, j in _mst([(k, p.centre) for k, p in enumerate(model.pads_of(n))])]
     forced = {}
+    if len(layers) > 1 and len(many) > 1:
+        start = {}
+        for n in sorted(many, key=lambda n: (-len(adj[n]), n)):
+            if allowed[n]:
+                start[n] = min(allowed[n], key=lambda L: (sum(1 for m_ in adj[n] if start.get(m_) == L) * 10
+                                                          + sum(1 for p in pads[n] if L not in p.layers) * 3, L))
+        forced = plan_layers(model, many, pads, layers, allowed, start, log=log, later=later)
     failed, runs = list(nets), []
     for rnd in range(rounds):
         # 1. layers: most-crossed first; a layer its pads are on saves vias
