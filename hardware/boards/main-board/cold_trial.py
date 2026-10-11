@@ -122,6 +122,14 @@ PLACE_FINDINGS = ("courtyards_overlap", "items_not_allowed", "shorting_items", "
 # THE REVIEWER'S MOVES, by family, each with why (Router.edit: reroute / through / clear).
 # The record of every review of this trial; replayed by every run from that family on.
 EDITS = {
+    "mcu-fanin": [
+        # Review of family 5 (mcu-fanin), 2026-10-11 (3dfb6b8f): IO35 open at J1.10 - IO38 left
+        # J1.8 up and right to a via at (323.9, 129.3) and doubled back to R34, west, over pin
+        # 10's way out; IO36's front line closed the other side. IO38 out, then IO35 again
+        {"clear": "/IO38", "rect": [319.7, 128.8, 325.0, 136.8],
+         "why": "IO38's detour east over J1.10; R34 is west"},
+        {"reroute": "/IO35", "why": "J1.10, free once IO38 is out"},
+    ],
     "chain": [
         # Review of family 5 (mcu), 2026-10-11 (3dfb6b8f): IO1 and IO36 open - J-MCU pins 4 and
         # 12, and U1 pin 3, walled in above J-MCU's top row (y 131-138). The mcu family's own
