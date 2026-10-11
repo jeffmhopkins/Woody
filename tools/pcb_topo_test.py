@@ -14,7 +14,8 @@ import tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
-CELLS = ["squeeze", "middle", "fan", "around", "cross", "grid", "scramble", "triad", "channel", "tree"]
+CELLS = ["squeeze", "middle", "fan", "around", "cross", "grid", "scramble", "triad", "channel", "tree",
+         "stagemix", "stacked", "stage4", "island4"]
 
 
 def _setup():
@@ -246,6 +247,83 @@ def cell_tree(out, plot):
         T.tp(b, f"D{k}b", f"D{k}", *c)
     m, runs, failed, bad, rep = _board2(b, ["CLK", "D0", "D1", "D2", "D3"])
     return _result2("tree", b, m, runs, failed, bad, rep, out, plot)
+
+
+def _stage(name, b, lay, fams, out, plot, ground=None):
+    """Route `fams` through Router.stage (T4) and judge the board as the grid router's
+    stage cells are judged."""
+    _, R2, _, _, B = _setup()
+    m = R2.model_from_board(b, lay)
+    r = R2.Router(m, flow=0.3)
+    rep = r.stage(fams, board=b, ground=ground)
+    res = B.finish(name, b, m, r, out, plot, pour=ground, written=True)
+    res.update(families=[(x["family"], x["nets"], x["runs"], x["failed"], x["vias"]) for x in rep],
+               topo_log=[l_ for l_ in r.log if "topo" in l_][:4])
+    res["pass"] = B.clean(res) and not any(x["failed"] for x in rep)
+    return res, m, r, rep
+
+
+def cell_stagemix(out, plot):
+    """The grid router's stages board (minikey): the rail by the grid router, the keys by
+    the topological planner, in one Router.stage - the rail's copper locked under the keys."""
+    _, R2, T, _, B = _setup()
+    import pcb_pack as P
+    b = T.minikey()
+    bd = P.board_of(b)
+    pk = P.Packer(bd, ["SW1", "SW2", "SW3", "J1", "H1", "H2", "H3", "H4"])
+    pk.pack("U1", ["C6", "R11"])
+    pk.pack("J1", ["C7"])
+    pk.pattern(["SW1", "SW2", "SW3"], {f"SW{k}": list(T.MINIKEY["keys"][k]) for k in (1, 2, 3)})
+    pk.apply(b)
+    lay = dict(B.LAY, power_nets=["V3V3"])
+    fams = [{"name": "rail", "nets": ["V3V3"]}, {"name": "keys", "nets": ["KEY*", "SWL*", "FREE"], "engine": "topo"},
+            {"name": "rest", "nets": ["*"], "engine": "topo"}]
+    res, *_ = _stage("stagemix", b, lay, fams, out, plot, ground="GND")
+    return res
+
+
+def cell_stacked(out, plot):
+    """Two topo families, the second planned against the first's LOCKED copper: across, then
+    down - the grid board in two stages."""
+    _, _, T, _, B = _setup()
+    b = T.new_board(40.0, 40.0)
+    for i in range(4):
+        y = 10.0 + i * 6.0
+        T.tp(b, f"H{i}a", f"H{i}", 4.0, y)
+        T.tp(b, f"H{i}b", f"H{i}", 36.0, y)
+        x = 10.0 + i * 6.0
+        T.tp(b, f"V{i}a", f"V{i}", x, 4.0)
+        T.tp(b, f"V{i}b", f"V{i}", x, 36.0)
+    fams = [{"name": "across", "nets": ["H*"], "engine": "topo"}, {"name": "down", "nets": ["V*"], "engine": "topo"}]
+    res, *_ = _stage("stacked", b, B.LAY, fams, out, plot)
+    return res
+
+
+def cell_stage4(out, plot):
+    """The four-layer board: GND and POS planes, their fanout vias laid first; the signals by
+    the topological planner on the outer layers, round the fanout."""
+    _, R2, T, _, B = _setup()
+    b, lay = T.four_layer(False)
+    res, m, r, rep = _stage("stage4", b, lay, [{"name": "sig", "nets": ["S*"], "engine": "topo"}], out, plot)
+    p = os.path.join(out, "stage4.kicad_pcb")
+    bad, on_plane, vias = B._four_checks(R2, b, lay, p)
+    res.update(check_planes=bad[:5], tracks_on_plane_layers=on_plane)
+    res["pass"] = res["pass"] and not bad and not on_plane
+    return res
+
+
+def cell_island4(out, plot):
+    """The four-layer board with an AGND island, its moat and its tie: the island's nets and
+    the rest by the topological planner, kept off the moat."""
+    _, R2, T, _, B = _setup()
+    b, lay = T.four_layer(True)
+    fams = [{"name": "sig", "nets": ["S*", "SIG_A", "AIN", "A3V3"], "engine": "topo"}]
+    res, m, r, rep = _stage("island4", b, lay, fams, out, plot)
+    p = os.path.join(out, "island4.kicad_pcb")
+    bad, on_plane, vias = B._four_checks(R2, b, lay, p)
+    res.update(check_planes=bad[:5], tracks_on_plane_layers=on_plane)
+    res["pass"] = res["pass"] and not bad and not on_plane
+    return res
 
 
 def run_cell(name, out, plot):

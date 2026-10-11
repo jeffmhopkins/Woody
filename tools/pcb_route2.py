@@ -1660,7 +1660,8 @@ class Router:
         reviewed and accepted (a reason, or its start), which is reported, not paused for
         the board to a reviewer. Unlocked copper the board came with (Router.adopt) is
         routed, liquid-passed and written with the family that owns its net.
-        `families`: [{name, nets: [names or fnmatch globs], first?, layers?, near?}] - `near`
+        `families`: [{name, nets: [names or fnmatch globs], first?, layers?, near?, engine?}] -
+        `engine: topo` plans the family with pcb_topo (no detour pass, no liquid pass); `near`
         [x0, y0, x1, y1] keeps only the nets with a pad inside it; a net claimed
         by an earlier family is not routed again; whatever no family names goes last, as
         "rest". Returns [{family, nets, failed, pushed, rerouted, edits, liquid, runs,
@@ -1718,8 +1719,33 @@ class Router:
             lead = [n for p_ in fam.get("first") or [] for n in nets if n == p_ or fnmatch.fnmatch(n, p_)]
             log0 = len(self.log)
             tt = {"route": time.monotonic()}
-            failed = self.route(nets, first=lead + [n for n in first if n in nets and n not in lead], rescue=True)
-            rescued = [l_[len("rescue: "):] for l_ in self.log[log0:] if l_.startswith("rescue: ")]
+            topo = fam.get("engine") == "topo"
+            if topo:
+                # the topological planner (pcb_topo, ADR 0029, #47): every net of the family
+                # planned together - places in each edge's order, layers, vias - then drawn as
+                # rubber bands. Each run is held to fits() before it is laid; a net any of whose
+                # runs does not fit is left open for the push below
+                import pcb_topo
+                later_ = [n_ for _, ns_ in plan[k:] for n_ in ns_]
+                truns, tfailed, trep = pcb_topo.route_board(self.m, nets, log=self.log, later=later_)
+                failed = {n: "topo: not planned" for n in tfailed}
+                by = {}
+                for r_ in truns:
+                    by.setdefault(r_.net, []).append(r_)
+                for n, rs in sorted(by.items()):
+                    why_ = [f for r_ in rs for f in fits(r_, self.m, self.fields, self.fence)[:1]]
+                    if why_:
+                        failed[n] = f"topo: does not fit - {why_[0][0]} at {why_[0][1]}"
+                        continue
+                    for r_ in rs:
+                        lay(r_, self.m)
+                        self.runs.append(r_)
+                rescued = []
+                self.log.append(f"stage {name}: topo - {len(by)} net(s) planned, {len(trep['log'])} round(s), "
+                                f"{trep['vias']} via(s); open {sorted(failed)}")
+            else:
+                failed = self.route(nets, first=lead + [n for n in first if n in nets and n not in lead], rescue=True)
+                rescued = [l_[len("rescue: "):] for l_ in self.log[log0:] if l_.startswith("rescue: ")]
             # 2. pushed in: past this family's copper, shoved aside (earlier families are locked)
             tt["route"] = round(time.monotonic() - tt["route"], 1)
             t_ = time.monotonic()
@@ -1735,8 +1761,8 @@ class Router:
             t_ = time.monotonic()
             rerouted = []
             for n in nets:
-                if n in failed:
-                    continue
+                if n in failed or topo:
+                    continue        # a topo family's bands are taut already
                 aw = sum(math.dist(a, b) for _, a, b in self.airwires([n]))
                 ln = sum(r_.length() for r_ in self.runs_of(n))
                 if aw > 0 and ln > detour * aw:
@@ -1761,7 +1787,7 @@ class Router:
             # 5. the liquid pass, over this family alone (everything earlier is locked)
             tt["edits"] = round(time.monotonic() - t_, 1)
             t_ = time.monotonic()
-            liq = self.liquid(fillet) if liquid else None
+            liq = self.liquid(fillet) if liquid and not topo else None
             tt["liquid"] = round(time.monotonic() - t_, 1)
             for n, saved in saved_cls.items():
                 if saved is None:

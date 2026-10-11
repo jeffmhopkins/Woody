@@ -60,8 +60,23 @@ def _polys(g):
     return [p for p in getattr(g, "geoms", [g]) if p.geom_type == "Polygon" and p.area > 1e-6]
 
 
+SIDE = 0.5                  # mm: no outline side longer - see _split
+
+
+def _split(pts, side=SIDE):
+    """A closed ring's points with every side cut to at most `side`: the narrowest gap
+    between a corner and an outline is square onto a side's middle, and only an EDGE of the
+    map is measured - with long sides that gap fell inside a triangle, and a line went
+    through a passage narrower than a track (the four-layer board's S1, by C1)."""
+    out = []
+    for a, b in zip(pts, pts[1:] + pts[:1]):
+        n = max(1, int(math.ceil(math.dist(a, b) / side)))
+        out += [(a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n) for k in range(n)]
+    return out
+
+
 def _corners(poly, tol=0.02):
-    """A pad's outline as at most a few dozen corners (its convex hull, simplified)."""
+    """A pad's outline as corners (its convex hull, simplified), its sides split to SIDE."""
     h = poly.convex_hull.simplify(tol)
     if h.geom_type != "Polygon":
         h = poly.buffer(0.01).convex_hull
@@ -69,7 +84,7 @@ def _corners(poly, tol=0.02):
     # counter-clockwise, without repeats
     if Polygon(pts).exterior.is_ccw is False:
         pts = pts[::-1]
-    return pts
+    return _split(pts)
 
 
 class Map:
@@ -94,6 +109,12 @@ class Map:
                 areas.append(e.geom)
         self.areas = unary_union(areas) if areas else Polygon()
         self.pads = [p for p in model.pads if layer in set(p.layers)]
+        # a pad whose centre is under copper (a plane pad's own fanout track) is no terminal
+        # here, but it is still copper: it joins the areas - left out, the map had no corner
+        # of it and a line was planned straight across it (the four-layer board's C1)
+        under = [p.geom for p in self.pads if self.areas.contains(Point(p.centre))]
+        if under:
+            self.areas = unary_union([self.areas] + under)
         verts, segs, holes = [], [], []
         self.vpad = {}                  # vertex -> the pad (index) it is the centre or a corner of
         self.centre = {}                # pad index -> its centre vertex
@@ -115,7 +136,7 @@ class Map:
                 segs.append((first + k, first + (k + 1) % len(cs)))
 
         def ring(coords):
-            coords = list(coords)[:-1]
+            coords = _split(list(coords)[:-1])
             i0 = len(verts)
             verts.extend(coords)
             segs.extend((i0 + k, i0 + (k + 1) % len(coords)) for k in range(len(coords)))
@@ -126,7 +147,25 @@ class Map:
             for hole in poly.interiors:
                 ring(hole.coords)
                 holes.append(Polygon(hole).representative_point().coords[0])
-        A = {"vertices": np.array(verts, dtype=float), "segments": np.array(segs, dtype=int)}
+        # triangle (C) is fed clean input or it crashes the process (the island board, a
+        # segfault): coincident points merged - the first keeps its index, so the pads'
+        # centres and corners keep theirs - zero-length and repeated segments dropped
+        key, remap, clean = {}, {}, []
+        for i, (x, y) in enumerate(verts):
+            k_ = (round(x, 5), round(y, 5))
+            if k_ in key:
+                remap[i] = key[k_]
+            else:
+                key[k_] = remap[i] = len(clean)
+                clean.append((x, y))
+        segs = sorted({(min(remap[a], remap[b]), max(remap[a], remap[b])) for a, b in segs if remap[a] != remap[b]})
+        self._remap = remap
+        self.centre = {i: remap[c] for i, c in self.centre.items()}
+        vp = {}
+        for v, i in self.vpad.items():
+            vp.setdefault(remap[v], i)          # a corner two pads share: the first pad's
+        self.vpad = vp
+        A = {"vertices": np.array(clean, dtype=float), "segments": np.array(segs, dtype=int).reshape(-1, 2)}
         if holes:
             A["holes"] = np.array(holes, dtype=float)
         T = triangle.triangulate(A, "p")
@@ -261,7 +300,15 @@ class Map:
             return k in self.edges and len(self.order[k]) < self.capacity(k, own)
 
         def tolls(a, b):
-            return toll * sum(1 for (c, d) in pending if _cross(a, b, c, d))
+            # crossing a pending airwire near one of its ends seals that pad's way out - six
+            # tolls; anywhere else one (the stagemix board: the keys crossed between U1's
+            # rows, a few mm from the pins the next family needed, for one toll each)
+            t = 0.0
+            for (c, d) in pending:
+                if _cross(a, b, c, d):
+                    x = _meet(a, b, c, d)
+                    t += toll * (6.0 if min(math.dist(x, c), math.dist(x, d)) < 3.0 else 1.0)
+            return t
 
         def push(st, g, pt, frm):
             nonlocal cnt
@@ -365,7 +412,7 @@ class Map:
                 for lid in self.lines:
                     pts, _ = self._band(lid)
                     self._settle(lid, pts)
-            paths = {lid: self._inflate(lid, self._band(lid)[0]) for lid in self.lines}
+            paths = {lid: self._round(lid, self._inflate(lid, self._band(lid)[0])) for lid in self.lines}
             for lid in self.lines:
                 net = self.lines[lid]["net"]
                 others = [LineString(p) for l2, p in paths.items()
@@ -375,11 +422,36 @@ class Map:
                 break
         for lid, ln in self.lines.items():
             if ln["host"] is not None and len(paths[lid]) >= 2 and len(paths.get(ln["host"], [])) >= 2:
-                h = LineString(paths[ln["host"]])
-                prev = Point(paths[lid][-2])
-                foot = h.interpolate(h.project(prev))
-                paths[lid] = paths[lid][:-1] + [(foot.x, foot.y)]
+                paths[lid] = self._tee_end(paths[lid], LineString(paths[ln["host"]]))
         return paths
+
+    def _tee_end(self, pts, host):
+        """A branch cut where it first comes within a track's width of its trunk, and ended
+        square on the trunk from there: drawn to the trunk's crossing on its last edge it ran
+        along the trunk first and zig-zagged into it (the stagemix board's KEY3, 37 deg)."""
+        reach = self.width
+        out = [pts[0]]
+        for a, b in zip(pts, pts[1:]):
+            seg = LineString([a, b])
+            if seg.distance(host) <= reach:
+                # the first point of this segment that close
+                lo, hi = 0.0, 1.0
+                if Point(a).distance(host) > reach:
+                    for _ in range(30):
+                        mid = (lo + hi) / 2
+                        q = (a[0] + (b[0] - a[0]) * mid, a[1] + (b[1] - a[1]) * mid)
+                        if Point(q).distance(host) <= reach:
+                            hi = mid
+                        else:
+                            lo = mid
+                    q = (a[0] + (b[0] - a[0]) * hi, a[1] + (b[1] - a[1]) * hi)
+                    out.append(q)
+                foot = host.interpolate(host.project(Point(out[-1])))
+                out.append((foot.x, foot.y))
+                return out
+            out.append(b)
+        foot = host.interpolate(host.project(Point(out[-1])))
+        return out + [(foot.x, foot.y)]
 
     def _pack(self):
         """Every line where its place puts it, packed round the middle of each edge's free
@@ -411,8 +483,13 @@ class Map:
         lids = self.order[k]
         i = lids.index(lid)
         sp = self.spacing[k]
-        lo = t0 if i == 0 else self.pos[(k, lids[i - 1])] + sp
-        hi = t1 if i == len(lids) - 1 else self.pos[(k, lids[i + 1])] - sp
+        net = self.lines[lid]["net"]
+        # a neighbour of the same net is the same copper: no spacing off it (spaced, a tee's
+        # branch pushed its own trunk up into a needless V - the stagemix board's KEY3)
+        sp_lo = 0.0 if i > 0 and self.lines[lids[i - 1]]["net"] == net else sp
+        sp_hi = 0.0 if i < len(lids) - 1 and self.lines[lids[i + 1]]["net"] == net else sp
+        lo = t0 if i == 0 else self.pos[(k, lids[i - 1])] + sp_lo
+        hi = t1 if i == len(lids) - 1 else self.pos[(k, lids[i + 1])] - sp_hi
         lo, hi = max(lo, t0), min(hi, t1)
         if lo > hi:
             lo = hi = min(max(self.pos[(k, lid)], t0), t1)
@@ -554,6 +631,39 @@ class Map:
             pts = seq if end == 0 else seq[::-1]
         return pts
 
+    def _round(self, lid, pts, sharp=100.0):
+        """Every bend sharper than `sharp` degrees (pcb.py check's acid trap is any under 90:
+        a hairpin round a small pad - the stagemix board's KEY3) drawn as an arc round the
+        nearest copper, at the distance the bend keeps from it; kept only if the arc keeps
+        that distance from all copper."""
+        from shapely.ops import nearest_points
+        cop, _ = self._copper_for(self.lines[lid]["net"])
+        if cop.is_empty or len(pts) < 3:
+            return pts
+        out = [pts[0]]
+        for i in range(1, len(pts) - 1):
+            A, V, C = out[-1], pts[i], pts[i + 1]
+            u = R2._unit(A[0] - V[0], A[1] - V[1])
+            w = R2._unit(C[0] - V[0], C[1] - V[1])
+            ang = math.degrees(math.acos(max(-1.0, min(1.0, u[0] * w[0] + u[1] * w[1]))))
+            if ang >= sharp:
+                out.append(V)
+                continue
+            O = nearest_points(cop, Point(V))[0]
+            o = (O.x, O.y)
+            r = math.dist(o, V)
+            if r < self.keep * 0.9 or math.dist(A, o) <= r + 1e-6 or math.dist(C, o) <= r + 1e-6:
+                out.append(V)
+                continue
+            turn = _tri2(A, V, C)
+            arc = _arc(o, r, _tangent(A, o, r, turn), _tangent(C, o, r, -turn), turn)
+            if arc is None or LineString([A] + arc + [C]).distance(cop) < self.keep - TOL:
+                out.append(V)
+                continue
+            out.extend(arc)
+        out.append(pts[-1])
+        return out
+
     def _corner_at(self, a, b, c):
         """The corner the path a -> b -> c bends round at b: the nearest corner to b on the
         inside of the turn, within reach of a pressed bend (a clearance off it, and a pitch
@@ -654,6 +764,15 @@ def _cross(a, b, c, d):
     d1, d2 = _tri2(c, d, a), _tri2(c, d, b)
     d3, d4 = _tri2(a, b, c), _tri2(a, b, d)
     return d1 * d2 < 0 and d3 * d4 < 0
+
+
+def _meet(a, b, c, d):
+    """Where lines a-b and c-d meet (they are known to cross)."""
+    den = (b[0] - a[0]) * (d[1] - c[1]) - (b[1] - a[1]) * (d[0] - c[0])
+    if abs(den) < 1e-12:
+        return a
+    t = ((c[0] - a[0]) * (d[1] - c[1]) - (c[1] - a[1]) * (d[0] - c[0])) / den
+    return (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
 
 
 def _centroid(pts):
@@ -774,9 +893,14 @@ def route_layer(model, layer, pairs, **kw):
 
 # ------------------------------------------------------------------ T2: layers and vias
 
+_VIAS = 0
+
+
 def _via_pad(model, net, xy):
     d, drill = model.rules.via_size(net)
-    return R2.Pad(ref=VIA_REF, num=str(len(model.pads)), net=net, layers=set(range(model.nl)),
+    global _VIAS
+    _VIAS += 1
+    return R2.Pad(ref=VIA_REF, num=str(_VIAS), net=net, layers=set(range(model.nl)),
                   geom=Point(xy).buffer(d / 2, quad_segs=8), centre=xy, smd=False, drill=drill)
 
 
@@ -810,9 +934,32 @@ def _via_ok(model, net, xy, placed, layers):
     return True
 
 
-def _place_via(model, net, near, toward, placed, layers, rmin=None):
+def _reach(model, net, pad, layer, placed=()):
+    """The free room `pad` can reach on `layer` with a track of `net`: the board's inside
+    less every other net's copper on that layer (pads, tracks, vias, keep-outs, holes, the
+    vias placed so far) grown by the clearance and half a track - the pieces of it the pad
+    touches. A via for the pad must stand in it: placed by distance alone it went where the
+    pad could not reach (the stagemix board's U1.2, walled in by an earlier family's keys)."""
+    R = model.rules
+    w = R.width(net)
+    keep = R.clear(net) + w / 2 + TOL
+    obs = []
+    for e in model.index.e.values():
+        if layer not in set(e.layers) or e.net == net:
+            continue
+        if (e.kind == "keepout" and e.tracks) or e.kind in ("hole", "track", "via", "pad"):
+            obs.append(e.geom)
+    obs += [p.geom for p in model.pads if p.net != net and layer in set(p.layers)]
+    obs += [q.geom for q in placed if q.net != net]
+    free = model.inside.difference(unary_union(obs).buffer(keep)) if obs else model.inside
+    near = pad.geom.buffer(keep + 0.05)
+    return unary_union([g for g in _polys(free) if g.intersects(near)])
+
+
+def _place_via(model, net, near, toward, placed, layers, rmin=None, region=None):
     """A legal via of `net` as near `near` as it can stand, on the side toward `toward`:
-    rings of candidates, nearest first, each ring's best by its distance to `toward`."""
+    rings of candidates, nearest first, each ring's best by its distance to `toward`. With
+    `region`, only where a track can reach it (_reach)."""
     d, _ = model.rules.via_size(net)
     r0 = rmin if rmin is not None else d / 2 + model.rules.clearance + 0.3
     for ring_ in range(12):
@@ -821,6 +968,8 @@ def _place_via(model, net, near, toward, placed, layers, rmin=None):
         for j in range(24):
             a = 2 * math.pi * j / 24
             q = (near[0] + r * math.cos(a), near[1] + r * math.sin(a))
+            if region is not None and not region.contains(Point(q)):
+                continue
             if _via_ok(model, net, q, placed, layers):
                 cands.append((math.dist(q, toward), q))
         if cands:
@@ -842,13 +991,16 @@ def _mst(points):
     return out
 
 
-def route_board(model, nets, layers=None, rounds=4, log=None):
+def route_board(model, nets, layers=None, rounds=4, log=None, later=()):
     """Nets on the board's signal layers (T2, T3): each net to one layer - fewest crossings
     of its tree's straight airwires with nets on the same layer, then fewest vias - a via
     beside each pad not on that layer, the net's pads (or their vias) joined by a tree of
     two-pad lines; then each layer planned by the T1 planner. A net that fails moves to
-    another layer and the board is planned again, up to `rounds`. Returns (runs, failed,
-    report): one Run per line, and one per via (its two layers at one point)."""
+    another layer and the board is planned again, up to `rounds`. `later`: nets of families
+    still to come - their straight airwires are priced as this family's pending ones are, so
+    a family does not wall in the next (the stagemix board: the keys wrapped U1 and the last
+    family's SCK could not leave its pin). Returns (runs, failed, report): one Run per line,
+    and one per via (its two layers at one point)."""
     import copy
     log = log if log is not None else []
     R = model.rules
@@ -861,6 +1013,8 @@ def route_board(model, nets, layers=None, rounds=4, log=None):
               for i, j in _mst([(k, p.centre) for k, p in enumerate(pads[n])])] for n in many}
     adj = {n: {m_ for m_ in many if m_ != n and any(_cross(*e, *f) for e in aw[n] for f in aw[m_])}
            for n in many}
+    future = [(model.pads_of(n)[i].centre, model.pads_of(n)[j].centre) for n in later
+              for i, j in _mst([(k, p.centre) for k, p in enumerate(model.pads_of(n))])]
     forced = {}
     failed, runs = list(nets), []
     for rnd in range(rounds):
@@ -888,7 +1042,8 @@ def route_board(model, nets, layers=None, rounds=4, log=None):
                     ends.append(p)
                     continue
                 pl = next((x for x in sorted(p.layers) if x in allowed[n]), None)
-                xy = _place_via(model, n, p.centre, centre, placed, layers) if pl is not None else None
+                xy = _place_via(model, n, p.centre, centre, placed, layers,
+                                region=_reach(model, n, p, pl, placed)) if pl is not None else None
                 if xy is None:
                     ok = False
                     break
@@ -919,10 +1074,12 @@ def route_board(model, nets, layers=None, rounds=4, log=None):
             idx = {id(p): i for i, p in enumerate(mp.pads)}
             lids = {}
             for j, (n, x, y, t) in enumerate(pairs):
-                pending = [(u.centre, w.centre) for n2, u, w, _ in pairs[j + 1:] if n2 != n]
+                pending = [(u.centre, w.centre) for n2, u, w, _ in pairs[j + 1:] if n2 != n] + future
                 lid = mp.route(n, idx[id(x)], idx[id(y)], pending=pending, tee=t)
                 if lid is None:
                     bad.add(n)
+                    log.append(f"topo: {n} on {model.layer_names[L]}: no way from {x.ref}.{x.num} to {y.ref}.{y.num}"
+                               + (" (or its tree)" if t else ""))
                 else:
                     lids[lid] = (n, x, y)
             paths = mp.geometry()
