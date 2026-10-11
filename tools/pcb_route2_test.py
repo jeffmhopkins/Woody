@@ -259,7 +259,9 @@ def cell_nonplanar(out, plot):
     dt = time.monotonic() - t0
     res = finish("nonplanar", b, m, r, out, plot, drc=False)
     res.update(failed=failed, seconds=round(dt, 1), **r.summary())
-    res["pass"] = list(failed) == ["B"] and failed["B"] == "none" and dt < 60
+    # no path, said either way: the search exhausted ("none"), or proved before it began
+    # ("walled: ...", Router._enclosed)
+    res["pass"] = list(failed) == ["B"] and (failed["B"] == "none" or str(failed["B"]).startswith("walled:")) and dt < 60
     return res
 
 

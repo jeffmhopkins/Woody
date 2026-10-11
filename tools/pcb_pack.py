@@ -178,7 +178,8 @@ def board_of(kboard, islands=(), edge=0.3, rails=()):
     import pcbnew
     import pcb_route2
     parts = []
-    for fp in kboard.GetFootprints():
+    # footprints and tracks in an order of our own, not KiCad's (pcb_route2.model_from_board)
+    for fp in sorted(kboard.GetFootprints(), key=lambda f: f.GetReference()):
         pads, geo = [], []
         cop = {"F": [], "B": []}
         for pad in fp.Pads():
@@ -206,7 +207,8 @@ def board_of(kboard, islands=(), edge=0.3, rails=()):
                 c = pad.GetPosition()
                 holes.append(Point(pcbnew.ToMM(c.x), pcbnew.ToMM(c.y)).buffer(pcbnew.ToMM(pad.GetDrillSize().x) / 2))
     bd = Board(pcb_route2.outline_of(kboard), parts, keep, holes, isl, edge, rails)
-    for t in kboard.GetTracks():
+    for t in sorted(kboard.GetTracks(), key=lambda t: (isinstance(t, pcbnew.PCB_VIA), t.GetNetname(), t.GetLayer(),
+                                                       t.GetStart().x, t.GetStart().y, t.GetEnd().x, t.GetEnd().y)):
         if isinstance(t, pcbnew.PCB_VIA):
             c = t.GetPosition()
             bd.wires.append((t.GetNetname(), {"F", "B"}, Point(pcbnew.ToMM(c.x), pcbnew.ToMM(c.y)).buffer(pcbnew.ToMM(t.GetWidth(pcbnew.F_Cu)) / 2)))

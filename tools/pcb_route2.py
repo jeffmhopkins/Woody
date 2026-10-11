@@ -2639,7 +2639,14 @@ def model_from_board(board, lay, fence=None, via_off_silk=True):
     names = [board.GetLayerName(l) for l in board.GetEnabledLayers().CuStack()]
     lids = list(board.GetEnabledLayers().CuStack())
     pads, holes, keeps = [], [], []
-    for fp in board.GetFootprints():
+    # footprints, zones and tracks in an order of our own, not KiCad's (see the tracks, below)
+    fps_sorted = sorted(board.GetFootprints(), key=lambda f: f.GetReference())
+
+    def zkey(z):
+        bb = z.GetBoundingBox()
+        return (z.GetZoneName(), z.GetNetname(), z.GetLayer(), bb.GetLeft(), bb.GetTop(), bb.GetRight(), bb.GetBottom())
+    zones_sorted = sorted(board.Zones(), key=zkey)
+    for fp in fps_sorted:
         for pad in fp.Pads():
             on = [k for k, l in enumerate(lids) if pad.IsOnLayer(l)]
             if pad.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH:
@@ -2656,7 +2663,7 @@ def model_from_board(board, lay, fence=None, via_off_silk=True):
                             tie=fp.IsNetTie(),
                             face_of_hole=not pad.HasHole() and any(q.HasHole() and q.GetNumber() == pad.GetNumber()
                                                                    for q in fp.Pads())))
-    for z in board.Zones():
+    for z in zones_sorted:
         if z.GetIsRuleArea():
             g = _poly_of(z.Outline())
             ls = [k for k, l in enumerate(lids) if z.IsOnLayer(l)]
@@ -2664,7 +2671,7 @@ def model_from_board(board, lay, fence=None, via_off_silk=True):
     if via_off_silk:
         silk = (pcbnew.F_SilkS, pcbnew.B_SilkS)
         items = [d for d in board.GetDrawings() if d.GetLayer() in silk]
-        for fp in board.GetFootprints():
+        for fp in fps_sorted:
             items += [g for g in fp.GraphicalItems() if g.GetLayer() in silk]
             items += [f for f in fp.GetFields() if f.GetLayer() in silk and f.IsVisible()]
         for it in items:
@@ -2702,7 +2709,7 @@ def model_from_board(board, lay, fence=None, via_off_silk=True):
     if lay.get("planes") or lay.get("islands"):
         m.planes = Planes(lay, m, board, to_pcb=_frame(lay))
         zones = []
-        for z in board.Zones():
+        for z in zones_sorted:
             if z.GetIsRuleArea():
                 continue
             for k, lid in enumerate(lids):
@@ -2710,7 +2717,14 @@ def model_from_board(board, lay, fence=None, via_off_silk=True):
                     zones.append((k, _poly_of(z.Outline())))
         for L, geom, exempt in m.planes.splits(m, zones):
             m.index.add(net=None, layers=[L], geom=geom, kind="reserve", locked=True, family=exempt)
-    for t in board.GetTracks():
+    # in an order of our own: KiCad's follows the items' random ids, so a board saved by one
+    # run and read by the next gave the index another order - and every tie broken by it
+    # another answer (a stopped-and-resumed run laid other copper than one run, one time in
+    # three)
+    def tkey(t):
+        a, b = t.GetStart(), t.GetEnd()
+        return (isinstance(t, pcbnew.PCB_VIA), t.GetNetname(), t.GetLayer(), min((a.x, a.y), (b.x, b.y)), max((a.x, a.y), (b.x, b.y)))
+    for t in sorted(board.GetTracks(), key=tkey):
         net = t.GetNetname()
         if isinstance(t, pcbnew.PCB_VIA):
             c = t.GetPosition()
