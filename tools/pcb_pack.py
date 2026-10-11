@@ -861,9 +861,32 @@ class Packer:
             ready = [r for r in todo if not signal(r) or any(signal(r) & signal(q) for q in seated)]
             if not ready:
                 ready = todo            # nothing left can wait for anything: as they are
-            groups = {}
             prefer = prefer or {}
             ready = [r for r in ready if r not in prefer or prefer[r] not in self.bd.unplaced] or ready
+            # a part with a net PRIVATE to one seated part - that part and it alone on it, a
+            # charge-pump or bootstrap cap on its IC's pin - is seated alone, first: in a shared
+            # row it went wherever the row fitted (the main board's C207, U13's VCAP cap, 11 mm
+            # off it in a row with C208)
+            power = self.bd.power
+            owners = {}
+            for q, part in self.placed.items():
+                for n in {n for n, _ in part.pads if n}:
+                    owners.setdefault(n, set()).add(q)
+            for r in list(ready):
+                mine = signal(r) - power
+                priv = [n for n in mine if len(owners.get(n, set()) - {r}) == 1]
+                anchors = {next(iter(owners[n] - {r})) for n in priv}
+                if mine and len(priv) == len(mine) and len(anchors) == 1 and next(iter(anchors)) in seated:
+                    a = next(iter(anchors))
+                    res1 = None
+                    for reach in reaches:
+                        res1 = self.pack(a, [r], rotations=(0, 90), grow=reach)
+                        if res1["result"] == "packed":
+                            break
+                    rep.append((f"round {a} (its private net)", [r], res1["result"]))
+                    if res1["result"] == "packed":
+                        ready.remove(r)
+            groups = {}
             for r in ready:
                 if r in prefer and prefer[r] in seated:
                     groups.setdefault(prefer[r], []).append(r)

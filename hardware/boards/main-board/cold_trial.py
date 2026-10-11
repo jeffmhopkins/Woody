@@ -75,6 +75,15 @@ FAMILIES = [
 ]
 
 
+# WHAT A REVIEW ACCEPTED, by family: a review reason (or its start) that asks for no second
+# look, each with why. Reported in the family's record, not paused for.
+ACCEPT = {
+    # 2026-10-10: J5 pin 10 can only leave its 1.27 mm header round the end; 9.6 mm for a
+    # 3.4 mm airwire is the way round (the source's run was 23.5 mm)
+    "power": ["still long: /V3V3_CHAIN_RH"],
+}
+
+
 # KiCad's findings a placement may not have (pcb_route2.drc on the placed board, before a fill)
 PLACE_FINDINGS = ("courtyards_overlap", "items_not_allowed", "shorting_items", "clearance", "hole_clearance",
                   "solder_mask_bridge", "tracks_crossing")
@@ -476,7 +485,7 @@ def main():
         pcb_plot.plot(path, png, nets=nets, title=f"main board cold: family {k} {name}")
         return png
     rep = r.stage(FAMILIES, board=board, checkpoint=checkpoint, first=lay.get("route_first") or [], plot=plot,
-                  start=start, stop=stop, pause="--pause" in sys.argv, edits=EDITS)
+                  start=start, stop=stop, pause="--pause" in sys.argv, edits=EDITS, accept=ACCEPT)
     for line in r.log:
         if not line.startswith(("route:", "rescue ")):
             print("cold: route " + line)

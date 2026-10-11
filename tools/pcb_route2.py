@@ -1561,7 +1561,8 @@ class Router:
 
     # ---- family by family, with a review between
     def stage(self, families, board=None, checkpoint=None, ground=None, connect_first=(), first=(),
-              detour=1.8, pull=1.0, fillet=0.0, liquid=True, plot=None, edits=None, start=1, stop=None, pause=False):
+              detour=1.8, pull=1.0, fillet=0.0, liquid=True, plot=None, edits=None, start=1, stop=None, pause=False,
+              accept=None):
         """Route a board in FAMILIES, one at a time, each reviewed and adjusted before the next
         is let near it (the owner, 2026-10-05 and 2026-10-10: "do families of traces... then
         the next ones", "review it and push the traces around with the liquid tools, then hand
@@ -1581,7 +1582,8 @@ class Router:
         checkpoint board, whose families' copper it reads as locked). `pause`: stop after the
         first family whose `review` is not empty - what it could not settle itself (a net
         open, a net pushed in or rescued - other copper moved for it -, a detour not cured,
-        an edit that failed): the point to hand
+        an edit that failed): the point to hand - less what `accept[family]` lists as already
+        reviewed and accepted (a reason, or its start), which is reported, not paused for
         the board to a reviewer. Unlocked copper the board came with (Router.adopt) is
         routed, liquid-passed and written with the family that owns its net.
         `families`: [{name, nets: [names or fnmatch globs], first?, layers?}] - a net claimed
@@ -1693,7 +1695,11 @@ class Router:
             why += [f"rescued: {x}" for x in rescued]          # copper ripped up and laid again
             why += [f"still long: {n} {a} mm" for n, b_, a, _ in rerouted if a > b_ - 1e-6]
             why += [f"edit failed: {e['edit']} {e['net']} - {e.get('why') or e.get('mode')}" for e in done_edits if not e["ok"]]
-            rec["review"] = why
+            # what a reviewer has already looked at and accepted (accept[family]: the reason's
+            # own words, or its start) asks for no second look
+            ok_ = (accept or {}).get(name, [])
+            rec["accepted"] = [w for w in why if any(w.startswith(a) for a in ok_)]
+            rec["review"] = [w for w in why if w not in rec["accepted"]]
             report.append(rec)
             self.log.append(f"stage {k} {name}: {rec['nets']} net(s), {rec['runs']} run(s), {rec['length_mm']} mm, "
                             f"{rec['vias']} via(s); failed {list(failed) or 'none'}; pushed in {len(pushed)}; "
