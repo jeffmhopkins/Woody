@@ -78,7 +78,10 @@ FAMILIES = [
     # long lines with a pad at J-MCU (IO2, IO39, IO35) ahead of U6's own hops, which were
     # then walled in on both layers - GATE_A_OUT, IO6 and LED_D1 open. U6 shares IO1 and
     # IO2 with J-MCU: one crowd, not two
-    {"name": "mcu-fanin", "nets": ["/IO*", "*TXD*", "*RXD*", "/led-strip-drive/*"], "near": [300.0, 108.0, 334.0, 138.0],
+    # and EVERY net at its parts, not the mcu's only: family 7 (midi) found MIDI_RING_DRV
+    # walled in at U6.8 by this family's copper; /carrier/IO34 (U1.4 - J1.14) was left to "rest"
+    {"name": "mcu-fanin", "nets": ["/IO*", "*TXD*", "*RXD*", "/led-strip-drive/*", "*MIDI*", "/carrier/IO34"],
+     "near": [300.0, 108.0, 334.0, 138.0],
      "first": ["/IO36", "/IO1"]},
     {"name": "mcu", "nets": ["/IO*", "/SPI*", "*TXD*", "*RXD*", "/led-strip-drive/*", "/LED_*"]},
     {"name": "midi", "nets": ["*MIDI*"]},
