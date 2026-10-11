@@ -400,12 +400,15 @@ class Packer:
             d = float(depth)
             if side == "pins":
                 # the sides its pins leave by, read from the pads as the part now stands (a
-                # packed part may have been turned): pads long in x leave E and W
-                g = next((g_ for n, f, g_ in part.padgeo if f == part.side), None)
-                if g is None:
+                # packed part may have been turned): away from its other row - the axis its
+                # pads stand at two places on (an SOIC's columns: E and W; J-MCU's rows: N and
+                # S); pins on four sides, all four (as Router.reserve_escapes)
+                cs = [g_.centroid for n, f, g_ in part.padgeo if f == part.side]
+                if not cs:
                     continue
-                gx0, gy0, gx1, gy1 = g.bounds
-                side = "EW" if (gx1 - gx0) >= (gy1 - gy0) else "NS"
+                xs = {round(c.x, 1) for c in cs}
+                ys = {round(c.y, 1) for c in cs}
+                side = "EW" if len(xs) == 2 and len(ys) > 2 else "NS" if len(ys) == 2 and len(xs) > 2 else "EWNS"
             # `side`: one of E W N S, or several ("EW": both pin rows of an SOIC)
             for s_ in side:
                 out.append({"E": box(x1, y0, x1 + d, y1), "W": box(x0 - d, y0, x0, y1),

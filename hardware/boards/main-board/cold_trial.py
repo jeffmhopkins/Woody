@@ -283,14 +283,14 @@ def drivers(board, comps, rails):
 ESCAPE_DEPTH = 1.2            # mm: Router.reserve_escapes' bands, and the packer's room for them
 
 
-def escape_rows(bd, depth, min_pins=8, pitch_max=1.3):
+def escape_rows(bd, depth, min_pins=5, pitch_max=1.3):
     """{ref: ("pins", depth)} for each fine-pitch part (as Router.reserve_escapes picks them):
     the packer keeps parts out of a band `depth` deep along each side its pins leave by,
     read from the part as it stands once it is seated (Packer.escape_bands)."""
     out = {}
     for r, p in bd.parts.items():
         geo = [g for n, f, g in p.padgeo if f == p.side and n and not n.startswith("unconnected")]
-        allp = [g for n, f, g in p.padgeo if f == p.side]
+        allp = [g for n, f, g in p.padgeo if f == p.side]          # a through-hole pin is on its face too
         if len(allp) < min_pins or not geo:
             continue
         cs = [g.centroid for g in allp]

@@ -1862,33 +1862,41 @@ class Router:
             out["why"] = str(why)
         return out
 
-    def reserve_escapes(self, depth=1.2, min_pins=8, pitch_max=1.3, field_cost=3.0):
-        """ESCAPE BANDS: each SMD pin of a fine-pitch part (at least `min_pins` SMD pads, its
-        rows' pitch at most `pitch_max`) gets a band `depth` mm out from its pad's outer
-        end, as wide as the pad, reserved for that pin's own net on the pad's layer: room
-        for its stub and a via, whatever routes first. Without them an early family ran its
-        rail along a register's row of pin ends and walled in two key pins a later family
-        needed (the main board's U8, pins 14 and 6, behind DEV_3V3 and the chain). Returns
-        how many bands."""
+    def reserve_escapes(self, depth=1.2, min_pins=5, pitch_max=1.3, field_cost=3.0):
+        """ESCAPE BANDS: each pin of a fine-pitch part (at least `min_pins` pads with a net,
+        surface-mount or through-hole, its pitch at most `pitch_max`) gets a band `depth` mm
+        out from its pad's outer end, as wide as the pad across that way, reserved for that
+        pin's own net on every layer: room for its stub and a via, whatever routes first.
+        The way out is away from the part's other row: the axis on which its pads stand at
+        two places only (an SOIC's two columns - out sideways; J-MCU's two rows - out up and
+        down); a part with pins on four sides, each pad's nearest side. And the part's whole
+        pin field is `field_cost` dear to every net. (Without them early families walled in
+        U8's pins 14 and 6, then J-MCU's 4 and 12 and U1's 3 - a through-hole header and a
+        SOT-23, which the first bands left out.) Returns how many bands."""
         byref = {}
         for p in self.m.pads:
-            if p.smd and p.net and not p.net.startswith("unconnected"):
+            if p.net and not p.net.startswith("unconnected") and not p.face_of_hole:
                 byref.setdefault(p.ref, []).append(p)
         n = 0
         every = list(range(self.m.nl))
         for ref, ps in sorted(byref.items()):
-            allp = [p for p in self.m.pads if p.ref == ref and p.smd]
+            allp = [p for p in self.m.pads if p.ref == ref and not p.face_of_hole]
             if len(allp) < min_pins:
                 continue
-            cx = sum(p.centre[0] for p in allp) / len(allp)
-            cy = sum(p.centre[1] for p in allp) / len(allp)
             gaps = sorted(math.dist(a.centre, b.centre) for a in allp for b in allp if a is not b)
             if not gaps or gaps[0] > pitch_max:
                 continue
+            cx = sum(p.centre[0] for p in allp) / len(allp)
+            cy = sum(p.centre[1] for p in allp) / len(allp)
+            xs = {round(p.centre[0], 1) for p in allp}
+            ys = {round(p.centre[1], 1) for p in allp}
+            axis = "x" if len(xs) == 2 and len(ys) > 2 else "y" if len(ys) == 2 and len(xs) > 2 else None
+            hx = max(abs(p.centre[0] - cx) for p in allp) or 1.0
+            hy = max(abs(p.centre[1] - cy) for p in allp) or 1.0
             for p in sorted(ps, key=lambda q: q.num):
                 x0, y0, x1, y1 = p.geom.bounds
-                w, h = x1 - x0, y1 - y0
-                if w >= h:          # a pad long in x: it leaves to the side away from the part
+                ax = axis or ("x" if abs(p.centre[0] - cx) / hx >= abs(p.centre[1] - cy) / hy else "y")
+                if ax == "x":
                     band = box(x1, y0, x1 + depth, y1) if p.centre[0] > cx else box(x0 - depth, y0, x0, y1)
                 else:
                     band = box(x0, y1, x1, y1 + depth) if p.centre[1] > cy else box(x0, y0 - depth, x1, y0)
