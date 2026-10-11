@@ -100,6 +100,14 @@ ACCEPT = {
         # complete. Why the first attempt failed is the router's to answer, not this board's
         "pushed in: /CHAIN_SCK",
     ],
+    "mcu": [
+        # 2026-10-11 (3dfb6b8f): 87.9 mm and 12 vias for a 35.1 mm airwire, D10 - D11 - D12.
+        # The way along y 123 crosses DEV_3V3's front line at x 270 and the keys and chain
+        # families' locked copper round D11-D12, the board's densest place. A WS2815 data
+        # line at 800 kHz: length and vias cost it nothing electrically. The cure is the
+        # placement - the drivers' chain in one row, clear of the key lines - not this family
+        "still long: /led-strip-drive/LED_D3",
+    ],
     "keys": [
         # 2026-10-11: 9.1 mm for a 4.5 mm airwire - U7's pin rows' room puts R33 that far off;
         # the source's run was 10.5 mm
