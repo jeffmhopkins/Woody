@@ -485,7 +485,10 @@ def main():
         pcb_plot.plot(path, png, nets=nets, title=f"main board cold: family {k} {name}")
         return png
     rep = r.stage(FAMILIES, board=board, checkpoint=checkpoint, first=lay.get("route_first") or [], plot=plot,
-                  start=start, stop=stop, pause="--pause" in sys.argv, edits=EDITS, accept=ACCEPT)
+                  start=start, stop=stop, pause="--pause" in sys.argv, edits=EDITS, accept=ACCEPT,
+                  # every fine-pitch pin's escape band kept for its own net (Router.reserve_escapes):
+                  # without them power and the chain walled in U8's pins 14 and 6 before the keys
+                  escape={"depth": 1.2})
     for line in r.log:
         if not line.startswith(("route:", "rescue ")):
             print("cold: route " + line)

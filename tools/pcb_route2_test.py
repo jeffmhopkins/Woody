@@ -90,6 +90,10 @@ acid traps (check_tracks: KiCad's DRC has no such test), unless it says why not.
                router says so at once and names the pad ("walled: P2 ...") - not a search
                spent to its budget (the main board's U8 pin 1 took minutes per attempt to
                answer "budget"); and a pad with a way out is not called walled
+  escape       an SOIC whose pins 1 and 3 are a rail routed in the first family and pin 2 a
+               signal routed in the second, both on the front: without escape bands the rail
+               runs across pin 2's end and walls it in (the main board's U8, pins 14 and 6);
+               with Router.reserve_escapes pin 2 keeps its band and routes - clean
   rescue       a net walled out by an earlier one: rescue takes that one up and both route
   minikey      a three-key board: packed (pcb_pack) then routed, liquid pass, DRC clean
 """
@@ -109,7 +113,7 @@ CELLS = ["fanout", "pinch", "updown", "bus", "nonplanar", "locked", "offgrid", "
          "fold", "jogs", "equalise", "fillet", "ground", "enclosed", "stitch", "pourcut", "rescue", "minikey",
          "planes4", "island4", "optin4", "orphan4", "fragments", "lockedvia", "guard", "stages", "push",
          "stagepush", "edits", "resume", "resume4",
-         "partial", "partialpush", "connect", "moatpin", "walled"]
+         "partial", "partialpush", "connect", "moatpin", "walled", "escape"]
 
 
 def _setup():
@@ -1112,6 +1116,35 @@ def cell_walled(out, plot):
     ok2, _, why2 = r2.route_net("P")
     res = {"boxed": {"ok": ok, "why": why, "seconds": round(dt, 2)}, "gap": {"ok": ok2, "why": why2}}
     res["pass"] = not ok and str(why).startswith("walled:") and "P2" in str(why) and dt < 5.0 and ok2
+    return res
+
+
+def cell_escape(out, plot):
+    pcbnew, R2, T = _setup()
+
+    def board():
+        b = T.new_board(40.0, 24.0)
+        T.soic(b, "U1", ["VR", "SG", "VR", "N4", "N5", "N6", "N7", "N8"], 20.0, 12.0, 0, True)
+        T.keepout(b, 18.6, 9.0, 21.4, 15.0, layers=("F",))      # under the body: no way between the rows
+        T.tp(b, "TS", "SG", 5.0, 3.0)
+        return b
+    # the rail on the front only; the signal may take a via - if there is room for one
+    lay = dict(LAY, net_classes={"front": {"nets": ["VR"], "layers": ["F.Cu"]}})
+    fams = [{"name": "rail", "nets": ["VR"]}, {"name": "sig", "nets": ["SG"]}]
+    out_ = {}
+    for tag, esc in (("without", None), ("with", {"depth": 1.2})):
+        b = board()
+        m = R2.model_from_board(b, lay)
+        r = R2.Router(m)
+        rep = r.stage(fams, board=b, escape=esc)
+        failed = {k: v for x in rep for k, v in x["failed"].items()}
+        out_[tag] = {"failed": failed}
+        if esc:
+            res = finish("escape", b, m, r, out, plot, written=True)
+            out_[tag].update(drc_errors=res["drc_errors"], acid_traps=res["acid_traps"])
+    res = dict(out_)
+    res["pass"] = bool(out_["without"]["failed"]) and not out_["with"]["failed"] and out_["with"]["drc_errors"] == 0 \
+        and out_["with"]["acid_traps"] == 0
     return res
 
 

@@ -1612,7 +1612,7 @@ class Router:
     # ---- family by family, with a review between
     def stage(self, families, board=None, checkpoint=None, ground=None, connect_first=(), first=(),
               detour=1.8, pull=1.0, fillet=0.0, liquid=True, plot=None, edits=None, start=1, stop=None, pause=False,
-              accept=None):
+              accept=None, escape=None):
         """Route a board in FAMILIES, one at a time, each reviewed and adjusted before the next
         is let near it (the owner, 2026-10-05 and 2026-10-10: "do families of traces... then
         the next ones", "review it and push the traces around with the liquid tools, then hand
@@ -1652,6 +1652,8 @@ class Router:
         rest = [n for n in allnets if n not in claimed]
         if rest:
             plan.append(({"name": "rest"}, rest))
+        if escape:
+            self.reserve_escapes(**escape)
         if P is not None and P.fanout_nets:
             self.fanout()               # a pad that has its via already (a checkpoint's) is skipped
         for spec in connect_first:
@@ -1821,6 +1823,41 @@ class Router:
         else:
             out["why"] = str(why)
         return out
+
+    def reserve_escapes(self, depth=1.2, min_pins=8, pitch_max=1.3):
+        """ESCAPE BANDS: each SMD pin of a fine-pitch part (at least `min_pins` SMD pads, its
+        rows' pitch at most `pitch_max`) gets a band `depth` mm out from its pad's outer
+        end, as wide as the pad, reserved for that pin's own net on the pad's layer: room
+        for its stub and a via, whatever routes first. Without them an early family ran its
+        rail along a register's row of pin ends and walled in two key pins a later family
+        needed (the main board's U8, pins 14 and 6, behind DEV_3V3 and the chain). Returns
+        how many bands."""
+        byref = {}
+        for p in self.m.pads:
+            if p.smd and p.net and not p.net.startswith("unconnected"):
+                byref.setdefault(p.ref, []).append(p)
+        n = 0
+        for ref, ps in sorted(byref.items()):
+            allp = [p for p in self.m.pads if p.ref == ref and p.smd]
+            if len(allp) < min_pins:
+                continue
+            cx = sum(p.centre[0] for p in allp) / len(allp)
+            cy = sum(p.centre[1] for p in allp) / len(allp)
+            gaps = sorted(math.dist(a.centre, b.centre) for a in allp for b in allp if a is not b)
+            if not gaps or gaps[0] > pitch_max:
+                continue
+            for p in sorted(ps, key=lambda q: q.num):
+                x0, y0, x1, y1 = p.geom.bounds
+                w, h = x1 - x0, y1 - y0
+                if w >= h:          # a pad long in x: it leaves to the side away from the part
+                    band = box(x1, y0, x1 + depth, y1) if p.centre[0] > cx else box(x0 - depth, y0, x0, y1)
+                else:
+                    band = box(x0, y1, x1, y1 + depth) if p.centre[1] > cy else box(x0, y0 - depth, x1, y0)
+                self.m.index.add(net=None, layers=list(p.layers), geom=band, kind="reserve", locked=True,
+                                 family={p.net})
+                n += 1
+        self.log.append(f"escape bands: {n}, {depth} mm out from each pin of each fine-pitch part")
+        return n
 
     def adopt(self, nets=None):
         """The board's UNLOCKED copper made this router's own: each track segment and via a
