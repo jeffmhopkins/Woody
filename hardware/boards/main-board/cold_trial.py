@@ -564,7 +564,9 @@ def reseat_before(board, path, lay, out, k):
     os.replace(path, path.replace(".kicad_pcb", ".kicad_pcb.before-reseat"))
     os.replace(tmp, path)
     print(f"cold: reseat: wrote {path} (the old one .before-reseat)")
-    return pcbnew.LoadBoard(path)
+    # the board in hand, which is what was saved: pcbnew.LoadBoard of it again, straight after
+    # the KiCad check, gave back a bare SwigPyObject (2026-10-11)
+    return board
 
 
 def main():
