@@ -1862,7 +1862,7 @@ class Router:
             out["why"] = str(why)
         return out
 
-    def reserve_escapes(self, depth=1.2, min_pins=5, pitch_max=1.3, field_cost=3.0):
+    def reserve_escapes(self, depth=1.2, min_pins=8, pitch_max=1.3, field_cost=3.0, smd_only=True):
         """ESCAPE BANDS: each pin of a fine-pitch part (at least `min_pins` pads with a net,
         surface-mount or through-hole, its pitch at most `pitch_max`) gets a band `depth` mm
         out from its pad's outer end, as wide as the pad across that way, reserved for that
@@ -1873,14 +1873,17 @@ class Router:
         pin field is `field_cost` dear to every net. (Without them early families walled in
         U8's pins 14 and 6, then J-MCU's 4 and 12 and U1's 3 - a through-hole header and a
         SOT-23, which the first bands left out.) Returns how many bands."""
+        # surface-mount parts of 8 pins and more by default: widened to through-hole headers
+        # and 5-pin parts on the main board, 129 bands and their fields taxed every line that
+        # crossed them, and the mcu family went from 2 nets open to 5 - `smd_only`, `min_pins`
         byref = {}
         for p in self.m.pads:
-            if p.net and not p.net.startswith("unconnected") and not p.face_of_hole:
+            if p.net and not p.net.startswith("unconnected") and not p.face_of_hole and (p.smd or not smd_only):
                 byref.setdefault(p.ref, []).append(p)
         n = 0
         every = list(range(self.m.nl))
         for ref, ps in sorted(byref.items()):
-            allp = [p for p in self.m.pads if p.ref == ref and not p.face_of_hole]
+            allp = [p for p in self.m.pads if p.ref == ref and not p.face_of_hole and (p.smd or not smd_only)]
             if len(allp) < min_pins:
                 continue
             gaps = sorted(math.dist(a.centre, b.centre) for a in allp for b in allp if a is not b)
