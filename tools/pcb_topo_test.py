@@ -15,7 +15,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 CELLS = ["squeeze", "middle", "fan", "around", "cross", "grid", "scramble", "triad", "channel", "tree",
-         "stagemix", "stacked", "stage4", "island4"]
+         "stagemix", "stacked", "stage4", "island4", "crowd"]
 
 
 def _setup():
@@ -323,6 +323,64 @@ def cell_island4(out, plot):
     bad, on_plane, vias = B._four_checks(R2, b, lay, p)
     res.update(check_planes=bad[:5], tracks_on_plane_layers=on_plane)
     res["pass"] = res["pass"] and not bad and not on_plane
+    return res
+
+
+def crowd_board():
+    """The main board's J-MCU crowd, small: a 2 x 10, 1.27 mm through-hole header (J1) with
+    a 14-pin driver (U6) and a 6-pin protection array (U1) beside it, series and pull
+    resistors, and the far ends at the board's edges - the nets that walled each other in
+    on eight grid-router runs (2026-10-11), as the real one has them: header pin to IC pin
+    to resistor, three pads a net."""
+    _, _, T, _, _ = _setup()
+    b = T.new_board(64.0, 44.0)
+    fp = T._fp(b, "J1", "HDR-2x10-1.27")
+    pins = {}
+    for k in range(20):
+        col, row = k // 2, k % 2
+        x, y = -5.715 + col * 1.27, (-0.635 if row == 0 else 0.635)
+        pins[k + 1] = (x, y)
+    net_of = {4: "IO1", 5: "IO2", 6: "IO7", 8: "IO38", 10: "IO35", 12: "IO36", 14: "IO34", 16: "TXD",
+              18: "IO37", 19: "IO6", 2: "GND", 20: "GND"}
+    for k, (x, y) in pins.items():
+        T._tht(b, fp, k, x, y, 0.85, 0.5, net_of.get(k, ""))
+    T._court_rect(fp, 13.6, 3.0)
+    T._place(b, fp, 36.0, 37.0)
+    # U6 - the LED and MIDI driver: IO1 in, IO2 in, outputs to the edge
+    T.soic(b, "U6", ["GND", "IO1", "GATE", "GND", "IO6", "MTIP", "GND", "MRING", "IO2", "GND", "", "GND", "GND", ""],
+           24.0, 18.0)
+    # U1 - the protection array on IO35, IO36, IO34
+    T.soic(b, "U1", ["IO35", "GND", "IO36", "IO34", "", ""], 30.0, 29.0)
+    # series and pull resistors
+    T.passive(b, "R10", "IO1", "GND", 18.0, 10.0)
+    T.passive(b, "R49", "V3", "IO2", 14.0, 14.0)
+    T.passive(b, "R48", "V3", "IO6", 30.0, 10.0)
+    T.passive(b, "R11", "GATE", "LEDDI", 33.0, 14.0)
+    T.passive(b, "R35", "IO7", "SHLD", 16.0, 30.0)
+    T.passive(b, "R34", "IO38", "SCK", 12.0, 34.0)
+    T.passive(b, "R1", "IO35", "SCLK", 54.0, 24.0, rot=90.0)
+    T.passive(b, "R2", "IO36", "MOSI", 57.0, 24.0, rot=90.0)
+    # the far ends, at the edges
+    for ref, n, x, y in (("TP1", "SHLD", 3.0, 30.0), ("TP2", "SCK", 3.0, 36.0), ("TP3", "SCLK", 54.0, 4.0),
+                         ("TP4", "MOSI", 58.0, 4.0), ("TP5", "LEDDI", 44.0, 4.0), ("TP6", "MTIP", 3.0, 18.0),
+                         ("TP7", "MRING", 3.0, 22.0), ("TP8", "IO37", 61.0, 30.0), ("TP9", "TXD", 61.0, 36.0),
+                         ("TP10", "IO34", 61.0, 16.0), ("TP11", "IO35", 3.0, 8.0), ("TP12", "IO36", 8.0, 4.0)):
+        T.tp(b, ref, n, x, y)
+    return b
+
+
+def cell_crowd(out, plot):
+    """THE GATE before the main board (#47 T4b): the J-MCU crowd, small, one topo family on
+    two layers. Every net routes; DRC clean."""
+    _, _, _, _, B = _setup()
+    b = crowd_board()
+    nets = ["IO1", "IO2", "IO6", "IO7", "IO38", "IO35", "IO36", "IO34", "TXD", "IO37", "GATE", "LEDDI", "MTIP",
+            "MRING", "SHLD", "SCK", "SCLK", "MOSI", "V3", "GND"]
+    fams = [{"name": "crowd", "nets": nets, "engine": "topo"}]
+    res, m, r, rep = _stage("crowd", b, B.LAY, fams, out, plot)
+    res["pushed"] = [p[0] for x in rep for p in x["pushed"]]
+    res["topo_log"] = [l_ for l_ in r.log if l_.startswith("topo")]
+    res["pass"] = res["pass"] and not res["pushed"]
     return res
 
 
