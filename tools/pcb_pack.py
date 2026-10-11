@@ -439,6 +439,10 @@ class Packer:
         for r in cluster:
             p = self.placed[r]
             fe = self.bd.far_ends(p, set(cluster) | {anchor})
+            # a power net steers only a part with nothing else to follow: U6's INST_5V_A, to the
+            # USB OR, sent it to J-MCU's far side from LED 1, where its signal goes
+            sig = [x for x in fe if x[0] not in self.bd.power]
+            fe = sig or (fe if not {n for n, _ in p.pads if n} - self.bd.power - self.bd.rails else [])
             if not fe:
                 fe = self.far_ends2(p, set(cluster) | {anchor})
             if fe:
@@ -460,7 +464,7 @@ class Packer:
         before its neighbours, whose only placed far end is its anchor: U6 (the LED level
         shifter) went to J-MCU's far side, away from LED 1 its output reaches through R11,
         because nothing placed told it which way (the main board, its IO6 247 mm for 33)."""
-        rails = self.bd.rails
+        rails = self.bd.rails | self.bd.power          # neither steers: see sides_for
         mine = {n for n, _ in part.pads if n and not n.startswith("unconnected") and n not in rails}
         out = []
         for r, q in self.placed.items():
@@ -848,11 +852,20 @@ class Packer:
                                                      -len(self.placed[q].pads), q))
                 if not cand or (not signal(r) & signal(cand[0]) and sheets.get(cand[0]) != sheets.get(r)):
                     continue            # no anchor yet: a later round, once its neighbours are seated
+                # its preferred side at every reach first, and only then any side: with the side
+                # fallback at the first reach, U6 took J-MCU's far side at 12 mm before its own,
+                # toward LED 1, was tried at 20 (the main board: IO6 247 mm for the source's 33)
                 res = None
+                pref = self.sides_for(cand[0], [r])[r]
                 for reach in reaches:
-                    res = self.pack(cand[0], [r], rotations=turns, grow=reach)
+                    res = self.pack(cand[0], [r], rotations=turns, grow=reach, side=pref)
                     if res["result"] == "packed":
                         break
+                if res["result"] != "packed":
+                    for reach in reaches:
+                        res = self.pack(cand[0], [r], rotations=turns, grow=reach)
+                        if res["result"] == "packed":
+                            break
                 rep.append((f"round {cand[0]}", [r], res["result"]))
                 progress |= res["result"] == "packed"
         # the tall rail-only passives, where the LEDs' cone is a cost: each on its own, tried round every
