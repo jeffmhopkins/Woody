@@ -317,7 +317,7 @@ class Map:
             return None
         return sum(self._cross(self._cur, self.lines[l]["net"]) for l in xs)
 
-    def route(self, net, ia, ib, pending=(), toll=None, tee=False, cross=None):
+    def route(self, net, ia, ib, pending=(), toll=None, tee=False, cross=None, guide=None, guide_w=1.5):
         """Plan one line from pad ia's centre to pad ib's (indices into self.pads). Returns
         the line id, or None. `pending`: [(a, b)] the straight airwires of nets still to be
         routed; each one this line's way crosses costs `toll` mm (default: a few pitches) -
@@ -329,6 +329,11 @@ class Map:
             return None
         self._cur = net
         self._cross = cross
+        # THE GUIDE: the way the negotiated plan found for this net (plan_layers), followed
+        # here as a cost - each mm of line `guide_w` mm dearer for each mm it strays beyond
+        # a band round the guide - so a layer laid net by net keeps the order and the sides
+        # the negotiation settled, instead of planning them again from scratch
+        self._guide, self._gw = guide, guide_w
         pa, pb = self.centre[ia], self.centre[ib]
         own = {ia, ib}
         P, Q = self.xy[pa], self.xy[pb]
@@ -350,6 +355,13 @@ class Map:
                     t += toll * (6.0 if min(math.dist(x, c), math.dist(x, d)) < 3.0 else 1.0)
             return t
 
+        def stray(a, b):
+            if self._guide is None:
+                return 0.0
+            mid = Point((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+            off = mid.distance(self._guide) - 0.5
+            return self._gw * math.dist(a, b) * off if off > 0 else 0.0
+
         def push(st, g, pt, frm):
             nonlocal cnt
             if g < best.get(st, math.inf) - 1e-12:
@@ -367,7 +379,7 @@ class Map:
                     xc = self._xcost(ti, ("v", pa), ("e", k, s))
                     if xc is not None:
                         pt = self._slot_point(k, s)
-                        push((k, s, self._other(k, ti)), math.dist(P, pt) + tolls(P, pt) + xc, pt, ("start", ti))
+                        push((k, s, self._other(k, ti)), math.dist(P, pt) + tolls(P, pt) + xc + stray(P, pt), pt, ("start", ti))
         while heap:
             f, _, g, st, pt = heapq.heappop(heap)
             if f >= goal_cost:
@@ -382,7 +394,7 @@ class Map:
                         goal, goal_cost = ("tee", st, lids[nb]), g
             xq = self._xcost(ti, ("e", k1, s1), ("v", pb)) if pb in self.tris[ti] else None
             if xq is not None:
-                c = g + math.dist(pt, Q) + tolls(pt, Q) + xq
+                c = g + math.dist(pt, Q) + tolls(pt, Q) + xq + stray(pt, Q)
                 if c < goal_cost:
                     goal, goal_cost = ("end", st, ti), c
             for k2 in self._tri_edges(ti):
@@ -392,7 +404,7 @@ class Map:
                     xc = self._xcost(ti, ("e", k1, s1), ("e", k2, s2))
                     if xc is not None:
                         p2 = self._slot_point(k2, s2)
-                        push((k2, s2, self._other(k2, ti)), g + math.dist(pt, p2) + tolls(pt, p2) + xc, p2, (st, ti))
+                        push((k2, s2, self._other(k2, ti)), g + math.dist(pt, p2) + tolls(pt, p2) + xc + stray(pt, p2), p2, (st, ti))
         if goal is None:
             return None
         steps = []
@@ -468,7 +480,13 @@ class Map:
                 # (one ending beside the other, or round a bend) are spaced by nothing else
                 # (the crowd board: IO7 0.1 mm into IO38 and IO36)
                 if og is not None:
-                    paths[lid] = self._inflate(lid, paths[lid], lines=og)
+                    pushed = self._inflate(lid, paths[lid], lines=og)
+                    # kept only if it bends nothing sharper than a right angle: pushed off
+                    # its neighbours where they leave adjacent pads, a fan's lines zig-zagged
+                    # (the fan board, 59 acid traps) - a pair still too close is the
+                    # planner's check's to send back (_verify)
+                    if _sharpest(pushed) >= 90.0 or _sharpest(pushed) >= _sharpest(paths[lid]):
+                        paths[lid] = pushed
             if not self._widen(paths):
                 break
         for lid, ln in self.lines.items():
@@ -626,6 +644,9 @@ class Map:
         need_l = self.width + self.clear + TOL / 2
         if lines is not None:
             lines = lines.intersection(_box(x0 - 3.0, y0 - 3.0, x1 + 3.0, y1 + 3.0))
+        # the line's own terminal pads: inside them it is its own copper, not near anyone's
+        ln = self.lines[lid]
+        own = unary_union([self.pads[self.vpad[v]].geom for v in (ln["pa"], ln["pb"]) if v is not None])
         pts = list(pts)
         for _ in range(rounds):
             worst, at = 0.0, None
@@ -633,7 +654,8 @@ class Map:
                 seg = LineString([a, b])
                 if seg.length < 1e-9:
                     continue
-                for g, nd in ((cop, need), (lines, need_l)):
+                inside_own = own is not None and own.contains(seg)
+                for g, nd in ((cop, need), (None if inside_own else lines, need_l)):
                     if g is None or g.is_empty:
                         continue
                     short = nd - seg.distance(g)
@@ -949,8 +971,7 @@ def route_layer(model, layer, pairs, **kw):
     runs = []
     for lid, net in lids.items():
         r = R2.Run(net, [(0, 0, layer)], model.rules.width(net), via=model.rules.via_size(net))
-        pts = [(round(float(x), 4), round(float(y), 4), layer) for x, y in paths[lid]]
-        r.pts = [p for i, p in enumerate(pts) if i == 0 or p != pts[i - 1]]
+        r.pts = _clean([(round(float(x), 4), round(float(y), 4), layer) for x, y in paths[lid]])
         runs.append(r)
     return runs, failed, mp
 
@@ -1124,7 +1145,7 @@ def plan_layers(model, nets, pads, layers, allowed, start, rounds=6, log=None, l
         log.append(f"topo plan round {rnd + 1}: crossings {total}, on one layer {same}; unplanned {sorted(set(unplanned))}")
         key = (same, len(set(unplanned)))
         if best is None or key < best[0]:
-            best = (key, dict(col))
+            best = (key, dict(col), mp, dict(lids))
         if key == (0, 0):
             break
         for n, d in xg.items():
@@ -1133,7 +1154,13 @@ def plan_layers(model, nets, pads, layers, allowed, start, rounds=6, log=None, l
                     k = frozenset((n, m_))
                     hist[k] = hist.get(k, 0.0) + 4.0 * c
         order = sorted(nets, key=lambda n: (-sum(c for m_, c in xg.get(n, {}).items() if col.get(m_) == col.get(n)), n))
-    return best[1]
+    # the guides: the best round's lines drawn (in the plan map, every layer's copper in the
+    # way) - one MultiLineString of each net's lines
+    _, col, mp, lids = best
+    paths = mp.geometry(passes=3, rounds=1)
+    from shapely.geometry import MultiLineString
+    guides = {n: MultiLineString([paths[l] for l in ls if len(paths[l]) > 1]) for n, ls in lids.items()}
+    return col, guides
 
 
 def route_board(model, nets, layers=None, rounds=4, log=None, later=()):
@@ -1159,14 +1186,14 @@ def route_board(model, nets, layers=None, rounds=4, log=None, later=()):
            for n in many}
     future = [(model.pads_of(n)[i].centre, model.pads_of(n)[j].centre) for n in later
               for i, j in _mst([(k, p.centre) for k, p in enumerate(model.pads_of(n))])]
-    forced = {}
+    forced, guides = {}, {}
     if len(layers) > 1 and len(many) > 1:
         start = {}
         for n in sorted(many, key=lambda n: (-len(adj[n]), n)):
             if allowed[n]:
                 start[n] = min(allowed[n], key=lambda L: (sum(1 for m_ in adj[n] if start.get(m_) == L) * 10
                                                           + sum(1 for p in pads[n] if L not in p.layers) * 3, L))
-        forced = plan_layers(model, many, pads, layers, allowed, start, log=log, later=later)
+        forced, guides = plan_layers(model, many, pads, layers, allowed, start, log=log, later=later)
     failed, runs = list(nets), []
     best = None
     for rnd in range(rounds):
@@ -1227,7 +1254,10 @@ def route_board(model, nets, layers=None, rounds=4, log=None, later=()):
             lids = {}
             for j, (n, x, y, t) in enumerate(pairs):
                 pending = [(u.centre, w.centre) for n2, u, w, _ in pairs[j + 1:] if n2 != n] + future
-                lid = mp.route(n, idx[id(x)], idx[id(y)], pending=pending, tee=t)
+                # a via stub (pad to its via) follows no guide: the plan had no via
+                g_ = guides.get(n) if not (x.ref == VIA_REF) != (y.ref == VIA_REF) else None
+                lid = mp.route(n, idx[id(x)], idx[id(y)], pending=pending, tee=t,
+                               guide=g_ if g_ is not None and not g_.is_empty else None)
                 if lid is None:
                     bad.add(n)
                     log.append(f"topo: {n} on {model.layer_names[L]}: no way from {x.ref}.{x.num} to {y.ref}.{y.num}"
@@ -1263,6 +1293,32 @@ def route_board(model, nets, layers=None, rounds=4, log=None, later=()):
     return runs, failed, {"assign": assign, "vias": nvias, "split": [], "log": log}
 
 
+def _sharpest(pts):
+    """The sharpest bend of a polyline, in degrees between its two legs (180 = straight)."""
+    worst = 180.0
+    for a, v, c in zip(pts, pts[1:], pts[2:]):
+        u = R2._unit(a[0] - v[0], a[1] - v[1])
+        w = R2._unit(c[0] - v[0], c[1] - v[1])
+        if u == (0.0, 0.0) or w == (0.0, 0.0):
+            continue
+        worst = min(worst, math.degrees(math.acos(max(-1.0, min(1.0, u[0] * w[0] + u[1] * w[1])))))
+    return worst
+
+
+def _clean(pts, eps=1e-3):
+    """A run's points with every one within `eps` of the one kept before it dropped (the last
+    kept always): two points 1e-4 apart wrote a zero-length track, whose direction is
+    noise - an acid trap at 0 deg (the crowd board's IO2)."""
+    out = []
+    for i, p in enumerate(pts):
+        if out and math.dist(p[:2], out[-1][:2]) < eps:
+            if i == len(pts) - 1:
+                out[-1] = p
+            continue
+        out.append(p)
+    return out
+
+
 def _build(model, pieces, got, placed, failed, layers):
     """{net: [Run]} - each planned line a Run, each via a Run of its two layers at a point."""
     R = model.rules
@@ -1275,8 +1331,7 @@ def _build(model, pieces, got, placed, failed, layers):
             if path is None:
                 continue
             r = R2.Run(n, [(0, 0, 0)], R.width(n), via=R.via_size(n))
-            pts = [(round(float(px), 4), round(float(py), 4), L) for px, py in path]
-            r.pts = [q for i, q in enumerate(pts) if i == 0 or q != pts[i - 1]]
+            r.pts = _clean([(round(float(px), 4), round(float(py), 4), L) for px, py in path])
             out.setdefault(n, []).append(r)
     for v in placed:
         if v.net in failed or v.net not in pieces:
