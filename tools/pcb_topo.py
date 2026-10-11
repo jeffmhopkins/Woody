@@ -110,7 +110,11 @@ class Map:
             if not on(e.layers):
                 continue
             if (e.kind == "keepout" and e.tracks) or e.kind == "hole" \
-                    or (e.kind in ("track", "via") and e.net not in self.nets):
+                    or (e.kind in ("track", "via") and e.net not in self.nets) \
+                    or (e.kind == "reserve" and not (set(e.family or ()) & self.nets)):
+                # a reservation (a pair's guard, a part's clearance, a pin's escape band) is in
+                # the way of every net it is not for - the grid router holds it so, and a plan
+                # through it is one the grid cannot lay (#47 T6)
                 areas.append(e.geom)
         self.areas = unary_union(areas) if areas else Polygon()
         self.pads = [p for p in model.pads if on(p.layers)]
@@ -224,6 +228,24 @@ class Map:
         g = max(pieces, key=lambda g: g.length)
         t0, t1 = seg.project(Point(g.coords[0])), seg.project(Point(g.coords[-1]))
         return (min(t0, t1), max(t0, t1), L)
+
+    def pitch_of(self, net):
+        """The centre-to-centre room a line of `net` takes: its class's track and clearance."""
+        R = self.m.rules
+        return R.width(net) + R.clear(net) + TOL
+
+    def room(self, k, net, own=()):
+        """Whether edge k takes one more line, of `net`, beside those on it: the pitches of
+        all of them, each net's own class (#47 T6 - a 0.6 mm rail is not a 0.2 mm signal),
+        within its free part (per layer of the plan map's `lanes`)."""
+        if k in self.inpad:
+            return self.inpad[k] in own and len(self.order[k]) < 8
+        t0, t1, _ = self.edges[k]
+        if t1 - t0 < SLACK:
+            return False
+        ps = [self.pitch_of(self.lines[l]["net"]) for l in self.order[k]] + [self.pitch_of(net)]
+        need = sum(ps) - max(ps)
+        return need <= (t1 - t0 - SLACK) * self.lanes + 1e-9
 
     def capacity(self, k, own=()):
         """How many lines edge k takes. An edge inside a pad takes its own net's line only."""
@@ -342,7 +364,7 @@ class Map:
         goal, goal_cost = None, math.inf
 
         def ok(k):
-            return k in self.edges and len(self.order[k]) < self.capacity(k, own)
+            return k in self.edges and self.room(k, net, own)
 
         def tolls(a, b):
             # crossing a pending airwire near one of its ends seals that pad's way out - six
@@ -1032,7 +1054,8 @@ def _reach(model, net, pad, layer, placed=()):
     for e in model.index.e.values():
         if layer not in set(e.layers) or e.net == net:
             continue
-        if (e.kind == "keepout" and e.tracks) or e.kind in ("hole", "track", "via", "pad"):
+        if (e.kind == "keepout" and e.tracks) or e.kind in ("hole", "track", "via", "pad") \
+                or (e.kind == "reserve" and net not in (e.family or ())):
             obs.append(e.geom)
     obs += [p.geom for p in model.pads if p.net != net and layer in set(p.layers)]
     obs += [q.geom for q in placed if q.net != net]
@@ -1076,7 +1099,7 @@ def _mst(points):
     return out
 
 
-def _colour(nets, xg, allowed, vias_on, start, passes=12):
+def _colour(nets, xg, allowed, vias_on, start, passes=12, dear=None):
     """Layers for nets from their crossing graph xg {net: {other: count}}: each net the layer
     with the fewest crossings with nets on the same layer (ten each), then the fewest vias
     (three each), passes until nothing changes - a min-conflict 2-colouring that keeps what
@@ -1089,7 +1112,9 @@ def _colour(nets, xg, allowed, vias_on, start, passes=12):
                 continue
             def cost(L):
                 same = sum(c for m_, c in xg.get(n, {}).items() if col.get(m_) == L)
-                return (same * 10 + vias_on(n, L) * 3, 0 if L == col.get(n) else 1, L)
+                # a class's layer_cost (the analog nets' B.Cu at 6x): five per unit over one
+                extra = 5.0 * (dear(n, L) - 1.0) if dear else 0.0
+                return (same * 10 + vias_on(n, L) * 3 + extra, 0 if L == col.get(n) else 1, L)
             best = min(allowed[n], key=cost)
             if best != col.get(n):
                 col[n], moved = best, True
@@ -1139,7 +1164,8 @@ def plan_layers(model, nets, pads, layers, allowed, start, rounds=6, log=None, l
                 for l2 in mp.crossed(l):
                     m_ = mp.lines[l2]["net"]
                     xg.setdefault(n, {})[m_] = xg.get(n, {}).get(m_, 0) + 1
-        col = _colour(nets, xg, allowed, vias_on, col)
+        col = _colour(nets, xg, allowed, vias_on, col,
+                      dear=lambda n, L: model.rules.layer_cost(n, model.layer_names[L]))
         same = sum(c for n, d in xg.items() for m_, c in d.items() if col.get(n) == col.get(m_)) // 2
         total = sum(c for d in xg.values() for c in d.values()) // 2
         log.append(f"topo plan round {rnd + 1}: crossings {total}, on one layer {same}; unplanned {sorted(set(unplanned))}")

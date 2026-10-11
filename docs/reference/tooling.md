@@ -993,6 +993,20 @@ prove nothing about themselves.
   bench. Its `crowd` cell is the main board's J-MCU crowd made small, the
   gate before the main board (#47).
 
+  **Per-net and per-part rules** (#47 T6). The planner follows the same
+  rules as the copper:
+  - each net's class gives its own track, clearance, `layers:` and
+    `layer_cost:`, and an edge's room is the sum of the pitches of the lines
+    on it;
+  - a reservation keeps out every net it is not for (a pair's `guard:`, a
+    pin's escape band, a part's clearance);
+  - `layout.yaml` **`part_clearance: {REF: mm}`** keeps every other net's
+    copper that much more than the clearance off the named part's pads, on
+    each layer they are on. The part's own nets are exempt.
+
+  Each rule has its own bench cell (widths, clear, layercost, guard, part),
+  and `mixed` is the crowd board with all of them at once.
+
   **A family by place**: `near: [x0, y0, x1, y1]` keeps only the family's nets
   with a pad in that box; the rest go to the families after it. Use it for a
   crowded fan-in, a connector's rows or a part's pins, routed as a group

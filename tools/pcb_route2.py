@@ -2959,6 +2959,18 @@ def model_from_board(board, lay, fence=None, via_off_silk=True):
             zone_ = unary_union(legs).buffer(rules.clearance + g - EPS)
             m.index.add(net=None, layers=[lids.index(Lid)], geom=zone_, kind="reserve", locked=True,
                         family={n for n in own if n})
+    # layout.yaml part_clearance: {REF: mm} - every other net's copper kept that much more
+    # than the clearance off the part's pads, on each layer a pad of it is on: a reservation
+    # its own nets are exempt from (#47 T6, the owner 2026-10-11: "each component can have
+    # keep out radius differences")
+    for ref, extra in sorted((lay.get("part_clearance") or {}).items()):
+        ps = [p for p in m.pads if p.ref == ref]
+        own = {p.net for p in ps if p.net}
+        for L in range(m.nl):
+            gs = [p.geom for p in ps if L in p.layers]
+            if gs:
+                m.index.add(net=None, layers=[L], geom=unary_union(gs).buffer(rules.clearance + float(extra) - EPS),
+                            kind="reserve", locked=True, family=own)
     if lay.get("planes") or lay.get("islands"):
         m.planes = Planes(lay, m, board, to_pcb=_frame(lay))
         zones = []

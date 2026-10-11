@@ -15,7 +15,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 CELLS = ["squeeze", "middle", "fan", "around", "cross", "grid", "scramble", "triad", "channel", "tree",
-         "stagemix", "stacked", "stage4", "island4", "crowd"]
+         "stagemix", "stacked", "stage4", "island4", "crowd",
+         "widths", "clear", "layercost", "guard", "part", "mixed"]
 
 
 def _setup():
@@ -392,6 +393,196 @@ def cell_crowd(out, plot):
     res["pushed"] = [p[0] for x in rep for p in x["pushed"]]
     res["topo_log"] = [l_ for l_ in r.log if l_.startswith("topo")]
     res["pass"] = res["pass"] and not res["pushed"]
+    return res
+
+
+# ------------------------------------------------------------------ T6: per-net and per-part rules
+
+def _copper(b, net=None, other=False):
+    """Shapely copper of `net` (or of every net but it, with other=True), per KiCad layer."""
+    import pcbnew
+    from shapely.geometry import LineString, Point
+    from shapely.ops import unary_union
+    mm = pcbnew.ToMM
+    out = {}
+    def want(n):
+        return (n != net) if other else (n == net)
+    for t in b.GetTracks():
+        if not want(t.GetNetname()) or not t.GetNetname():
+            continue
+        if isinstance(t, pcbnew.PCB_VIA):
+            g = Point(mm(t.GetPosition().x), mm(t.GetPosition().y)).buffer(mm(t.GetWidth(pcbnew.F_Cu)) / 2)
+            for L in (pcbnew.F_Cu, pcbnew.B_Cu):
+                out.setdefault(L, []).append(g)
+        else:
+            g = LineString([(mm(t.GetStart().x), mm(t.GetStart().y)), (mm(t.GetEnd().x), mm(t.GetEnd().y))]).buffer(mm(t.GetWidth()) / 2)
+            out.setdefault(t.GetLayer(), []).append(g)
+    for fp in b.GetFootprints():
+        for pad in fp.Pads():
+            if not want(pad.GetNetname()) or not pad.GetNetname():
+                continue
+            for L in (pcbnew.F_Cu, pcbnew.B_Cu):
+                if pad.IsOnLayer(L):
+                    from pcb_route2 import _poly_of
+                    out.setdefault(L, []).append(_poly_of(pad.GetEffectivePolygon(L)))
+    return {L: unary_union(gs) for L, gs in out.items()}
+
+
+def _gap(b, net, others=None):
+    """The least distance on any layer between `net`'s copper and every other net's (or the
+    copper of the nets in `others`)."""
+    mine = _copper(b, net)
+    if others is None:
+        theirs = _copper(b, net, other=True)
+    else:
+        from shapely.ops import unary_union
+        parts = [_copper(b, n) for n in others]
+        theirs = {}
+        for d in parts:
+            for L, g in d.items():
+                theirs[L] = unary_union([theirs[L], g]) if L in theirs else g
+    return min((mine[L].distance(theirs[L]) for L in mine if L in theirs), default=99.0)
+
+
+def Point_far():
+    from shapely.geometry import Point
+    return Point(1e6, 1e6)
+
+
+def _t6_board(w=40.0, h=24.0):
+    _, _, T, _, _ = _setup()
+    return T.new_board(w, h)
+
+
+def cell_widths(out, plot):
+    """A 0.6 mm rail and three 0.25 mm signals through one channel: each at its own class's
+    width, the rail's room counted at its own pitch (not the family's widest)."""
+    pcbnew, R2, T, _, B = _setup()
+    b = _t6_board(50.0, 20.0)
+    T.keepout(b, 15.0, 0.0, 35.0, 6.4, layers=("F", "B"))
+    T.keepout(b, 15.0, 10.4, 35.0, 20.0, layers=("F", "B"))
+    T.tp(b, "P1", "PWR", 4.0, 8.4, w=1.5, h=1.5)
+    T.tp(b, "P2", "PWR", 46.0, 8.4, w=1.5, h=1.5)
+    for k, y in enumerate((3.0, 14.0, 17.0)):
+        T.tp(b, f"S{k}a", f"S{k}", 4.0, y)
+        T.tp(b, f"S{k}b", f"S{k}", 46.0, y)
+    lay = dict(B.LAY, net_classes={"rail": {"nets": ["PWR"], "track": 0.6}})
+    res, m, r, rep = _stage("widths", b, lay, [{"name": "all", "nets": ["PWR", "S*"], "engine": "topo"}], out, plot)
+    ws = sorted({round(pcbnew.ToMM(t.GetWidth()), 2) for t in b.GetTracks() if t.GetNetname() == "PWR"
+                 and not isinstance(t, pcbnew.PCB_VIA)})
+    res["pwr_widths"] = ws
+    res["pass"] = res["pass"] and ws == [0.6]
+    return res
+
+
+def cell_clear(out, plot):
+    """A class with 0.5 mm clearance (a high-voltage node) among 0.2 mm signals: every other
+    net's copper kept 0.5 off it - measured on the board, KiCad's DRC knowing only 0.2."""
+    _, R2, T, _, B = _setup()
+    b = _t6_board()
+    T.tp(b, "H1", "HV", 4.0, 12.0)
+    T.tp(b, "H2", "HV", 36.0, 12.0)
+    for k, (a, c) in enumerate((((4.0, 6.0), (36.0, 18.0)), ((4.0, 18.0), (36.0, 6.0)), ((20.0, 2.0), (20.0, 22.0)))):
+        T.tp(b, f"S{k}a", f"S{k}", *a)
+        T.tp(b, f"S{k}b", f"S{k}", *c)
+    lay = dict(B.LAY, net_classes={"hv": {"nets": ["HV"], "clearance": 0.5}})
+    res, m, r, rep = _stage("clear", b, lay, [{"name": "all", "nets": ["HV", "S*"], "engine": "topo"}], out, plot)
+    g = round(_gap(b, "HV"), 3)
+    res["hv_gap"] = g
+    res["pass"] = res["pass"] and g >= 0.5 - 0.005
+    return res
+
+
+def cell_layercost(out, plot):
+    """Two nets that must cross; A's class makes B.Cu twenty times dearer: A stays on the
+    front, the other goes under it."""
+    pcbnew, R2, T, _, B = _setup()
+    b = _t6_board(30.0, 20.0)
+    T.tp(b, "A1", "A", 4.0, 4.0)
+    T.tp(b, "A2", "A", 26.0, 16.0)
+    T.tp(b, "C1", "C", 4.0, 16.0)
+    T.tp(b, "C2", "C", 26.0, 4.0)
+    lay = dict(B.LAY, net_classes={"front": {"nets": ["A"], "layer_cost": {"B.Cu": 20.0}}})
+    res, m, r, rep = _stage("layercost", b, lay, [{"name": "all", "nets": ["A", "C"], "engine": "topo"}], out, plot)
+    back = sum(pcbnew.ToMM(t.GetLength()) for t in b.GetTracks() if t.GetNetname() == "A"
+               and not isinstance(t, pcbnew.PCB_VIA) and t.GetLayer() == pcbnew.B_Cu)
+    res["a_on_back_mm"] = round(back, 2)
+    res["pass"] = res["pass"] and back < 0.01
+    return res
+
+
+def cell_guard(out, plot):
+    """A locked pair with a 0.55 mm guard (layout.yaml pairs:, as the breath sensor's): every
+    other net's copper kept the clearance plus the guard off its legs."""
+    pcbnew, R2, T, _, B = _setup()
+    b = _t6_board(40.0, 24.0)
+    for n, y in (("PA", 11.6), ("PB", 12.6)):
+        T.tp(b, f"{n}1", n, 4.0, y, w=0.6, h=0.6)
+        T.tp(b, f"{n}2", n, 36.0, y, w=0.6, h=0.6)
+    T.track(b, "PA", [(4.0, 11.6), (36.0, 11.6)], w=0.25, locked=True)
+    T.track(b, "PB", [(4.0, 12.6), (36.0, 12.6)], w=0.25, locked=True)
+    for k, (ya, yb) in enumerate(((4.0, 20.0), (20.0, 4.0))):
+        T.tp(b, f"S{k}a", f"S{k}", 10.0 + k * 20.0, ya)
+        T.tp(b, f"S{k}b", f"S{k}", 10.0 + k * 20.0, yb)
+    lay = dict(B.LAY, pairs=[{"nets": ["PA", "PB"], "layer": "F.Cu", "width": 0.25, "gap": 0.75, "guard": 0.55}])
+    res, m, r, rep = _stage("guard", b, lay, [{"name": "all", "nets": ["S*"], "engine": "topo"}], out, plot)
+    # to the pair's LEGS (its locked tracks), on its layer: the guard is round the legs
+    from shapely.geometry import LineString
+    from shapely.ops import unary_union
+    legs = unary_union([LineString([(pcbnew.ToMM(t.GetStart().x), pcbnew.ToMM(t.GetStart().y)),
+                                    (pcbnew.ToMM(t.GetEnd().x), pcbnew.ToMM(t.GetEnd().y))]).buffer(pcbnew.ToMM(t.GetWidth()) / 2)
+                        for t in b.GetTracks() if t.GetNetname() in ("PA", "PB") and t.GetLayer() == pcbnew.F_Cu
+                        and not isinstance(t, pcbnew.PCB_VIA)])
+    gF = min(_copper(b, n).get(pcbnew.F_Cu, Point_far()).distance(legs) for n in ("S0", "S1"))
+    res["gap_to_pair"] = round(gF, 3)
+    # the guard is on the pair's layer for tracks, everywhere for vias (pcb.py check_pair_guard)
+    res["pass"] = res["pass"] and gF >= 0.2 + 0.55 - 0.005
+    return res
+
+
+def cell_part(out, plot):
+    """part_clearance: {U1: 0.6} - every other net's copper 0.2 + 0.6 off U1's pads, while
+    U1's own nets reach them."""
+    pcbnew, R2, T, _, B = _setup()
+    b = _t6_board(40.0, 24.0)
+    T.soic(b, "U1", ["N1", "N2", "", "", "", "", "", ""], 20.0, 12.0)
+    T.tp(b, "T1", "N1", 4.0, 4.0)
+    T.tp(b, "T2", "N2", 4.0, 20.0)
+    for k, (xa, xb) in enumerate(((14.0, 26.0), (26.0, 14.0))):
+        T.tp(b, f"S{k}a", f"S{k}", xa, 2.0)
+        T.tp(b, f"S{k}b", f"S{k}", xb, 22.0)
+    lay = dict(B.LAY, part_clearance={"U1": 0.6})
+    res, m, r, rep = _stage("part", b, lay, [{"name": "all", "nets": ["N1", "N2", "S*"], "engine": "topo"}], out, plot)
+    u1 = {}
+    for fp in b.GetFootprints():
+        if fp.GetReference() == "U1":
+            from pcb_route2 import _poly_of
+            from shapely.ops import unary_union
+            u1 = unary_union([_poly_of(p.GetEffectivePolygon(pcbnew.F_Cu)) for p in fp.Pads()])
+    # on U1's own layer: its pads are SMD, and a track may pass under it on the back
+    d = min(_copper(b, n).get(pcbnew.F_Cu, Point_far()).distance(u1) for n in ("S0", "S1"))
+    res["gap_to_U1"] = round(d, 3)
+    res["pass"] = res["pass"] and d >= 0.2 + 0.6 - 0.005
+    return res
+
+
+def cell_mixed(out, plot):
+    """The crowd board with the rules at once: a 0.4 mm rail class on the LED line, a 0.4 mm
+    clearance class on the MIDI drive, B.Cu dear for the SPI pair, and 0.4 mm more round U1
+    (the protection array)."""
+    _, R2, _, _, B = _setup()
+    b = crowd_board()
+    nets = ["IO1", "IO2", "IO6", "IO7", "IO38", "IO35", "IO36", "IO34", "TXD", "IO37", "GATE", "LEDDI", "MTIP",
+            "MRING", "SHLD", "SCK", "SCLK", "MOSI"]
+    lay = dict(B.LAY, planes=[{"layer": "In1.Cu", "net": "GND"}, {"layer": "In2.Cu", "net": "V3"}], fanout=["GND", "V3"],
+               net_classes={"led": {"nets": ["LEDDI", "GATE"], "track": 0.4},
+                            "midi": {"nets": ["MTIP", "MRING"], "clearance": 0.4},
+                            "spi": {"nets": ["SCLK", "MOSI"], "layer_cost": {"B.Cu": 6.0}}},
+               part_clearance={"U1": 0.4})
+    res, m, r, rep = _stage("mixed", b, lay, [{"name": "crowd", "nets": nets, "engine": "topo"}], out, plot)
+    gm = min(_gap(b, n) for n in ("MTIP", "MRING"))
+    res["midi_gap"] = round(gm, 3)
+    res["pass"] = res["pass"] and gm >= 0.4 - 0.005
     return res
 
 
