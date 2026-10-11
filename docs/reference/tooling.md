@@ -980,6 +980,15 @@ prove nothing about themselves.
   move it; it is written, whole per net, by the family that writes that net.
   Locked copper stays an obstacle nothing moves.
 
+  **A family by place**: `near: [x0, y0, x1, y1]` keeps only the family's nets
+  with a pad in that box; the rest go to the families after it. Use it for a
+  crowded fan-in, a connector's rows or a part's pins, routed as a group
+  before the long lines that cross it (the owner, 2026-10-11). It is the
+  bench's `near` cell. The **rescue** stops as soon as its next order is one
+  it has already laid. Two nets that each need the only way through trade
+  places in every order, and the rescue says so instead of running every
+  order (the `rescuerepeat` cell).
+
   **When a reviewer is wanted**: each family's `review` lists what it could not
   settle by itself — a net still open, a net pushed in or rescued (copper moved
   for it: the board's own included), a detour the pull did not cure, an edit

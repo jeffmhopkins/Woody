@@ -117,7 +117,8 @@ CELLS = ["fanout", "pinch", "updown", "bus", "nonplanar", "locked", "offgrid", "
          "fold", "jogs", "equalise", "fillet", "ground", "enclosed", "stitch", "pourcut", "rescue", "minikey",
          "planes4", "island4", "optin4", "orphan4", "fragments", "lockedvia", "guard", "stages", "push",
          "stagepush", "edits", "resume", "resume4",
-         "partial", "partialpush", "connect", "moatpin", "walled", "escape", "rescuebox"]
+         "partial", "partialpush", "connect", "moatpin", "walled", "escape", "rescuebox",
+         "near", "rescuerepeat"]
 
 
 def _setup():
@@ -1164,6 +1165,47 @@ def cell_rescuebox(out, plot):
     part = sorted(p.name for p in r._open_part("N"))
     res = {"boxed": part}
     res["pass"] = part == ["A2.1", "A3.1"]
+    return res
+
+
+def cell_near(out, plot):
+    pcbnew, R2, T = _setup()
+    b = T.new_board(60.0, 20.0)
+    # P and Q have a pad in the box (x 0-20); R has none. A family by place takes P and Q
+    # and leaves R to the rest, though its glob names all three
+    for net, xa, xb, y in (("P", 5.0, 50.0, 5.0), ("Q", 10.0, 15.0, 10.0), ("R", 30.0, 55.0, 15.0)):
+        T.tp(b, net + "1", net, xa, y)
+        T.tp(b, net + "2", net, xb, y)
+    m = R2.model_from_board(b, LAY)
+    r = R2.Router(m)
+    rep = r.stage([{"name": "fanin", "nets": ["*"], "near": [0.0, 0.0, 20.0, 20.0]}], board=b)
+    res = finish("near", b, m, r, out, plot, written=True)
+    res.update(families=[(x["family"], x["nets"], x["failed"]) for x in rep])
+    res["pass"] = [(x["family"], x["nets"]) for x in rep] == [("fanin", 2), ("rest", 1)] \
+        and not any(x["failed"] for x in rep) and clean(res)
+    return res
+
+
+def cell_rescuerepeat(out, plot):
+    pcbnew, R2, T = _setup()
+    b = T.new_board(40.0, 20.0)
+    # the rescue cell's wall, but X front-only too: one gap, two nets that each need it. No
+    # order settles it, and the rescue must say so after two orders, not run all four
+    T.keepout(b, 19.5, 0.0, 20.5, 9.6, layers=("F",), vias=False)
+    T.keepout(b, 19.5, 10.4, 20.5, 20.0, layers=("F",), vias=False)
+    T.tp(b, "Y1", "Y", 5.0, 10.0)
+    T.tp(b, "Y2", "Y", 35.0, 10.0)
+    T.tp(b, "X1", "X", 13.0, 10.0)
+    T.tp(b, "X2", "X", 27.0, 10.0)
+    lay = dict(LAY, net_classes={"front": {"nets": ["X", "Y"], "layers": ["F.Cu"]}})
+    m = R2.model_from_board(b, lay)
+    r = R2.Router(m, pitch=0.1)
+    failed = r.route(first=["X"], rescue=False)
+    got = r.rescue("Y", radii=(3.0,))
+    tries = [l_ for l_ in r.log if l_.startswith("rescue Y") and "box, order " in l_]
+    said = any("no order settles it" in l_ for l_ in r.log)
+    res = {"failed_first": sorted(failed), "rescued": got, "orders_tried": len(tries), "said_so": said}
+    res["pass"] = sorted(failed) == ["Y"] and not got and len(tries) == 2 and said
     return res
 
 

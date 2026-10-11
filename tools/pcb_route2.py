@@ -1660,7 +1660,8 @@ class Router:
         reviewed and accepted (a reason, or its start), which is reported, not paused for
         the board to a reviewer. Unlocked copper the board came with (Router.adopt) is
         routed, liquid-passed and written with the family that owns its net.
-        `families`: [{name, nets: [names or fnmatch globs], first?, layers?}] - a net claimed
+        `families`: [{name, nets: [names or fnmatch globs], first?, layers?, near?}] - `near`
+        [x0, y0, x1, y1] keeps only the nets with a pad inside it; a net claimed
         by an earlier family is not routed again; whatever no family names goes last, as
         "rest". Returns [{family, nets, failed, pushed, rerouted, edits, liquid, runs,
         length_mm, vias, review, paused?}] for the families routed."""
@@ -1671,6 +1672,12 @@ class Router:
         for fam in families:
             pats = fam["nets"]
             mine = [n for n in allnets if n not in claimed and any(n == p_ or fnmatch.fnmatch(n, p_) for p_ in pats)]
+            if fam.get("near"):
+                # a family by place: only its nets with a pad in the box - the rest are left to
+                # the families after it. A crowded fan-in (a connector's rows, a part's pins)
+                # routed as one before the long lines through it (the owner, 2026-10-11)
+                nb = box(*fam["near"])
+                mine = [n for n in mine if any(nb.contains(Point(*p.centre)) for p in self.m.pads_of(n))]
             claimed |= set(mine)
             plan.append((fam, mine))
         rest = [n for n in allnets if n not in claimed]
@@ -2167,6 +2174,7 @@ class Router:
             # the failed net first, then the taken-up ones; whatever fails moves to the front
             # and the set is laid again - up to `orders` orders (the rip-up's negotiation)
             order = [net] + victims
+            seen = set()
             for attempt in range(orders):
                 laid, failed_now, whys = [], [], []
                 for n_ in order:
@@ -2190,7 +2198,15 @@ class Router:
                 promoted = [n_ for n_ in failed_now if n_ not in order[:len(failed_now)]]
                 if not promoted and attempt:
                     break                   # the same nets fail in front: another order changes nothing
+                seen.add(tuple(order))
                 order = failed_now + [n_ for n_ in order if n_ not in failed_now]
+                # nor when the next order is one already laid: two nets that each take the only
+                # way the other has trade places for ever (the main board, 2026-10-11: IO2 and
+                # IO36 at U1, a 1627 s rescue that ended where it began)
+                if tuple(order) in seen:
+                    self.log.append(f"rescue {net}, {r} mm box: {', '.join(order[:len(failed_now)])} first was "
+                                    f"laid already - no order settles it")
+                    break
             # put everything back
             for v in victims:
                 for r_ in saved[v]:
