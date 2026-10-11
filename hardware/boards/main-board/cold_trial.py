@@ -123,9 +123,15 @@ PLACE_FINDINGS = ("courtyards_overlap", "items_not_allowed", "shorting_items", "
 # The record of every review of this trial; replayed by every run from that family on.
 EDITS = {
     "mcu-fanin": [
-        # Review of family 5 (mcu-fanin), 2026-10-11 (3dfb6b8f): IO35 open at J1.10 - IO38 left
-        # J1.8 up and right to a via at (323.9, 129.3) and doubled back to R34, west, over pin
-        # 10's way out; IO36's front line closed the other side. IO38 out, then IO35 again
+        # Review of family 5 (mcu-fanin), 2026-10-11 (3dfb6b8f): IO35 open at J1.10. IO1 left
+        # J1.4, the westmost of these pins, up and EAST on F.Cu to R10 across pins 6, 8 and 10;
+        # IO7 and IO38, both bound west, were forced east between diagonals and doubled back,
+        # over pin 10's way out. A first try clearing IO38 alone failed: "still in the
+        # rectangle" - IO1 had closed the west. J-MCU is THT: IO1 can take the back at its pad
+        {"clear": "/IO1", "rect": [317.2, 128.8, 323.0, 136.8],
+         "why": "IO1 bound east across the row's westbound exits"},
+        {"clear": "/IO7", "rect": [318.4, 128.8, 325.0, 136.8],
+         "why": "IO7's detour east over J1.10; R35 is west"},
         {"clear": "/IO38", "rect": [319.7, 128.8, 325.0, 136.8],
          "why": "IO38's detour east over J1.10; R34 is west"},
         {"reroute": "/IO35", "why": "J1.10, free once IO38 is out"},
