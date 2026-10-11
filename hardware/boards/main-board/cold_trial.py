@@ -84,6 +84,12 @@ ACCEPT = {
               # 2026-10-11: 39.4 mm (the source's 28.5; this placement's buck corner has given
               # 35-54 in every run) - C207 and C43 at U13 and U5, the rail between them
               "still long: /power-entry-instrument/BUCK_A_OUT"],
+    "chain": [
+        # 2026-10-11 (ae771009): CHAIN_SCK's first route and its rescue (683 s) failed; the
+        # push routed it shoving nothing - a re-route from clean. Routed whole; the family is
+        # complete. Why the first attempt failed is the router's to answer, not this board's
+        "pushed in: /CHAIN_SCK",
+    ],
     "keys": [
         # 2026-10-11: 9.1 mm for a 4.5 mm airwire - U7's pin rows' room puts R33 that far off;
         # the source's run was 10.5 mm
