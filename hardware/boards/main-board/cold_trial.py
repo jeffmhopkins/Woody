@@ -545,7 +545,16 @@ def reseat_before(board, path, lay, out, k):
         return board
     after = pcbnew.LoadBoard(done[0].replace(".json", ".kicad_pcb"))
     ra = pcb_route2.Router(pcb_route2.model_from_board(after, lay))
-    opened = [(p.net, p.centre) for n in failed for p in ra._open_part(n)]
+    # a net the router found WALLED names its pads: those, not every pad still apart - IO36,
+    # with no copper at all, was every pad on the board and a way the board's whole length
+    # (it took up U1 and R2 and seated U1 20 mm east of the pins it guards)
+    byname = {p.name: p for p in ra.m.pads}
+    opened = []
+    for n in failed:
+        why = str(rec["failed"][n])
+        named = re.findall(r"([A-Z]+[0-9]+\.[0-9A-Z]+) \(", why) if why.startswith("walled:") else []
+        opened += [(n, byname[x].centre) for x in named if x in byname] or \
+            [(p.net, p.centre) for p in ra._open_part(n)]
     rails = [p_["net"] for p_ in lay["planes"]] + [i["net"] for i in lay["islands"]] + ["DEV_3V3"]
     fixed = fixed_parts(board, lay, comps_of())
     esc = escape_rows(pcb_pack.board_of(board, rails=rails), ESCAPE_DEPTH + 0.4, header_depth=HEADER_ESCAPE)
@@ -566,10 +575,11 @@ def reseat_before(board, path, lay, out, k):
         raise SystemExit(f"cold: reseat: KiCad placement findings {pe} - not kept")
     os.replace(path, path.replace(".kicad_pcb", ".kicad_pcb.before-reseat"))
     os.replace(tmp, path)
-    print(f"cold: reseat: wrote {path} (the old one .before-reseat)")
-    # the board in hand, which is what was saved: pcbnew.LoadBoard of it again, straight after
-    # the KiCad check, gave back a bare SwigPyObject (2026-10-11)
-    return board
+    print(f"cold: reseat: wrote {path} (the old one .before-reseat); routing on in a new process")
+    # in a new process: after the KiCad check in this one, pcbnew handed back bare
+    # SwigPyObjects - from LoadBoard, then from the board in hand (2026-10-11, twice)
+    sys.stdout.flush()
+    os.execv(sys.executable, [sys.executable] + [a for a in sys.argv if a != "--reseat"])
 
 
 def main():
