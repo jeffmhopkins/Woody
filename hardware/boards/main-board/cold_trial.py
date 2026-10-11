@@ -93,6 +93,11 @@ ACCEPT = {
         # it. A chain-family `clear` would open one (12 mm, 2 vias on this line); left for the
         # whole board's review, with the keys' total (446 mm / 44 vias vs the source's 366 / 22)
         "still long: /LT4/SWITCH_LEG",
+        # 2026-10-11 (a89e362b placement): 47.5 mm / 6 vias for a 24.5 mm airwire (the source's
+        # 38.8 / 2) - U8 pin 3 up to RT4's network crosses the chain's corridor between the
+        # switches and the registers, as every key line does; the family's via count is the
+        # whole board's review's, not this line's
+        "still long: /KEY_RT4",
     ],
 }
 
