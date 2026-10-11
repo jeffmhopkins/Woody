@@ -82,7 +82,9 @@ FAMILIES = [
     # walled in at U6.8 by this family's copper; /carrier/IO34 (U1.4 - J1.14) was left to "rest"
     {"name": "mcu-fanin", "nets": ["/IO*", "*TXD*", "*RXD*", "/led-strip-drive/*", "*MIDI*", "/carrier/IO34"],
      "near": [300.0, 108.0, 334.0, 138.0],
-     "first": ["/IO36", "/IO1"]},
+     # IO7 before IO1: with the MIDI and IO34 nets in, IO1 (then cleared to the back) walled
+     # IO7 in at both ends, J1.6 and R35.1
+     "first": ["/IO36", "/IO7", "/IO1"]},
     {"name": "mcu", "nets": ["/IO*", "/SPI*", "*TXD*", "*RXD*", "/led-strip-drive/*", "/LED_*"]},
     {"name": "midi", "nets": ["*MIDI*"]},
 ]
