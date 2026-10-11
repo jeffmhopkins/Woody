@@ -94,6 +94,10 @@ acid traps (check_tracks: KiCad's DRC has no such test), unless it says why not.
                signal routed in the second, both on the front: without escape bands the rail
                runs across pin 2's end and walls it in (the main board's U8, pins 14 and 6);
                with Router.reserve_escapes pin 2 keeps its band and routes - clean
+  rescuebox    a three-pad net whose two left pads are joined already and whose right pad is
+               open: the rescue boxes the right pad and the joined pad nearest it, not the
+               net's whole span - a board-long line's rescue took up twenty nets (the main
+               board's mcu family, 82 min)
   rescue       a net walled out by an earlier one: rescue takes that one up and both route
   minikey      a three-key board: packed (pcb_pack) then routed, liquid pass, DRC clean
 """
@@ -113,7 +117,7 @@ CELLS = ["fanout", "pinch", "updown", "bus", "nonplanar", "locked", "offgrid", "
          "fold", "jogs", "equalise", "fillet", "ground", "enclosed", "stitch", "pourcut", "rescue", "minikey",
          "planes4", "island4", "optin4", "orphan4", "fragments", "lockedvia", "guard", "stages", "push",
          "stagepush", "edits", "resume", "resume4",
-         "partial", "partialpush", "connect", "moatpin", "walled", "escape"]
+         "partial", "partialpush", "connect", "moatpin", "walled", "escape", "rescuebox"]
 
 
 def _setup():
@@ -1145,6 +1149,21 @@ def cell_escape(out, plot):
     res = dict(out_)
     res["pass"] = bool(out_["without"]["failed"]) and not out_["with"]["failed"] and out_["with"]["drc_errors"] == 0 \
         and out_["with"]["acid_traps"] == 0
+    return res
+
+
+def cell_rescuebox(out, plot):
+    pcbnew, R2, T = _setup()
+    b = T.new_board(80.0, 20.0)
+    T.tp(b, "A1", "N", 5.0, 10.0)
+    T.tp(b, "A2", "N", 20.0, 10.0)
+    T.tp(b, "A3", "N", 75.0, 10.0)
+    T.track(b, "N", [(5.0, 10.0), (20.0, 10.0)])
+    m = R2.model_from_board(b, LAY)
+    r = R2.Router(m)
+    part = sorted(p.name for p in r._open_part("N"))
+    res = {"boxed": part}
+    res["pass"] = part == ["A2.1", "A3.1"]
     return res
 
 

@@ -2079,13 +2079,44 @@ class Router:
         return missed
 
     # ---- rescue
+    def _open_part(self, net):
+        """The pads a rescue need box: the net's pads grouped by the copper already joining
+        them, every group but the largest, and the largest's pad nearest to them - where the
+        net is still apart. All the net's pads boxed a board-long line's whole length: one
+        rescue of IO35 on the main board took up twenty nets, and the family took 82 min."""
+        pads = self.m.pads_of(net)
+        own = [e for e in self.m.index.of_net(net) if e.kind in ("track", "via")]
+        items = [("pad", p, set(p.layers), p.geom) for p in pads] + [("cu", e, set(e.layers), e.geom) for e in own]
+        parent = list(range(len(items)))
+
+        def find(i):
+            while parent[i] != i:
+                parent[i] = parent[parent[i]]
+                i = parent[i]
+            return i
+        for i in range(len(items)):
+            for j in range(i + 1, len(items)):
+                if items[i][2] & items[j][2] and items[i][3].intersects(items[j][3]):
+                    parent[find(i)] = find(j)
+        groups = {}
+        for i, it in enumerate(items):
+            if it[0] == "pad":
+                groups.setdefault(find(i), []).append(it[1])
+        gs = sorted(groups.values(), key=lambda g: (-len(g), min(p.name for p in g)))
+        if len(gs) < 2:
+            return pads
+        rest = [p for g in gs[1:] for p in g]
+        near = min(gs[0], key=lambda p: min(math.dist(p.centre, q.centre) for q in rest))
+        return rest + [near]
+
     def rescue(self, net, radii=(1.5, 3.0, 5.0), orders=4):
-        """Take up the unlocked copper of other nets in a box round the failed net's pads and
+        """Take up the unlocked copper of other nets in a box round where the failed net is
+        still apart (Router._open_part) and
         lay the set again: the failed net first, then the taken-up ones, and whatever fails
         moves to the front for the next order, up to `orders` orders. Kept only if every net
         of the set routes; else all put back. Never locked copper, never a net with copper
         outside the fence, never the ground."""
-        ps = self.m.pads_of(net)
+        ps = self._open_part(net)
         xs = [p.centre[0] for p in ps]
         ys = [p.centre[1] for p in ps]
         for r in radii:
