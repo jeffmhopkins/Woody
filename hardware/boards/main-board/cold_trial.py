@@ -69,27 +69,13 @@ FAMILIES = [
     {"name": "chain", "nets": ["/CHAIN_*", "/HOP_*"], "first": ["/CHAIN_SCK", "/CHAIN_SHLD", "/CHAIN_SER_LH"]},
     # each key's T into its register
     {"name": "keys", "nets": ["/KEY_*", "*/SWITCH_LEG"]},
-    # the Matrix's lines from J-MCU: SPI, the LED data, the service UART
-    # J-MCU's top row and U1 by place, before the rest of the mcu lines (the owner,
-    # 2026-10-11: "breaking up families geographically"). Routed as one family the crowd
-    # walled in one of its own each time: IO2 looped round U1 pin 3 (IO36), and with IO36
-    # leading, J1.4 (IO1) - each a pad-to-pad hop of a few mm that a long line crossed first
-    # The box reaches north over U6 too (review of family 6, 2026-10-11): at 124 it took the
-    # long lines with a pad at J-MCU (IO2, IO39, IO35) ahead of U6's own hops, which were
-    # then walled in on both layers - GATE_A_OUT, IO6 and LED_D1 open. U6 shares IO1 and
-    # IO2 with J-MCU: one crowd, not two
-    # and EVERY net at its parts, not the mcu's only: family 7 (midi) found MIDI_RING_DRV
-    # walled in at U6.8 by this family's copper; /carrier/IO34 (U1.4 - J1.14) was left to "rest"
-    {"name": "mcu-fanin", "nets": ["/IO*", "*TXD*", "*RXD*", "/led-strip-drive/*", "*MIDI*", "/carrier/IO34"],
-     "near": [300.0, 108.0, 334.0, 138.0],
-     # IO1 first: J1.4 is the row's westmost signal pin and both its other pads (U6.2, R10)
-     # are north-west - laid later, the lines that wrap the connector's west end (IO37 on
-     # the front, IO2 on the back) and IO36's diagonal over the row closed its corner
-     # (2026-10-11, the header-band placement, reseated). IO36 and IO7 led before, on the
-     # old placement, against walls that placement made
-     "first": ["/IO1", "/IO7"]},
-    {"name": "mcu", "nets": ["/IO*", "/SPI*", "*TXD*", "*RXD*", "/led-strip-drive/*", "/LED_*"]},
-    {"name": "midi", "nets": ["*MIDI*"]},
+    # the Matrix's lines from J-MCU (SPI, the LED data, the service UART), U6's LED and MIDI
+    # drive and U1's protected lines: ONE family, planned by the topological planner and laid
+    # by this router along the plan (engine: topo; ADR 0029 as amended, #47 T5). By the grid
+    # router alone this crowd walled in a different one of its own pins on every run - split
+    # by place (mcu-fanin), reordered, hand-edited, reseated - 2026-10-11, 59d0c147..3f5c2d42
+    {"name": "mcu", "nets": ["/IO*", "/SPI*", "*TXD*", "*RXD*", "/led-strip-drive/*", "/LED_*", "*MIDI*",
+                             "/carrier/IO34"], "engine": "topo"},
 ]
 
 
