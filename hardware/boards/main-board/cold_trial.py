@@ -60,15 +60,16 @@ FAMILIES = [
     # power and rails: the layer-limited power classes cannot hop a signal via, so they go
     # before anything can wall them in (layout.yaml route_first: says the same)
     {"name": "power", "nets": ["INST_5V_A", "BUCK_IN", "/power-entry-instrument/BUCK_A_OUT", "UMBILICAL_POS12", "DEV_3V3",
-                               "/V3V3_CHAIN_*"]},
+                               "/V3V3_CHAIN_*"], "engine": "topo"},
     # the analog block's own nets, over their island (the pair is already laid and locked)
     {"name": "analog", "nets": ["/SENSOR_RAW", "/breath-adc/*", "/breath-excitation-reference/*", "REF_VIN", "VS",
-                                "BREATH_SENSE", "AGND_SENSE", "*BREATH*"]},
+                                "BREATH_SENSE", "AGND_SENSE", "*BREATH*"], "engine": "topo"},
     # the key chain: SCK, SH/LD and the hops run the board's length together. The clock leads
     # and SH/LD beside it - laid last (shortest first), SCK found the corridor taken (run 3)
-    {"name": "chain", "nets": ["/CHAIN_*", "/HOP_*"], "first": ["/CHAIN_SCK", "/CHAIN_SHLD", "/CHAIN_SER_LH"]},
+    {"name": "chain", "nets": ["/CHAIN_*", "/HOP_*"], "first": ["/CHAIN_SCK", "/CHAIN_SHLD", "/CHAIN_SER_LH"],
+     "engine": "topo"},
     # each key's T into its register
-    {"name": "keys", "nets": ["/KEY_*", "*/SWITCH_LEG"]},
+    {"name": "keys", "nets": ["/KEY_*", "*/SWITCH_LEG"], "engine": "topo"},
     # the Matrix's lines from J-MCU (SPI, the LED data, the service UART), U6's LED and MIDI
     # drive and U1's protected lines: ONE family, planned by the topological planner and laid
     # by this router along the plan (engine: topo; ADR 0029 as amended, #47 T5). By the grid
@@ -76,6 +77,8 @@ FAMILIES = [
     # by place (mcu-fanin), reordered, hand-edited, reseated - 2026-10-11, 59d0c147..3f5c2d42
     {"name": "mcu", "nets": ["/IO*", "/SPI*", "*TXD*", "*RXD*", "/led-strip-drive/*", "/LED_*", "*MIDI*",
                              "/carrier/IO34"], "engine": "topo"},
+    # whatever no family above names, last, on the same engine (2026-10-11 restart, #47 T5)
+    {"name": "rest", "nets": ["*"], "engine": "topo"},
 ]
 
 
@@ -131,15 +134,8 @@ EDITS = {
     # mcu-fanin's edits (2026-10-11: clear IO1, IO7, IO38 off J-MCU's top row, reroute IO35)
     # were moves on the 3dfb6b8f placement's copper; withdrawn with the header band, which
     # moved the parts they worked round. In git, 22edb841..907418bb
-    "chain": [
-        # Review of family 5 (mcu), 2026-10-11 (3dfb6b8f): IO1 and IO36 open - J-MCU pins 4 and
-        # 12, and U1 pin 3, walled in above J-MCU's top row (y 131-138). The mcu family's own
-        # lines there its rescue could move; what it could not was CHAIN_QH_RT, run across the
-        # whole area on B.Cu (and round U1 on F.Cu), so nothing could drop to the back to pass
-        # under them. Kept out of that area but where it reaches its own pin.
-        {"clear": "/CHAIN_QH_RT", "rect": [308.0, 128.0, 326.0, 138.2],
-         "why": "leave the back under J-MCU's top row to the Matrix's lines"},
-    ],
+    # chain's clear of CHAIN_QH_RT off J-MCU's front (e8fd6b44) was a move against the grid
+    # router's mcu copper; withdrawn with the restart on engine: topo (#47 T5)
     "power": [
         # Review of family 1, 2026-10-10: U13 (U-USBOR) pin 3 left open, "budget". INST_5V_A
         # leaves pin 4 over the part's top and down its right side, and pin 2's locked plane
@@ -640,7 +636,7 @@ def main():
         # beside its checkpoint: what --reseat reads back (the family's open nets)
         with open(checkpoint(start + i, x["family"]).replace(".kicad_pcb", ".json"), "w") as f:
             json.dump(rec, f, default=str, indent=1)
-    last = len(FAMILIES) + 1                   # the families and "rest"
+    last = len(FAMILIES)                       # "rest" is a family of its own now (it takes "*")
     done = rep and not rep[-1].get("paused") and (stop is None or stop >= last)
     if not done:
         print(f"cold: stopped after family {start + len(rep) - 1} - review its plot, then --start {start + len(rep)}")
