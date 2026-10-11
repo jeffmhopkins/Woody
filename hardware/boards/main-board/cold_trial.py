@@ -116,6 +116,15 @@ PLACE_FINDINGS = ("courtyards_overlap", "items_not_allowed", "shorting_items", "
 # THE REVIEWER'S MOVES, by family, each with why (Router.edit: reroute / through / clear).
 # The record of every review of this trial; replayed by every run from that family on.
 EDITS = {
+    "chain": [
+        # Review of family 5 (mcu), 2026-10-11 (3dfb6b8f): IO1 and IO36 open - J-MCU pins 4 and
+        # 12, and U1 pin 3, walled in above J-MCU's top row (y 131-138). The mcu family's own
+        # lines there its rescue could move; what it could not was CHAIN_QH_RT, run across the
+        # whole area on B.Cu (and round U1 on F.Cu), so nothing could drop to the back to pass
+        # under them. Kept out of that area but where it reaches its own pin.
+        {"clear": "/CHAIN_QH_RT", "rect": [308.0, 128.0, 326.0, 138.2],
+         "why": "leave the back under J-MCU's top row to the Matrix's lines"},
+    ],
     "power": [
         # Review of family 1, 2026-10-10: U13 (U-USBOR) pin 3 left open, "budget". INST_5V_A
         # leaves pin 4 over the part's top and down its right side, and pin 2's locked plane
