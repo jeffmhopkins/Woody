@@ -1012,14 +1012,16 @@ class Packer:
         return n
 
 
-def reseat(kboard, open_pads, rails=(), body=(), escape=None, reach=1.5, log=None):
+def reseat(kboard, open_pads, rails=(), body=(), escape=None, reach=1.5, log=None, max_pads=8):
     """A placement rescue: the parts in the way of a family's open pads, seated again with the
     copper already routed as an obstacle (the owner, 2026-10-11: "a partial replacement
     after each family is routed"). `open_pads`: [(net, (x, y))] - each pad a family could not
     join, as the board stood BEFORE that family (its checkpoint k-1). THE WAY: from each open
     pad to the nearest other pad of its net, `reach` mm either side. A part may move if its
-    courtyard is on the way, nothing fixes it (locked, body CAD, `body`), it has at most three
-    pads, and no copper of a signal net touches them - only the plane vias of the fanout,
+    courtyard is on the way, nothing fixes it (locked, body CAD, `body`), it has at most
+    `max_pads` pads (a small IC too: U1, the TVS array J-MCU's lines cross to reach, five
+    pads, was the next wall once the resistors had moved), and no copper of a signal net
+    touches them - only the plane vias of the fanout,
     which go with it (the router lays them again where it now stands). It is packed round the
     placed part it shares the most signal nets with, under every placement rule, the way
     kept out. Returns {"moved": {ref: (x, y)}, "kept": {ref: why}, "removed": n items}.
@@ -1061,7 +1063,7 @@ def reseat(kboard, open_pads, rails=(), body=(), escape=None, reach=1.5, log=Non
         if part.locked or r in body:
             kept[r] = "fixed"
             continue
-        if len(part.pads) > 3:
+        if len(part.pads) > max_pads:
             kept[r] = f"{len(part.pads)} pads"
             continue
         cu = touching(fp)
