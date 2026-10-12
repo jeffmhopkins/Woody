@@ -482,8 +482,10 @@ class Model:
         named = self.rules.cls(net).get("layers")
         return not named or len(named) > 1
 
+    hidden = frozenset()            # pad names a family leaves to a later one (skip_pads)
+
     def pads_of(self, net):
-        return [p for p in self.pads if p.net == net]
+        return [p for p in self.pads if p.net == net and p.name not in self.hidden]
 
     def nets(self):
         return sorted({p.net for p in self.pads if p.net and not p.net.startswith("unconnected")})
@@ -1728,6 +1730,13 @@ class Router:
             if k < start or (stop is not None and k > stop):
                 continue
             before = set(id(r_) for r_ in self.runs)
+            # `skip_pads`: pads this family leaves alone, for a later family that names their net
+            # to join them - a rail stops short of a header whose escape strip its pins share
+            # with signal pins, and the header's own family plans that strip whole (J-MCU's back
+            # row, #47 2026-10-12: the power family ran the 5 V and 3.3 V lines through the
+            # middle of the strip first, and IO2 at J1.5 had no way out)
+            self.m.hidden = frozenset(p.name for p in self.m.pads
+                                      if any(fnmatch.fnmatch(p.name, g) for g in fam.get("skip_pads") or []))
             saved_cls = {}
             if fam.get("layers"):           # a family's layers narrow its nets' own
                 for n in nets:
@@ -1904,7 +1913,9 @@ class Router:
             if pause and rec["review"]:
                 rec["paused"] = True
                 self.log.append(f"stage {k} {name}: paused for review - {'; '.join(rec['review'])}")
+                self.m.hidden = frozenset()
                 return report
+        self.m.hidden = frozenset()
         if ground and (stop is None or stop >= len(plan)):
             before = set(id(r_) for r_ in self.runs)
             self.route_ground(ground)

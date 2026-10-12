@@ -65,7 +65,11 @@ FAMILIES = [
     # power and rails: the layer-limited power classes cannot hop a signal via, so they go
     # before anything can wall them in (layout.yaml route_first: says the same)
     {"name": "power", "nets": ["INST_5V_A", "BUCK_IN", "/power-entry-instrument/BUCK_A_OUT", "UMBILICAL_POS12", "DEV_3V3",
-                               "/V3V3_CHAIN_*"], "engine": "topo"},
+                               "/V3V3_CHAIN_*"], "engine": "topo",
+     # J-MCU's power pins are left to its own family: its back row leaves only through the
+     # strip between it and the board's edge, which its signal pins share (the owner's choice,
+     # 2026-10-12 - laid here, INST_5V_A and DEV_3V3 split the strip and walled IO2 at J1.5)
+     "skip_pads": ["J1.*"]},
     # the analog block's own nets, over their island (the pair is already laid and locked)
     {"name": "analog", "nets": ["/SENSOR_RAW", "/breath-adc/*", "/breath-excitation-reference/*", "REF_VIN", "VS",
                                 "BREATH_SENSE", "AGND_SENSE", "*BREATH*"], "engine": "topo"},
@@ -82,7 +86,9 @@ FAMILIES = [
     # router alone this crowd walled in a different one of its own pins on every run - split
     # by place (mcu-fanin), reordered, hand-edited, reseated - 2026-10-11, 59d0c147..3f5c2d42
     {"name": "mcu", "nets": ["/IO*", "/SPI*", "*TXD*", "*RXD*", "/led-strip-drive/*", "/LED_*", "*MIDI*",
-                             "/carrier/IO34"], "engine": "topo"},
+                             "/carrier/IO34",
+                             # J1's 5 V and 3.3 V pins, joined here to the rails family 1 laid
+                             "INST_5V_A", "DEV_3V3"], "engine": "topo"},
     {"name": "chain", "nets": ["/CHAIN_*", "/HOP_*"], "first": ["/CHAIN_SCK", "/CHAIN_SHLD", "/CHAIN_SER_LH"],
      "engine": "topo"},
     # each key's T into its register
