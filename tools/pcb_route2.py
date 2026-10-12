@@ -2364,6 +2364,48 @@ class Router:
         self.runs[self.runs.index(old)] = new
         return new
 
+    def _square_tees(self, net):
+        """Each run of `net` whose end meets the net's other copper under 90 degrees has its
+        last point moved to the foot of the point before it on the track it meets, so it
+        meets that track square - where the moved run still fits (replace). Returns how
+        many ends were squared."""
+        n = 0
+        for run in list(self.runs_of(net)):
+            for at in (0, -1):
+                if self._acute_ends(run) == 0 or len(run.pts) < 2:
+                    break
+                j, prev = run.pts[at], run.pts[1 if at == 0 else -2]
+                if j[2] != prev[2]:
+                    continue                    # a via at the end
+                for r2 in self.runs_of(net):
+                    if r2 is run:
+                        continue
+                    hit = None
+                    for (L, a, b, _) in r2.segments():
+                        if L != j[2] or LineString([a, b]).distance(Point(j[:2])) > 1e-3:
+                            continue
+                        seg = LineString([a, b])
+                        t = seg.project(Point(prev[:2]))
+                        if 1e-3 < t < seg.length - 1e-3:
+                            f = seg.interpolate(t)
+                            if math.dist((f.x, f.y), prev[:2]) > 1e-3:
+                                hit = (f.x, f.y)
+                                break
+                    if hit is None:
+                        continue
+                    was = list(run.pts)
+                    pts = list(was)
+                    pts[at] = (hit[0], hit[1], j[2])
+                    before = self._acute_ends(run)
+                    new = self.replace(run, pts, keep_crossings=True)
+                    if new is None:
+                        continue
+                    if self._acute_ends(new) < before:
+                        run, n = new, n + 1
+                        break
+                    run = self.replace(new, was, keep_crossings=False) or new   # no better: put it back
+        return n
+
     def _acute_ends(self, run, skip=None):
         """How many of the run's two ends meet a same-net track of its layer under 90
         degrees: its end segment, from the junction, against each way the other track
@@ -2424,6 +2466,22 @@ class Router:
         bad = trapped()
         done = []
         for n_ in sorted(bad):
+            # first the cheap repair: a branch that meets its trunk at 45 deg by a last short
+            # leg is ended square onto the trunk instead (the main board's DEV_3V3, 2026-10-12:
+            # every re-route laid the same 0.28 mm diagonal stub onto the same trunk)
+            for t in list(board.GetTracks()):
+                if t.GetNetname() == n_ and t.m_Uuid.AsString() not in had:
+                    board.Delete(t)
+            for r_ in self.runs_of(n_):
+                self._unlock(r_)
+            squared = self._square_tees(n_)
+            for r_ in self.runs_of(n_):
+                self._lock(r_)
+                r_.items = []
+            write(board, self.m, self.runs_of(n_))
+            if squared and n_ not in trapped():
+                done.append((n_, "squared", squared))
+                continue
             # the router is deterministic: laid again the same way, a net meets itself the same
             # way (the floatcrowd board's IO35, 2026-10-12). A net still trapped is laid again
             # pulled into a corridor round its pads, a narrow one and then a wide one

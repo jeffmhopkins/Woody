@@ -684,10 +684,13 @@ def acute_closed(board, net, layer, p, a, c, width):
     nb = math.hypot(ux, uy)
     cos = max(-1.0, min(1.0, (a[0] * c[0] + a[1] * c[1]) / (na * nc)))
     half = math.acos(cos) / 2
-    if not nb or half <= 0:
+    if not nb:
         return False
     if math.sin(half) < 1e-3:
-        return True             # the two run out along each other: no wedge, an overlap merge_tracks takes
+        # the two run out along each other: no wedge, an overlap merge_tracks takes - exactly
+        # along each other too (half 0), which an earlier `half <= 0` test reported as a trap
+        # (the main board's BUCK_IN: two legs out of U5.1's centre, one over the other)
+        return True
     d = (width / 2) / math.sin(half)
     m = pcbnew.VECTOR2I(int(p[0] + ux / nb * d), int(p[1] + uy / nb * d))
     for t in board.GetTracks():
