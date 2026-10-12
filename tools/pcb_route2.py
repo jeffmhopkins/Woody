@@ -2424,18 +2424,23 @@ class Router:
         bad = trapped()
         done = []
         for n_ in sorted(bad):
-            for t in list(board.GetTracks()):
-                if t.GetNetname() == n_ and t.m_Uuid.AsString() not in had:
-                    board.Delete(t)
-            runs = self.runs_of(n_)
-            for r_ in runs:
-                self._unlock(r_)
-            rep_ = self.reroute(n_)
-            for r_ in self.runs_of(n_):
-                self._lock(r_)
-                r_.items = []
-            write(board, self.m, self.runs_of(n_))
-            done.append((n_, rep_["mode"]))
+            # the router is deterministic: laid again the same way, a net meets itself the same
+            # way (the floatcrowd board's IO35, 2026-10-12). A net still trapped is laid again
+            # pulled into a corridor round its pads, a narrow one and then a wide one
+            for pull in (None, 1.5, 4.0):
+                for t in list(board.GetTracks()):
+                    if t.GetNetname() == n_ and t.m_Uuid.AsString() not in had:
+                        board.Delete(t)
+                for r_ in self.runs_of(n_):
+                    self._unlock(r_)
+                rep_ = self.reroute(n_, pull=pull)
+                for r_ in self.runs_of(n_):
+                    self._lock(r_)
+                    r_.items = []
+                write(board, self.m, self.runs_of(n_))
+                if n_ not in trapped():
+                    break
+            done.append((n_, rep_["mode"], pull))
         if done:
             left = trapped()
             self.log.append(f"stage: acid traps re-routed {done}; still trapped {sorted(left)}")
