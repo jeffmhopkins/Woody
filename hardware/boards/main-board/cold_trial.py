@@ -74,6 +74,11 @@ FAMILIES = [
     {"name": "chain", "nets": ["/CHAIN_*", "/HOP_*"], "first": ["/CHAIN_SCK", "/CHAIN_SHLD", "/CHAIN_SER_LH"],
      "engine": "topo"},
     # each key's T into its register
+    # the SPI bus, J-MCU to the MCP3202 at the far end (IO35 SCK, IO36 MOSI, IO37 MISO): 220 mm
+    # between two fixed parts. Laid last in "mcu", it had to cross the whole finished board, and
+    # Freerouting left the same three open on this placement (#47, 2026-10-12). Laid here, before
+    # the keys, while the board is open
+    {"name": "spi", "nets": ["/IO35", "/IO36", "/IO37"], "engine": "topo"},
     {"name": "keys", "nets": ["/KEY_*", "*/SWITCH_LEG"], "engine": "topo"},
     # the Matrix's lines from J-MCU (SPI, the LED data, the service UART), U6's LED and MIDI
     # drive and U1's protected lines: ONE family, planned by the topological planner and laid
