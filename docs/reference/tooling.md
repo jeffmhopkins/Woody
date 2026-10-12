@@ -797,6 +797,17 @@ families:
   `--labels`, `--layout` for a trial's own `layout.yaml`) draws the family in
   colour over everything else in grey, with each net's length and vias. It
   only reads.
+- **Scoring it:** `python3 tools/pcb_score.py <board.kicad_pcb> [--nets
+  GLOB,...] [--md out.md] [--csv out.csv]` gives the plot's findings as
+  numbers. For each routed net it reports:
+  - its pads, and its airwire (the shortest tree through its pads);
+  - the routed length, its ratio to the airwire, and its vias;
+  - connections still open, dangling track ends, and acid traps.
+  It flags any net that is open, dangles, has an acid trap, or routes more
+  than 1.5 times its airwire. It leaves out the plane nets. Two boards routed
+  from one placement score on the same terms, so a family, an engine or
+  another router (the Freerouting benchmark, #47) can be compared. It only
+  reads.
 
 ### Learned the hard way
 
@@ -1383,6 +1394,7 @@ re-described here.
 | `sch.py` | A hand-written netlist built into a sheet | §3 |
 | `pcb.py`, `pcb_route.py`, `pcb_main.py`, `pcb_freeroute.py` | Board layout, routing, the main board's kind, the Freerouting round trip | §4 |
 | `pcb_plot.py` | A board's routing in 2D, nets by name, glob or family (read-only) | §4, *The router: families* |
+| `pcb_score.py` | A board's per-net scorecard: length against airwire, vias, open, dangling, acid traps (read-only) | §4, *The router: families* |
 | `pcb_families_test.py` | The families stage on a constructed boxing-in board; `--identity <board>`: no `families:` routes byte for byte as before | its docstring; §4, *The router: families* |
 | `pcb_route2.py` | The centreline router and its tools (fields, reroute and shove, via slide, liquid pass, staged families with push, edits and resume), into a copy only | §4, *The centreline router and the cluster packer* |
 | `pcb_pack.py` | The cluster packer and the place report, into a copy only | §4, *The centreline router and the cluster packer* |
