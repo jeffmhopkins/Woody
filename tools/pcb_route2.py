@@ -277,6 +277,20 @@ def local_values(fields, rules, net, x, y):
 
 # ------------------------------------------------------------------ runs
 
+def _acute_turn(a, j, c):
+    """Whether the bend a - j - c turns back under 90 degrees (its two legs from j less
+    than a right angle apart): an acid trap inside one run."""
+    u, v = (a[0] - j[0], a[1] - j[1]), (c[0] - j[0], c[1] - j[1])
+    nu, nv = math.hypot(*u), math.hypot(*v)
+    return bool(nu and nv) and (u[0] * v[0] + u[1] * v[1]) / (nu * nv) > 1e-6
+
+
+def _acute_bends(run):
+    p = run.pts
+    return sum(1 for i in range(1, len(p) - 1) if p[i - 1][2] == p[i][2] == p[i + 1][2]
+               and _acute_turn(p[i - 1], p[i], p[i + 1]))
+
+
 class Run:
     """A route as a centreline. pts: [(x, y, layer)]; two consecutive points at one x, y
     on two layers are a via. widths: one per segment (None: the net's width)."""
@@ -2404,6 +2418,34 @@ class Router:
                         run, n = new, n + 1
                         break
                     run = self.replace(new, was, keep_crossings=False) or new   # no better: put it back
+            # and a bend inside the run turned back under 90 degrees (the same DEV_3V3 trap:
+            # the branch and the trunk above it were one run, through a 135 deg turn, the
+            # trunk below teeing into the bend): the bend moved to the foot of one neighbour
+            # on the other's segment, which makes it square
+            i = 1
+            while i < len(run.pts) - 1:
+                a, j, c = run.pts[i - 1], run.pts[i], run.pts[i + 1]
+                if not (a[2] == j[2] == c[2]) or not _acute_turn(a, j, c):
+                    i += 1
+                    continue
+                before = self._acute_ends(run) + _acute_bends(run)
+                was = list(run.pts)
+                for p_, q_ in ((a, c), (c, a)):
+                    seg = LineString([j[:2], q_[:2]])
+                    t = seg.project(Point(p_[:2]))
+                    if not 1e-3 < t < seg.length - 1e-3:
+                        continue
+                    f = seg.interpolate(t)
+                    pts = list(was)
+                    pts[i] = (f.x, f.y, j[2])
+                    new = self.replace(run, pts, keep_crossings=True)
+                    if new is None:
+                        continue
+                    if self._acute_ends(new) + _acute_bends(new) < before:
+                        run, n = new, n + 1
+                        break
+                    run = self.replace(new, was, keep_crossings=False) or new
+                i += 1
         return n
 
     def _acute_ends(self, run, skip=None):
