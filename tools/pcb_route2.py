@@ -2418,6 +2418,59 @@ class Router:
                         run, n = new, n + 1
                         break
                     run = self.replace(new, was, keep_crossings=False) or new   # no better: put it back
+            # or the run it meets is the one to change: a run ending on another's corner, whose
+            # next short leg leaves at 45 deg to it (DEV_3V3 at (138.9, 120.9), probed 2026-10-12:
+            # the trunk carried on straight as a run of its own, the other turned off through a
+            # 0.28 mm diagonal). That corner is cut square - the other run carried along this
+            # one's line to its next leg's line, then turned - and the two share that stretch
+            for at in (0, -1):
+                if self._acute_ends(run) == 0 or len(run.pts) < 2:
+                    break
+                j, nb = run.pts[at], run.pts[1 if at == 0 else -2]
+                if j[2] != nb[2]:
+                    continue
+                u = _unit(nb[0] - j[0], nb[1] - j[1])
+                for other in list(self.runs_of(net)):
+                    if other is run:
+                        continue
+                    ks = [k for k, q in enumerate(other.pts) if math.dist(q[:2], j[:2]) < 1e-3 and q[2] == j[2]]
+                    done_ = False
+                    for k in ks:
+                        for d in (1, -1):
+                            if not (0 <= k + 2 * d < len(other.pts)):
+                                continue
+                            n_, m_ = other.pts[k + d], other.pts[k + 2 * d]
+                            if not (n_[2] == m_[2] == j[2]):
+                                continue
+                            v = _unit(n_[0] - j[0], n_[1] - j[1])
+                            if u[0] * v[0] + u[1] * v[1] <= 1e-6:
+                                continue            # that leg is not the acute one
+                            w = (m_[0] - n_[0], m_[1] - n_[1])
+                            den = u[0] * w[1] - u[1] * w[0]
+                            if abs(den) < 1e-9:
+                                continue
+                            # c = j + t u = n_ + s w
+                            t = ((n_[0] - j[0]) * w[1] - (n_[1] - j[1]) * w[0]) / den
+                            sw = ((n_[0] - j[0]) * u[1] - (n_[1] - j[1]) * u[0]) / den
+                            if t <= 1e-3 or not (-1.0 < sw < 1.0):
+                                continue
+                            c = (j[0] + t * u[0], j[1] + t * u[1], j[2])
+                            pts = list(other.pts)
+                            pts[k + d] = c
+                            before = self._acute_ends(run) + self._acute_ends(other) + _acute_bends(other)
+                            was = list(other.pts)
+                            new = self.replace(other, pts, keep_crossings=True)
+                            if new is None:
+                                continue
+                            if self._acute_ends(run) + self._acute_ends(new) + _acute_bends(new) < before:
+                                n += 1
+                                done_ = True
+                                break
+                            self.replace(new, was, keep_crossings=False)
+                        if done_:
+                            break
+                    if done_:
+                        break
             # and a bend inside the run turned back under 90 degrees (the same DEV_3V3 trap:
             # the branch and the trunk above it were one run, through a 135 deg turn, the
             # trunk below teeing into the bend): the bend moved to the foot of one neighbour
@@ -2473,7 +2526,9 @@ class Router:
                     if math.dist(o, j) < 1e-3:
                         continue
                     v = _unit(o[0] - j[0], o[1] - j[1])
-                    if u[0] * v[0] + u[1] * v[1] > 1e-6:        # under 90 degrees
+                    # under 90 degrees - and not along each other: an overlap is no wedge, as
+                    # pcb.py check holds it (pcb_route.acute_closed)
+                    if 1e-6 < u[0] * v[0] + u[1] * v[1] < 1.0 - 1e-6:
                         n += 1
                         break
         return n
