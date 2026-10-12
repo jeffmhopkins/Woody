@@ -71,15 +71,11 @@ FAMILIES = [
                                 "BREATH_SENSE", "AGND_SENSE", "*BREATH*"], "engine": "topo"},
     # the key chain: SCK, SH/LD and the hops run the board's length together. The clock leads
     # and SH/LD beside it - laid last (shortest first), SCK found the corridor taken (run 3)
-    {"name": "chain", "nets": ["/CHAIN_*", "/HOP_*"], "first": ["/CHAIN_SCK", "/CHAIN_SHLD", "/CHAIN_SER_LH"],
-     "engine": "topo"},
-    # each key's T into its register
-    # the SPI bus, J-MCU to the MCP3202 at the far end (IO35 SCK, IO36 MOSI, IO37 MISO): 220 mm
-    # between two fixed parts. Laid last in "mcu", it had to cross the whole finished board, and
-    # Freerouting left the same three open on this placement (#47, 2026-10-12). Laid here, before
-    # the keys, while the board is open
-    {"name": "spi", "nets": ["/IO35", "/IO36", "/IO37"], "engine": "topo"},
-    {"name": "keys", "nets": ["/KEY_*", "*/SWITCH_LEG"], "engine": "topo"},
+    # J-MCU's whole fan-in, the SPI bus with it, laid third - before the chain and the keys,
+    # while the header's front is open. Its 1.27 mm through-hole pins pass no line between
+    # them, so each leaves straight out of its own row, and every pin must get out together:
+    # with the SPI bus laid alone before the keys (#47, 2026-10-12), IO37 crossed in front of
+    # pins 14 and 16 and IO36 wrapped under pin 5, and IO34, IO39 and IO2 were walled
     # the Matrix's lines from J-MCU (SPI, the LED data, the service UART), U6's LED and MIDI
     # drive and U1's protected lines: ONE family, planned by the topological planner and laid
     # by this router along the plan (engine: topo; ADR 0029 as amended, #47 T5). By the grid
@@ -87,6 +83,10 @@ FAMILIES = [
     # by place (mcu-fanin), reordered, hand-edited, reseated - 2026-10-11, 59d0c147..3f5c2d42
     {"name": "mcu", "nets": ["/IO*", "/SPI*", "*TXD*", "*RXD*", "/led-strip-drive/*", "/LED_*", "*MIDI*",
                              "/carrier/IO34"], "engine": "topo"},
+    {"name": "chain", "nets": ["/CHAIN_*", "/HOP_*"], "first": ["/CHAIN_SCK", "/CHAIN_SHLD", "/CHAIN_SER_LH"],
+     "engine": "topo"},
+    # each key's T into its register
+    {"name": "keys", "nets": ["/KEY_*", "*/SWITCH_LEG"], "engine": "topo"},
     # whatever no family above names, last, on the same engine (2026-10-11 restart, #47 T5)
     {"name": "rest", "nets": ["*"], "engine": "topo"},
 ]
