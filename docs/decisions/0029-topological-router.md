@@ -126,3 +126,31 @@ edge orders, negotiated crossings) stand. The rubber-band drawing stays in
 `pcb_topo` as the engine `topo-bands`, with its bench cells. It may replace
 the grid laying where it proves itself, as a later stage.
 
+
+## Amendment, 2026-10-12: the cold trial drops locked copper on the parts it moves
+
+**Decided by the owner, 2026-10-12**, from three options put to them in the
+working chat. The other two were: pin every part that has locked copper,
+or strip all locked copper. They chose to drop the locked copper on the
+parts the placement moves.
+
+**Why.** The cold trial re-places most of the main board. Its first run
+under the topological engine moved 82 of 170 parts. It kept a locked track
+unless that track reached a moved part's pad. Two kinds of locked copper
+were left in open board:
+- locked middles of routes whose unlocked ends were stripped;
+- locked stubs from a fixed part's pad toward where a moved part had been.
+That is 40 dangling ends on 13 nets. Families 1 to 3 were routed round
+them, and joined some of their own lines to them.
+
+**What changes.** `strip` in the trial (`hardware/boards/main-board/cold_trial.py`)
+also drops a locked island:
+- that reaches no pad and no zone of its net; or
+- that touched unlocked copper of its net and reaches fewer than two pads.
+An island that joins two pads by itself is a whole route and stays. The
+breath pair is one; an unlocked branch also touched it.
+
+What stays is the copper of the fixed parts: the analog block's hand routes,
+the pair and its guards, and the fixed parts' plane vias. The source board's
+locked copper is not touched. This applies to the trial only, which copies
+the board.

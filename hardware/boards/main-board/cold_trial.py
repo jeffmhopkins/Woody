@@ -22,9 +22,14 @@ IC round the placed part it shares most nets with, then the passives round their
 the body CAD's height rooms, the iron room and the island rule, with the LEDs' cone a
 cost (a tall bulk part goes where it rises least into it).
 
-COPPER: every unlocked track and via goes; a locked one stays only if every pad its copper
-reaches is a fixed part's (the pair and its guards, the analog block's hand routes, the
-fixed parts' plane vias). The zones stay, emptied for a refill.
+COPPER: every unlocked track and via goes. A locked one stays only if:
+- every pad its copper reaches is a fixed part's (the pair and its guards, the analog
+  block's hand routes, the fixed parts' plane vias);
+- it reaches a pad or a zone of its net;
+- it is not a stub cut from a route being stripped, i.e. it touched unlocked copper of
+  its net and reaches fewer than two pads.
+That is the owner's decision of 2026-10-12, ADR 0029 amendment. The zones stay, emptied
+for a refill.
 
 FAMILIES (the pcb-routing skill's order): power and rails, the analog block's own nets,
 the key chain, the keys, the SPI and the Matrix's lines, MIDI, then the rest. The plane
@@ -217,7 +222,8 @@ def fixed_parts(board, lay, comps):
 
 def strip(board, fixed):
     """Every unlocked track and via goes; locked copper goes unless every pad it reaches
-    belongs to a fixed part. Connectivity is per net and per layer, a via joining all."""
+    belongs to a fixed part, it reaches a pad or zone, and it is no stub of a stripped route
+    (the module docstring, COPPER). Connectivity is per net and per layer, a via joining all."""
     tracks = list(board.GetTracks())
     gone = [t for t in tracks if not t.IsLocked()]
     locked = [t for t in tracks if t.IsLocked()]
@@ -254,15 +260,47 @@ def strip(board, fixed):
                 continue
             if lay_ is None or lu is None or lay_ == lu:
                 parent[find(i)] = find(j)
-    bad = set()
+    bad, held, reach = set(), set(), {}
     for ref, net, lid, pg in pads:
-        if ref in fixed:
-            continue
         for j in tree.query(pg):
             t, g, lay_ = items[int(j)]
             if t.GetNetname() == net and (lay_ is None or lay_ == lid) and g.intersects(pg):
+                (held if ref in fixed else bad).add(find(int(j)))
+                reach.setdefault(find(int(j)), set()).add((ref, id(pg)))
+    # and a locked island that reaches no pad and no zone of its net goes too: the locked
+    # middle of a route whose unlocked ends were stripped above. Kept, the cold trial of
+    # 2026-10-12 routed families 1 to 3 round 40 such stubs left in open board (IO2's
+    # thirteen ends at x 305-311, IO35's at (171.7, 141.9)), and joined some of its own
+    # nets' lines to them. The owner, 2026-10-12: drop locked copper on the parts the
+    # placement moves; keep what stays with fixed parts
+    for z in board.Zones():
+        if z.GetIsRuleArea() or not z.GetNetname():
+            continue
+        for lid in (pcbnew.F_Cu, pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.B_Cu):
+            if not z.IsOnLayer(lid):
+                continue
+            zg = pcb_route2._poly_of(z.Outline())
+            for j in tree.query(zg):
+                t, g, lay_ = items[int(j)]
+                if t.GetNetname() == z.GetNetname() and (lay_ is None or lay_ == lid) and g.intersects(zg):
+                    held.add(find(int(j)))
+    # and one that touched unlocked copper of its net and reaches fewer than two pads: a stub
+    # of a route being stripped, left dangling from it (IO33, IO37, CHAIN_QH_RT: locked from
+    # a fixed part's pad toward where a moved part was, the rest of the way unlocked). One
+    # that joins two pads by itself is a whole route between fixed parts and stays (the
+    # breath pair, which an unlocked branch also touched)
+    for u in gone:
+        gu, lu = shape(u)
+        for j in tree.query(gu):
+            t, g, lay_ = items[int(j)]
+            if t.GetNetname() == u.GetNetname() and (lay_ is None or lu is None or lay_ == lu) and g.intersects(gu) \
+                    and len(reach.get(find(int(j)), ())) < 2:
                 bad.add(find(int(j)))
+    strip.cut = sorted({items[i][0].GetNetname() for i in range(len(items)) if find(i) in bad})
+    loose = {find(i) for i in range(len(items))} - held - bad
+    bad |= loose
     lost = [t for i, (t, _, _) in enumerate(items) if find(i) in bad]
+    strip.loose = sorted({items[i][0].GetNetname() for i in range(len(items)) if find(i) in loose})
     gone += lost
     for t in gone:
         board.Delete(t)
