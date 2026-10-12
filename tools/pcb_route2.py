@@ -1542,7 +1542,16 @@ class Router:
         # a rescue that took it up and laid it again as a plain net would wall the rest in
         if rescue:
             self.ground = ground
+            # a family's `rescue_s`: the seconds all its rescues may take together. Spent, a
+            # rescue under way puts back what it took up, and the nets still apart stay failed -
+            # reported, where an unbounded rescue on the main board's J-MCU family ran past the
+            # session's two-hour limit twice and reported nothing (#47, 2026-10-12)
+            budget = getattr(self, "rescue_s", None)
+            self._rescue_until = time.monotonic() + budget if budget else None
             for n in list(failed):
+                if self._rescue_until and time.monotonic() > self._rescue_until:
+                    self.log.append(f"rescue {n}: not tried - the family's rescue time ({budget} s) is spent")
+                    continue
                 t0 = time.monotonic()
                 got = self.rescue(n)
                 self.net_time["rescue " + n] = self.net_time.get("rescue " + n, 0.0) + time.monotonic() - t0
@@ -1737,6 +1746,7 @@ class Router:
             # middle of the strip first, and IO2 at J1.5 had no way out)
             self.m.hidden = frozenset(p.name for p in self.m.pads
                                       if any(fnmatch.fnmatch(p.name, g) for g in fam.get("skip_pads") or []))
+            self.rescue_s = fam.get("rescue_s")
             saved_cls = {}
             if fam.get("layers"):           # a family's layers narrow its nets' own
                 for n in nets:
@@ -1913,9 +1923,9 @@ class Router:
             if pause and rec["review"]:
                 rec["paused"] = True
                 self.log.append(f"stage {k} {name}: paused for review - {'; '.join(rec['review'])}")
-                self.m.hidden = frozenset()
+                self.m.hidden, self.rescue_s = frozenset(), None
                 return report
-        self.m.hidden = frozenset()
+        self.m.hidden, self.rescue_s = frozenset(), None
         if ground and (stop is None or stop >= len(plan)):
             before = set(id(r_) for r_ in self.runs)
             self.route_ground(ground)
@@ -2277,6 +2287,9 @@ class Router:
             order = [net] + victims
             seen = set()
             for attempt in range(orders):
+                if getattr(self, "_rescue_until", None) and time.monotonic() > self._rescue_until:
+                    self.log.append(f"rescue {net}, {r} mm box: the family's rescue time is spent")
+                    break
                 laid, failed_now, whys = [], [], []
                 for n_ in order:
                     ok_, rv, why_ = self.route_net(n_)
@@ -2314,6 +2327,8 @@ class Router:
                     lay(r_, self.m)
                     self.runs.append(r_)
             self.log.append(f"rescue {net}, {r} mm box: put back")
+            if getattr(self, "_rescue_until", None) and time.monotonic() > self._rescue_until:
+                break
         return False
 
     def _fixed(self, net):

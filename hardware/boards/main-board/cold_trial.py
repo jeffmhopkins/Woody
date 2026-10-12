@@ -88,7 +88,10 @@ FAMILIES = [
     {"name": "mcu", "nets": ["/IO*", "/SPI*", "*TXD*", "*RXD*", "/led-strip-drive/*", "/LED_*", "*MIDI*",
                              "/carrier/IO34",
                              # J1's 5 V and 3.3 V pins, joined here to the rails family 1 laid
-                             "INST_5V_A", "DEV_3V3"], "engine": "topo"},
+                             "INST_5V_A", "DEV_3V3"], "engine": "topo",
+     # its rescues, together, at most 40 min: unbounded, they ran past the session's two-hour
+     # limit twice (2026-10-12) and reported nothing. What they leave apart is reported failed
+     "rescue_s": 2400},
     {"name": "chain", "nets": ["/CHAIN_*", "/HOP_*"], "first": ["/CHAIN_SCK", "/CHAIN_SHLD", "/CHAIN_SER_LH"],
      "engine": "topo"},
     # each key's T into its register
