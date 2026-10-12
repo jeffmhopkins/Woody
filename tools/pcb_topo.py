@@ -93,16 +93,28 @@ class Map:
     Every pad on the layer is a wheel only its net enters; everything else on the layer -
     holes, keep-outs, other nets' copper - is an area obstacle, a hole in the map."""
 
-    def __init__(self, model, layer, nets, pitch=None, width=None, lanes=1):
+    def __init__(self, model, layer, nets, pitch=None, width=None, lanes=1, narrow=False, layers=None):
         """`layer` None: every layer at once - the PLAN map, where a net's way and its
         crossings are negotiated before it has a layer: all copper on any layer is in the
         way, and each edge takes `lanes` times the lines (one set per layer)."""
         R = model.rules
         self.m, self.layer, self.lanes = model, layer, lanes
-        on = (lambda ls: True) if layer is None else (lambda ls: layer in set(ls))
+        # the plan map (layer None): what is on any of the SIGNAL layers being planned - not
+        # the plane layers, whose reservations (the splits) walled every pad in on the main
+        # board (J4.10 reached a millimetre round itself; five power nets unplanned)
+        if layer is None:
+            sig = set(layers) if layers is not None else set(range(model.nl))
+            on = (lambda ls: bool(set(ls) & sig))
+        else:
+            on = (lambda ls: layer in set(ls))
         self.nets = set(nets)
-        self.width = width or max(R.width(n) for n in nets)
-        self.clear = max([R.clear(n) for n in nets] + [R.clearance])
+        # `narrow`: the map at the family's NARROWEST track and clearance, each wider line
+        # charged its extra where it crosses an edge (room) - at the widest, a 0.3 mm rail
+        # could not leave a 1.27 mm header's pin because 0.5 mm rails were in its family
+        # (the main board's power family: five of seven nets unplanned, 2026-10-11)
+        pick = min if narrow else max
+        self.width = width or pick(R.width(n) for n in nets)
+        self.clear = pick(R.clear(n) for n in nets) if narrow else max([R.clear(n) for n in nets] + [R.clearance])
         self.keep = self.clear + self.width / 2 + TOL            # a centreline's distance off copper
         self.pitch = pitch or (self.width + self.clear + TOL)
         areas = []
@@ -155,7 +167,12 @@ class Map:
             ring(poly.exterior.coords)
             for hole in poly.interiors:
                 ring(hole.coords)
-                holes.append(Polygon(hole).representative_point().coords[0])
+                # seeded in the obstacle, not in free room nested inside the hole (an island of
+                # room in a ring of copper): seeded there, triangle ate the island (the main
+                # board, a 106 mm² hole at x 306)
+                solid = Polygon(hole).difference(room).buffer(-0.02)    # off simplify's slivers
+                solid = max(_polys(solid) or [Polygon(hole)], key=lambda g: g.area)
+                holes.append(solid.representative_point().coords[0])
         # triangle (C) is fed clean input or it crashes the process (the island board, a
         # segfault): coincident points merged - the first keeps its index, so the pads'
         # centres and corners keep theirs - zero-length and repeated segments dropped
@@ -189,8 +206,12 @@ class Map:
         # what copper keeps clear of: every pad, every area, the board's edge
         pads_g = unary_union([p.geom for p in self.pads]) if self.pads else Polygon()
         outside = model.outline.buffer(5.0).difference(model.inside)
-        self.blk = unary_union([pads_g.buffer(self.keep), self.areas.buffer(self.keep),
-                                outside.buffer(self.width / 2 + TOL)])
+        self._rest = unary_union([self.areas.buffer(self.keep), outside.buffer(self.width / 2 + TOL)])
+        self._padkeep = [p.geom.buffer(self.keep) for p in self.pads]
+        from shapely.strtree import STRtree as _T
+        self._padtree = _T(self._padkeep) if self._padkeep else None
+        self._span = {}
+        self.blk = unary_union([pads_g.buffer(self.keep), self._rest])
         self.edges, self.inpad = {}, {}
         for k, ts in self.etris.items():
             if len(ts) != 2:
@@ -229,6 +250,34 @@ class Map:
         t0, t1 = seg.project(Point(g.coords[0])), seg.project(Point(g.coords[-1]))
         return (min(t0, t1), max(t0, t1), L)
 
+    def span(self, k, own=()):
+        """Edge k's free part for a line from the pads `own`: an end on one of them is that
+        line's own copper, not in its way. Measured against every pad, the edges between a
+        header pin's open side and its neighbours' (they run along the pin column) had no
+        free part at all, and nothing could leave the pin: on the main board J4.10 reached a
+        millimetre round itself and five power nets went unplanned (#47 T5)."""
+        # The PLAN map's only: its lines are guides. A per-layer map's are drawn as bands, and
+        # the drawing measures each edge without the relief - a line placed there on an edge
+        # it took for shut came apart into thousands of segments (the fan board)
+        mine = [e for e in (self.vpad.get(k[0]), self.vpad.get(k[1])) if e is not None and e in own]
+        if self.layer is not None or not mine or k in self.inpad:
+            return self.edges[k]
+        key = (k, frozenset(mine))
+        if key not in self._span:
+            seg = LineString([self.xy[k[0]], self.xy[k[1]]])
+            near = [self._padkeep[i] for i in self._padtree.query(seg) if i not in own]
+            blk = unary_union(near + [self._rest.intersection(seg.buffer(0.01))])
+            free = seg.difference(blk)
+            pieces = [g for g in getattr(free, "geoms", [free]) if g.geom_type == "LineString" and g.length > 0] \
+                if not free.is_empty else []
+            if not pieces:
+                self._span[key] = (0.0, -1.0, seg.length)
+            else:
+                g = max(pieces, key=lambda g: g.length)
+                t0, t1 = seg.project(Point(g.coords[0])), seg.project(Point(g.coords[-1]))
+                self._span[key] = (min(t0, t1), max(t0, t1), seg.length)
+        return self._span[key]
+
     def pitch_of(self, net):
         """The centre-to-centre room a line of `net` takes: its class's track and clearance."""
         R = self.m.rules
@@ -240,18 +289,23 @@ class Map:
         within its free part (per layer of the plan map's `lanes`)."""
         if k in self.inpad:
             return self.inpad[k] in own and len(self.order[k]) < 8
-        t0, t1, _ = self.edges[k]
+        t0, t1, _ = self.span(k, own)
         if t1 - t0 < SLACK:
             return False
-        ps = [self.pitch_of(self.lines[l]["net"]) for l in self.order[k]] + [self.pitch_of(net)]
+        others = [self.lines[l]["net"] for l in self.order[k]]
+        ps = [self.pitch_of(n_) for n_ in others] + [self.pitch_of(net)]
         need = sum(ps) - max(ps)
-        return need <= (t1 - t0 - SLACK) * self.lanes + 1e-9
+        # each end of the free part was measured at this map's keep; a line keeping further
+        # off copper (wider, or a wider clearance) has that much less of it, at each end
+        R = self.m.rules
+        extra = max(0.0, max(R.clear(n_) + R.width(n_) / 2 + TOL - self.keep for n_ in others + [net]))
+        return need <= (t1 - t0 - SLACK - 2 * extra) * self.lanes + 1e-9
 
     def capacity(self, k, own=()):
         """How many lines edge k takes. An edge inside a pad takes its own net's line only."""
         if k in self.inpad:
             return 8 if self.inpad[k] in own else 0     # a pad of several lines of its net
-        t0, t1, _ = self.edges[k]
+        t0, t1, _ = self.span(k, own)
         # a lane wants SLACK more than the bare clearances: a gap of exactly a track between
         # two of a SOIC's pins (0.67 mm for 0.65) took a line the geometry then could not
         # draw clear (the crowd board's IO1 and GATE between U6's pins)
@@ -1139,7 +1193,7 @@ def plan_layers(model, nets, pads, layers, allowed, start, rounds=6, log=None, l
               for i, j in _mst([(k, p.centre) for k, p in enumerate(model.pads_of(n))])]
     order = sorted(nets, key=lambda n: (-sum(math.dist(a.centre, b.centre) for a in pads[n] for b in pads[n]), n))
     for rnd in range(rounds):
-        mp = Map(model, None, nets, lanes=len(layers))
+        mp = Map(model, None, nets, lanes=len(layers), narrow=True, layers=layers)
         idx = {id(p): i for i, p in enumerate(mp.pads)}
 
         def price(a, b):
@@ -1214,7 +1268,7 @@ def plan(model, nets, layers=None, log=None, later=(), rounds=6):
                                                       + sum(1 for p in pads[n] if L not in p.layers) * 3, L))
     if len(layers) < 2:
         col = start
-        mp = Map(model, layers[0], many)
+        mp = Map(model, layers[0], many, narrow=True)
         idx = {id(p): i for i, p in enumerate(mp.pads)}
         lids = {}
         for n in many:
