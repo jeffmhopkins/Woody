@@ -2385,6 +2385,8 @@ class Router:
         many ends were squared."""
         n = 0
         for run in list(self.runs_of(net)):
+            if run not in self.runs:
+                continue                        # replaced by an earlier repair here
             for at in (0, -1):
                 if self._acute_ends(run) == 0 or len(run.pts) < 2:
                     break
@@ -2431,7 +2433,7 @@ class Router:
                     continue
                 u = _unit(nb[0] - j[0], nb[1] - j[1])
                 for other in list(self.runs_of(net)):
-                    if other is run:
+                    if other is run or other not in self.runs:
                         continue
                     ks = [k for k, q in enumerate(other.pts) if math.dist(q[:2], j[:2]) < 1e-3 and q[2] == j[2]]
                     done_ = False
@@ -2466,7 +2468,9 @@ class Router:
                                 n += 1
                                 done_ = True
                                 break
-                            self.replace(new, was, keep_crossings=False)
+                            # no better: put it back, and go on with the run that is in the list
+                            # (going on with the old one crashed the main board's family 1)
+                            other = self.replace(new, was, keep_crossings=False) or new
                         if done_:
                             break
                     if done_:
