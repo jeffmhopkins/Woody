@@ -118,8 +118,26 @@ class Map:
         self.keep = self.clear + self.width / 2 + TOL            # a centreline's distance off copper
         self.pitch = pitch or (self.width + self.clear + TOL)
         areas = []
+        # the plan map: another net's TRACK on some of the planned layers only is no wall - a
+        # line may pass it on another layer. It is a crossing, priced in the search and
+        # counted against that layer when layers are chosen (fixed_cross). As a wall, the
+        # earlier families' front copper boxed the chain's pads in (the main board's family 3,
+        # 2026-10-12: seven of eight nets unplanned, R44.1 shut in 11 by 12 mm)
+        self.fixed = []                 # [(layer set, geometry)]
+        self.banned = []                # [(layer set, geometry)]
         for e in model.index.e.values():
             if not on(e.layers):
+                continue
+            if layer is None and e.kind == "track" and e.net not in self.nets and not sig <= set(e.layers):
+                self.fixed.append((set(e.layers) & sig, e.geom))
+                continue
+            # and a keep-out or a reservation on some of the planned layers only: no wall either
+            # (a B.Cu keep-out over the main board's top half covered J4.2 and J5.2, and
+            # CHAIN_SCK went unplanned) - a line through it is barred from those layers when
+            # layers are chosen (banned_on)
+            if layer is None and e.kind in ("keepout", "reserve") and not sig <= set(e.layers) \
+                    and ((e.kind == "keepout" and e.tracks) or not (set(e.family or ()) & self.nets)):
+                self.banned.append((set(e.layers) & sig, e.geom))
                 continue
             if (e.kind == "keepout" and e.tracks) or e.kind == "hole" \
                     or (e.kind in ("track", "via") and e.net not in self.nets) \
@@ -211,6 +229,7 @@ class Map:
         from shapely.strtree import STRtree as _T
         self._padtree = _T(self._padkeep) if self._padkeep else None
         self._span = {}
+        self._fixed_tree = _T([g for _, g in self.fixed]) if self.fixed else None
         self.blk = unary_union([pads_g.buffer(self.keep), self._rest])
         self.edges, self.inpad = {}, {}
         for k, ts in self.etris.items():
@@ -277,6 +296,53 @@ class Map:
                 t0, t1 = seg.project(Point(g.coords[0])), seg.project(Point(g.coords[-1]))
                 self._span[key] = (min(t0, t1), max(t0, t1), seg.length)
         return self._span[key]
+
+    def fixed_cross(self, a, b):
+        """{layer: how many of the plan map's one-layer tracks the segment a - b crosses}."""
+        out = {}
+        if self._fixed_tree is None or math.dist(a, b) < 1e-9:
+            return out
+        seg = LineString([a, b])
+        for i in self._fixed_tree.query(seg):
+            ls, g = self.fixed[int(i)]
+            if g.intersects(seg):
+                for L in ls:
+                    out[L] = out.get(L, 0) + 1
+        return out
+
+    def banned_on(self, pts):
+        """{layer: mm of a line through `pts` inside the partial-layer keep-outs and
+        reservations of that layer}: by length, because a long net touches some on every
+        layer (CHAIN_SCK: a B.Cu keep-out over its header pins, F.Cu ones further along) and
+        a count barred it from both."""
+        if not self.banned or len(pts) < 2:
+            return {}
+        line = LineString(pts)
+        out = {}
+        for ls, g in self.banned:
+            if g.intersects(line):
+                mm = g.intersection(line).length
+                for L in ls:
+                    out[L] = out.get(L, 0.0) + mm
+        return out
+
+    def sketch(self, lid):
+        """A planned line as points: its end, its place on each edge it crosses, its end."""
+        ln = self.lines[lid]
+        pts = [self.xy[ln["pa"]]]
+        for k in ln["edges"]:
+            pts.append(self._slot_point_of(k, lid))
+        if ln["pb"] is not None:
+            pts.append(self.xy[ln["pb"]])
+        return pts
+
+    def _slot_point_of(self, k, lid):
+        t0, t1, L = self.edges[k]
+        lids = self.order[k]
+        n = len(lids)
+        i = lids.index(lid)
+        t = t0 + (t1 - t0) * (i + 1) / (n + 1) if t1 > t0 else L / 2
+        return self._at(k, t)
 
     def pitch_of(self, net):
         """The centre-to-centre room a line of `net` takes: its class's track and clearance."""
@@ -431,6 +497,13 @@ class Map:
                     t += toll * (6.0 if min(math.dist(x, c), math.dist(x, d)) < 3.0 else 1.0)
             return t
 
+        def fixed(a, b):
+            # a one-layer track crossed: a line can pass it on another layer, so it costs
+            # little - two mm each - and layer choice weighs it (plan_layers)
+            if not self.fixed:
+                return 0.0
+            return 2.0 * max(self.fixed_cross(a, b).values(), default=0)
+
         def stray(a, b):
             if self._guide is None:
                 return 0.0
@@ -455,7 +528,7 @@ class Map:
                     xc = self._xcost(ti, ("v", pa), ("e", k, s))
                     if xc is not None:
                         pt = self._slot_point(k, s)
-                        push((k, s, self._other(k, ti)), math.dist(P, pt) + tolls(P, pt) + xc + stray(P, pt), pt, ("start", ti))
+                        push((k, s, self._other(k, ti)), math.dist(P, pt) + tolls(P, pt) + xc + stray(P, pt) + fixed(P, pt), pt, ("start", ti))
         while heap:
             f, _, g, st, pt = heapq.heappop(heap)
             if f >= goal_cost:
@@ -470,7 +543,7 @@ class Map:
                         goal, goal_cost = ("tee", st, lids[nb]), g
             xq = self._xcost(ti, ("e", k1, s1), ("v", pb)) if pb in self.tris[ti] else None
             if xq is not None:
-                c = g + math.dist(pt, Q) + tolls(pt, Q) + xq + stray(pt, Q)
+                c = g + math.dist(pt, Q) + tolls(pt, Q) + xq + stray(pt, Q) + fixed(pt, Q)
                 if c < goal_cost:
                     goal, goal_cost = ("end", st, ti), c
             for k2 in self._tri_edges(ti):
@@ -480,7 +553,7 @@ class Map:
                     xc = self._xcost(ti, ("e", k1, s1), ("e", k2, s2))
                     if xc is not None:
                         p2 = self._slot_point(k2, s2)
-                        push((k2, s2, self._other(k2, ti)), g + math.dist(pt, p2) + tolls(pt, p2) + xc + stray(pt, p2), p2, (st, ti))
+                        push((k2, s2, self._other(k2, ti)), g + math.dist(pt, p2) + tolls(pt, p2) + xc + stray(pt, p2) + fixed(pt, p2), p2, (st, ti))
         if goal is None:
             return None
         steps = []
@@ -1153,7 +1226,7 @@ def _mst(points):
     return out
 
 
-def _colour(nets, xg, allowed, vias_on, start, passes=12, dear=None):
+def _colour(nets, xg, allowed, vias_on, start, passes=12, dear=None, fixed=None):
     """Layers for nets from their crossing graph xg {net: {other: count}}: each net the layer
     with the fewest crossings with nets on the same layer (ten each), then the fewest vias
     (three each), passes until nothing changes - a min-conflict 2-colouring that keeps what
@@ -1168,7 +1241,9 @@ def _colour(nets, xg, allowed, vias_on, start, passes=12, dear=None):
                 same = sum(c for m_, c in xg.get(n, {}).items() if col.get(m_) == L)
                 # a class's layer_cost (the analog nets' B.Cu at 6x): five per unit over one
                 extra = 5.0 * (dear(n, L) - 1.0) if dear else 0.0
-                return (same * 10 + vias_on(n, L) * 3 + extra, 0 if L == col.get(n) else 1, L)
+                # the earlier copper on L its way crosses: a crossing as dear as another net's
+                fx = 10 * (fixed or {}).get(n, {}).get(L, 0)
+                return (same * 10 + vias_on(n, L) * 3 + extra + fx, 0 if L == col.get(n) else 1, L)
             best = min(allowed[n], key=cost)
             if best != col.get(n):
                 col[n], moved = best, True
@@ -1218,8 +1293,17 @@ def plan_layers(model, nets, pads, layers, allowed, start, rounds=6, log=None, l
                 for l2 in mp.crossed(l):
                     m_ = mp.lines[l2]["net"]
                     xg.setdefault(n, {})[m_] = xg.get(n, {}).get(m_, 0) + 1
+        fx = {}
+        for n, ls in lids.items():
+            for l in ls:
+                pts = mp.sketch(l)
+                for a, b in zip(pts, pts[1:]):
+                    for L, c in mp.fixed_cross(a, b).items():
+                        fx.setdefault(n, {})[L] = fx.get(n, {}).get(L, 0) + c
+                for L, mm in mp.banned_on(pts).items():
+                    fx.setdefault(n, {})[L] = fx.get(n, {}).get(L, 0) + mm      # a crossing a mm
         col = _colour(nets, xg, allowed, vias_on, col,
-                      dear=lambda n, L: model.rules.layer_cost(n, model.layer_names[L]))
+                      dear=lambda n, L: model.rules.layer_cost(n, model.layer_names[L]), fixed=fx)
         same = sum(c for n, d in xg.items() for m_, c in d.items() if col.get(n) == col.get(m_)) // 2
         total = sum(c for d in xg.values() for c in d.values()) // 2
         log.append(f"topo plan round {rnd + 1}: crossings {total}, on one layer {same}; unplanned {sorted(set(unplanned))}")
