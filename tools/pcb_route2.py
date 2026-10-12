@@ -2378,6 +2378,13 @@ class Router:
         self.runs[self.runs.index(old)] = new
         return new
 
+    def _held(self, net, pt, skip):
+        """Whether another run of `net` than `skip` ends at pt: a point not to move, or that
+        run's end is left off the copper it joined (the main board's INST_5V_A at U13.4,
+        2026-10-12: a squared bend left a branch ending 0.28 mm off its trunk's centreline)."""
+        return any(r is not skip and any(math.dist(q[:2], pt[:2]) < 1e-3 and q[2] == pt[2] for q in (r.pts[0], r.pts[-1]))
+                   for r in self.runs_of(net))
+
     def _square_tees(self, net):
         """Each run of `net` whose end meets the net's other copper under 90 degrees has its
         last point moved to the foot of the point before it on the track it meets, so it
@@ -2393,6 +2400,9 @@ class Router:
                 j, prev = run.pts[at], run.pts[1 if at == 0 else -2]
                 if j[2] != prev[2]:
                     continue                    # a via at the end
+                if sum(1 for r in self.runs_of(net) if r is not run and
+                       any(math.dist(q[:2], j[:2]) < 1e-3 for q in (r.pts[0], r.pts[-1]))) > 0:
+                    continue                    # another run ends here too: it would be left behind
                 for r2 in self.runs_of(net):
                     if r2 is run:
                         continue
@@ -2442,7 +2452,7 @@ class Router:
                             if not (0 <= k + 2 * d < len(other.pts)):
                                 continue
                             n_, m_ = other.pts[k + d], other.pts[k + 2 * d]
-                            if not (n_[2] == m_[2] == j[2]):
+                            if not (n_[2] == m_[2] == j[2]) or self._held(net, n_, other):
                                 continue
                             v = _unit(n_[0] - j[0], n_[1] - j[1])
                             if u[0] * v[0] + u[1] * v[1] <= 1e-6:
@@ -2482,7 +2492,7 @@ class Router:
             i = 1
             while i < len(run.pts) - 1:
                 a, j, c = run.pts[i - 1], run.pts[i], run.pts[i + 1]
-                if not (a[2] == j[2] == c[2]) or not _acute_turn(a, j, c):
+                if not (a[2] == j[2] == c[2]) or not _acute_turn(a, j, c) or self._held(net, j, run):
                     i += 1
                     continue
                 before = self._acute_ends(run) + _acute_bends(run)
