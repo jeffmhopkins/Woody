@@ -13,8 +13,10 @@ A trial, like cold_trial.py: it writes into --out, never the board itself.
 2. The moat's keep-out and the plane fanout (pcb_route.moat_keepout, pcb_route.fanout), as
    pcb.py's `route: freerouting` lays them before the autorouter.
 3. The Freerouting round trip (tools/pcb_freeroute.py: its pinned release, neck-down off).
-4. Zones filled and pcb.post_route: tidied, KiCad's missing connections tried once more,
-   the silkscreen.
+4. Zones filled and the tracks tidied (plane orphans, doubled and dangling tracks). What
+   Freerouting left unrouted is REPORTED, by net - the next placement question. With
+   --complete, pcb.py's whole post_route instead: the grid router routes what is left, with
+   rip-up, and the silkscreen (slow: 13 connections ran past two hours, 2026-10-13).
 5. The scorecard (tools/pcb_score.py) and KiCad's DRC; the board, a render and the score in
    --out.
 
@@ -89,7 +91,19 @@ def main():
     edge = float(lay["rules"]["edge_clearance"])
     step(f"import pcb_freeroute; pcb_freeroute.route({path!r}, {edge!r}, {lay.get('directions')!r})")
     step(f"import pcb_route; pcb_route.fill_zones({path!r})")
-    step(f"import pcb; pcb.post_route({path!r}, {HERE!r})")
+    if "--complete" in args:
+        # the whole of pcb.py's post_route: what Freerouting left routed by the grid router,
+        # with rip-up - slow (13 connections ran past two hours, 2026-10-13), for a finished board
+        step(f"import pcb; pcb.post_route({path!r}, {HERE!r})")
+    else:
+        # a placement trial: tidied only (plane orphans their via, doubled and dangling tracks
+        # off). What Freerouting left is reported, not ground at: it is the next placement
+        # question
+        step("import pcbnew, yaml, pcb_route; "
+             f"lay = yaml.safe_load(open({os.path.join(HERE, 'layout.yaml')!r})); b = pcbnew.LoadBoard({path!r}); "
+             "o = pcb_route.plane_orphans(b, lay); "
+             "o and pcb_route.fanout(b, lay, pcb_route.Obstacles(b, lay), only=o); "
+             f"pcb_route.tidy(b, lay); pcbnew.SaveBoard({path!r}, b)")
     step(f"import pcb_route; pcb_route.fill_zones({path!r})")
     md = os.path.join(out, "score.md")
     step(f"import pcb_score; rows = pcb_score.score({path!r}, everything=True); t = pcb_score.totals(rows); "
@@ -97,6 +111,9 @@ def main():
          f"print('fr_trial: open', [r['net'] for r in rows if r['open']])")
     step(f"import pcb_route2 as R; e, u = R.drc({path!r}); import collections; "
          f"print('fr_trial: KiCad DRC', len(e), 'error(s)', dict(collections.Counter(x[0] for x in e)), u, 'unconnected')")
+    # what is still apart, by net: the placement loop's input
+    step(f"import pcb; m = pcb.unconnected_of({path!r}); import collections; "
+         "c = collections.Counter(x[0] for x in m); print('fr_trial: unrouted by net', dict(c.most_common()))")
     return 0
 
 
