@@ -1861,7 +1861,22 @@ class Router:
                     for r_ in self.runs_of(rep["net"]):
                         self._lock(r_)
                     failed.pop(rep["net"], None)
-            # 5. the liquid pass, over this family alone (everything earlier is locked)
+            # 5. A FAMILY IS WHOLE ONLY IF EACH OF ITS NETS IS, checked again: a pass after a net
+            # routed (a rescue, a push, a detour) can take a piece of it up and not lay it back.
+            # The main board's mcu family reported "failed none" with J1.13 apart (2026-10-13). A
+            # net found apart is routed once more, and reported failed if it still is
+            for n in nets:
+                if n in failed or len(self.m.pads_of(n)) < 2:
+                    continue
+                if len(self.pad_groups(n)) > 1:
+                    self.route_net(n)
+                    gs = self.pad_groups(n)
+                    if len(gs) > 1:
+                        failed[n] = "apart after the family's passes: " + ", ".join(p.name for g in gs[1:] for p in g)
+                        self.log.append(f"stage {k} {name}: {n} {failed[n]}")
+                    else:
+                        self.log.append(f"stage {k} {name}: {n} was apart after the family's passes; joined again")
+            # 6. the liquid pass, over this family alone (everything earlier is locked)
             tt["edits"] = round(time.monotonic() - t_, 1)
             t_ = time.monotonic()
             liq = self.liquid(fillet) if liquid and not topo else None
@@ -2228,6 +2243,29 @@ class Router:
         return missed
 
     # ---- rescue
+    def pad_groups(self, net):
+        """The net's pads grouped by the copper joining them, largest first: one group when
+        the net is whole."""
+        pads = self.m.pads_of(net)
+        own = [e for e in self.m.index.of_net(net) if e.kind in ("track", "via")]
+        items = [("pad", p, set(p.layers), p.geom) for p in pads] + [("cu", e, set(e.layers), e.geom) for e in own]
+        parent = list(range(len(items)))
+
+        def find(i):
+            while parent[i] != i:
+                parent[i] = parent[parent[i]]
+                i = parent[i]
+            return i
+        for i in range(len(items)):
+            for j in range(i + 1, len(items)):
+                if items[i][2] & items[j][2] and items[i][3].intersects(items[j][3]):
+                    parent[find(i)] = find(j)
+        groups = {}
+        for i, it in enumerate(items):
+            if it[0] == "pad":
+                groups.setdefault(find(i), []).append(it[1])
+        return sorted(groups.values(), key=lambda g: (-len(g), min(p.name for p in g)))
+
     def _open_part(self, net):
         """The pads a rescue need box: the net's pads grouped by the copper already joining
         them, every group but the largest, and the largest's pad nearest to them - where the
