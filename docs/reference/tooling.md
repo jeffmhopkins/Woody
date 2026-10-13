@@ -595,7 +595,12 @@ this order (step 4 is Freerouting's only):
    session; its pass limit is not honoured in batch, and a shell timeout's kill
    writes nothing. Its costs are its defaults: a flatter direction cost and
    cheaper vias were tried on the first layout and left more unrouted; it takes
-   no layer direction in batch (step 5).
+   no layer direction in batch (step 5). Its automatic neck-down is off: on, it
+   thinned lines to 0.187 mm into pads, under the minimum track width (25 DRC
+   errors on the main board, #47). The main board's driver since 2026-10-13
+   (ADR 0029, amended) is `hardware/boards/main-board/fr_trial.py`. It takes a
+   placed board, keeps only the analog hand routes, runs these steps, then
+   scores the result (`pcb_score.py`) and runs KiCad's DRC.
 5. Zones filled, then `pcb.post_route`: `pcb_route.tidy` (doubled, zero-length
    and dangling tracks removed, and a via met on one face only; acute joins squared, collinear runs merged, as on a key
    board; and with `directions: chamfer`, each right-angle corner cut to two

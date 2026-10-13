@@ -154,3 +154,49 @@ What stays is the copper of the fixed parts: the analog block's hand routes,
 the pair and its guards, and the fixed parts' plane vias. The source board's
 locked copper is not touched. This applies to the trial only, which copies
 the board.
+
+## Amendment, 2026-10-13: Freerouting routes; development goes to placement
+
+**Decided by the owner, 2026-10-13**, in the working chat. The owner, of the
+router: *"it's obviously apparent that this Auto is slow and also not very
+good"*. Of the way forward: *"we should focus more on the original placement
+and using free router … if we're going to do any more development we should do
+it on the placement side of the components … only some components need be
+locked, and if we're routing and we're finding issues with being able to find
+good routes on a family, we should be able to just move some of the components
+around and push and shove traces to get where we want."* Starting point: the
+cold trial's clean placement. What stays: the analog hand routes and the parts
+a rule fixes (the connectors among them).
+
+**Why.** The measurements of 2026-10-12, on one placement (#47):
+
+| | This router | Freerouting |
+|---|---|---|
+| The whole board | about 45 min for 26 of its 89 signal nets | 89 nets in 49 min, 5 left open |
+| On the same 26 nets, length / airwire | 1.13x | 1.17x |
+| On the same 26 nets, vias | 39 | 55 |
+
+So this router's copper was as good or better, but it was far slower. Its
+fixes had become the patch-and-rerun loop this ADR was written to end, at 1 to
+2 hours a cycle. The push-and-shove the owner asked for in the Context is
+Freerouting's core, and KiCad's interactive router does it too. The board's
+hard places proved to be placement and constraints, not the router:
+- J-MCU's back row escapes only through a 3 mm strip;
+- the SPI bus runs 220 mm between two fixed parts;
+- the chain's length is its airwire.
+
+**What changes.**
+- **Routing is Freerouting's.** This means `tools/pcb_freeroute.py`, the
+  pinned release, with automatic neck-down now off.
+- **The main board's driver is `hardware/boards/main-board/fr_trial.py`.** It
+  strips the placement's copper but for the analog hand routes, lays the moat
+  keep-out and the plane fanout, routes with Freerouting, runs `post_route`,
+  then scores the result (`tools/pcb_score.py`) and runs KiCad's DRC.
+- **Development goes to placement.** Where a family will not route cleanly,
+  the parts in its way move (`pcb_pack`), and the board is routed again.
+
+**What stays.**
+- `pcb_route2` and `pcb_topo` stay as they are, with their benches, but are
+  not developed further for this board.
+- So do the scorecard, `skip_pads` and `rescue_s`, the acid-trap repairs, and
+  the cold trial's placement and copper rules.

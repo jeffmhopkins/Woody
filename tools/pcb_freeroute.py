@@ -42,6 +42,10 @@ TIMEOUT_S = 20 * 60 + 180  # the backstop, for a hung JVM
 # connections unrouted where the defaults left 16-18, in the same time. What it leaves
 # goes to pcb_route.complete.
 SCORING = {}
+# Its automatic neck-down OFF: on, it thinned lines to 0.187 mm where they enter a pad, under
+# the board's minimum track width - every one of the 25 DRC errors of the 2026-10-12
+# benchmark on the main board's clean cold placement (#47)
+NECKDOWN = False
 
 
 def jar():
@@ -110,7 +114,8 @@ def route(path, edge, directions=None):
             with_directions(dsn, directions)
         r = subprocess.run(["java", f"-Duser.home={t}", "-jar", j, "-de", dsn, "-do", ses, "-mp", str(PASSES),
                             f"--router.max_passes={PASSES}", "--gui.enabled=false", "-da",
-                            f"--router.job_timeout={JOB_TIMEOUT}"] + [f"--router.scoring.{k}={v}" for k, v in SCORING.items()],
+                            f"--router.job_timeout={JOB_TIMEOUT}",
+                            f"--router.automatic_neckdown={str(NECKDOWN).lower()}"] + [f"--router.scoring.{k}={v}" for k, v in SCORING.items()],
                            capture_output=True, text=True, timeout=TIMEOUT_S, cwd=t)
         log = (r.stdout + r.stderr).splitlines()
         if not os.path.exists(ses):
