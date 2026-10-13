@@ -27,6 +27,12 @@ MOVES = [
     # 24 mm from J1.6 and J1.8 - further than the cold placement's. They stay; J-MCU's crowd
     # (U1, U6 and their parts) is the next placement question
     ("U9", ["R36"], "SER is driven from the chain's end, U9 (the LH chain's last register): its series resistor there"),
+    # U-TVS-SPI clamps the pad side of R-SPI-SER (IO35, IO36, IO34 - spi-link), so it "stands on
+    # the J-MCU side of the resistors" (layout.yaml, U1's note), beside R1, R2 and R40 east of
+    # J-MCU. The cold placement put it WEST of J-MCU, across its top row's way out: the second
+    # trial left nine connections there, IO35 open at U1.1 itself (2026-10-13)
+    ("R2", ["U1"], "the SPI clamp beside the SPI series resistors it clamps, on their J-MCU side",
+     ["W", "S", "N", "E"]),
 ]
 
 
