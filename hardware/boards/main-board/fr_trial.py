@@ -191,14 +191,26 @@ def main():
                  f"lay = yaml.safe_load(open({os.path.join(HERE, 'layout.yaml')!r})); b = pcbnew.LoadBoard({path!r}); "
                  f"pcb_route.tidy(b, lay); pcbnew.SaveBoard({path!r}, b)")
     else:
-        # a placement trial: tidied only (plane orphans their via, doubled and dangling tracks
-        # off). What Freerouting left is reported, not ground at: it is the next placement
-        # question
+        # tidied (plane orphans their via, doubled and dangling tracks off) - and KEPT ONLY IF it
+        # leaves no more connections apart than it found: on trials 5 and 7 (2026-10-13) the tidy
+        # took apart one and two connections Freerouting had made
+        count = lambda: int(step(f"import pcb; print('LEFT', len(pcb.unconnected_of({path!r})))")
+                            .split("LEFT", 1)[1].split()[0])
+        n0 = count()
+        back = path + ".before-tidy"
+        shutil.copy(path, back)
         step("import pcbnew, yaml, pcb_route; "
              f"lay = yaml.safe_load(open({os.path.join(HERE, 'layout.yaml')!r})); b = pcbnew.LoadBoard({path!r}); "
              "o = pcb_route.plane_orphans(b, lay); "
              "o and pcb_route.fanout(b, lay, pcb_route.Obstacles(b, lay), only=o); "
              f"pcb_route.tidy(b, lay); pcbnew.SaveBoard({path!r}, b)")
+        step(f"import pcb_route; pcb_route.fill_zones({path!r})")
+        n1 = count()
+        if n1 > n0:
+            shutil.copy(back, path)
+            print(f"fr_trial: the tidy left {n1} connection(s) apart where Freerouting left {n0} - not kept")
+        else:
+            print(f"fr_trial: tidied ({n0} -> {n1} apart)")
     step(f"import pcb_route; pcb_route.fill_zones({path!r})")
     md = os.path.join(out, "score.md")
     step(f"import pcb_score; rows = pcb_score.score({path!r}, everything=True); t = pcb_score.totals(rows); "
