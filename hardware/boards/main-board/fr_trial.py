@@ -67,15 +67,15 @@ CONNECT_FIRST = [
     # J-MCU's two neighbouring 5 V pins: the source board joins them by a 0.4 mm link it did not
     # lock, so the copper strip took it; Freerouting never made it again
     ("J1.1", "J1.3"),
+    # the buck's output cap to the OR controller's output, 2.5 mm - BEFORE the gate below: laid
+    # first, the gate went round over U13.6 to reach U13.5 and sealed it in (2026-10-13)
+    ("C207.2", "U13.6"),
     # the USB OR-ing FET's gate to the controller, 5 mm: Freerouting ringed Q2.1 in with
     # BUCK_A_OUT (U13.3 - U13.6) and every round left it
     ("Q2.1", "U13.5"),
     # J-MCU pin 20 to the right-hand chain's last register: its way out of the header's top row
     # was taken by IO34 (F.Cu, y 133) and IO6 (B.Cu) before it was routed
     ("J1.20", "U8.9"),
-    # the buck's output cap to the OR controller's output, 2.5 mm, last left of trial 7's board
-    # after three more rounds; the cold trial needed its edit `connect U13.3 - U13.6` here too
-    ("C207.2", "U13.6"),
 ]
 COMPLETE_S = 40 * 60      # the grid completion's bound: past it the board as Freerouting left it
 
