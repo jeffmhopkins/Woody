@@ -15,9 +15,10 @@ A trial, like cold_trial.py: it writes into --out, never the board itself.
 3. The Freerouting round trip (tools/pcb_freeroute.py: its pinned release, neck-down off).
    FIRST, alone (FIRST, or --first): the nets that cross the board between two fixed parts,
    routed by Freerouting on a copy where nothing else has a net, then fixed on the board.
-4. Zones filled and pcb.py's post_route: what Freerouting left, routed by the grid router with
-   rip-up, tidied, the silkscreen - bounded by COMPLETE_S, past which the board goes back to
-   Freerouting's. What is still apart is REPORTED by net. --no-complete: tidied only.
+4. Freerouting again on its own result (its wiring unfixed, so it rips up and shoves), up to
+   ROUNDS rounds or until nothing is left; then the tracks tidied. What is still apart is
+   REPORTED by net. --complete adds pcb.py's post_route (the grid router with rip-up), bounded
+   by COMPLETE_S - off by default: every one of trial 4's 26 DRC errors was on a net it laid.
 5. The scorecard (tools/pcb_score.py) and KiCad's DRC; the board, a render and the score in
    --out.
 
@@ -47,7 +48,15 @@ KEEP = ["AGND_INST", "/SENSOR_BUFFERED_OUT", "/SENSOR_RAW", "VS", "/breath-excit
 # Left to the end of Freerouting's run they had the whole finished board to cross, and four of
 # trial 3's nine leftovers were these (2026-10-13). The SPI bus (J-MCU to the MCP3202) and the
 # chain's two long lines from their series resistors at J-MCU
-FIRST = ["/IO35", "/IO36", "/IO37", "/CHAIN_SCK", "/CHAIN_SHLD"]
+# Off by default since trial 4 (2026-10-13): with these five fixed first, Freerouting left 19
+# connections for the rest, against trial 3's 9 without. `--first` still runs it
+FIRST = []
+FIRST_TRIED = ["/IO35", "/IO36", "/IO37", "/CHAIN_SCK", "/CHAIN_SHLD"]
+# Freerouting again on its own result, until nothing is left or ROUNDS are run: its wiring goes
+# back unfixed, so the next round rips up and shoves round what it left - Freerouting's own
+# push-and-shove finishing the board, where the grid completion laid illegal copper (trial 1's
+# crossing, trial 4's 26 DRC errors, every one on a net it routed)
+ROUNDS = 3
 COMPLETE_S = 40 * 60      # the grid completion's bound: past it the board as Freerouting left it
 
 
@@ -129,9 +138,16 @@ def main():
     first = args[args.index("--first") + 1].split(",") if "--first" in args else FIRST
     if first and first != [""]:
         first_pass(path, first, edge, lay.get("directions"))
-    step(f"import pcb_freeroute; pcb_freeroute.route({path!r}, {edge!r}, {lay.get('directions')!r})")
-    step(f"import pcb_route; pcb_route.fill_zones({path!r})")
-    if "--no-complete" not in args:
+    rounds = int(args[args.index("--rounds") + 1]) if "--rounds" in args else ROUNDS
+    for k in range(1, rounds + 1):
+        step(f"import pcb_freeroute; pcb_freeroute.route({path!r}, {edge!r}, {lay.get('directions')!r})")
+        step(f"import pcb_route; pcb_route.fill_zones({path!r})")
+        left = step(f"import pcb; print('LEFT', len(pcb.unconnected_of({path!r})))")
+        n = int(left.split("LEFT", 1)[1].split()[0]) if left and "LEFT" in left else -1
+        print(f"fr_trial: Freerouting round {k}: {n} connection(s) left")
+        if n == 0:
+            break
+    if "--complete" in args:
         # the whole of pcb.py's post_route: what Freerouting left, routed by the grid router with
         # rip-up, tidied, the silkscreen. BOUNDED: unbounded, 13 connections ran past two hours
         # (2026-10-13); past COMPLETE_S the board goes back to Freerouting's, and what is left
