@@ -71,6 +71,7 @@ def clean(path, short=0.6, rounds=6, log=print):
             break
     for u in gone:
         b.Delete(u)
+    traps = pcb.check_tracks(b)         # as they stand once the scraps are off, not as tested
     pcbnew.SaveBoard(path, b)
     log(f"pcb_clean: acid traps {first} -> {len(traps)}, {removed} scrap(s) removed")
     for t in traps:

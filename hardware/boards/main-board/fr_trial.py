@@ -70,6 +70,9 @@ CONNECT_FIRST = [
     # the buck's output cap to the OR controller's output, 2.5 mm - BEFORE the gate below: laid
     # first, the gate went round over U13.6 to reach U13.5 and sealed it in (2026-10-13)
     ("C207.2", "U13.6"),
+    # and its other side, VCAP: with only pin 6 laid first, Freerouting still took the gate up
+    # between C207 and U13 to reach pin 5, and walled pins 6 and 1 off from C207 (2026-10-13)
+    ("C207.1", "U13.1"),
     # the USB OR-ing FET's gate to the controller, 5 mm: Freerouting ringed Q2.1 in with
     # BUCK_A_OUT (U13.3 - U13.6) and every round left it
     ("Q2.1", "U13.5"),
