@@ -11,7 +11,9 @@ A trial, like cold_trial.py: it writes into --out, never the board itself.
    #33), kept locked so Freerouting routes round them. Everything else is Freerouting's:
    the owner, 2026-10-13, "only some components need be locked".
 2. The moat's keep-out and the plane fanout (pcb_route.moat_keepout, pcb_route.fanout), as
-   pcb.py's `route: freerouting` lays them before the autorouter.
+   pcb.py's `route: freerouting` lays them before the autorouter; then CONNECT_FIRST, the
+   named pad-to-pad connections Freerouting could not make, laid on that near-empty board and
+   fixed.
 3. The Freerouting round trip (tools/pcb_freeroute.py: its pinned release, neck-down off).
    FIRST, alone (FIRST, or --first): the nets that cross the board between two fixed parts,
    routed by Freerouting on a copy where nothing else has a net, then fixed on the board.
@@ -57,6 +59,20 @@ FIRST_TRIED = ["/IO35", "/IO36", "/IO37", "/CHAIN_SCK", "/CHAIN_SHLD"]
 # push-and-shove finishing the board, where the grid completion laid illegal copper (trial 1's
 # crossing, trial 4's 26 DRC errors, every one on a net it routed)
 ROUNDS = 3
+# Pad-to-pad connections laid BEFORE Freerouting, on the board that holds only the kept copper
+# and the fanout (pcb_route.complete, as pcb_route.prepare's connect_first), then fixed. Each is
+# one Freerouting's rounds could not make on trial 5's board (2026-10-13: four left, round 4 on)
+CONNECT_FIRST = [
+    # J-MCU's two neighbouring 5 V pins: the source board joins them by a 0.4 mm link it did not
+    # lock, so the copper strip took it; Freerouting never made it again
+    ("J1.1", "J1.3"),
+    # the USB OR-ing FET's gate to the controller, 5 mm: Freerouting ringed Q2.1 in with
+    # BUCK_A_OUT (U13.3 - U13.6) and every round left it
+    ("Q2.1", "U13.5"),
+    # J-MCU pin 20 to the right-hand chain's last register: its way out of the header's top row
+    # was taken by IO34 (F.Cu, y 133) and IO6 (B.Cu) before it was routed
+    ("J1.20", "U8.9"),
+]
 COMPLETE_S = 40 * 60      # the grid completion's bound: past it the board as Freerouting left it
 
 
@@ -126,6 +142,20 @@ def main():
     pcb_route.moat_keepout(b, lay)
     rep = pcb_route.fanout(b, lay, pcb_route.Obstacles(b, lay))
     print(f"fr_trial: fanout: {len(rep)} line(s) of report" + (f"; {rep[:3]}" if rep else ""))
+    # the named connections, laid before anything else and fixed
+    import pcb_route as PR
+    done = 0
+    for a_, c_ in CONNECT_FIRST:
+        pa = b.FindFootprintByReference(a_.split(".")[0]).FindPadByNumber(a_.split(".")[1])
+        pc = b.FindFootprintByReference(c_.split(".")[0]).FindPadByNumber(c_.split(".")[1])
+        before = {t.m_Uuid.AsString() for t in b.GetTracks()}
+        at = [(pcbnew.ToMM(q.GetPosition().x), pcbnew.ToMM(q.GetPosition().y)) for q in (pa, pc)]
+        left = PR.complete(b, lay, [(pa.GetNetname(), at[0], at[1])])
+        for t in b.GetTracks():
+            if t.m_Uuid.AsString() not in before:
+                t.SetLocked(True)
+        done += 0 if left else 1
+        print(f"fr_trial: connect first {a_} - {c_} ({pa.GetNetname()}): {'FAILED' if left else 'laid, fixed'}")
     pcbnew.SaveBoard(path, b)
     # the board's own project, its net classes from layout.yaml (as pcb.py layout writes them)
     pro = os.path.splitext(path)[0] + ".kicad_pro"
