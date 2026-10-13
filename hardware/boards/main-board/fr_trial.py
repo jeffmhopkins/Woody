@@ -13,10 +13,11 @@ A trial, like cold_trial.py: it writes into --out, never the board itself.
 2. The moat's keep-out and the plane fanout (pcb_route.moat_keepout, pcb_route.fanout), as
    pcb.py's `route: freerouting` lays them before the autorouter.
 3. The Freerouting round trip (tools/pcb_freeroute.py: its pinned release, neck-down off).
-4. Zones filled and the tracks tidied (plane orphans, doubled and dangling tracks). What
-   Freerouting left unrouted is REPORTED, by net - the next placement question. With
-   --complete, pcb.py's whole post_route instead: the grid router routes what is left, with
-   rip-up, and the silkscreen (slow: 13 connections ran past two hours, 2026-10-13).
+   FIRST, alone (FIRST, or --first): the nets that cross the board between two fixed parts,
+   routed by Freerouting on a copy where nothing else has a net, then fixed on the board.
+4. Zones filled and pcb.py's post_route: what Freerouting left, routed by the grid router with
+   rip-up, tidied, the silkscreen - bounded by COMPLETE_S, past which the board goes back to
+   Freerouting's. What is still apart is REPORTED by net. --no-complete: tidied only.
 5. The scorecard (tools/pcb_score.py) and KiCad's DRC; the board, a render and the score in
    --out.
 
@@ -37,19 +38,55 @@ sys.path.insert(0, TOOLS)
 
 # the analog block's hand routes, kept (#33): its island, the breath pair and its guards
 KEEP = ["AGND_INST", "/SENSOR_BUFFERED_OUT", "/SENSOR_RAW", "VS", "/breath-excitation-reference/*",
-        "/breath-adc/*", "REF_VIN", "/BREATH_SENSE"]
+        "/breath-adc/*", "REF_VIN", "/BREATH_SENSE",
+        # and J-MCU's 5 V link J1.3 - J1.17 under its back row, the source board's hand route:
+        # left to Freerouting it was the one connection in that strip it did not make (trial 3)
+        "INST_5V_A"]
+
+# Routed FIRST, alone on the board, then fixed: the nets that cross it between two fixed parts.
+# Left to the end of Freerouting's run they had the whole finished board to cross, and four of
+# trial 3's nine leftovers were these (2026-10-13). The SPI bus (J-MCU to the MCP3202) and the
+# chain's two long lines from their series resistors at J-MCU
+FIRST = ["/IO35", "/IO36", "/IO37", "/CHAIN_SCK", "/CHAIN_SHLD"]
+COMPLETE_S = 40 * 60      # the grid completion's bound: past it the board as Freerouting left it
 
 
-def step(code):
-    """`code` in a fresh process (a just-saved board, as pcb.py does it), its output shown."""
-    r = subprocess.run([sys.executable, "-c", f"import sys; sys.path.insert(0, {TOOLS!r}); " + code],
-                       capture_output=True, text=True)
+def step(code, timeout=None):
+    """`code` in a fresh process (a just-saved board, as pcb.py does it), its output shown.
+    With `timeout` (s), None when it runs out."""
+    try:
+        r = subprocess.run([sys.executable, "-c", f"import sys; sys.path.insert(0, {TOOLS!r}); " + code],
+                           capture_output=True, text=True, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        return None
     out = "\n".join(l for l in r.stdout.splitlines() if "Debug:" not in l and not l.startswith("route: WARNING"))
     if out:
         print(out)
     if r.returncode:
         sys.exit(f"fr_trial: failed: {code[:80]}\n{r.stderr[-3000:]}")
     return r.stdout
+
+
+def first_pass(path, first, edge, directions):
+    """The nets `first` names, routed by Freerouting ALONE on the board at `path` (every other
+    pad unnetted on a copy, so it has nothing else to connect but stands as an obstacle), then
+    copied onto the board fixed. The rest of the board is routed round them."""
+    a = path.replace(".kicad_pcb", ".first.kicad_pcb")
+    shutil.copy(path, a)
+    shutil.copy(os.path.splitext(path)[0] + ".kicad_pro", os.path.splitext(a)[0] + ".kicad_pro")
+    step("import pcbnew, fnmatch; "
+         f"b = pcbnew.LoadBoard({a!r}); first = {first!r}; "
+         "[p.SetNetCode(0) for f in b.GetFootprints() for p in f.Pads() "
+         " if p.GetNetname() and not any(fnmatch.fnmatchcase(p.GetNetname(), g) for g in first)]; "
+         f"pcbnew.SaveBoard({a!r}, b)")
+    step(f"import pcb_freeroute; pcb_freeroute.route({a!r}, {edge!r}, {directions!r})")
+    out = step("import pcbnew, fnmatch; "
+               f"src = pcbnew.LoadBoard({a!r}); dst = pcbnew.LoadBoard({path!r}); first = {first!r}; n = 0\n"
+               "for t in src.GetTracks():\n"
+               "    if any(fnmatch.fnmatchcase(t.GetNetname(), g) for g in first):\n"
+               "        c = t.Duplicate(); c.SetNet(dst.FindNet(t.GetNetname())); c.SetLocked(True); dst.Add(c); n += 1\n"
+               f"pcbnew.SaveBoard({path!r}, dst); print('fr_trial: first pass', n, 'track(s) and via(s) fixed for', first)")
+    return out
 
 
 def main():
@@ -89,12 +126,24 @@ def main():
         pcb.set_net_classes(j, lay)
         json.dump(j, open(pro, "w"), indent=2)
     edge = float(lay["rules"]["edge_clearance"])
+    first = args[args.index("--first") + 1].split(",") if "--first" in args else FIRST
+    if first and first != [""]:
+        first_pass(path, first, edge, lay.get("directions"))
     step(f"import pcb_freeroute; pcb_freeroute.route({path!r}, {edge!r}, {lay.get('directions')!r})")
     step(f"import pcb_route; pcb_route.fill_zones({path!r})")
-    if "--complete" in args:
-        # the whole of pcb.py's post_route: what Freerouting left routed by the grid router,
-        # with rip-up - slow (13 connections ran past two hours, 2026-10-13), for a finished board
-        step(f"import pcb; pcb.post_route({path!r}, {HERE!r})")
+    if "--no-complete" not in args:
+        # the whole of pcb.py's post_route: what Freerouting left, routed by the grid router with
+        # rip-up, tidied, the silkscreen. BOUNDED: unbounded, 13 connections ran past two hours
+        # (2026-10-13); past COMPLETE_S the board goes back to Freerouting's, and what is left
+        # is reported
+        back = path + ".before-complete"
+        shutil.copy(path, back)
+        if step(f"import pcb; pcb.post_route({path!r}, {HERE!r})", timeout=COMPLETE_S) is None:
+            shutil.copy(back, path)
+            print(f"fr_trial: the completion ran past {COMPLETE_S} s - the board as Freerouting left it")
+            step("import pcbnew, yaml, pcb_route; "
+                 f"lay = yaml.safe_load(open({os.path.join(HERE, 'layout.yaml')!r})); b = pcbnew.LoadBoard({path!r}); "
+                 f"pcb_route.tidy(b, lay); pcbnew.SaveBoard({path!r}, b)")
     else:
         # a placement trial: tidied only (plane orphans their via, doubled and dangling tracks
         # off). What Freerouting left is reported, not ground at: it is the next placement
