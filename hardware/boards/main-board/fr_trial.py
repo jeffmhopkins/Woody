@@ -18,7 +18,8 @@ A trial, like cold_trial.py: it writes into --out, never the board itself.
    FIRST, alone (FIRST, or --first): the nets that cross the board between two fixed parts,
    routed by Freerouting on a copy where nothing else has a net, then fixed on the board.
 4. Freerouting again on its own result (its wiring unfixed, so it rips up and shoves), up to
-   ROUNDS rounds or until nothing is left; then the tracks tidied. What is still apart is
+   ROUNDS rounds or until nothing is left; then the tracks tidied (kept only if it parts
+   nothing) and the scraps that make acid traps taken off (tools/pcb_clean.py). What is still apart is
    REPORTED by net. --complete adds pcb.py's post_route (the grid router with rip-up), bounded
    by COMPLETE_S - off by default: every one of trial 4's 26 DRC errors was on a net it laid.
 5. The scorecard (tools/pcb_score.py) and KiCad's DRC; the board, a render and the score in
@@ -214,6 +215,9 @@ def main():
             print(f"fr_trial: the tidy left {n1} connection(s) apart where Freerouting left {n0} - not kept")
         else:
             print(f"fr_trial: tidied ({n0} -> {n1} apart)")
+        # and the scraps left at Freerouting's joints that make acid traps (tools/pcb_clean.py:
+        # a removal kept only if the net stays as joined), 30 -> 4 on trial 7's board
+        step(f"import pcb_clean; pcb_clean.clean({path!r})")
     step(f"import pcb_route; pcb_route.fill_zones({path!r})")
     md = os.path.join(out, "score.md")
     step(f"import pcb_score; rows = pcb_score.score({path!r}, everything=True); t = pcb_score.totals(rows); "
