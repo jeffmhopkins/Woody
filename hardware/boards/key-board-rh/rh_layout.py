@@ -140,9 +140,9 @@ def routes(cu, sw):
     # RH3: up the mouth side of its resistor, then a diagonal parallel to RH2's to stand under pin 4
     xc = ser["RH3"][0] - 1.2
     cu.track("/KEY_RH3", mouth_end(ser, "RH3", xc) + [(xc, ch(-5.1) - (x4 - xc)), (x4, ch(-5.1)), (x4, y4)])
-    # RH4: up the corridor, across at 45 over RH3's switch, and along to stand under pin 3
-    cu.track("/KEY_RH4", mouth_end(ser, "RH4", xl4) + [(xl4, 27.0), (xl4 - (ch(-4.6) - 27.0), ch(-4.6)), (x3 + 0.5, ch(-4.6)),
-                                                       (x3, ch(-4.1)), (x3, y3)])
+    # RH4: up the corridor, then one diagonal over RH3's switch straight to the foot of pin 3
+    # (owner, 2026-11-20: "this spot should just be one diagonal going down to the left")
+    cu.track("/KEY_RH4", mouth_end(ser, "RH4", xl4) + [(xl4, ch(-4.1) - (xl4 - x3)), (x3, ch(-4.1)), (x3, y3)])
     # RH5 and RH6 leave the far row between C7 and C9 and go over C9 toward the tail, RH5 inside.
     # Each comes down to its key on one long diagonal rather than round a square corner (owner,
     # 2026-11-20: "need to be routed diagonally down"): RH5's runs beside the rail's, RH6's passes
