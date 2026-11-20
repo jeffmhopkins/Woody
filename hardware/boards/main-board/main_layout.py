@@ -38,8 +38,8 @@ THE FLOORPLAN, and why each part is where it is.
 5. THE REGISTER'S OWN SMALL PARTS STAND IN ONE ROW between it and the LED row, level with
    the combs there; the capacitor of pin 16 stands on end beside that pin.
 6. EACH LED'S 100 nF STANDS IN THE ROW, on the mouth side of its LED, a millimetre clear.
-7. THE CHAIN'S SERIES RESISTORS STAND IN ONE ROW AT J-MCU, under the Matrix ribbon's fold,
-   with R-LED-SERIES among them below the first LED's data pad.
+7. THE CHAIN'S SERIES RESISTORS STAND IN ONE ROW AT J-MCU'S MOUTH END, SER's pull-up the
+   fourth in the row; R-LED-SERIES stands below the first LED's data pad.
 8. THE ANALOG BLOCK IS LAID OUT ALONG ITS SIGNAL, from the sensor's pins outward (owner,
    2026-11-20: a fresh approach, best analog first):
    - the sensor's three live pins are on its far edge, RAW nearest the mouth, then AGND,
@@ -56,11 +56,13 @@ THE FLOORPLAN, and why each part is where it is.
      its supply resistor are ONE row above it, in signal order from the mouth.
    - nothing analog is within the LEDs' row, and no analog line crosses it on the top face.
 9. THE TAIL END follows J-MCU's fan-out (the note over its PLACE entries): the chain's
-   resistors at the header's mouth end, under the gap their lines climb to the far band;
-   the LED driver beside the first LED, pin 1 tailward; the SPI resistors a row under the
-   umbilical's pins, the reverse-polarity diode astride two of those lines at the pins;
-   the breath resistors on their own pins' lines; the inrush switch in the corner beyond
-   the pins. The regulator stands as reviewed (#33, #34, #45), its inductor turned to it.
+   resistors at the header's mouth end; the LED driver beside the first LED, pin 1
+   tailward; the SPI resistors a row under the umbilical's pins, the reverse-polarity
+   diode astride two of those lines at the pins; the breath resistors on their own pins'
+   lines; the inrush switch in the corner beyond the pins; the MIDI clamp between the
+   beads and J-MIDI's pins, clear of the lead that plugs in from the tail. The regulator
+   stands as reviewed (#33, #34, #45) but for two turns: the inductor's input pad faces
+   the regulator, and the OR-ing switch faces its controller so gate and 5 V run straight.
 
 SPACING, so that nothing is tight or a little off without a reason: a millimetre between
 courtyards; parts side by side at 3 mm (0805), end to end at 4.5 mm; every row and comb
@@ -138,19 +140,27 @@ PLACE.update({
 # J-MCU's odd pins can only leave toward the near edge and its even pins toward the far one,
 # so which line leaves on which face, and round which end, is settled before any part stands:
 #   top, round the TAIL end, nested: IO6, 3V3, IO36, IO35, IO34 (inside to outside)
-#   top, round the MOUTH end: IO33; top, straight out from the even row: QH
-#   bottom: the chain's IO38 and IO7 and the ADC's four, toward the mouth; IO1, IO2 and the
-#   service UART from the even row
+#   top, straight out from the even row: QH, and 5 V from pins 1-2 past the header's mouth end
+#   bottom, under the odd row and north past the mouth end, seven lanes: IO33, IO35, IO36,
+#   IO37, IO38, IO7, IO39 (inside to outside). IO39 turns toward the mouth first, IO7 and
+#   IO38 end on vias under their resistors, the ADC's three turn next, IO33 ends last.
+#   bottom, from the even row toward the tail: IO1, IO2, the service UART, 5 V to the LED driver
+#   3V3 has no lane toward the mouth: its trunk starts at a via by R49, runs the bottom face
+#   north of the even row's lines and comes down to R37, then lies south of the chain's trunk
+#   (whose lines must rise to the chain headers) and north of the ADC's.
+# Under the three 1206 bodies pass 5 V (south) and QH (north) on the top face; each chain
+# line takes a via between two of their pads to the bottom trunk.
 # Each resistor then stands where its line arrives, and nothing crosses on a face.
-TRIO = 23.9                   # the chain's three series resistors: fed from J-MCU's mouth end, out toward the far band
+TRIO = 23.9                   # the chain's three series resistors: fed from J-MCU's mouth end by vias under them
 SPI_Y = 19.5                  # the umbilical's SPI resistors, a row under its pins; 3V3 and IO36 pass under their bodies
 BUS_U, BUS_G = 16.4, 14.5     # the inrush switch's two buses, UMBILICAL_POS12 over INRUSH_GATE
 COL = (293.95, 296.4, 298.85) # ...and its three columns
 PLACE.update({
     "R35": (247.7, TRIO, ("IO7", "S")), "R34": (250.7, TRIO, ("IO38", "S")), "R36": (253.7, TRIO, ("IO33", "S")),
-    "R37": (256.7, TRIO, ("3V3", "S")),   # SER's pull-up beside its resistor; QH passes under all four bodies
+    "R37": (256.7, TRIO + 0.55, ("3V3", "S")),   # SER's pull-up, its SER pad level with R36's; QH passes under its body
     "C45": (252.6, 28.5, "-y"),
-    "L1": (247.8, 17.9, ("BUCK_IN", "W")),   # its regulator side toward the regulator
+    "L1": (247.8, 17.9, ("BUCK_IN", "W")),
+    "Q2": (237.9, 19.45, ("INST_5V", "E")), "C208": (242.1, 20.6, ("INST_5V", "W")),   # its regulator side toward the regulator
     "R45": (43.8, 19.55, ("3V3", "E")),    # the ADC chip-select pull-up over R47, sharing its 3V3
     # the LED driver, pin 1 toward the tail: its LED output leaves under the body to R11 below
     # the first LED's data pad, its MIDI outputs leave the far end, IO6 comes up its tail side
@@ -175,7 +185,8 @@ PLACE.update({
     "R38": (281.3, 37.39, ("BREATH_SENSE", "E")), "R39": (281.3, 34.85, ("AGND_SENSE", "E")),
     "D5": (292.2, 36.36, ("BREATH", "E")), "D6": (292.2, 34.15, ("AGND_SENSE", "E")),
     # MIDI: each bead in line with its pin of J-MIDI
-    "FB3": (281.85, 40.0, ("TIP_R", "W")), "FB4": (281.85, 42.0, ("RING_R", "W")),
+    "FB3": (275.4, 38.96, ("TIP_R", "W")), "FB4": (275.4, 41.95, ("RING_R", "W")),
+    "U12": (281.5, 41.0, ("1", (1.14, -0.95))),
     # the inrush switch in the free corner beyond the pins, 12 V reaching it down the tail edge:
     # three columns on two buses, each gate part under the rung it hangs from
     "Q1": (COL[0] - 0.94, (BUS_U + BUS_G) / 2, ("2", "NE")),
