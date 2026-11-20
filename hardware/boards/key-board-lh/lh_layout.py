@@ -243,8 +243,11 @@ def routes(geo):
     c6 = (upin(15)[0] + 1.9, Y_CAPS)
     xt = sw["LH3"][0] + X_CAP + 1.3 + 1.2      # the trunk's way down: third of the corridor's four lines (below)
     yr5, yr4, yr = pu1["LH5"][1], pu1["LH4"][1], pu1["LH3"][1]
-    xe = sw["LH4"][0] + X_CAP + 1.3      # round LH4, outside its capacitor
-    xw = sw["LH3"][0] + X_CAP + 1.3      # back up to the row keys' rail, mouth side of LH4's line
+    # THE TRUNK RINGS LH4, AND THE RING IS LEFT OPEN TO THE POUR (owner, 2026-11-20: "Now we're
+    # have large islands"): wherever it passes a part or another line it stands far enough off
+    # for the pour to run between, so the ground inside the ring is one piece with the rest.
+    xe = sw["LH4"][0] + 8.0      # round LH4, a pour's width outside its capacitor
+    xw = sw["LH3"][0] + 7.0      # back up to the row keys' rail, a pour's width on the mouth side of LH4's line
     track(V33, [j, c7, (c7[0] + 1.0, c7[1]), (c7[0] + 1.0 + Y_RAIL - c7[1], Y_RAIL), r11, (x12 - 0.5, Y_RAIL), (x12, Y_RAIL - 0.5),
                 (x12, Y_CAPS), upin(12), (x12, ch(1.7)), (x12 + 0.8, ch(0.9)), (x16 - 0.8, ch(0.9)), (x16, ch(1.7)), upin(16),
                 (x16, UY + 3.45), (c6[0], UY + 3.45 + c6[0] - x16), c6, (xt, c6[1] - (xt - c6[0])), (xt, yr5 + 0.5), (xt + 0.5, yr5),
@@ -287,7 +290,9 @@ def routes(geo):
     assert xl5 + 0.125 + 0.2 <= ser["LH5"][0] - 0.725 + 1e-6, "LH5's line fouls its own resistor"
     # LH3 and LH4 cross together at 45 to stand under pins 4 and 3
     track("/KEY_LH3", tail_end("LH3") + [(xl3, 31.5), (x4, 31.5 + xl3 - x4), (x4, y4)])
-    track("/KEY_LH4", mouth_end("LH4", xl4) + [(xl4, 32.1), (x3, 32.1 + xl4 - x3), (x3, y3)])
+    # LH4 climbs 0.8 out from its place in the corridor until it is past the trunk's way up
+    # (xw), which is the gap the pour inside the trunk's ring joins the rest through
+    track("/KEY_LH4", mouth_end("LH4", xl4 + 0.8) + [(xl4 + 0.8, 24.5), (xl4, 25.3), (xl4, 32.1), (x3, 32.1 + xl4 - x3), (x3, y3)])
     # LH5: out of the far row between C8 and C6, over C6's ground via, and straight down the corridor
     track("/KEY_LH5", [(x14, y14), (x14, UY + 3.6), (x14 + 0.3, UY + 3.9), (x14 + 0.3, Y_VIA + 0.55), (x14 + 0.8, Y_VIA + 1.05),
                        (xl5 - 0.5, Y_VIA + 1.05), (xl5, Y_VIA + 0.55)] + mouth_end("LH5", xl5)[::-1])
@@ -339,10 +344,10 @@ def draw(board):
         board.Add(v)
 
 
-# The parts face's pour is cut into pieces by the 3V3 trunk, which rings LH4. Every piece holds
-# a ground pin or a ground via of its own; the ring's inside, which had only LH4's switch pin
-# through its relief spokes, gets one via more.
-STITCH = [(102.5, 20.5)]
+# No stitching via: the parts face's pour is one piece but for the pocket round U1's pin 15,
+# which a line on either side of that pin (LH5's and 3V3) closes, and which C6's and C8's
+# ground vias tie to the switch-side face.
+STITCH = []
 
 
 def relieve(board):
