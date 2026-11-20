@@ -80,10 +80,10 @@ better."*
 ## Open, and what decides each
 
 - **Which boards this covers.** The right-hand key board and the Matrix
-  carrier are next by the plan this work follows; the owner has not yet said
-  whether the main board and the module's boards follow. The owner decides.
-- **Whether the right hand's header turns too.** Decided when that board's
-  placement is shown.
+  carrier are next by the plan this work follows, and the main board after
+  them (the owner, 2026-11-20: *"We'll be redoing the main board as well"*).
+  The owner has not yet said whether the module's boards follow. The owner
+  decides.
 - **Grounding the key boards' mounts.** The owner, 2026-11-20: *"I think the
   standoffs can actually be part of the ground plane?"* Not done: ADR 0020
   Amendment 7 leaves all four unplated because the columns already tie the

@@ -15,16 +15,14 @@ toward the tail, with a sixth key. The two registers have the same pins for the 
 for the four keys of the near row, so what decided that board decides this one:
 
 1. THE CHAIN BUS RUNS UNDER THE REGISTER, between its pad rows, in J-CHAIN's own pin order.
-2. THAT NEEDS J-CHAIN'S MOUTH TOWARD THE MOUTH END, as the left hand's now is. THE BODY CAD
-   STILL FACES THIS ONE TOWARD THE TAIL (config/body.yaml routing.chain_fold), and the
-   owner has not decided to turn it: this script seats the header TURNED, as a proposal
-   (FACE, below), and says so when it runs. Facing the tail, the header's signal row is on
-   its mouth side, and the register behind it would have its four near-row key inputs
-   facing the far edge, away from every switch.
+2. THAT NEEDS J-CHAIN'S MOUTH TOWARD THE MOUTH END, as the left hand's is, and it keeps the
+   ribbon's hairpin from lying under the register (owner, 2026-11-20: "we do need to turn
+   it"; ADR 0017, the right hand's Amendment of that date; config/body.yaml
+   routing.chain_fold). The body CAD finds the turned header's place along the body.
 3. U1 stands as close behind the header as the left hand's does (owner, 2026-11-20, chose
-   "Register closer to the header"), so the bus is as short as on the left. That puts the
-   register on the mouth side of RH3, so RH3's line leaves the mouth end of its node, as
-   RH4's and RH5's do; RH1 and RH2 still leave the tail end.
+   "Register closer to the header"), so the bus is as short as on the left. That is level
+   with RH3, as the left hand's register is level with LH3: RH1, RH2 and RH3 leave the tail
+   end of their nodes, RH4 and RH5 the mouth end.
 4. EACH KEY'S NETWORK STANDS OUTSIDE ITS OWN SWITCH'S PINS (tools/pcb_hand.py, KEY_NET).
 5. The register's two decouplers each stand across a 3V3 pin and the ground pin beside
    it on the far row: C7 across pins 11 and 12, C9 across 16 and 15. RH6 and RH5 (pins 13
@@ -50,13 +48,9 @@ SRC = os.path.join(HERE, NAME + ".kicad_pcb")
 OUT = os.path.join(HERE, NAME + ".hand.kicad_pcb")
 V33 = "V3V3_CHAIN_RH"
 
-# PROPOSED, NOT DECIDED: J-CHAIN's mouth toward the mouth end (-1). The body CAD says +1.
-# When the owner decides, config/body.yaml routing.chain_fold moves and this line goes.
-FACE = -1
-
-# J-CHAIN's pads with the header turned about its pad centre: the signal row (odd pins) at
+# J-CHAIN's pads where the body CAD puts the header (pcb_hand.seat_chain holds this script to it): the signal row (odd pins) at
 # JX, pin 1 at the far-edge end, 1.27 between pins.
-JX, JY1 = 183.41, 45.19
+JX, JY1 = 191.36, 45.19
 
 
 def jpin(k):
@@ -106,9 +100,10 @@ def routes(cu, sw):
     j = jpin(11)
     cu.track("/CHAIN_SCK", [j, (JX + 1.24, j[1]), (JX + 1.24 + ch(-1.0) - j[1], ch(-1.0)), (x2 - 0.3, ch(-1.0)), (x2, ch(-1.3)), (x2, y2)])
 
-    # -- the corridor between RH3's capacitor and RH5's resistor: RH4, 3V3, RH5 side by side
-    xw = cap["RH3"][0] + 1.3      # the rail's way back up to the row keys, mouth side of RH4's line
-    xl4, xt, xl5 = xw + 0.6, xw + 1.2, xw + 1.8
+    # -- the corridor between RH3's capacitor and RH5's resistor: RH3, RH4, 3V3, RH5 side by side
+    xl3 = cap["RH3"][0] + 1.3
+    xl4, xt, xl5 = xl3 + 0.6, xl3 + 1.2, xl3 + 1.8
+    xw = xl3                      # the rail's way back up to the row keys, where RH3's line has left for its pin
     assert xl5 + 0.125 + 0.2 <= ser["RH5"][0] - 0.725 + 1e-6, "RH5's line fouls its own resistor"
     x6c = ser["RH6"][0] - 1.7     # RH6's way down, between the trunk's ring round RH4 and RH6's own resistor
 
@@ -137,17 +132,15 @@ def routes(cu, sw):
     # RH2: beside its capacitor, then one diagonal to stand under pin 5
     xc = cap["RH2"][0] + 1.3
     cu.track("/KEY_RH2", tail_end(cap, "RH2") + [(xc, ch(-4.5) - (x5 - xc)), (x5, ch(-4.5)), (x5, y5)])
-    # RH3: up the mouth side of its resistor, then a diagonal parallel to RH2's to stand under pin 4
-    xc = ser["RH3"][0] - 1.2
-    cu.track("/KEY_RH3", mouth_end(ser, "RH3", xc) + [(xc, ch(-5.1) - (x4 - xc)), (x4, ch(-5.1)), (x4, y4)])
-    # RH4: up the corridor, then one diagonal over RH3's switch straight to the foot of pin 3
-    # (owner, 2026-11-20: "this spot should just be one diagonal going down to the left")
-    cu.track("/KEY_RH4", mouth_end(ser, "RH4", xl4) + [(xl4, ch(-4.1) - (xl4 - x3)), (x3, ch(-4.1)), (x3, y3)])
+    # RH3 and RH4 go up the corridor side by side, and each takes one diagonal to the foot of
+    # its pin (owner, 2026-11-20: "this spot should just be one diagonal going down to the left")
+    cu.track("/KEY_RH3", tail_end(cap, "RH3") + [(xl3, 31.5), (x4, 31.5 + xl3 - x4), (x4, y4)])
+    cu.track("/KEY_RH4", mouth_end(ser, "RH4", xl4) + [(xl4, 32.1), (x3, 32.1 + xl4 - x3), (x3, y3)])
     # RH5 and RH6 leave the far row between C7 and C9 and go over C9 toward the tail, RH5 inside.
     # Each comes down to its key on one long diagonal rather than round a square corner (owner,
     # 2026-11-20: "need to be routed diagonally down"): RH5's runs beside the rail's, RH6's passes
     # the far side of RH5's switch.
-    D5, D6 = 10.0, 14.0        # as long as C9's ground via and RH5's ground pin allow
+    D5, D6 = 2.5, 14.0         # as long as C9's pad and RH5's ground pin allow
     cu.track("/KEY_RH5", [(x14, y14), (x14, Y_VIA + 0.55), (x14 + 0.5, Y_VIA + 1.05), (xl5 - D5, Y_VIA + 1.05), (xl5, Y_VIA + 1.05 - D5)]
              + mouth_end(ser, "RH5", xl5)[::-1])
     cu.track("/KEY_RH6", [(x13, y13), (x13, Y_VIA + 1.15), (x13 + 0.5, Y_VIA + 1.65), (x6c - D6, Y_VIA + 1.65), (x6c, Y_VIA + 1.65 - D6)]
@@ -173,7 +166,7 @@ def main():
     board = pcbnew.LoadBoard(SRC)
     pcb_hand.strip(board)
     fps = {fp.GetReference(): fp for fp in board.GetFootprints()}
-    pcb_hand.seat_chain(fps[pcb.ref_of(comps, "J-CHAIN")], geo, jpin, face=FACE)
+    pcb_hand.seat_chain(fps[pcb.ref_of(comps, "J-CHAIN")], geo, jpin)
     place = {**PLACE, **pcb_hand.key_places(comps, geo["switches"])}
     pcb_hand.seat_all(board, place)
     cu = pcb_hand.Copper()
@@ -181,8 +174,8 @@ def main():
         routes(cu, geo["switches"])
         cu.draw(board)
     pcb_hand.finish(board, lay, comps, OUT)
-    print(f"rh_layout: {len(place)} part(s) seated, {cu.segments()} track segment(s), {len(cu.vias)} ground via(s); J-CHAIN seated TURNED as a proposal (the body CAD faces it "
-          f"the other way); wrote {os.path.relpath(OUT, ROOT)}")
+    print(f"rh_layout: {len(place)} part(s) seated, {cu.segments()} track segment(s), {len(cu.vias)} ground via(s); "
+          f"wrote {os.path.relpath(OUT, ROOT)}")
 
 
 if __name__ == "__main__":

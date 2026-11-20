@@ -1361,9 +1361,9 @@ routing:
     source: "length added to the service path for the turns at the sockets and the hand [drawing convention]"
     decided_by: "M4, on the first assembly"
   chain_fold:
-    value: [-1, 1]
+    value: [-1, -1]
     status: nominal
-    source: "which way each ribbon's spare length folds closed, along the body (+1 toward the tail), for left_hand and right_hand, and with it which way both of that ribbon's headers face. The left hand's folds toward the mouth (owner, 2026-11-20: 'Turn it'; ADR 0017, Amendment of that date), so the key board's signal row, the row behind the header's mouth, faces its register (hardware/boards/key-board-lh/lh_layout.py); on the right hand, chain_clear keeps the tail side off the regulator block, and each hairpin must stop short of its board's columns (drc.echo 'key-chain ribbon hairpin clear of the columns', clash.txt)"
+    source: "which way each ribbon's spare length folds closed, along the body (+1 toward the tail), for left_hand and right_hand, and with it which way both of that ribbon's headers face. Both fold toward the mouth (owner, 2026-11-20: 'Turn it' for the left hand and 'we do need to turn it' for the right; ADR 0017, the two Amendments of that date), so each key board's signal row, the row behind the header's mouth, faces its register and the ribbon does not lie under it (hardware/boards/key-board-lh/lh_layout.py, key-board-rh/rh_layout.py); chain_clear finds each header's place, and each hairpin must stop short of its board's columns (drc.echo 'key-chain ribbon hairpin clear of the columns', clash.txt)"
     decided_by: "the clash check"
   ribbon_t:
     value: 1.0
