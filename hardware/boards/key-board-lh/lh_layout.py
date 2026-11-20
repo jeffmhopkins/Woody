@@ -146,16 +146,18 @@ def routes(cu, sw):
                 (x12, Y_CAPS), upin(12), (x12, ch(1.7)), (x12 + 0.8, ch(0.9)), (x16 - 0.8, ch(0.9)), (x16, ch(1.7)), upin(16),
                 (x16, UY + 3.45), (c6[0], UY + 3.45 + c6[0] - x16), c6, (xt, c6[1] - (xt - c6[0])), (xt, yr5 + 3.0), (xt + 3.0, yr5),
                 pu1["LH5"], (xe - 6.3, yr5), (xe, yr5 - 6.3), (xe, yr4 + 1.5), (xe - 1.5, yr4), pu1["LH4"], (xw + 3.8, yr4),
-                (xw, yr4 + 3.8), (xw, yr - 3.2), (xw - 3.2, yr), pu1["LH3"], pu1["LH2"], pu1["LH1"]], PW)
+                (xw + 3.8 - (yr - yr4), yr), pu1["LH3"], pu1["LH2"], pu1["LH1"]], PW)
 
     # -- the key lines. Each leaves the end of its node that faces the register (owner,
     # 2026-11-20): LH1..LH3 the tail end, LH4 and LH5 the mouth end.
     (x6, y6), (x5, y5), (x4, y4), (x3, y3), (x14, y14) = upin(6), upin(5), upin(4), upin(3), upin(14)
-    # LH1 and LH2 climb beside their own capacitor to a little past the pole, cross at 45 to
-    # their height under the header's pin rows, and turn up into pins 6 and 5, LH1 nearer
-    for k, lvl, (px, py) in (("LH1", ch(-4.0), (x6, y6)), ("LH2", ch(-4.5), (x5, y5))):
-        xc, yt = cap[k][0] + 1.3, sw[k][1] + 0.9
-        cu.track("/KEY_" + k, tail_end(cap, k) + [(xc, yt), (xc + lvl - yt, lvl), (px - 0.5, lvl), (px, lvl + 0.5), (px, py)])
+    # LH1 and LH2 each leave their capacitor on one diagonal (owner, 2026-11-20, on the
+    # right-hand board: "should do a full diagonal"): LH1 to its height under the header's pin
+    # rows and along into pin 6, LH2 straight to stand under pin 5
+    (xc, yc), lvl = cap["LH1"], ch(-4.0)
+    cu.track("/KEY_LH1", [(xc, yc), (xc + 0.8, yc), (xc + 0.8 + lvl - yc, lvl), (x6 - 0.5, lvl), (x6, lvl + 0.5), (x6, y6)])
+    xc, yc = cap["LH2"]
+    cu.track("/KEY_LH2", [(xc, yc), (xc + 0.8, yc), (x5, yc + x5 - xc - 0.8), (x5, y5)])
     # The corridor between LH3's capacitor and LH5's resistor carries four lines side by side,
     # in the order they reach the register and the trunk reaches LH5: LH3, LH4, 3V3, LH5.
     xl3 = cap["LH3"][0] + 1.3
@@ -166,7 +168,7 @@ def routes(cu, sw):
     cu.track("/KEY_LH4", mouth_end(ser, "LH4", xl4) + [(xl4, 32.1), (x3, 32.1 + xl4 - x3), (x3, y3)])
     # LH5: out of the far row between C8 and C6, over C6's ground via, and straight down the corridor
     cu.track("/KEY_LH5", [(x14, y14), (x14, UY + 3.6), (x14 + 0.3, UY + 3.9), (x14 + 0.3, Y_VIA + 0.55), (x14 + 0.8, Y_VIA + 1.05),
-                       (xl5 - 0.5, Y_VIA + 1.05), (xl5, Y_VIA + 0.55)] + mouth_end(ser, "LH5", xl5)[::-1])
+                       (xl5 - 2.0, Y_VIA + 1.05), (xl5, Y_VIA - 0.95)] + mouth_end(ser, "LH5", xl5)[::-1])
     # the free input: pin 11 up into its pull-up
     x11, y11 = upin(11)
     cu.track("/KEY_FREE3", [(x11, y11), (x11, UY + 3.4), (x11 - 0.5, UY + 3.9), (x11 - 0.5, Y_RAIL - 1.825)])
