@@ -55,8 +55,12 @@ THE FLOORPLAN, and why each part is where it is.
      toward the tail; the divider, the anti-alias capacitor, its decoupling, its bulk and
      its supply resistor are ONE row above it, in signal order from the mouth.
    - nothing analog is within the LEDs' row, and no analog line crosses it on the top face.
-9. THE POWER BLOCK AND THE UMBILICAL CORNER are as reviewed (#33, #34, #45); the corner is
-   the next block to be laid out afresh.
+9. THE TAIL END follows J-MCU's fan-out (the note over its PLACE entries): the chain's
+   resistors at the header's mouth end, under the gap their lines climb to the far band;
+   the LED driver beside the first LED, pin 1 tailward; the SPI resistors a row under the
+   umbilical's pins, the reverse-polarity diode astride two of those lines at the pins;
+   the breath resistors on their own pins' lines; the inrush switch in the corner beyond
+   the pins. The regulator stands as reviewed (#33, #34, #45), its inductor turned to it.
 
 SPACING, so that nothing is tight or a little off without a reason: a millimetre between
 courtyards; parts side by side at 3 mm (0805), end to end at 4.5 mm; every row and comb
@@ -129,16 +133,56 @@ PLACE.update({
     "R33": (50.5 + 2 * END, LOW, ("FREE", "E")), "C206": (50.5 + 3 * END, LOW, ("3V3", "W")),
     # REG-RT's: pin 12's capacitor
     "C14": (166.5, LOW, ("3V3", "E")),
-    # the row at J-MCU, a millimetre apart: SER's, SH/LD's, the LED data's, SCK's; the pull-up before them
-    "R37": (249.0, 23.3, ("3V3", "W")), "R36": (255.5, 23.3, "+x"), "R35": (261.2, 23.3, "+x"),
-    "R11": (265.55, 23.3, ("LED_DI", "N")), "R34": (269.9, 23.3, "+x"),
+})
+# ---- the tail end: J-MCU's fan-out, the LED driver, the umbilical ---------------------------------
+# J-MCU's odd pins can only leave toward the near edge and its even pins toward the far one,
+# so which line leaves on which face, and round which end, is settled before any part stands:
+#   top, round the TAIL end, nested: IO6, 3V3, IO36, IO35, IO34 (inside to outside)
+#   top, round the MOUTH end: IO33; top, straight out from the even row: QH
+#   bottom: the chain's IO38 and IO7 and the ADC's four, toward the mouth; IO1, IO2 and the
+#   service UART from the even row
+# Each resistor then stands where its line arrives, and nothing crosses on a face.
+TRIO = 23.9                   # the chain's three series resistors: fed from J-MCU's mouth end, out toward the far band
+SPI_Y = 19.5                  # the umbilical's SPI resistors, a row under its pins; 3V3 and IO36 pass under their bodies
+BUS_U, BUS_G = 16.4, 14.5     # the inrush switch's two buses, UMBILICAL_POS12 over INRUSH_GATE
+COL = (293.95, 296.4, 298.85) # ...and its three columns
+PLACE.update({
+    "R35": (247.7, TRIO, ("IO7", "S")), "R34": (250.7, TRIO, ("IO38", "S")), "R36": (253.7, TRIO, ("IO33", "S")),
+    "R37": (256.7, TRIO, ("3V3", "S")),   # SER's pull-up beside its resistor; QH passes under all four bodies
     "C45": (252.6, 28.5, "-y"),
-    "R45": (244.5, 23.3, ("IO39", "E")),      # the ADC's chip-select pull-up, where its line leaves J-MCU for the mouth
-    # the umbilical's three SPI resistors a courtyard and 0.6 mm apart, their clamp centred over them, CS's pull-up beside it
-    "R1": (274.6, 19.3, None), "R2": (277.6, 19.3, None), "R3": (280.6, 19.3, None),
-    "U1": (277.6, 24.3, None), "R40": (281.4, 24.3, ("IO34", "S")),
-    # U6's four small parts in one line at 3 mm
-    "R49": (261.9, 37.4, None), "R48": (264.9, 37.4, None), "R10": (267.9, 37.4, None), "C12": (270.9, 37.4, None),
+    "L1": (247.8, 17.9, ("BUCK_IN", "W")),   # its regulator side toward the regulator
+    "R45": (43.8, 19.55, ("3V3", "E")),    # the ADC chip-select pull-up over R47, sharing its 3V3
+    # the LED driver, pin 1 toward the tail: its LED output leaves under the body to R11 below
+    # the first LED's data pad, its MIDI outputs leave the far end, IO6 comes up its tail side
+    "U6": (270.9, 30.0, ("1", "SE")),
+    "R11": (265.43, TRIO, ("LED_DI", "N")), "C12": (268.43, 23.6, ("INST_5V", "N")),
+    "R10": (275.6, 25.4, ("IO1", "N")),
+    "R51": (268.43, 37.5, ("RING_DRV", "S")), "R50": (271.43, 37.5, ("TIP_DRV", "S")),
+    # the nest round J-MCU's tail end, in the order the lines arrive: IO6's pull-up where it
+    # crosses 3V3, IO2's on a branch of 3V3, the clamp astride the three SPI lines, the three
+    # series resistors, and CS's pull-up closing the row
+    "R48": (276.72, 20.81, ("IO6", "N")), "R49": (279.0, 24.5, ("IO2", "N")),
+    "U1": (277.0, 16.85, ("1", "NE")),
+    "R1": (280.3, SPI_Y, ("SCLK", "N")), "R2": (283.3, SPI_Y, ("MOSI", "N")), "R3": (286.3, SPI_Y, ("CS_MOD", "N")),
+    "R40": (289.0, SPI_Y - 0.55, ("IO34", "S")),
+    "R46": (285.5, 15.6, ("TXD_HDR", "W")),
+    # at the umbilical's pins: the reverse-polarity diode astride SCLK and MOSI, its pads on
+    # the 12 V pin and the ground pin; the surge diode on a stub beside it
+    "D2": (290.5, 28.2, ("UMBILICAL", "N")), "D3": (283.75, 29.6, ("UMBILICAL", "N")),
+    "C46": (280.6, 28.0, ("INST_POS12", "N")),
+    "NT1": (293.6, 19.61, ("DIG_GND", "E")),
+    # the breath pair's resistors on their pins' own lines; a clamp hanging from each line
+    "R38": (281.3, 37.39, ("BREATH_SENSE", "E")), "R39": (281.3, 34.85, ("AGND_SENSE", "E")),
+    "D5": (292.2, 36.36, ("BREATH", "E")), "D6": (292.2, 34.15, ("AGND_SENSE", "E")),
+    # MIDI: each bead in line with its pin of J-MIDI
+    "FB3": (281.85, 40.0, ("TIP_R", "W")), "FB4": (281.85, 42.0, ("RING_R", "W")),
+    # the inrush switch in the free corner beyond the pins, 12 V reaching it down the tail edge:
+    # three columns on two buses, each gate part under the rung it hangs from
+    "Q1": (COL[0] - 0.94, (BUS_U + BUS_G) / 2, ("2", "NE")),
+    "C39": (COL[1], (BUS_U + BUS_G) / 2, ("UMBILICAL", "N")), "R41": (COL[2], (BUS_U + BUS_G) / 2, ("UMBILICAL", "N")),
+    "C40": (COL[0], 11.75, ("INRUSH_GATE", "N")), "D21": (COL[1], 10.85, ("INRUSH_GATE", "N")),
+    "R42": (COL[2], 11.6, ("INRUSH_GATE", "N")),
+    "R43": (COL[0] - 0.9, 8.8, ("MILLER", "E")),
 })
 # ---- the analog block, at the mouth end ---------------------------------------------------------
 ADC_ROW = 17.25               # the ADC's row: divider, anti-alias, decoupling, bulk, supply resistor
