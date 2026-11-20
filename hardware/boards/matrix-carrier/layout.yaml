@@ -1,7 +1,8 @@
-# FIRST-LAYOUT INPUT for the Matrix carrier's PCB - tools/pcb.py layout, `kind: main`
-# (tools/pcb_main.py: the main board's kind, which reads its places from the body CAD's
-# pcb-geometry.echo by cluster). Once the .kicad_pcb exists it is the source; this file
-# records how the first layout was made.
+# THE LIMITS THE MATRIX CARRIER IS HELD TO, and where its fixed parts come from - tools/pcb.py
+# check, `kind: main` (the main board's kind, which reads its places from the body CAD's
+# pcb-geometry.echo by cluster). The copper is laid out by hand: carrier_layout.py, beside this
+# file, writes out every track and says why each is where it is (issue #48, ADR 0030). No
+# router runs on this board.
 #
 # THE MATRIX CARRIER (owner, 2026-10-03: option (c), "SEPARATE SMALL MATRIX CARRIER", and
 # "Hang from the lid"; ADR 0021 amendment 2026-10-03). FROM THE BODY CAD, NOT HERE
@@ -77,15 +78,15 @@ underside_rows: [J-MCU-C]
 # HDR-MATRIX, pin 1 at the Matrix's USB-C edge (pcb-geometry.echo 'matrix' 'pins'): the
 # 5V..IO1 row on the near side, the IO33..RX row on the far side, on top, pins along +x.
 # SURFACE MOUNT (hanxia TP-YQ): nothing comes through to the underside, where J-MCU-C's
-# insulator lies under the 5V..IO1 row's first pins, and the bottom face is free for lines.
+# insulator lies under the 5V..IO1 row's first pins, and the bottom face is one whole plane.
 parts:
   J2: [272.97, 17.07, 90]        # HDR-MATRIX, the 5V..IO1 row
   J3: [272.97, 39.93, 90]        # HDR-MATRIX, the IO33..RX row
 
-# PWR_GND poured on both faces: the Matrix's pad-row GND and J-MCU-C's four grounds join it,
-# and the mounts are on it.
+# PWR_GND poured on the bottom face only, whole: J-MCU-C's four grounds and the mounts join it
+# there, and the Matrix's pad-row GND reaches it through the board's one via. The top face
+# carries every line and has no pour (ADR 0030).
 planes:
-  - {layer: F.Cu, net: PWR_GND}
   - {layer: B.Cu, net: PWR_GND}
 
 silk:
@@ -93,11 +94,8 @@ silk:
   search: true
   title: "WOODY Matrix carrier"
   rev: "A"
-  date: "2026-10-03"
+  date: "2026-11-20"
 
-# EVERY TRACK IS DRAWN BY carrier_routes.py (run it instead of pcb.py layout): an orderly
-# two-layer bus with one ladder, because J-MCU-C's back row reaches J3 in the wrong order on
-# any one layer - the script says why. The autorouter after it finds nothing left to do.
-route: astar
-directions:
-  chamfer: 0.6
+# No router: `route: false` keeps tools/pcb.py from running one on this board
+# (carrier_layout.py, ADR 0030).
+route: false

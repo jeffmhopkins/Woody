@@ -3,12 +3,14 @@
 ribbon's pins re-ordered so that no line crosses another (owner, 2026-11-20, chose
 "Re-order the ribbon pins"). NO ROUTER OF ANY KIND IS CALLED: every track is written out below.
 
-    python3 hardware/boards/matrix-carrier/carrier_layout.py     # writes matrix-carrier.hand.kicad_pcb
+    python3 hardware/boards/matrix-carrier/carrier_layout.py     # rewrites matrix-carrier.kicad_pcb
+    python3 tools/pcb.py check hardware/boards/matrix-carrier
 
-A TRIAL, beside the board it reads. It READS matrix-carrier.kicad_pcb for what the body CAD
-and the sheet fix (the outline, the three connectors, the mounts), strips its copper, gives
-J-MCU-C's pads the nets of PINS below, and draws the tracks. The sheet still carries the old
-pin order until this is accepted, so pcb.py check's schematic parity is not run on the trial.
+THE RECORD of this board's copper (owner, 2026-11-20: "Awesome. Lock that in"). It READS
+matrix-carrier.kicad_pcb for what the body CAD and the sheet fix (the outline, the three
+connectors, the mounts, the silkscreen), strips its copper, holds J-MCU-C's pads to the nets
+of PINS below (the sheet's, matrix-carrier.kicad_sch: pcb.py check proves the two agree), and
+draws the tracks. Run twice it writes the same board.
 
 THE FLOORPLAN. There is nothing to place: all three connectors are the body CAD's. What is
 decided here is the order of the ribbon's 24 pins, and it is decided by where each line ends:
@@ -27,9 +29,9 @@ decided here is the order of the ribbon's 24 pins, and it is decided by where ea
 4. The four ribbon grounds are spread along the back row and go straight into the plane.
 """
 import os
-import shutil
-import subprocess
 import sys
+
+import yaml
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
@@ -41,7 +43,7 @@ import pcb_hand     # noqa: E402
 
 NAME = "matrix-carrier"
 SRC = os.path.join(HERE, NAME + ".kicad_pcb")
-OUT = os.path.join(HERE, NAME + ".hand.kicad_pcb")
+LAY = os.path.join(HERE, "layout.yaml")
 F = pcbnew.F_Cu
 TW, NW, PW = 0.25, 0.2, 0.4          # a line, a line necked through the one tight gap, a supply line
 C = 0.3                              # a 45-degree corner
@@ -171,10 +173,15 @@ def routes(cu):
 
 def main():
     board = pcbnew.LoadBoard(SRC)
-    pcb_hand.strip(board)
+    for t in list(board.GetTracks()):                    # the copper goes; the silkscreen stays
+        board.Delete(t)
     for z in list(board.Zones()):                        # no pour on the face the lines are on
-        if not z.GetIsRuleArea() and z.IsOnLayer(F):
+        if z.GetIsRuleArea():
+            continue
+        if z.IsOnLayer(F):
             board.Delete(z)
+        else:
+            z.UnFill()
     for z in board.Zones():
         if z.GetNetname() == GND:
             z.SetPadConnection(pcbnew.ZONE_CONNECTION_THERMAL)
@@ -183,7 +190,11 @@ def main():
         pad = j.FindPadByNumber(str(k))
         got = pcb_hand.body_xy(pad.GetPosition())
         assert abs(got[0] - j1(k)[0]) < 0.01 and abs(got[1] - j1(k)[1]) < 0.01, (k, got, j1(k))
-        pad.SetNetCode(board.FindNet(net).GetNetCode() if net else 0)
+        if net is None:              # on no net: KiCad's own name for such a pad, so the sheet's parity holds
+            net = f"unconnected-({j.GetReference()}-Pin_{k}-Pad{k})"
+            if board.FindNet(net) is None:
+                board.Add(pcbnew.NETINFO_ITEM(board, net))
+        pad.SetNetCode(board.FindNet(net).GetNetCode())
         if net == GND:               # boxed in by its neighbours' pads: one spoke is all that fits, so it joins whole
             pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
     for f in board.GetFootprints():                      # the mounts are bolted, not soldered: whole
@@ -193,10 +204,15 @@ def main():
     cu = pcb_hand.Copper()
     routes(cu)
     cu.draw(board)
-    pcbnew.SaveBoard(OUT, board)
-    shutil.copy(os.path.join(HERE, NAME + ".kicad_pro"), OUT.replace(".kicad_pcb", ".kicad_pro"))
-    pcb_hand.fill(OUT)
-    print(f"carrier_layout: {cu.segments()} track segment(s), {len(cu.vias)} via(s); wrote {os.path.relpath(OUT, ROOT)}")
+    date = yaml.safe_load(open(LAY))["silk"]["date"]     # the title block's and the silkscreen's
+    old = board.GetTitleBlock().GetDate()
+    board.GetTitleBlock().SetDate(date)
+    for d in board.GetDrawings():
+        if isinstance(d, pcbnew.PCB_TEXT) and old and old in d.GetText():
+            d.SetText(d.GetText().replace(old, date))
+    pcbnew.SaveBoard(SRC, board)
+    pcb_hand.fill(SRC)
+    print(f"carrier_layout: {cu.segments()} track segment(s), {len(cu.vias)} via(s); wrote {os.path.relpath(SRC, ROOT)}")
 
 
 if __name__ == "__main__":

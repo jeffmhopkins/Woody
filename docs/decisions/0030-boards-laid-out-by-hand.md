@@ -1,7 +1,8 @@
 # 0030 — The key boards are laid out by hand, over one whole ground plane
 
 **Status:** Accepted, 2026-11-20. Decided by the owner, in the working chat,
-across one review of the left-hand key board's placement and copper (below).
+across one review of the left-hand key board's placement and copper (below);
+amended the same day for the Matrix carrier (*Amendment* below).
 Tracked in #48. It sets ADR 0029's routers aside for the boards laid out under
 it; the main board is not yet one of them (*Open*).
 
@@ -77,11 +78,47 @@ better."*
   header; the main board fails its header position check until it is laid
   out again.
 
+## Amendment, 2026-11-20 — the Matrix carrier, and the order of its ribbon's pins
+
+The Matrix carrier carries nothing but connections, and its first layout
+needed both faces and a ladder of vias for them. The cause was not the layout:
+the ribbon's pins arrived at `J-MCU-C` in an order that crossed on the way to
+the Matrix's pad rows, whatever was drawn. The owner was asked whether to
+re-order the ribbon's pins so the carrier routes without crossings, and chose
+**"Re-order the ribbon pins"**; shown the result, *"Awesome. Lock that in"*.
+The owner had already said of the main board, the ribbon's other end, *"if we
+need to relay out the order for the header pins to make it route better we can
+do that too"*.
+
+1. **The carrier sets the ribbon's pin order.** The table is in
+   `hardware/boards/matrix-carrier/README.md`, *The ribbon's pins*, and the
+   sheet `matrix-carrier.kicad_sch` owns it. The main board's `J-MCU` takes
+   pin 25 − *k* for `J-MCU-C` pin *k*, as before (ADR 0021, *Amendment,
+   2026-10-03*); only which line is on which conductor has moved.
+2. **Every line on the top face, the bottom face one whole ground plane.**
+   One via, the Matrix's ground pad's. `carrier_layout.py` writes out every
+   track and replaces `carrier_routes.py`.
+3. **The three 5 V pins stay three and the four ground pins stay four.** One
+   5 V pin moved rows so the front row's lanes fit; a ground pin still sits
+   between every two signal lines of the back row.
+4. **Two things this layout does that the key boards' do not**, both for want
+   of room at a 1.27 mm header: three lines neck to the layout's `track_min`
+   through one gap in the near pad row, and `J-MCU-C`'s four ground pins join
+   the plane whole, with no thermal spokes. The owner was told of both with
+   the trial.
+
+**What this breaks until the main board follows.** `J-MCU`'s sheet
+(`hardware/carrier/carrier.kicad_sch`), its notes, `hardware/carrier/midi-out`
+and ADR 0018's account of pins 23 and 24 still describe the old order, and
+`tools/kicad.py check` fails on the ribbon's two ends. They are the main
+board's and move with its new layout, in the same change as its `J-MCU`.
+`docs/log/2026-11-20-main-board-handover.md` lists them.
+
 ## Open, and what decides each
 
-- **Which boards this covers.** The right-hand key board and the Matrix
-  carrier are next by the plan this work follows, and the main board after
-  them (the owner, 2026-11-20: *"We'll be redoing the main board as well"*).
+- **Which boards this covers.** The Matrix carrier is done (*Amendment*
+  above). The main board is next
+  (the owner, 2026-11-20: *"We'll be redoing the main board as well"*).
   The owner has not yet said whether the module's boards follow. The owner
   decides.
 - **Grounding the key boards' mounts.** The owner, 2026-11-20: *"I think the
