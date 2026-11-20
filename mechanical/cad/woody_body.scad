@@ -954,7 +954,7 @@ module pcb_geometry() {
     // the body: mouth x, centre y, which way the mouth faces (+1 the tail),
     // length, mouth to far pin row - as a key board's "chain".
     for (cl = chain_ribbon_cls) echo("PCB", "main", "chain", str("J-CHAIN-", cl == "left_hand" ? "LH" : "RH"),
-                                     chain_x(cl), chain_y, chain_dir(cl), boards_chain_hdr_l, boards_chain_hdr_pin_back);
+                                     mb_chain_x(cl), chain_y, chain_dir(cl), boards_chain_hdr_l, boards_chain_hdr_pin_back);
     // The Matrix's header: its insulator's extent along x, centre y, length
     // across, and the mouth's direction (+1 the tail) - the ribbon comes in
     // over the tongue.
@@ -1009,7 +1009,7 @@ module pcb_geometry() {
     for (cl = ["left_hand", "right_hand"]) let(r = kb_rect(cl))
         echo("PCB", "main", "keepout", str("under key board ", cl), r[0], r[1], r[2], r[3], cb_room);
     echo("PCB", "main", "keepout", "elsewhere", cb_x[0], cb_y[0], ua_x0, cb_y[1], gap_room);
-    for (cl = chain_ribbon_cls) let(sp = chain_span(chain_x(cl), chain_dir(cl)))
+    for (cl = chain_ribbon_cls) let(sp = chain_span(mb_chain_x(cl), chain_dir(cl)))
         echo("PCB", "main", "keepout", str("ribbon ", cl), sp[0], chain_y - boards_chain_hdr_l / 2, sp[1], chain_y + boards_chain_hdr_l / 2, 0);
     // J-MIDI (config/body.yaml midi.hdr_at, placed by the layout), a side-entry
     // header facing the tail (issue #45), and its plug's reach past its face:
@@ -1272,6 +1272,10 @@ chain_z_low = chain_zm + boards_chain_plug_t / 2 + routing_chain_bend_r + routin
 chain_z_up = chain_zk - boards_chain_plug_t / 2 - routing_chain_bend_r - routing_chain_ribbon_t / 2;
 chain_r = (chain_z_up - chain_z_low) / 2;        // the fold's radius
 function chain_dir(cl) = routing_chain_fold[search([cl], chain_ribbon_cls)[0]];
+// The main board's header stands boards.chain_mb_shift from straight under the key
+// board's, the way both face, so its copper clears the thumb switch beside it.
+function mb_chain_x_at(x, d) = x + d * boards_chain_mb_shift;
+function mb_chain_x(cl) = mb_chain_x_at(chain_x(cl), chain_dir(cl));
 // A header's footprint, from its mouth at x: [x0, x1] along the body - pins,
 // body, and the plug standing out of the mouth, with the same 0.5 margin at
 // both ends (the plug end had none, and the right hand's header on the main
@@ -1290,7 +1294,12 @@ function key_stubs(k) = let(c = key_xy(k), m = key_face(k) == "top" ? [1] : [1, 
     concat([[c, ks33_stub]], [for (s = m, p = ks33_pins) [c + [p[0], s * p[1]], 1.3]]);
 function chain_clear(x, cl) = let(d = chain_dir(cl), sp = chain_span(x, d), c = [(sp[0] + sp[1]) / 2, chain_y], sz = [sp[1] - sp[0], boards_chain_hdr_l],
                                   tl = chain_tail_rect_at(x, d))
+    // where the pair stands is found with both boards' switches against the key board's header,
+    // as it was before the main board's header was shifted (boards.chain_mb_shift), so the
+    // shift does not walk the key boards' headers along the body; the shifted header is held
+    // clear as well
     min([for (k = concat(cluster_keys(cl), bottom_keys), st = key_stubs(k)) rect_gap(st[0], c, sz, 0) - st[1] - 0.3]) >= 0
+    && chain_stub_gap(x, cl) >= 0.3
     // the key header's pin tails, on the key board's top, outside every switch body
     && min([for (k = cluster_keys(cl)) max(abs(key_xy(k)[0] - (tl[0] + tl[2]) / 2) - (tl[2] - tl[0]) / 2,
                                           abs(key_xy(k)[1] - (tl[1] + tl[3]) / 2) - (tl[3] - tl[1]) / 2) - plate_cutout / 2]) >= 0.5
@@ -1300,14 +1309,20 @@ function chain_clear(x, cl) = let(d = chain_dir(cl), sp = chain_span(x, d), c = 
     // and the header, its plug and the hairpin clear of the columns, which
     // stand through the whole gap between the boards
     && chain_col_gap(chain_hairpin_at(x, d)) >= col_keep_r + 0.5
-    && chain_col_gap(sp, boards_chain_hdr_l) >= col_keep_r + 0.5;
+    && chain_col_gap(sp, boards_chain_hdr_l) >= col_keep_r + 0.5
+    && chain_col_gap(chain_span(mb_chain_x_at(x, d), d), boards_chain_hdr_l) >= col_keep_r + 0.5;
 function chain_col_gap(h, w = routing_chain_ribbon_w) = min([for (m = columns()) rect_gap(m, [(h[0] + h[1]) / 2, chain_y], [h[1] - h[0], w], 0)]);
 // Along the key board: the clear mouth position nearest its middle.
+// The nearest switch stub to either header: the key board's switches to its header at x, the
+// thumb switches to the main board's at mb_chain_x_at (both boards' stubs stand through both faces).
+function chain_stub_gap(x, cl) = let(d = chain_dir(cl))
+    min([for (b = [[cluster_keys(cl), x], [bottom_keys, mb_chain_x_at(x, d)]]) let(sp = chain_span(b[1], d))
+         for (k = b[0], st = key_stubs(k)) rect_gap(st[0], [(sp[0] + sp[1]) / 2, chain_y], [sp[1] - sp[0], boards_chain_hdr_l], 0) - st[1]]);
 function chain_x(cl) = let(t = [for (k = cluster_keys(cl)) key_xy(k)[0]], m = (min(t) + max(t)) / 2,
                            ok = [for (x = [min(t) : 0.5 : max(t)]) if (chain_clear(x, cl)) x], d = [for (x = ok) abs(x - m)])
     len(ok) > 0 ? ok[search(min(d), d)[0]] : undef;
 function kb_chain(cl) = [chain_x(cl), chain_y];
-function mb_chain(cl) = [chain_x(cl), chain_y];
+function mb_chain(cl) = [mb_chain_x(cl), chain_y];
 // THE SERVICE LENGTH (routing.chain_service, ADR 0025). The key plate, with
 // both key boards on it, held straight up off its columns by
 // routing.chain_raise while a hand plugs or unplugs the main board's socket:
@@ -1324,24 +1339,27 @@ chain_drops = 2 * (PI / 2 * routing_chain_bend_r);
 chain_leg = (chain_len - chain_drops - PI * chain_r) / 2;
 function chain_exit(cl) = chain_x(cl) + chain_dir(cl) * boards_chain_plug_proud;
 // The hairpin's extent along the body, for the parts it must clear.
-function chain_hairpin_at(x, d) = let(a = x + d * boards_chain_plug_proud, b = a + d * (chain_leg + chain_r + routing_chain_ribbon_t)) [min(a, b), max(a, b)];
+function chain_hairpin_at(x, d) = let(a = x + d * boards_chain_plug_proud, b = a + d * (chain_leg + boards_chain_mb_shift / 2 + chain_r + routing_chain_ribbon_t)) [min(a, b), max(a, b)];
 function chain_hairpin(cl) = chain_hairpin_at(chain_x(cl), chain_dir(cl));
 function chain_path(cl) = let(xe = chain_exit(cl), dr = chain_dir(cl), zl = chain_z_low + e_mb, zu = chain_z_up + e_kb,
-                              r = (zu - zl) / 2, zc = (zu + zl) / 2, xf = xe + dr * chain_leg)
-    concat([[xe, chain_zm + e_mb + boards_chain_plug_t / 2], [xe + dr * routing_chain_bend_r, zl]],
+                              r = (zu - zl) / 2, zc = (zu + zl) / 2, xm = xe + dr * boards_chain_mb_shift,
+                              xf = xe + dr * (chain_leg + boards_chain_mb_shift / 2))
+    // the main board's plug stands boards.chain_mb_shift nearer the fold: its leg is half that
+    // shorter and the key board's half that longer, so the fold moves half of it
+    concat([[xm, chain_zm + e_mb + boards_chain_plug_t / 2], [xm + dr * routing_chain_bend_r, zl]],
            [for (a = [-90 : 10 : 90]) [xf + dr * r * cos(a), zc + r * sin(a)]],
            [[xe + dr * routing_chain_bend_r, zu], [xe, chain_zk + e_kb - boards_chain_plug_t / 2]]);
 function path_len(p) = sum([for (i = [0 : len(p) - 2]) norm(p[i + 1] - p[i])]);
 // The gap between two boxes [x0, y0, z0, x1, y1, z1]: the largest of the per-axis gaps (negative = overlap).
 function box_gap(a, b) = max([for (i = [0 : 2]) max(b[i] - a[i + 3], a[i] - b[i + 3])]);
 module chain_header(cl, z0, up) {
-    x = chain_x(cl); d = chain_dir(cl);
+    x = up ? mb_chain_x(cl) : chain_x(cl); d = chain_dir(cl);
     // the shroud, its mouth at x facing d; hanging (up = false) or standing
     translate([d > 0 ? x - boards_chain_hdr_d : x, chain_y - boards_chain_hdr_l / 2, up ? z0 : z0 - boards_chain_hdr_h])
         cube([boards_chain_hdr_d, boards_chain_hdr_l, boards_chain_hdr_h]);
 }
-module chain_plug(cl, zc) {
-    x = chain_x(cl); d = chain_dir(cl);
+module chain_plug(cl, zc, main = false) {
+    x = main ? mb_chain_x(cl) : chain_x(cl); d = chain_dir(cl);
     // the socket, its back standing chain_plug_proud out of the mouth
     translate([d > 0 ? x + boards_chain_plug_proud - boards_chain_plug_h : x - boards_chain_plug_proud, chain_y - boards_chain_plug_l / 2, zc - boards_chain_plug_t / 2])
         cube([boards_chain_plug_h, boards_chain_plug_l, boards_chain_plug_t]);
@@ -1351,7 +1369,7 @@ module ribbons_3d() {
         P([0.10, 0.10, 0.10], false, str("J-CHAIN ", cl, " key board")) chain_header(cl, top_z + e_kb, false);
         P([0.10, 0.10, 0.10], false, str("J-CHAIN ", cl, " main board")) chain_header(cl, cb_top + e_mb, true);
         P([0.25, 0.25, 0.30], false, str("IDC plug ", cl, " key board")) chain_plug(cl, chain_zk + e_kb);
-        P([0.25, 0.25, 0.30], false, str("IDC plug ", cl, " main board")) chain_plug(cl, chain_zm + e_mb);
+        P([0.25, 0.25, 0.30], false, str("IDC plug ", cl, " main board")) chain_plug(cl, chain_zm + e_mb, true);
         // Swept as a strip of the ribbon's width across the body, bending in (x, z).
         P([0.72, 0.72, 0.74], false, str("ribbon ", cl)) for (i = [0 : len(p) - 2])
             hull() for (q = [p[i], p[i + 1]]) translate([q[0], chain_y, q[1]]) cube([routing_chain_ribbon_t, routing_chain_ribbon_w, routing_chain_ribbon_t], center = true);
@@ -1563,7 +1581,7 @@ function pad_row(a, b) = [min(a[0], b[0]) - boards_pin_pad / 2, min(a[1], b[1]) 
 svc_at = boards_service_hdr_at;
 svc_end = svc_at + [(boards_service_hdr_pins - 1) * 2.54, 0];
 tht_tails = concat(
-    [for (cl = chain_ribbon_cls) [str("J-CHAIN-", cl == "left_hand" ? "LH" : "RH"), chain_tail_rect(cl), boards_chain_hdr_tail - switch_pcb_t, "plate"]],
+    [for (cl = chain_ribbon_cls) [str("J-CHAIN-", cl == "left_hand" ? "LH" : "RH"), chain_tail_rect_at(mb_chain_x(cl), chain_dir(cl)), boards_chain_hdr_tail - switch_pcb_t, "plate"]],
     [["J-MCU", [jm_x0, jm_y - jm_sz[1] / 2, jm_x1, jm_y + jm_sz[1] / 2], boards_mcu_conn_tail - switch_pcb_t, "plate"],
      ["J-UMB", pad_row([ju_tail_x, ec_c[0] - ju_l / 2 + 1.27], [ju_tail_x, ec_c[0] + ju_l / 2 - 1.27]), boards_umb_joint_tail - switch_pcb_t, "end"],
      // U-BUCK stands in the regulator block (the layout keeps it there): the
@@ -1622,7 +1640,7 @@ function so_clear(p) = let(r = mb_keep_d / 2 + 0.5)
     // mount's PWR_GND pad (ADR 0025 point 7) and its nut must not reach it
     && rect_gap(p, port_slot_c, port_slot_sz, 0) >= r
     && max(abs(p[0] - tall_c[0][0]) - tall_sz[0] / 2, abs(p[1] - tall_c[0][1]) - tall_sz[1] / 2) >= r
-    && min([for (cl = chain_ribbon_cls) let(sp = chain_span(chain_x(cl), chain_dir(cl)), x0 = sp[0], x1 = sp[1])
+    && min([for (cl = chain_ribbon_cls) let(sp = chain_span(mb_chain_x(cl), chain_dir(cl)), x0 = sp[0], x1 = sp[1])
               rect_gap(p, [(x0 + x1) / 2, chain_y], [x1 - x0, boards_chain_hdr_l], 0)]) >= r + 1
     && max(abs(p[0] - (jm_x0 + jm_x1) / 2) - jm_sz[0] / 2, abs(p[1] - jm_y) - jm_sz[1] / 2) >= r
     // J-UMB and, in front of it, the band its footprint and the parts that
@@ -1675,7 +1693,7 @@ module centre_board_3d() {
     P(C_ENVELOPE, false, "parts main board") translate([0, 0, cb_top]) linear_extrude(boards_smt_h) difference() {
         offset(-0.5) cb_2d();
         // nothing under the chain header and its plug (the ribbon's hairpin is above them, between the plugs)
-        for (cl = chain_ribbon_cls) let(sp = chain_span(chain_x(cl), chain_dir(cl)), x0 = sp[0], x1 = sp[1])
+        for (cl = chain_ribbon_cls) let(sp = chain_span(mb_chain_x(cl), chain_dir(cl)), x0 = sp[0], x1 = sp[1])
             translate([x0 - 0.5, chain_y - boards_chain_hdr_l / 2 - 0.5]) square([x1 - x0 + 1, boards_chain_hdr_l + 1]);
         translate([jm_x0 - 0.5, jm_y - jm_sz[1] / 2 - 0.5]) square(jm_sz + [1, 1]);
         translate([ua_x0 - boards_umb_joint_d - 0.5, ec_c[0] - ju_l / 2 - 0.5]) square([boards_umb_joint_d + 1, ju_l + 1]);
@@ -2109,7 +2127,7 @@ module drc_report() {
     for (cl = chain_ribbon_cls) let(x = chain_x(cl), d = chain_dir(cl), sp = x == undef ? undef : chain_span(x, d),
                                     c = x == undef ? undef : [(sp[0] + sp[1]) / 2, chain_y], sz = x == undef ? undef : [sp[1] - sp[0], boards_chain_hdr_l])
         drc(x != undef, str("chain headers on the ", cl, " boards clear of the switches"),
-            x == undef ? "none found" : [x, min([for (k = concat(cluster_keys(cl), bottom_keys), st = key_stubs(k)) rect_gap(st[0], c, sz, 0) - st[1]]),
+            x == undef ? "none found" : [x, chain_stub_gap(x, cl),
                                          chain_col_gap(sp, boards_chain_hdr_l) - col_keep_r],
             "mm: the headers' mouths along the body; the header and its plug to the nearest switch's pins and pole (against 0.3); and to the nearest column's hex, off its axis (against 0.5)");
     drc(cb_tail_y[1] - cb_tail_y[0] >= ju_l + 2 * boards_board_clear && ua_x0 > cb_x[1], "J-UMB on the main board's tongue, against the etherCON's adapter",

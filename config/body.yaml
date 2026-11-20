@@ -518,6 +518,11 @@ boards:
     status: tbd
     source: "how far the FFSD socket stands out of the header's mouth - NOT given by either print, which also say DO NOT SCALE; estimated as the socket's 5.08 height less a mouth-to-floor depth of about 3.67 that is not dimensioned. It sets where the cable leaves the socket and whether it clears the shroud. An estimate until a mated pair is measured [datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf sheet 1 and datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf sheet 2]"
     decided_by: "M4, on the first mated pair"
+  chain_mb_shift:
+    value: 2.54
+    status: nominal
+    source: "how far the main board's chain header stands from straight under its key board's, toward the way both headers face (routing.chain_fold), for both hands. Turned to face the mouth (ADR 0017, the two Amendments of 2026-11-20), each main-board header put its ground pins 7 and 9 on the leg pad of the thumb switch beside it, LT4's and RT4's, copper to copper [the main board's layout, 2026-11-20]: chain_clear tests the switch pins' stubs, not their 3.4 mm pads. 2.54 leaves the pad its iron room (main-board README, Soldering-iron room). The ribbon takes up the offset in its fold, which moves half of it along the body (chain_hairpin_at)"
+    decided_by: "owner, 2026-11-20, in the working chat: 'Main-board headers 2.5 mm to mouth'"
   chain_hdr_tail:
     value: 2.15
     status: nominal

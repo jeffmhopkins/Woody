@@ -1,6 +1,6 @@
 ISO-10303-21;
 HEADER;
-FILE_DESCRIPTION(('Woody body oak-top, mm','cad 20368d26a401','verify: python3 tools/cad.py explain fab-step-oak-top'),'2;1');
+FILE_DESCRIPTION(('Woody body oak-top, mm','cad e882c932a520','verify: python3 tools/cad.py explain fab-step-oak-top'),'2;1');
 FILE_NAME('oak-top.step','2000-01-01T00:00:00',('Author'),(
     'Open CASCADE'),'Open CASCADE STEP processor 8.0','Open CASCADE 8.0'
   ,'Unknown');

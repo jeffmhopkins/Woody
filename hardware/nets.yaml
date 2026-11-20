@@ -306,7 +306,7 @@ nets:
   IO6:
     kind: signal
     domain: digital
-    carries: "The MIDI out's tip line, ESP32 GPIO6 to U-LVLSHIFT gate B, through J-MCU pin 23 (J-MCU-C pin 2): UART1 TX in Type A, held high in Type B (issue #37)"
+    carries: "The MIDI out's tip line, ESP32 GPIO6 to U-LVLSHIFT gate B, through J-MCU pin 21 (J-MCU-C pin 4): UART1 TX in Type A, held high in Type B (issue #37)"
     driver: carrier/carrier
     receivers: [carrier/led-strip-drive]
     note: "HIGH-IMPEDANCE THROUGH THE BOOTLOADER WINDOW: R-MIDI-PU-T holds it high, so tip and ring sit at one voltage and no byte goes out"
@@ -314,7 +314,7 @@ nets:
   IO2:
     kind: signal
     domain: digital
-    carries: "The MIDI out's ring line, ESP32 GPIO2 to U-LVLSHIFT gate C, through J-MCU pin 5: held high in Type A, UART1 TX in Type B (issue #37). A spare shield between IO1 and IO7 until then"
+    carries: "The MIDI out's ring line, ESP32 GPIO2 to U-LVLSHIFT gate C, through J-MCU pin 16 (J-MCU-C pin 9): held high in Type A, UART1 TX in Type B (issue #37)"
     driver: carrier/carrier
     receivers: [carrier/led-strip-drive]
     note: "HIGH-IMPEDANCE THROUGH THE BOOTLOADER WINDOW: R-MIDI-PU-R holds it high, as IO6. Static in Type A, so it still shields IO1 from IO7 on the ribbon; it switches only as Type B's sink"

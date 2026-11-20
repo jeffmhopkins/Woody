@@ -70,6 +70,14 @@ only by the firmware clamp and the regulator (`U-BUCK`), so it all crosses
    > ribbon's other end is that board's `J-MCU-C`, numbered as `J-MCU-KB`
    > was. `EN` and `IO0` are no longer wired out (program over USB only):
    > `J-MCU` pins 23 and 24 are on no net.
+   >
+   > **Amended 2026-11-20 (ADR 0030, *Amendment, 2026-11-20*):** the owner
+   > chose to re-order the ribbon's pins so the Matrix carrier routes on one
+   > face. The allocation of functions to Matrix pins is unchanged; the order
+   > of the conductors is now the carrier's
+   > (`hardware/boards/matrix-carrier/README.md`, *The ribbon's pins*), and
+   > `J-MCU` pin 6 is the one on no net. The rule above still binds: the
+   > three SPI lines run over unbroken ground from `J-MCU` to `J-UMB`.
 
 ## Options considered
 

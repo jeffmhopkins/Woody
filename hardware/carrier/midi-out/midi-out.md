@@ -227,20 +227,14 @@ GPIO0, 3, 45 and 46 `[ds ESP32-S3-datasheet-v2.2.pdf p.32]`.
 
 ## The ribbon conductors
 
-The tip line is **IO6, on `J-MCU` pin 23**: on the Matrix carrier, `J-MCU-C`
-pin 2, the header's front row at its tail end. That pin runs straight up the
-carrier's bottom face, through one via, and into `HDR-MATRIX` J2.5
-(`hardware/boards/matrix-carrier/carrier_routes.py`). The ring line is **IO2,
-on `J-MCU` pin 5**, which was already routed as a spare shield. `J-MCU` pin 24
-(`J-MCU-C` pin 1) was the other spare conductor, and it cannot be reached on
-the carrier. It is the back row's last pin: the back row's ten lanes fill both
-faces under it, the top face's via diagonal fences it to the east, and its
-neighbour in the front row stands over it.
+The tip line is **IO6, on `J-MCU` pin 21** (`J-MCU-C` pin 4), and the ring
+line **IO2, on `J-MCU` pin 16** (`J-MCU-C` pin 9). The order is the Matrix
+carrier's, which routes every line on one face
+(`hardware/boards/matrix-carrier/README.md`, *The ribbon's pins*).
 
-IO2 is static in the default Type A: held high, it still shields `IO1` (LED
-data) from `IO7` (`SH/LD`) on the ribbon, as it did held low (`carrier.md`,
-*The pin map*). **In Type B it is the line that switches**, at UART edges
-between the LED data and the chain's load line. The chain's marker check
+IO2 is static in the default Type A, held high. **In Type B it is the line
+that switches**, at UART edges. On the ribbon it lies between `3V3` and
+`IO38`, the chain's clock (`carrier.md`, *The pin map*). The chain's marker check
 catches a corrupted frame (`firmware/README.md`, *SPI3*), and the GPIO's
 drive strength can be set to its lowest for this pin. **E11 or E14 should
 confirm that playing in Type B produces no marker errors.**

@@ -179,7 +179,9 @@ the only board.
 - **The Matrix ribbon** carries the MIDI tip line on `J-MCU` pin 23, which
   was spare since 2026-10-03, and the ring line on pin 5, IO2, the spare
   shield. Pin 24 cannot be routed on the carrier (`midi-out.md`, *The ribbon
-  conductors*).
+  conductors*). *Superseded 2026-11-20 by the re-ordered ribbon (ADR 0018,
+  amendment of that date): the tip is now on `J-MCU` pin 21 and the ring on
+  pin 16.*
 - **The Matrix ribbon's closed fold has more room.** The extension's plug set
   its forward limit until now. The carrier keeps its height (drc.echo
   *"Matrix ribbon closed: its folds between the sockets"*).

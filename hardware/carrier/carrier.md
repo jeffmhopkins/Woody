@@ -261,7 +261,7 @@ and its two `J-CHAIN`. The section number is kept because other pages cite `carr
   IO36 MOSI ──┼─┬────[R-SPI-SER 82R]──── J-UMB pin 5   ┘
   IO34 CS   ──┼─┼─┬──[R-SPI-SER 82R]──── J-UMB pin 7   ┐ pair (7,8)
               │ │ │                      J-UMB pin 8 ──┘ DIG_GND ── PWR_GND at J-UMB
-              │ │ ├── [R-CS-PULL-INST 10k 1%] to 3V3 (J-MCU pin 13): CS held high while the ESP32 boots
+              │ │ ├── [R-CS-PULL-INST 10k 1%] to 3V3 (J-MCU pin 15): CS held high while the ESP32 boots
               │ │ │
         [U-TVS-SPI 4-ch array to PWR_GND]  on the PAD side of R-SPI-SER (cs-fall-reentry)
   IO37 MISO ── MCP3202 DOUT only (never leaves the board)
@@ -422,33 +422,41 @@ matrix is exercised — is what confirms it.
 one). [`netlist.yaml`](netlist.yaml) is authoritative:
 
 ```
-  pin  1 5V     2 GND    3 5V     4 IO1    5 IO2    6 IO7
-  pin  7 IO3    8 IO38   9 GND   10 IO35  11 GND   12 IO36
-  pin 13 3V3   14 IO34  15 GND   16 IO39  17 5V    18 IO37
-  pin 19 IO33  20 IO40  21 IO44  22 IO43  23 IO6   24 —
+  pin  1 5V     2 5V     3 5V     4 GND    5 IO33   6 —
+  pin  7 IO34   8 GND    9 IO35  10 IO3   11 IO36  12 IO1
+  pin 13 IO37  14 GND   15 3V3   16 IO2   17 IO38  18 IO44
+  pin 19 IO7   20 GND   21 IO6   22 IO43  23 IO39  24 IO40
 ```
 
-The order is for the ribbon's length, where conductors sit side by side for
-~100 mm; at the header they are millimetres apart. **Every fast line has a
-ground, a supply or a static line on both sides**: `IO35` (`SCLK`) between
-two grounds; `IO38` (chain `SCK`) between spare `IO3` and ground, and pin 9
-is **the ground between the SPI clock and the chain clock**; `IO36`
-(`MOSI`) between ground and 3V3; `IO34` (`CS_MOD`) between 3V3 and ground;
-`IO7` (`SH/LD`) between the two spares. The board-local lines are covered
-the same way — `IO39` between ground and 5V, `IO37` between 5V and `IO33`,
-`IO1` (LED data) between 5V and `IO2` — using lines that are quiet in play:
-`IO33` moves only for the chain self-test, and `IO44` (`RX`) only with
-something on the service header. `IO43` (`TX`) sits between `RX` and `IO6`, the MIDI out's tip line since issue
-#37: two slow UART lines side by side, with the unused pin 24 at the edge
-(`IO0` and `EN` until 2026-10-03; program over USB only, ADR 0021,
-*Amendment, 2026-10-03*). `EN` is no longer on the ribbon at all, so no
-ribbon conductor can glitch it; the Matrix has no capacitor on it - `R8` and
-`Key1` are all that is on its `RESET` net - which is #14 A2's accepted risk
-([`service-uart`](service-uart/service-uart.md)). **The spares must be quiet to shield:** firmware
-drives `IO3` low (`firmware/README.md`). `IO2` is the MIDI out's ring line
-since issue #37: held high, and so static, in Type A; in Type B it is the line
-that switches, between `IO1` and `IO7` (`midi-out.md`, *The ribbon
-conductors*).
+**The order is the Matrix carrier's** (owner, 2026-11-20, "Re-order the
+ribbon pins"; ADR 0030, *Amendment, 2026-11-20*): its layout puts every line
+on one face with no crossing, so each pin is where its Matrix pad's line
+arrives (`hardware/boards/matrix-carrier/README.md`, *The ribbon's pins*).
+It still carries three 5 V and four grounds, and the three umbilical SPI
+lines still run over the unbroken `PWR_GND` plane from `J-MCU` to `J-UMB`
+(ADR 0018). Along the ribbon, conductor beside conductor:
+
+- `IO35` (`SCLK`) has a ground on one side and `IO3` on the other, which
+  firmware drives low (`firmware/README.md`), so it is shielded both ways.
+- `IO38` (chain `SCK`) sits between `IO2` and `IO44` (`RX`). `IO2` is static
+  in Type A and `RX` moves only with something on the service header.
+- `IO7` (`SH/LD`) sits between `RX` and a ground.
+- **`IO1`, the LED data, lies between `IO36` (`MOSI`) and `IO37` (`MISO`),
+  the SPI bus the breath ADC is read on.** The old order kept every fast line
+  between quiet ones, and this one does not here. *Open*: E11 (breath output
+  clean while the Matrix is exercised) decides it. If E11 shows breath
+  samples disturbed while the LEDs update, the order moves again, at both
+  ends (`carrier_layout.py` `PINS` and this sheet together), or firmware
+  keeps LED updates out of ADC reads.
+- `IO6` (the MIDI out's tip) sits between a ground and `IO43` (`TX`), two
+  slow UART lines side by side.
+
+`EN` is not on the ribbon at all, so no ribbon conductor can glitch it; the
+Matrix has no capacitor on it - `R8` and `Key1` are all that is on its
+`RESET` net - which is #14 A2's accepted risk
+([`service-uart`](service-uart/service-uart.md)). `IO2` is the MIDI out's
+ring line since issue #37: held high, and so static, in Type A; in Type B it
+is the line that switches (`midi-out.md`, *The ribbon conductors*).
 
 **`J-UMB` is where the umbilical reaches this board** (ADR 0021). The
 instrument's etherCON, `J-UMBILICAL-INST`, is soldered to its own small board,

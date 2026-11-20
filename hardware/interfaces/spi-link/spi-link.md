@@ -362,7 +362,7 @@ resistors, one at each end of the cable, both pulling up**:
 
 | Part | Where | To | Value |
 |---|---|---|---|
-| `R-CS-PULL-INST` | main board (`carrier/carrier`), `IO34` beside `J-MCU` pins 13/14, on the MCU side of `R-SPI-SER-CS` | `DEV_3V3` | 10 kΩ |
+| `R-CS-PULL-INST` | main board (`carrier/carrier`), `IO34` at `J-MCU` (pin 7; 3V3 on pin 15), on the MCU side of `R-SPI-SER-CS` | `DEV_3V3` | 10 kΩ |
 | `R-CS-PULL-MOD` (`R-PULL-CS` on the sheet) | module main board (`module/digital-and-supervision`), at the cable node, ahead of `R-RX-CS` and `U-RX-MOD` | `LOGIC_5V` | 100 kΩ |
 
 **Why up at the module, not the proposed weak pull-down.** The receive path
