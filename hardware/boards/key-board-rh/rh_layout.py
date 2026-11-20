@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """The right key board laid out by hand (issue #48, ADR 0030): every part placed on purpose
 here, and every track and via written out below the placement. NO ROUTER OF ANY KIND IS CALLED.
-THE PLACEMENT IS UNDER REVIEW: the tracks below are the plan drawn over it, not accepted copper.
 
-    python3 hardware/boards/key-board-rh/rh_layout.py            # writes key-board-rh.hand.kicad_pcb (--place-only: no copper)
+    python3 hardware/boards/key-board-rh/rh_layout.py            # rewrites key-board-rh.kicad_pcb (--place-only: no copper)
 
-It READS key-board-rh.kicad_pcb (rev A, which stays the source until this board is
-accepted) for what the body CAD and the sheets fix, strips its copper, and seats the
-parts. Body frame throughout: x along the body from the mouth, y across it from the near
-side, mm, seen from above; all parts but the switches are on the underside.
+It is THE RECORD OF THIS BOARD'S LAYOUT and rewrites key-board-rh.kicad_pcb in place, as
+the left-hand board's script does its board, which says what is kept and what is replaced.
+Body frame throughout: x along the body from the mouth, y across it from the near side,
+mm, seen from above; all parts but the switches are on the underside.
 
 THE FLOORPLAN is the left-hand board's (hardware/boards/key-board-lh/lh_layout.py), 108 mm
 toward the tail, with a sixth key. The two registers have the same pins for the chain and
@@ -45,7 +44,6 @@ from pcb_hand import GND, PITCH, PW, X_CAP, mouth_end, tail_end      # noqa: E40
 
 NAME, CLUSTER = "key-board-rh", "right_hand"
 SRC = os.path.join(HERE, NAME + ".kicad_pcb")
-OUT = os.path.join(HERE, NAME + ".hand.kicad_pcb")
 V33 = "V3V3_CHAIN_RH"
 
 # J-CHAIN's pads where the body CAD puts the header (pcb_hand.seat_chain holds this script to it): the signal row (odd pins) at
@@ -175,9 +173,9 @@ def main():
     if "--place-only" not in sys.argv:
         routes(cu, geo["switches"])
         cu.draw(board)
-    pcb_hand.finish(board, lay, comps, OUT)
+    pcb_hand.finish(board, lay, comps, SRC)
     print(f"rh_layout: {len(place)} part(s) seated, {cu.segments()} track segment(s), {len(cu.vias)} ground via(s); "
-          f"wrote {os.path.relpath(OUT, ROOT)}")
+          f"wrote {os.path.relpath(SRC, ROOT)}")
 
 
 if __name__ == "__main__":

@@ -190,6 +190,12 @@ def routes(cu, sw):
 
 
 
+# R11 stands between C8 and J-CHAIN with a part or a pad on every side the silkscreen step
+# tries, so its reference is put by hand in the clear strip between it and the far edge,
+# directly over it: nearer R11 than anything else, and C8's own reference reads the other way.
+LABELS = {"R11": (90.36, 48.45, 0)}
+
+
 def main():
     lay = yaml.safe_load(open(os.path.join(HERE, "layout.yaml")))
     comps, _ = pcb.sheet_netlist(os.path.join(HERE, NAME + ".kicad_sch"))
@@ -204,7 +210,7 @@ def main():
     if "--place-only" not in sys.argv:
         routes(cu, geo["switches"])
         cu.draw(board)
-    pcb_hand.finish(board, lay, comps, SRC)
+    pcb_hand.finish(board, lay, comps, SRC, labels=LABELS)
     print(f"lh_layout: {len(place)} part(s) seated, {cu.segments()} track segment(s), {len(cu.vias)} ground via(s); "
           f"wrote {os.path.relpath(SRC, ROOT)}")
 

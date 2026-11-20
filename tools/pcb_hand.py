@@ -219,12 +219,17 @@ def fill(path):
     subprocess.run([sys.executable, "-c", code, path], check=True)
 
 
-def finish(board, lay, comps, out):
-    """The date, the plane's rules, the silkscreen; saved and the plane poured."""
+def finish(board, lay, comps, out, labels=None):
+    """The date, the plane's rules, the silkscreen; saved and the plane poured. `labels` is
+    {reference: (body x, body y, angle)} for a part the silkscreen step finds no clear place
+    beside: its reference is put there by hand, on the parts face, near enough to be read as
+    that part's and no other's (owner, 2026-11-20). pcb.py check holds it to the silk limits."""
     board.GetTitleBlock().SetDate(lay["silk"]["date"])
     relieve(board)
     no_parts_face_pour(board)
     pcb.add_silk_generic(board, lay, comps)
+    for ref, (x, y, angle) in (labels or {}).items():
+        pcb.silk_text(board, ref, *pcb.to_pcb(x, y), angle=angle)
     pcb.silk_off_vias(board)
     pcbnew.SaveBoard(out, board)
     fill(out)
