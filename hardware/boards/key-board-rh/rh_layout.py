@@ -125,13 +125,14 @@ def routes(cu, sw):
 
     # -- the key lines, each from the end of its node that faces the register
     (x6, y6), (x5, y5), (x4, y4), (x3, y3), (x13, y13), (x14, y14) = upin(6), upin(5), upin(4), upin(3), upin(13), upin(14)
-    # RH1 climbs beside its capacitor, crosses at 45 to its height under the header's pin
-    # rows, and turns up into pin 6
-    xc, yt, lvl = cap["RH1"][0] + 1.3, sw["RH1"][1] + 0.9, ch(-4.0)
-    cu.track("/KEY_RH1", tail_end(cap, "RH1") + [(xc, yt), (xc + lvl - yt, lvl), (x6 - 0.5, lvl), (x6, lvl + 0.5), (x6, y6)])
-    # RH2: beside its capacitor, then one diagonal to stand under pin 5
-    xc = cap["RH2"][0] + 1.3
-    cu.track("/KEY_RH2", tail_end(cap, "RH2") + [(xc, ch(-4.5) - (x5 - xc)), (x5, ch(-4.5)), (x5, y5)])
+    # RH1 leaves its capacitor on one diagonal all the way to its height under the header's
+    # pin rows (owner, 2026-11-20: "should do a full diagonal kind of like the other one
+    # does"), then runs along and turns up into pin 6
+    (xc, yc), lvl = cap["RH1"], ch(-4.0)
+    cu.track("/KEY_RH1", [(xc, yc), (xc + 0.8, yc), (xc + 0.8 + lvl - yc, lvl), (x6 - 0.5, lvl), (x6, lvl + 0.5), (x6, y6)])
+    # RH2: the same, one diagonal from its capacitor to stand under pin 5
+    xc, yc = cap["RH2"]
+    cu.track("/KEY_RH2", [(xc, yc), (xc + 0.8, yc), (x5, yc + x5 - xc - 0.8), (x5, y5)])
     # RH3 and RH4 go up the corridor side by side, and each takes one diagonal to the foot of
     # its pin (owner, 2026-11-20: "this spot should just be one diagonal going down to the left")
     cu.track("/KEY_RH3", tail_end(cap, "RH3") + [(xl3, 31.5), (x4, 31.5 + xl3 - x4), (x4, y4)])
