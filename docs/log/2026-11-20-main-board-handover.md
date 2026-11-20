@@ -74,8 +74,24 @@ board is laid out*. The mechanics are in `tools/pcb_hand.py`; each board has
 one script beside it that writes every track and via. No router of any kind is
 run, at the owner's instruction.
 
-## 4. Still running when this was written
+## 4. The clash check, run after the headers turned
 
-The body CAD's outputs were being rebuilt for the turned right-hand header,
-the clash check last. `mechanical/drc.echo` already passes with the turned
-header; the clash result for the turned ribbons was not yet in.
+`mechanical/clash.txt` was rebuilt the same day. Two of its clashes come from
+the turned headers, and both are the main board's:
+
+- `switch LT4 x tails J-CHAIN-LH` and `switch RT4 x tails J-CHAIN-RH`. With
+  its mouth toward the mouthpiece, each main-board chain header's through-hole
+  tails come down where a thumb switch stands under the main board. The key
+  boards' own headers are clear.
+
+The main board's new layout has to settle this before copper: move
+`J-CHAIN-LH` and `J-CHAIN-RH` off the thumb switches (the ribbon's fold in
+`config/body.yaml` `routing` moves with them), or use a header with no tails
+through the board. It is the owner's choice if it changes the ribbon's path.
+
+The report's other findings (every key cap against the oak, the breath sensor
+and the MIDI lead against the main board, the Matrix's LEDs against the oak
+top) are not near the headers. The report had last been rebuilt on 2026-10-05,
+before issues #40, #42, #43 and #45 changed the body, so they were probably
+there unseen; that is an inference from the dates, not something checked
+finding by finding.
