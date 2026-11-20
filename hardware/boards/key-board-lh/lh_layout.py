@@ -40,13 +40,12 @@ THE FLOORPLAN, and why each part is where it is.
    line leaves whichever end of the node faces the register.
 5. 3V3 IS ONE TRUNK. Out of the header's pin 3 straight into C7 (the reservoir), along
    the far row: R11 (the free input's pull-up), C8 across pins 12/13, under the body to
-   pin 16 and C6 across 16/15; then down between LH5's and LH4's lines to LH5's pull-up,
-   and on to one 2 mm link on the switch side that takes it under LH4's line to the rail
-   for the other four. That link is the only signal or power copper off the parts face.
-6. GROUND IS THE SWITCH-SIDE FACE, whole but for that link. Every switch's and the header's ground
+   pin 16 and C6 across 16/15; then on between LH5's and LH4's lines to their
+   pull-ups, round LH4 and back along the near edge through the three row keys' pull-ups.
+6. GROUND IS THE SWITCH-SIDE FACE, whole, and the parts face has no pour at all. Every switch's and the header's ground
    pin is a through-hole into it; the register's ground pins and the capacitors reach
    it by a via each. No ground track but each capacitor's neck to its switch's pin.
-   Every ground pad, surface-mount too, is joined to the pour by relief spokes.
+   The switches' and the header's ground pins join the plane by relief spokes.
 """
 import math
 import os
@@ -244,22 +243,16 @@ def routes(geo):
     c6 = (upin(15)[0] + 1.9, Y_CAPS)
     xt = sw["LH3"][0] + X_CAP + 1.3 + 1.2      # the trunk's way down: third of the corridor's four lines (below)
     yr5, yr4, yr = pu1["LH5"][1], pu1["LH4"][1], pu1["LH3"][1]
-    # THE TRUNK DOES NOT RING LH4. On one face it has to: LH4's line leaves its switch on the
-    # mouth side, so the rail can reach LH4's pull-up and the row keys' only round LH4's tail
-    # side, and the ring cut the ground inside it off from the rest (owner, 2026-11-20: "Now
-    # we're have large islands", then "Would it just be better to run that 3 volt rail on the
-    # back side?"). ONE LINK ON THE SWITCH SIDE, 2 mm long between two vias, takes the rail
-    # under LH4's line instead - the only copper on that face that is not ground. From the
-    # link the rail runs the row keys' pull-ups one way and down to LH4's the other.
-    xw = sw["LH3"][0] + 6.9      # the rail's side of the link, mouth side of LH4's line
-    xa = xt + 0.4                # the trunk's side of it
+    # The trunk rings LH4: LH4's line leaves its switch on the mouth side, so on one face the
+    # rail reaches LH4's pull-up and the row keys' only round LH4's tail side. With no pour on
+    # this face (NO PARTS-FACE POUR, below) the ring encloses nothing.
+    xe = sw["LH4"][0] + X_CAP + 1.3      # round LH4, outside its capacitor
+    xw = sw["LH3"][0] + X_CAP + 1.3      # back up to the row keys' rail, mouth side of LH4's line
     track(V33, [j, c7, (c7[0] + 1.0, c7[1]), (c7[0] + 1.0 + Y_RAIL - c7[1], Y_RAIL), r11, (x12 - 0.5, Y_RAIL), (x12, Y_RAIL - 0.5),
                 (x12, Y_CAPS), upin(12), (x12, ch(1.7)), (x12 + 0.8, ch(0.9)), (x16 - 0.8, ch(0.9)), (x16, ch(1.7)), upin(16),
-                (x16, UY + 3.45), (c6[0], UY + 3.45 + c6[0] - x16), c6, (xt, c6[1] - (xt - c6[0])), (xt, yr + 0.4), (xa, yr)], PW)
-    track(V33, [(xt, yr5), pu1["LH5"]], PW)                # LH5's pull-up: a square tee off the trunk
-    track(V33, [(xa, yr), (xw, yr)], PW, pcbnew.F_Cu)
-    VIAS.extend([(V33, (xa, yr)), (V33, (xw, yr))])
-    track(V33, [pu1["LH4"], (xw + 0.5, yr4), (xw, yr4 + 0.5), (xw, yr), pu1["LH3"], pu1["LH2"], pu1["LH1"]], PW)
+                (x16, UY + 3.45), (c6[0], UY + 3.45 + c6[0] - x16), c6, (xt, c6[1] - (xt - c6[0])), (xt, yr5 + 0.5), (xt + 0.5, yr5),
+                pu1["LH5"], (xe - 0.5, yr5), (xe, yr5 - 0.5), (xe, yr4 + 0.5), (xe - 0.5, yr4), pu1["LH4"], (xw + 0.5, yr4),
+                (xw, yr4 + 0.5), (xw, yr - 0.5), (xw - 0.5, yr), pu1["LH3"], pu1["LH2"], pu1["LH1"]], PW)
 
     # -- each key, the same copper at all five: a neck from each pin straight out to its part,
     # and the node from the resistor's lower pad down at 45, along under both pins through the
@@ -351,36 +344,25 @@ def draw(board):
 
 STITCH = []
 
-# NO POUR ROUND THE REGISTER (owner, 2026-11-20: "some of the copper around the icy is
-# particularly nasty. Looking on the autofill"). Between the register's pads, the chain bus under
-# it, the header's pin rows and the four capacitors the fill left slivers, necks and one
-# closed pocket. A fill keep-out on the parts face covers the whole group out to the board's
-# far edge; every ground pad inside it has its own via to the switch-side face, which is whole
-# under all of it. Body frame: (x0, y0, x1, y1).
-NO_POUR = (80.9, 35.5, 99.6, 49.6)
 
-
-def no_pour(board):
-    z = pcbnew.ZONE(board)
-    z.SetIsRuleArea(True)
-    z.SetZoneName("no-pour-register")
-    z.SetLayer(pcbnew.B_Cu)
-    for f in (z.SetDoNotAllowTracks, z.SetDoNotAllowVias, z.SetDoNotAllowPads, z.SetDoNotAllowFootprints):
-        f(False)
-    z.SetDoNotAllowCopperPour(True)
-    x0, y0, x1, y1 = NO_POUR
-    for x, y in ((x0, y0), (x1, y0), (x1, y1), (x0, y1)):
-        z.AppendCorner(pcb.V(*pcb.to_pcb(x, y)), -1)
-    board.Add(z)
+def no_parts_face_pour(board):
+    """NO PARTS-FACE POUR (owner, 2026-11-20: "if we had the ground plane on the bottom, we
+    don't need to fill in the top layer correct?"). Correct: the switch-side face is one whole
+    ground plane under every line, and these are slow lines. The parts face's fill added
+    nothing to it, and the tracks cut it into regions joined by necks, slivers between pads
+    and a closed pocket by the register - each of which was then a thing to fix. Every
+    ground pad on this face reaches the plane without it: the capacitors by their necks to
+    the switches' through-hole pins or by their own vias, the register's pins by vias, the
+    header's by its pins. So rev A's parts-face zone is deleted, not refilled."""
+    for z in list(board.Zones()):
+        if not z.GetIsRuleArea() and z.GetNetname() == GND and z.IsOnLayer(pcbnew.B_Cu) and not z.IsOnLayer(pcbnew.F_Cu):
+            board.Delete(z)
 
 
 def relieve(board):
-    """EVERY GROUND PAD GETS THERMAL RELIEF, the surface-mount ones too (owner, 2026-11-20:
+    """Every ground pad the plane meets is joined to it by relief spokes (owner, 2026-11-20:
     "Do the resistors that land on ground need their own ground pad so they can actually be
-    soldered?"). Rev A's zones relieved only the through-hole pads, so a capacitor's or the
-    register's ground pad was one piece with the pour: a 0805 with one pad in a plane and the
-    other on a track heats unevenly in reflow and can stand up, and cannot be reworked by
-    hand. Each pad is now its own island joined by spokes. Vias stay solid."""
+    soldered?"), so no pad to be soldered is one piece with a plane. Vias stay solid."""
     for z in board.Zones():
         if z.GetNetname() == GND:
             z.SetPadConnection(pcbnew.ZONE_CONNECTION_THERMAL)
@@ -404,7 +386,7 @@ def main():
         routes(pcb.cad_geometry("left_hand"))
         draw(board)
     relieve(board)
-    no_pour(board)
+    no_parts_face_pour(board)
     pcb.add_silk_generic(board, lay, comps)
     pcb.silk_off_vias(board)
     pcbnew.SaveBoard(OUT, board)
