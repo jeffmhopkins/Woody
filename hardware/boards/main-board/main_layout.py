@@ -540,8 +540,8 @@ def leds():
         if c not in x or c == "D21":
             continue
         xb = x[b]
-        over = [(xb + 1.2, 26.9), (xb + 1.2, 30.2), (xb + 0.4, 31.0)]
-        T(net, [f"{b}.4"] + over + [(xb - 3.5, 31.0), (xb - 4.4, 30.1), f"{c}.6"])
+        over = [(xb + 1.2, 26.9), (xb + 1.2, 30.15), (xb + 0.4, 30.95)]
+        T(net, [f"{b}.4"] + over + [(xb - 3.5, 30.95), (xb - 4.35, 30.1), f"{c}.6"])
 
 
 def legs():
@@ -556,16 +556,158 @@ def legs():
     T("/LT3/SWITCH_LEG", ["SW3.1", (94.4, v)])
     T("/LT3/SWITCH_LEG", [(94.4, v), (94.4, 30.9)], SIG, "B")
     T("/LT3/SWITCH_LEG", [(94.4, 30.9), (94.4, 31.49), "R17.2"])
-    T("/RT1/SWITCH_LEG", ["SW5.1", (162.4, v)])
-    T("/RT1/SWITCH_LEG", [(162.4, v), (154.81, v), (149.31, 30.9)], SIG, "B")
-    T("/RT1/SWITCH_LEG", [(149.31, 30.9), (150.5, 30.9), "R21.2"])
+    T("/RT1/SWITCH_LEG", ["SW5.1", (162.4, 20.4), (157.4, v)])
+    T("/RT1/SWITCH_LEG", [(157.4, v), (151.9, 30.9)], SIG, "B")
+    T("/RT1/SWITCH_LEG", [(151.9, 30.9), (150.5, 30.9), "R21.2"])
     T("/RT3/SWITCH_LEG", ["SW7.1", (202.4, v), (218.0, v)])
     T("/RT3/SWITCH_LEG", [(218.0, v), (218.0, 30.9)], SIG, "B")
     T("/RT3/SWITCH_LEG", [(218.0, 30.9), (218.0, 44.09), "R25.2"])
     for n, pts in (("/LT1/SWITCH_LEG", ((66.0, v), (71.5, 30.9))), ("/LT3/SWITCH_LEG", ((94.4, v), (94.4, 30.9))),
-                   ("/RT1/SWITCH_LEG", ((162.4, v), (149.31, 30.9))), ("/RT3/SWITCH_LEG", ((218.0, v), (218.0, 30.9)))):
+                   ("/RT1/SWITCH_LEG", ((157.4, v), (151.9, 30.9))), ("/RT3/SWITCH_LEG", ((218.0, v), (218.0, 30.9)))):
         for x, y in pts:
             VIAS.append((n, x, y))
+
+
+# The chain's lines on the bottom face, north of the LED row and south of the registers.
+# Toward the tail from the right hand's header they are QH, SER, SH/LD, SCK from the LED row
+# outward; between the headers SER, SH/LD, the hop between the hands, SCK.
+BAND = {"CHAIN_QH_RT": 31.6, "CHAIN_SER_LH": 32.0, "CHAIN_SHLD": 32.4, "HOP_LT_RH": 33.05, "CHAIN_SCK": 33.7}
+SCK_E = 32.8                  # SCK's lane on the tail side of the right hand's header, where the hop is not
+
+
+def chain():
+    """STAGE 4c: THE CHAIN'S TRUNK, bottom face. The three outputs and the return pass under
+    the LED row at the tail end, where their vias already stand, and run toward the mouth in
+    BAND. At each header a line reaches its pin from the side the pin faces: SCK straight up
+    into pin 2; SH/LD and SER round the header's mouth side into pins 4 and 6. The right
+    hand's header turns SCK onto the top face; it comes back down beside the register and goes
+    on to the left hand's. The hop between the hands leaves the right header's pin 6 and ends
+    on a via beside the left header, the one place it changes face."""
+    q, e, h, lt, k = (BAND[n] for n in ("CHAIN_QH_RT", "CHAIN_SER_LH", "CHAIN_SHLD", "HOP_LT_RH", "CHAIN_SCK"))
+    c = 0.3
+    # the return, to a via under the right register's QH pin
+    T("CHAIN_QH_RT", [(245.6, 25.2), (245.6, q - c), (245.6 - c, q), (166.9, q), (166.5, q - 0.4)], FINE, "B")
+    VIAS.append(("CHAIN_QH_RT", 166.5, q - 0.4))
+    T("CHAIN_QH_RT", [(166.5, q - 0.4), (165.06, 32.64), "U8.9"])
+    # SER, to the left header's pin 6
+    T("CHAIN_SER_LH", [(255.2, 25.36), (254.34, 24.5), (248.2, 24.5), (247.9, 24.8), (247.9, e - c), (247.9 - c, e),
+                       (77.5 + c, e), (77.5, e + c), (77.5, 41.38 - c), (77.5 + c, 41.38), "J4.6"], FINE, "B")
+    # SH/LD, to pin 4 of both
+    T("CHAIN_SHLD", [(249.2, 25.36), (249.2, h - c), (249.2 - c, h), (185.9, h)], FINE, "B")
+    T("CHAIN_SHLD", [(185.9, h), (185.9, 40.11 - c), (185.9 + c, 40.11), "J5.4"], FINE, "B")
+    T("CHAIN_SHLD", [(185.9, h), (77.9 + c, h), (77.9, h + c), (77.9, 40.11 - c), (77.9 + c, 40.11), "J4.4"], FINE, "B")
+    # SCK, to pin 2 of both
+    T("CHAIN_SCK", [(252.2, 25.36), (252.2, SCK_E - c), (252.2 - c, SCK_E), (189.05, SCK_E), (187.55, 34.3), "J5.2"], FINE, "B")
+    VIAS.append(("CHAIN_SCK", 175.0, 37.9))
+    T("CHAIN_SCK", [(175.0, 37.9), (175.0 - (37.9 - k), k), (80.55, k), (79.55, k + 1.0), "J4.2"], FINE, "B")
+    # the hop between the hands
+    T("HOP_LT_RH", ["J5.6", (185.0, 41.38), (185.0 - (41.38 - lt), lt), (82.2, lt)], FINE, "B")
+    VIAS.append(("HOP_LT_RH", 82.2, lt))
+    T("HOP_LT_RH", [(82.2, lt), (81.15, 32.0), (70.9, 32.0), (70.35, 31.45), (51.62, 31.45), "R44.2"])
+    T("HOP_LT_QH", ["R44.1", (53.23, 34.9), (55.93, 34.9), "U7.9"])
+
+
+def registers():
+    """STAGE 4d: THE TWO REGISTERS, top face but for each hop's line under its register. What
+    both hands share is drawn once and placed twice."""
+    for dx, u, tvs, j, fb, hop, x1, x2, x3, x4, sw_far, sw_tail, far_mouth, far_tail, near_tail in (
+            (0, "U7", "U9", "J4", "FB1", "HOP_LH_LT", "KEY_LT1", "KEY_LT2", "KEY_LT3", "KEY_LT4", "SW2", "SW4",
+             ("R15", "C16", "R14"), ("R19", "C18", "R18"), ("R17", "C17", "R16")),
+            (RH, "U8", "U11", "J5", "FB2", "HOP_RH_RT", "KEY_RT1", "KEY_RT2", "KEY_RT3", "KEY_RT4", "SW6", "SW8",
+             ("R23", "C20", "R22"), ("R27", "C22", "R26"), ("R25", "C21", "R24"))):
+        def X(x):
+            return x + dx
+        lh = dx == 0
+        leg2, leg4 = (("/LT2/SWITCH_LEG", "/LT4/SWITCH_LEG") if lh else ("/RT2/SWITCH_LEG", "/RT4/SWITCH_LEG"))
+        # SCK: out of pin 2 below the clamp, a stub up to the clamp, in under the register to pin 2
+        T("CHAIN_SCK", [f"{j}.2", (X(78.61), 37.9), (X(68.05), 37.9)])
+        T("CHAIN_SCK", [(X(68.05), 37.9), (X(67.0), 37.9), (X(65.74), 37.9), (X(64.67), 38.97), f"{u}.2"])   # x 67: where the right hand's via stands
+        T("CHAIN_SCK", [(X(68.05), 37.9), f"{tvs}.1"])
+        # SH/LD: straight from pin 4 between the clamp's rows into pin 1
+        T("CHAIN_SHLD", [f"{j}.4", (X(69.95), 40.11), (X(65.94), 40.11), f"{u}.1"])
+        T("CHAIN_SHLD", [(X(69.95), 40.11), f"{tvs}.3"])
+        # pins 6 and 10 of the header
+        T("CHAIN_SER_LH" if lh else "HOP_LT_RH", [f"{tvs}.4", (X(79.42), 41.25), f"{j}.6"])
+        T("V3V3_CHAIN_LH" if lh else "V3V3_CHAIN_RH", [f"{fb}.2", (X(79.47), 44.0), f"{j}.10"])
+        # the hop into this register: from the header's pin 8 on the bottom face to a via under the body
+        T(hop, [f"{j}.8", (X(62.98), 42.65), (X(58.33), 38.0)], FINE, "B")
+        VIAS.append((hop, X(58.33), 38.0))
+        T(hop, [(X(58.33), 38.0), f"{u}.10"])
+        # the far row's two keys: each switch's line south of its ground pin to its resistor
+        T(leg2, [f"{sw_far}.1", (X(46.95), 41.85), (X(54.76), 41.85), f"{far_mouth[0]}.2"])
+        T(leg4, [f"{sw_tail}.1", (X(86.95), 41.85), (X(94.76), 41.85), f"{far_tail[0]}.2"])
+        # each comb's key line: resistor, capacitor, pull-up
+        for n, (r, cp, pu) in ((x2, far_mouth), (x4, far_tail), (x3, near_tail)):
+            T(n, [f"{r}.1", f"{cp}.1", f"{pu}.2"])
+        # the far mouth-side key: down between its resistor and capacitor to pin 5
+        T(x2, [(X(60.0), 47.41), (X(60.0), 44.36), (X(60.86), 43.5), f"{u}.5"])
+        # the two tail-side keys: along the far band over the header, down beside the register
+        T(x4, [f"{far_tail[0]}.1", (X(66.4), 47.41), (X(66.1), 47.11), (X(66.1), 42.7), (X(65.8), 42.4), (X(63.71), 42.4),
+               (X(63.41), 42.1), f"{u}.3"])
+        T(x3, [f"{near_tail[0]}.1", (X(107.61), 48.3), (X(65.9), 48.3), (X(65.6), 48.0), (X(65.6), 43.2), (X(65.3), 42.9),
+               (X(62.44), 42.9), (X(62.14), 42.6), f"{u}.4"])
+    # the hop's line reaches the right register's clamp on top
+    T("HOP_RH_RT", ["J5.8", (177.45, 42.65), "U11.5"])
+    # the left hand's near mouth-side key: up past the supply capacitor, under the register to pin 6
+    T("KEY_LT1", ["R13.1", "C15.1", "R12.2"])
+    T("KEY_LT1", ["R13.1", (73.0, 36.6), (72.2, 37.4), (60.39, 37.4), (59.59, 38.2), "U7.6"])
+    # the right hand's: round the register's mouth end and under it to pin 6
+    T("KEY_RT1", ["R21.1", "C19.1", "R20.2"])
+    T("KEY_RT1", ["R20.2", (162.91, 32.91), (164.0, 34.0), (164.0, 38.5), (164.8, 39.3), (167.29, 39.3), (167.59, 39.6), "U8.6"])
+    # the left register's two unused inputs
+    T("KEY_FREE2", ["R33.2", (56.76, 34.45), (59.14, 34.45), (59.59, 34.9), "U7.11"])
+    T("KEY_FREE1", ["R32.2", (60.86, 34.65), "U7.12"])
+    # the right register's two spare keys: SW- through the other's comb between its pads
+    T("KEY_SWP", ["R29.1", "C23.1", "R28.2"])
+    T("KEY_SWM", ["R31.1", "C24.1", "R30.2"])
+    T("KEY_SWP", ["R29.1", (171.71, 32.91), (171.41, 33.21), "U8.14"])
+    T("KEY_SWM", ["R31.1", (209.59, 32.91), (208.68, 32.0), (170.43, 32.0), (170.13, 32.3), "U8.13"])
+
+
+def v3():
+    """STAGE 4e: 3V3. One lane on the bottom face south of the LED row (tail() and analog()
+    draw it); from it a line goes north under the LED row to each via, and each via's parts
+    hang from it on top. North of the right hand's header a second lane leaves the trunk at
+    the tail end and passes under SW8's pole."""
+    lane = lambda x: LANE["DEV_3V3"] if x > STEP_X else MOUTH["DEV_3V3"]   # noqa: E731
+    W = 0.3
+
+    def tap(x, y, top):
+        T("DEV_3V3", [(x, lane(x)), (x, y)], W, "B")
+        VIAS.append(("DEV_3V3", x, y))
+        T("DEV_3V3", [(x, y)] + top)
+    # the left register: one via under pin 16; the row's parts on a bus along their south side
+    T("DEV_3V3", [(65.0, lane(65.0)), (65.0, 33.46), (65.94, 34.4)], W, "B")
+    VIAS.append(("DEV_3V3", 65.94, 34.4))
+    T("DEV_3V3", [(65.94, 34.4), "U7.16"])
+    T("DEV_3V3", ["U7.16", (66.115, 36.2), "C13.1"])
+    T("DEV_3V3", [(65.94, 34.4), (65.94, 32.3), (65.64, 32.0), (53.69, 32.0), "R33.1"])
+    T("DEV_3V3", [(57.59, 32.0), "R32.1"])
+    T("DEV_3V3", [(61.83, 32.0), "C206.1"])
+    T("DEV_3V3", ["C206.1", (61.83, 34.2), (62.14, 34.51), "U7.13"])
+    # ...and round the hop's via to the far side: the far key's pull-up and the header's bead
+    T("DEV_3V3", [(65.0, 32.4), (57.9, 32.4), (57.2, 33.1), (57.2, 43.7), (57.9, 44.4), (66.5, 44.4), (66.9, 44.0)], W, "B")
+    via("DEV_3V3", 64.5, 44.4, "R14.1")
+    via("DEV_3V3", 66.9, 44.0, "FB1.1")
+    # the left hand's other pull-ups
+    tap(77.5, 30.9, [(77.5, 31.09), "R12.1"])
+    tap(89.81, 30.9, ["R18.1"])
+    tap(115.9, 30.9, [(115.9, 44.19), "R16.1"])
+    # the right hand's
+    tap(158.2, 30.9, [(156.5, 30.9), "R20.1"])
+    tap(169.18, 30.9, ["C14.1", (169.18, 34.2), (168.87, 34.51), "U8.12"])
+    T("DEV_3V3", ["U8.12", (168.87, 37.05), (169.17, 37.35), (173.64, 37.35), (173.94, 37.05), "U8.16"])
+    T("DEV_3V3", ["U8.16", (174.115, 36.2), "C205.1"])
+    T("DEV_3V3", [(169.5, 37.35), (169.5, 43.4), (171.69, 45.59), "R22.1"], FINE)
+    tap(198.0, 30.9, [(196.5, 30.9), "R28.1"])
+    tap(215.0, 30.9, [(216.5, 30.9), "R30.1"])
+    # north of the right header
+    T("DEV_3V3", [(264.0, 28.4), (264.0, 34.6), (263.3, 35.3), (191.55, 35.3), (190.85, 36.0), (190.85, 44.6)], W, "B")
+    VIAS.append(("DEV_3V3", 190.85, 44.6))
+    T("DEV_3V3", [(190.85, 44.6), (190.85, 46.0), (190.55, 46.3), (176.24, 46.3), (175.94, 46.0), "FB2.1"])
+    for x, r in ((222.5, "R24.1"), (212.5, "R26.1")):
+        T("DEV_3V3", [(x, 35.3), (x, 44.3)], W, "B")
+        via("DEV_3V3", x, 44.3, r)
 
 
 def breath_strip():
@@ -617,7 +759,7 @@ def planes(board, geo):
     return lay
 
 
-STAGES = [analog, breath_pair, power, tail, leds, legs]
+STAGES = [analog, breath_pair, power, tail, leds, legs, chain, registers, v3]
 
 
 def copper():
