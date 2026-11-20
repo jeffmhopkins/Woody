@@ -81,7 +81,7 @@ plate_bottom,routing.chain_ribbon_t,tbd,0.8,"M4, with the cable",yes,"M4, with t
 plate_bottom,routing.chain_bend_r,tbd,1.0,"M4, on the first cable",yes,"M4, on the first cable"
 plate_bottom,routing.chain_raise,tbd,30.0,"M4, on the first assembly",yes,"M4, on the first assembly"
 plate_bottom,routing.chain_slack,tbd,10.0,"M4, on the first assembly",yes,"M4, on the first assembly"
-plate_bottom,routing.chain_fold,nominal,"[1, 1]",the clash check,no,a working estimate the part can be cut to
+plate_bottom,routing.chain_fold,nominal,"[-1, -1]",the clash check,no,a working estimate the part can be cut to
 plate_bottom,fabrication.plate_alloy,nominal,"aluminium, 5052 or 6061",,no,a working estimate the part can be cut to
 plate_bottom,fabrication.plate_profile_tol,nominal,"[-0.13, 0.13]",,no,a working estimate the part can be cut to
 plate_bottom,fabrication.corner_r_outer,nominal,1.0,"M4, on the first parts cut",no,a working estimate the part can be cut to
