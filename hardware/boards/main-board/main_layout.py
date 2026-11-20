@@ -17,28 +17,35 @@ THE FLOORPLAN, and why each part is where it is.
 
 1. A THROUGH-HOLE PIN IS A FREE LAYER CHANGE. Each chain header's pads, J-MCU's and the
    switches' reach both faces, so a line that starts or ends on one can run on the bottom
-   face without a via at that end. The top face cannot carry the chain past a header
-   without crossings: a header's five signal pads stand in one column that only opens
-   toward the mouth, and the register behind it wants the same lines. So the chain's
-   trunk (SCK, SH/LD, SER, the two hops, QH back) runs on the bottom face from pad to
-   pad, and the top face carries only each header's short lines into its register.
+   face without a via at that end. The chain's trunk (SCK, SH/LD, SER, the two hops, QH
+   back) runs on the bottom face from pad to pad, and each near-row key's leg crosses the
+   LED row there; the top face carries each header's short lines into its register.
 2. EACH REGISTER STANDS ON THE MOUTH SIDE OF ITS HEADER, key row toward the far edge, pin 1
-   at the header end. SH/LD then runs dead straight from the header's pad 4 through the
-   clamp's body into pin 1, and SCK passes under the clamp and turns up into pin 2 from
-   inside. The four key inputs (pins 3..6) face the far band, where the far-row keys'
-   networks stand; the supply pins and the unused inputs face the LED row.
+   at the header end. SH/LD then runs from the header's pad 4 through the clamp into pin 1,
+   and SCK passes under the clamp and turns up into pin 2 from inside. Its place along the
+   body is the nearest that leaves the far-row switch's ground pin its iron room.
 3. THE CLAMP (U-TVS-CHAIN) STANDS IN THE COLUMN BETWEEN THE REGISTER AND THE HEADER'S BODY,
-   turned so the lines pass through it in the order the header gives them: SCK under its
-   near row, SH/LD between its rows, the serial line into its far row.
-4. THE FAR-ROW KEYS' NETWORKS STAND ABOVE THE REGISTER, the mouth-side key's on the mouth
-   side and the tail-side key's on the tail side, so neither line crosses the other. THE
-   NEAR-ROW KEYS' NETWORKS STAY AT THEIR SWITCHES, where #34 gave them their iron room;
-   each of those four lines crosses the LED row on the bottom face.
-5. EACH LED'S 100 nF STANDS IN THE ROW, on the mouth side of its LED beside the supply
-   pad, not across the body from it: the bands either side of the row stay clear.
-6. THE CHAIN'S SERIES RESISTORS STAND AT J-MCU, under the Matrix ribbon's fold, where the
-   pins arrive; R-SER-TERM beside the one it pulls up.
-7. THE ANALOG BLOCK, THE POWER BLOCK AND THE TAIL are as reviewed (#8, #33, #34, #45).
+   turned so the lines pass through it in the order the header gives them. That column is
+   4.5 mm for a 3.5 mm part; it is the one tight place, and it is tight on purpose.
+4. EVERY KEY'S THREE PARTS ARE ONE COMB: series resistor, capacitor, pull-up, standing side
+   by side at 3 mm, their KEY pads at one end in a line. Every comb is the same.
+   - the far-row key by the register: above the register, KEY end toward its pins;
+   - the two keys on the tail side of the header: in the far band past the switch, their
+     KEY lines passing over the header's last pins;
+   - the near-row key on the mouth side: in the gap between two LEDs, its KEY line round
+     the register's mouth end;
+   - the two spare positions (right hand only): in the next two gaps between LEDs.
+5. THE REGISTER'S OWN SMALL PARTS STAND IN ONE ROW between it and the LED row, level with
+   the combs there; the capacitor of pin 16 stands on end beside that pin.
+6. EACH LED'S 100 nF STANDS IN THE ROW, on the mouth side of its LED, a millimetre clear.
+7. THE CHAIN'S SERIES RESISTORS STAND IN ONE ROW AT J-MCU, under the Matrix ribbon's fold,
+   with R-LED-SERIES among them below the first LED's data pad.
+8. THE ANALOG BLOCK, THE POWER BLOCK AND THE TAIL are as reviewed (#8, #33, #34, #45).
+
+SPACING, so that nothing is tight or a little off without a reason: a millimetre between
+courtyards; parts side by side at 3 mm (0805), end to end at 4.5 mm; every row and comb
+of the far band on one of two lines, y 33.0 and y 46.5, but the combs that stand in a gap
+between LEDs, which sit a millimetre lower to clear the header's nose.
 """
 import os
 import sys
@@ -59,61 +66,91 @@ P = 1.27
 
 # ---- a chain header and its register: the left hand's; the right's is RH further along ---------
 JX, JY2 = 79.55, 38.84        # J-CHAIN's signal column (even pins), pin 2; pins 4..12 each 1.27 toward the far edge
-UX, UY = 61.4, 38.4           # the register. y: its pin 1 pad takes SH/LD straight off pad 4. x: its courtyard 2 mm of iron room from the switch's ground pin
+UX, UY = 61.5, 38.5           # the register: the nearest to the mouth that leaves SW2's ground pin its iron room
+CX = 69.0                     # the column between the register and the header's body
+LOW, HIGH = 33.0, 46.5        # the two lines every row and comb of the far band stands on
+GAP = 32.0                    # a comb in a gap between LEDs: a millimetre lower, clear of the header's nose above it
+SIDE, END = 3.0, 4.5          # 0805s side by side, and end to end
 
 
 def jpin(k, dx=0.0):
     return (JX + dx + (P if k % 2 else 0), JY2 + P * ((k - 1) // 2))
 
 
+def comb(x, y, key_end, series, cap, pull):
+    """One key's network: the three parts side by side from x toward the tail, KEY pads at key_end."""
+    return {r: (x + i * SIDE, y, ("KEY", key_end)) for i, r in enumerate((series, cap, pull))}
+
+
 def block(dx, r):
-    """One hand's register block. r maps this function's names to that hand's references."""
+    """What both hands' register blocks share. r maps the names here to that hand's references."""
     p = {
-        r["U"]: (UX + dx, UY, ("1", (4.445, 2.475))),             # key row toward the far edge, pin 1 at the header end
-        r["TVS"]: (69.0 + dx, jpin(4)[1], ("1", (-0.95, -1.1375))),  # SH/LD passes between its rows, level with pad 4
-        r["FB"]: (69.0 + dx, jpin(10)[1], "-x"),                  # pad 2 level with the header's pad 10
-        # the supply pins' capacitors, in the strip between the register and the LED row
-        r["C16"]: (UX + dx + 3.5, 33.1, "+x"),                    # its 3V3 pad under pin 16
-        # the far-row keys' networks, above the key row
-        r["Cm"]: (58.3 + dx, 44.4, "+x"), r["Sm"]: (57.8 + dx, 47.3, "+x"), r["Pm"]: (61.35 + dx, 47.3, "+x"),
-        r["Pt"]: (64.95 + dx, 44.4, "-x"), r["Ct"]: (64.95 + dx, 47.3, "+x"), r["St"]: (68.6 + dx, 47.3, "-x"),
+        r["U"]: (UX + dx, UY, ("1", (4.445, 2.475))),               # key row toward the far edge, pin 1 at the header end
+        r["TVS"]: (CX + dx, jpin(4)[1], ("1", (-0.95, -1.1375))),    # SH/LD passes between its rows, level with pad 4
+        r["FB"]: (CX + dx, 44.0, "-x"),                              # pad 2 level with the header's pad 10
+        r["C16"]: (CX + dx, 35.25, ("3V3", "N")),                    # on end beside pin 16
     }
+    p.update(comb(58.5 + dx, HIGH, "S", *r["far_mouth"]))            # above the register
+    p.update(comb(98.5 + dx, HIGH, "N", *r["far_tail"]))             # past the tail-side switch
+    p.update(comb(108.5 + dx, HIGH, "N", *r["near_tail"]))
     return p
 
 
 PLACE = {}
 PLACE.update(block(0, {"U": "U7", "TVS": "U9", "FB": "FB1", "C16": "C13",
-                       "Cm": "C16", "Sm": "R15", "Pm": "R14", "Pt": "R18", "Ct": "C18", "St": "R19"}))
+                       "far_mouth": ("R15", "C16", "R14"), "far_tail": ("R19", "C18", "R18"), "near_tail": ("R17", "C17", "R16")}))
 PLACE.update(block(RH, {"U": "U8", "TVS": "U11", "FB": "FB2", "C16": "C205",
-                        "Cm": "C20", "Sm": "R23", "Pm": "R22", "Pt": "R26", "Ct": "C22", "St": "R27"}))
+                        "far_mouth": ("R23", "C20", "R22"), "far_tail": ("R27", "C22", "R26"), "near_tail": ("R25", "C21", "R24")}))
+# the near-row key on the mouth side, in a gap between LEDs: the left hand's under its header's nose, the right hand's before its register
+PLACE.update(comb(73.0, GAP, "N", "R13", "C15", "R12"))
+PLACE.update(comb(150.5, GAP, "N", "R21", "C19", "R20"))
+# the right hand's two spare positions, in the next two gaps
+PLACE.update(comb(190.5, GAP, "S", "R29", "C23", "R28"))
+PLACE.update(comb(210.5, GAP, "S", "R31", "C24", "R30"))
 PLACE.update({
-    # REG-LT's own: its second capacitor under pin 13, the two unused inputs' pull-ups on toward the mouth, the hop's resistor at QH
-    "C206": (61.1, 33.1, "+x"), "R33": (57.4, 33.1, "-x"), "R32": (53.7, 33.1, "-x"), "R44": (54.5, 35.9, "+x"),
-    # REG-RT's own: its second capacitor under pin 12; the two spare positions' networks under and past its header's nose
-    "C14": (UX + RH - 1.6, 33.1, "+x"),
-    "R28": (181.2, 33.1, "-x"), "C23": (184.8, 33.1, "-x"), "R29": (188.4, 33.1, "-x"),
-    "R30": (192.3, 33.1, "-x"), "C24": (195.9, 33.1, "-x"), "R31": (199.5, 33.1, "-x"),
-    # the chain's series resistors under the Matrix ribbon's fold, the pull-up beside its line
-    "R34": (269.6, 22.95, "+x"), "R35": (262.4, 22.95, "+x"), "R36": (257.0, 22.95, "+x"), "R37": (256.9, 25.3, "-x"),
-    "C45": (252.6, 28.75, "-y"),
+    # REG-LT's row: the two unused inputs' pull-ups, the hop's resistor at QH, pin 13's capacitor under it
+    "R32": (50.5, LOW, ("FREE", "E")), "R44": (50.5 + END, LOW, ("QH", "E")),
+    "R33": (50.5 + 2 * END, LOW, ("FREE", "E")), "C206": (50.5 + 3 * END, LOW, ("3V3", "W")),
+    # REG-RT's: pin 12's capacitor
+    "C14": (166.5, LOW, ("3V3", "E")),
+    # the row at J-MCU, a millimetre apart: SER's, SH/LD's, the LED data's, SCK's; the pull-up before them
+    "R37": (249.0, 23.3, ("3V3", "W")), "R36": (255.5, 23.3, "+x"), "R35": (261.2, 23.3, "+x"),
+    "R11": (265.55, 23.3, ("LED_DI", "N")), "R34": (269.9, 23.3, "+x"),
+    "C45": (252.6, 28.5, "-y"),
+    # U6's four small parts in one line at 3 mm
+    "R49": (261.9, 37.4, None), "R48": (264.9, 37.4, None), "R10": (267.9, 37.4, None), "C12": (270.9, 37.4, None),
 })
-LED_CAP_DX = -5.6             # each LED's 100 nF: this far from its LED's centre, in the row
+LED_CAP_DX = -6.5             # each LED's 100 nF: this far from its LED's centre, in the row, a millimetre between courtyards
 KEEP_CAP = ("C37", "C38")     # the two at the analog island keep their places (#33)
 
 # Every part not named above keeps the place the reviewed board gave it.
 
 
 def seat(fp, x, y, how):
-    if isinstance(how, str) or how is None:
+    """how: a pcb_hand.seat way; None to keep the turn it has; (pad, (dx, dy)) for the pad
+    that must lie there from the centre; (net, side) for the pad whose net's name contains
+    `net` to lie on the N (far), S (near), E (tail) or W (mouth) side."""
+    if how is None:
+        fp.SetPosition(pcb.V(*pcb.to_pcb(x, y)))
+        return
+    if isinstance(how, str):
         return pcb_hand.seat(fp, x, y, how)
-    pad, (dx, dy) = how
     fp.SetPosition(pcb.V(*pcb.to_pcb(x, y)))
     for rot in (0, 90, 180, 270):
         fp.SetOrientationDegrees(rot)
-        px, py = pcb_hand.body_xy(fp.FindPadByNumber(pad).GetPosition())
-        if abs(px - x - dx) < 0.03 and abs(py - y - dy) < 0.03:
-            return
-    raise SystemExit(f"main_layout: no turn puts {fp.GetReference()}'s pad {pad} at {dx, dy} from its centre")
+        if isinstance(how[1], str):
+            pads = [q for q in fp.Pads() if how[0] in q.GetNetname().split("/")[-1]]
+            if len(pads) != 1:
+                raise SystemExit(f"main_layout: {fp.GetReference()} has {len(pads)} pads on a net named {how[0]}")
+            px, py = pcb_hand.body_xy(pads[0].GetPosition())
+            dx, dy = px - x, py - y
+            if {"N": dy > 0.3, "S": dy < -0.3, "E": dx > 0.3, "W": dx < -0.3}[how[1]]:
+                return
+        else:
+            px, py = pcb_hand.body_xy(fp.FindPadByNumber(how[0]).GetPosition())
+            if abs(px - x - how[1][0]) < 0.03 and abs(py - y - how[1][1]) < 0.03:
+                return
+    raise SystemExit(f"main_layout: no turn puts {fp.GetReference()} as {how}")
 
 
 GONE = []                     # zones taken off the board, held: pcbnew hands back no outline once Python frees one
