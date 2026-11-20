@@ -541,14 +541,24 @@ because a via in a pad wicks its solder away; **no via goes under silkscreen**
 (the legend would print onto a tented hole); a pad stub that would meet its
 path at an acute angle is left out, the path already ending inside the pad;
 and the mount holes' copper keep-outs (ADR 0020) are obstacles on both layers.
-**It proves nothing about itself** — KiCad's DRC and `pcb.py check` do. It is
-for simple digital boards like the key boards; the main board uses its fanout,
-pair and moat pieces and `complete` for the rest (*The main board*, below).
+**It proves nothing about itself** — KiCad's DRC and `pcb.py check` do.
+
+**No router lays the key boards, the Matrix carrier or the main board any
+more** (ADR 0030, #48). Each has a script beside it (`lh_layout.py`,
+`rh_layout.py`, `carrier_layout.py`, `main_layout.py`) that places every part
+and writes out every track and via, on the shared mechanics in
+`tools/pcb_hand.py`; its `layout.yaml` says `route: false` and keeps only the
+limits `check` holds. The routing steps in this section are for the boards
+still routed by them.
 
 ### The main board — `kind: main` (`tools/pcb_main.py`)
 
-A board whose `layout.yaml` says `kind: main` is built by `tools/pcb_main.py`
-and checked by the same `pcb.py check`, with more. The key boards' own path is
+A board whose `layout.yaml` says `kind: main` is checked by the same `pcb.py
+check`, with more (`tools/pcb_main.py`). Its copper is
+`hardware/boards/main-board/main_layout.py`'s (ADR 0030), which draws the
+planes and islands from `layout.yaml` with `pcb_main`'s own functions; the
+table's router-only rows and the routing steps below record how
+`tools/pcb.py layout` built it before that. The key boards' own path is
 unchanged: their `layout.yaml` names no kind.
 
 | What | From |
@@ -571,7 +581,7 @@ unchanged: their `layout.yaml` names no kind.
 | A guarded pair | `pairs:` `guard:` - every other net's copper the router lays kept that much further off the pair's legs than the clearance (the breath pair beside clock lines: 3W) |
 | Parts allowed underneath | `underside_rows:` - the BOM rows that may sit on the underside (the thumb switches); `check` fails any other part there |
 
-**Routing (`route: astar`, the main board's; or `route: freerouting`).** In
+**Routing (`route: astar`, the main board's until ADR 0030; or `route: freerouting`).** In
 this order (step 4 is Freerouting's only):
 1. **`pairs:`** — `pcb_route.route_pair`: two nets side by side on one layer,
    routed as one fat track (two widths and the gap) by A* through the `through:`
@@ -713,7 +723,7 @@ silkscreen clear of every via, and the stackup.
 
 ### The router: families (`layout.yaml` `families:`)
 
-Under `route: astar` (the main board, the module's boards, the Matrix carrier),
+Under `route: astar` (the module's boards),
 `families:` turns the one shortest-first queue of `pcb_route.complete` into an
 ordered list of families (`pcb_route.route_families`; the owner's rule is point
 4 of *The routing policy*). A board without `families:` routes exactly as before:

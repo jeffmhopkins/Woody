@@ -2,9 +2,9 @@
 
 **Status:** Accepted, 2026-11-20. Decided by the owner, in the working chat,
 across one review of the left-hand key board's placement and copper (below);
-amended the same day for the Matrix carrier (*Amendment* below).
-Tracked in #48. It sets ADR 0029's routers aside for the boards laid out under
-it; the main board is not yet one of them (*Open*).
+amended the same day for the Matrix carrier and for the main board (the two
+*Amendments* below). Tracked in #48. It sets ADR 0029's routers aside for the
+boards laid out under it.
 
 ## Context
 
@@ -107,20 +107,47 @@ do that too"*.
    the plane whole, with no thermal spokes. The owner was told of both with
    the trial.
 
-**What this breaks until the main board follows.** `J-MCU`'s sheet
-(`hardware/carrier/carrier.kicad_sch`), its notes, `hardware/carrier/midi-out`
-and ADR 0018's account of pins 23 and 24 still describe the old order, and
-`tools/kicad.py check` fails on the ribbon's two ends. They are the main
-board's and move with its new layout, in the same change as its `J-MCU`.
-`docs/log/2026-11-20-main-board-handover.md` lists them.
+**The main board followed the same day** (next amendment): `J-MCU`'s sheet
+(`hardware/carrier/carrier.kicad_sch`) carries the new order and
+`tools/kicad.py check` passes on the ribbon's two ends.
+`docs/log/2026-11-20-main-board-handover.md` is the list it worked from.
+
+## Amendment, 2026-11-20 — the main board
+
+The owner, 2026-11-20: *"We'll be redoing the main board as well"*. It was
+shown in stages: the placement, reworked on the owner's review until the
+owner said *"Ok, I think you're good for traces unless you have
+reservations"*, then the copper a block at a time.
+`hardware/boards/main-board/main_layout.py` is its record, and that board's
+README says what the layout holds.
+
+The rules above hold on it. What a four-layer board with an analog block
+changes or adds:
+
+1. **Ground and +12 V are the two inner layers**, each one piece, so the outer
+   faces carry lines only and neither has a pour. The `AGND_INST` island and
+   its one tie stay (ADR 0017, `power-entry-instrument.md` §2).
+2. **The analog block is placed and routed first**, along its signal from the
+   sensor's pins outward (owner: a fresh approach to that block).
+3. **The breath pair runs in straight lines and 45-degree steps**, not arcs,
+   and has no guard tracks: the band it runs in carries nothing else on its
+   layer, and the 3W keep-off is checked on the board.
+4. **A soldered ground pin meets the plane through relief spokes**, as the key
+   boards' ground pads do. `J-MCU`'s four ground pins join it whole, for the
+   same want of room as `J-MCU-C`'s above; the mounts join it whole because
+   they are clamped, not soldered, and stay plated on `PWR_GND` (ADR 0025).
+5. **Three ground pins have a via in the pad** (`U9` pin 2, `U11` pin 2, `U1`
+   pin 2): each is the middle pin of a small clamp with a line either side of
+   it, so there is no place beside the pad. The owner was told with the
+   result.
+6. **The chain's pin order at each `J-CHAIN` is unchanged.** The board routes
+   with it.
 
 ## Open, and what decides each
 
-- **Which boards this covers.** The Matrix carrier is done (*Amendment*
-  above). The main board is next
-  (the owner, 2026-11-20: *"We'll be redoing the main board as well"*).
-  The owner has not yet said whether the module's boards follow. The owner
-  decides.
+- **Which boards this covers.** The key boards, the Matrix carrier and the
+  main board are done (the *Amendments* above). The owner has not yet said
+  whether the module's boards follow. The owner decides.
 - **Grounding the key boards' mounts.** The owner, 2026-11-20: *"I think the
   standoffs can actually be part of the ground plane?"* Not done: ADR 0020
   Amendment 7 leaves all four unplated because the columns already tie the

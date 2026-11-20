@@ -3,15 +3,24 @@
 and every track and via written out below the placement.
 NO ROUTER OF ANY KIND IS CALLED: not tools/pcb_route*.py, not Freerouting, not KiCad's.
 
-    python3 hardware/boards/main-board/main_layout.py --place-only --out <file>   # the placement alone, to another file
+    python3 hardware/boards/main-board/main_layout.py                             # rewrites main-board.kicad_pcb
+    python3 hardware/boards/main-board/main_layout.py --place-only --out <file>   # a trial: the placement alone
+    python3 hardware/boards/main-board/main_layout.py --copper --out <file>       # a trial: with the copper, unfinished
 
-THIS IS STAGE 2b: THE PLACEMENT, FOR REVIEW. No copper is written yet and the board file is
-not rewritten: --out names the file the placement goes to. From the board it keeps what the
-body CAD and the sheets fix - the outline, the switches, the mounts, the LEDs, J-MCU, J-UMB,
-the sensor, the zones - refreshes every pad's net from the sheet (J-MCU's order moved,
-carrier.md), seats both chain headers where the body CAD puts them, and seats every other
-part where PLACE says. Body frame throughout: x along the body from the mouth, y across it
-from the near side, mm, seen from above; every part but the switches is on the top face.
+From the board it keeps what the body CAD and the sheets fix - the outline, the switches, the
+mounts, the LEDs, J-MCU, J-UMB, the sensor - refreshes every pad's net from the sheet, seats
+both chain headers where the body CAD puts them, and seats every other part where PLACE
+says. Then the copper, a stage a function in STAGES, each line in the order its signal runs;
+the planes and islands from layout.yaml; the silkscreen; and the planes poured. Body frame
+throughout: x along the body from the mouth, y across it from the near side, mm, seen from
+above; every part but the switches is on the top face.
+
+THE LAYERS. 1, the top face: the parts, the analog block's lines, the LED data line, the
+power paths, each header's short lines into its register. 2: PWR_GND, one piece, and the
+AGND_INST island under the analog block. 3: INST_POS12, one piece, and the AGND strip under
+the breath pair. 4, the bottom face: the breath pair along the far edge, the chain's trunk
+north of the LED row, the ADC's four lines and 3V3 south of it, and each near-row key's line
+where it crosses under the row. Neither outer face has a pour.
 
 THE FLOORPLAN, and why each part is where it is.
 
@@ -143,9 +152,10 @@ PLACE.update({
 # so which line leaves on which face, and round which end, is settled before any part stands:
 #   top, round the TAIL end, nested: IO6, 3V3, IO36, IO35, IO34 (inside to outside)
 #   top, straight out from the even row: QH, and 5 V from pins 1-2 past the header's mouth end
-#   bottom, under the odd row and north past the mouth end, seven lanes: IO33, IO35, IO36,
-#   IO37, IO38, IO7, IO39 (inside to outside). IO39 turns toward the mouth first, IO7 and
-#   IO38 end on vias under their resistors, the ADC's three turn next, IO33 ends last.
+#   bottom, under the odd row and north past the mouth end, six lanes: IO35, IO36, IO37,
+#   IO38, IO7, IO39 (inside to outside). IO39 turns toward the mouth first, IO7 and IO38
+#   end on vias under their resistors, the ADC's three turn next. IO33 goes the same way
+#   round on the top face: the row's pads leave room for six lanes under them, not seven.
 #   bottom, from the even row toward the tail: IO1, IO2, the service UART, 5 V to the LED driver
 #   3V3 has no lane toward the mouth: its trunk starts at a via by R49, runs the bottom face
 #   north of the even row's lines and comes down to R37, then lies south of the chain's trunk
@@ -266,7 +276,7 @@ def analog():
                               (13.25, 17.25), "R4.1"])
     via("SENSOR_BUFFERED_OUT", 16.6, 28.4)
     # the divider, the anti-alias capacitor, the ADC's input: under the row, clear of CS over it
-    T("ADC_IN", ["R4.2", "R5.1", (19.09, 16.5), (19.39, 16.2), (23.25, 16.2), (23.55, 16.5), "C1.1"])
+    T("ADC_IN", ["R4.2", "R5.1", (19.09, 16.5), (19.39, 16.2), (23.55, 16.2)])
     T("ADC_IN", ["C1.1", (23.55, 13.9), (24.57, 12.88), "U2.2"])
     # the reference: from its pin under the row of its own pads, through its two capacitors,
     # between R-ISO-REF's pads, up under R-FB-REF's body, into the buffer's + input
@@ -381,6 +391,14 @@ def step(net):
     return [(x, LANE[net]), (x - d, MOUTH[net]), (HWY, MOUTH[net])]
 
 
+def two(net, x, y, up=1.5):
+    """Two vias side by side beside a wide pad, each on its own track straight out of it:
+    the pad's centre line is `up` from the vias."""
+    for dx in (-0.6, 0.6):
+        T(net, [(x + dx, y - up), (x + dx, y)], PWR)
+        VIAS.append((net, x + dx, y))
+
+
 def power():
     """STAGE 2: POWER. 12 V comes in at J-UMB pin 3, passes the inrush switch and drops into the
     layer-3 plane beside it; the plane carries it to the regulator's inductor. The regulator's
@@ -398,15 +416,20 @@ def power():
     T("INRUSH_GATE", ["C39.2", "D21.1"])
     T("INRUSH_GATE", [(298.85, 14.5), "R42.1"])
     T("INRUSH_MILLER", ["C40.2", (293.95, 8.8)])
+    # the switch's drain into the plane carries the whole instrument: three vias on one bar (#8-6)
     via("INST_POS12", 291.0, 15.45, "Q1.3", 0.5)
+    T("INST_POS12", [(291.0, 14.5), (291.0, 16.4)], 0.5)
+    VIAS.extend([("INST_POS12", 291.0, 14.5), ("INST_POS12", 291.0, 16.4)])
     via("INST_POS12", 291.1, 8.8, "R43.2")
     T("PWR_GND", ["J6.6", (291.5, 24.69)], 0.8)
     T("DIG_GND", ["J6.8", "NT1.1"], 0.5)
     # the regulator: 12 V up from the plane below the inductor, then the loop
     for at, x in (((249.6, 15.5), 249.6), ((250.5, 15.5), 250.5)):
         via("INST_POS12", x, 14.6, at, PWR)
-    via("INST_POS12", 209.5, 20.2, "C44.1", PWR)
-    via("INST_POS12", 209.5, 13.0, "C10.1", PWR)
+    # the bulk capacitors, the regulator's input capacitor and its output capacitor: two vias a
+    # pad, since each carries a supply's pulse current (#8-6)
+    two("INST_POS12", 209.5, 20.2)       # C44.1
+    two("INST_POS12", 209.5, 13.0)       # C10.1
     T("BUCK_IN", ["L1.2", (243.0, 17.9), (240.9, 15.8), (240.9, 10.6), (240.1, 9.8), "C11.1",
                   (231.05, 9.8), "U5.1"], 0.6)
     T("BUCK_A_OUT", ["U5.3", (219.9, 14.75), (218.52, 16.13), "C43.1", (218.52, 20.2), (222.4, 20.2),
@@ -415,9 +438,13 @@ def power():
     T("BUCK_A_OUT", ["U13.3", (233.3, 19.45), (233.3, 21.35), "U13.6"])
     T("USBOR_GATE", ["U13.5", "Q2.1"])
     T("USBOR_VCAP", ["C207.1", "U13.1"])
-    for pad, x, y in (("U13.2", 231.0, 20.4), ("C208.2", 243.05, 22.0), ("C11.2", 237.0, 17.55),
-                      ("C43.2", 222.9, 18.3), ("C44.2", 214.9, 20.2), ("C10.2", 214.9, 13.0)):
+    for pad, x, y in (("U13.2", 231.0, 20.4), ("C208.2", 243.05, 22.0), ("C43.2", 222.9, 18.3)):
         via("PWR_GND", x, y, pad, PWR)
+    T("PWR_GND", [(222.9, 18.3), (222.9, 17.2)], PWR)
+    VIAS.append(("PWR_GND", 222.9, 17.2))
+    two("PWR_GND", 237.0, 17.55, 2.35)   # C11.2
+    two("PWR_GND", 214.9, 20.2)          # C44.2
+    two("PWR_GND", 214.9, 13.0)          # C10.2
     # 5 V
     T("INST_5V_A", ["J1.3", "J1.1", "J1.2"], 0.5)
     T("INST_5V_A", ["J1.2", (255.28, 23.5), (238.84, 23.5), "Q2.3"], 0.5)
@@ -477,7 +504,7 @@ def tail():
     T("MIDI_TIP", ["FB3.2", (279.0, 38.96), (279.44, 39.4), (283.75, 39.4), (285.0, 40.65)])
     T("MIDI_TIP", [(282.9, 39.4), (282.9, 40.0)])
     T("MIDI_RING", ["FB4.2", (278.9, 41.95), (279.55, 42.6), (284.4, 42.6)])
-    T("MIDI_RING", [(283.6, 42.6), (282.95, 41.95)])
+    T("MIDI_RING", ["U12.3", (282.64, 42.6)])
     via("PWR_GND", 281.5, 41.0, "U12.2")
     T("PWR_GND", [(280.55, 40.05), (281.5, 41.0), (280.55, 41.95)])
     # the LED driver
@@ -780,6 +807,7 @@ def planes_in():
     VIAS.append((G, 277.0, 17.99))                                  # U1's ground pin is shut in by IO35 and IO36: a via in the pad
     via(P12, 282.2, 28.95, "C46.1", PWR)
     via(G, 282.1, 27.05, "C46.2", PWR)
+    T(G, [(282.1, 27.05), (283.0, 27.05)], PWR)                     # ...which is the clamp's second (#8-6)
     via(G, 285.4, 27.6, "D3.2", PWR)
     via(G, 283.6, 45.0, "J7.3", PWR)
     via(G, 290.4, 12.6, "J2.3", PWR)
@@ -910,6 +938,10 @@ def draw_copper(board):
     for n, x, y in vias:
         cu.via(net(n), (x, y))
     cu.draw(board)
+    # the breath pair's two lines are locked: layout.yaml pairs: guard is checked against them
+    for t in board.GetTracks():
+        if t.GetLayer() == pcbnew.B_Cu and t.GetNetname() in ("/SENSOR_BUFFERED_OUT", "AGND_INST") and not isinstance(t, pcbnew.PCB_VIA):
+            t.SetLocked(True)
     return cu
 
 
@@ -975,10 +1007,32 @@ def keepouts(board, geo, comps, fps):
         pcb_main.rule_area(board, rect, kname, ["F.Cu"], footprints=True, copper=False)
 
 
+def finish(board, lay, comps):
+    """The date and the silkscreen, saved and the planes poured: pcb_hand.finish's steps, less
+    its ground-pour rules (planes() has set this board's), and two places where the silkscreen
+    step leaves legends under the fab's silk clearance of each other."""
+    board.GetTitleBlock().SetDate(lay["silk"]["date"])
+    pcb.add_silk_generic(board, lay, comps)
+    for d in board.GetDrawings():
+        # R32's reference stands a hair under the clearance from C36's: a step toward its own part, between the two
+        if d.GetClass() == "PCB_TEXT" and d.GetText() == "R32":
+            d.Move(pcbnew.VECTOR2I(0, -pcbnew.FromMM(0.07)))
+    for g in board.FindFootprintByReference("D2").GraphicalItems():
+        # D-TVS's outline runs on past its pad to D6's: both strokes stop level with the pad's end
+        if g.GetLayer() == pcbnew.F_SilkS and g.GetClass() == "PCB_SHAPE" and g.GetStart().x == g.GetEnd().x:
+            ys = sorted((g.GetStart().y, g.GetEnd().y))
+            g.SetStart(pcbnew.VECTOR2I(g.GetStart().x, ys[0] + pcbnew.FromMM(0.3)))
+            g.SetEnd(pcbnew.VECTOR2I(g.GetStart().x, ys[1]))
+    pcb.silk_off_vias(board)
+    pcbnew.SaveBoard(SRC, board)
+    pcb_hand.fill(SRC)
+
+
 def main():
     out = sys.argv[sys.argv.index("--out") + 1] if "--out" in sys.argv else None
-    if not ({"--place-only", "--copper"} & set(sys.argv)) or not out:
-        raise SystemExit("main_layout: --place-only --out <file> for the placement alone, --copper --out <file> with the copper drawn so far")
+    trial = {"--place-only", "--copper"} & set(sys.argv)
+    if trial and not out:
+        raise SystemExit("main_layout: --place-only and --copper write a trial to --out <file>; with neither, the board itself is written")
     comps, nets = pcb.sheet_netlist(os.path.join(HERE, NAME + ".kicad_sch"))
     geo = pcb_main.geometry("main")
     board = pcbnew.LoadBoard(SRC)
@@ -1010,14 +1064,19 @@ def main():
     for ref, (x, y, how) in place.items():
         seat(fps[ref], x, y, how)
     keepouts(board, geo, comps, fps)
-    if "--copper" in sys.argv:
-        cu = draw_copper(board)
-        strip_into_yaml()
-        lay = planes(board, geo)
-        print(f"main_layout: {cu.segments()} track segments and {len(cu.vias)} vias drawn by hand")
-    pcbnew.SaveBoard(out, board)
-    print(f"main_layout: {len(place)} part(s) moved to their new places, the rest as reviewed; wrote {out}")
-
+    if "--place-only" in sys.argv:
+        pcbnew.SaveBoard(out, board)
+        print(f"main_layout: {len(place)} part(s) seated, no copper; wrote {out}")
+        return
+    cu = draw_copper(board)
+    strip_into_yaml()
+    lay = planes(board, geo)
+    if out:
+        pcbnew.SaveBoard(out, board)
+    else:
+        finish(board, lay, comps)
+    print(f"main_layout: {len(place)} part(s) seated, {cu.segments()} track segment(s), {len(cu.vias)} via(s), all by hand; "
+          f"wrote {out or os.path.relpath(SRC, ROOT)}")
 
 if __name__ == "__main__":
     sys.exit(main())
