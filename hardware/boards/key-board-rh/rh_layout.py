@@ -143,10 +143,14 @@ def routes(cu, sw):
     # RH4: up the corridor, across at 45 over RH3's switch, and along to stand under pin 3
     cu.track("/KEY_RH4", mouth_end(ser, "RH4", xl4) + [(xl4, 27.0), (xl4 - (ch(-4.6) - 27.0), ch(-4.6)), (x3 + 0.5, ch(-4.6)),
                                                        (x3, ch(-4.1)), (x3, y3)])
-    # RH5 and RH6 leave the far row between C7 and C9 and go over C9 toward the tail, RH5 inside
-    cu.track("/KEY_RH5", [(x14, y14), (x14, Y_VIA + 0.55), (x14 + 0.5, Y_VIA + 1.05), (xl5 - 0.5, Y_VIA + 1.05), (xl5, Y_VIA + 0.55)]
+    # RH5 and RH6 leave the far row between C7 and C9 and go over C9 toward the tail, RH5 inside.
+    # Each comes down to its key on one long diagonal rather than round a square corner (owner,
+    # 2026-11-20: "need to be routed diagonally down"): RH5's runs beside the rail's, RH6's passes
+    # the far side of RH5's switch.
+    D5, D6 = 10.0, 14.0        # as long as C9's ground via and RH5's ground pin allow
+    cu.track("/KEY_RH5", [(x14, y14), (x14, Y_VIA + 0.55), (x14 + 0.5, Y_VIA + 1.05), (xl5 - D5, Y_VIA + 1.05), (xl5, Y_VIA + 1.05 - D5)]
              + mouth_end(ser, "RH5", xl5)[::-1])
-    cu.track("/KEY_RH6", [(x13, y13), (x13, Y_VIA + 1.15), (x13 + 0.5, Y_VIA + 1.65), (x6c - 0.5, Y_VIA + 1.65), (x6c, Y_VIA + 1.15)]
+    cu.track("/KEY_RH6", [(x13, y13), (x13, Y_VIA + 1.15), (x13 + 0.5, Y_VIA + 1.65), (x6c - D6, Y_VIA + 1.65), (x6c, Y_VIA + 1.65 - D6)]
              + mouth_end(ser, "RH6", x6c)[::-1])
 
     # -- ground: each of these is a pad's own short stub to a via into the switch-side face
