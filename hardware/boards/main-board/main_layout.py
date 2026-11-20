@@ -355,6 +355,155 @@ def breath_pair():
     via("AGND_INST", 278.6, 34.85, "R39.1")
 
 
+def jx(n):
+    """J-MCU pin n's x: two rows of twelve, the odd row nearest the near edge."""
+    return 255.28 + 1.27 * ((n - 1) // 2)
+
+
+HWY = 206.0     # where the bottom-face lines running toward the mouth stop until stage 4 takes them on
+
+
+def power():
+    """STAGE 2: POWER. 12 V comes in at J-UMB pin 3, passes the inrush switch and drops into the
+    layer-3 plane beside it; the plane carries it to the regulator's inductor. The regulator's
+    loop is on top and short: inductor, input capacitor, U5, output capacitor. 5 V leaves the
+    OR-ing switch on top, under the three 1206 bodies, to J-MCU pins 1 to 3, and goes on under
+    the header on the bottom face to the LED driver. 3V3 is J-MCU pin 15 round the tail end (drawn in
+    stage 3); its trunk starts by R49 and runs the bottom face toward the mouth."""
+    # 12 V entry and the inrush switch
+    T("UMBILICAL_POS12", ["J6.3", (290.5, 32.31)], 0.8)
+    T("UMBILICAL_POS12", ["D2.1", "D3.1"], 0.6)
+    T("UMBILICAL_POS12", ["J6.3", (297.6, 32.31), (297.6, 16.4)], 0.6)
+    T("UMBILICAL_POS12", ["Q1.2", "C39.1", (297.6, 16.4), (298.85, 16.4)], 0.5)
+    T("INRUSH_GATE", ["Q1.1", "C39.2", (298.85, 14.5)])
+    T("INRUSH_GATE", ["Q1.1", "C40.1"])
+    T("INRUSH_GATE", ["C39.2", "D21.1"])
+    T("INRUSH_GATE", [(298.85, 14.5), "R42.1"])
+    T("INRUSH_MILLER", ["C40.2", (293.95, 8.8)])
+    via("INST_POS12", 291.0, 15.45, "Q1.3", 0.5)
+    via("INST_POS12", 291.1, 8.8, "R43.2")
+    T("PWR_GND", ["J6.6", (291.5, 24.69)], 0.8)
+    T("DIG_GND", ["J6.8", "NT1.1"], 0.5)
+    # the regulator: 12 V up from the plane below the inductor, then the loop
+    for at, x in (((249.6, 15.5), 249.6), ((250.5, 15.5), 250.5)):
+        via("INST_POS12", x, 14.6, at, PWR)
+    via("INST_POS12", 209.5, 20.2, "C44.1", PWR)
+    via("INST_POS12", 209.5, 13.0, "C10.1", PWR)
+    T("BUCK_IN", ["L1.2", (243.0, 17.9), (240.9, 15.8), (240.9, 10.6), (240.1, 9.8), "C11.1",
+                  (231.05, 9.8), "U5.1"], 0.6)
+    T("BUCK_A_OUT", ["U5.3", (219.9, 14.75), (218.52, 16.13), "C43.1", (218.52, 20.2), (222.4, 20.2),
+                     (223.15, 19.45), "C207.2", "U13.3"], 0.5)
+    T("BUCK_A_OUT", ["U13.3", (232.16, 18.5), "Q2.2"], 0.5)
+    T("BUCK_A_OUT", ["U13.3", (233.3, 19.45), (233.3, 21.35), "U13.6"])
+    T("USBOR_GATE", ["U13.5", "Q2.1"])
+    T("USBOR_VCAP", ["C207.1", "U13.1"])
+    for pad, x, y in (("U13.2", 231.0, 20.4), ("C208.2", 243.05, 22.0), ("C11.2", 237.0, 17.55),
+                      ("C43.2", 222.9, 18.3), ("C44.2", 214.9, 20.2), ("C10.2", 214.9, 13.0)):
+        via("PWR_GND", x, y, pad, PWR)
+    # 5 V
+    T("INST_5V_A", ["J1.3", "J1.1", "J1.2"], 0.5)
+    T("INST_5V_A", ["J1.2", (255.28, 23.5), (238.84, 23.5), "Q2.3"], 0.5)
+    T("INST_5V_A", ["Q2.3", "U13.4"], 0.5)
+    T("INST_5V_A", ["C208.1", (241.15, 23.5)], PWR)
+    T("INST_5V_A", ["J1.2", (255.28, 14.3), (265.53, 24.55), (267.0, 24.55)], PWR, "B")
+    via("INST_5V_A", 267.0, 24.55, "C12.1", PWR)
+    T("INST_5V_A", ["U6.14", "C12.1"], PWR)
+    # the 3V3 trunk
+    via("DEV_3V3", 280.4, 23.59, "R49.1")
+    T("DEV_3V3", [(280.4, 23.59), (280.4, 28.4), (262.9, 28.4), (256.7, 22.2), (244.0, 22.2),
+                  (242.2, 24.0), (HWY, 24.0)], 0.3, "B")
+    via("DEV_3V3", 256.7, 22.2, "R37.2")
+
+
+def tail():
+    """STAGE 3: THE TAIL END'S DIGITAL LINES. J-MCU fans out two ways. Five lines leave the odd
+    row on top, round the header's tail end, nested, to the DAC, the SPI resistors and the LED
+    driver. Six leave it on the bottom, under the row and round the header's mouth end, to
+    the chain resistors and the lines running toward the mouth, and pin 5 goes the same way on
+    top. The row's pads reach 0.97 mm toward the near edge, which leaves room there for six. The even row's four go straight
+    out on the bottom."""
+    c = 0.3
+
+    def top(net, n, y, xc, rest):
+        x = jx(n)
+        T(net, [f"J1.{n}", (x, y + c), (x + c, y), (xc - c, y), (xc, y + c)] + rest)
+
+    def low(net, n, y, xc, rest):
+        x = jx(n)
+        T(net, [f"J1.{n}", (x, y + c), (x - c, y), (xc + c, y), (xc, y + c)] + rest, FINE, "B")
+
+    top("IO34", 7, 8.05, 272.4, [(272.4, 14.35), (272.7, 14.65), (281.9, 14.65), (283.9, 16.65),
+                                 (284.91, 16.65), "R3.1", "R40.2"])
+    T("IO34", [(276.05, 14.65), "U1.4"])
+    top("IO35", 9, 8.55, 271.9, [(271.9, 14.77), (273.98, 16.85), (279.11, 16.85), "R1.1"])
+    T("IO35", [(277.95, 16.85), "U1.1"])
+    top("IO36", 11, 9.05, 271.4, [(271.4, 14.98), (275.47, 19.05), (282.29, 19.05), "R2.1"])
+    T("IO36", [(276.05, 19.05), "U1.3"])
+    top("DEV_3V3", 15, 9.55, 270.9, [(270.9, 15.15), (275.65, 19.9), "R48.1", (279.0, 19.9), (289.0, 19.9)])
+    T("DEV_3V3", [(279.0, 19.9), "R49.1"])
+    top("IO6", 21, 10.05, 270.4, [(270.4, 15.4), (276.9, 21.9), (276.9, 31.27), "U6.5"])
+    # the module's SPI, from its resistors to J-UMB
+    T("SCLK", ["J6.4", (288.7, 29.77), (280.3, 21.37), "R1.2"])
+    T("MOSI", ["J6.5", (288.3, 27.23), (283.3, 22.23), "R2.2"])
+    T("CS_MOD", ["J6.7", (287.49, 22.15), "R3.2"])
+    # the breath pair's last step to J-UMB
+    T("BREATH_SENSE", ["J6.1", "R38.2"])
+    T("BREATH_SENSE", [(293.25, 37.39), "D5.1"])
+    T("AGND_SENSE", ["J6.2", "R39.2"])
+    T("AGND_SENSE", [(293.25, 34.85), "D6.1"])
+    # MIDI out
+    T("MIDI_TIP_DRV", ["U6.6", (271.43, 32.54), "R50.1"])
+    T("MIDI_RING_DRV", ["U6.8", "R51.1"])
+    T("MIDI_TIP_R", ["R50.2", "FB3.1"])
+    T("MIDI_RING_R", ["R51.2", (268.43, 40.5), (269.88, 41.95), "FB4.1"])
+    T("MIDI_TIP", ["FB3.2", (279.0, 38.96), (279.44, 39.4), (283.75, 39.4), (285.0, 40.65)])
+    T("MIDI_TIP", [(282.9, 39.4), (282.9, 40.0)])
+    T("MIDI_RING", ["FB4.2", (278.9, 41.95), (279.55, 42.6), (284.4, 42.6)])
+    T("MIDI_RING", [(283.6, 42.6), (282.95, 41.95)])
+    via("PWR_GND", 281.5, 41.0, "U12.2")
+    T("PWR_GND", [(280.55, 40.05), (281.5, 41.0), (280.55, 41.95)])
+    # the LED driver
+    T("GATE_A_OUT", ["U6.3", (270.9, 28.73), (270.9, 21.9), (270.6, 21.6), (266.82, 21.6), "R11.1"])
+    T("LED_DI", ["R11.2", "D8.4"])
+    VIAS.append(("IO2", 270.0, 24.3))
+    T("IO2", [(270.0, 24.3), (270.0, 32.54), "U6.9"])
+    via("IO2", 279.0, 26.6, "R49.2")
+    VIAS.append(("IO1", 275.6, 27.46))
+    T("IO1", ["U6.2", (275.6, 27.46), "R10.1"])
+    # the even row, bottom face
+    T("IO1", ["J1.12", (261.63, 17.2), (271.89, 27.46), (275.6, 27.46)], FINE, "B")
+    T("IO2", ["J1.16", (264.17, 18.47), (270.0, 24.3)], FINE, "B")
+    T("IO2", [(270.0, 24.3), (272.3, 26.6), (279.0, 26.6)], FINE, "B")
+    T("U0TXD", ["J1.22", (267.98, 14.2), (269.38, 15.6), (287.6, 15.6)], FINE, "B")
+    T("U0RXD", ["J1.18", (265.44, 14.0), (267.84, 16.4), (288.2, 16.4), (288.8, 15.8), (288.8, 10.45),
+                (287.75, 9.4)], FINE, "B")
+    via("U0TXD", 287.6, 15.6, "R46.1")
+    T("TXD_HDR", ["R46.2", (284.0, 15.01), "J2.1"])
+    via("U0RXD", 287.75, 9.4, "J2.2")
+    # the odd row, bottom face: under the row, north past the header's mouth end
+    low("IO39", 23, 8.0, 251.9, [(251.9, 14.3), (247.5, 18.7), (239.4, 18.7), (235.8, 22.3), (HWY, 22.3)])
+    low("IO7", 19, 8.42, 252.3, [(252.3, 16.6), (251.6, 17.3)])
+    low("IO38", 17, 8.84, 252.7, [(252.7, 18.1), (252.4, 18.4)])
+    low("IO37", 13, 9.26, 253.1, [(253.1, 18.8), (252.8, 19.1), (239.6, 19.1), (236.0, 22.7), (HWY, 22.7)])
+    low("IO36", 11, 9.68, 253.5, [(253.5, 19.2), (253.2, 19.5), (239.8, 19.5), (236.2, 23.1), (HWY, 23.1)])
+    low("IO35", 9, 10.1, 253.9, [(253.9, 19.6), (253.6, 19.9), (240.0, 19.9), (236.4, 23.5), (HWY, 23.5)])
+    T("IO33", ["J1.5", (257.82, 10.35), (257.52, 10.05), (254.6, 10.05), (254.3, 10.35), (254.3, 22.2)])
+    VIAS.append(("IO7", 251.6, 17.3))
+    T("IO7", [(251.6, 17.3), (251.6, 20.6), (250.85, 21.35), (248.79, 21.35), "R35.1"])
+    VIAS.append(("IO38", 252.4, 18.4))
+    T("IO38", [(252.4, 18.4), (252.4, 20.74), "R34.1"])
+    # the chain's three outputs: a via between the pads, then the bottom face toward the mouth
+    via("CHAIN_SHLD", 249.2, 25.36, "R35.2")
+    T("CHAIN_SHLD", [(249.2, 25.36), (HWY, 25.36)], FINE, "B")
+    via("CHAIN_SCK", 252.2, 25.36, "R34.2")
+    T("CHAIN_SCK", [(252.2, 25.36), (251.51, 26.05), (HWY, 26.05)], FINE, "B")
+    T("CHAIN_SER_LH", ["R36.2", (255.2, 25.36), "R37.1"])
+    VIAS.append(("CHAIN_SER_LH", 255.2, 25.36))
+    T("CHAIN_SER_LH", [(255.2, 25.36), (254.34, 24.5), (HWY, 24.5)], FINE, "B")
+    # the chain's return to J-MCU pin 24, on top
+    T("CHAIN_QH_RT", ["J1.24", (269.25, 20.8), (268.95, 21.1), (262.0, 21.1), (258.65, 24.45), (HWY, 24.45)])
+
+
 def breath_strip():
     """The AGND strip in layer 3 under the breath pair: both lines' paths grown by a
     millimetre, square at the ends so each end via stands on it. layout.yaml's islands:
@@ -404,7 +553,7 @@ def planes(board, geo):
     return lay
 
 
-STAGES = [analog, breath_pair]
+STAGES = [analog, breath_pair, power, tail]
 
 
 def copper():
