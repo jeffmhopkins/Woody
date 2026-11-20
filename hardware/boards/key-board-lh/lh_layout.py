@@ -331,6 +331,18 @@ def draw(board):
 STITCH = [(99.3, 38.5), (99.5, 31.0)]
 
 
+def relieve(board):
+    """EVERY GROUND PAD GETS THERMAL RELIEF, the surface-mount ones too (owner, 2026-11-20:
+    "Do the resistors that land on ground need their own ground pad so they can actually be
+    soldered?"). Rev A's zones relieved only the through-hole pads, so a capacitor's or the
+    register's ground pad was one piece with the pour: a 0805 with one pad in a plane and the
+    other on a track heats unevenly in reflow and can stand up, and cannot be reworked by
+    hand. Each pad is now its own island joined by spokes. Vias stay solid."""
+    for z in board.Zones():
+        if z.GetNetname() == GND:
+            z.SetPadConnection(pcbnew.ZONE_CONNECTION_THERMAL)
+
+
 def fill(path):
     """The zones filled in a process of their own: filling a board just edited in memory
     crashes KiCad 9's Python. ZONE_FILLER pours the planes; it routes nothing."""
@@ -348,6 +360,7 @@ def main():
     if "--place-only" not in sys.argv:
         routes(pcb.cad_geometry("left_hand"))
         draw(board)
+    relieve(board)
     pcb.add_silk_generic(board, lay, comps)
     pcb.silk_off_vias(board)
     pcbnew.SaveBoard(OUT, board)
