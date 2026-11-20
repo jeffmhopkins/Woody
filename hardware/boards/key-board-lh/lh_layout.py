@@ -32,17 +32,20 @@ THE FLOORPLAN, and why each part is where it is.
 3. U1 stands just past the header's pin rows, its pin-8/9 end toward them and its key
    inputs (pins 3..6) facing the key row, so LH1..LH4 arrive in pin order from the side
    their switches are on, and LH5 leaves the far row toward its own switch.
-4. EACH KEY'S NETWORK IS TUCKED UNDER ITS OWN SWITCH'S PINS, the same way round all
-   five: the series resistor under pin 1 (the switch leg), the capacitor under pin 2
-   (ground - its ground pad lands on the switch's own ground pin, no via), and the
-   pull-up hanging below the node, its rail end toward the near edge.
+4. EACH KEY'S NETWORK STANDS OUTSIDE ITS OWN SWITCH'S PINS, the same way round all five:
+   the series resistor beside pin 1 (the switch leg) on the mouth side, the capacitor
+   beside pin 2 (ground) on the tail side, each joined to its pin by one short neck; the
+   node runs between them under both pins with the pull-up hanging from its middle, its
+   rail end toward the near edge. Nothing passes between a pin and the pole, and the key
+   line leaves whichever end of the node faces the register.
 5. 3V3 IS ONE TRUNK. Out of the header's pin 3 straight into C7 (the reservoir), along
    the far row: R11 (the free input's pull-up), C8 across pins 12/13, under the body to
    pin 16 and C6 across 16/15; then on between LH5's and LH4's lines to their
    pull-ups, round LH4 and back along the near edge through the three row keys' pull-ups.
 6. GROUND IS THE SWITCH-SIDE FACE, unbroken. Every switch's and the header's ground
    pin is a through-hole into it; the register's ground pins and the capacitors reach
-   it by a via each. No ground track.
+   it by a via each. No ground track but each capacitor's neck to its switch's pin.
+   Every ground pad, surface-mount too, is joined to the pour by relief spokes.
 """
 import math
 import os
@@ -102,12 +105,20 @@ PLACE = {
 
 # ---- a key's network, relative to its switch's centre -------------------------------------------
 # The switch's pins (hardware/lib, SW_Gateron_KS33_1u): pin 1, the leg, at (-4.4, -4.7);
-# pin 2, ground, at (+2.6, -5.75). The three KEY pads stand in one row, DROP below the centre.
-DROP = 9.0
+# pin 2, ground, at (+2.6, -5.75); the pole's hole, 5.25 across, at the centre.
+# NOTHING PASSES BETWEEN A PIN AND THE POLE (owner, 2026-11-20, of the line that did: "Each of
+# these need work too"). That gap is 2 mm, and a line through it cut the ground pin's relief
+# ring and dropped into the node between two pads. So each part stands OUTSIDE its own pin,
+# beside it and level with it, joined by one short straight neck: the series resistor on the
+# mouth side of the leg pin, the capacitor on the tail side of the ground pin. The node runs
+# between the two under both pins, DROP below the centre, with the pull-up hanging from its
+# middle. Its two ends are free, and the key line leaves from the one facing the register.
+DROP = 8.5                    # the node: clear of the ground pin's relief ring above it, and LH4's pull-up below it clear of the board's edge by a strip of pour
+X_SER, X_CAP = -7.8, 6.0      # the two parts' columns: a millimetre of mask between pad and pin
 KEY_NET = {
-    "R-KEY-SER": (-3.69, -DROP, "+x"),                    # pad 2 (the leg) under pin 1, pad 1 at the node
+    "R-KEY-SER": (X_SER, -4.7 - 0.9125, "-y"),            # pad 2 (the leg) level with pin 1, pad 1 (the node) below it
     "R-KEY-PU": (-0.94, -DROP - 0.9125, "-y"),            # pad 2 at the node, pad 1 (3V3) toward the near edge
-    "C-KEY": (1.85, -DROP, "-x"),                         # pad 1 at the node, pad 2 (ground) under pin 2
+    "C-KEY": (X_CAP, -5.75 - 0.9125, "-y"),               # pad 2 (ground) level with pin 2, pad 1 (the node) below it
 }
 BODY = ("SW", "J", "H")
 
@@ -230,54 +241,56 @@ def routes(geo):
     r11 = (PLACE["R11"][0], Y_RAIL)
     x12, x16 = upin(12)[0], upin(16)[0]
     c6 = (upin(15)[0] + 1.9, Y_CAPS)
-    xt = sw["LH5"][0] - 6.7      # the trunk's way down, between LH3's ground pin and LH5's leg pin
+    xt = sw["LH3"][0] + X_CAP + 1.3 + 1.2      # the trunk's way down: third of the corridor's four lines (below)
     yr5, yr4, yr = pu1["LH5"][1], pu1["LH4"][1], pu1["LH3"][1]
-    xe = sw["LH4"][0] + 5.0      # round LH4, outside its ground pin
-    xw = sw["LH4"][0] - 8.5      # back up to the row keys' rail, short of LH4's leg pin
+    xe = sw["LH4"][0] + X_CAP + 1.3      # round LH4, outside its capacitor
+    xw = sw["LH3"][0] + X_CAP + 1.3      # back up to the row keys' rail, mouth side of LH4's line
     track(V33, [j, c7, (c7[0] + 1.0, c7[1]), (c7[0] + 1.0 + Y_RAIL - c7[1], Y_RAIL), r11, (x12 - 0.5, Y_RAIL), (x12, Y_RAIL - 0.5),
                 (x12, Y_CAPS), upin(12), (x12, ch(1.7)), (x12 + 0.8, ch(0.9)), (x16 - 0.8, ch(0.9)), (x16, ch(1.7)), upin(16),
                 (x16, UY + 3.45), (c6[0], UY + 3.45 + c6[0] - x16), c6, (xt, c6[1] - (xt - c6[0])), (xt, yr5 + 0.5), (xt + 0.5, yr5),
                 pu1["LH5"], (xe - 0.5, yr5), (xe, yr5 - 0.5), (xe, yr4 + 0.5), (xe - 0.5, yr4), pu1["LH4"], (xw + 0.5, yr4),
                 (xw, yr4 + 0.5), (xw, yr - 0.5), (xw - 0.5, yr), pu1["LH3"], pu1["LH2"], pu1["LH1"]], PW)
 
-    # -- each key, the same copper at all five: the node's three pads joined in their row, the
-    # leg up into the switch's pin 1, the capacitor's ground up into the switch's ground pin.
+    # -- each key, the same copper at all five: a neck from each pin straight out to its part,
+    # and the node from the resistor's lower pad down at 45, along under both pins through the
+    # pull-up, and up at 45 into the capacitor's lower pad.
+    ser = {k: (x + X_SER, y - 4.7 - 1.825) for k, (x, y, _) in sw.items()}     # each node's mouth end
+    cap = {k: (x + X_CAP, y - 5.75 - 1.825) for k, (x, y, _) in sw.items()}    # and its tail end
     for k, (sx, sy, _) in sw.items():
-        key = "/KEY_" + k
-        track(key, [(sx - 2.7775, sy - DROP), (sx + 0.9, sy - DROP)])
-        track(f"/{k}/SWITCH_LEG", [(sx - 4.6025, sy - DROP), (sx - 4.6025, sy - 4.9025), (sx - 4.4, sy - 4.7)])
-        track(GND, [(sx + 2.8, sy - DROP), (sx + 2.8, sy - 5.95), (sx + 2.6, sy - 5.75)])
+        ry, cy = sy - DROP - ser[k][1], sy - DROP - cap[k][1]
+        track("/KEY_" + k, [ser[k], (ser[k][0] - ry, sy - DROP), (cap[k][0] + cy, sy - DROP), cap[k]])
+        track(f"/{k}/SWITCH_LEG", [(sx - 4.4, sy - 4.7), (sx + X_SER, sy - 4.7)])
+        track(GND, [(sx + 2.6, sy - 5.75), (sx + X_CAP, sy - 5.75)])
 
-    # -- the key lines. Each leaves its node between the switch's two pins and climbs past the
-    # pole on the register's side (owner, 2026-11-20): LH1..LH3 on the tail side, between the
-    # pole and the ground pin; LH4 and LH5 on the mouth side, between the pole and the leg pin.
-    def tail_side(k, x_or_y, level=None):
-        """From k's node up and out toward the tail at 45; to height `level` if given, else to x."""
-        sx, sy, _ = sw[k]
-        n, t = (sx - 0.94, sy - DROP), (sx - 0.94, sy - STEM - 2.33)       # the turn: clear of the pole and the ground pin alike
-        if level is not None:
-            return [n, t, (t[0] + level - t[1], level)]
-        return [n, t, (x_or_y, t[1] + x_or_y - t[0])]
+    # -- the key lines. Each leaves the end of its node that faces the register (owner,
+    # 2026-11-20): LH1..LH3 the tail end, LH4 and LH5 the mouth end. It steps sideways off the
+    # pad, clear of the pad above it, and climbs.
+    def tail_end(k):
+        (x, y) = cap[k]
+        return [(x, y), (x + 0.8, y), (x + 1.3, y + 0.5)]
 
-    def mouth_side(k):
-        sx, sy, _ = sw[k]
-        return [(sx - 0.94, sy - DROP), (sx - 0.94, sy - 4.4), (sx - 0.94 - 2.96, sy - 1.44)]
+    def mouth_end(k, to):
+        """To the column x = `to`, mouth side of the resistor."""
+        (x, y) = ser[k]
+        return [(x, y), (to + 0.5, y), (to, y + 0.5)]
 
-    # LH1 and LH2 run in under the header's pin rows and turn up into pins 6 and 5, LH1 nearer
     (x6, y6), (x5, y5), (x4, y4), (x3, y3), (x14, y14) = upin(6), upin(5), upin(4), upin(3), upin(14)
-    track("/KEY_LH1", tail_side("LH1", None, ch(-4.0)) + [(x6 - 0.5, ch(-4.0)), (x6, ch(-3.5)), (x6, y6)])
-    track("/KEY_LH2", tail_side("LH2", None, ch(-4.5)) + [(x5 - 0.5, ch(-4.5)), (x5, ch(-4.0)), (x5, y5)])
-    # LH3: out at 45 to the line straight under pin 4 (which is why U1 stands where it does), and up
-    assert abs(x4 - (sw["LH3"][0] + STEM)) < 1e-6
-    track("/KEY_LH3", tail_side("LH3", x4) + [(x4, y4)])
-    # LH4: straight down from pin 3 beside LH3's line, then one diagonal to its own switch
-    xs = sw["LH4"][0] - 3.9
-    track("/KEY_LH4", [(x3, y3), (x3, 32.5), (xs, 32.5 - (xs - x3))] + mouth_side("LH4")[::-1])
-    # LH5: out of the far row between C8 and C6, over C6's ground via, and one diagonal down
-    xs = sw["LH5"][0] - 3.9
-    ys = sw["LH5"][1] + 3.3      # where the diagonal lands: it passes clear of C6's 3V3 pad
+    # LH1 and LH2 climb beside their own capacitor to a little past the pole, cross at 45 to
+    # their height under the header's pin rows, and turn up into pins 6 and 5, LH1 nearer
+    for k, lvl, (px, py) in (("LH1", ch(-4.0), (x6, y6)), ("LH2", ch(-4.5), (x5, y5))):
+        xc, yt = cap[k][0] + 1.3, sw[k][1] + 0.9
+        track("/KEY_" + k, tail_end(k) + [(xc, yt), (xc + lvl - yt, lvl), (px - 0.5, lvl), (px, lvl + 0.5), (px, py)])
+    # The corridor between LH3's capacitor and LH5's resistor carries four lines side by side,
+    # in the order they reach the register and the trunk reaches LH5: LH3, LH4, 3V3, LH5.
+    xl3 = cap["LH3"][0] + 1.3
+    xl4, xt, xl5 = xl3 + 0.6, xl3 + 1.2, xl3 + 1.8
+    assert xl5 + 0.125 + 0.2 <= ser["LH5"][0] - 0.725 + 1e-6, "LH5's line fouls its own resistor"
+    # LH3 and LH4 cross together at 45 to stand under pins 4 and 3
+    track("/KEY_LH3", tail_end("LH3") + [(xl3, 31.5), (x4, 31.5 + xl3 - x4), (x4, y4)])
+    track("/KEY_LH4", mouth_end("LH4", xl4) + [(xl4, 32.1), (x3, 32.1 + xl4 - x3), (x3, y3)])
+    # LH5: out of the far row between C8 and C6, over C6's ground via, and straight down the corridor
     track("/KEY_LH5", [(x14, y14), (x14, UY + 3.6), (x14 + 0.3, UY + 3.9), (x14 + 0.3, Y_VIA + 0.55), (x14 + 0.8, Y_VIA + 1.05),
-                       (xs - (Y_VIA + 1.05 - ys), Y_VIA + 1.05), (xs, ys)] + mouth_side("LH5")[::-1])
+                       (xl5 - 0.5, Y_VIA + 1.05), (xl5, Y_VIA + 0.55)] + mouth_end("LH5", xl5)[::-1])
     # the free input: pin 11 up into its pull-up
     x11, y11 = upin(11)
     track("/KEY_FREE3", [(x11, y11), (x11, UY + 3.4), (x11 - 0.5, UY + 3.9), (x11 - 0.5, Y_RAIL - 1.825)])
@@ -326,9 +339,10 @@ def draw(board):
         board.Add(v)
 
 
-# The parts face's pour, tied to the ground face where the tracks cut a piece of it off from
-# every ground pin: the strip between the 3V3 trunk's way down and LH4's line, at both ends.
-STITCH = [(99.3, 38.5), (99.5, 31.0)]
+# The parts face's pour is cut into pieces by the 3V3 trunk, which rings LH4. Every piece holds
+# a ground pin or a ground via of its own; the ring's inside, which had only LH4's switch pin
+# through its relief spokes, gets one via more.
+STITCH = [(102.5, 20.5)]
 
 
 def relieve(board):
