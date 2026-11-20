@@ -40,7 +40,23 @@ THE FLOORPLAN, and why each part is where it is.
 6. EACH LED'S 100 nF STANDS IN THE ROW, on the mouth side of its LED, a millimetre clear.
 7. THE CHAIN'S SERIES RESISTORS STAND IN ONE ROW AT J-MCU, under the Matrix ribbon's fold,
    with R-LED-SERIES among them below the first LED's data pad.
-8. THE ANALOG BLOCK, THE POWER BLOCK AND THE TAIL are as reviewed (#8, #33, #34, #45).
+8. THE ANALOG BLOCK IS LAID OUT ALONG ITS SIGNAL, from the sensor's pins outward (owner,
+   2026-11-20: a fresh approach, best analog first):
+   - the sensor's three live pins are on its far edge, RAW nearest the mouth, then AGND,
+     then VS. The buffer stands under the sensor's near edge turned so RAW drops into its
+     mouth-side column and VS leaves its tail-side column: the two run down under the
+     sensor side by side with AGND between them. They used to cross there.
+   - the reference buffer's feedback stands under and beside the pins it serves; REF_5V
+     comes in along one line from the reference, tailward of the buffer, passing between
+     R-ISO-REF's pads and R-FB-REF's so that it reaches its pin inside VS without a via.
+   - the reference's input parts hang from REF_VIN's bus beyond the reference, the 12 V
+     end last, nearest the supply.
+   - the ADC stands in the band below, its analog pins toward the mouth and its SPI pins
+     toward the tail; the divider, the anti-alias capacitor, its decoupling, its bulk and
+     its supply resistor are ONE row above it, in signal order from the mouth.
+   - nothing analog is within the LEDs' row, and no analog line crosses it on the top face.
+9. THE POWER BLOCK AND THE UMBILICAL CORNER are as reviewed (#33, #34, #45); the corner is
+   the next block to be laid out afresh.
 
 SPACING, so that nothing is tight or a little off without a reason: a millimetre between
 courtyards; parts side by side at 3 mm (0805), end to end at 4.5 mm; every row and comb
@@ -117,8 +133,41 @@ PLACE.update({
     "R37": (249.0, 23.3, ("3V3", "W")), "R36": (255.5, 23.3, "+x"), "R35": (261.2, 23.3, "+x"),
     "R11": (265.55, 23.3, ("LED_DI", "N")), "R34": (269.9, 23.3, "+x"),
     "C45": (252.6, 28.5, "-y"),
+    "R45": (244.5, 23.3, ("IO39", "E")),      # the ADC's chip-select pull-up, where its line leaves J-MCU for the mouth
+    # the umbilical's three SPI resistors a courtyard and 0.6 mm apart, their clamp centred over them, CS's pull-up beside it
+    "R1": (274.6, 19.3, None), "R2": (277.6, 19.3, None), "R3": (280.6, 19.3, None),
+    "U1": (277.6, 24.3, None), "R40": (281.4, 24.3, ("IO34", "S")),
     # U6's four small parts in one line at 3 mm
     "R49": (261.9, 37.4, None), "R48": (264.9, 37.4, None), "R10": (267.9, 37.4, None), "C12": (270.9, 37.4, None),
+})
+# ---- the analog block, at the mouth end ---------------------------------------------------------
+ADC_ROW = 17.25               # the ADC's row: divider, anti-alias, decoupling, bulk, supply resistor
+REF_LINE = 20.5               # REF_5V's line from the reference to the buffer; the feedback parts stand on it
+PLACE.update({
+    # the buffer under the sensor's near edge, turned so SENSOR_RAW drops into pin 5 on the mouth
+    # side and VS leaves on the tail side: the two no longer cross under the sensor
+    "U3": (14.0, 25.5, ("5", "NW")),
+    "C203": (8.9, 26.5, ("SENSOR_RAW", "N")), "C204": (8.9, 22.0, ("INST_POS12", "N")),
+    # the reference buffer's feedback: C9 and R9 under the pins they serve, R7 and R8 in the
+    # corridor VS climbs; REF_5V passes between R7's pads and between R8's to reach pin 3 inside VS
+    "C9": (13.5, REF_LINE, ("REF_MINUS", "N")), "R9": (16.5, REF_LINE, ("BUF_OUT", "N")),
+    "R7": (20.5, REF_LINE, ("VS", "N")), "R8": (19.55, 24.0, ("VS", "E")),
+    # the reference, tailward on the same line: its output capacitors on the line, its input
+    # parts hanging from REF_VIN's bus beyond it, the 12 V end last
+    "C7": (24.0, REF_LINE + 0.95, ("REF_5V", "S")), "C5": (27.0, REF_LINE + 1.46, ("REF_5V", "S")),
+    "U4": (32.0, 23.0, ("5", "SW")),
+    "C6": (38.5, 23.55, ("REF_VIN", "N")), "C4": (41.75, 23.04, ("REF_VIN", "N")),
+    "D1": (45.0, 22.85, ("REF_VIN", "N")), "R6": (48.25, 23.55, ("REF_VIN", "N")),
+    # the ADC in the band below, analog pins toward the mouth, SPI toward the tail; everything
+    # that hangs on it in ONE row above it, in signal order from the mouth
+    "U2": (28.0, 12.25, ("1", "NW")),
+    "R4": (15.5, ADC_ROW, ("SENSOR_BUFFERED", "W")), "R5": (20.0, ADC_ROW, ("ADC_IN", "W")),
+    "C1": (24.5, ADC_ROW, ("ADC_IN", "W")), "C3": (28.65, ADC_ROW, ("ADC_VDD", "E")),
+    "C42": (33.5, ADC_ROW, ("ADC_VDD", "W")), "C2": (38.95, ADC_ROW, ("ADC_VDD", "W")),
+    "R47": (43.8, ADC_ROW, ("ADC_VDD", "W")),
+    "NT2": (32.6, 9.0, None),
+    # the sensor's supply capacitors beside its far pins, 3 mm apart
+    "C202": (21.75, 47.4, ("VS", "S")), "C201": (24.75, 47.4, ("VS", "S")), "C8": (27.75, 47.4, ("VS", "S")),
 })
 LED_CAP_DX = -6.5             # each LED's 100 nF: this far from its LED's centre, in the row, a millimetre between courtyards
 KEEP_CAP = ("C37", "C38")     # the two at the analog island keep their places (#33)
@@ -129,7 +178,8 @@ KEEP_CAP = ("C37", "C38")     # the two at the analog island keep their places (
 def seat(fp, x, y, how):
     """how: a pcb_hand.seat way; None to keep the turn it has; (pad, (dx, dy)) for the pad
     that must lie there from the centre; (net, side) for the pad whose net's name contains
-    `net` to lie on the N (far), S (near), E (tail) or W (mouth) side."""
+    `net` to lie on the N (far), S (near), E (tail) or W (mouth) side; (pad, corner) for an
+    IC's pad to lie in the NW, NE, SW or SE corner."""
     if how is None:
         fp.SetPosition(pcb.V(*pcb.to_pcb(x, y)))
         return
@@ -138,7 +188,11 @@ def seat(fp, x, y, how):
     fp.SetPosition(pcb.V(*pcb.to_pcb(x, y)))
     for rot in (0, 90, 180, 270):
         fp.SetOrientationDegrees(rot)
-        if isinstance(how[1], str):
+        if isinstance(how[1], str) and how[1] in ("NW", "NE", "SW", "SE"):
+            px, py = pcb_hand.body_xy(fp.FindPadByNumber(how[0]).GetPosition())
+            if (("N" in how[1]) == (py > y)) and (("E" in how[1]) == (px > x)):
+                return
+        elif isinstance(how[1], str):
             pads = [q for q in fp.Pads() if how[0] in q.GetNetname().split("/")[-1]]
             if len(pads) != 1:
                 raise SystemExit(f"main_layout: {fp.GetReference()} has {len(pads)} pads on a net named {how[0]}")
