@@ -3,13 +3,14 @@
 and every track and via written out below the placement.
 NO ROUTER OF ANY KIND IS CALLED: not tools/pcb_route*.py, not Freerouting, not KiCad's.
 
-    python3 hardware/boards/key-board-lh/lh_layout.py            # writes key-board-lh.hand.kicad_pcb (--place-only: no copper)
+    python3 hardware/boards/key-board-lh/lh_layout.py            # rewrites key-board-lh.kicad_pcb (--place-only: no copper)
 
-It READS key-board-lh.kicad_pcb (rev A, which stays the source until this board is
-accepted) for what the body CAD and the sheets fix - the outline, the five switches,
-the four mounts and their keep-outs, the ground zones' outlines, every pad's net -
-strips its copper, seats J-CHAIN where the body CAD now puts it, and every other part
-where PLACE says. Body frame throughout:
+It is THE RECORD OF THIS BOARD'S LAYOUT and rewrites key-board-lh.kicad_pcb in place. From
+the board it keeps what the body CAD and the sheets fix - the outline, the five switches,
+the four mounts and their keep-outs, the switch-side ground zone's outline, every pad's
+net - and replaces the rest: it strips the copper and silkscreen, seats J-CHAIN where the
+body CAD puts it and every other part where PLACE says, and draws the tracks. Running it
+twice gives the same board. Then: tools/pcb.py check, tools/pcb.py render. Body frame throughout:
 x along the body from the mouth, y across it from the near side, mm, seen from above;
 all parts but the switches are on the underside.
 
@@ -63,7 +64,7 @@ import pcb          # noqa: E402  (frames, the sheets' netlist, the silkscreen s
 
 NAME = "key-board-lh"
 SRC = os.path.join(HERE, NAME + ".kicad_pcb")
-OUT = os.path.join(HERE, NAME + ".hand.kicad_pcb")
+OUT = SRC
 
 # ---- the register and its own parts ------------------------------------------------------------
 # J-CHAIN's pads, once seated where the body CAD puts it (seat_chain, below): the signal
@@ -246,13 +247,15 @@ def routes(geo):
     # The trunk rings LH4: LH4's line leaves its switch on the mouth side, so on one face the
     # rail reaches LH4's pull-up and the row keys' only round LH4's tail side. With no pour on
     # this face (NO PARTS-FACE POUR, below) the ring encloses nothing.
+    # Every corner of the ring is cut at 45 as far as what stands inside it allows (owner,
+    # 2026-11-20: "some of the 3 volt rail looks like it could use more diagonal").
     xe = sw["LH4"][0] + X_CAP + 1.3      # round LH4, outside its capacitor
     xw = sw["LH3"][0] + X_CAP + 1.3      # back up to the row keys' rail, mouth side of LH4's line
     track(V33, [j, c7, (c7[0] + 1.0, c7[1]), (c7[0] + 1.0 + Y_RAIL - c7[1], Y_RAIL), r11, (x12 - 0.5, Y_RAIL), (x12, Y_RAIL - 0.5),
                 (x12, Y_CAPS), upin(12), (x12, ch(1.7)), (x12 + 0.8, ch(0.9)), (x16 - 0.8, ch(0.9)), (x16, ch(1.7)), upin(16),
-                (x16, UY + 3.45), (c6[0], UY + 3.45 + c6[0] - x16), c6, (xt, c6[1] - (xt - c6[0])), (xt, yr5 + 0.5), (xt + 0.5, yr5),
-                pu1["LH5"], (xe - 0.5, yr5), (xe, yr5 - 0.5), (xe, yr4 + 0.5), (xe - 0.5, yr4), pu1["LH4"], (xw + 0.5, yr4),
-                (xw, yr4 + 0.5), (xw, yr - 0.5), (xw - 0.5, yr), pu1["LH3"], pu1["LH2"], pu1["LH1"]], PW)
+                (x16, UY + 3.45), (c6[0], UY + 3.45 + c6[0] - x16), c6, (xt, c6[1] - (xt - c6[0])), (xt, yr5 + 3.0), (xt + 3.0, yr5),
+                pu1["LH5"], (xe - 6.3, yr5), (xe, yr5 - 6.3), (xe, yr4 + 1.5), (xe - 1.5, yr4), pu1["LH4"], (xw + 3.8, yr4),
+                (xw, yr4 + 3.8), (xw, yr - 3.2), (xw - 3.2, yr), pu1["LH3"], pu1["LH2"], pu1["LH1"]], PW)
 
     # -- each key, the same copper at all five: a neck from each pin straight out to its part,
     # and the node from the resistor's lower pad down at 45, along under both pins through the
@@ -385,12 +388,12 @@ def main():
     if "--place-only" not in sys.argv:
         routes(pcb.cad_geometry("left_hand"))
         draw(board)
+    board.GetTitleBlock().SetDate(lay["silk"]["date"])
     relieve(board)
     no_parts_face_pour(board)
     pcb.add_silk_generic(board, lay, comps)
     pcb.silk_off_vias(board)
     pcbnew.SaveBoard(OUT, board)
-    shutil.copyfile(os.path.join(HERE, NAME + ".kicad_pro"), OUT[:-len(".kicad_pcb")] + ".kicad_pro")
     fill(OUT)
     n = sum(len(pts) - 1 for _, _, pts, _ in T)
     print(f"lh_layout: {len(place)} part(s) seated, {n} track segment(s), {len(VIAS)} via(s) by pads, "

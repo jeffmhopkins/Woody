@@ -3,7 +3,8 @@
 **Status:** Accepted, 2026-10-11. Decided by the owner, in the working chat,
 from four options put to them (below). Tracked in #47, under #46. **Amended
 2026-10-11** (the copper is laid by the grid router along the plan: *Amendment*
-below).
+below). **Set aside 2026-11-20 for the boards laid out by hand**
+([ADR 0030](0030-boards-laid-out-by-hand.md)): no router lays their copper.
 
 ## Context
 

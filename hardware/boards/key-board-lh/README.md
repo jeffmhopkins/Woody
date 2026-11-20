@@ -32,8 +32,9 @@ This page covers the board as a made thing.
 | File | What it is |
 |---|---|
 | `key-board-lh.kicad_sch` (+ the three circuit sheets it places) | **Source.** Every connection, and each part's identity: `Row`, `Pins`, `Manufacturer`, `MPN`, `LCSC`, `Assembly` (ADR 0019) |
-| `key-board-lh.kicad_pcb` (+ `.kicad_pro`, which holds its design rules) | **Source**, once laid out: edit it in KiCad 9 |
-| `layout.yaml` | The first layout's inputs, and the limits the board is held to. `networks:`, `parts:`, `silk:`, `route:`, `route_first:`, `standoff_footprint:`, `ground_net:` and `power_nets:` are read only by `pcb.py layout`. `rules:`, `fab:` and `connect_first:` are read by **every** `pcb.py check` too: the board's design settings must still say what they say, and each `connect_first` path must stay within its `max_mm` (below) |
+| `lh_layout.py` | **The record of the layout** (ADR 0030): every part's place and every track and via, written out by hand with the reason for each. It rewrites `key-board-lh.kicad_pcb`. No router runs on this board |
+| `key-board-lh.kicad_pcb` (+ `.kicad_pro`, which holds its design rules) | Written by `lh_layout.py`. Change the layout there and run it, so the reasons stay with the copper |
+| `layout.yaml` | The limits the board is held to, and what its silkscreen says. `rules:` and `fab:` are read by **every** `pcb.py check`: the board's design settings must still say what they say. `silk:`, `heights:`, `standoff_footprint:`, `ground_net:` and `power_nets:` are read by the checks and by `lh_layout.py` |
 | `board-netlist.yaml` | Exported from the sheets (`tools/kicad.py export`) |
 | `*.sch.png`, `*.pcb-*.png` | Renders, recorded in `hardware/SHEETS.csv` |
 | `fab/` | **Generated** by `tools/pcb.py render`, and recorded in the ledger against the board *and* the sheets. Never edit it by hand: `kicad.py check` fails on a stale file, and on any file in `fab/` that no tool wrote |
@@ -90,9 +91,6 @@ full list and the reasons):
 - two tracks of one net meeting on one layer at under 90° (an acid trap),
   including a track that ends in the middle of another; a wedge whose apex a
   via or pad of the net fills is not one;
-- a `layout.yaml` `connect_first:` connection with no track path of its own,
-  or a longer one than its `max_mm` (the decoupler's return to the register's
-  ground pin);
 - the board's thickness or outline differing from the body CAD's;
 - a switch, mount hole or `J-CHAIN` not where the body CAD puts it, or
   turned or on the wrong side;
@@ -102,59 +100,50 @@ full list and the reasons):
   `hardware.kb_mount_float`, plus `rules.clearance` (ADR 0020).
 
 **What holds the owner's rule (every key's network placed the same way round
-its switch) after the layout:** only the switches' positions. `layout`
-places the networks from the one pattern and stops if any key's three KEY
-pads are not the three nearest its T's junction; `check` holds each switch
-where the body CAD puts it. Nothing re-checks the networks' own positions
-once the `.kicad_pcb` is edited by hand.
+its switch):** `lh_layout.py` places all five from one table (`KEY_NET`),
+relative to each switch's position in the body CAD, and `check` holds each
+switch where the body CAD puts it.
 
 `kicad.py check` also holds `J-CHAIN`'s pins to the ribbon's netlist
 (`hardware/interfaces/key-chain-loom/netlist.yaml`).
 
-`tools/pcb.py layout … --force` rebuilds the board from scratch, from
-`layout.yaml` and the body CAD. It overwrites any hand edits, so run it only
-while `layout.yaml` is still the record of the layout. If the router cannot
-finish a net, it exits 1 and leaves the existing board as it was.
-`docs/reference/tooling.md` §4 covers the tools.
+### How this board is laid out
+
+By hand, in `lh_layout.py` (ADR 0030). The script's opening comment is the
+floorplan and the reason for each choice; these are the rules the owner's
+review of the copper set, 2026-11-20, and the next boards start from them:
+
+- **The switch-side face is the ground plane, and it is whole.** No signal or
+  power copper is on it. Every line on the parts face runs over it.
+- **The parts face has no pour.** A second fill added nothing to a whole
+  plane under slow lines, and the tracks cut it into regions joined by necks.
+- **Every ground pad reaches the plane by its own short way:** a key's
+  capacitor by a neck to its switch's through-hole ground pin, the register's
+  pins and its capacitors by a via each, the header by its pins.
+- **The plane meets every pin it joins through relief spokes**, so no joint
+  is soldered into solid copper.
+- **Nothing passes between a switch's pin and its pole.** Each key's series
+  resistor stands beside the leg pin and its capacitor beside the ground pin,
+  outside them, each on one short straight neck. The node runs under both
+  pins, the pull-up hangs from its middle, and the key line leaves the end
+  facing the register.
+- **The chain's four lines run under the register**, between its pad rows,
+  straight from the header: no line wraps a part and none crosses another.
+- **3V3 is one trunk on the parts face**, with no via.
+- **`J-CHAIN` faces the mouth** (ADR 0017, *Amendment, 2026-11-20*).
 
 ### Making the next board from this one
 
-The right-hand board, or any other simple board, starts from a copy of
-`layout.yaml`:
-- `cluster:` and `suffix:` name the cluster (`right_hand`, `RH`). The switches,
-  mount holes, `J-CHAIN` and outline then come from the body CAD for that cluster.
-- `networks:` gives ONE PATTERN for every key: where the T's junction sits
-  relative to the key's switch, and which way its resistors and capacitor
-  turn. `tools/pcb.py` `network_parts` places each key's three parts from its
-  switch's position in the body CAD, so every key's network sits the same way
-  round its switch. A key that cannot take the pattern goes under `except:`,
-  with the reason; on this board none does.
-- `route_first:` names the nets routed before the rest, in order. They are
-  the chain nets reaching `J-CHAIN`'s far (odd) row, which a track can reach
-  only from behind the header. On this board they also include three key
-  lines, which would otherwise be boxed in at the register:
-  - `/KEY_LH5` goes first, because U1.14's only way out is a via between the
-    pin rows, which SCK would otherwise take;
-  - `/KEY_LH4` and `/KEY_LH1` go straight after the chain nets.
+Start from a copy of `lh_layout.py` and of `layout.yaml` (`cluster:` and
+`suffix:` name the cluster; the switches, mounts, `J-CHAIN` and outline then
+come from the body CAD for it). Work out the floorplan from that board's
+register pinout first, show the placement before drawing copper, then write
+the tracks. Run `pcb.py check` until it passes, then `pcb.py render`. Write
+the board's README from this one.
 
-  With that order, every net routes on the first pass. `layout.yaml` says why,
-  line by line.
-- **No mount is plated.** All four stay unplated with their copper
-  keep-outs: the key plate is grounded through the columns at the main
-  board's mounts (ADR 0025). Amendment 5's `bond_mount` is gone from
-  `layout.yaml`; `tools/pcb.py` still supports the key for a board that needs one.
-- `connect_first:` names pad-to-pad connections routed before everything,
-  each with the `max_mm` that `pcb.py check` then holds it to: here the
-  decoupler's return to the register's ground pin. Name the new board's pads.
-- `parts:` places everything else: the register, its decoupler, the free-bit
-  pull-ups and `C-BULK-CHAIN-<suffix>`.
-- `rules:`, `fab:` (the board house), `silk:` (title, revision, date; `at`
-  for the parts side, `top_at` for the switch side),
-  `standoff_footprint:`, `route:`, `ground_net:` and `power_nets:` are copied
-  as they are. `power_nets:` names that board's rail.
-
-Then run `pcb.py layout`, and move parts in `layout.yaml` until `pcb.py check`
-passes. Write the board's README from this one.
+**No mount is plated.** All four stay unplated with their copper keep-outs:
+the key plate is grounded through the columns at the main board's mounts
+(ADR 0025; ADR 0020 Amendment 7).
 
 ## Ordering it — JLCPCB
 
@@ -332,7 +321,7 @@ board's are the same.
 | PTH drill | 0.15–6.3; ≥ 0.5 recommended for PTH | `rules: drill_min` | 0.70 (J1) | ok |
 | NPTH drill | ≥ 0.50 | — | the mount holes (`standoff_footprint`) and the switch poles | ok |
 | PTH annular ring | ≥ 0.18 absolute, 0.25 recommended | `fab: annular_min` | **0.185, J1's pads on the sides facing a neighbour** (the 1.07 pad across a 0.70 drill) | **+0.005: at the absolute minimum** (*Open*) |
-| Via hole / diameter | ≥ 0.15 / 0.25; diameter ≥ hole + 0.10 (0.15 preferred); a 0.2–0.25 hole under 0.45 costs more | `rules: via_drill`, `via`, `via_min` | the rule on every via (30 on this board, 33 on the right-hand one); ring 0.20 | ok, and no via surcharge |
+| Via hole / diameter | ≥ 0.15 / 0.25; diameter ≥ hole + 0.10 (0.15 preferred); a 0.2–0.25 hole under 0.45 costs more | `rules: via_drill`, `via`, `via_min` | the rule on every via; ring 0.20 | ok, and no via surcharge |
 | Via hole to hole / pad hole to hole | ≥ 0.20 / 0.45 | `fab: hole_to_hole` | ≥ the rule (DRC) | ok |
 | PTH to track | ≥ 0.28 (0.35 recommended) | `fab: hole_clearance` | ≥ the rule (DRC) | at JLC's minimum by rule |
 | Mask expansion / bridge | 1:1 opening; bridge between pads ≥ 0.13 in white or black, 1 oz (0.10 in green) | board setup: expansion 0 | the narrowest pad gap: 0.20 between J1's pads (1.27 pitch − 1.07 pad) | 1.5× `[calc: 0.20 / 0.13]` |
@@ -353,7 +342,7 @@ that KiCad's DRC does not test are checked by `pcb.py` itself (above).
 ## Assembling the rest by hand
 
 1. **J1** (`J-CHAIN`; the part is on its BOM row and the sheet).
-   - It goes on the bottom side, **mouth toward the tail**. The silkscreen marks it: an arrow beside the header points out of its mouth, and pin 1's dot is behind the pins, away from the mouth.
+   - It goes on the bottom side, **mouth toward the mouth end** (ADR 0017, *Amendment, 2026-11-20*). The silkscreen marks it: an arrow beside the header points out of its mouth, and pin 1's dot is behind the pins, away from the mouth.
    - **Backward is 3V3 on ground.** The 2×6 pad grid fits the header either way round. Turned 180°, the header puts the ribbon's 3V3 on a ground pin (`key-chain-loom.md`). Fit it with its mouth at the arrow.
    - Seat it flat and solder it from the top (switch) side.
    - The plate has **no window** over the tails. Seated flat, they stop short of the grounded plate (`mechanical/drc.echo` "J-CHAIN pin tails clear of the key plate"), so do not trim them or leave the header standing proud.
@@ -451,6 +440,7 @@ J1 with pin 1's dot and the arrow out of its mouth, where it is soldered;
 |---|---|---|---|
 | A | 2026-09-27 | First layout: every key's network the same T in the same place round its switch, six test pads in one row (QH, SER, GND, SCK, SH/LD, 3V3), C7 (`C-BULK-CHAIN`), silkscreen on both sides, no acute track junction (`pcb.py check` tests every join, a track ending mid-track included). Not yet ordered; re-laid out on the same date for the screwed corner mount (keep-outs from the nut and the spacer/washer; ADR 0020 Amendment 3 then moved the heads from plugged bores into blind pockets, which changes nothing on the board); on 2026-09-28, C7 made a fitted, machine-placed part (it had been a do-not-fit footprint; owner: it costs cents) and J-CHAIN's pads lengthened on their free side; the same day the corner mounts went to M2.5 for PEM studs pressed flush into the plate (ADR 0020 Amendment 4: larger holes and keep-outs, mounts 0.2 further in), and the washer dropped, the spacer taking its length; on 2026-09-29 re-laid out for the cassette's columns (ADR 0025): no bonded mount (Amendment 5's is superseded), the mouth end 0.6 and the tail end 0.2 longer, J-CHAIN 0.5 further toward the tail and the register, its decoupler, R11 and C7 moved 0.5 with it; on 2026-10-03 re-laid out for the KS-33's pin holes, Gateron's 3.0 mm on 3.4 mm pads (issue #6-1; ADR 0020 Amendment 8), each key's network 9.0 mm from its switch so its labels clear the bigger pads; on 2026-10-05 the mouth end lengthened and its two mounts moved with it, so the columns keep `hardware.col_web_min` of plate from the thumb switches' cutouts (issue #43; ADR 0025, Amendment 2026-10-05 (2)): the outline's mouth edge, H1, H2, their keep-outs and the pour's edge moved, every part and track where it was | git history of this directory |
 | B | 2026-10-03 | C8, the register's second decoupler (the shared REG sheet gained it for review #6-5; the right-hand board's C9), placed by hand under U1's ground pin 8 on the bottom face: its 3V3 pad squared onto the 3V3 track's 45-degree run, its ground pad onto pin 8's ground line, both 0.4 mm. Nothing else moved. `pcb.py check` passes. Not yet ordered | `key-board-lh.kicad_pcb`, `layout.yaml` |
+| C | 2026-11-20 | Laid out again, by hand (issue #48, ADR 0030): no router. `J-CHAIN` turned to face the mouth (ADR 0017, *Amendment, 2026-11-20*); the chain bus under the register; each key's resistor and capacitor outside its switch's pins; all signal and power copper on the parts face with no via; the switch-side face one whole ground plane and no pour on the parts face; relief spokes on every pin the plane joins. Reviewed by the owner as placement, then as copper. `pcb.py check` passes. Not yet ordered | `lh_layout.py`, `key-board-lh.kicad_pcb`, `layout.yaml` |
 | — | 2026-10-04 | Silkscreen and title block read `rev A  2026-10-03` again, not B (review #6-7; the rule below). No copper moved; renders and `fab/` re-written | `key-board-lh.kicad_pcb`, `layout.yaml` `silk:` |
 
 **The letters in this table are design history.** The silkscreen and title
