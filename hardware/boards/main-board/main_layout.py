@@ -66,7 +66,7 @@ THE FLOORPLAN, and why each part is where it is.
 
 SPACING, so that nothing is tight or a little off without a reason: a millimetre between
 courtyards; parts side by side at 3 mm (0805), end to end at 4.5 mm; every row and comb
-of the far band on one of two lines, y 33.0 and y 46.5, but the combs that stand in a gap
+of the far band on one of two lines, y 33.2 and y 46.5, but the combs that stand in a gap
 between LEDs, which sit a millimetre lower to clear the header's nose.
 """
 import os
@@ -90,7 +90,7 @@ P = 1.27
 JX, JY2 = 79.55, 38.84        # J-CHAIN's signal column (even pins), pin 2; pins 4..12 each 1.27 toward the far edge
 UX, UY = 61.5, 38.5           # the register: the nearest to the mouth that leaves SW2's ground pin its iron room
 CX = 69.0                     # the column between the register and the header's body
-LOW, HIGH = 33.0, 46.5        # the two lines every row and comb of the far band stands on
+LOW, HIGH = 33.2, 46.5        # the two lines every row and comb of the far band stands on
 GAP = 32.0                    # a comb in a gap between LEDs: a millimetre lower, clear of the header's nose above it
 SIDE, END = 3.0, 4.5          # 0805s side by side, and end to end
 
@@ -112,7 +112,7 @@ def block(dx, r):
         r["FB"]: (CX + dx, 44.0, "-x"),                              # pad 2 level with the header's pad 10
         r["C16"]: (CX + dx, 35.25, ("3V3", "N")),                    # on end beside pin 16
     }
-    p.update(comb(58.5 + dx, HIGH, "S", *r["far_mouth"]))            # above the register
+    p.update(comb(58.5 + dx, HIGH, "N", *r["far_mouth"]))            # above the register
     p.update(comb(98.5 + dx, HIGH, "N", *r["far_tail"]))             # past the tail-side switch
     p.update(comb(108.5 + dx, HIGH, "N", *r["near_tail"]))
     return p
@@ -127,14 +127,16 @@ PLACE.update(block(RH, {"U": "U8", "TVS": "U11", "FB": "FB2", "C16": "C205",
 PLACE.update(comb(73.0, GAP, "N", "R13", "C15", "R12"))
 PLACE.update(comb(150.5, GAP, "N", "R21", "C19", "R20"))
 # the right hand's two spare positions, in the next two gaps
-PLACE.update(comb(190.5, GAP, "S", "R29", "C23", "R28"))
-PLACE.update(comb(210.5, GAP, "S", "R31", "C24", "R30"))
+PLACE.update(comb(190.5, GAP, "N", "R29", "C23", "R28"))
+PLACE.update(comb(210.5, GAP, "N", "R31", "C24", "R30"))
 PLACE.update({
-    # REG-LT's row: the two unused inputs' pull-ups, the hop's resistor at QH, pin 13's capacitor under it
-    "R32": (50.5, LOW, ("FREE", "E")), "R44": (50.5 + END, LOW, ("QH", "E")),
-    "R33": (50.5 + 2 * END, LOW, ("FREE", "E")), "C206": (50.5 + 3 * END, LOW, ("3V3", "W")),
-    # REG-RT's: pin 12's capacitor
-    "C14": (166.5, LOW, ("3V3", "E")),
+    # REG-LT's row, in the order of the pins it serves so that no two of its lines cross: the
+    # hop's resistor (pin 9), the two unused inputs' pull-ups (pins 11 and 12), and pin 13's
+    # capacitor with each pad under its own pin
+    "R44": (50.7, LOW, ("QH", "E")), "R33": (54.6, LOW, ("FREE", "E")),
+    "R32": (58.5, LOW, ("FREE", "E")), "C206": (62.78, LOW, ("3V3", "W")),
+    # REG-RT's: the capacitor of pins 11 and 12, each pad under its own pin
+    "C14": (168.23, LOW, ("3V3", "E")),
 })
 # ---- the tail end: J-MCU's fan-out, the LED driver, the umbilical ---------------------------------
 # J-MCU's odd pins can only leave toward the near edge and its even pins toward the far one,
@@ -158,7 +160,7 @@ COL = (293.95, 296.4, 298.85) # ...and its three columns
 PLACE.update({
     "R35": (247.7, TRIO, ("IO7", "S")), "R34": (250.7, TRIO, ("IO38", "S")), "R36": (253.7, TRIO, ("IO33", "S")),
     "R37": (256.7, TRIO + 0.55, ("3V3", "S")),   # SER's pull-up, its SER pad level with R36's; QH passes under its body
-    "C45": (252.6, 28.5, "-y"),
+    "C45": (252.0, 28.5, "+x"),            # in the LED capacitors' row, a millimetre from the first one
     "L1": (247.8, 17.9, ("BUCK_IN", "W")),
     "Q2": (237.9, 19.45, ("INST_5V", "E")), "C208": (242.1, 20.6, ("INST_5V", "W")),   # its regulator side toward the regulator
     "R45": (43.8, 19.55, ("3V3", "E")),    # the ADC chip-select pull-up over R47, sharing its 3V3
@@ -320,12 +322,12 @@ def analog():
     via("DEV_3V3", 46.72, 23.6)
     T("DEV_3V3", [(46.72, 23.6), (46.72, 17.25), "R47.1"])
     T("DEV_3V3", [(46.72, 19.55), "R45.1"])
-    X = 56.0                  # where digital() takes the bottom lanes up
-    T("IO39", [(X, 21.55), (43.35, 21.55), (42.0, 20.2)], FINE, "B")
-    T("IO37", [(X, 21.95), (34.4, 21.95), (34.0, 21.55), (34.0, 11.62)], FINE, "B")
-    T("IO36", [(X, 22.35), (33.75, 22.35), (33.35, 21.95), (33.35, 10.99), (32.7, 10.34)], FINE, "B")
-    T("IO35", [(X, 22.75), (33.1, 22.75), (32.7, 22.35), (32.7, 12.88)], FINE, "B")
-    T("DEV_3V3", [(X, 23.6), (46.72, 23.6)], 0.3, "B")
+    # the five bottom lanes from J-MCU end here; tail() draws them as far as HWY
+    T("IO39", [(HWY, MOUTH["IO39"]), (43.35, 21.55), (42.0, 20.2)], FINE, "B")
+    T("IO37", [(HWY, MOUTH["IO37"]), (34.4, 21.95), (34.0, 21.55), (34.0, 11.62)], FINE, "B")
+    T("IO36", [(HWY, MOUTH["IO36"]), (33.75, 22.35), (33.35, 21.95), (33.35, 10.99), (32.7, 10.34)], FINE, "B")
+    T("IO35", [(HWY, MOUTH["IO35"]), (33.1, 22.75), (32.7, 22.35), (32.7, 12.88)], FINE, "B")
+    T("DEV_3V3", [(HWY, MOUTH["DEV_3V3"]), (46.72, 23.6)], 0.3, "B")
 
 
 MOUNTS_FAR = (37.8, 121.7, 145.8, 247.7)      # the far column mounts the breath pair steps round
@@ -360,7 +362,23 @@ def jx(n):
     return 255.28 + 1.27 * ((n - 1) // 2)
 
 
-HWY = 206.0     # where the bottom-face lines running toward the mouth stop until stage 4 takes them on
+HWY = 56.0      # where tail()'s bottom lanes hand over to analog()'s
+# The five lines that run the board's length on the bottom face, south of the LED row and
+# north of the near-row switches. From the regulator they hold LANE, which clears the U-bolt's
+# leg; past it they step once, together, to MOUTH, which lets 3V3 come up inside the analog
+# island south of REF_VIN's line.
+LANE = {"IO39": 22.3, "IO37": 22.7, "IO36": 23.1, "IO35": 23.5, "DEV_3V3": 24.0}
+MOUTH = {"IO39": 21.55, "IO37": 21.95, "IO36": 22.35, "IO35": 22.75, "DEV_3V3": 23.6}
+STEP_X = 128.6   # the step, on the mouth side of the U-bolt's leg
+
+
+def step(net):
+    """A lane's step from LANE to MOUTH, each a little before the one south of it so the
+    diagonals keep the lanes' spacing."""
+    i = list(LANE).index(net)
+    x = STEP_X - 0.166 * i - (0.1 if net == "DEV_3V3" else 0)
+    d = LANE[net] - MOUTH[net]
+    return [(x, LANE[net]), (x - d, MOUTH[net]), (HWY, MOUTH[net])]
 
 
 def power():
@@ -411,7 +429,7 @@ def power():
     # the 3V3 trunk
     via("DEV_3V3", 280.4, 23.59, "R49.1")
     T("DEV_3V3", [(280.4, 23.59), (280.4, 28.4), (262.9, 28.4), (256.7, 22.2), (244.0, 22.2),
-                  (242.2, 24.0), (HWY, 24.0)], 0.3, "B")
+                  (242.2, 24.0)] + step("DEV_3V3"), 0.3, "B")
     via("DEV_3V3", 256.7, 22.2, "R37.2")
 
 
@@ -481,12 +499,12 @@ def tail():
     T("TXD_HDR", ["R46.2", (284.0, 15.01), "J2.1"])
     via("U0RXD", 287.75, 9.4, "J2.2")
     # the odd row, bottom face: under the row, north past the header's mouth end
-    low("IO39", 23, 8.0, 251.9, [(251.9, 14.3), (247.5, 18.7), (239.4, 18.7), (235.8, 22.3), (HWY, 22.3)])
+    low("IO39", 23, 8.0, 251.9, [(251.9, 14.3), (247.5, 18.7), (239.4, 18.7), (235.8, 22.3)] + step("IO39"))
     low("IO7", 19, 8.42, 252.3, [(252.3, 16.6), (251.6, 17.3)])
     low("IO38", 17, 8.84, 252.7, [(252.7, 18.1), (252.4, 18.4)])
-    low("IO37", 13, 9.26, 253.1, [(253.1, 18.8), (252.8, 19.1), (239.6, 19.1), (236.0, 22.7), (HWY, 22.7)])
-    low("IO36", 11, 9.68, 253.5, [(253.5, 19.2), (253.2, 19.5), (239.8, 19.5), (236.2, 23.1), (HWY, 23.1)])
-    low("IO35", 9, 10.1, 253.9, [(253.9, 19.6), (253.6, 19.9), (240.0, 19.9), (236.4, 23.5), (HWY, 23.5)])
+    low("IO37", 13, 9.26, 253.1, [(253.1, 18.8), (252.8, 19.1), (239.6, 19.1), (236.0, 22.7)] + step("IO37"))
+    low("IO36", 11, 9.68, 253.5, [(253.5, 19.2), (253.2, 19.5), (239.8, 19.5), (236.2, 23.1)] + step("IO36"))
+    low("IO35", 9, 10.1, 253.9, [(253.9, 19.6), (253.6, 19.9), (240.0, 19.9), (236.4, 23.5)] + step("IO35"))
     T("IO33", ["J1.5", (257.82, 10.35), (257.52, 10.05), (254.6, 10.05), (254.3, 10.35), (254.3, 22.2)])
     VIAS.append(("IO7", 251.6, 17.3))
     T("IO7", [(251.6, 17.3), (251.6, 20.6), (250.85, 21.35), (248.79, 21.35), "R35.1"])
@@ -494,14 +512,60 @@ def tail():
     T("IO38", [(252.4, 18.4), (252.4, 20.74), "R34.1"])
     # the chain's three outputs: a via between the pads, then the bottom face toward the mouth
     via("CHAIN_SHLD", 249.2, 25.36, "R35.2")
-    T("CHAIN_SHLD", [(249.2, 25.36), (HWY, 25.36)], FINE, "B")
     via("CHAIN_SCK", 252.2, 25.36, "R34.2")
-    T("CHAIN_SCK", [(252.2, 25.36), (251.51, 26.05), (HWY, 26.05)], FINE, "B")
     T("CHAIN_SER_LH", ["R36.2", (255.2, 25.36), "R37.1"])
     VIAS.append(("CHAIN_SER_LH", 255.2, 25.36))
-    T("CHAIN_SER_LH", [(255.2, 25.36), (254.34, 24.5), (HWY, 24.5)], FINE, "B")
-    # the chain's return to J-MCU pin 24, on top
-    T("CHAIN_QH_RT", ["J1.24", (269.25, 20.8), (268.95, 21.1), (262.0, 21.1), (258.65, 24.45), (HWY, 24.45)])
+    # the chain's return to J-MCU pin 24, on top under the three bodies to a via beyond them
+    T("CHAIN_QH_RT", ["J1.24", (269.25, 20.8), (268.95, 21.1), (262.0, 21.1), (258.65, 24.45), (246.35, 24.45),
+                      (245.6, 25.2)])
+    VIAS.append(("CHAIN_QH_RT", 245.6, 25.2))
+
+
+LED_X0, LED_PITCH = 262.98, 19.869     # D8's centre, and the step toward the mouth to each next LED
+
+
+def leds():
+    """STAGE 4a: THE LED DATA CHAIN, all of it on top. Each LED's output goes to the next LED's
+    data pad and to the backup pad of the one after. The first is a straight line along the
+    row of data pads. The second starts at the same data pad, runs under that LED between its
+    two columns of pads, comes out on the far side over the unused pad, and drops to the row
+    of backup pads. So two lines lie in every gap, one on each row, and none cross."""
+    x = {f"D{8 + k}": LED_X0 - LED_PITCH * k for k in range(13)}
+    nets = [("LED_DI", None, "D8", "D9")] + [(f"LED_D{k}", f"D{7 + k}", f"D{8 + k}", f"D{9 + k}") for k in range(1, 13)]
+    for net, a, b, c in nets:
+        if net == "LED_D12":     # the analog island reaches under the reference here: round its corner
+            T(net, ["D19.3", (36.0, 26.9), (35.2, 27.7), (28.8, 27.7), (28.0, 26.9), "D20.4"])
+        elif a:
+            T(net, [f"{a}.3", f"{b}.4"])
+        if c not in x or c == "D21":
+            continue
+        xb = x[b]
+        over = [(xb + 1.2, 26.9), (xb + 1.2, 30.2), (xb + 0.4, 31.0)]
+        T(net, [f"{b}.4"] + over + [(xb - 3.5, 31.0), (xb - 4.4, 30.1), f"{c}.6"])
+
+
+def legs():
+    """STAGE 4b: THE NEAR ROW'S FOUR KEYS. Each switch's line has the bottom lanes and the LED
+    row between it and its resistor. It crosses the lanes on top, takes a via between the
+    lanes and the LED row, passes under the LED row on the bottom face, and comes up beside
+    its resistor."""
+    v = 25.4                                   # the row of vias between the lanes and the LED data pads
+    T("/LT1/SWITCH_LEG", ["SW1.1", (66.0, v)])
+    T("/LT1/SWITCH_LEG", [(66.0, v), (71.5, 30.9)], SIG, "B")
+    T("/LT1/SWITCH_LEG", [(71.5, 30.9), (73.0, 30.9), "R13.2"])
+    T("/LT3/SWITCH_LEG", ["SW3.1", (94.4, v)])
+    T("/LT3/SWITCH_LEG", [(94.4, v), (94.4, 30.9)], SIG, "B")
+    T("/LT3/SWITCH_LEG", [(94.4, 30.9), (94.4, 31.49), "R17.2"])
+    T("/RT1/SWITCH_LEG", ["SW5.1", (162.4, v)])
+    T("/RT1/SWITCH_LEG", [(162.4, v), (154.81, v), (149.31, 30.9)], SIG, "B")
+    T("/RT1/SWITCH_LEG", [(149.31, 30.9), (150.5, 30.9), "R21.2"])
+    T("/RT3/SWITCH_LEG", ["SW7.1", (202.4, v), (218.0, v)])
+    T("/RT3/SWITCH_LEG", [(218.0, v), (218.0, 30.9)], SIG, "B")
+    T("/RT3/SWITCH_LEG", [(218.0, 30.9), (218.0, 44.09), "R25.2"])
+    for n, pts in (("/LT1/SWITCH_LEG", ((66.0, v), (71.5, 30.9))), ("/LT3/SWITCH_LEG", ((94.4, v), (94.4, 30.9))),
+                   ("/RT1/SWITCH_LEG", ((162.4, v), (149.31, 30.9))), ("/RT3/SWITCH_LEG", ((218.0, v), (218.0, 30.9)))):
+        for x, y in pts:
+            VIAS.append((n, x, y))
 
 
 def breath_strip():
@@ -553,7 +617,7 @@ def planes(board, geo):
     return lay
 
 
-STAGES = [analog, breath_pair, power, tail]
+STAGES = [analog, breath_pair, power, tail, leds, legs]
 
 
 def copper():
@@ -600,6 +664,8 @@ def draw_copper(board):
     tracks, vias = copper()
 
     def net(n):
+        if n.startswith("/") and board.FindNet(n):
+            return n                           # a full name, for the nets several sheets share a short one of
         if len(full.get(n, [])) != 1:
             raise SystemExit(f"main_layout: {n} names {len(full.get(n, []))} nets on the board")
         return full[n][0]
