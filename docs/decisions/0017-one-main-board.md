@@ -2,7 +2,8 @@
 
 **Status:** Accepted; amended 2026-09-27 (the key-board chain: 1.27 mm IDC, *Amendment* below)
 and 2026-09-29 (four layers, and parts on both faces, *Amendment* below) and
-2026-10-04 (through-hole tails over the plate trimmed to a length, *Amendment* below); the
+2026-10-04 (through-hole tails over the plate trimmed to a length, *Amendment* below) and
+2026-11-20 (the left hand's chain headers face the mouth, *Amendment* below); the
 wiring details are [ADR 0018](0018-main-board-wiring-decisions.md)
 
 Replaces the **centre board** and the two **thumb boards** with one board.
@@ -249,3 +250,42 @@ and `tools/pcb.py render` writes the result, with its arithmetic, into the
 `config/body.yaml`. `U-BUCK`'s cut, `boards.tht_trim`, goes on the same
 column. The main board's README, *Ordering it* (**Through-hole tails**), says which parts and why
 the others need none.
+
+## Amendment, 2026-11-20 — the left hand's chain headers face the mouth
+
+**The owner, 2026-11-20** (in the working chat, on the first hand-placed left
+key board, issue #48): **"Seems like maybe we could turn the header 180°?"**,
+and, told that the ribbon and the main board follow it, **"Turn it, we will be
+reviewing all the boards so this is ok"**.
+
+`J-CHAIN`'s signal pins are its odd row, the row behind its mouth
+(`key-chain-loom.md`). With the mouth toward the tail that row faced away from
+the key board's register, and the chain's four lines and 3V3 had to wrap the
+header's end to reach it. With the mouth toward the instrument's mouth end the
+row faces the register and the bus runs straight in
+(`hardware/boards/key-board-lh/lh_layout.py`, *The floorplan*).
+
+**What turns.** `config/body.yaml` `routing.chain_fold` for the left hand. It
+is one figure for the ribbon's fold and for the way both of that ribbon's
+headers face, so the key board's `J-CHAIN` and the main board's `J-CHAIN-LH`
+turn together and stay stacked, **both mouths still facing the same way**
+(reason 2 above). The ribbon is the same part folded the same way, mirrored:
+the same hairpin, the same `-RN2` cable and length code, the same pin map.
+The model's own rule then finds the header's place along the body again
+(`mechanical/export/pcb-geometry.echo` `chain`), and the `drc.echo` rules
+that held the old place hold the new one: "chain headers on the left_hand
+boards clear of the switches", "key-chain ribbon hairpin inside the body
+(left_hand)", "key-chain ribbon hairpin clear of the columns (left_hand)".
+
+**What follows it.**
+
+- The main board's `J-CHAIN-LH` is no longer where the body CAD puts it, and
+  `tools/pcb.py check hardware/boards/main-board` fails on it until that board
+  is laid out again (issue #48's plan: after the three small boards).
+- The rev A `key-board-lh.kicad_pcb` fails the same check until the
+  hand-laid board replaces it.
+- [ADR 0025](0025-the-cassette.md)'s "left-hand board's tail column" is, for
+  a ribbon too long, now the column at that board's mouth end: the hairpin
+  lies on the other side of the header.
+- The right hand's ribbon is unchanged; whether it turns is decided with the
+  right-hand key board's layout.

@@ -269,7 +269,7 @@ service position is the key plate, with both key boards on it, **held raised
 straight up off its columns** far enough for a hand to reach the main board's
 sockets (`routing.chain_service`, `routing.chain_raise`, plus
 `routing.chain_slack`). It is not laid beside the body any more: a ribbon that
-long folds into a hairpin that reaches the left-hand board's tail column. The free length is
+long folds into a hairpin that reaches one of the left-hand board's columns. The free length is
 `mechanical/drc.echo` "key-chain ribbon length (derived)", in millimetres.
 **The part is ordered by a different line**: "key-chain cable to order
 (FFSD length code)" is the FFSD length field — inches, overall, measured

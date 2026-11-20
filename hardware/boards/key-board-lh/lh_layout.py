@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """The left key board laid out by hand (issue #48): every part placed on purpose here,
-and - once the placement is accepted - every track and via written out below it.
+and every track and via written out below the placement.
 NO ROUTER OF ANY KIND IS CALLED: not tools/pcb_route*.py, not Freerouting, not KiCad's.
 
-    python3 hardware/boards/key-board-lh/lh_layout.py            # writes key-board-lh.hand.kicad_pcb
+    python3 hardware/boards/key-board-lh/lh_layout.py            # writes key-board-lh.hand.kicad_pcb (--place-only: no copper)
 
 It READS key-board-lh.kicad_pcb (rev A, which stays the source until this board is
 accepted) for what the body CAD and the sheets fix - the outline, the five switches,
-J-CHAIN, the four mounts and their keep-outs, the ground zones' outlines, every pad's net -
-strips its copper, and seats every other part where PLACE says. Body frame throughout:
+the four mounts and their keep-outs, the ground zones' outlines, every pad's net -
+strips its copper, seats J-CHAIN where the body CAD now puts it, and every other part
+where PLACE says. Body frame throughout:
 x along the body from the mouth, y across it from the near side, mm, seen from above;
 all parts but the switches are on the underside.
 
@@ -23,26 +24,30 @@ THE FLOORPLAN, and why each part is where it is.
    THE CHAIN BUS THEREFORE RUNS UNDER THE REGISTER, between its pad rows: all four lines
    enter at the pin-8/9 end and turn into their pads from inside. Across that end, from
    the key row's side, they lie SCK, SH/LD, SER, QH - which is J-CHAIN's own pin order
-   (11, 9, 7, 5), so the bus leaves the header, turns once round its pin-1 end and runs
-   straight into the register with no line crossing another and no via.
-2. U1 stands just past the header's mouth, its pin-8/9 end toward the header and its
-   key inputs (pins 3..6) facing the key row, so LH1..LH4 arrive in pin order from the
-   side their switches are on, and LH5 leaves the far row toward its own switch.
-3. EACH KEY'S NETWORK IS TUCKED UNDER ITS OWN SWITCH'S PINS, the same way round all
+   (11, 9, 7, 5).
+2. J-CHAIN'S MOUTH FACES THE MOUTH END (owner, 2026-11-20: "Seems like maybe we could turn
+   the header 180"; config/body.yaml routing.chain_fold), so its signal row - the row
+   behind the mouth - faces the register, and the bus runs straight from the header's
+   pads into the register's end: no line wraps the header, none crosses another, no via.
+3. U1 stands just past the header's pin rows, its pin-8/9 end toward them and its key
+   inputs (pins 3..6) facing the key row, so LH1..LH4 arrive in pin order from the side
+   their switches are on, and LH5 leaves the far row toward its own switch.
+4. EACH KEY'S NETWORK IS TUCKED UNDER ITS OWN SWITCH'S PINS, the same way round all
    five: the series resistor under pin 1 (the switch leg), the capacitor under pin 2
    (ground - its ground pad lands on the switch's own ground pin, no via), and the
    pull-up hanging below the node, its rail end toward the near edge.
-4. 3V3 IS ONE TRUNK. With the bus from the header, round U1's end to the far row:
-   C7 (the reservoir), R11 (the free input's pull-up), C8 across pins 12/13, under the
-   body to pin 16 and C6 across 16/15; then on between LH5's and LH4's lines to their
+5. 3V3 IS ONE TRUNK. Out of the header's pin 3 straight into C7 (the reservoir), along
+   the far row: R11 (the free input's pull-up), C8 across pins 12/13, under the body to
+   pin 16 and C6 across 16/15; then on between LH5's and LH4's lines to their
    pull-ups, round LH4 and back along the near edge through the three row keys' pull-ups.
-5. GROUND IS THE SWITCH-SIDE FACE, unbroken. Every switch's and the header's ground
+6. GROUND IS THE SWITCH-SIDE FACE, unbroken. Every switch's and the header's ground
    pin is a through-hole into it; the register's ground pins and the capacitors reach
    it by a via each. No ground track.
 """
 import math
 import os
 import shutil
+import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -58,10 +63,21 @@ SRC = os.path.join(HERE, NAME + ".kicad_pcb")
 OUT = os.path.join(HERE, NAME + ".hand.kicad_pcb")
 
 # ---- the register and its own parts ------------------------------------------------------------
-# U1's centre. x: its body's header end 1.6 past the ribbon plug's keep-out (pcb-geometry.echo
-# "ribbon left_hand"). y: the chain bus runs straight from under the header into the channel
-# between the pad rows, so the channel's middle line (SER) is the bus's middle line.
-UX, UY = 87.5, 36.8
+# J-CHAIN's pads, once seated where the body CAD puts it (seat_chain, below): the signal
+# row (odd pins) at JX, pin 1 at the far-edge end, 1.27 between pins.
+JX, JY1 = 83.36, 45.19
+
+
+def jpin(k):
+    return (JX if k % 2 else JX - 1.27, JY1 - 1.27 * ((k - 1) // 2))
+
+
+# U1's centre. x: pin 4 (LH3's input) straight above the line LH3's key line climbs past its
+# own switch's pole on, 3.4 toward the tail from the switch's centre (the body CAD's LH3,
+# pcb-geometry.echo) - which also leaves the bus room to step from the header's 1.27 pitch
+# to the channel's. y: SH/LD (J-CHAIN pin 9) runs dead straight from its pad down the
+# channel, half a pitch below the channel's middle line.
+UX, UY = 90.0 + 3.4 - 1.27 / 2, jpin(9)[1] + 0.5
 PITCH = 1.27
 
 
@@ -73,15 +89,15 @@ def upin(n):
 
 
 Y_CAPS = UY + 4.7             # C8, C6: their courtyards clear of U1's
-Y_RAIL = UY + 6.52            # the 3V3 spine past the far row: through C7.1 and R11.1
+Y_RAIL = UY + 6.43            # the 3V3 spine past the far row: through R11.1
 
 # (x, y, which way pad 1 faces) - the way is found on the board, not assumed (seat(), below)
 PLACE = {
     "U1": (UX, UY, None),                                 # turned as rev A has it: pins 1..8 toward the key row
-    "C7": (82.6, Y_RAIL + 0.95, "-y"),                    # C-BULK-CHAIN: first on the trunk after the bus; ground end toward the far edge
-    "R11": (85.1, Y_RAIL - 0.9125, "+y"),                 # FREE3's pull-up: pad 2 down onto pin 11, pad 1 on the spine
-    "C8": (upin(12)[0] + 0.95, Y_CAPS, "-x"),            # across pins 12 (3V3) and 13 (ground)
-    "C6": (upin(15)[0] + 0.95, Y_CAPS, "+x"),            # across pins 16 (VCC) and 15 (ground)
+    "C7": (85.3, jpin(3)[1] + 0.95, "-y"),                # C-BULK-CHAIN: its 3V3 pad level with J-CHAIN pin 3, one straight stub; ground end toward the far edge
+    "R11": (upin(11)[0] - 0.5, Y_RAIL - 0.9125, "+y"),    # FREE3's pull-up: pad 2 down onto pin 11, pad 1 on the spine
+    "C8": (upin(12)[0] + 0.95, Y_CAPS, "-x"),             # across pins 12 (3V3) and 13 (ground)
+    "C6": (upin(15)[0] + 0.95, Y_CAPS, "+x"),             # across pins 16 (VCC) and 15 (ground)
 }
 
 # ---- a key's network, relative to its switch's centre -------------------------------------------
@@ -117,6 +133,27 @@ def seat(fp, x, y, way):
     raise SystemExit(f"lh_layout: no turn puts {fp.GetReference()}'s pad 1 toward {way}")
 
 
+def seat_chain(fp, geo):
+    """J-CHAIN where the body CAD puts it and facing the way it says (pcb.chain_target):
+    the turn is found, as pcb.place_chain finds it for a new board."""
+    (tx, ty), d = pcb.chain_target(geo)
+    for rot in (0, 90, 180, 270):
+        fp.SetOrientationDegrees(rot)
+        p1, p2 = fp.FindPadByNumber("1").GetPosition(), fp.FindPadByNumber("2").GetPosition()
+        dx, dy = pcbnew.ToMM(p2.x - p1.x), pcbnew.ToMM(p2.y - p1.y)
+        if abs(dy) < 1e-3 and dx * d > 0:
+            cx, cy = pcb.pads_centre(fp)
+            at = fp.GetPosition()
+            fp.SetPosition(pcb.V(pcbnew.ToMM(at.x) + tx - cx, pcbnew.ToMM(at.y) + ty - cy))
+            for k in (1, 3, 11, 12):
+                got, want = body_xy(fp.FindPadByNumber(str(k)).GetPosition()), jpin(k)
+                if math.dist(got, want) > 0.01:
+                    raise SystemExit(f"lh_layout: J-CHAIN pin {k} is at {got}, and this layout is drawn for {want} - "
+                                     "the body CAD moved the header (pcb-geometry.echo); move JX, JY1 and what follows from them")
+            return
+    raise SystemExit("lh_layout: no turn puts J-CHAIN's mouth where the body CAD faces it")
+
+
 def placement(board, comps):
     geo = pcb.cad_geometry("left_hand")
     place = dict(PLACE)
@@ -125,6 +162,7 @@ def placement(board, comps):
         for row, (dx, dy, way) in KEY_NET.items():
             place[pcb.ref_of(comps, row, key)] = (sx + dx, sy + dy, way)
     fps = {fp.GetReference(): fp for fp in board.GetFootprints()}
+    seat_chain(fps[pcb.ref_of(comps, "J-CHAIN")], geo)
     loose = sorted(r for r in fps if not r.startswith(BODY) and r not in place)
     if loose:
         raise SystemExit(f"lh_layout: no place given for {', '.join(loose)}")
@@ -144,16 +182,180 @@ def strip(board):
         board.Delete(d)
 
 
+# ---- the copper: every track and via, by hand ---------------------------------------------------
+# All of it on the parts face (B.Cu); the switch-side face is ground and nothing else. Each
+# line is a list of points in the body frame, drawn at 0, 45 and 90 degrees. T: (net, width,
+# points); VIAS: (net, point), ground only.
+TW, PW = 0.25, 0.4            # signal and 3V3 (layout.yaml rules: track, power_track)
+VIA, DRILL = 0.7, 0.3         # layout.yaml rules: via, via_drill
+GND, V33 = "GND_CHAIN", "V3V3_CHAIN_LH"
+STEM = 3.4                    # a key line climbs past its switch's pole this far from its centre, either side
+T, VIAS = [], []
+
+
+def track(net, pts, w=TW):
+    for a, b in zip(pts, pts[1:]):
+        dx, dy = abs(a[0] - b[0]), abs(a[1] - b[1])
+        assert dx < 1e-6 or dy < 1e-6 or abs(dx - dy) < 1e-6, f"{net}: {a} -> {b} is not at 0, 45 or 90 degrees"
+    T.append((net, w, pts))
+
+
+def ch(d):
+    """A line's height in the channel under U1, d from its middle."""
+    return UY + d
+
+
+def routes(geo):
+    # -- the chain bus: straight out of J-CHAIN's signal row into the channel under U1. From
+    # the key row's side the channel holds SCK, SH/LD, SER, QH at half-millimetre steps, the
+    # header's own order; each steps once from its pad's height to its channel height (SH/LD
+    # not at all) and turns into its pad from inside.
+    (x9, y9), (x10, y10), (x1, y1), (x2, y2) = upin(9), upin(10), upin(1), upin(2)
+    j = jpin(5)
+    track("/HOP_LH_LT", [j, (84.55, j[1]), (84.55 + j[1] - ch(0.5), ch(0.5)), (x9 - 0.5, ch(0.5)), (x9, ch(1.0)), (x9, y9)])
+    j = jpin(7)
+    track("/CHAIN_SER_LH", [j, (84.55, j[1]), (84.55 + j[1] - ch(0), ch(0)), (x10 - 1.0, ch(0)), (x10, ch(1.0)), (x10, y10)])
+    j = jpin(9)
+    track("/CHAIN_SHLD", [j, (x1 - 0.5, ch(-0.5)), (x1, ch(-1.0)), (x1, y1)])
+    j = jpin(11)
+    track("/CHAIN_SCK", [j, (84.6, j[1]), (84.6 + ch(-1.0) - j[1], ch(-1.0)), (x2 - 0.3, ch(-1.0)), (x2, ch(-1.3)), (x2, y2)])
+
+    # -- 3V3, one trunk. Pin 3 straight into C7; up to the spine past the far row and along it
+    # through R11 to C8 and pin 12; under the body to pin 16 and out to C6; then between
+    # LH5's line and LH4's down to LH5's pull-up, round LH4 by the tail side to its pull-up,
+    # and back along the near edge through the row keys' pull-ups, ending at LH1's.
+    sw = geo["switches"]
+    pu1 = {k: (x - 0.94, y - DROP - 1.825) for k, (x, y, _) in sw.items()}       # each pull-up's rail pad
+    j, c7 = jpin(3), (PLACE["C7"][0], jpin(3)[1])
+    r11 = (PLACE["R11"][0], Y_RAIL)
+    x12, x16 = upin(12)[0], upin(16)[0]
+    c6 = (upin(15)[0] + 1.9, Y_CAPS)
+    xt = sw["LH5"][0] - 6.7      # the trunk's way down, between LH3's ground pin and LH5's leg pin
+    yr5, yr4, yr = pu1["LH5"][1], pu1["LH4"][1], pu1["LH3"][1]
+    xe = sw["LH4"][0] + 5.0      # round LH4, outside its ground pin
+    xw = sw["LH4"][0] - 8.5      # back up to the row keys' rail, short of LH4's leg pin
+    track(V33, [j, c7, (c7[0] + 1.0, c7[1]), (c7[0] + 1.0 + Y_RAIL - c7[1], Y_RAIL), r11, (x12 - 0.5, Y_RAIL), (x12, Y_RAIL - 0.5),
+                (x12, Y_CAPS), upin(12), (x12, ch(1.7)), (x12 + 0.8, ch(0.9)), (x16 - 0.8, ch(0.9)), (x16, ch(1.7)), upin(16),
+                (x16, UY + 3.45), (c6[0], UY + 3.45 + c6[0] - x16), c6, (xt, c6[1] - (xt - c6[0])), (xt, yr5 + 0.5), (xt + 0.5, yr5),
+                pu1["LH5"], (xe - 0.5, yr5), (xe, yr5 - 0.5), (xe, yr4 + 0.5), (xe - 0.5, yr4), pu1["LH4"], (xw + 0.5, yr4),
+                (xw, yr4 + 0.5), (xw, yr - 0.5), (xw - 0.5, yr), pu1["LH3"], pu1["LH2"], pu1["LH1"]], PW)
+
+    # -- each key, the same copper at all five: the node's three pads joined in their row, the
+    # leg up into the switch's pin 1, the capacitor's ground up into the switch's ground pin.
+    for k, (sx, sy, _) in sw.items():
+        key = "/KEY_" + k
+        track(key, [(sx - 2.7775, sy - DROP), (sx + 0.9, sy - DROP)])
+        track(f"/{k}/SWITCH_LEG", [(sx - 4.6025, sy - DROP), (sx - 4.6025, sy - 4.9025), (sx - 4.4, sy - 4.7)])
+        track(GND, [(sx + 2.8, sy - DROP), (sx + 2.8, sy - 5.95), (sx + 2.6, sy - 5.75)])
+
+    # -- the key lines. Each leaves its node between the switch's two pins and climbs past the
+    # pole on the register's side (owner, 2026-11-20): LH1..LH3 on the tail side, between the
+    # pole and the ground pin; LH4 and LH5 on the mouth side, between the pole and the leg pin.
+    def tail_side(k, x_or_y, level=None):
+        """From k's node up and out toward the tail at 45; to height `level` if given, else to x."""
+        sx, sy, _ = sw[k]
+        n, t = (sx - 0.94, sy - DROP), (sx - 0.94, sy - STEM - 2.33)       # the turn: clear of the pole and the ground pin alike
+        if level is not None:
+            return [n, t, (t[0] + level - t[1], level)]
+        return [n, t, (x_or_y, t[1] + x_or_y - t[0])]
+
+    def mouth_side(k):
+        sx, sy, _ = sw[k]
+        return [(sx - 0.94, sy - DROP), (sx - 0.94, sy - 4.4), (sx - 0.94 - 2.96, sy - 1.44)]
+
+    # LH1 and LH2 run in under the header's pin rows and turn up into pins 6 and 5, LH1 nearer
+    (x6, y6), (x5, y5), (x4, y4), (x3, y3), (x14, y14) = upin(6), upin(5), upin(4), upin(3), upin(14)
+    track("/KEY_LH1", tail_side("LH1", None, ch(-4.0)) + [(x6 - 0.5, ch(-4.0)), (x6, ch(-3.5)), (x6, y6)])
+    track("/KEY_LH2", tail_side("LH2", None, ch(-4.5)) + [(x5 - 0.5, ch(-4.5)), (x5, ch(-4.0)), (x5, y5)])
+    # LH3: out at 45 to the line straight under pin 4 (which is why U1 stands where it does), and up
+    assert abs(x4 - (sw["LH3"][0] + STEM)) < 1e-6
+    track("/KEY_LH3", tail_side("LH3", x4) + [(x4, y4)])
+    # LH4: straight down from pin 3 beside LH3's line, then one diagonal to its own switch
+    xs = sw["LH4"][0] - 3.9
+    track("/KEY_LH4", [(x3, y3), (x3, 32.5), (xs, 32.5 - (xs - x3))] + mouth_side("LH4")[::-1])
+    # LH5: out of the far row between C8 and C6, over C6's ground via, and one diagonal down
+    xs = sw["LH5"][0] - 3.9
+    ys = sw["LH5"][1] + 3.3      # where the diagonal lands: it passes clear of C6's 3V3 pad
+    track("/KEY_LH5", [(x14, y14), (x14, UY + 3.6), (x14 + 0.3, UY + 3.9), (x14 + 0.3, Y_VIA + 0.55), (x14 + 0.8, Y_VIA + 1.05),
+                       (xs - (Y_VIA + 1.05 - ys), Y_VIA + 1.05), (xs, ys)] + mouth_side("LH5")[::-1])
+    # the free input: pin 11 up into its pull-up
+    x11, y11 = upin(11)
+    track("/KEY_FREE3", [(x11, y11), (x11, UY + 3.4), (x11 - 0.5, UY + 3.9), (x11 - 0.5, Y_RAIL - 1.825)])
+
+    # -- ground: no track runs anywhere. Each of these is a pad's own short stub to a via
+    # into the switch-side face.
+    x8, y8 = upin(8)
+    track(GND, [(x8, y8), (x8 - 1.3, y8)])                       # U1's ground pin, toward the header
+    VIAS.append((GND, (x8 - 1.3, y8)))
+    x13, y13 = upin(13)
+    c82 = (x12 + 1.9, Y_CAPS)
+    track(GND, [(x13, y13), (x13, UY + 3.6), (x13 + 0.5, UY + 4.1)])   # pin 13 into C8's ground pad
+    track(GND, [c82, (c82[0], Y_VIA)])
+    VIAS.append((GND, (c82[0], Y_VIA)))
+    x15, y15 = upin(15)
+    track(GND, [(x15, y15), (x15, Y_VIA)])                       # pin 15 up through C6's ground pad
+    VIAS.append((GND, (x15, Y_VIA)))
+    c72 = (PLACE["C7"][0], jpin(3)[1] + 1.9)
+    track(GND, [c72, (c72[0], c72[1] + 1.5)])                    # C7's ground end
+    VIAS.append((GND, (c72[0], c72[1] + 1.5)))
+
+
+Y_VIA = Y_CAPS + 1.65         # C8's and C6's ground vias, past their pads
+
+
+def draw(board):
+    for net, w, pts in T:
+        ni = board.FindNet(net)
+        assert ni is not None, net
+        for a, b in zip(pts, pts[1:]):
+            if math.dist(a, b) < 1e-6:
+                continue
+            t = pcbnew.PCB_TRACK(board)
+            t.SetStart(pcb.V(*pcb.to_pcb(*a)))
+            t.SetEnd(pcb.V(*pcb.to_pcb(*b)))
+            t.SetWidth(pcb.MM(w))
+            t.SetLayer(pcbnew.B_Cu)
+            t.SetNet(ni)
+            board.Add(t)
+    for net, p in VIAS + [(GND, q) for q in STITCH]:
+        v = pcbnew.PCB_VIA(board)
+        v.SetPosition(pcb.V(*pcb.to_pcb(*p)))
+        v.SetWidth(pcbnew.F_Cu, pcb.MM(VIA))
+        v.SetDrill(pcb.MM(DRILL))
+        v.SetNet(board.FindNet(net))
+        board.Add(v)
+
+
+# The parts face's pour, tied to the ground face where the tracks cut a piece of it off from
+# every ground pin: the strip between the 3V3 trunk's way down and LH4's line, at both ends.
+STITCH = [(99.3, 38.5), (99.5, 31.0)]
+
+
+def fill(path):
+    """The zones filled in a process of their own: filling a board just edited in memory
+    crashes KiCad 9's Python. ZONE_FILLER pours the planes; it routes nothing."""
+    code = ("import pcbnew, sys; b = pcbnew.LoadBoard(sys.argv[1]); b.BuildConnectivity(); "
+            "pcbnew.ZONE_FILLER(b).Fill(b.Zones()); pcbnew.SaveBoard(sys.argv[1], b)")
+    subprocess.run([sys.executable, "-c", code, path], check=True)
+
+
 def main():
     lay = yaml.safe_load(open(os.path.join(HERE, "layout.yaml")))
     comps, _ = pcb.sheet_netlist(os.path.join(HERE, NAME + ".kicad_sch"))
     board = pcbnew.LoadBoard(SRC)
     strip(board)
     place = placement(board, comps)
+    if "--place-only" not in sys.argv:
+        routes(pcb.cad_geometry("left_hand"))
+        draw(board)
     pcb.add_silk_generic(board, lay, comps)
+    pcb.silk_off_vias(board)
     pcbnew.SaveBoard(OUT, board)
     shutil.copyfile(os.path.join(HERE, NAME + ".kicad_pro"), OUT[:-len(".kicad_pcb")] + ".kicad_pro")
-    print(f"lh_layout: {len(place)} part(s) seated, no copper yet; wrote {os.path.relpath(OUT, ROOT)}")
+    fill(OUT)
+    n = sum(len(pts) - 1 for _, _, pts in T)
+    print(f"lh_layout: {len(place)} part(s) seated, {n} track segment(s), {len(VIAS)} ground via(s), "
+          f"{len(STITCH)} stitching via(s); wrote {os.path.relpath(OUT, ROOT)}")
 
 
 if __name__ == "__main__":
