@@ -40,9 +40,10 @@ THE FLOORPLAN, and why each part is where it is.
    line leaves whichever end of the node faces the register.
 5. 3V3 IS ONE TRUNK. Out of the header's pin 3 straight into C7 (the reservoir), along
    the far row: R11 (the free input's pull-up), C8 across pins 12/13, under the body to
-   pin 16 and C6 across 16/15; then on between LH5's and LH4's lines to their
-   pull-ups, round LH4 and back along the near edge through the three row keys' pull-ups.
-6. GROUND IS THE SWITCH-SIDE FACE, unbroken. Every switch's and the header's ground
+   pin 16 and C6 across 16/15; then down between LH5's and LH4's lines to LH5's pull-up,
+   and on to one 2 mm link on the switch side that takes it under LH4's line to the rail
+   for the other four. That link is the only signal or power copper off the parts face.
+6. GROUND IS THE SWITCH-SIDE FACE, whole but for that link. Every switch's and the header's ground
    pin is a through-hole into it; the register's ground pins and the capacitors reach
    it by a via each. No ground track but each capacitor's neck to its switch's pin.
    Every ground pad, surface-mount too, is joined to the pour by relief spokes.
@@ -204,11 +205,11 @@ STEM = 3.4                    # a key line climbs past its switch's pole this fa
 T, VIAS = [], []
 
 
-def track(net, pts, w=TW):
+def track(net, pts, w=TW, layer=pcbnew.B_Cu):
     for a, b in zip(pts, pts[1:]):
         dx, dy = abs(a[0] - b[0]), abs(a[1] - b[1])
         assert dx < 1e-6 or dy < 1e-6 or abs(dx - dy) < 1e-6, f"{net}: {a} -> {b} is not at 0, 45 or 90 degrees"
-    T.append((net, w, pts))
+    T.append((net, w, pts, layer))
 
 
 def ch(d):
@@ -243,16 +244,22 @@ def routes(geo):
     c6 = (upin(15)[0] + 1.9, Y_CAPS)
     xt = sw["LH3"][0] + X_CAP + 1.3 + 1.2      # the trunk's way down: third of the corridor's four lines (below)
     yr5, yr4, yr = pu1["LH5"][1], pu1["LH4"][1], pu1["LH3"][1]
-    # THE TRUNK RINGS LH4, AND THE RING IS LEFT OPEN TO THE POUR (owner, 2026-11-20: "Now we're
-    # have large islands"): wherever it passes a part or another line it stands far enough off
-    # for the pour to run between, so the ground inside the ring is one piece with the rest.
-    xe = sw["LH4"][0] + 8.0      # round LH4, a pour's width outside its capacitor
-    xw = sw["LH3"][0] + 7.0      # back up to the row keys' rail, a pour's width on the mouth side of LH4's line
+    # THE TRUNK DOES NOT RING LH4. On one face it has to: LH4's line leaves its switch on the
+    # mouth side, so the rail can reach LH4's pull-up and the row keys' only round LH4's tail
+    # side, and the ring cut the ground inside it off from the rest (owner, 2026-11-20: "Now
+    # we're have large islands", then "Would it just be better to run that 3 volt rail on the
+    # back side?"). ONE LINK ON THE SWITCH SIDE, 2 mm long between two vias, takes the rail
+    # under LH4's line instead - the only copper on that face that is not ground. From the
+    # link the rail runs the row keys' pull-ups one way and down to LH4's the other.
+    xw = sw["LH3"][0] + 6.9      # the rail's side of the link, mouth side of LH4's line
+    xa = xt + 0.4                # the trunk's side of it
     track(V33, [j, c7, (c7[0] + 1.0, c7[1]), (c7[0] + 1.0 + Y_RAIL - c7[1], Y_RAIL), r11, (x12 - 0.5, Y_RAIL), (x12, Y_RAIL - 0.5),
                 (x12, Y_CAPS), upin(12), (x12, ch(1.7)), (x12 + 0.8, ch(0.9)), (x16 - 0.8, ch(0.9)), (x16, ch(1.7)), upin(16),
-                (x16, UY + 3.45), (c6[0], UY + 3.45 + c6[0] - x16), c6, (xt, c6[1] - (xt - c6[0])), (xt, yr5 + 0.5), (xt + 0.5, yr5),
-                pu1["LH5"], (xe - 0.5, yr5), (xe, yr5 - 0.5), (xe, yr4 + 0.5), (xe - 0.5, yr4), pu1["LH4"], (xw + 0.5, yr4),
-                (xw, yr4 + 0.5), (xw, yr - 0.5), (xw - 0.5, yr), pu1["LH3"], pu1["LH2"], pu1["LH1"]], PW)
+                (x16, UY + 3.45), (c6[0], UY + 3.45 + c6[0] - x16), c6, (xt, c6[1] - (xt - c6[0])), (xt, yr + 0.4), (xa, yr)], PW)
+    track(V33, [(xt, yr5), pu1["LH5"]], PW)                # LH5's pull-up: a square tee off the trunk
+    track(V33, [(xa, yr), (xw, yr)], PW, pcbnew.F_Cu)
+    VIAS.extend([(V33, (xa, yr)), (V33, (xw, yr))])
+    track(V33, [pu1["LH4"], (xw + 0.5, yr4), (xw, yr4 + 0.5), (xw, yr), pu1["LH3"], pu1["LH2"], pu1["LH1"]], PW)
 
     # -- each key, the same copper at all five: a neck from each pin straight out to its part,
     # and the node from the resistor's lower pad down at 45, along under both pins through the
@@ -290,9 +297,7 @@ def routes(geo):
     assert xl5 + 0.125 + 0.2 <= ser["LH5"][0] - 0.725 + 1e-6, "LH5's line fouls its own resistor"
     # LH3 and LH4 cross together at 45 to stand under pins 4 and 3
     track("/KEY_LH3", tail_end("LH3") + [(xl3, 31.5), (x4, 31.5 + xl3 - x4), (x4, y4)])
-    # LH4 climbs 0.8 out from its place in the corridor until it is past the trunk's way up
-    # (xw), which is the gap the pour inside the trunk's ring joins the rest through
-    track("/KEY_LH4", mouth_end("LH4", xl4 + 0.8) + [(xl4 + 0.8, 24.5), (xl4, 25.3), (xl4, 32.1), (x3, 32.1 + xl4 - x3), (x3, y3)])
+    track("/KEY_LH4", mouth_end("LH4", xl4) + [(xl4, 32.1), (x3, 32.1 + xl4 - x3), (x3, y3)])
     # LH5: out of the far row between C8 and C6, over C6's ground via, and straight down the corridor
     track("/KEY_LH5", [(x14, y14), (x14, UY + 3.6), (x14 + 0.3, UY + 3.9), (x14 + 0.3, Y_VIA + 0.55), (x14 + 0.8, Y_VIA + 1.05),
                        (xl5 - 0.5, Y_VIA + 1.05), (xl5, Y_VIA + 0.55)] + mouth_end("LH5", xl5)[::-1])
@@ -322,7 +327,7 @@ Y_VIA = Y_CAPS + 1.65         # C8's and C6's ground vias, past their pads
 
 
 def draw(board):
-    for net, w, pts in T:
+    for net, w, pts, layer in T:
         ni = board.FindNet(net)
         assert ni is not None, net
         for a, b in zip(pts, pts[1:]):
@@ -332,7 +337,7 @@ def draw(board):
             t.SetStart(pcb.V(*pcb.to_pcb(*a)))
             t.SetEnd(pcb.V(*pcb.to_pcb(*b)))
             t.SetWidth(pcb.MM(w))
-            t.SetLayer(pcbnew.B_Cu)
+            t.SetLayer(layer)
             t.SetNet(ni)
             board.Add(t)
     for net, p in VIAS + [(GND, q) for q in STITCH]:
@@ -344,10 +349,29 @@ def draw(board):
         board.Add(v)
 
 
-# No stitching via: the parts face's pour is one piece but for the pocket round U1's pin 15,
-# which a line on either side of that pin (LH5's and 3V3) closes, and which C6's and C8's
-# ground vias tie to the switch-side face.
 STITCH = []
+
+# NO POUR ROUND THE REGISTER (owner, 2026-11-20: "some of the copper around the icy is
+# particularly nasty. Looking on the autofill"). Between the register's pads, the chain bus under
+# it, the header's pin rows and the four capacitors the fill left slivers, necks and one
+# closed pocket. A fill keep-out on the parts face covers the whole group out to the board's
+# far edge; every ground pad inside it has its own via to the switch-side face, which is whole
+# under all of it. Body frame: (x0, y0, x1, y1).
+NO_POUR = (80.9, 35.5, 99.6, 49.6)
+
+
+def no_pour(board):
+    z = pcbnew.ZONE(board)
+    z.SetIsRuleArea(True)
+    z.SetZoneName("no-pour-register")
+    z.SetLayer(pcbnew.B_Cu)
+    for f in (z.SetDoNotAllowTracks, z.SetDoNotAllowVias, z.SetDoNotAllowPads, z.SetDoNotAllowFootprints):
+        f(False)
+    z.SetDoNotAllowCopperPour(True)
+    x0, y0, x1, y1 = NO_POUR
+    for x, y in ((x0, y0), (x1, y0), (x1, y1), (x0, y1)):
+        z.AppendCorner(pcb.V(*pcb.to_pcb(x, y)), -1)
+    board.Add(z)
 
 
 def relieve(board):
@@ -380,13 +404,14 @@ def main():
         routes(pcb.cad_geometry("left_hand"))
         draw(board)
     relieve(board)
+    no_pour(board)
     pcb.add_silk_generic(board, lay, comps)
     pcb.silk_off_vias(board)
     pcbnew.SaveBoard(OUT, board)
     shutil.copyfile(os.path.join(HERE, NAME + ".kicad_pro"), OUT[:-len(".kicad_pcb")] + ".kicad_pro")
     fill(OUT)
-    n = sum(len(pts) - 1 for _, _, pts in T)
-    print(f"lh_layout: {len(place)} part(s) seated, {n} track segment(s), {len(VIAS)} ground via(s), "
+    n = sum(len(pts) - 1 for _, _, pts, _ in T)
+    print(f"lh_layout: {len(place)} part(s) seated, {n} track segment(s), {len(VIAS)} via(s) by pads, "
           f"{len(STITCH)} stitching via(s); wrote {os.path.relpath(OUT, ROOT)}")
 
 
