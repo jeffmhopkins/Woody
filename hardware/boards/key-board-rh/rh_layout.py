@@ -120,7 +120,8 @@ def routes(cu, sw):
                    (x11, Y_CAPS), upin(11), (x11, ch(1.7)), (x11 + 0.8, ch(0.9)), (x16 - 0.8, ch(0.9)), (x16, ch(1.7)), upin(16),
                    (x16, Y_CAPS), c9, (xt, c9[1] - (xt - c9[0])), (xt, yr5 + 3.0), (xt + 3.0, yr5),
                    pu1["RH5"], (xe - 6.3, yr5), (xe, yr5 - 6.3), (xe, yr4)], PW)
-    cu.track(V33, [pu1["RH6"], pu1["RH4"], (xw + 3.8, yr4), (xw, yr4 + 3.8), (xw, yr - 3.2), (xw - 3.2, yr),
+    cu.track(V33, [pu1["RH6"], pu1["RH4"], (xw + 3.8, yr4), (xw + 3.8 - (yr - yr4), yr),     # one diagonal between the two rails (owner, 2026-11-20)
+                  
                    pu1["RH3"], pu1["RH2"], pu1["RH1"]], PW)
 
     # -- the key lines, each from the end of its node that faces the register
