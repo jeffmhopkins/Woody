@@ -160,7 +160,7 @@ COL = (293.95, 296.4, 298.85) # ...and its three columns
 PLACE.update({
     "R35": (247.7, TRIO, ("IO7", "S")), "R34": (250.7, TRIO, ("IO38", "S")), "R36": (253.7, TRIO, ("IO33", "S")),
     "R37": (256.7, TRIO + 0.55, ("3V3", "S")),   # SER's pull-up, its SER pad level with R36's; QH passes under its body
-    "C45": (252.0, 28.5, "+x"),            # in the LED capacitors' row, a millimetre from the first one
+    "C45": (252.0, 28.5, "-x"),            # in the LED capacitors' row, a millimetre from the first one
     "L1": (247.8, 17.9, ("BUCK_IN", "W")),
     "Q2": (237.9, 19.45, ("INST_5V", "E")), "C208": (242.1, 20.6, ("INST_5V", "W")),   # its regulator side toward the regulator
     "R45": (43.8, 19.55, ("3V3", "E")),    # the ADC chip-select pull-up over R47, sharing its 3V3
@@ -556,14 +556,14 @@ def legs():
     T("/LT3/SWITCH_LEG", ["SW3.1", (94.4, v)])
     T("/LT3/SWITCH_LEG", [(94.4, v), (94.4, 30.9)], SIG, "B")
     T("/LT3/SWITCH_LEG", [(94.4, 30.9), (94.4, 31.49), "R17.2"])
-    T("/RT1/SWITCH_LEG", ["SW5.1", (162.4, 20.4), (157.4, v)])
-    T("/RT1/SWITCH_LEG", [(157.4, v), (151.9, 30.9)], SIG, "B")
+    T("/RT1/SWITCH_LEG", ["SW5.1", (162.4, 20.4), (157.4, v), (153.4, v)])
+    T("/RT1/SWITCH_LEG", [(153.4, v), (153.4, 29.4), (151.9, 30.9)], SIG, "B")
     T("/RT1/SWITCH_LEG", [(151.9, 30.9), (150.5, 30.9), "R21.2"])
     T("/RT3/SWITCH_LEG", ["SW7.1", (202.4, v), (218.0, v)])
     T("/RT3/SWITCH_LEG", [(218.0, v), (218.0, 30.9)], SIG, "B")
     T("/RT3/SWITCH_LEG", [(218.0, 30.9), (218.0, 44.09), "R25.2"])
     for n, pts in (("/LT1/SWITCH_LEG", ((66.0, v), (71.5, 30.9))), ("/LT3/SWITCH_LEG", ((94.4, v), (94.4, 30.9))),
-                   ("/RT1/SWITCH_LEG", ((157.4, v), (151.9, 30.9))), ("/RT3/SWITCH_LEG", ((218.0, v), (218.0, 30.9)))):
+                   ("/RT1/SWITCH_LEG", ((153.4, v), (151.9, 30.9))), ("/RT3/SWITCH_LEG", ((218.0, v), (218.0, 30.9)))):
         for x, y in pts:
             VIAS.append((n, x, y))
 
@@ -686,13 +686,13 @@ def v3():
     T("DEV_3V3", [(61.83, 32.0), "C206.1"])
     T("DEV_3V3", ["C206.1", (61.83, 34.2), (62.14, 34.51), "U7.13"])
     # ...and round the hop's via to the far side: the far key's pull-up and the header's bead
-    T("DEV_3V3", [(65.0, 32.4), (57.9, 32.4), (57.2, 33.1), (57.2, 43.7), (57.9, 44.4), (66.5, 44.4), (66.9, 44.0)], W, "B")
-    via("DEV_3V3", 64.5, 44.4, "R14.1")
+    T("DEV_3V3", [(65.0, 32.4), (57.9, 32.4), (57.2, 33.1), (57.2, 42.8), (57.9, 43.5), (64.1, 43.5), (64.5, 43.9), (64.6, 44.0), (66.9, 44.0)], W, "B")
+    via("DEV_3V3", 64.5, 43.9, "R14.1")
     via("DEV_3V3", 66.9, 44.0, "FB1.1")
     # the left hand's other pull-ups
     tap(77.5, 30.9, [(77.5, 31.09), "R12.1"])
     tap(89.81, 30.9, ["R18.1"])
-    tap(115.9, 30.9, [(115.9, 44.19), "R16.1"])
+    tap(117.4, 30.9, [(117.4, 42.69), "R16.1"])
     # the right hand's
     tap(158.2, 30.9, [(156.5, 30.9), "R20.1"])
     tap(169.18, 30.9, ["C14.1", (169.18, 34.2), (168.87, 34.51), "U8.12"])
@@ -700,7 +700,9 @@ def v3():
     T("DEV_3V3", ["U8.16", (174.115, 36.2), "C205.1"])
     T("DEV_3V3", [(169.5, 37.35), (169.5, 43.4), (171.69, 45.59), "R22.1"], FINE)
     tap(198.0, 30.9, [(196.5, 30.9), "R28.1"])
-    tap(215.0, 30.9, [(216.5, 30.9), "R30.1"])
+    T("DEV_3V3", [(213.4, lane(213.4)), (213.4, 29.3), (215.0, 30.9)], W, "B")     # round C28's ground via
+    VIAS.append(("DEV_3V3", 215.0, 30.9))
+    T("DEV_3V3", [(215.0, 30.9), (216.5, 30.9), "R30.1"])
     # north of the right header
     T("DEV_3V3", [(264.0, 28.4), (264.0, 34.6), (263.3, 35.3), (191.55, 35.3), (190.85, 36.0), (190.85, 44.6)], W, "B")
     VIAS.append(("DEV_3V3", 190.85, 44.6))
@@ -708,6 +710,85 @@ def v3():
     for x, r in ((222.5, "R24.1"), (212.5, "R26.1")):
         T("DEV_3V3", [(x, 35.3), (x, 44.3)], W, "B")
         via("DEV_3V3", x, 44.3, r)
+
+
+def planes_in():
+    """STAGE 5: GROUND AND 12 V INTO THE PLANES. Every surface pad on either net gets a via
+    beside it, on the side nothing passes: one via per pad, or one between two pads that
+    face each other."""
+    G, P12 = "PWR_GND", "INST_POS12"
+    x = {f"D{8 + k}": LED_X0 - LED_PITCH * k for k in range(13)}
+    cap = {"D8": "C26", "D9": "C27", "D10": "C28", "D11": "C29", "D12": "C30", "D13": "C31", "D14": "C32",
+           "D15": "C33", "D16": "C34", "D17": "C35", "D18": "C36"}
+    for d, xb in x.items():
+        if d == "D8":                                               # the 3V3 trunk passes under here: a step north
+            T(G, ["D8.5", (265.8, 28.5), (266.6, 29.3)], PWR)
+            VIAS.append((G, 266.6, 29.3))
+        else:
+            via(G, xb + 3.6, 28.5, f"{d}.5", PWR)                   # the LED's ground pad, toward the tail
+        if d in cap:                                                # its capacitor a step toward the mouth
+            T(P12, [f"{cap[d]}.1", f"{d}.2"], PWR)
+            VIAS.append((P12, xb - 4.0, 28.5))
+            if d != "D8":
+                via(G, xb - 8.6, 28.5, f"{cap[d]}.2", PWR)
+    T(G, ["D8.5", "D8.6"], PWR)
+    # the first LED's capacitor and C45 beside it share a ground via; C45's 12 V has its own
+    T(G, ["C45.2", (254.25, 28.5), "C26.2"], PWR)
+    VIAS.append((G, 254.25, 28.5))
+    via(P12, 250.0, 28.5, "C45.1", PWR)
+    # the two LEDs at the analog island, whose capacitors stand north of them
+    T(P12, ["D20.2", (23.6, 28.5), "C38.1"], PWR)
+    via(P12, 23.6, 34.4, "C38.1", PWR)
+    via(G, 26.7, 33.0, "C38.2", PWR)
+    via(P12, 40.52, 28.5, "D19.2", PWR)
+    via(P12, 43.47, 34.4, "C37.1", PWR)
+    via(G, 46.6, 33.0, "C37.2", PWR)
+    via(P12, 37.9, 34.0, "C47.1", PWR)
+    via(G, 40.95, 32.65, "C47.2", PWR)
+    # the key combs' capacitors
+    for pad, vx, vy in (("C15.2", 74.5, 30.9), ("C19.2", 155.0, 30.9), ("C23.2", 192.0, 30.9), ("C24.2", 212.0, 30.9),
+                        ("C16.2", 61.5, 44.3), ("C18.2", 101.5, 44.3), ("C17.2", 111.5, 44.3),
+                        ("C20.2", 168.75, 44.6), ("C22.2", 209.5, 44.3), ("C21.2", 219.5, 44.3)):
+        VIAS.append((G, vx, vy))
+        py = 31.05 if vy < 40 else 45.55
+        px = float({"C15": 76.0, "C19": 153.5, "C23": 193.5, "C24": 213.5}.get(pad[:3], vx))
+        T(G, [(vx, vy), (px, vy), pad] if vy < 40 else [(vx, vy), pad] if pad != "C20.2" else [(vx, vy), (169.5, 45.35), pad], PWR)
+    # the registers
+    via(G, 55.9, 40.97, "U7.8", PWR)
+    via(G, 165.06, 42.65, "U8.8", PWR)
+    VIAS.append((G, 64.04, 34.5))
+    T(G, ["C206.2", (63.73, 34.19), (64.04, 34.5)], PWR)
+    T(G, ["U7.14", (63.41, 35.13), (64.04, 34.5), (64.67, 35.13), "U7.15"])
+    via(G, 70.4, 34.3, "C13.2", PWR)
+    via(G, 179.0, 34.3, "C205.2", PWR)
+    VIAS.append((G, 69.0, 38.97))          # the clamps' ground pads are shut in by SCK and SH/LD: a via in the pad
+    VIAS.append((G, 177.0, 38.97))
+    VIAS.append((G, 167.5, 30.9))
+    T(G, [(167.5, 30.9), (167.5, 32.98), "C14.2"], PWR)
+    T(G, ["U8.11", (167.59, 33.51), "C14.2"])
+    via(G, 172.68, 34.4, "U8.15", PWR)
+    # the tail end. The LEDs' level shifter: its two ground pins side by side share the first
+    # LED's via, the others one each on the side no line passes
+    T(G, ["U6.13", "U6.12"])
+    T(G, ["U6.12", (267.17, 28.73), (266.6, 29.3)])
+    via(G, 266.7, 31.27, "U6.10")
+    via(G, 275.1, 30.0, "U6.4")
+    via(G, 275.1, 33.81, "U6.7")
+    VIAS.append((G, 273.38, 24.49))                                 # between pin 1 and R10's ground end
+    T(G, ["U6.1", (273.38, 24.49), "R10.2"])
+    via(G, 270.0, 22.65, "C12.2", PWR)
+    VIAS.append((G, 277.0, 17.99))                                  # U1's ground pin is shut in by IO35 and IO36: a via in the pad
+    via(P12, 282.2, 28.95, "C46.1", PWR)
+    via(G, 282.1, 27.05, "C46.2", PWR)
+    via(G, 285.4, 27.6, "D3.2", PWR)
+    via(G, 283.6, 45.0, "J7.3", PWR)
+    via(G, 290.4, 12.6, "J2.3", PWR)
+    VIAS.append((G, 291.6, 19.61))                                  # in the net tie's own pad: bare copper, no solder
+    VIAS.append((G, 290.0, 33.5))
+    T(G, ["D6.2", (290.65, 34.15), (290.0, 33.5)])
+    via(G, 289.9, 36.36, "D5.2")
+    via(G, 296.4, 8.15, "D21.2", PWR)
+    via(G, 298.85, 9.45, "R42.2", PWR)
 
 
 def breath_strip():
@@ -756,10 +837,23 @@ def planes(board, geo):
         pcb_main.copper_zone(board, pl["net"], pl["layer"], region, 0, pl.get("name", pl["net"]))
     for spec, p, moat in isl:
         pcb_main.copper_zone(board, spec["net"], spec["layer"], p.intersection(outline), 1, spec["net"] + " island")
+    # every soldered ground pin meets its plane through relief spokes, as on the key boards
+    # (pcb_hand.relieve); vias stay solid, and so does a mount's pad, which is clamped under
+    # a screw and never soldered
+    for z in board.Zones():
+        if not z.GetIsRuleArea() and z.GetNetname() == "PWR_GND":
+            z.SetPadConnection(pcbnew.ZONE_CONNECTION_THERMAL)
+    # J-MCU's four ground pins too: a 1.27 mm header leaves room for one spoke where the
+    # rules ask two, the same exception the carrier's end of this ribbon takes (ADR 0030)
+    for fp in board.GetFootprints():
+        ref = fp.GetReference()
+        for pad in fp.Pads():
+            if ref.startswith("H") or (ref == "J1" and pad.GetNetname() == "PWR_GND"):
+                pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
     return lay
 
 
-STAGES = [analog, breath_pair, power, tail, leds, legs, chain, registers, v3]
+STAGES = [analog, breath_pair, power, tail, leds, legs, chain, registers, v3, planes_in]
 
 
 def copper():
