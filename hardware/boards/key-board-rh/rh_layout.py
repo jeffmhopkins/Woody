@@ -21,9 +21,10 @@ for the four keys of the near row, so what decided that board decides this one:
    (FACE, below), and says so when it runs. Facing the tail, the header's signal row is on
    its mouth side, and the register behind it would have its four near-row key inputs
    facing the far edge, away from every switch.
-3. U1 stands with pin 4 (RH3's input) 3.4 toward the tail from RH3's centre, as the left
-   hand's stands to LH3. The header is 8 mm further from it than on the left, so the bus
-   is 8 mm longer and nothing else changes.
+3. U1 stands as close behind the header as the left hand's does (owner, 2026-11-20, chose
+   "Register closer to the header"), so the bus is as short as on the left. That puts the
+   register on the mouth side of RH3, so RH3's line leaves the mouth end of its node, as
+   RH4's and RH5's do; RH1 and RH2 still leave the tail end.
 4. EACH KEY'S NETWORK STANDS OUTSIDE ITS OWN SWITCH'S PINS (tools/pcb_hand.py, KEY_NET).
 5. The register's two decouplers each stand across a 3V3 pin and the ground pin beside
    it on the far row: C7 across pins 11 and 12, C9 across 16 and 15. RH6 and RH5 (pins 13
@@ -62,7 +63,7 @@ def jpin(k):
     return (JX if k % 2 else JX - PITCH, JY1 - PITCH * ((k - 1) // 2))
 
 
-UX, UY = 198.0 + 3.4 - PITCH / 2, jpin(9)[1] + 0.5
+UX, UY = JX + 9.405, jpin(9)[1] + 0.5        # the left hand's distance from its header's signal row
 
 
 def upin(n):
@@ -105,9 +106,9 @@ def routes(cu, sw):
     j = jpin(11)
     cu.track("/CHAIN_SCK", [j, (JX + 1.24, j[1]), (JX + 1.24 + ch(-1.0) - j[1], ch(-1.0)), (x2 - 0.3, ch(-1.0)), (x2, ch(-1.3)), (x2, y2)])
 
-    # -- the corridor between RH3's capacitor and RH5's resistor: RH3, RH4, 3V3, RH5 side by side
-    xl3 = cap["RH3"][0] + 1.3
-    xl4, xt, xl5 = xl3 + 0.6, xl3 + 1.2, xl3 + 1.8
+    # -- the corridor between RH3's capacitor and RH5's resistor: RH4, 3V3, RH5 side by side
+    xw = cap["RH3"][0] + 1.3      # the rail's way back up to the row keys, mouth side of RH4's line
+    xl4, xt, xl5 = xw + 0.6, xw + 1.2, xw + 1.8
     assert xl5 + 0.125 + 0.2 <= ser["RH5"][0] - 0.725 + 1e-6, "RH5's line fouls its own resistor"
     x6c = ser["RH6"][0] - 1.7     # RH6's way down, between the trunk's ring round RH4 and RH6's own resistor
 
@@ -120,7 +121,6 @@ def routes(cu, sw):
     c9 = (PLACE["C9"][0] + 0.9125, Y_CAPS)
     yr5, yr4, yr = pu1["RH5"][1], pu1["RH4"][1], pu1["RH3"][1]
     xe = sw["RH4"][0] + X_CAP + 1.3      # round RH4, outside its capacitor
-    xw = xl3                             # back up to the row keys' rail, mouth side of RH4's line
     cu.track(V33, [j, c8, (c8[0] + 1.0, c8[1]), (c8[0] + 1.0 + Y_RAIL - c8[1], Y_RAIL), (x11 - 0.5, Y_RAIL), (x11, Y_RAIL - 0.5),
                    (x11, Y_CAPS), upin(11), (x11, ch(1.7)), (x11 + 0.8, ch(0.9)), (x16 - 0.8, ch(0.9)), (x16, ch(1.7)), upin(16),
                    (x16, Y_CAPS), c9, (xt, c9[1] - (xt - c9[0])), (xt, yr5 + 3.0), (xt + 3.0, yr5),
@@ -130,11 +130,19 @@ def routes(cu, sw):
 
     # -- the key lines, each from the end of its node that faces the register
     (x6, y6), (x5, y5), (x4, y4), (x3, y3), (x13, y13), (x14, y14) = upin(6), upin(5), upin(4), upin(3), upin(13), upin(14)
-    for k, lvl, (px, py) in (("RH1", ch(-4.0), (x6, y6)), ("RH2", ch(-4.5), (x5, y5))):
-        xc, yt = cap[k][0] + 1.3, sw[k][1] + 0.9
-        cu.track("/KEY_" + k, tail_end(cap, k) + [(xc, yt), (xc + lvl - yt, lvl), (px - 0.5, lvl), (px, lvl + 0.5), (px, py)])
-    cu.track("/KEY_RH3", tail_end(cap, "RH3") + [(xl3, 31.5), (x4, 31.5 + xl3 - x4), (x4, y4)])
-    cu.track("/KEY_RH4", mouth_end(ser, "RH4", xl4) + [(xl4, 32.1), (x3, 32.1 + xl4 - x3), (x3, y3)])
+    # RH1 climbs beside its capacitor, crosses at 45 to its height under the header's pin
+    # rows, and turns up into pin 6
+    xc, yt, lvl = cap["RH1"][0] + 1.3, sw["RH1"][1] + 0.9, ch(-4.0)
+    cu.track("/KEY_RH1", tail_end(cap, "RH1") + [(xc, yt), (xc + lvl - yt, lvl), (x6 - 0.5, lvl), (x6, lvl + 0.5), (x6, y6)])
+    # RH2: beside its capacitor, then one diagonal to stand under pin 5
+    xc = cap["RH2"][0] + 1.3
+    cu.track("/KEY_RH2", tail_end(cap, "RH2") + [(xc, ch(-4.5) - (x5 - xc)), (x5, ch(-4.5)), (x5, y5)])
+    # RH3: up the mouth side of its resistor, then a diagonal parallel to RH2's to stand under pin 4
+    xc = ser["RH3"][0] - 1.2
+    cu.track("/KEY_RH3", mouth_end(ser, "RH3", xc) + [(xc, ch(-5.1) - (x4 - xc)), (x4, ch(-5.1)), (x4, y4)])
+    # RH4: up the corridor, across at 45 over RH3's switch, and along to stand under pin 3
+    cu.track("/KEY_RH4", mouth_end(ser, "RH4", xl4) + [(xl4, 27.0), (xl4 - (ch(-4.6) - 27.0), ch(-4.6)), (x3 + 0.5, ch(-4.6)),
+                                                       (x3, ch(-4.1)), (x3, y3)])
     # RH5 and RH6 leave the far row between C7 and C9 and go over C9 toward the tail, RH5 inside
     cu.track("/KEY_RH5", [(x14, y14), (x14, Y_VIA + 0.55), (x14 + 0.5, Y_VIA + 1.05), (xl5 - 0.5, Y_VIA + 1.05), (xl5, Y_VIA + 0.55)]
              + mouth_end(ser, "RH5", xl5)[::-1])
