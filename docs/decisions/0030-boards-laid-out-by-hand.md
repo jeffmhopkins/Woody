@@ -136,10 +136,15 @@ changes or adds:
    boards' ground pads do. `J-MCU`'s four ground pins join it whole, for the
    same want of room as `J-MCU-C`'s above; the mounts join it whole because
    they are clamped, not soldered, and stay plated on `PWR_GND` (ADR 0025).
-5. **Three ground pins have a via in the pad** (`U9` pin 2, `U11` pin 2, `U1`
-   pin 2): each is the middle pin of a small clamp with a line either side of
-   it, so there is no place beside the pad. The owner was told with the
-   result.
+5. **No via stands in a pad** (owner, 2026-11-21: *"better just to do the jogs
+   and make it work"*). `U9` pin 2, `U11` pin 2 and `U1` pin 2 are each the
+   middle pin of a small clamp with a line either side of it. At the two
+   register clamps `SCK` passes 0.4 mm lower than it enters the register, and
+   the via stands between it and the pad; at `U1` `IO36` and 3V3 pass north of
+   the via, and the SPI resistors' row moved with them. An open via in a small
+   pad draws solder off the pin in reflow, and the fab's fill for it is not its
+   default on four layers [ds `JLCPCB-PCB-CAPABILITIES.pdf`, *Via-in-Pad
+   Process*].
 6. **The chain's pin order at each `J-CHAIN` is unchanged.** The board routes
    with it.
 

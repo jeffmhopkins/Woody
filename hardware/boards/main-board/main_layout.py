@@ -164,7 +164,7 @@ PLACE.update({
 # line takes a via between two of their pads to the bottom trunk.
 # Each resistor then stands where its line arrives, and nothing crosses on a face.
 TRIO = 24.35                  # the chain's three series resistors: fed from J-MCU's mouth end by vias under them
-SPI_Y = 19.5                  # the umbilical's SPI resistors, a row under its pins; 3V3 and IO36 pass under their bodies
+SPI_Y = 19.65                  # the umbilical's SPI resistors, a row under its pins; 3V3 and IO36 pass under their bodies
 BUS_U, BUS_G = 16.4, 14.5     # the inrush switch's two buses, UMBILICAL_POS12 over INRUSH_GATE
 COL = (293.95, 296.4, 298.85) # ...and its three columns
 PLACE.update({
@@ -189,7 +189,7 @@ PLACE.update({
     # the nest round J-MCU's tail end, in the order the lines arrive: IO6's pull-up where it
     # crosses 3V3, IO2's on a branch of 3V3, the clamp astride the three SPI lines, the three
     # series resistors, and CS's pull-up closing the row
-    "R48": (276.72, 20.81, ("IO6", "N")),
+    "R48": (276.72, 21.7, ("IO6", "N")),
     "U1": (277.0, 16.85, ("1", "NE")),
     "R1": (280.3, SPI_Y, ("SCLK", "N")), "R2": (283.3, SPI_Y, ("MOSI", "N")), "R3": (286.3, SPI_Y, ("CS_MOD", "N")),
     "R40": (289.0, SPI_Y - 0.55, ("IO34", "S")),
@@ -465,7 +465,7 @@ def power():
     # the 3V3 trunk: from a via between IO6's pull-up and the SPI resistors, north-west under
     # the surge diode to a lane under the LED driver, south of the two LED data lines there,
     # and down to R37's via
-    via("DEV_3V3", 278.4, 21.5, (278.4, 19.9))
+    via("DEV_3V3", 278.4, 21.5, (278.4, 20.25), FINE)
     T("DEV_3V3", [(278.4, 21.5), (271.6, TRUNK), (256.7, TRUNK), (256.7, 22.2), (256.2, 22.2), (254.4, 24.0)] + step("DEV_3V3"), 0.3, "B")
     via("DEV_3V3", 256.7, 22.2, "R37.2")
 
@@ -486,21 +486,22 @@ def tail():
 
     # the odd row's lines toward the tail: five lanes on top hard under the row's pads, each
     # straight from its pin to its part
-    T("IO34", ["J1.7", (259.095, 14.95), (259.395, 14.65), (281.9, 14.65), (283.9, 16.65), (284.91, 16.65), "R3.1", "R40.2"], FINE)
+    T("IO34", ["J1.7", (259.095, 14.95), (259.395, 14.65), (281.9, 14.65), (283.9, 16.65), (284.76, 16.65), "R3.1", "R40.2"], FINE)
     T("IO34", [(276.05, 14.65), "U1.4"])
-    T("IO35", ["J1.9", (260.365, 15.35), (260.665, 15.05), (272.18, 15.05), (273.98, 16.85), (279.11, 16.85), "R1.1"], FINE)
+    T("IO35", ["J1.9", (260.365, 15.35), (260.665, 15.05), (272.18, 15.05), (273.98, 16.85), (278.96, 16.85), "R1.1"], FINE)
     T("IO35", [(277.95, 16.85), "U1.1"])
-    T("IO36", ["J1.11", (261.635, 15.75), (261.935, 15.45), (271.87, 15.45), (275.47, 19.05), (282.29, 19.05), "R2.1"], FINE)
-    T("IO36", [(276.05, 19.05), "U1.3"])
-    T("DEV_3V3", ["J1.15", (264.175, 16.15), (264.475, 15.85), (271.6, 15.85), (275.65, 19.9), "R48.1", (289.0, 19.9)], FINE)
+    T("IO36", ["J1.11", (261.635, 15.75), (261.935, 15.45), (271.1, 15.45), (275.5, 19.85), (281.64, 19.85), "R2.1"], FINE)
+    T("IO36", [(276.05, 19.85), "U1.3"], FINE)
+    T("DEV_3V3", ["J1.15", (264.175, 16.15), (264.475, 15.85), (270.9, 15.85), (275.3, 20.25), (289.0, 20.25)], FINE)
+    T("DEV_3V3", [(276.72, 20.25), "R48.1"], FINE)
     # IO6 turns north past the header's end, between R10 and the first LED's capacitor, to
     # the driver; its pull-up hangs on a branch
     T("IO6", ["J1.21", (267.985, 16.55), (268.285, 16.25), (270.1, 16.25), (270.4, 16.55), (270.4, 29.6), (268.73, 31.27), "U6.5"], FINE)
-    T("IO6", [(270.4, 17.0), (270.8, 17.0), (275.52, 21.72), "R48.2"], FINE)
+    T("IO6", [(270.4, 17.0), (270.8, 17.0), (276.41, 22.61), "R48.2"], FINE)
     # the module's SPI, from its resistors to J-UMB: SCLK comes down the tail side of the first LED
-    T("SCLK", ["J6.4", (290.07, 29.77), (281.26, 20.96), "R1.2"])
+    T("SCLK", ["J6.4", (290.07, 29.77), (281.41, 21.11), "R1.2"])
     T("MOSI", ["J6.5", (288.3, 27.23), (283.3, 22.23), "R2.2"])
-    T("CS_MOD", ["J6.7", (287.49, 22.15), "R3.2"])
+    T("CS_MOD", ["J6.7", (287.34, 22.15), "R3.2"])
     # the breath pair's last step to J-UMB
     T("BREATH_SENSE", ["J6.1", "R38.2"])
     T("BREATH_SENSE", [(293.25, 37.39), "D5.1"])
@@ -692,9 +693,10 @@ def registers():
         leg2, leg4 = (("/LT2/SWITCH_LEG", "/LT4/SWITCH_LEG") if lh else ("/RT2/SWITCH_LEG", "/RT4/SWITCH_LEG"))
         # SCK: out of pin 2 below the clamp, a stub up to the clamp, in under the register to pin 2
         y2, y4, y6, y8, y10 = (jpin(k)[1] for k in (2, 4, 6, 8, 10))
-        T("CHAIN_SCK", [f"{j}.2", (X(JX - (y2 - 37.9)), 37.9), (X(72.05), 37.9)])
+        # (it passes the clamp 0.4 lower than it enters the register, so the clamp's ground via stands
+        # between it and the pad and not in the pad)
+        T("CHAIN_SCK", [f"{j}.2", (X(JX - (y2 - 37.5)), 37.5), (X(72.05), 37.5), (X(72.05), 37.9), f"{tvs}.1"])
         T("CHAIN_SCK", [(X(72.05), 37.9), (X(70.3), 37.9), (X(69.74), 37.9), (X(68.67), 38.97), f"{u}.2"])   # x 67: where the right hand's via stands
-        T("CHAIN_SCK", [(X(72.05), 37.9), f"{tvs}.1"])
         # SH/LD: straight from pin 4 between the clamp's rows into pin 1
         T("CHAIN_SHLD", [f"{j}.4", (X(73.95), y4), (X(69.94), y4), f"{u}.1"])
         T("CHAIN_SHLD", [(X(73.95), y4), f"{tvs}.3"])
@@ -723,7 +725,7 @@ def registers():
     T("HOP_RH_RT", ["J5.8"] + [(x + RH, y) for x, y in hop_out(jpin(8)[1], HOP_TOP)] + [(CX + RH - 0.95 + HOP_TOP - (jpin(4)[1] + 1.1375), HOP_TOP), "U11.5"])
     # the left hand's near mouth-side key: up past the supply capacitor, under the register to pin 6
     T("KEY_LT1", ["R13.1", "C15.1", "R12.2"])
-    T("KEY_LT1", ["R13.1", (74.0, 36.6), (73.2, 37.4), (64.39, 37.4), (63.59, 38.2), "U7.6"])
+    T("KEY_LT1", ["R13.1", (74.0, 36.24), (73.2, 37.04), (70.9, 37.04), (70.54, 37.4), (64.39, 37.4), (63.59, 38.2), "U7.6"])
     # the right hand's: round the register's mouth end and under it to pin 6
     T("KEY_RT1", ["R21.1", "C19.1", "R20.2"])
     T("KEY_RT1", ["R20.2", (166.91, 32.91), (168.0, 34.0), (168.0, 38.5), (168.8, 39.3), (171.29, 39.3), (171.59, 39.6), "U8.6"])
@@ -828,8 +830,8 @@ def planes_in():
     T(G, ["U7.14", (67.41, 35.13), (68.04, 34.5), (68.67, 35.13), "U7.15"])
     via(G, 71.7, 33.0, "C13.2", PWR)                 # south of it: the key's line passes its tail side
     via(G, 181.1, 34.3, "C205.2", PWR)
-    VIAS.append((G, 73.0, 38.97))          # the clamps' ground pads are shut in by SCK and SH/LD: a via in the pad
-    VIAS.append((G, 181.0, 38.97))
+    via(G, 73.0, 38.18, "U9.2")            # the clamps' ground vias: just off the pad, between it and SCK
+    via(G, 181.0, 38.18, "U11.2")
     VIAS.append((G, 171.59, 34.55))        # on the line from pin 11 to its capacitor: D13 stands where a via south of it would
     T(G, ["U8.11", (171.59, 33.51), "C14.2"])
     via(G, 176.68, 34.4, "U8.15", PWR)
@@ -845,7 +847,7 @@ def planes_in():
     T(G, ["U6.1", (266.88, 24.5), (267.49, 23.89), "R10.2"])
     VIAS.append((G, 260.75, 23.2))
     T(G, ["C12.2", (261.3, 22.65), (260.75, 23.2)], PWR)
-    VIAS.append((G, 277.0, 17.99))                                  # U1's ground pin is shut in by IO35 and IO36: a via in the pad
+    via(G, 277.0, 19.2, "U1.2")                                     # U1's ground via: just off the pad, IO36 and 3V3 passing north of it
     via(P12, 272.3, 34.2, "C46.1", PWR)
     via(G, 275.55, 35.6, "C46.2", PWR)
     via(G, 276.35, 24.6, "D3.2", PWR)                               # the clamp's two (#8-6)
