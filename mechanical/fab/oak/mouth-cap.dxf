@@ -7,7 +7,7 @@ Thickness: 6 mm (ends.mouth_cap_t)
 999
 Quantity per instrument: 1
 999
-Units mm. Cut every closed outline. cad b04d92889097; verify: python3 tools/cad.py explain fab-dxf-mouth-cap
+Units mm. Cut every closed outline. cad 14207e3ef202; verify: python3 tools/cad.py explain fab-dxf-mouth-cap
   0
 SECTION
   2

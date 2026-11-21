@@ -45,16 +45,21 @@ plate_bottom,boards.tall_l,tbd,10.0,M4 main board layout,yes,M4 main board layou
 plate_bottom,boards.tall_w,tbd,15.0,M4 main board layout,yes,M4 main board layout
 plate_bottom,boards.sensor_port_offset,tbd,2.1,the part in hand at M4,yes,the part in hand at M4
 plate_bottom,boards.sensor_lead_row,tbd,10.2,M4 footprint,yes,M4 footprint
-plate_bottom,boards.chain_hdr_l,nominal,13.97,"M4, with J-CHAIN's part",no,a working estimate the part can be cut to
-plate_bottom,boards.chain_hdr_pin_back,nominal,7.86,"M4, with J-CHAIN's part",no,a working estimate the part can be cut to
-plate_bottom,boards.chain_plug_proud,tbd,1.4,"M4, on the first mated pair",yes,"M4, on the first mated pair"
-plate_bottom,boards.chain_mb_shift,nominal,2.54,"owner, 2026-11-20, in the working chat: 'Main-board headers 2.5 mm to mouth'",no,a working estimate the part can be cut to
-plate_bottom,boards.chain_hdr_tail,nominal,2.15,M4,no,a working estimate the part can be cut to
-plate_bottom,boards.chain_hdr_mouth_z,nominal,3.05,M4,no,a working estimate the part can be cut to
-plate_bottom,boards.chain_plug_t,nominal,3.05,M4,no,a working estimate the part can be cut to
+plate_bottom,boards.chain_hdr_l,nominal,12.65,"M4, with J-CHAIN's part",no,a working estimate the part can be cut to
+plate_bottom,boards.chain_hdr_h,nominal,5.4,"M4, with J-CHAIN's part",no,a working estimate the part can be cut to
+plate_bottom,boards.chain_hdr_w,nominal,5.1,"M4, with J-CHAIN's part",no,a working estimate the part can be cut to
+plate_bottom,boards.chain_hdr_pins_l,nominal,5.08,"M4, with J-CHAIN's part",no,a working estimate the part can be cut to
+plate_bottom,boards.chain_plug_cable,nominal,1.8,"M4, on the first mated pair",no,a working estimate the part can be cut to
+plate_bottom,boards.chain_mb_shift,nominal,0.0,"the main board's layout, and M4 on the first mated pair",no,a working estimate the part can be cut to
+plate_bottom,boards.chain_stub_room,nominal,2.4,the main board's layout,no,a working estimate the part can be cut to
+plate_bottom,boards.chain_hdr_tail,nominal,2.1,M4,no,a working estimate the part can be cut to
+plate_bottom,boards.chain_plug_l,nominal,14.34,M4,no,a working estimate the part can be cut to
+plate_bottom,boards.mcu_conn_l,nominal,21.59,"M4, on the part bought",no,a working estimate the part can be cut to
+plate_bottom,boards.mcu_conn_w,nominal,5.85,"M4, on the part bought",no,a working estimate the part can be cut to
 plate_bottom,boards.umb_adapter_t,tbd,1.6,"M4, with the board ordered",yes,"M4, with the board ordered"
 plate_bottom,boards.umb_parts_d,nominal,14,"M4 main board layout, routed",no,a working estimate the part can be cut to
-plate_bottom,boards.mcu_conn_at,nominal,"[262.27, 14.9, 90]",the main board's layout; the Matrix carrier's J-MCU-C stands straight above it,no,a working estimate the part can be cut to
+plate_bottom,boards.mcu_conn_tail,nominal,2.1,"M4, on the part bought",no,a working estimate the part can be cut to
+plate_bottom,boards.mcu_conn_at,nominal,"[262.27, 18.17, 90]",the main board's layout and the Matrix carrier's,no,a working estimate the part can be cut to
 plate_bottom,boards.tall_at_x,nominal,225.0,,no,a working estimate the part can be cut to
 plate_bottom,boards.tall_side,nominal,near,,no,a working estimate the part can be cut to
 plate_bottom,boards.service_hdr_at,nominal,"[284.0, 11.0]",M4 main board layout,no,a working estimate the part can be cut to
@@ -77,9 +82,8 @@ plate_bottom,hardware.ubolt_span,tbd,20.0,M4,yes,M4
 plate_bottom,hardware.ubolt_nut_af,tbd,5.5,"M4, with the U-bolt bought",yes,"M4, with the U-bolt bought"
 plate_bottom,hardware.ubolt_washer_od,tbd,6.0,"M4, with the washers bought",yes,"M4, with the washers bought"
 plate_bottom,routing.tube_lane,tbd,left,M4,yes,M4
-plate_bottom,routing.chain_ribbon_w,nominal,7.62,"M4, with the cable",no,a working estimate the part can be cut to
-plate_bottom,routing.chain_ribbon_t,tbd,0.8,"M4, with the cable",yes,"M4, with the cable"
-plate_bottom,routing.chain_bend_r,tbd,1.0,"M4, on the first cable",yes,"M4, on the first cable"
+plate_bottom,routing.chain_ribbon_w,nominal,6.35,"M4, with the cable",no,a working estimate the part can be cut to
+plate_bottom,routing.chain_ribbon_t,tbd,0.64,"M4, with the cable",yes,"M4, with the cable"
 plate_bottom,routing.chain_raise,tbd,30.0,"M4, on the first assembly",yes,"M4, on the first assembly"
 plate_bottom,routing.chain_slack,tbd,10.0,"M4, on the first assembly",yes,"M4, on the first assembly"
 plate_bottom,routing.chain_fold,nominal,"[-1, -1]",the clash check,no,a working estimate the part can be cut to
