@@ -388,11 +388,11 @@ is stocked in the hundreds of thousands
 `[web, 2026-11-21: https://www.digikey.co.uk/en/products/detail/cnc-tech/3220-10-0100-00/3883661]`,
 and CNC Tech's drawing does not list a 12-position size at all.
 
-**The Matrix's ribbon is not changed.** `J-MCU` and `J-MCU-C` stay
-right-angle: that header lies along the body, so a vertical socket would send
-its ribbon across the body, and between the header and the LED row there is no
-room for the ribbon's fold (`drc.echo` "J-MCU, its plug and the Matrix ribbon
-off the LED row").
+**The Matrix's ribbon followed the same day.** `J-MCU` and `J-MCU-C` lie
+along the body, so a vertical socket sends the ribbon across the body and
+over the LED row; the owner chose that, and
+[ADR 0018](0018-main-board-wiring-decisions.md), *Amendment, 2026-11-21*,
+records it.
 
 **What follows it.** The main board and both key boards are laid out again
 round the new footprint (`woody:IDC-Header_2x05_P1.27mm_CNCTech_3220_Vertical`),

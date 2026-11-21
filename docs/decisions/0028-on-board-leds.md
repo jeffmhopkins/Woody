@@ -267,7 +267,10 @@ This supersedes the corner position of 2026-10-02.
    steps clear of the LEDs by the body CAD's own rule (`cb_ends`); the main
    board's layout moves its parts round the row
    (`hardware/boards/main-board/README.md`). The Matrix's ribbon is longer by
-   `J-MCU`'s move (*"Matrix ribbon length"*).
+   `J-MCU`'s move (*"Matrix ribbon length"*). *Since 2026-11-21 `J-MCU`
+   stands vertical and its ribbon crosses the row, over no LED (the owner's
+   choice of that date, ADR 0018, Amendment, 2026-11-21); the rule quoted
+   above is withdrawn for "Matrix ribbon crosses the LED row over no LED".*
 4. **The U-bolt station is no longer exactly midway between two LEDs.** The
    rule's purpose holds and the body CAD checks it: no LED's courtyard
    reaches the station's line, so none stands under the strap, and every LED

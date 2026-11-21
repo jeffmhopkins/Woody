@@ -1,7 +1,8 @@
 # 0018 — Main board wiring: five decisions
 
 **Status:** Accepted. **Amended 2026-10-01** (the module end of `DIG_GND` is
-settled, *Amendment* below).
+settled, *Amendment* below) and **2026-11-21** (the Matrix ribbon's headers
+stand vertical, *Amendment* below).
 
 Closes five items that [ADR 0017](0017-one-main-board.md)'s rework left open
 on the main board's pages. Decided by the owner, 2026-09-26, taking the
@@ -114,3 +115,53 @@ was settled on it: its value, its layer stack and the reason the DAC's
 analog ground is not bridged to `DIG_GND` are in `config/figures.yaml`, owned
 by `hardware/module/power-entry/power-entry.md` *Grounding*. Nothing in
 decisions 1–5 changes. Found by the 2026-10-01 pre-layout review (A8-5).
+
+## Amendment, 2026-11-21 — the Matrix ribbon's headers stand vertical
+
+Issue #49. The key chain's headers went vertical that day (ADR 0017,
+*Amendment, 2026-11-21*), and the owner asked the same of the Matrix's pair:
+"What about the carrier board? Also carrier board we should be open to
+changing geometry as needed". Three choices followed, each made on a card in
+the working chat; the words quoted are the cards' option labels.
+
+1. **"Vertical, ribbon across the row."** `J-MCU` stands straight up from the
+   main board and `J-MCU-C` hangs mouth down from the Matrix carrier's arm,
+   rows along the body. The ribbon leaves both sockets toward the far side
+   and lies in one fold across the LED row. This withdraws the rule of
+   2026-10-03 that kept `J-MCU`, its plug and the ribbon off the row
+   (ADR 0021, *Amendment, 2026-10-03*, item 4; ADR 0028). What replaces it
+   is narrower: the ribbon crosses where the row has no LED, and no LED's
+   courtyard comes within `boards.board_clear` of a header, a socket or the
+   ribbon (`mechanical/drc.echo` *"Matrix ribbon crosses the LED row over no
+   LED"*). The ribbon lies a header's height above the board; what it does
+   to the light is the cone note's to state (*"tall parts in the LEDs'
+   cone"*).
+2. **"24-way, thin stock, carrier untouched."** The common vertical header
+   in this pitch is 26-way, and its thirteenth pad column lands in the
+   carrier's fan-out, which was locked on 2026-11-20 (ADR 0030, *Amendment,
+   2026-11-20*). A 24-way vertical header puts its pads where the
+   right-angle header's were, so the carrier's copper, the ribbon's ways
+   (`mcu-ribbon-ways`), the sockets and every pin number stay. The cost is
+   supply: the `J-MCU` BOM row names three equal parts and what stock each
+   had that day. Order spares with the first build.
+3. **"Push it red, main-board thread finishes."** The body CAD, the carrier
+   board, both sheets and the parts land first; `J-MCU`'s copper on the main
+   board is laid with the LED row, so the main board's checks fail between
+   the two commits.
+
+**The two headers stand side by side, not mouth to mouth.** Two mated pairs
+do not fit between the main board and the carrier (*"Matrix ribbon's
+headers: side by side, not mouth to mouth"*). `J-MCU-C` keeps its place under
+the arm and `J-MCU` stands beside it, toward the far side
+(`boards.mcu_conn_at`, `boards.mcu_conn_c_shift`).
+
+**The cable is made end for end, and no pin number moves.** `J-MCU` pin *n*
+is still `J-MCU-C` pin 25 − *n* (`check_matrix`). With both headers vertical
+that takes both sockets on the same face of the ribbon, the carrier's pin 1
+on conductor 24. The `CBL-MCU-RIBBON` row says how to make and test it. Its
+length and its fold are *"Matrix ribbon length"*, *"Matrix ribbon to cut"*,
+*"Matrix ribbon fold no tighter than its bend radius"* and *"Matrix ribbon
+closed: its legs and fold over the main board"*.
+
+Nothing in decisions 1–5 changes: the allocation, the protection and the
+grounds are as they were.

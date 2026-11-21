@@ -184,7 +184,9 @@ the only board.
   pin 16.*
 - **The Matrix ribbon's closed fold has more room.** The extension's plug set
   its forward limit until now. The carrier keeps its height (drc.echo
-  *"Matrix ribbon closed: its folds between the sockets"*).
+  *"Matrix ribbon closed: its folds between the sockets"*; *since 2026-11-21
+  the ribbon lies in one fold across the body, ADR 0018, Amendment of that
+  date*).
 - **The main board gains `J-MIDI` and its parts in the freed corner.** They
   are not yet placed on the layout, which issue #35 has open.
 

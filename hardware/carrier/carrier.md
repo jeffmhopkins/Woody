@@ -353,7 +353,11 @@ board of its own, hung from the oak top (owner, 2026-10-03:
 2026-10-03*; `hardware/boards/matrix-carrier/`), so it cannot plug into this
 board. `CBL-MCU-RIBBON` is a plain IDC ribbon from the carrier's `J-MCU-C`
 into `J-MCU`, plugged and unplugged with the lid raised, as the key chain's
-ribbons are. A dead Matrix is a bench job and not a strip-down: raise the
+ribbons are. Both headers stand vertical, side by side with their rows along
+the body, and the ribbon between them lies in one fold across the LED row,
+over a stretch with no LED (owner, 2026-11-21;
+[ADR 0018](../../docs/decisions/0018-main-board-wiring-decisions.md),
+*Amendment, 2026-11-21*). A dead Matrix is a bench job and not a strip-down: raise the
 lid, unplug `J-MCU`, unscrew the carrier from the oak, and change the Matrix
 on it. Nothing on this board is touched. The ribbon's length is
 `mechanical/drc.echo` *"Matrix ribbon length"*; the builder's notes are on
@@ -497,9 +501,9 @@ page and have no BOM entry yet.
 | Ref | Value | Job | Confidence |
 |---|---|---|---|
 | `U-MCU-RT` | ESP32-S3-Matrix | The instrument. On its own carrier, hung from the oak top, not on this board; reached by `CBL-MCU-RIBBON` | `[repo]` |
-| `J-MCU` | 2 × 12, 1.27 mm shrouded box header, right-angle | The Matrix's connector, at the tail end. Pin map decided (ADR 0018) — *The Matrix and the umbilical at the tail end* | pin map decided; `[from memory]` part; part **open**, M4 |
-| `CBL-MCU-RIBBON` | 24-way flat ribbon, 0.635 mm, IDC socket each end | From `J-MCU-C` on the Matrix carrier into `J-MCU`; the carrier's socket crimped turned over | `[ds]` sockets and ribbon; part **open**, M4 |
-| `J-MCU-C` | as `J-MCU` | The ribbon's carrier end, hung under the Matrix carrier above `J-MCU`; pin k is `J-MCU` pin 25 − k | `[repo]` |
+| `J-MCU` | 2 × 12, 1.27 mm shrouded box header, vertical | The Matrix's connector, at the tail end. Pin map decided (ADR 0018) — *The Matrix and the umbilical at the tail end* | pin map decided; `[ds]` part, stock thin (its BOM row) |
+| `CBL-MCU-RIBBON` | 24-way flat ribbon, 0.635 mm, IDC socket each end | From `J-MCU-C` on the Matrix carrier into `J-MCU`; both sockets on one face of the ribbon, crimped end for end (its BOM row) | `[ds]` sockets and ribbon; part **open**, M4 |
+| `J-MCU-C` | as `J-MCU` | The ribbon's carrier end, hung mouth down under the Matrix carrier's arm, beside `J-MCU`; pin k is `J-MCU` pin 25 − k | `[repo]` |
 | `HDR-MATRIX` ×2 | 1 × 10 2.54 mm pin header, surface mount | The Matrix on its carrier (`hardware/boards/matrix-carrier/`), its pad rows on the posts | `[ds]` |
 | `J-UMB` | 1 × 8, 2.54 mm right-angle pin header | Where the umbilical reaches this board, on its tongue: soldered into it and into `PCB-UMB-ADAPTER` (ADR 0021); `interfaces/spi-link`'s row | `[from memory]` envelope; part **open**, M4 |
 | `J-UMBILICAL-INST`, `PCB-UMB-ADAPTER` | NE8FAV on its adapter board | The instrument's etherCON behind the tail cap, and the board that carries it to `J-UMB`; `interfaces/spi-link`'s rows | `[ds]` NE8FAV; adapter **open**, M4 |

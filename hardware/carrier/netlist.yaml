@@ -104,11 +104,12 @@ components:
     - 23
     - 24
     note: 'The Matrix''s ribbon lands here, conductor n on pin n (ADR 0018); its other end is J-MCU-C on the Matrix
-      carrier, pin 25-n (ADR 0021 amendment 2026-10-03). The order is the carrier''s, chosen so that board routes
-      on one face (owner, 2026-11-20; ADR 0030 amendment; hardware/boards/matrix-carrier/README.md, The ribbon''s
-      pins). Pin 21 carries IO6, the MIDI out''s tip line, and pin 16 IO2, its ring line (carrier/midi-out); pin
-      6 is on no net. Three 5 V and four grounds as before. Which lines lie beside which on the ribbon, and the
-      one open pairing (the LED data between MOSI and MISO): carrier.md, The pin map'
+      carrier, pin 25-n (ADR 0021 amendment 2026-10-03; ADR 0018, Amendment of 2026-11-21: both headers stand straight
+      up). The order is the carrier''s, chosen so that board routes on one face (owner, 2026-11-20; ADR 0030 amendment;
+      hardware/boards/matrix-carrier/README.md, The ribbon''s pins). Pin 21 carries IO6, the MIDI out''s tip line,
+      and pin 16 IO2, its ring line (carrier/midi-out); pin 6 is on no net. Three 5 V and four grounds as before.
+      Which lines lie beside which on the ribbon, and the one open pairing (the LED data between MOSI and MISO):
+      carrier.md, The pin map'
   NT-DIG:
     value: net tie
     pins:

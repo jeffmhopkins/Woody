@@ -8,7 +8,8 @@ ribbon's pins re-ordered so that no line crosses another (owner, 2026-11-20, cho
 
 THE RECORD of this board's copper (owner, 2026-11-20: "Awesome. Lock that in"). It READS
 matrix-carrier.kicad_pcb for what the body CAD and the sheet fix (the outline, the three
-connectors, the mounts, the silkscreen), strips its copper, holds J-MCU-C's pads to the nets
+connectors, the mounts, the silkscreen), strips its copper, gives J-MCU-C the footprint its
+sheet names (pcb_hand.refit: the same pads in the same places), holds its pads to the nets
 of PINS below (the sheet's, matrix-carrier.kicad_sch: pcb.py check proves the two agree), and
 draws the tracks. Run twice it writes the same board.
 
@@ -18,7 +19,8 @@ decided here is the order of the ribbon's 24 pins, and it is decided by where ea
 1. EVERY LINE IS ON THE TOP FACE, where the Matrix's two surface-mount pad rows are. The
    bottom face is one whole ground plane; the top face has no pour. The only via is the
    one that takes the Matrix's ground pad down to the plane.
-2. J-MCU-C's front row leaves toward the far side and its back row toward the near edge,
+2. J-MCU-C stands straight down from the arm (ADR 0018, Amendment of 2026-11-21), its two
+   rows along the body. Its front row leaves toward the far side and its back row toward the near edge,
    each pin onto a lane of its own, the pin furthest from the Matrix on the outermost lane.
    So the order of the pins along the header IS the order of the lanes, and the order of
    the lanes is the order the lines peel off as they pass under the Matrix's near pad row.
@@ -185,6 +187,11 @@ def main():
     for z in board.Zones():
         if z.GetNetname() == GND:
             z.SetPadConnection(pcbnew.ZONE_CONNECTION_THERMAL)
+    comps, nets = pcb.sheet_netlist(os.path.join(HERE, NAME + ".kicad_sch"))
+    for n, _ in nets:                                    # a pad the sheet leaves open has a net of its own, named for it
+        if board.FindNet(n) is None:
+            board.Add(pcbnew.NETINFO_ITEM(board, n))
+    pcb_hand.refit(board, comps, nets)
     j = next(f for f in board.GetFootprints() if f.GetReference() == "J1")
     for k, net in PINS.items():
         pad = j.FindPadByNumber(str(k))
@@ -204,12 +211,24 @@ def main():
     cu = pcb_hand.Copper()
     routes(cu)
     cu.draw(board)
-    date = yaml.safe_load(open(LAY))["silk"]["date"]     # the title block's and the silkscreen's
-    old = board.GetTitleBlock().GetDate()
-    board.GetTitleBlock().SetDate(date)
-    for d in board.GetDrawings():
-        if isinstance(d, pcbnew.PCB_TEXT) and old and old in d.GetText():
-            d.SetText(d.GetText().replace(old, date))
+    lay = yaml.safe_load(open(LAY))
+    silk = lay["silk"]                                   # the title block's and the silkscreen's
+    tb = board.GetTitleBlock()
+    tb.SetDate(silk["date"])
+    tb.SetRevision(silk["rev"])
+    for d in list(board.GetDrawings()):
+        if not isinstance(d, pcbnew.PCB_TEXT):
+            continue
+        if d.GetText().startswith("rev "):
+            d.SetText(f"rev {silk['rev']}  {silk['date']}")
+        elif d.GetText() == "J1" or d.GetText().startswith("J-MCU-C"):
+            board.Delete(d)                              # written for the header this board had; put back below
+    # J-MCU-C's marks, on the arm's underside beside it, on its far side (its near side is the
+    # board's edge): its reference, and which way its key faces, since its outline is not printed
+    # (it overhangs the arm's end, and pcb.fit_footprint_silk takes such an outline off)
+    pcb.fit_footprint_silk(board, lay["fab"])
+    pcb.silk_text(board, "J1", *pcb.to_pcb(262.27, 16.5))
+    pcb.silk_text(board, "J-MCU-C KEY: NEAR EDGE", *pcb.to_pcb(262.27, 18.3))
     pcbnew.SaveBoard(SRC, board)
     pcb_hand.fill(SRC)
     print(f"carrier_layout: {cu.segments()} track segment(s), {len(cu.vias)} via(s); wrote {os.path.relpath(SRC, ROOT)}")

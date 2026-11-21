@@ -5,8 +5,8 @@ mounts (owner, 2026-10-03: a "SEPARATE SMALL MATRIX CARRIER", "Hang from the
 lid", and option A for its outline;
 [ADR 0021](../../../docs/decisions/0021-pcb-mount-ethercon.md), *Amendment,
 2026-10-03*). It carries nothing but connections: two 1×10 headers under the
-Matrix's pad rows, and `J-MCU-C`, hung under its arm straight above the main
-board's `J-MCU`, which the Matrix ribbon (`CBL-MCU-RIBBON`) joins.
+Matrix's pad rows, and `J-MCU-C`, a vertical header hung mouth down under its arm, beside the
+main board's `J-MCU`, which the Matrix ribbon (`CBL-MCU-RIBBON`) joins.
 
 > **Status: not orderable until the main board's `J-MCU` takes this board's
 > pin order** (*The ribbon's pins* below). Two more things are decided with parts in
@@ -70,7 +70,7 @@ the Matrix.
 
 | Reference | BOM row | What it is |
 |---|---|---|
-| J1 | `J-MCU-C` | the ribbon's carrier end, 2×12 1.27 mm, on the bottom face under the arm |
+| J1 | `J-MCU-C` | the ribbon's carrier end, 2×12 1.27 mm vertical, on the bottom face under the arm, mouth down, key toward the near edge |
 | J2 | `HDR-MATRIX` | the Matrix's 5V..IO1 pad row, surface mount |
 | J3 | `HDR-MATRIX` | the Matrix's IO33..RX pad row, surface mount |
 | H1–H3 | `MECH-MX-*` | the hanging mounts: insert in the oak, spacer, the board, washer, screw |
@@ -82,3 +82,4 @@ the Matrix.
 | A | 2026-10-03 | First layout, every track by hand (`carrier_routes.py`): a bottom-face bus at 0.7 mm, one ladder of vias onto the top face, 5V, 3V3 and ground on the top face 0.4 mm, PWR_GND poured both faces and stitched. `pcb.py check` passes. Not yet ordered | `matrix-carrier.kicad_pcb`, `layout.yaml`, `carrier_routes.py` |
 | B | 2026-10-04 | IO6, the MIDI out's tip line (issue #37), from J-MCU-C pin 2 straight up the bottom face, a via, and into J2.5 on the top face (`carrier_routes.py`). J-MCU-C pin 1 stays unconnected: the bus boxes it in. `pcb.py check` passes | `matrix-carrier.kicad_pcb`, `carrier_routes.py` |
 | C | 2026-11-20 | Laid out again by hand on one face (`carrier_layout.py`, which replaces `carrier_routes.py`): the ribbon's pins re-ordered so no line crosses another, every line on the top face, the bottom face one whole ground plane, one via. `pcb.py check` passes; the ribbon check against the main board fails until `J-MCU` follows. Not yet ordered | `matrix-carrier.kicad_sch`, `matrix-carrier.kicad_pcb`, `layout.yaml`, `carrier_layout.py` |
+| D | 2026-11-21 | J-MCU-C is a vertical header (owner, 2026-11-21; ADR 0018, *Amendment, 2026-11-21*), its pads where the right-angle header's were, so no track moved. Its outline is not printed (the insulator overhangs the arm's end); its reference and key side are, beside it. `pcb.py check` passes. Not yet ordered | `matrix-carrier.kicad_sch`, `matrix-carrier.kicad_pcb`, `layout.yaml`, `carrier_layout.py` |

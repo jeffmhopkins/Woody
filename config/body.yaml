@@ -558,17 +558,20 @@ boards:
   # the lid, so it unplugs at the main board like the key boards). The
   # umbilical reaches the board through the etherCON's adapter (below).
   mcu_conn_l:
-    value: 21.54
-    status: settled
-    source: "J-MCU, the XKB X1270WR-2x12A-9TV01 box header, side entry, across the body: dimension C for 2x12 [ds XKB-X1270WR-2x12A-9TV01.pdf] (ADR 0018)"
+    value: 21.59
+    status: nominal
+    source: "J-MCU and J-MCU-C, a 2x12 1.27 mm shrouded box header standing straight up (ADR 0018, Amendment of 2026-11-21): its length along its rows, the longest of the candidates hardware/carrier/bom.csv J-MCU lists - Samtec SHF-112, 12 x 1.27 + 6.35 [datasheets/connectors/SAMTEC-SHF-ESHF-EHF-ECF-CATALOG-PAGE.pdf]; the XKB X1270WV family is 21.54 [calc: its series' C - A = 7.57 on A 13.97, datasheets/connectors/XKB-X1270WV-2xXXA-6TV01-1.27MM-BOX-HEADER-VERTICAL.pdf, whose table has no 24-position row; the right-angle part of the same family gives the same C, connectors/XKB-X1270WR-2x12A-9TV01.pdf]"
+    decided_by: "M4, on the part bought"
   mcu_conn_w:
-    value: 8.97
-    status: settled
-    source: "the same header along the body with its tail pads: 5.40 body, its far tail row 2.60 behind the body's back (rev A1 side view) [ds XKB-X1270WR-2x12A-9TV01.pdf], and that row's pad reaching 0.965 past the hole, away from the body [repo hardware/lib/woody.pretty/IDC-Header_2x12_P1.27mm_XKB_X1270WR_Horizontal.kicad_mod; calc 5.40 + 2.60 + 0.965 = 8.965]"
+    value: 5.85
+    status: nominal
+    source: "the same header across its two rows, the widest candidate: Samtec SHF 5.85 [datasheets/connectors/SAMTEC-SHF-ESHF-EHF-ECF-CATALOG-PAGE.pdf]; the XKB X1270WV family is 5.10 [datasheets/connectors/XKB-X1270WV-2xXXA-6TV01-1.27MM-BOX-HEADER-VERTICAL.pdf]"
+    decided_by: "M4, on the part bought"
   mcu_conn_h:
-    value: 5.1
-    status: settled
-    source: "the same header's height above the board [ds XKB-X1270WR-2x12A-9TV01.pdf]"
+    value: 5.4
+    status: nominal
+    source: "the same header's height off its board, the tallest candidate: XKB X1270WV 5.40 [datasheets/connectors/XKB-X1270WV-2xXXA-6TV01-1.27MM-BOX-HEADER-VERTICAL.pdf]; Samtec SHF -TH is 5.33 [datasheets/connectors/SAMTEC-SHF-ESHF-EHF-ECF-CATALOG-PAGE.pdf]"
+    decided_by: "M4, on the part bought"
   # The umbilical (ADR 0021): the etherCON on its own adapter board, which a
   # right-angle 2.54 mm header joins to a tongue of the main board. The
   # header is J-UMB, 8 pins, pin N = etherCON pin N.
@@ -630,13 +633,24 @@ boards:
     source: "the 2.54 mm headers' pads, J-UMB's (and HDR-SERVICE's row, for its envelope), 1.70 round/square [repo hardware/lib/woody.pretty/PinHeader_1x08_P2.54mm_Horizontal_Hanxia_PZ2.54-WZ.kicad_mod; KiCad Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical]"
   mcu_conn_tail:
     value: 2.1
-    status: settled
-    source: "J-MCU's tails past its seating plane, 2.10 [ds XKB-X1270WR-2x12A-9TV01.pdf rev A1 side view; repo hardware/lib/README.md]"
-  mcu_conn_at:
-    value: [262.27, 14.9, 90]
     status: nominal
-    source: "J-MCU's place, ONE figure: its insulator's centre along and across the body, and the way its mouth faces (0 the tail, 90 the far side, 270 the near side). Off the LED row (the owner, 2026-10-03: 'This connector needs moved to the side so that it doesn't cause coverage of the led'): turned along the body at the near edge, its tails at the edge and its mouth toward the row, in the tail strip between column mount H8 and the tail's end mount. Along the body, the least x that keeps its insulator out of the near tail column's nut keep-out (drc.echo 'columns vertical: the main board's mounts under the key boards''); drc.echo 'J-MCU, its plug and the Matrix ribbon off the LED row' holds it across. Across the body, 14.9 rather than hard against the edge (2026-10-03, coordinator's go): the 1.27 mm back row has 0.2 mm between its pads, so its lines must leave behind it, toward the edge, and both the main board and the carrier need five lanes a face there; at the edge-most place the back row stood 0.31 from the board edge and no line fitted"
-    decided_by: "the main board's layout; the Matrix carrier's J-MCU-C stands straight above it"
+    source: "the same header's tails below its seating plane: XKB X1270WV 2.10 [datasheets/connectors/XKB-X1270WV-2xXXA-6TV01-1.27MM-BOX-HEADER-VERTICAL.pdf]. Samtec's catalogue page does not dimension its tail; a part with longer tails is cut to this (boards.tht_trim's rule, drc.echo 'through-hole tails under the main board clear of the bottom plate')"
+    decided_by: "M4, on the part bought"
+  mcu_conn_at:
+    value: [262.27, 18.17, 90]
+    status: nominal
+    source: "J-MCU's place, ONE figure: its insulator's centre along and across the body, and the way the ribbon leaves both sockets (90 the far side). Both headers stand straight up, their rows along the body (the owner's choice, 2026-11-21: 'Vertical, ribbon across the row'; ADR 0018, Amendment of that date), in the tail strip between column mount H8 and the tail's end mount. Along the body, where the right-angle header it replaces had its pins, so every pin keeps its place along the body on both boards. Across the body, boards.mcu_conn_c_shift on from J-MCU-C's place, which is the one that is held: J-MCU-C's two rows stand where the carrier's layout has them, 11.385 and 12.655 [calc: 12.02 + 6.15]"
+    decided_by: "the main board's layout and the Matrix carrier's"
+  mcu_conn_c_shift:
+    value: -6.15
+    status: nominal
+    source: "how far J-MCU-C's header, hung under the Matrix carrier's arm, stands from straight over J-MCU, across the body (negative: toward the near edge, against the way the ribbon leaves, boards.mcu_conn_at): the header's width across its rows and 0.3. The two mated pairs cannot stand mouth to mouth as the key chain's do: the gap between the main board and the carrier leaves them less than the 1 mm the key chain's keep (drc.echo 'Matrix ribbon's headers: side by side, not mouth to mouth' prints both), so they stand side by side, each socket passing the other header, and J-MCU-C's leg of the ribbon passes over J-MCU's socket [calc: 5.85 + 0.3]"
+    decided_by: "M4, on the first mated pair"
+  mcu_plug_cable:
+    value: 1.8
+    status: nominal
+    source: "the socket's cable face above its header's mouth, where the ribbon lies as it leaves: mating face to cable face, 5.30 [datasheets/connectors/CNCTECH-3230-XX-0103-00-1.27MM-IDC-SOCKET.pdf], less the mouth's depth, 3.5 [datasheets/connectors/XKB-X1270WV-2xXXA-6TV01-1.27MM-BOX-HEADER-VERTICAL.pdf] [calc: 5.30 - 3.5]"
+    decided_by: "M4, on the first mated pair"
   tall_at_x:
     value: 225.0
     status: nominal
@@ -725,7 +739,7 @@ boards:
   # original length I think", then option (c), a separate small carrier, and
   # "Hang from the lid"; ADR 0021 amendment 2026-10-03): two 1x10 headers join
   # its pad rows to the carrier, which hangs from the oak top on four spacers
-  # and carries J-MCU-C straight above J-MCU. hardware/boards/matrix-carrier/.
+  # and carries J-MCU-C beside J-MCU. hardware/boards/matrix-carrier/.
   matrix_mount:
     value: "carrier"
     status: settled
@@ -751,6 +765,11 @@ boards:
     value: 0.5
     status: nominal
     source: "how far the carrier runs past the Matrix's tail edge (its mouth edge is flush with the Matrix's, where the extension's plug stands in front of it; owner, 2026-10-03, option A), and the arm past J-MCU-C's insulator: HDR-MATRIX's end pads stand 1.07 in from the Matrix's edge, and the carrier keeps its edge clearance from them [drawing convention]"
+  matrix_arm_w:
+    value: 12.385
+    status: nominal
+    source: "the Matrix carrier's arm across the body, from the main board's near edge: wide enough for J-MCU-C's far row's nine lanes beside its pads (hardware/boards/matrix-carrier/carrier_layout.py), and the width the arm had under the right-angle header, so the carrier's outline did not move when the headers were stood up (2026-11-21)"
+    decided_by: "the Matrix carrier's layout"
   matrix_mount_dxy:
     value: [7.3, 17.5]
     status: nominal
@@ -760,10 +779,10 @@ boards:
     status: nominal
     source: "which of the four places matrix_mount_dxy gives carry a mount, as [along, across] signs (+1 the tail and the far side): THREE, not four. The near mouth-end corner has none: every one of J-MCU-C's lines to HDR-MATRIX runs along the carrier's near strip past it, between J-MCU-C and the near header row, and a mount there left room for six of the fifteen a face (pcb.py layout, 2026-10-03). Three mounts hold the carrier; J-MCU-C's arm is held at its root"
   mcu_plug_proud:
-    value: 1.5
+    value: 2.9
     status: nominal
-    source: "how far a mated IDC socket stands past its header's mouth, where the ribbon leaves the socket's back: the socket's height with its cover, 5.00 [ds YXCON-IDC3-24232A1AUC1-1.27MM-IDC-SOCKET.pdf], less the header shroud's inner depth, 3.50 [ds XKB-X1270WR-2x12A-9TV01.pdf; the drawing gives 3.70 and 3.50 inner without saying which is which, so the larger proud] [calc]"
-    decided_by: "the first pair mated"
+    source: "how far a mated socket, with its cover, stands out of its header's mouth: the socket over its cover, 6.40 [datasheets/connectors/CNCTECH-3230-XX-0103-00-1.27MM-IDC-SOCKET.pdf], less the mouth's depth, 3.5 [datasheets/connectors/XKB-X1270WV-2xXXA-6TV01-1.27MM-BOX-HEADER-VERTICAL.pdf] [calc: 6.40 - 3.5]. From two drawings, not a mated pair"
+    decided_by: "M4, on the first mated pair"
   # THE MATRIX'S USB-C RECEPTACLE, on its underside at the mouth edge (review
   # #19 F1, 2026-10-02: the plug was modelled below it, too low to meet the key
   # plate it in fact runs into).
@@ -775,16 +794,19 @@ boards:
   # CBL-MCU-RIBBON's IDC socket, at each end (the same part both ends).
   mcu_plug_t:
     value: 3.05
-    status: settled
-    source: "the IDC socket's thickness across its two rows [ds YXCON-IDC3-24232A1AUC1-1.27MM-IDC-SOCKET.pdf]"
+    status: nominal
+    source: "CBL-MCU-RIBBON's socket, CNC Tech 3230-24-0103-00, CBL-CHAIN's in its 24-position size: its thickness across its two rows, 3.05 [datasheets/connectors/CNCTECH-3230-XX-0103-00-1.27MM-IDC-SOCKET.pdf]"
+    decided_by: "M4"
   mcu_plug_l:
-    value: 19.44
-    status: settled
-    source: "the same socket's length, 1.27 x 12 positions + 4.2 [calc, ds YXCON-IDC3-24232A1AUC1-1.27MM-IDC-SOCKET.pdf]"
+    value: 23.23
+    status: nominal
+    source: "the same socket's length over its cover's latches, dimension C for 24 positions [datasheets/connectors/CNCTECH-3230-XX-0103-00-1.27MM-IDC-SOCKET.pdf]"
+    decided_by: "M4"
   mcu_plug_h:
-    value: 5.0
-    status: settled
-    source: "the same socket's height along its pins, with its cover [ds YXCON-IDC3-24232A1AUC1-1.27MM-IDC-SOCKET.pdf]"
+    value: 6.4
+    status: nominal
+    source: "the same socket's height along its insertion, over its cover, 6.40 [datasheets/connectors/CNCTECH-3230-XX-0103-00-1.27MM-IDC-SOCKET.pdf]"
+    decided_by: "M4"
   matrix_under_h:
     value: 3.36
     status: nominal
@@ -1332,8 +1354,8 @@ routing:
   # (on edge it does not fit between the boards' part layers - clash check).
   mcu_ribbon_w:
     value: 15.24
-    status: tbd
-    source: "24-way 0.635 mm ribbon for a 1.27 mm dual-row header [calc: 24 x 0.635]: allocation in hardware/carrier/bom.csv CBL-MCU-RIBBON (ADR 0018)"
+    status: nominal
+    source: "24-way 0.635 mm ribbon for a 2x12 1.27 mm socket [calc: 24 x 0.635]: allocation in hardware/carrier/bom.csv CBL-MCU-RIBBON (ADR 0018)"
     decided_by: "M4"
   mcu_ribbon_t:
     value: 0.64

@@ -24,7 +24,7 @@ inputs:
   datasheets/analog/OPAx197-ti-pspice-sboma34d.lib: fc5b020e63346e51
   hardware/module/umbilical-load-switch/sim/sims.yaml: cadec99739eed8eb
   hardware/carrier/power-entry-instrument/sim/sims.yaml: 74df1b0396d96b17
-  drc:Matrix ribbon length: '49.15'
+  drc:Matrix ribbon length: '48.41'
   figure:umbilical-current: 359 mA
   figure:dac-rail: 5.23 V
   figure:mod-reference: 3.3333 V

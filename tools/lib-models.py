@@ -89,29 +89,6 @@ def port(x, y0, z, length, d_root, d_tip):
 
 
 # ------------------------------------------------------------------ the parts
-def xkb_x1270wr_2x12a_9tv01():
-    """J-MCU. XKB X1270WR-2x12A-9TV01, datasheets/connectors/XKB-X1270WR-2x12A-9TV01.pdf
-    rev A1: C 21.54 long, B 20.14 inside, 5.10 high (3.70 inside), 5.40 deep (3.50
-    inside), key slot 2.35 in the wall over the odd row; tails 0.40 square, 2.10
-    past the seating plane; far (odd) tail row 2.60 behind the back face, the
-    near row 1.27 in front of it (side view). Rows at half the height +/- 0.635."""
-    n, p = 12, 1.27
-    yc = (n - 1) * p / 2
-    back, depth, h = 2.60, 5.40, 5.10
-    body = box(back, back + depth, yc - 21.54 / 2, yc + 21.54 / 2, 0, h)
-    zc = h / 2
-    cav = box(back + depth - 3.50, back + depth + 1, yc - 20.14 / 2, yc + 20.14 / 2, zc - 3.70 / 2, zc + 3.70 / 2)
-    key = box(back + depth - 3.50, back + depth + 1, yc - 2.35 / 2, yc + 2.35 / 2, zc, h + 1)
-    body = cut(body, cav, key)
-    tip = back + depth - 0.6                                              # [est] post tip inside the mouth
-    pins = []
-    for k in range(n):
-        y = k * p
-        pins.append(rt_pin(0.0, y, zc + p / 2, tip, 0.40, 2.10))          # odd: upper row, far tails
-        pins.append(rt_pin(p, y, zc - p / 2, tip, 0.40, 2.10))            # even: lower row, near tails
-    return [("body", body, BLACK), ("pins", fuse(*pins), GOLD)]
-
-
 def hanxia_pz254_1x8p_wz():
     """J-UMB. hanxia HX PZ2.54-1x8P WZ, datasheets/connectors/HANXIA-HX-PZ2.54-1x8P-WZ.pdf:
     insulator 2.50 x 2.50, (B - 0.2) = 20.12 long for 8 pins; the posts 6.00 past
@@ -157,25 +134,37 @@ def nxp_case_1351_01():
     return [("body", fuse(body, ports), WHITE), ("leads", fuse(*leads), TIN)]
 
 
-def cnctech_3220_10_0100_00():
-    """J-CHAIN. CNC Tech 3220-10-0100-00, datasheets/connectors/CNCTECH-3220-XX-0100-00-1.27MM-BOX-HEADER-VERTICAL.pdf
-    rev A: vertical, C 12.65 long (10 positions), 5.1 across (3.7 inside), 5.40 high
-    (3.5 deep inside), posts 0.40 square, tails 2.1 past the seating plane, key slot
-    in the wall over the odd row. The cavity's length, the slot's width and the
-    posts' height inside the mouth are not dimensioned for this size [est]."""
-    n, p = 5, 1.27
+def box_header_vertical(n, L):
+    """A vertical 1.27 mm shrouded box header of the pattern CNC Tech's 3220 and XKB's
+    X1270WV share: n positions a row and L long, 5.1 across (3.7 inside), 5.40 high (3.5
+    deep inside), posts 0.40 square, tails 2.1 past the seating plane, key slot in the wall
+    over the odd row. The cavity's length, the slot's width (XKB gives 2.35) and the posts'
+    height inside the mouth are not dimensioned on CNC Tech's drawing [est]."""
+    p = 1.27
     xc, yc = p / 2, (n - 1) * p / 2
-    L, W, H = 12.65, 5.1, 5.40
+    W, H = 5.1, 5.40
     body = box(xc - W / 2, xc + W / 2, yc - L / 2, yc + L / 2, 0, H)
     cav = box(xc - 3.7 / 2, xc + 3.7 / 2, yc - (L - 1.4) / 2, yc + (L - 1.4) / 2, H - 3.5, H + 1)   # [est] 0.7 end walls, as the long walls
-    key = box(xc - W / 2 - 1, xc, yc - 2.35 / 2, yc + 2.35 / 2, H - 3.5, H + 1)                        # [est] 2.35 wide, as the XKB family's
+    key = box(xc - W / 2 - 1, xc, yc - 2.35 / 2, yc + 2.35 / 2, H - 3.5, H + 1)
     body = cut(body, cav, key)
     pins = [box(x - 0.2, x + 0.2, k * p - 0.2, k * p + 0.2, -2.1, H - 0.6) for k in range(n) for x in (0.0, p)]   # [est] tips 0.6 under the mouth
     return [("body", body, BLACK), ("pins", fuse(*pins), GOLD)]
 
 
+def cnctech_3220_10_0100_00():
+    """J-CHAIN. CNC Tech 3220-10-0100-00, datasheets/connectors/CNCTECH-3220-XX-0100-00-1.27MM-BOX-HEADER-VERTICAL.pdf
+    rev A: 10 positions, C 12.65."""
+    return box_header_vertical(5, 12.65)
+
+
+def xkb_x1270wv_2x12():
+    """J-MCU and J-MCU-C. XKB X1270WV-2x12, datasheets/connectors/XKB-X1270WV-2xXXA-6TV01-1.27MM-BOX-HEADER-VERTICAL.pdf:
+    24 positions, C 21.54 [calc: the series' C - A = 7.57; its table has no 24-position row]."""
+    return box_header_vertical(12, 21.54)
+
+
 MODELS = {
-    "XKB_X1270WR-2x12A-9TV01": xkb_x1270wr_2x12a_9tv01,
+    "XKB_X1270WV-2x12": xkb_x1270wv_2x12,
     "CNCTech_3220-10-0100-00": cnctech_3220_10_0100_00,
     "Hanxia_HX_PZ2.54-1x8P_WZ": hanxia_pz254_1x8p_wz,
     "NXP_Case1351-01_MPXV4006DP": nxp_case_1351_01,

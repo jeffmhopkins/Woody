@@ -957,9 +957,9 @@ module pcb_geometry() {
     // here), length, half the row spacing - as a key board's "chain".
     for (cl = chain_ribbon_cls) echo("PCB", "main", "chain", str("J-CHAIN-", cl == "left_hand" ? "LH" : "RH"),
                                      mb_chain_x(cl), chain_y, chain_dir(cl), boards_chain_hdr_l, 1.27 / 2);
-    // The Matrix's header: its insulator's extent along x, centre y, length
-    // across, and the mouth's direction (+1 the tail) - the ribbon comes in
-    // over the tongue.
+    // The Matrix's header, standing straight up: its insulator's extent along x,
+    // centre y, its width across its two rows, and the way the ribbon leaves its
+    // socket (90 the far side).
     echo("PCB", "main", "connector", "J-MCU", jm_x0, jm_x1, jm_y, jm_sz[1], 1, jm_dir);
     // J-UMB: the right-angle header whose tails go down through the
     // tongue and whose posts go through the adapter; its insulator's extent along x (it stands against the
@@ -1022,16 +1022,15 @@ module pcb_geometry() {
     // The Matrix ribbon (since 2026-10-02 an IDC ribbon up to the right-hand
     // key board): nothing in J-MCU's mated socket and the ribbon's rise off its
     // back (height 0); past it, parts under the closed fold's lowest leg there.
-    echo("PCB", "main", "keepout", "Matrix ribbon", jm_plug[0], jm_plug[1], jm_plug[2], jm_plug[3], 0);
-    let(f = mcu_rect(mcu_us[0] + routing_mcu_ribbon_t / 2, mcu_fold_u[1], mcu_fold[jm_dir == 0 ? 1 : 0], mcu_fold[jm_dir == 0 ? 3 : 2]))
-        echo("PCB", "main", "keepout", "Matrix ribbon fold", f[0], f[1], f[2], f[3], mcu_zs[1] - routing_mcu_ribbon_t / 2 - cb_top);
+    echo("PCB", "main", "keepout", "Matrix ribbon", min(jm_plug[0], jm_x0), min(jm_plug[1], jm_y - jm_sz[1] / 2), max(jm_plug[2], jm_x1), max(jm_plug[3], jm_y + jm_sz[1] / 2), 0);
+    echo("PCB", "main", "keepout", "Matrix ribbon fold", mcu_run[0], jm_y + jm_sz[1] / 2, mcu_run[2], mcu_run[3], mcu_zm - routing_mcu_ribbon_t / 2 - cb_top);
     echo("PCB", "main", "board", "thickness", switch_pcb_t, "smt_height_max", boards_smt_h,
          "side", "parts on top; the thumb switches from below, their footprints on the underside");
     // THE MATRIX CARRIER (hardware/boards/matrix-carrier, boards.matrix_mount
     // "carrier"), cluster "matrix", the main board's echo format (pcb_main.py):
     // its thickness (the main board's, switch.pcb_t); J-MCU-C, hung under the
-    // carrier's arm straight above J-MCU, its mouth the same way, so the ribbon
-    // rises from one socket's back to the other's; HDR-MATRIX's two rows, pin 1
+    // carrier's arm beside J-MCU (boards.mcu_conn_c_shift), standing straight down,
+    // the ribbon leaving both sockets the same way; HDR-MATRIX's two rows, pin 1
     // and pin 10 of each (row 0 the 5V..IO1 row), and the pitch; the four
     // hanging mounts (hole, what bears on the top face - the spacer - and on the
     // underside - the washer under the screw's head); and the one room on its top face, under
@@ -1219,24 +1218,30 @@ led_pitch = (mb_ends[1] - mb_ends[0] - 2 * led_margin) / (led_slots - 1);
 led_empty = lighting_led_empty_slot;
 function led_slot(n) = n < led_empty ? n : n + 1;
 function led_xy(n) = [mb_ends[1] - led_margin - (led_slot(n) - 1) * led_pitch, led_y];
-// J-MCU's place is ONE config figure, boards.mcu_conn_at [x, y, facing]: its insulator's
-// centre and the way its mouth faces (0 toward the tail, 90 toward the far side, 270 the
-// near side). Off the LED row since 2026-10-03 (the owner: "This connector needs moved to the
-// side so that it doesn't cause coverage of the led"); drc.echo 'J-MCU, its plug and the
-// Matrix ribbon off the LED row' holds it. jm_x0..jm_x1 and jm_y, jm_sz are its box along
-// and across the body whichever way it faces.
+// J-MCU's place is ONE config figure, boards.mcu_conn_at [x, y, way]: its insulator's
+// centre and the way the ribbon leaves both sockets (90 toward the far side). J-MCU and
+// J-MCU-C STAND STRAIGHT UP, their rows along the body (the owner's choice, 2026-11-21:
+// "Vertical, ribbon across the row"; ADR 0018's Amendment of that date): J-MCU on the main
+// board's top, J-MCU-C hanging from the Matrix carrier's arm boards.mcu_conn_c_shift from
+// straight over it, across the body - side by side, because the gap between the two boards is too
+// small for the pairs to stand mouth to mouth as the key chain's do (drc.echo 'Matrix
+// ribbon's headers: side by side, not mouth to mouth'). jm_x0..jm_x1, jm_y and jm_sz are
+// J-MCU's box along and across the body; jk_* J-MCU-C's.
 jm_dir = boards_mcu_conn_at[2];
-jm_along = jm_dir == 0 || jm_dir == 180;          // mouth along the body
-jm_bb = jm_along ? [boards_mcu_conn_w, boards_mcu_conn_l] : [boards_mcu_conn_l, boards_mcu_conn_w];
-jm_x0 = boards_mcu_conn_at[0] - jm_bb[0] / 2;
-jm_x1 = jm_x0 + jm_bb[0];
-// the mated plug in front of its mouth (the Matrix ribbon's socket), as a box: past the
-// mouth by the socket's proud and the ribbon leaving its back
-mcu_plug_d = boards_mcu_plug_proud + routing_mcu_ribbon_t;
-jm_plug = jm_dir == 0 ? [jm_x1, boards_mcu_conn_at[1] - jm_bb[1] / 2, jm_x1 + mcu_plug_d, boards_mcu_conn_at[1] + jm_bb[1] / 2]
-        : jm_dir == 90 ? [jm_x0, boards_mcu_conn_at[1] + jm_bb[1] / 2, jm_x1, boards_mcu_conn_at[1] + jm_bb[1] / 2 + mcu_plug_d]
-        : jm_dir == 270 ? [jm_x0, boards_mcu_conn_at[1] - jm_bb[1] / 2 - mcu_plug_d, jm_x1, boards_mcu_conn_at[1] - jm_bb[1] / 2]
-        : [jm_x0 - mcu_plug_d, boards_mcu_conn_at[1] - jm_bb[1] / 2, jm_x0, boards_mcu_conn_at[1] + jm_bb[1] / 2];
+assert(jm_dir == 90, "the Matrix ribbon is drawn leaving its sockets toward the far side (90) only");
+jm_sz = [boards_mcu_conn_l, boards_mcu_conn_w];   // along x, across y
+jm_x0 = boards_mcu_conn_at[0] - jm_sz[0] / 2;
+jm_x1 = jm_x0 + jm_sz[0];
+jm_y = boards_mcu_conn_at[1];
+jk_x0 = jm_x0;
+jk_x1 = jm_x1;
+jk_y = jm_y + boards_mcu_conn_c_shift;
+// a mated socket in plan, over the header at y: longer than the header, over its cover's latches
+function mcu_plug_box(y) = [boards_mcu_conn_at[0] - boards_mcu_plug_l / 2, y - boards_mcu_plug_t / 2,
+                            boards_mcu_conn_at[0] + boards_mcu_plug_l / 2, y + boards_mcu_plug_t / 2];
+function mcu_hdr_box(y) = [jm_x0, y - jm_sz[1] / 2, jm_x1, y + jm_sz[1] / 2];
+jm_plug = mcu_plug_box(jm_y);
+jk_plug = mcu_plug_box(jk_y);
 
 // THE KEY BOARDS ARE ON RIBBONS (owner, 2026-09-26: ribbons rather than
 // blind-mating stacking headers, so the lid comes off with them attached -
@@ -1374,27 +1379,24 @@ module ribbons_3d() {
 // THE MATRIX AND THE UMBILICAL (owner, 2026-09-26: "what about matrix led
 // esp32 and ethercon wire connections?"), both onto the main board's tail
 // end. The Matrix: since 2026-10-03 on its own carrier hung from the oak top
-// (boards.matrix_mount "carrier"), whose header J-MCU-C hangs straight above
-// J-MCU; a plain 24-way IDC ribbon joins the two, and unplugs at J-MCU with
+// (boards.matrix_mount "carrier"), whose header J-MCU-C hangs from its arm beside
+// J-MCU; a plain IDC ribbon in one fold joins the two, and unplugs at J-MCU with
 // the lid raised, as the key chain's do. The umbilical (ADR 0021): no
 // cable inside the body. The etherCON is soldered to its adapter, and J-UMB,
 // a right-angle header on a tongue of the main board, is soldered to both.
 module tail_wiring_3d() {
-    P([0.85, 0.85, 0.80], false, "J-MCU") translate([jm_x0, jm_y - jm_sz[1] / 2, cb_top + e_mb]) cube([jm_sz[0], jm_sz[1], boards_mcu_conn_h]);
-    // its mate on the Matrix carrier, hanging from the underside straight above it
-    P([0.85, 0.85, 0.80], false, "J-MCU-C") translate([jk_x0, jk_y - jm_sz[1] / 2, mx_carrier_bot - boards_mcu_conn_h + explode]) cube([jm_sz[0], jm_sz[1], boards_mcu_conn_h]);
-    // the mated sockets, their backs boards.mcu_plug_proud past the mouths
-    for (k = [0, 1]) let(u = [jm_u, jk_u][k][1] + boards_mcu_plug_proud,
-                         r = mcu_rect(u - boards_mcu_plug_h, u, mcu_c[k] - boards_mcu_plug_l / 2, mcu_c[k] + boards_mcu_plug_l / 2))
-        P([0.25, 0.25, 0.30], false, str("IDC plug Matrix ", k == 0 ? "main board" : "carrier"))
-            translate([r[0], r[1], (k == 0 ? jm_z + e_mb : kbm_z + explode) - boards_mcu_plug_t / 2]) cube([r[2] - r[0], r[3] - r[1], boards_mcu_plug_t]);
+    P([0.10, 0.10, 0.10], false, "J-MCU") translate([jm_x0, jm_y - jm_sz[1] / 2, cb_top + e_mb]) cube([jm_sz[0], jm_sz[1], boards_mcu_conn_h]);
+    // its mate on the Matrix carrier, hanging from the arm's underside beside it
+    P([0.10, 0.10, 0.10], false, "J-MCU-C") translate([jk_x0, jk_y - jm_sz[1] / 2, mx_carrier_bot - boards_mcu_conn_h + explode]) cube([jm_sz[0], jm_sz[1], boards_mcu_conn_h]);
+    // the mated sockets and their covers, standing boards.mcu_plug_proud out of the mouths
+    P([0.25, 0.25, 0.30], false, "IDC plug Matrix main board")
+        translate([jm_plug[0], jm_plug[1], cb_top + e_mb + boards_mcu_conn_h + boards_mcu_plug_proud - boards_mcu_plug_h]) cube([boards_mcu_plug_l, boards_mcu_plug_t, boards_mcu_plug_h]);
+    P([0.25, 0.25, 0.30], false, "IDC plug Matrix carrier")
+        translate([jk_plug[0], jk_plug[1], mx_carrier_bot + explode - boards_mcu_conn_h - boards_mcu_plug_proud]) cube([boards_mcu_plug_l, boards_mcu_plug_t, boards_mcu_plug_h]);
     P([0.10, 0.10, 0.10], false, "J-UMB") translate([ua_x0 - boards_umb_joint_d, ec_c[0] - ju_l / 2, cb_top + e_mb]) cube([boards_umb_joint_d, ju_l, boards_umb_joint_h]);
-    // Swept as a strip of the ribbon's width along the rows, bending in (u, z); the
-    P([0.30, 0.30, 0.80], false, "Matrix ribbon") for (i = [0 : len(mcu_path) - 2])
-        hull() for (j = [i, i + 1]) let(q = mcu_path[j], c = mcu_c[j >= len(mcu_path) - 2 ? 1 : 0],
-                                        z = q[1] + (q[1] > (mcu_zs[1] + mcu_zs[2]) / 2 ? explode : e_mb))
-            translate(jm_dir == 0 ? [q[0], c, z] : [c, q[0], z])
-                cube(jm_dir == 0 ? [routing_mcu_ribbon_t, routing_mcu_ribbon_w, routing_mcu_ribbon_t] : [routing_mcu_ribbon_w, routing_mcu_ribbon_t, routing_mcu_ribbon_t], center = true);
+    // Swept as a strip of the ribbon's width along the body, bending in (y, z).
+    P([0.72, 0.72, 0.74], false, "Matrix ribbon") let(p = mcu_path_at(mcu_zm + e_mb, mcu_zk + explode)) for (i = [0 : len(p) - 2])
+        hull() for (q = [p[i], p[i + 1]]) translate([boards_mcu_conn_at[0], q[0], q[1]]) cube([routing_mcu_ribbon_w, routing_mcu_ribbon_t, routing_mcu_ribbon_t], center = true);
 }
 
 // The regulator block (a module and its bulk capacitors, for the one dev
@@ -1406,7 +1408,7 @@ far_y = cb_y[tube_side < 0 ? 1 : 0] + tube_side * (boards_tall_l / 2 + 0.5);
 near_y = cb_y[tube_side < 0 ? 0 : 1] - tube_side * (boards_tall_l / 2 + 0.5);
 // boards.tall_side: which edge it stands against. The near edge since 2026-10-03 (the
 // owner: the breath pair runs along the far edge only, and the buck keeps off it)
-tall_c = [[boards_tall_at_x, boards_tall_side == "near" ? near_y : far_y]];   // boards.tall_at_x (J-MCU no longer places it: it moved off the LED row, 2026-10-03)
+tall_c = [[boards_tall_at_x, boards_tall_side == "near" ? near_y : far_y]];   // boards.tall_at_x (J-MCU does not place it)
 // Is any key board overhead? Tested against each key board's outline,
 // kb_rect - a full rectangle across the cavity since ADR 0025. (It used to
 // test per-key cluster_pcb_w squares, which predate those boards, and so
@@ -1445,71 +1447,41 @@ module cb_2d() {
         for (c = cb_standoffs) translate(c) circle(d = hardware_kb_board_hole);
     }
 }
-jm_sz = jm_bb;                                   // along x, across y, as it faces
-jm_y = boards_mcu_conn_at[1];
-jm_z = cb_top + boards_mcu_conn_h / 2;
-// J-MCU-C: the ribbon's other end, hung from the Matrix carrier's underside
-// (its arm) STRAIGHT ABOVE J-MCU, its mouth the same way, so the ribbon rises
-// from one socket's back to the other's.
-assert(jm_dir == 0 || jm_dir == 90, "the Matrix ribbon is drawn for J-MCU facing the tail (0) or the far side (90) only");
-jk_x0 = jm_x0;
-jk_x1 = jm_x1;
-jk_y = jm_y;
-kbm_z = mx_carrier_bot - boards_mcu_conn_h / 2;
-// The two headers in the ribbon's own frame: u along the mouths' axis (x for 0,
-// y for 90), increasing toward the mouths; c across it, along the rows. Each
-// header's insulator back and mouth along u, and its rows' centre along c.
-jm_u = jm_dir == 0 ? [jm_x0, jm_x1] : [jm_y - jm_sz[1] / 2, jm_y + jm_sz[1] / 2];
-jk_u = jm_dir == 0 ? [jk_x0, jk_x1] : [jk_y - jm_sz[1] / 2, jk_y + jm_sz[1] / 2];
-mcu_c = jm_dir == 0 ? [jm_y, jk_y] : [boards_mcu_conn_at[0], boards_mcu_conn_at[0]];
-// a rectangle [x0, y0, x1, y1] from u0..u1 and c0..c1 in that frame
-function mcu_rect(u0, u1, c0, c1) = jm_dir == 0 ? [u0, c0, u1, c1] : [c0, u0, c1, u1];
-jk_plug = mcu_rect(jk_u[1], jk_u[1] + mcu_plug_d, mcu_c[1] - jm_sz[jm_dir == 0 ? 1 : 0] / 2, mcu_c[1] + jm_sz[jm_dir == 0 ? 1 : 0] / 2);
-// the insulator itself, and its pad rows behind it (narrower, along the rows)
-function mcu_body(u, c) = mcu_rect(u[1] - boards_mcu_conn_body_d, u[1], c - boards_mcu_conn_l / 2, c + boards_mcu_conn_l / 2);
-function mcu_tails(u, c) = mcu_rect(u[0], u[1] - boards_mcu_conn_body_d, c - boards_mcu_conn_tails_l / 2, c + boards_mcu_conn_tails_l / 2);
-// THE MATRIX RIBBON (CBL-MCU-RIBBON, since 2026-10-02 crimped at both ends).
-// Both sockets' backs stand boards.mcu_plug_proud past the headers' mouths,
-// and the ribbon leaves each up or down across its back, at mcu_us.
-// SERVICE LENGTH as the key chain's (routing.chain_service): straight between
-// the sockets with the key plate held routing.chain_raise off its columns,
-// plus routing.chain_slack.
-mcu_us = [jm_u[1], jk_u[1]] + [1, 1] * (boards_mcu_plug_proud + routing_mcu_ribbon_t / 2);
-mcu_du = mcu_us[1] - mcu_us[0];                   // the sockets' offset along u, which the last leg takes
-mcu_dc = mcu_c[1] - mcu_c[0];                     // and across, along the rows, which the folds take by a skew
-mcu_len = (kbm_z - jm_z - boards_mcu_plug_t) + abs(mcu_du) + routing_chain_raise + routing_chain_slack;
-// CLOSED, the spare folds flat between the two sockets' heights in four legs:
-// back over J-MCU, forward, back, and forward to the carrier's socket, each
-// fold a half turn. Legs at mcu_zs, the lowest mcu_leg_air over J-MCU, the
-// highest a bend radius under the carrier's socket and mcu_leg_air under J-MCU-C.
-mcu_leg_air = 0.15;   // drawing convention: closed, the legs lie just off the headers' plastic
-mcu_zs = let(z0 = cb_top + boards_mcu_conn_h + routing_mcu_ribbon_t / 2 + mcu_leg_air,
-             z3 = min(kbm_z - boards_mcu_plug_t / 2 - routing_chain_bend_r, mx_carrier_bot - boards_mcu_conn_h - mcu_leg_air) - routing_mcu_ribbon_t / 2)
-    [for (i = [0 : 3]) z0 + (z3 - z0) * i / 3];
-mcu_fr = (mcu_zs[1] - mcu_zs[0]) / 2;   // each fold's radius
-mcu_rises = (mcu_zs[0] - (jm_z + boards_mcu_plug_t / 2)) + ((kbm_z - boards_mcu_plug_t / 2) - mcu_zs[3]);
-// THE LED ROW'S BAND across the body (ADR 0028 amendment, 2026-10-03): the
-// LEDs' courtyards plus board_clear each side. Nothing of J-MCU, J-MCU-C,
-// their plugs or the ribbon stands in it.
+// THE MATRIX RIBBON (CBL-MCU-RIBBON), as the key chain's (above): a socket goes in along
+// the pins and the ribbon leaves it flat, both sockets the same way - across the body,
+// toward the far side - so its spare length closes in ONE fold between the two sockets'
+// cable faces, with no turn at either socket. The ribbon's plane at each end: the header's
+// height, the socket's cable face above the mouth, and half the ribbon.
+mcu_cable_z = boards_mcu_conn_h + boards_mcu_plug_cable + routing_mcu_ribbon_t / 2;
+mcu_zm = cb_top + mcu_cable_z;                   // the ribbon's plane at J-MCU's socket
+mcu_zk = mx_carrier_bot - mcu_cable_z;           // and at J-MCU-C's
+mcu_fr = (mcu_zk - mcu_zm) / 2;                  // the fold's radius
+// What is left between the two mated sockets' covers if the pairs stood mouth to mouth,
+// which is why they do not; and between each socket's cover and the board it faces.
+mcu_stack_gap = (mx_carrier_bot - cb_top) - 2 * (boards_mcu_conn_h + boards_mcu_plug_proud);
+mcu_cover_gap = (mx_carrier_bot - cb_top) - (boards_mcu_conn_h + boards_mcu_plug_proud);
+// The leg from the socket that stands behind the other, the way the ribbon leaves, passes
+// that other socket's cover: its near face to the cover.
+mcu_pass_gap = (mx_carrier_bot - cb_top) - (boards_mcu_conn_h + boards_mcu_plug_proud) - (mcu_cable_z + routing_mcu_ribbon_t / 2);
+// SERVICE LENGTH as the key chain's (routing.chain_service): straight between the sockets
+// with the lid, which the carrier hangs from, raised routing.chain_raise, plus
+// routing.chain_slack; and the sockets' offset across the body.
+mcu_len = (mcu_zk - mcu_zm) + abs(boards_mcu_conn_c_shift) + routing_chain_raise + routing_chain_slack;
+// WHAT TO CUT: a socket crimped across the ribbon, flush, at each end.
+mcu_cut = mcu_len + 2 * boards_mcu_plug_t;
+// CLOSED: a leg from each socket and the one fold. The legs differ by the sockets' offset.
+mcu_fold_y = (jm_y + jk_y + mcu_len - PI * mcu_fr) / 2;                 // the fold's centre, across the body
+mcu_legs = [mcu_fold_y - jm_y, mcu_fold_y - jk_y];                      // J-MCU's leg, J-MCU-C's
+mcu_fold_out = mcu_fold_y + mcu_fr + routing_mcu_ribbon_t / 2;          // the fold's outside
+// the closed ribbon in plan: from the nearer socket to the fold's outside, its own width along the body
+mcu_run = [boards_mcu_conn_at[0] - routing_mcu_ribbon_w / 2, min(jm_y, jk_y), boards_mcu_conn_at[0] + routing_mcu_ribbon_w / 2, mcu_fold_out];
+// in (y, z): off J-MCU's socket, the fold, and back to J-MCU-C's
+function mcu_path_at(zl, zu) = let(r = (zu - zl) / 2, zc = (zu + zl) / 2)
+    concat([[jm_y, zl]], [for (a = [-90 : 10 : 90]) [mcu_fold_y + r * cos(a), zc + r * sin(a)]], [[jk_y, zu]]);
+mcu_path = mcu_path_at(mcu_zm, mcu_zk);
+// THE LED ROW'S BAND across the body: the LEDs' courtyards plus board_clear each side.
 led_band = [led_y - lighting_led_court[1] / 2 - boards_board_clear, led_y + lighting_led_court[1] / 2 + boards_board_clear];
-// How far forward the ribbon may reach: short of the Matrix's mouth edge by
-// board_clear when the mouths face the tail; short of the LED row's band when
-// they face it. (Until issue #37 the extension's plug, over J-MCU's row, set it
-// tighter: owner, 2026-10-03, option A.)
-mcu_front_max = jm_dir == 0 ? matrix_xy[0] - boards_matrix_board / 2 - boards_board_clear : led_band[0];
-// How far the legs reach back (facing the far side: over J-MCU and on past its
-// back, to a fold short of the board's near edge; otherwise to 1 mm short of
-// J-MCU's back) and forward, at most, from mcu_us[0]. The legs run back 4 times
-// and forward twice: forward as far as a third of the spare, back the rest.
-mcu_reach_max = [jm_dir == 90 ? mcu_us[0] - (cb_y[0] + mcu_fr + routing_mcu_ribbon_t / 2) : mcu_us[0] - (jm_u[0] + 1),
-                 mcu_front_max - mcu_fr - routing_mcu_ribbon_t / 2 - mcu_us[0]];
-mcu_spare = mcu_len - mcu_rises - 3 * PI * mcu_fr - abs(mcu_du);   // the legs' run: 4 x back + 2 x forward
-mcu_reach = let(f = min(mcu_reach_max[1], mcu_spare / 6)) [(mcu_spare - 2 * f) / 4, f];
-mcu_fold_front = mcu_us[0] + mcu_reach[1] + mcu_fr + routing_mcu_ribbon_t / 2;   // the forward folds' outside
-mcu_fold_u = [mcu_us[0] - mcu_reach[0] - mcu_fr - routing_mcu_ribbon_t / 2,
-              max(mcu_us[0] + mcu_reach[1] + mcu_fr, mcu_us[1]) + routing_mcu_ribbon_t / 2];   // the closed fold's extent along u
-mcu_cw = max(routing_mcu_ribbon_w, boards_mcu_plug_l);   // its width along the rows, the sockets' or the ribbon's
-mcu_fold = mcu_rect(mcu_fold_u[0], mcu_fold_u[1], min(mcu_c) - mcu_cw / 2, max(mcu_c) + mcu_cw / 2);
+
 // THE MATRIX CARRIER'S OUTLINE (hardware/boards/matrix-carrier): the main
 // board's width, from the Matrix's mouth edge (flush: the extension's plug
 // stands in front of it) to just past its tail edge (boards.matrix_carrier_past),
@@ -1526,7 +1498,7 @@ mx_notch = [mx_x0 - 1, matrix_xy[1] - mx_notch_w / 2,
             matrix_xy[0] - boards_matrix_board / 2 + boards_matrix_usb[1] + boards_matrix_notch_clear, matrix_xy[1] + mx_notch_w / 2];
 // the arm's mouth end: past J-MCU-C's insulator, but short of the right-hand key board's
 // tail end, which stands over it (the clash check found them 0.3 into each other)
-mx_arm = [max(jk_x0 - boards_matrix_carrier_past, kb_rect("right_hand")[2] + boards_matrix_carrier_past), cb_y[0], mx_x0 + 1, jk_y + jm_sz[1] / 2 + boards_matrix_carrier_past];
+mx_arm = [max(jk_x0 - boards_matrix_carrier_past, kb_rect("right_hand")[2] + boards_matrix_carrier_past), cb_y[0], mx_x0 + 1, cb_y[0] + boards_matrix_arm_w];
 mx_mounts = [for (c = boards_matrix_mount_corners) matrix_xy + [c[0] * boards_matrix_mount_dxy[0], c[1] * boards_matrix_mount_dxy[1]]];
 module matrix_carrier_2d() {
     // the slot is cut after the outline's rounding, as the receptacle's shell grown by
@@ -1552,12 +1524,6 @@ midi_lead = [[midi_hdr_front + midi_hdr_plug_l, midi_hdr_at[1], midi_lead_z0],
              [midi_tab_x - midi_hdr_plug_l, midi_c[0], midi_c[1]],
              [midi_tab_x, midi_c[0], midi_c[1]]];
 midi_run = midi_hdr_plug_l + path_len(midi_lead);
-// in (u, z): up off J-MCU's socket, the four legs, and up into J-MCU-C's
-mcu_path = concat([[mcu_us[0], jm_z + boards_mcu_plug_t / 2], [mcu_us[0], mcu_zs[0]]],
-                  half_turn([mcu_us[0] - mcu_reach[0], (mcu_zs[0] + mcu_zs[1]) / 2], mcu_fr, 270, 90),
-                  half_turn([mcu_us[0] + mcu_reach[1], (mcu_zs[1] + mcu_zs[2]) / 2], mcu_fr, -90, 90),
-                  half_turn([mcu_us[0] - mcu_reach[0], (mcu_zs[2] + mcu_zs[3]) / 2], mcu_fr, 270, 90),
-                  [[mcu_us[1], mcu_zs[3]], [mcu_us[1], kbm_z - boards_mcu_plug_t / 2]]);
 // J-UMB: one pin per umbilical conductor at 2.54 mm, centred on the
 // etherCON's axis across the body, its row meeting the adapter at
 // boards.umb_joint_row_h above the main board.
@@ -1692,9 +1658,8 @@ module centre_board_3d() {
             translate([x0 - 0.5, chain_y - boards_chain_hdr_l / 2 - 0.5]) square([x1 - x0 + 1, boards_chain_hdr_l + 1]);
         translate([jm_x0 - 0.5, jm_y - jm_sz[1] / 2 - 0.5]) square(jm_sz + [1, 1]);
         translate([ua_x0 - boards_umb_joint_d - 0.5, ec_c[0] - ju_l / 2 - 0.5]) square([boards_umb_joint_d + 1, ju_l + 1]);
-        // nothing under J-MCU's socket and the Matrix ribbon's rise off it
-        let(r = mcu_rect(jm_u[1], mcu_us[0] + routing_mcu_ribbon_t / 2, mcu_c[0] - mcu_cw / 2, mcu_c[0] + mcu_cw / 2))
-            translate([r[0] - 0.5, r[1] - 0.5]) square([r[2] - r[0] + 1, r[3] - r[1] + 1]);
+        // nothing under J-MCU's socket, which overhangs its header's ends
+        let(r = jm_plug) translate([r[0] - 0.5, r[1] - 0.5]) square([r[2] - r[0] + 1, r[3] - r[1] + 1]);
         translate(sensor_c) square([boards_sensor_body + 1, boards_sensor_leads + 1], center = true);
         for (c = tall_c) translate(c) square(tall_sz + [1, 1], center = true);
         for (c = cb_standoffs) translate(c) circle(d = mb_keep_d + 1);
@@ -1893,18 +1858,18 @@ module drc_report() {
             [edge, jmcu, block, nut, svc],
             str("mm, the least over every LED, from its courtyard to: the board's nearest edge, J-MCU, the regulator block (each against boards.board_clear ", boards_board_clear,
                 "), a mount's nut keep-out (against 0), HDR-SERVICE's pads (board_clear)"));
-    // THE LED ROW'S BAND (ADR 0028 amendment, 2026-10-03): the LEDs' courtyards across the
-    // body plus board_clear each side, over the row's length, at every height. Nothing of
-    // J-MCU, its mated plug or the Matrix ribbon's rise may stand in it - over or in the
-    // row is what the owner saw as "coverage of the led". (A 120-degree cone, the typical
-    // PLCC emission, cannot be the zone: a ribbon rising 15 mm to the key board would need
-    // 24 mm from the row, and the board's edge is 21 away - drc 'tall parts in the LEDs' cone'.)
-    let(boxes = [[jm_x0, jm_y - jm_sz[1] / 2, jm_x1, jm_y + jm_sz[1] / 2], jm_plug,
-                 [jk_x0, jk_y - jm_sz[1] / 2, jk_x1, jk_y + jm_sz[1] / 2], jk_plug, mcu_fold],
+    // THE MATRIX RIBBON CROSSES THE LED ROW OVER NO LED (the owner's choice, 2026-11-21:
+    // "Vertical, ribbon across the row", which replaces 2026-10-03's 'J-MCU, its plug and the
+    // Matrix ribbon off the LED row'). The closed ribbon lies flat across the row's band, a
+    // header's height above the board; no LED's courtyard may come within boards.board_clear
+    // of it in plan, nor of either header or socket - it crosses where the row has no LED.
+    let(boxes = [mcu_hdr_box(jm_y), jm_plug, mcu_hdr_box(jk_y), jk_plug, mcu_run],
         stack = [min([for (b = boxes) b[0]]), min([for (b = boxes) b[1]]), max([for (b = boxes) b[2]]), max([for (b = boxes) b[3]])],
-        gap = max(led_band[0] - stack[3], stack[1] - led_band[1]))
-        drc(gap >= 0, "J-MCU, its plug and the Matrix ribbon off the LED row", [boards_mcu_conn_at, stack, led_band, gap],
-            "J-MCU's place and facing (boards.mcu_conn_at; J-MCU-C straight above it), the box of both insulators, their mated plugs and the closed ribbon's folds, the LED row's band across the body (courtyards + board_clear), and mm between them (against 0)");
+        ct = lighting_led_court,
+        gap = min([for (n = [1 : led_n], b = boxes) rect_gap_r(b, [led_xy(n)[0] - ct[0] / 2, led_xy(n)[1] - ct[1] / 2, led_xy(n)[0] + ct[0] / 2, led_xy(n)[1] + ct[1] / 2])]),
+        over = stack[3] > led_band[0])
+        drc(gap >= boards_board_clear, "Matrix ribbon crosses the LED row over no LED", [boards_mcu_conn_at, stack, led_band, over, gap, mcu_zm - routing_mcu_ribbon_t / 2 - cb_top],
+            str("J-MCU's place and the way the ribbon leaves (boards.mcu_conn_at), the box in plan of both headers, their mated sockets and the closed ribbon out to its fold, the LED row's band across the body (courtyards + board_clear), whether the ribbon reaches into the band, the least mm from any of those parts to an LED's courtyard (against boards.board_clear ", boards_board_clear, "), and the ribbon's underside above the board where it crosses"));
     // THE LEDS' CONE (a NOTE, not a rule): each tall part the body CAD places, against the
     // LEDs' emission cone, lighting.led_view_angle wide: a part h tall stands in an LED's
     // cone where it is nearer that LED's courtyard than (h - the LED's height) x tan(half
@@ -1917,9 +1882,9 @@ module drc_report() {
         dist = function(b) max(0, min([for (n = [1 : led_n]) rect_gap_r(b, court(n))])),
         tall = [["regulator block", [tall_c[0][0] - tall_sz[0] / 2, tall_c[0][1] - tall_sz[1] / 2, tall_c[0][0] + tall_sz[0] / 2, tall_c[0][1] + tall_sz[1] / 2], boards_tall_h],
                 ["J-MCU", [jm_x0, jm_y - jm_sz[1] / 2, jm_x1, jm_y + jm_sz[1] / 2], boards_mcu_conn_h],
-                ["J-MCU's plug and ribbon rise", jm_plug, cb_room],
-                ["the Matrix ribbon's closed folds", mcu_fold, cb_room],
-                ["J-MCU-C and its plug, under the Matrix carrier", [min(jk_x0, jk_plug[0]), min(jk_y - jm_sz[1] / 2, jk_plug[1]), max(jk_x1, jk_plug[2]), max(jk_y + jm_sz[1] / 2, jk_plug[3])], mx_carrier_bot - cb_top],
+                ["J-MCU's socket", jm_plug, boards_mcu_conn_h + boards_mcu_plug_proud],
+                ["the Matrix ribbon, closed, from its underside up", mcu_run, mcu_zk + routing_mcu_ribbon_t / 2 - cb_top],
+                ["J-MCU-C and its socket, under the Matrix carrier's arm", [min(jk_x0, jk_plug[0]), jk_y - jm_sz[1] / 2, max(jk_x1, jk_plug[2]), jk_y + jm_sz[1] / 2], mx_carrier_bot - cb_top],
                 ["U-BREATH", [sensor_c[0] - boards_sensor_body / 2, sensor_c[1] - boards_sensor_leads / 2, sensor_c[0] + boards_sensor_body / 2, sensor_c[1] + boards_sensor_leads / 2], boards_sensor_h],
                 ["HDR-SERVICE", pad_row(svc_at, svc_end), boards_service_hdr_h]],
         rows = [for (r = tall) let(d = dist(r[1]), need = max(0, (r[2] - lighting_led_h) * t)) [r[0], r[2], d, need, max(0, (r[2] - lighting_led_h) - d / t)]])
@@ -2150,13 +2115,17 @@ module drc_report() {
     drc(ju_m >= 0, "J-UMB's row lands on the adapter clear of the etherCON's footprint", [ju_r, ju_m],
         "mm: the row from the axis (negative = below), and its margin past a pitch from G, from the peg line and from the adapter's edge; a turned connector puts its footprint across the row and is not handled");
     drc(undef, "Matrix ribbon length", mcu_len,
-        "mm of ribbon between the sockets (CBL-MCU-RIBBON): straight from J-MCU's socket up to J-MCU-C's with the lid, which the carrier hangs from, raised routing.chain_raise, plus routing.chain_slack");
-    drc(mcu_fr >= routing_chain_bend_r && mcu_reach[0] <= mcu_reach_max[0] + 0.01 && mcu_reach[1] <= mcu_reach_max[1] + 0.01
-        && mcu_fold_front <= mcu_front_max + 0.01,
-        "Matrix ribbon closed: its folds between the sockets", [mcu_reach, mcu_reach_max, mcu_fr, mcu_fold_u, mcu_front_max, [mcu_du, mcu_dc], path_len(mcu_path)],
-        str("mm: the legs' reach back over J-MCU and forward from J-MCU's socket's back; the most each may reach (1 mm short of J-MCU's back; forward, short of ",
-            jm_dir == 0 ? "the Matrix's mouth edge by boards.board_clear" : "the LED row's band", "); the folds' radius (against routing.chain_bend_r); the closed fold's extent along the mouths' axis and the most its front may reach; ",
-            "J-MCU-C's socket's offset from J-MCU's along that axis and along the rows (0, 0: straight above it); the closed path's length"));
+        "mm of ribbon between the sockets (CBL-MCU-RIBBON): from J-MCU's socket up to J-MCU-C's with the lid, which the carrier hangs from, raised routing.chain_raise, the sockets' offset across the body, plus routing.chain_slack");
+    drc(undef, "Matrix ribbon to cut", mcu_cut, "mm of flat cable, end to end, a socket crimped flush at each end (CBL-MCU-RIBBON)");
+    drc(mcu_stack_gap < 1 && mcu_cover_gap >= 1 && abs(boards_mcu_conn_c_shift) >= jm_sz[1] + 0.25 && mcu_pass_gap >= 1
+        && mx_arm[3] - (jk_y + jm_sz[1] / 2) >= boards_matrix_carrier_past && (jk_y - jm_sz[1] / 2) - mx_arm[1] >= boards_matrix_carrier_past,
+        "Matrix ribbon's headers: side by side, not mouth to mouth", [mcu_stack_gap, mcu_cover_gap, abs(boards_mcu_conn_c_shift) - jm_sz[1], mcu_pass_gap, mx_carrier_bot - cb_top,
+                                                                      [(jk_y - jm_sz[1] / 2) - mx_arm[1], mx_arm[3] - (jk_y + jm_sz[1] / 2)]],
+        "mm: what two mated pairs standing mouth to mouth would leave between their sockets' covers (under the 1 the key chain's keep, so they stand side by side); each socket's cover to the board it faces (against 1); between the two headers' plastic in plan (boards.mcu_conn_c_shift, against 0.25); the ribbon's leg from the one socket, where it passes the other socket's cover (against 1); the gap between the main board's top and the carrier's underside; and the carrier's arm past J-MCU-C's insulator on its near and far sides (against boards.matrix_carrier_past)");
+    drc(mcu_fr >= routing_chain_bend_r, "Matrix ribbon fold no tighter than its bend radius", mcu_fr,
+        "mm: the one fold between the two sockets' cable faces, against routing.chain_bend_r");
+    drc(mcu_fold_out <= cb_y[1] && min(mcu_legs) > 0, "Matrix ribbon closed: its legs and fold over the main board", [mcu_legs, mcu_fr, [mcu_run[1], mcu_fold_out], cb_y, path_len(mcu_path)],
+        "mm: the legs from J-MCU's socket and from J-MCU-C's, flat across the body; the fold's radius; the closed ribbon's extent across the body, from the nearer socket's rows to the fold's outside, and the main board's edges; the closed path's length");
     // THE MATRIX CARRIER (boards.matrix_mount "carrier", ADR 0021 amendment
     // 2026-10-03), hung from the oak top. Its stack: the Matrix's top under the
     // oak, and the thread and the wood at each mount.
@@ -2183,12 +2152,12 @@ module drc_report() {
         rb = [matrix_xy[0] - matrix_rebate / 2, matrix_xy[1] - matrix_rebate / 2, matrix_xy[0] + matrix_rebate / 2, matrix_xy[1] + matrix_rebate / 2],
         g_mx = min([for (m = mx_mounts) rect_gap_r(mbox, [m[0], m[1], m[0], m[1]]) - hardware_mx_spacer_od / 2]),
         g_edge = min([for (m = mx_mounts) min(m[1] - cb_y[0], cb_y[1] - m[1], m[0] - mx_x0, mx_x1 - m[0]) - rs]),
-        g_jk = min([for (m = mx_mounts) rect_gap_r([jk_x0, jk_y - jm_sz[1] / 2, jk_x1, jk_plug[3]], [m[0], m[1], m[0], m[1]]) - max(rh, rs)]),
+        g_jk = min([for (m = mx_mounts) rect_gap_r([min(jk_x0, jk_plug[0]), jk_y - jm_sz[1] / 2, max(jk_x1, jk_plug[2]), jk_y + jm_sz[1] / 2], [m[0], m[1], m[0], m[1]]) - max(rh, rs)]),
         g_rb = min([for (m = mx_mounts) rect_gap_r(rb, [m[0], m[1], m[0], m[1]]) - ri]),
         g_pk = usb_pocket_need > 0 ? min([for (m = mx_mounts) rect_gap_r(usb_oak_pocket(), [m[0], m[1], m[0], m[1]]) - ri]) : 99)
         drc(g_mx >= 0.3 && g_edge >= 0.3 && g_jk >= boards_board_clear && g_rb >= hardware_col_pocket_wall && g_pk >= hardware_col_pocket_wall,
             "Matrix carrier's mounts clear", [mx_mounts, g_mx, g_edge, g_jk, g_rb, g_pk],
-            "the mounts (boards.matrix_mount_dxy), then mm: spacer to the Matrix's edge (against 0.3); washer to the carrier's edge (0.3); screw head and washer to J-MCU-C and its plug under the arm (board_clear); insert to the window's rebate and to the plug's pocket in the oak (col_pocket_wall)");
+            "the mounts (boards.matrix_mount_dxy), then mm: spacer to the Matrix's edge (against 0.3); washer to the carrier's edge (0.3); screw head and washer to J-MCU-C and its socket under the arm (board_clear); insert to the window's rebate and to the plug's pocket in the oak (col_pocket_wall)");
     // THE RECOVERY PLUG AGAINST THE OAK (review #19 F1; lid off since issue #37):
     // centred on the receptacle, a plug's overmould rises past the oak's
     // underside, which is pocketed over it so the Matrix can be reflashed on the

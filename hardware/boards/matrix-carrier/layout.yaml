@@ -7,8 +7,8 @@
 # THE MATRIX CARRIER (owner, 2026-10-03: option (c), "SEPARATE SMALL MATRIX CARRIER", and
 # "Hang from the lid"; ADR 0021 amendment 2026-10-03). FROM THE BODY CAD, NOT HERE
 # (mechanical/export/pcb-geometry.echo, cluster "matrix"; the outline matrix-carrier.dxf):
-# the outline with its USB-C notch and its arm over J-MCU, J-MCU-C's place (straight above
-# J-MCU, its mouth the same way), HDR-MATRIX's two rows, the three hanging mounts and the
+# the outline with its USB-C notch and its arm, J-MCU-C's place (beside J-MCU, not over
+# it: config/body.yaml boards.mcu_conn_c_shift), HDR-MATRIX's two rows, the three hanging mounts and the
 # room on the top face under the Matrix. Coordinates are the body frame (x along the body
 # from the mouth, y across, seen from above), as the key boards' and the main board's.
 
@@ -49,12 +49,13 @@ mounts:
   footprint: "MountingHole:MountingHole_2.7mm_M2.5_Pad_TopBottom"
   net: PWR_GND
 
-# J-MCU-C (J1), hung under the carrier's arm: its back pad row 8.00 behind the insulator's
-# mouth face, as the main board's J-MCU (its layout.yaml), on the bottom face. With the
-# echo's facing (90, mouth toward the far side) it lands straight above J-MCU, its pin
-# 25-k over J-MCU's pin k.
+# J-MCU-C (J1), standing straight down from the carrier's arm, on the bottom face (ADR 0018,
+# Amendment of 2026-11-21): its pad row nearer the near edge 2.29 in from the insulator's
+# near face [calc: half the envelope's width, boards.mcu_conn_w, less half the row spacing],
+# the pads centred along the echo's box. The echo's 90 is the way the ribbon leaves its
+# socket, toward the far side. Its pin 25-k carries J-MCU's pin k.
 connectors:
-  J-MCU-C: {row: J-MCU-C, rot: 0, back_row_from: x1, back_row_at: -8.00, bottom: true}
+  J-MCU-C: {row: J-MCU-C, rot: 0, back_row_from: x0, back_row_at: 2.29, bottom: true}
 
 # Parts whose courtyard is MEANT to lie off the board (pcb.py check_courtyards).
 courtyard_overhang:
@@ -65,7 +66,7 @@ courtyard_overhang:
     reason: "as J2: the other pad row's header, its mouth end 0.2 past the carrier's mouth edge"
     source: "as J2"
   J1:
-    reason: "J-MCU-C's insulator overhangs the arm's mouth end by 0.3: the arm stops boards.matrix_carrier_past short of the right-hand key board's tail end, which stands just over it, and the insulator hangs under the carrier, clear of that board. Plastic over air; no pad off the board"
+    reason: "J-MCU-C's insulator overhangs the arm's mouth end by a third of a millimetre: the arm stops boards.matrix_carrier_past short of the right-hand key board's tail end, which stands just over it, and the insulator hangs under the carrier, clear of that board. Plastic over air; no pad off the board"
     source: "config/body.yaml boards.matrix_carrier_past; mechanical/cad/woody_body.scad mx_arm and the outline's corner radius kb_corner_r"
 
 # Top-face parts' heights (pcb.py check_heights), against the one room the echo gives: under
@@ -93,8 +94,8 @@ silk:
   at: [[252.5, 17.8], [262.0, 17.8]]   # the arm's top face beside J-MCU-C's tails (it hangs underneath)
   search: true
   title: "WOODY Matrix carrier"
-  rev: "A"
-  date: "2026-11-20"
+  rev: "D"
+  date: "2026-11-21"
 
 # No router: `route: false` keeps tools/pcb.py from running one on this board
 # (carrier_layout.py, ADR 0030).

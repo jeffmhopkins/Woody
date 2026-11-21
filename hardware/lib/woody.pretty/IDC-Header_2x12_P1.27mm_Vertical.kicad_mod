@@ -1,13 +1,13 @@
-(footprint "IDC-Header_2x12_P1.27mm_XKB_X1270WR_Horizontal"
+(footprint "IDC-Header_2x12_P1.27mm_Vertical"
 	(version 20241229)
 	(generator "woody")
 	(layer "F.Cu")
-	(descr "XKB Connection X1270WR-2x12A-9TV01: 2x12 1.27 mm shrouded box header, right-angle, through-hole, keyed. From the banked drawing rev A1 (datasheets/connectors/XKB-X1270WR-2x12A-9TV01.pdf): 0.70 holes on a 1.27 grid, body C 21.54 long and 5.40 deep, the far (odd, upper) tail row 2.60 behind the body's back, the near (even) row 1.27 in front of it; mouth at +x. Pads 1.50 x 1.07 with the hole 0.215 off centre, lengthened away from the other row, as the J-CHAIN header's. Courtyard 0.25 round the insulator and, behind it, round the pad rows only, which are 15.04 long against its 21.54 (2026-10-03: J-MCU-KB stands with its pad rows beside the right-hand key board's tail column)")
-	(tags "IDC header 1.27mm shrouded right-angle XKB X1270WR 2x12")
+	(descr "2x12 1.27 mm shrouded box header, vertical, through-hole, keyed: J-MCU and J-MCU-C (hardware/carrier/bom.csv J-MCU lists the parts). Holes 0.70 on a 1.27 grid, XKB's recommended layout (datasheets/connectors/XKB-X1270WV-2xXXA-6TV01-1.27MM-BOX-HEADER-VERTICAL.pdf); pads as woody:IDC-Header_2x05_P1.27mm_CNCTech_3220_Vertical. Body drawn 21.59 x 5.85, the longest and widest candidate (config/body.yaml boards.mcu_conn_l, mcu_conn_w), centred on the pads; key slot over the odd row (-x). Courtyard takes in the mated socket's cover, 23.23 long.")
+	(tags "IDC box header 1.27mm shrouded vertical 2x12")
 	(property "Reference" "REF**"
-		(at 4.5 -5.2 0)
+		(at 0.635 -5.6 0)
 		(layer "F.SilkS")
-		(uuid "933ead9b-f659-53ea-8f97-d7215a4e6b98")
+		(uuid "30fab500-d094-59d0-a80f-328bf442e3c5")
 		(effects
 			(font
 				(size 1 1)
@@ -15,10 +15,10 @@
 			)
 		)
 	)
-	(property "Value" "X1270WR-2x12A-9TV01"
-		(at 4.5 19.4 0)
+	(property "Value" "2x12 box header"
+		(at 0.635 19.6 0)
 		(layer "F.Fab")
-		(uuid "6952f6ab-44a6-521f-850f-0be06360feb9")
+		(uuid "3ad13de2-5c1e-5a0b-9f72-fc60d3ceb857")
 		(effects
 			(font
 				(size 1 1)
@@ -30,7 +30,7 @@
 		(at 0 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "ec042a2a-b526-51f3-a5b6-f841304a0ae5")
+		(uuid "d673eba4-050d-5cf0-b114-a27a42c5ff6d")
 		(effects
 			(font
 				(size 1 1)
@@ -42,7 +42,7 @@
 		(at 0 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "754d76df-75df-583e-aaea-7b8b08db73f2")
+		(uuid "41977609-f6ff-5c83-b59b-c71d4a00298b")
 		(effects
 			(font
 				(size 1 1)
@@ -52,56 +52,59 @@
 	)
 	(attr through_hole)
 	(fp_rect
-		(start 2.6 -3.785)
-		(end 8 17.755)
+		(start -2.29 -3.81)
+		(end 3.56 17.78)
 		(stroke
 			(width 0.1)
 			(type solid)
 		)
 		(fill no)
 		(layer "F.Fab")
-		(uuid "277b632d-062a-59aa-a2d4-3f246853fef5")
-	)
-	(fp_poly
-		(pts (xy 2.6 -2.785) (xy 3.6 -3.785) (xy 2.6 -3.785))
-		(stroke
-			(width 0)
-			(type solid)
-		)
-		(fill yes)
-		(layer "F.Fab")
-		(uuid "1c7a6f85-e66e-5c1c-8c40-374790adbe9e")
+		(uuid "4876ca26-94c6-592b-9a97-596020474307")
 	)
 	(fp_rect
-		(start 2.48 -3.905)
-		(end 8.12 17.875)
+		(start -2.41 -3.93)
+		(end 3.68 17.9)
 		(stroke
 			(width 0.15)
 			(type solid)
 		)
 		(fill no)
 		(layer "F.SilkS")
-		(uuid "096eea15-3b46-5b8a-822f-5375589a6a87")
+		(uuid "f158b04f-6955-50cb-b258-4dab8c8809c7")
 	)
-	(fp_poly
-		(pts (xy -0.45 -1.45) (xy 0.45 -1.45) (xy 0 -0.87))
-		(stroke
-			(width 0)
-			(type solid)
-		)
-		(fill yes)
-		(layer "F.SilkS")
-		(uuid "32bd80f0-c007-5c0e-8001-4abcb8b63b66")
-	)
-	(fp_poly
-		(pts (xy -1.215 -0.785) (xy 2.35 -0.785) (xy 2.35 -4.035) (xy 8.25 -4.035) (xy 8.25 18.005) (xy 2.35 18.005) (xy 2.35 14.755) (xy -1.215 14.755))
+	(fp_rect
+		(start -2.54 -4.88)
+		(end 3.81 18.85)
 		(stroke
 			(width 0.05)
 			(type solid)
 		)
 		(fill no)
 		(layer "F.CrtYd")
-		(uuid "01d5ad0f-1892-5961-a221-1bc498da01d5")
+		(uuid "b7e3ebd2-f045-5998-89c9-340cf6c68793")
+	)
+	(fp_rect
+		(start -2.29 5.81)
+		(end -1.69 8.16)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "bf958f5c-431e-552c-859b-ac8576c295a9")
+	)
+	(fp_rect
+		(start -2.41 5.81)
+		(end -1.81 8.16)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "9c9739f6-42b8-56a2-bfec-5e4fd9bf04de")
 	)
 	(pad "1" thru_hole rect
 		(at 0 0)
@@ -111,7 +114,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "4355b8e6-4f08-5e00-8e99-e27f901c60e0")
 	)
 	(pad "2" thru_hole oval
 		(at 1.27 0)
@@ -121,7 +123,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "948b3a23-7077-50cc-bae8-d768722ceef7")
 	)
 	(pad "3" thru_hole oval
 		(at 0 1.27)
@@ -131,7 +132,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "b72e302e-b279-5c50-b790-cf523562b843")
 	)
 	(pad "4" thru_hole oval
 		(at 1.27 1.27)
@@ -141,7 +141,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "bdc51c7f-e674-5cf9-8f29-1ae7a8178fc3")
 	)
 	(pad "5" thru_hole oval
 		(at 0 2.54)
@@ -151,7 +150,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "72886d9c-2af4-5df1-838f-f7fe01e9ba74")
 	)
 	(pad "6" thru_hole oval
 		(at 1.27 2.54)
@@ -161,7 +159,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "266a4ace-cbcc-5d63-b7ef-ebe934bfd071")
 	)
 	(pad "7" thru_hole oval
 		(at 0 3.81)
@@ -171,7 +168,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "03bb868a-ecc9-5342-9966-70d1c439a5ee")
 	)
 	(pad "8" thru_hole oval
 		(at 1.27 3.81)
@@ -181,7 +177,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "2fbf68ac-f681-5280-90c1-71aacebb8f0c")
 	)
 	(pad "9" thru_hole oval
 		(at 0 5.08)
@@ -191,7 +186,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "edcdd8c1-302e-5414-bf5a-07aa45c989f4")
 	)
 	(pad "10" thru_hole oval
 		(at 1.27 5.08)
@@ -201,7 +195,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "02eb5b66-dca4-55b5-91c9-c40d5c5a056a")
 	)
 	(pad "11" thru_hole oval
 		(at 0 6.35)
@@ -211,7 +204,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "9f38365c-f000-5642-b0c8-99f5c8a1121b")
 	)
 	(pad "12" thru_hole oval
 		(at 1.27 6.35)
@@ -221,7 +213,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "ae9565a9-d376-5e58-bc6e-c5f24af56bd0")
 	)
 	(pad "13" thru_hole oval
 		(at 0 7.62)
@@ -231,7 +222,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "5ab41fe2-01db-53b8-ac8c-b5699339dbcb")
 	)
 	(pad "14" thru_hole oval
 		(at 1.27 7.62)
@@ -241,7 +231,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "ae0a1833-27e5-5465-abb9-49b6fb5432f3")
 	)
 	(pad "15" thru_hole oval
 		(at 0 8.89)
@@ -251,7 +240,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "2fa7529b-6ef3-519a-84d8-de6db175057e")
 	)
 	(pad "16" thru_hole oval
 		(at 1.27 8.89)
@@ -261,7 +249,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "e65f5ab4-8646-5dcf-8ffd-2284098aaf4f")
 	)
 	(pad "17" thru_hole oval
 		(at 0 10.16)
@@ -271,7 +258,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "f2c5d78d-6ce1-52a9-869e-d207d337d9c5")
 	)
 	(pad "18" thru_hole oval
 		(at 1.27 10.16)
@@ -281,7 +267,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "a65c3d7d-0ba5-52e7-b7f8-37425040db46")
 	)
 	(pad "19" thru_hole oval
 		(at 0 11.43)
@@ -291,7 +276,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "eda544e3-8492-5ada-8756-999aedf0ce1c")
 	)
 	(pad "20" thru_hole oval
 		(at 1.27 11.43)
@@ -301,7 +285,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "2ed6dcb7-6015-5bdc-a1f5-c73539595a07")
 	)
 	(pad "21" thru_hole oval
 		(at 0 12.7)
@@ -311,7 +294,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "bcfdae34-bbd6-556a-8762-7d5c8a42baec")
 	)
 	(pad "22" thru_hole oval
 		(at 1.27 12.7)
@@ -321,7 +303,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "7b4c03c1-d253-5a45-95f1-35af65e9e355")
 	)
 	(pad "23" thru_hole oval
 		(at 0 13.97)
@@ -331,7 +312,6 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "5c61ed9f-9db7-5a89-9dc6-16e86fda6db1")
 	)
 	(pad "24" thru_hole oval
 		(at 1.27 13.97)
@@ -341,9 +321,8 @@
 		)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "16ba91e1-c6eb-52d8-ad41-6618c74ad425")
 	)
-	(model "${KIPRJMOD}/../../lib/woody.3dshapes/XKB_X1270WR-2x12A-9TV01.step"
+	(model "${KIPRJMOD}/../../lib/woody.3dshapes/XKB_X1270WV-2x12.step"
 		(offset
 			(xyz 0 0 0)
 		)

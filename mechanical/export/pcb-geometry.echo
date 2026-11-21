@@ -31,7 +31,7 @@ ECHO: "PCB", "main", "switch", "RT3", 198, 18.5, 180
 ECHO: "PCB", "main", "switch", "RT4", 198, 38.5, 0
 ECHO: "PCB", "main", "chain", "J-CHAIN-LH", 78.5, 41.83, -1, 12.65, 0.635
 ECHO: "PCB", "main", "chain", "J-CHAIN-RH", 186.5, 41.83, -1, 12.65, 0.635
-ECHO: "PCB", "main", "connector", "J-MCU", 251.5, 273.04, 14.9, 8.97, 1, 90
+ECHO: "PCB", "main", "connector", "J-MCU", 251.475, 273.065, 18.17, 5.85, 1, 90
 ECHO: "PCB", "main", "connector", "J-UMB", 297.4, 299.9, 28.5, 8, 2.54, 1.25
 ECHO: "PCB", "main", "part", "U-BREATH", 14.15, 39.6, 0, 12.3, 17.8, 18.8
 ECHO: "PCB", "main", "part", "HDR-SERVICE", 284, 11, 0, 3, 2.54
@@ -70,11 +70,11 @@ ECHO: "PCB", "main", "keepout", "elsewhere", 7.5, 7.5, 299.9, 49.5, 20.2
 ECHO: "PCB", "main", "keepout", "ribbon left_hand", 75.45, 35.505, 81.55, 48.155, 0
 ECHO: "PCB", "main", "keepout", "ribbon right_hand", 183.45, 35.505, 189.55, 48.155, 0
 ECHO: "PCB", "main", "keepout", "J-MIDI and CBL-MIDI's plug (proposed)", 283.1, 36.55, 298.2, 49.45, 5.5
-ECHO: "PCB", "main", "keepout", "Matrix ribbon", 251.5, 19.385, 273.04, 21.525, 0
-ECHO: "PCB", "main", "keepout", "Matrix ribbon fold", 252.55, 21.525, 271.99, 23.95, 7.30333
+ECHO: "PCB", "main", "keepout", "Matrix ribbon", 250.655, 15.245, 273.885, 21.095, 0
+ECHO: "PCB", "main", "keepout", "Matrix ribbon fold", 254.65, 21.095, 269.89, 38.975, 7.2
 ECHO: "PCB", "main", "board", "thickness", 1.6, "smt_height_max", 2.62, "side", "parts on top; the thumb switches from below, their footprints on the underside"
 ECHO: "PCB", "matrix", "board", "thickness", 1.6, "smt_height_max", 2.5, "side", "HDR-MATRIX on top under the Matrix; J-MCU-C hung from the underside"
-ECHO: "PCB", "matrix", "connector", "J-MCU-C", 251.5, 273.04, 14.9, 8.97, 1, 90
+ECHO: "PCB", "matrix", "connector", "J-MCU-C", 251.475, 273.065, 12.02, 5.85, 1, 90
 ECHO: "PCB", "matrix", "pins", "HDR-MATRIX row 0", 272.97, 17.07, 295.83, 17.07, 2.54
 ECHO: "PCB", "matrix", "pins", "HDR-MATRIX row 1", 272.97, 39.93, 295.83, 39.93, 2.54
 ECHO: "PCB", "matrix", "standoff", "M2.5", 291.7, 11, 2.7, 4.5, 5, "hang"

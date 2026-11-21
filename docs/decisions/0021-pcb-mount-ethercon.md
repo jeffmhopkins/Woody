@@ -359,7 +359,7 @@ next amendment: no ESD protection is added.**
    raised, as the key chain's ribbons do: its slack is `routing.chain_raise`
    and `routing.chain_slack`, the same figures. Closed, that slack folds flat
    in four legs over `J-MCU` (*"Matrix ribbon closed: its folds between the
-   sockets"*, the rule's name since 2026-10-03). This answers review #19 F4:
+   sockets"*, the rule's name since 2026-10-03; *since 2026-11-21 one fold across the body, ADR 0018, Amendment of that date*). This answers review #19 F4:
    the slack is a figure, it lies in a checked place, and `J-MCU` is reached
    with the key plate raised, so the plate is not over it then.
 5. **The Matrix's grounds join the key board's `GND_CHAIN` pour.** That is
@@ -518,6 +518,9 @@ altogether (below).
    sockets"*); its thickness is now the banked cable's
    (`routing.mcu_ribbon_t`). `J-MCU`'s place is `boards.mcu_conn_at`, the
    main board's (option 1, along the near edge, off the LED row).
+   *Since 2026-11-21 both headers stand vertical, side by side, and the
+   ribbon crosses the LED row over no LED: ADR 0018, Amendment, 2026-11-21,
+   which names the rules that hold it now.*
 5. **Program over USB only.** The Matrix is programmed and recovered over
    its own USB-C - USB-Serial-JTAG through the tail receptacle (*since issue #37, with the lid off: the tail receptacle is gone, ADR 0015 amendment 2026-10-04*) - and, when
    that fails, with its own BOOT and RESET buttons, the lid off. **`EN` and
@@ -552,7 +555,11 @@ numbers (2026-10-03), the owner chose **A**:
 - **The carrier keeps its height.** A lower carrier would clear the shell
   with no slot, but the Matrix ribbon's closed folds lie between `J-MCU` and
   `J-MCU-C` under the arm, and they already fold at about the least bend
-  radius (drc.echo *"Matrix ribbon closed: its folds between the sockets"*).
+  radius (drc.echo *"Matrix ribbon closed: its folds between the sockets"*;
+  *since 2026-11-21 the ribbon no longer folds under the arm, ADR 0018,
+  Amendment of that date, but the carrier's height is what `J-MCU-C` and its
+  socket hang in: "Matrix ribbon's headers: side by side, not mouth to
+  mouth"*).
   Moving `J-MCU` under the carrier meets the main board's end mount,
   `HDR-SERVICE` and the LED row.
 - **So the cut-out becomes a slot for the shell only** (`boards.matrix_usb`

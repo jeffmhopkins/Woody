@@ -362,11 +362,14 @@ only as good as those envelopes. Group the report's lines by these causes
    on three mounts (*"Matrix carrier hangs from the oak"*): two 1×10 headers
    through its pad rows (`HDR-MATRIX`), a notch round its USB-C (and room for a recovery plug, lid off).
    A plain 24-way IDC ribbon (allocation on `CBL-MCU-RIBBON`, ADR 0018) runs
-   from `J-MCU-C`, hung under the carrier straight above J-MCU, down into
-   J-MCU at the main board's near edge. It plugs there with the lid raised,
-   as the key chain's do (*"Matrix ribbon length"*), and closed it folds flat
-   between the two headers (*"Matrix ribbon closed: its folds between the
-   sockets"*). **The umbilical has no cable inside the body** (ADR
+   from `J-MCU-C`, a vertical header hung mouth down under the carrier's
+   arm, into J-MCU, a vertical header standing beside it on the main board
+   (*"Matrix ribbon's headers: side by side, not mouth to mouth"*; owner,
+   2026-11-21, ADR 0018 amendment of that date). It plugs there with the lid
+   raised, as the key chain's do (*"Matrix ribbon length"*), and closed it
+   lies in one fold toward the far side, across the LED row where the row
+   has no LED (*"Matrix ribbon closed: its legs and fold over the main
+   board"*, *"Matrix ribbon crosses the LED row over no LED"*). **The umbilical has no cable inside the body** (ADR
    0021): the etherCON is soldered to its adapter, and J-UMB, a right-angle
    header, is soldered into the adapter and the tongue (*"J-UMB on the main
    board's tongue…"*, *"J-UMB's row lands on the adapter clear of the

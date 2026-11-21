@@ -293,7 +293,7 @@ scripts:
                            hardware/boards/key-board-rh/key-board-rh.kicad_pcb, hardware/boards/key-board-rh/layout.yaml,
                            datasheets/led/WS2815B-5050-3D.step, datasheets/mechanical/GATERON-KS-33-3D.step, datasheets/connectors/JST-S3B-PH-SM4-TB-3D.step,
                            hardware/lib/woody.3dshapes/Hanxia_HX_PZ2.54-1x8P_WZ.step, hardware/lib/woody.3dshapes/NXP_Case1351-01_MPXV4006DP.step,
-                           hardware/lib/woody.3dshapes/CNCTech_3220-10-0100-00.step, hardware/lib/woody.3dshapes/XKB_X1270WR-2x12A-9TV01.step,
+                           hardware/lib/woody.3dshapes/CNCTech_3220-10-0100-00.step, hardware/lib/woody.3dshapes/XKB_X1270WV-2x12.step,
                            mechanical/module/blender/studio_small_08_1k.hdr,
                            branding/export/scs-orbit-wave-mark.dxf, branding/export/spec.json, branding/build.py, tools/lib-models.py]
     out: mechanical/renders/photo-hero.png

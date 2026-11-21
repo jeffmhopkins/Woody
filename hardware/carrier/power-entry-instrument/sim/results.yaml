@@ -15,7 +15,7 @@ inputs:
   hardware/carrier/power-entry-instrument/sim/pei-or.cir: 6955961510f33cb8
   hardware/module/umbilical-load-switch/sim/lt1641.inc: 59be165ccd4451a6
   hardware/module/umbilical-load-switch/sim/sims.yaml: cadec99739eed8eb
-  drc:Matrix ribbon length: '49.15'
+  drc:Matrix ribbon length: '48.41'
   figure:umbilical-current: 359 mA
 ngspice: '42'
 sims:
@@ -925,10 +925,10 @@ sims:
         nominal: -0.0500022
         min: -0.0500034
         min_at: or_is_d1+ or_v_buck+ or_v_rev- or_v_usb-
-        max: 4.9414e-10
+        max: 4.93969e-10
         max_at: or_is_d1+ or_v_buck- or_v_rev- or_v_usb+
       i_usb_back:
-        nominal: -4.67798e-08
+        nominal: -4.67601e-08
         min: -0.0500022
         min_at: or_is_d1- or_v_buck- or_v_rev- or_v_usb+
         max: 1.18285e-06
@@ -955,13 +955,13 @@ sims:
         nominal: -0.928002
         min: -0.928003
         min_at: or_is_d1+ or_v_buck+ or_v_rev- or_v_usb-
-        max: 4.65816e-10
+        max: 4.65832e-10
         max_at: or_is_d1+ or_v_buck- or_v_rev- or_v_usb+
       i_usb_back:
-        nominal: -1.08311e-07
+        nominal: -1.07729e-07
         min: -0.928002
         min_at: or_is_d1+ or_v_buck- or_v_rev- or_v_usb+
-        max: 1.1647e-06
+        max: 1.16484e-06
         max_at: or_is_d1+ or_v_buck+ or_v_rev- or_v_usb-
     asserts:
     - expr: max['i_rev'] < 10.0e-6
@@ -988,11 +988,11 @@ sims:
         max: 4.62737
         max_at: or_rds- or_t_fwd- or_vth-
       i_rev_before:
-        nominal: 4.84022e-10
-        min: 4.84022e-10
-        min_at: nominal
-        max: 4.84063e-10
-        max_at: or_rds- or_t_fwd- or_vth+
+        nominal: 4.84079e-10
+        min: 4.83965e-10
+        min_at: or_rds- or_t_fwd- or_vth-
+        max: 4.84079e-10
+        max_at: nominal
     asserts:
     - expr: max['i_rev_before'] < 10.0e-6
       why: 'before the unplug USB carries the rail and Q-USBOR is off: no back-feed into the buck'
@@ -1014,7 +1014,7 @@ sims:
         max_at: or_is_d1+ or_rds- or_t_rev- or_v_rev-
       v_dip:
         nominal: 4.22121
-        min: 4.20057
+        min: 4.20058
         min_at: or_is_d1- or_rds+ or_t_rev+ or_v_rev+
         max: 4.33427
         max_at: or_is_d1+ or_rds- or_t_rev- or_v_rev-
@@ -1022,19 +1022,19 @@ sims:
         nominal: 4.32863e-10
         min: 4.32863e-10
         min_at: nominal
-        max: 4.42299e-10
+        max: 4.42355e-10
         max_at: or_is_d1+ or_rds- or_t_rev- or_v_rev-
       i_rev_peak:
-        nominal: 0.103467
-        min: 0.0197874
+        nominal: 0.103313
+        min: 0.0197489
         min_at: or_is_d1- or_rds- or_t_rev- or_v_rev-
-        max: 0.173637
+        max: 0.1737
         max_at: or_is_d1+ or_rds+ or_t_rev+ or_v_rev+
       t_rev_on:
-        nominal: 8.17103e-06
-        min: 1.05029e-06
+        nominal: 8.23902e-06
+        min: 1.04907e-06
         min_at: or_is_d1- or_rds- or_t_rev- or_v_rev-
-        max: 1.35302e-05
+        max: 1.35218e-05
         max_at: or_is_d1+ or_rds+ or_t_rev+ or_v_rev+
     asserts:
     - expr: max['i_rev'] < 10.0e-6
