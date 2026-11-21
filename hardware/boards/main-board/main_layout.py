@@ -143,7 +143,7 @@ PLACE.update({
     # hop's resistor (pin 9), the two unused inputs' pull-ups (pins 11 and 12), and pin 13's
     # capacitor with each pad under its own pin
     "R44": (54.7, LOW, ("QH", "E")), "R33": (58.6, LOW, ("FREE", "E")),
-    "R32": (62.5, LOW, ("FREE", "E")), "C206": (66.78, LOW, ("3V3", "W")),
+    "R32": (62.5, LOW, ("FREE", "E")), "C206": (67.09, LOW, ("3V3", "W")),
     # REG-RT's: the capacitor of pins 11 and 12, each pad under its own pin
     "C14": (172.23, LOW, ("3V3", "E")),
 })
@@ -179,7 +179,7 @@ PLACE.update({
     "U6": (264.4, 30.0, ("1", "SE")),
     "R11": (265.5, 23.6, ("GATE_A_OUT", "N")), "C12": (261.93, 23.6, ("INST_5V", "N")),
     "R10": (269.1, 24.8, ("IO1", "N")),
-    "R51": (261.93, 37.5, ("RING_DRV", "S")), "R50": (264.93, 37.5, ("TIP_DRV", "S")),
+    "R51": (261.93, 37.94, ("RING_DRV", "S")), "R50": (264.93, 37.94, ("TIP_DRV", "S")),
     "R49": (258.75, 32.54, ("IO2", "E")),   # IO2's pull-up at the driver's pin, its 3V3 from the line going north there
     # the first LED stands in the row's tail-end place, clear of the Matrix ribbon (owner,
     # 2026-11-20). On its mouth side in the row: the surge diode, then the LED's capacitor,
@@ -202,7 +202,7 @@ PLACE.update({
     "R38": (281.3, 37.39, ("BREATH_SENSE", "E")), "R39": (281.3, 34.85, ("AGND_SENSE", "E")),
     "D5": (292.2, 36.36, ("BREATH", "E")), "D6": (292.2, 34.15, ("AGND_SENSE", "E")),
     # MIDI: each bead in line with its pin of J-MIDI
-    "FB3": (275.4, 38.96, ("TIP_R", "W")), "FB4": (275.4, 41.95, ("RING_R", "W")),
+    "FB3": (275.4, 39.4, ("TIP_R", "W")), "FB4": (275.4, 41.95, ("RING_R", "W")),
     "U12": (281.5, 41.0, ("1", (1.14, -0.95))),
     # the inrush switch in the free corner beyond the pins, 12 V reaching it down the tail edge:
     # three columns on two buses, each gate part under the rung it hangs from
@@ -444,7 +444,7 @@ def power():
     T("BUCK_IN", [(244.05, 15.4), (237.0, 15.4), (226.1, 15.4)], 0.6)   # one straight line: inductor, input capacitor, regulator
     T("BUCK_A_OUT", ["U5.3", (221.02, 17.84), "C43.1", (222.63, 19.45), "C207.2", "U13.3"], 0.5)
     T("BUCK_A_OUT", ["U13.3", (232.16, 18.5), "Q2.2"], 0.5)
-    T("BUCK_A_OUT", ["U13.3", (233.3, 19.45), (233.3, 21.35), "U13.6"])
+    T("BUCK_A_OUT", ["U13.3", (233.0, 19.45), (233.3, 19.75), (233.3, 21.05), (233.6, 21.35), "U13.6"])
     T("USBOR_GATE", ["U13.5", "Q2.1"])
     T("USBOR_VCAP", ["C207.1", "U13.1"])
     for pad, x, y in (("U13.2", 231.0, 20.4), ("C208.2", 241.35, 20.6), ("C43.2", 217.1, 18.3)):
@@ -456,7 +456,7 @@ def power():
     two("PWR_GND", 214.9, 13.0)          # C10.2
     # 5 V
     T("INST_5V_A", ["J1.3", "J1.1", "J1.2"], 0.5)
-    T("INST_5V_A", ["J1.2", (255.285, 19.9), (255.58, 20.195), (255.58, 23.65), (255.28, 23.95), (240.4, 23.95), (238.84, 22.39), "Q2.3"], PWR)
+    T("INST_5V_A", ["J1.2", (255.58, 19.1), (255.58, 23.65), (255.28, 23.95), (240.4, 23.95), (238.84, 22.39), "Q2.3"], PWR)
     T("INST_5V_A", ["Q2.3", "U13.4"], 0.5)
     T("INST_5V_A", ["J1.2", (255.285, 20.0), (255.585, 20.3), (259.0, 20.3), (263.25, 24.55)], PWR, "B")
     via("INST_5V_A", 263.25, 24.55, "C12.1", PWR)
@@ -512,7 +512,7 @@ def tail():
     T("MIDI_RING_DRV", ["U6.8", "R51.1"])
     T("MIDI_TIP_R", ["R50.2", "FB3.1"])
     T("MIDI_RING_R", ["R51.2", (261.93, 40.5), (263.38, 41.95), "FB4.1"])
-    T("MIDI_TIP", ["FB3.2", (279.0, 38.96), (279.44, 39.4), (283.75, 39.4), (285.0, 40.65)])
+    T("MIDI_TIP", ["FB3.2", (283.75, 39.4), (285.0, 40.65)])
     T("MIDI_TIP", [(282.9, 39.4), (282.9, 40.0)])
     T("MIDI_RING", ["FB4.2", (278.9, 41.95), (279.55, 42.6), (284.4, 42.6)])
     T("MIDI_RING", ["U12.3", (282.64, 42.6)])
@@ -598,7 +598,7 @@ def leds():
         if c not in x or c == "D21" or b == "D8":
             continue
         xb = x[b]
-        over = [(xb + 1.2, 26.9), (xb + 1.2, 30.15), (xb + 0.4, 30.95)]
+        over = [(xb + 1.6, 26.9), (xb + 1.2, 27.3), (xb + 1.2, 30.15), (xb + 0.4, 30.95)]
         T(net, [f"{b}.4"] + over + [(xb - 3.5, 30.95), (xb - 4.35, 30.1), f"{c}.6"])
 
 
@@ -757,10 +757,10 @@ def v3():
     VIAS.append(("DEV_3V3", 69.94, 34.4))
     T("DEV_3V3", [(69.94, 34.4), "U7.16"])
     T("DEV_3V3", ["U7.16", (70.115, 36.2), "C13.1"])
-    T("DEV_3V3", [(69.94, 34.4), (69.94, 32.3), (69.64, 32.0), (57.69, 32.0), "R33.1"])
+    T("DEV_3V3", [(69.94, 34.4), (69.94, 32.3), (69.64, 32.0), (58.19, 32.0), (57.69, 32.5), "R33.1"])
     T("DEV_3V3", [(61.59, 32.0), "R32.1"])
-    T("DEV_3V3", [(65.83, 32.0), "C206.1"])
-    T("DEV_3V3", ["C206.1", (65.83, 34.2), (66.14, 34.51), "U7.13"])
+    T("DEV_3V3", [(66.14, 32.0), "C206.1"])
+    T("DEV_3V3", ["C206.1", "U7.13"])
     # ...and round the hop's via to the far side: the far key's pull-up and the header's bead
     T("DEV_3V3", [(64.2, 32.4), (61.9, 32.4), (61.2, 33.1), (61.2, 42.8), (61.9, 43.5), (68.1, 43.5), (68.5, 43.9), (68.6, 44.0), (70.9, 44.0)], W, "B")
     via("DEV_3V3", 68.5, 43.9, "R14.1")
@@ -827,7 +827,7 @@ def planes_in():
     via(G, 59.9, 40.97, "U7.8", PWR)
     via(G, 169.06, 42.65, "U8.8", PWR)
     VIAS.append((G, 68.04, 34.5))
-    T(G, ["C206.2", (67.73, 34.19), (68.04, 34.5)], PWR)
+    T(G, ["C206.2", (68.04, 34.5)], PWR)
     T(G, ["U7.14", (67.41, 35.13), (68.04, 34.5), (68.67, 35.13), "U7.15"])
     via(G, 71.7, 33.0, "C13.2", PWR)                 # south of it: the key's line passes its tail side
     via(G, 181.1, 34.3, "C205.2", PWR)
