@@ -658,8 +658,8 @@ def chain():
     T("CHAIN_SHLD", [(xh + RH, h), (xh + c, h), (xh, h + c), (xh, y4 - c), (xh + c, y4), "J4.4"], FINE, "B")
     # SCK, to pin 2 of both
     T("CHAIN_SCK", [(252.2, 25.81), (252.2, SCK_E - c), (252.2 - c, SCK_E), (JX + RH + 1.5, SCK_E), (JX + RH, SCK_E + 1.5), "J5.2"], FINE, "B")
-    VIAS.append(("CHAIN_SCK", 178.3, 37.9))
-    T("CHAIN_SCK", [(178.3, 37.9), (178.3 - (37.9 - k), k), (JX + 1.0, k), (JX, k + 1.0), "J4.2"], FINE, "B")
+    VIAS.append(("CHAIN_SCK", 178.3, 38.32))
+    T("CHAIN_SCK", [(178.3, 38.32), (178.3 - (38.32 - k), k), (JX + 1.0, k), (JX, k + 1.0), "J4.2"], FINE, "B")
     # the hop between the hands
     # straight down beside SH/LD past the clamp, then one 45 into its lane
     T("HOP_LT_RH", ["J5.6", (xh + RH, y6), (xh + RH - 0.9, y6 - 0.9), (xh + RH - 0.9, 35.0), (xh + RH - 0.9 - (35.0 - lt), lt), (82.2, lt)], FINE, "B")
@@ -695,8 +695,8 @@ def registers():
         y2, y4, y6, y8, y10 = (jpin(k)[1] for k in (2, 4, 6, 8, 10))
         # (it passes the clamp 0.4 lower than it enters the register, so the clamp's ground via stands
         # between it and the pad and not in the pad)
-        T("CHAIN_SCK", [f"{j}.2", (X(JX - (y2 - 37.5)), 37.5), (X(72.05), 37.5), (X(71.1), 37.5), (X(70.7), 37.9), (X(70.3), 37.9),
-                        (X(69.74), 37.9), (X(68.67), 38.97), f"{u}.2"])   # x 70.3: where the right hand's via stands
+        T("CHAIN_SCK", [f"{j}.2", (X(JX - (y2 - 37.5)), 37.5), (X(72.05), 37.5), (X(71.12), 37.5), (X(70.3), 38.32), (X(68.67), 39.95),
+                        f"{u}.2"])   # one diagonal into pin 2; x 70.3: where the right hand's via stands
         T("CHAIN_SCK", [(X(72.05), 37.5), f"{tvs}.1"])
         # SH/LD: straight from pin 4 between the clamp's rows into pin 1
         T("CHAIN_SHLD", [f"{j}.4", (X(73.95), y4), (X(69.94), y4), f"{u}.1"])
