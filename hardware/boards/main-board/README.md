@@ -269,6 +269,7 @@ pattern is the key boards' order sheet (`hardware/boards/key-board-lh/README.md`
 | Mask / silk | **White / black** (`fab:`) | ADR 0028: the top face is the LED row's first reflector |
 | Surface finish | LeadFree HASL (`fab: finish`) | 4-layer FR-4 takes HASL; only 6 layers and up do not [ds `JLCPCB-PCB-CAPABILITIES.pdf`, *Surface Finish*] |
 | Copper | 1 oz outer, 0.5 oz inner (the stack's) | |
+| Via-in-pad | **Epoxy filled and capped**, for the three ground vias that stand in a pad (`U1`, `U9`, `U11` pin 2; *The copper*, above) | An open via in a small pad draws solder off the pin in reflow, and JLC's soldermask plug is not allowed in or beside a pad; filled and capped takes these holes [ds `JLCPCB-PCB-CAPABILITIES.pdf`, *Via-in-Pad Process*]. It is JLC's default only from 6 layers up, so on this board it is picked on the quote form: `open` - its 4-layer price is the form's. If it is refused or dear, order without it and touch those three pins up by hand |
 | Delivery format | Single PCB, **edge rails and fiducials added by JLCPCB** | Standard PCBA asks both, and a board of at least 70 × 70 mm; this one has neither and is narrower (below) |
 | PCBA side | Top | Every machine part is on the top face; the thumb switches (underneath) are fitted by hand |
 | Assembly | `fab/main-board-bom-jlc.csv`, `-cpl-jlc.csv`; `-hand-assembly.csv` for the rest | One BOM row per LCSC number, its MPN as the Comment (#17 D5) |
