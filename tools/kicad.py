@@ -572,13 +572,17 @@ def check_allocation(board_docs):
 LOOM = os.path.join(ROOT, "hardware", "interfaces", "key-chain-loom", "netlist.yaml")
 
 
+CHAIN_WAYS = 10   # J-CHAIN's positions, and the ribbon's conductors (key-chain-loom.md)
+
+
 def check_chain(board_docs):
     """Each key board's J-CHAIN against the ribbon's other end (K7-1). The two ends are
     recorded apart: the board's pin map in its sheet (board-netlist.yaml), the ribbon's in
     the loom's netlist.yaml (exported from its sheet), as J-CHAIN-KEY-<LH|RH>. Pin k of the key board
     must be on the net the loom puts J-CHAIN-KEY-<x>.k on, by name, and a pin the board
-    leaves unconnected must be a spare conductor there. The loom's own -RN2 map is held
-    to its rule too: key-board pin k shares a net with main-board pin 13 - k. A swapped
+    leaves unconnected must be a spare conductor there. The loom's own map is held
+    to its rule too: the ribbon is straight, so key-board pin k shares a net with
+    main-board pin k (CHAIN_WAYS conductors). A swapped
     pin on either side is a wrong conductor, and on the rail and ground pins a short."""
     loom = yaml.safe_load(open(LOOM))
     lnet = {}
@@ -605,12 +609,12 @@ def check_chain(board_docs):
         for net, pins in doc["nets"].items():
             for p in pins:
                 bnet[p] = (net.lstrip("/"), len(pins))
-        for k in range(1, 13):
+        for k in range(1, CHAIN_WAYS + 1):
             want = lnet.get(f"{key}.{k}")
-            main = lnet.get(f"J-CHAIN-MAIN-{side}.{13 - k}")
+            main = lnet.get(f"J-CHAIN-MAIN-{side}.{k}")
             if want is None or want != main:
-                problems.append(f"chain: {rel} puts {key}.{k} on {want}, but J-CHAIN-MAIN-{side}.{13 - k} "
-                                f"(the same conductor, -RN2) on {main}")
+                problems.append(f"chain: {rel} puts {key}.{k} on {want}, but J-CHAIN-MAIN-{side}.{k} "
+                                f"(the same conductor) on {main}")
             got, size = bnet.get(f"{jref}.{k}", (None, 0))
             if size == 1:
                 # unconnected on the board: fine only on a conductor nothing else uses
@@ -620,7 +624,7 @@ def check_chain(board_docs):
                     problems.append(f"chain: {bname} leaves {jref}.{k} (J-CHAIN) unconnected; {rel} puts {key}.{k} on {want}")
             elif got != want:
                 problems.append(f"chain: {bname} wires {jref}.{k} (J-CHAIN) to {got}; {rel} puts {key}.{k} "
-                                f"(main-board pin {13 - k}) on {want}")
+                                f"(main-board pin {k}) on {want}")
     return problems
 
 
@@ -648,7 +652,7 @@ def check_chain_main(doc, js, loom, lnet, rel):
             continue
         seen.add(side)
         key = f"J-CHAIN-MAIN-{side}"
-        for k in range(1, 13):
+        for k in range(1, CHAIN_WAYS + 1):
             want = lnet.get(f"{key}.{k}")
             want = MAIN_ALIAS.get(want, want)
             got, size = bnet.get(f"{jref}.{k}", (None, 0))

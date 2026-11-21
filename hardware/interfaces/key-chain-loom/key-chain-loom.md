@@ -16,9 +16,9 @@ and the firmware do not change. What changed is where the registers sit:
   switches and networks (ADR 0017). Their part of the chain is traces.
 - **Two on the key boards**, `right_hand` and `left_hand`, which hang from the
   lid under the top plate (`PCB-CLUSTER`). Each key board connects to the main
-  board by **one 12-conductor 1.27 mm IDC ribbon** (`CBL-CHAIN`) with a 2×6
-  IDC socket at each end, plugged into a **through-hole, right-angle, shrouded
-  2×6 header** (`J-CHAIN`) on each board — **four** in all (`chain-connectors`):
+  board by **one 1.27 mm IDC ribbon** (`CBL-CHAIN`, `chain-conductors`) with a
+  2×5 IDC socket at each end, plugged into a **through-hole, vertical, shrouded
+  2×5 header** (`J-CHAIN`) on each board — **four** in all (`chain-connectors`):
   two on the main board, one on each key board.
   Through-hole because the board, not SMT pads, then takes the cable's pull
   (owner, 2026-09-27).
@@ -45,7 +45,6 @@ The `Dir` and `Peer` columns are defined once in
 | `QH` of `right_thumb` | main board only | in → out | `cluster/key-register` → MCU IO40 | `marker-bits`, `free-bits` | Bit 0 onward. **Reaches no connector** — a trace from the register to the MCU's pins |
 | `GND` ×5 (pins 1, 3, 5, 7, 9) | both | ref | `cluster/key-register`, `cluster/key-switch-network`, `cluster/key-marker-and-bits` | `chain-conductors` | One between every signal, and against pin 10 |
 | `3V3` (pin 10) | main → key boards | out | MCU board's 3V3 (`DEV_3V3`) → `right_thumb`/`left_thumb` direct, and → one `FB-CHAIN` per ribbon → the key board's `cluster/key-register`, `cluster/key-switch-network`, `cluster/key-marker-and-bits`; shared with `carrier/breath-adc` | `key-pullup-qty` | **It is also the MCP3202's reference** — `carrier.md` §2 carries that argument. No fuse (ADR 0018) |
-| spare ×2 (pins 11, 12) | both | — | — | `chain-conductors` | ADR 0009's rule, free in a 12-way part |
 | `J-CHAIN`, `CBL-CHAIN` | both | — | — | `chain-connectors` | This circuit's connectors and cables |
 | `R-CHAIN-SER`, `R-SER-TERM`, `R-HOP-SER`, `U-TVS-CHAIN`, `U-TVS-CHAIN-RH`, `FB-CHAIN` | main | — | — | — | This circuit's parts, all on the main board |
 | the 32 bits | all four registers | — | `cluster/key-marker-and-bits` | `marker-bits`, `free-bits` | Allocated in `config/key-layout.yaml`. The chain order is unchanged |
@@ -131,27 +130,25 @@ serial data flows toward the clock source (ADR 0001 fix 3) `[repo]`:
        CBL-CHAIN, cond. 6 out / 8 back  CBL-CHAIN, cond. 6 out / 8 back
    ┌─────────────┴─────────────┐    ┌───────────┴───────────────┐
    │ KEY BOARD right_hand      │    │ KEY BOARD left_hand       │
-   │  7 ──► SER (RH) QH ──► 5  │    │  7 ──► SER (LH) QH ──► 5  │
+   │  6 ──► SER (RH) QH ──► 8  │    │  6 ──► SER (LH) QH ──► 8  │
    └───────────────────────────┘    └───────────────────────────┘
-   (pin numbers inside the key-board boxes are the KEY BOARD's own J-CHAIN
-    pins, 13 − k for conductor k; everything above them is main-board
-    numbering)
+   (a pin has the same number at both ends of a ribbon: conductor k)
 
    SCK, SH/LD, 3V3 and the grounds are one net each, on every register and
    on both ribbons. Each ribbon carries its key board's SER IN on conductor 6
-   (key-board J-CHAIN pin 7) and its QH OUT on conductor 8 (key-board pin 5).
+   (J-CHAIN pin 6 at both ends) and its QH OUT on conductor 8 (pin 8).
 ```
 
-**The existing 12-way pinout already does this, and is kept.** Each ribbon is
+**The pinout does this.** Each ribbon is
 a single hop out and a single hop back: the key board's serial input on
-conductor 6 (key-board `J-CHAIN` pin 7) and its serial output on conductor 8
-(key-board pin 5), with a ground either side of both in the ribbon.
+conductor 6 and its serial output on conductor 8, with a ground either side
+of both in the ribbon.
 
 **No serial-input link is needed on any board.** The four-board design had a
 solder link on every cluster board to choose where `SER` came from, because
 the chain-end board was different ([`notes.md`](notes.md)). Now each key board
-has one connector and its `SER` is **always** conductor 6 — key-board
-`J-CHAIN` pin 7 — whatever drives main-board pin 6. Both key boards are identical in the chain;
+has one connector and its `SER` is **always** conductor 6 — `J-CHAIN` pin 6 —
+whatever drives main-board pin 6. Both key boards are identical in the chain;
 the difference between the right-hand and left-hand hop is two traces on the
 main board, which is one board with one layout anyway.
 
@@ -165,7 +162,7 @@ and `key-layout.yaml`'s order stands.
 
 ```
   from the MCU                  J-CHAIN, main board, BOTH ribbons
-  (MCU board pins)              (2×6 1.27 mm shrouded IDC, right-angle)
+  (MCU board pins)              (2×5 1.27 mm shrouded box header, vertical)
 
    IO38  ──[R-CHAIN-SER 100R]──────► 2 SCK    both ribbons, and RT/LT CLK
 
@@ -186,7 +183,6 @@ and `key-layout.yaml`'s order stands.
            ├──[FB-CHAIN 600R]──────────► 10 3V3  right_hand ribbon
            └──[FB-CHAIN 600R]──────────► 10 3V3  left_hand ribbon
    GND   ─────────────────────────────►  1 3 5 7 9  both ribbons
-                                         11 12  spare
 
    [U-TVS-CHAIN SP0504BAHTG] on SCK, SH/LD and the chain-end SER, to GND_CHAIN,
    at the left_hand J-CHAIN; its fourth channel is spare. Fitted (ADR 0018).
@@ -198,14 +194,13 @@ and `key-layout.yaml`'s order stands.
 
 ```
    J-CHAIN, key board              U-KEYS on this key board
-   conductor k = key-board pin 13 − k — see below
-   cond. 2  = pin 11  SCK   ───────►  CLK
-   cond. 4  = pin 9   SH/LD ───────►  SH/LD
-   cond. 6  = pin 7   SER   ───────►  SER (pin 10)
-   cond. 8  = pin 5   QH    ◄───────  QH  (pin 9)
-   cond. 10 = pin 3   3V3   ───────►  VCC, pull-ups, marker straps
-   cond. 1 3 5 7 9  = pins 12 10 8 6 4   GND
-   cond. 11 12      = pins 2 1           spare, unconnected
+   conductor k = pin k, as on the main board — see below
+   pin 2   SCK   ───────►  CLK
+   pin 4   SH/LD ───────►  SH/LD
+   pin 6   SER   ───────►  SER (pin 10)
+   pin 8   QH    ◄───────  QH  (pin 9)
+   pin 10  3V3   ───────►  VCC, pull-ups, marker straps
+   pins 1 3 5 7 9          GND
 
    No link, no pull-up, no choice: both key boards are this drawing.
 ```
@@ -214,51 +209,48 @@ and `key-layout.yaml`'s order stands.
 
 ## The ribbon — connector, cable, fold and pin numbering
 
-**The parts** (owner, 2026-09-27; ADR 0017's amendment). `J-CHAIN` is a
-2×6, 1.27 mm pitch, **shrouded, keyed, right-angle, through-hole** IDC
-header; the part is Samtec SHF-106-01-L-D-RA
-`[datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, the full print]`.
-`CBL-CHAIN` is a flat IDC ribbon, 12 conductors at 0.635 mm, with a 2×6 IDC
-socket at each end, bought as an assembled length; the part is Samtec
-**FFSD-06-D-xx.xx-01-N-RN2** — `xx.xx` is the length code below, in
-inches, and **`-RN2`, the notch reversed on the second socket, is what sets
-the pin map and which way each end's cable leaves** (below)
-`[datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf, sheet 2 fig 3]`. Their envelopes are `config/body.yaml` `boards.chain_hdr_*` and
-`boards.chain_plug_*`, and the ribbon's `routing.chain_ribbon_w` / `_t`.
-**Through-hole** is the owner's reason for the change: the cable's pull goes
-into the board, not into SMT pads.
+**The parts** (owner, 2026-11-21; ADR 0017's Amendment of that date).
+`J-CHAIN` is a 2×5, 1.27 mm pitch, **shrouded, keyed, vertical,
+through-hole** box header; the part is CNC Tech 3220-10-0100-00
+`[datasheets/connectors/CNCTECH-3220-XX-0100-00-1.27MM-BOX-HEADER-VERTICAL.pdf]`.
+`CBL-CHAIN` is a flat ribbon at 0.635 mm (`chain-conductors`) with a 2×5 IDC
+socket crimped at each end, CNC Tech 3230-10-0103-00
+`[datasheets/connectors/CNCTECH-3230-XX-0103-00-1.27MM-IDC-SOCKET.pdf]`, **made up here as a straight cable**: both sockets on the same face
+of the ribbon and the same way round, which is what sets the pin map and
+which way each header's key slot faces (below). Their envelopes are
+`config/body.yaml` `boards.chain_hdr_*` and `boards.chain_plug_*`, and the
+ribbon's `routing.chain_ribbon_w` / `_t`. **Through-hole** is the owner's
+reason for leaving flat flex: the cable's pull goes into the board, not into
+SMT pads. **Vertical, and this size**, are the owner's too: one bend in the
+cable, and a part that is common and stocked.
 
 **Where they sit** — `mechanical/DESIGN.md` and the model `[repo]`: on each key
-board the header hangs from the board's **underside directly over the main
-board's header** — stacked, at the same position along the body — both in the
-far band beside the LED row, **both mouths facing the same way along the
-body**. Each header stands `boards.chain_hdr_h` off its board with its mouth
-centred `boards.chain_hdr_mouth_z` above it; its pin rows are **behind the
-body's back face**, the tails bending down behind it (`boards.chain_hdr_pin_back`,
-from the mouth); a mated socket stands `boards.chain_plug_proud` out of the
-mouth (tbd). That stand-out decides whether the cable clears the shroud's
-mouth at all, not only where the ribbon folds: the cable leaves the socket a
-little inside its back face, so a socket that stands out less than estimated
-can pinch the cable on the shroud. It is measured on the first mated pair.
+board the header hangs from the board's **underside, mouth to mouth with the
+main board's header** — at the same position along the body
+(`boards.chain_mb_shift`) — both in the far band beside the LED row. Each
+header stands `boards.chain_hdr_h` off its board, its two pin rows under the
+middle of its body; a mated socket and its cover stand
+`boards.chain_plug_proud` out of the mouth, and the ribbon leaves the socket
+`boards.chain_plug_cable` above the mouth. Both are taken from the two
+drawings, not from a mated pair, and they set the room between the two
+sockets (`drc.echo` "key-chain sockets clear of each other, mouth to mouth")
+and the fold's radius: measured on the first mated pair.
 The key header's pin tails come up through the key board toward the grounded
 key plate and **stop short of it**: the plate has no window over them
 (`drc.echo` "J-CHAIN pin tails clear of the key plate"). The model places
 both headers clear of the switches (`drc.echo` "chain headers on the
 left_hand boards clear of the switches", and the `right_hand` rule).
 
-**How the ribbon lies closed** `[repo]`: with `-RN2`, **the main board's
-socket's cable leaves upward, toward the key board, and the key board's
-leaves downward**, so the two exits face each other across the gap between
-the plugs (*Pin numbering*, below). Each end turns out along the body and the
-ribbon folds back on itself into a **flat hairpin lying along the body,
-both legs between the two plugs' heights**, running the same way to the
-fold, so it never stands across the LED row's light. Which way each hand's
-hairpin folds is `config/body.yaml` `routing.chain_fold`, which says why.
-Leg and fold radius: `mechanical/drc.echo` "key-chain ribbon closed:
-hairpin leg and fold radius", held to the cable's bend radius by "key-chain
-ribbon fold no tighter than its bend radius". Both hairpins are checked
+**How the ribbon lies closed** `[repo]`: each socket goes in along its pins
+and **its ribbon leaves it flat, along the body**, both the same way; the
+spare length runs out from both sockets and closes in **one fold**, with no
+turn at either socket, so it never stands across the LED row's light. Which
+way each hand's ribbon leaves is `config/body.yaml` `routing.chain_fold`,
+which says why. Leg and fold radius: `mechanical/drc.echo` "key-chain ribbon
+closed: hairpin leg and fold radius", held to the cable's bend radius by
+"key-chain ribbon fold no tighter than its bend radius". Both are checked
 inside the body ("key-chain ribbon hairpin inside the body") and off the
-cassette's columns, which stand through the whole gap the hairpin lies in
+cassette's columns, which stand through the whole gap the ribbon lies in
 ("key-chain ribbon hairpin clear of the columns"; ADR 0025).
 
 **Why it is as long as it is** (owner, 2026-09-27: long enough "to have the
@@ -271,62 +263,56 @@ sockets (`routing.chain_service`, `routing.chain_raise`, plus
 `routing.chain_slack`). It is not laid beside the body any more: a ribbon that
 long folds into a hairpin that reaches one of the left-hand board's columns. The free length is
 `mechanical/drc.echo` "key-chain ribbon length (derived)", in millimetres.
-**The part is ordered by a different line**: "key-chain cable to order
-(FFSD length code)" is the FFSD length field — inches, overall, measured
-over both sockets as the print measures it, with its −0.125 in tolerance
-already covered — so the order is `FFSD-06-D-<that code>-01-N-RN2`. FFSD is
-built to length; there are no stock lengths. **So the key plate comes off by
+**The ribbon is cut by a different line**: "key-chain ribbon to cut" is the
+flat cable end to end, a socket crimped flush at each end. **So the key plate comes off by
 undoing its column screws, raising it and unplugging the main board's
 sockets**; it goes back on by plugging them in with the plate held raised,
 then lowering it onto its columns and screwing it down.
 
-**Pin numbering: key-board pin = 13 − main-board pin, and the cable sets
-it.** `[datasheet]`, both full prints banked:
+**Pin numbering: key-board pin = main-board pin, and the cable sets it**
+(`key-board-chain-pinmap`). `[datasheet]`, both drawings banked:
 
 1. **A keyed IDC socket always mates its position k to header pin k.** So
    which main-board pin reaches which key-board pin is set by **how the cable
-   assembly is built**, not by the headers.
-2. **On an FFSD cable, the first socket's cable leaves on the side of its
-   key and the second's on the side away from it; `-RN2` reverses the
-   second's notch, so both sockets' cables leave on their key's side**
-   (FFSD print sheet 1 fig 1, sheet 2 fig 3). The main board's header is
-   upright, its key slot in the odd-row wall, away from the board (SHF
-   print), so that socket's cable leaves **upward**, toward the key board.
-   The key board's header is the same part upside down on the key board's
-   underside, its slot facing down, so that socket's cable leaves
-   **downward**. The two face each other.
-3. **The cable is ordered `-RN2`.** Both ends are then built alike, so either
-   end may go on either board; the ribbon runs flat with no twist, and
-   conductor k meets key-board pin 13 − k:
+   is made up**, not by the headers.
+2. **The cable is straight**: both sockets are crimped on the same face of
+   the ribbon, their keys facing the same way along it, position 1 on the
+   same edge conductor. Conductor k is then position k of both sockets.
+3. **Folded closed, the two sockets face each other**, the main board's
+   opening down onto its header and the key board's opening up. Their keys
+   faced the same way along the flat ribbon, so now one faces the fold and
+   the other faces away from it — and each header is placed with its slot,
+   which is in the wall over its odd row, to suit:
 
 ```
-   conductor k  =  main-board J-CHAIN pin k
-                =  key-board J-CHAIN pin 13 − k
+   conductor k  =  main-board J-CHAIN pin k  =  key-board J-CHAIN pin k
 
-   k:        1    2    3    4    5    6    7    8    9   10   11   12
-   signal:  GND  SCK  GND SH/LD GND  SER  GND  QH   GND  3V3  sp   sp
-   key pin: 12   11   10    9    8    7    6    5    4    3    2    1
+   k:        1    2    3    4    5    6    7    8    9   10
+   signal:  GND  SCK  GND SH/LD GND  SER  GND  QH   GND  3V3
+
+   key board:   slot and odd row (grounds) toward the fold;
+                even row (signals, 3V3) toward its register
+   main board:  slot and odd row (grounds) away from the fold;
+                even row (signals, 3V3) toward the fold
 ```
 
 **The key boards' KiCad sheets carry that map** (their exported
-`hardware/boards/key-board-*/board-netlist.yaml` confirm it), and
-[`netlist.yaml`](netlist.yaml) nets the ribbon by it. Place the standard
-footprint on the key board's bottom side; do not hand-mirror it — the map is
-in the netting, and mirroring the footprint as well would undo it. **A standard cable,
-without `-RN2`, fits and looks right, and is wrong**: plugged with its
-second socket on the main board, both ends' cables leave downward and the
-ribbon takes a half-twist it absorbs unnoticed, and conductor k meets
-key-board pin k — conductor 10's 3V3 on pin 10, a ground, and `SH/LD` and
-conductor 6's signal on grounds too `[datasheet, both full prints; calc]`. **A cable whose ends both leave downward is a standard cable.**
-Nothing mechanical shows it, so every cable is metered before it is first
-powered (*Still open*, and the key board's README, *Bring-up*).
+`hardware/boards/key-board-*/board-netlist.yaml` confirm it),
+[`netlist.yaml`](netlist.yaml) nets the ribbon by it, and `tools/kicad.py
+check` holds the two together. Place the standard footprint on the key
+board's bottom side; do not hand-mirror it. **The ends are not
+interchangeable**: turned end for end, each socket's key is on the wrong side
+of its header and it goes in only with the ribbon twisted half a turn, which
+shows. **A cable made up with one socket turned round** goes in without a
+twist at one end only, and reverses the row order there — 3V3 onto a ground
+`[calc]`. So every cable is metered before it is first powered (*Still open*,
+and the key board's README, *Bring-up*).
 
 **What the header does to "a ground between every signal".** In the **ribbon**
 every signal conductor has a ground on both sides, which is ADR 0001's rule
 and the reason for the pinout. In the **header** the rows split it `[calc]`:
-on the key board the signals and 3V3 are the odd pins (one row) and the
-grounds the even pins (the other row); on the main board it is the other way
-round. A ground sits between signals **along the ribbon, not along the header
+on both boards the grounds are the odd pins (one row) and the signals and
+3V3 the even pins (the other row). A ground sits between signals **along the ribbon, not along the header
 row** — a few millimetres of adjacency inside the connector, not a return
 path, and the same for any 2-row IDC part.
 
@@ -417,7 +403,7 @@ and spends part of the 100 ns the run allows for setup. Whatever delay the part
 really has is added margin.
 
 **E14 confirms it** on the real boards: scope `right_hand`'s `CLK` (its
-`J-CHAIN` pin 11) against the hop's data at `right_hand`'s `SER` (pin 7), both
+`J-CHAIN` pin 2) against the hop's data at `right_hand`'s `SER` (pin 6), both
 at the register's pins, and show `SER` still steady for at least 1 ns after
 `CLK` crosses mid-rail at both edges of the data, with the marker counter at
 zero over a long run. A failure would duplicate a bit and shift the frame,
@@ -612,34 +598,24 @@ and none of it moved.
 Each item says what closes it and when. Nothing here waits on a derivation
 that could be done on paper.
 
-- **`J-CHAIN`'s supply — the first order.** The part is decided (a 2×6
-  1.27 mm shrouded, keyed, right-angle through-hole header inside
-  `boards.chain_hdr_*`, the same at all four positions; Samtec
-  SHF-106-01-L-D-RA, full print banked) and its footprint is laid out on both
-  key boards. What is open is buying it: DigiKey held **8** at $2.83 with a
-  4-week factory lead time `[web https://www.digikey.com/en/products/detail/samtec-inc/SHF-106-01-L-D-RA/8410402, 2026-09-30]`
-  — an instrument takes `chain-connectors`, so eight is one build and its
-  spares — and JLC/LCSC none (the key board's README, *Ordering it*). Buy them
-  with the first key-board order; failing DigiKey, Samtec direct. A stocked
-  alternative is **not** a drop-in: it changes a footprint on three boards, so
-  it would be a new decision, not this one.
-- **`CBL-CHAIN`'s fit — M4, the first mated pair.** The part and its order
-  code are decided: `FFSD-06-D-<code>-01-N-RN2`, `<code>` being `drc.echo`
-  "key-chain cable to order (FFSD length code)" written `XX.XX`. The print
-  allows any overall length in that field above a 1.00 in minimum, and
-  states increments only for the daisy-chain option (1.00 in), which this
-  cable does not use `[datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf,
-  sheet 1, the part-number block and note 11]`; Samtec's own site has FFSD-06-D product
-  pages at non-round lengths such as 31.90 `[web search result
-  https://www.samtec.com/products/ffsd-06-d-31.90-01-n, 2026-09-30; the page
-  itself answered HTTP 429, so its content is unread]`.
-  What only the hardware can close is `boards.chain_plug_proud`, the mated
-  socket's stand-out from the shroud's mouth, which the print does not
-  dimension and which decides whether the cable clears the mouth: **measured
-  on the first mated pair at M4.** Every cable is metered before it is first
-  powered (conductor 10 to the far socket's position 3, conductor 2 to its
-  position 11), because a standard cable goes in without any mechanical sign
-  (above) — that is a bring-up step, not an open item.
+- **`J-CHAIN`'s second source.** The part is decided and stocked (its row).
+  XKB's X1270WV-2x05B is the candidate second source and is not cleared: its
+  drawing could not be fetched (`datasheets/MANIFEST.csv`), and its height and
+  mouth depth must be held against `boards.chain_hdr_h` and
+  `boards.chain_plug_proud` before one is fitted. Closed by banking that
+  drawing.
+- **`CBL-CHAIN`'s fit — M4, the first mated pair.** The sockets, the cable
+  and the cut length are decided (its row; `drc.echo` "key-chain ribbon to
+  cut"). What only the hardware can close is `boards.chain_plug_proud` and
+  `boards.chain_plug_cable`, each the difference of two drawings' dimensions:
+  the room between the two mated sockets and the fold's radius hang on them
+  (`drc.echo` "key-chain sockets clear of each other, mouth to mouth",
+  "key-chain ribbon fold no tighter than its bend radius"). **Measured on the
+  first mated pair at M4**; if the pair is taller than drawn,
+  `boards.chain_mb_shift` moves the main board's header along the body.
+  Every cable is metered before it is first powered (conductor 10 to the far
+  socket's position 10, conductor 2 to its position 2, no two neighbours
+  shorted) — that is a bring-up step, not an open item.
 - **`R-CHAIN-SER`'s value — E14.** Scope `SCK` at the `left_hand` register on
   the real main board and ribbons (above). 100 Ω is fitted either way.
 - **Two tests of decided parts.** `U-TVS-CHAIN` and the absent fuse are

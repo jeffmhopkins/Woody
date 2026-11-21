@@ -96,7 +96,7 @@ RH = 108.0                    # the right hand's header, switches and register s
 P = 1.27
 
 # ---- a chain header and its register: the left hand's; the right's is RH further along ---------
-JX, JY2 = 79.55, 38.84        # J-CHAIN's signal column (even pins), pin 2; pins 4..12 each 1.27 toward the far edge
+JX, JY2 = 77.865, 39.29       # J-CHAIN's signal column (even pins, the mouth side), pin 2; pins 4..10 each 1.27 toward the far edge
 UX, UY = 61.5, 38.5           # the register: the nearest to the mouth that leaves SW2's ground pin its iron room
 CX = 69.0                     # the column between the register and the header's body
 LOW, HIGH = 33.2, 46.5        # the two lines every row and comb of the far band stands on
@@ -118,7 +118,7 @@ def block(dx, r):
     p = {
         r["U"]: (UX + dx, UY, ("1", (4.445, 2.475))),               # key row toward the far edge, pin 1 at the header end
         r["TVS"]: (CX + dx, jpin(4)[1], ("1", (-0.95, -1.1375))),    # SH/LD passes between its rows, level with pad 4
-        r["FB"]: (CX + dx, 44.0, "-x"),                              # pad 2 level with the header's pad 10
+        r["FB"]: (CX + dx, 44.0, "-x"),                              # pad 2 just under the header's pad 10, one line and a short 45 away
         r["C16"]: (CX + dx, 35.25, ("3V3", "N")),                    # on end beside pin 16
     }
     p.update(comb(58.5 + dx, HIGH, "N", *r["far_mouth"]))            # above the register
@@ -638,26 +638,39 @@ def chain():
     on a via beside the left header, the one place it changes face."""
     q, e, h, lt, k = (BAND[n] for n in ("CHAIN_QH_RT", "CHAIN_SER_LH", "CHAIN_SHLD", "HOP_LT_RH", "CHAIN_SCK"))
     c = 0.3
+    y4, y6 = jpin(4)[1], jpin(6)[1]
+    xh, xe = JX - 1.65, JX - 2.05     # SH/LD's and SER's ways up, on the mouth side of the header's pads
     # the return, to a via under the right register's QH pin
     T("CHAIN_QH_RT", [(245.6, 25.2), (245.6, q - c), (245.6 - c, q), (166.9, q), (166.5, q - 0.4)], FINE, "B")
     VIAS.append(("CHAIN_QH_RT", 166.5, q - 0.4))
     T("CHAIN_QH_RT", [(166.5, q - 0.4), (165.06, 32.64), "U8.9"])
     # SER, to the left header's pin 6
     T("CHAIN_SER_LH", [(255.2, 25.36), (254.34, 24.5), (248.2, 24.5), (247.9, 24.8), (247.9, e - c), (247.9 - c, e),
-                       (77.5 + c, e), (77.5, e + c), (77.5, 41.38 - c), (77.5 + c, 41.38), "J4.6"], FINE, "B")
+                       (xe + c, e), (xe, e + c), (xe, y6 - c), (xe + c, y6), "J4.6"], FINE, "B")
     # SH/LD, to pin 4 of both
-    T("CHAIN_SHLD", [(249.2, 25.36), (249.2, h - c), (249.2 - c, h), (185.9, h)], FINE, "B")
-    T("CHAIN_SHLD", [(185.9, h), (185.9, 40.11 - c), (185.9 + c, 40.11), "J5.4"], FINE, "B")
-    T("CHAIN_SHLD", [(185.9, h), (77.9 + c, h), (77.9, h + c), (77.9, 40.11 - c), (77.9 + c, 40.11), "J4.4"], FINE, "B")
+    T("CHAIN_SHLD", [(249.2, 25.36), (249.2, h - c), (249.2 - c, h), (xh + RH, h)], FINE, "B")
+    T("CHAIN_SHLD", [(xh + RH, h), (xh + RH, y4 - c), (xh + RH + c, y4), "J5.4"], FINE, "B")
+    T("CHAIN_SHLD", [(xh + RH, h), (xh + c, h), (xh, h + c), (xh, y4 - c), (xh + c, y4), "J4.4"], FINE, "B")
     # SCK, to pin 2 of both
-    T("CHAIN_SCK", [(252.2, 25.36), (252.2, SCK_E - c), (252.2 - c, SCK_E), (189.05, SCK_E), (187.55, 34.3), "J5.2"], FINE, "B")
+    T("CHAIN_SCK", [(252.2, 25.36), (252.2, SCK_E - c), (252.2 - c, SCK_E), (JX + RH + 1.5, SCK_E), (JX + RH, SCK_E + 1.5), "J5.2"], FINE, "B")
     VIAS.append(("CHAIN_SCK", 175.0, 37.9))
-    T("CHAIN_SCK", [(175.0, 37.9), (175.0 - (37.9 - k), k), (80.55, k), (79.55, k + 1.0), "J4.2"], FINE, "B")
+    T("CHAIN_SCK", [(175.0, 37.9), (175.0 - (37.9 - k), k), (JX + 1.0, k), (JX, k + 1.0), "J4.2"], FINE, "B")
     # the hop between the hands
-    T("HOP_LT_RH", ["J5.6", (185.0, 41.38), (185.0 - (41.38 - lt), lt), (82.2, lt)], FINE, "B")
+    T("HOP_LT_RH", ["J5.6", (xh + RH - 0.9, y6), (xh + RH - 0.9 - (y6 - lt), lt), (82.2, lt)], FINE, "B")
     VIAS.append(("HOP_LT_RH", 82.2, lt))
     T("HOP_LT_RH", [(82.2, lt), (81.15, 32.0), (70.9, 32.0), (70.35, 31.45), (51.62, 31.45), "R44.2"])
     T("HOP_LT_QH", ["R44.1", (53.23, 34.9), (55.93, 34.9), "U7.9"])
+
+
+HOP_Y = 42.65                 # each hop's line from its header's pin 8 toward the mouth, on the bottom face
+
+
+HOP_TOP = 42.75               # ...and the right hand's on the top face, between the clamp's pad 4 and the bead's pad 2
+
+
+def hop_out(y8, y=HOP_Y):
+    """From pin 8 straight out past its neighbours' pad ends, then one 45 down to y."""
+    return [(JX - 1.3, y8), (JX - 1.3 - (y8 - y), y)]
 
 
 def registers():
@@ -673,17 +686,19 @@ def registers():
         lh = dx == 0
         leg2, leg4 = (("/LT2/SWITCH_LEG", "/LT4/SWITCH_LEG") if lh else ("/RT2/SWITCH_LEG", "/RT4/SWITCH_LEG"))
         # SCK: out of pin 2 below the clamp, a stub up to the clamp, in under the register to pin 2
-        T("CHAIN_SCK", [f"{j}.2", (X(78.61), 37.9), (X(68.05), 37.9)])
+        y2, y4, y6, y8, y10 = (jpin(k)[1] for k in (2, 4, 6, 8, 10))
+        T("CHAIN_SCK", [f"{j}.2", (X(JX - (y2 - 37.9)), 37.9), (X(68.05), 37.9)])
         T("CHAIN_SCK", [(X(68.05), 37.9), (X(67.0), 37.9), (X(65.74), 37.9), (X(64.67), 38.97), f"{u}.2"])   # x 67: where the right hand's via stands
         T("CHAIN_SCK", [(X(68.05), 37.9), f"{tvs}.1"])
         # SH/LD: straight from pin 4 between the clamp's rows into pin 1
-        T("CHAIN_SHLD", [f"{j}.4", (X(69.95), 40.11), (X(65.94), 40.11), f"{u}.1"])
-        T("CHAIN_SHLD", [(X(69.95), 40.11), f"{tvs}.3"])
+        T("CHAIN_SHLD", [f"{j}.4", (X(69.95), y4), (X(65.94), y4), f"{u}.1"])
+        T("CHAIN_SHLD", [(X(69.95), y4), f"{tvs}.3"])
         # pins 6 and 10 of the header
-        T("CHAIN_SER_LH" if lh else "HOP_LT_RH", [f"{tvs}.4", (X(79.42), 41.25), f"{j}.6"])
-        T("V3V3_CHAIN_LH" if lh else "V3V3_CHAIN_RH", [f"{fb}.2", (X(79.47), 44.0), f"{j}.10"])
+        T("CHAIN_SER_LH" if lh else "HOP_LT_RH", [f"{tvs}.4", (X(JX - 0.1325), y6 - 0.1325), f"{j}.6"])
+        T("V3V3_CHAIN_LH" if lh else "V3V3_CHAIN_RH", [f"{fb}.2", (X(JX - (y10 - 44.0)), 44.0), f"{j}.10"])
         # the hop into this register: from the header's pin 8 on the bottom face to a via under the body
-        T(hop, [f"{j}.8", (X(62.98), 42.65), (X(58.33), 38.0)], FINE, "B")
+        # (it leaves the pad straight, then drops to HOP_Y past pad 6's end: 3V3's line lies just north)
+        T(hop, [f"{j}.8"] + [(X(x), y) for x, y in hop_out(y8)] + [(X(58.33 + HOP_Y - 38.0), HOP_Y), (X(58.33), 38.0)], FINE, "B")
         VIAS.append((hop, X(58.33), 38.0))
         T(hop, [(X(58.33), 38.0), f"{u}.10"])
         # the far row's two keys: each switch's line south of its ground pin to its resistor
@@ -700,7 +715,7 @@ def registers():
         T(x3, [f"{near_tail[0]}.1", (X(107.61), 48.3), (X(65.9), 48.3), (X(65.6), 48.0), (X(65.6), 43.2), (X(65.3), 42.9),
                (X(62.44), 42.9), (X(62.14), 42.6), f"{u}.4"])
     # the hop's line reaches the right register's clamp on top
-    T("HOP_RH_RT", ["J5.8", (177.45, 42.65), "U11.5"])
+    T("HOP_RH_RT", ["J5.8"] + [(x + RH, y) for x, y in hop_out(jpin(8)[1], HOP_TOP)] + [(CX + RH - 0.95 + HOP_TOP - (jpin(4)[1] + 1.1375), HOP_TOP), "U11.5"])
     # the left hand's near mouth-side key: up past the supply capacitor, under the register to pin 6
     T("KEY_LT1", ["R13.1", "C15.1", "R12.2"])
     T("KEY_LT1", ["R13.1", (73.0, 36.6), (72.2, 37.4), (60.39, 37.4), (59.59, 38.2), "U7.6"])
@@ -1074,6 +1089,7 @@ def main():
                 board.Add(ni)
             p.SetNet(ni)
     pcb_hand.strip(board)
+    pcb_hand.refit(board, comps, nets)
     fps = {fp.GetReference(): fp for fp in board.GetFootprints()}
     for cname, ch in geo["chains"].items():
         side = cname.split("-")[-1]

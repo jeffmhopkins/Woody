@@ -27,7 +27,7 @@ Since ADR 0017:
   cassette's columns at each corner (ADR 0025; ADR 0020 Amendment 7): under
   the key plate a spacer, then the board, then the column's standoff, which
   stands on the main board; a screw comes down through the plate, the spacer
-  and the board into the standoff. Each connects to the main board by one 1.27 mm IDC ribbon (`CBL-CHAIN`) into a through-hole right-angle header on its underside.
+  and the board into the standoff. Each connects to the main board by one 1.27 mm IDC ribbon (`CBL-CHAIN`) into a through-hole vertical header on its underside.
 - **`right_thumb` and `left_thumb` are on the main board** (`PCB-CARRIER`),
   their switches soldered to it and clipped into `PLATE-BOTTOM`, their
   registers and networks beside them.
@@ -39,8 +39,8 @@ once: hierarchical KiCad sheets placed per board, with which bit is a switch, a
 marker or free held in
 [`allocation.yaml`](key-marker-and-bits/allocation.yaml) (ADR 0019). **The two key boards are
 identical in the chain** — one connector each, `SER` in on conductor 6 and `QH` out
-on conductor 8 (key-board `J-CHAIN` pins 7 and 5; conductor k is key-board
-pin 13 − k, set by the cable, `key-chain-loom.md`) — so they differ only in switch count and strapping.
+on conductor 8 (`J-CHAIN` pins 6 and 8 at both ends: a straight cable,
+`key-board-chain-pinmap` on `key-chain-loom.md`) — so they differ only in switch count and strapping.
 
 **The two key boards are KiCad projects** placing these circuits' sheets, which are
 the source of truth (ADR 0019):
@@ -231,7 +231,7 @@ and `RT` are on the main board.
 | `R-KEY-PU` | 2.2 kΩ 1% 0805 | **6** | **6** | 6 | 6 | **24, not 21.** `RT` carries its 4 keys and the 2 reserved spare-switch positions; `LT` and `LH` each carry a pull-up for their *free* bits (22, 23, 31), which the first draft budgeted for switch positions only |
 | `R-KEY-SER` | 100 Ω 1% 0805 | 5 | 4 | 6 | 6 | |
 | `C-KEY` | 47 nF X7R 0805 | 5 | 4 | 6 | 6 | |
-| `J-CHAIN` | 2×6 1.27 mm shrouded IDC, right-angle, through-hole | 1 | — | 1 | — | One per key board, on its underside; its mate is on the main board (`chain-connectors`). Its pin tails stop short of the key plate, which has no window over them (`drc.echo` "J-CHAIN pin tails clear of the key plate") |
+| `J-CHAIN` | 2×5 1.27 mm shrouded box header, vertical, through-hole | 1 | — | 1 | — | One per key board, on its underside; its mate is on the main board (`chain-connectors`). Its pin tails stop short of the key plate, which has no window over them (`drc.echo` "J-CHAIN pin tails clear of the key plate") |
 | `C-BULK-CHAIN` | 10 µF X5R 0805 | 1 | — | 1 | — | The reservoir on each key board's 3V3, beside `J-CHAIN`: its ESR damps `FB-CHAIN` with `C-DECOUPLE-165` (`key-chain-loom.md`) |
 | `marker straps` | copper, no parts | 2 | 2 | 2 | 2 | **Decided** — 8-bit marker, §4. Straight to GND or 3V3, no resistor and no cap: the node never changes |
 

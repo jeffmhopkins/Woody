@@ -1,13 +1,13 @@
-(footprint "IDC-Header_2x06_P1.27mm_Samtec_SHF_Horizontal"
+(footprint "IDC-Header_2x05_P1.27mm_CNCTech_3220_Vertical"
 	(version 20241229)
 	(generator "woody")
 	(layer "F.Cu")
-	(descr "Samtec SHF-106-01-L-D-RA: 2x06 1.27 mm shrouded IDC header, right-angle, through-hole. Pads from KiCad PinHeader_2x06_P1.27mm_Horizontal; body from the banked print (datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf): length 13.97, depth 5.33, its back 1.26 behind the even row at the bend (sheet 2 C-C), mouth at +x. Courtyard includes the FFSD plug standing ~1.4 out of the mouth (config/body.yaml boards.chain_plug_proud, tbd).")
-	(tags "IDC header 1.27mm shrouded right-angle Samtec SHF")
+	(descr "CNC Tech 3220-10-0100-00: 2x05 1.27 mm shrouded box header, vertical, through-hole. Holes 0.70 on a 1.27 grid, the drawing's recommended layout (datasheets/connectors/CNCTECH-3220-XX-0100-00-1.27MM-BOX-HEADER-VERTICAL.pdf); pads as woody:IDC-Header_2x12_P1.27mm_XKB_X1270WR_Horizontal. Body 12.65 x 5.1, centred on the pads; key slot over the odd row (-x). Courtyard takes in the mated socket's cover, 14.34 long.")
+	(tags "IDC box header 1.27mm shrouded vertical CNC Tech 3220")
 	(property "Reference" "REF**"
-		(at 4.5 -5.2 0)
+		(at 0.635 -5.6 0)
 		(layer "F.SilkS")
-		(uuid "7d7e31b6-0c95-4cf8-93d6-f3544e81a862")
+		(uuid "96944606-2c1b-5f90-a9ca-cea88ba9dcfc")
 		(effects
 			(font
 				(size 1 1)
@@ -15,10 +15,10 @@
 			)
 		)
 	)
-	(property "Value" "SHF-106-01-L-D-RA"
-		(at 4.5 11.6 0)
+	(property "Value" "3220-10-0100-00"
+		(at 0.635 10.7 0)
 		(layer "F.Fab")
-		(uuid "0b7074b4-d991-4a4d-b1b8-50b1b1bb4a71")
+		(uuid "a030b911-b449-5250-8651-4e11a58bb419")
 		(effects
 			(font
 				(size 1 1)
@@ -30,7 +30,7 @@
 		(at 0 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "0ce9d7bb-f01a-4f69-bf5c-624a7a7c5d65")
+		(uuid "a32f4188-11d7-59ab-afea-b82ee37f1c72")
 		(effects
 			(font
 				(size 1 1)
@@ -42,7 +42,7 @@
 		(at 0 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "9d3da67e-c7a5-4888-9245-425793ddaae1")
+		(uuid "15aa7559-67de-5775-b6bd-6b83cccd0c08")
 		(effects
 			(font
 				(size 1 1)
@@ -52,37 +52,59 @@
 	)
 	(attr through_hole)
 	(fp_rect
-		(start 2.53 -3.81)
-		(end 7.86 10.16)
+		(start -1.915 -3.785)
+		(end 3.185 8.865)
 		(stroke
 			(width 0.1)
 			(type solid)
 		)
 		(fill no)
 		(layer "F.Fab")
-		(uuid "37e2e9fb-d7f2-4960-b318-c7d0633f6c99")
+		(uuid "fffea51d-7b82-5440-9cbd-795788080a59")
 	)
 	(fp_rect
-		(start 2.41 -3.93)
-		(end 7.98 10.28)
+		(start -2.035 -3.905)
+		(end 3.305 8.985)
 		(stroke
 			(width 0.15)
 			(type solid)
 		)
 		(fill no)
 		(layer "F.SilkS")
-		(uuid "9be53727-2ec2-4f4e-962b-5793be474352")
+		(uuid "da1f77db-d5ad-588c-9f70-9e6c817324b8")
 	)
 	(fp_rect
-		(start -0.75 -4.31)
-		(end 9.51 10.66)
+		(start -2.165 -4.88)
+		(end 3.435 9.96)
 		(stroke
 			(width 0.05)
 			(type solid)
 		)
 		(fill no)
 		(layer "F.CrtYd")
-		(uuid "8b91ccf6-9f1f-46d5-9e88-7caf4b29219d")
+		(uuid "6e82a8d8-8c53-5709-9b41-4c70e05d59c1")
+	)
+	(fp_rect
+		(start -1.915 1.365)
+		(end -1.315 3.715)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "bfdc7b48-ad19-5dc2-8612-8573e1a66d71")
+	)
+	(fp_rect
+		(start -2.035 1.365)
+		(end -1.435 3.715)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "ca323cc2-0061-5ccc-a822-741cf98836d9")
 	)
 	(pad "1" thru_hole rect
 		(at 0 0)
@@ -174,25 +196,7 @@
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
 	)
-	(pad "11" thru_hole oval
-		(at 0 6.35)
-		(size 1.5 1.07)
-		(drill 0.7
-			(offset -0.215 0)
-		)
-		(layers "*.Cu" "*.Mask")
-		(remove_unused_layers no)
-	)
-	(pad "12" thru_hole oval
-		(at 1.27 6.35)
-		(size 1.5 1.07)
-		(drill 0.7
-			(offset 0.215 0)
-		)
-		(layers "*.Cu" "*.Mask")
-		(remove_unused_layers no)
-	)
-	(model "${KIPRJMOD}/../../lib/woody.3dshapes/Samtec_SHF-106-01-L-D-RA.step"
+	(model "${KIPRJMOD}/../../lib/woody.3dshapes/CNCTech_3220-10-0100-00.step"
 		(offset
 			(xyz 0 0 0)
 		)

@@ -15,7 +15,7 @@
     (comment 4 "Ports are hierarchical labels (Dir, From/To, Figure). It spans three boards: no board places it - key-chain-loom.md")
   )
   (lib_symbols
-    (symbol "Connector_Generic:Conn_01x12"
+    (symbol "Connector_Generic:Conn_01x10"
 		(pin_names
 			(offset 1.016)
 			(hide yes)
@@ -24,15 +24,15 @@
 		(in_bom yes)
 		(on_board yes)
 		(property "Reference" "J"
-			(at 0 15.24 0)
+			(at 0 12.7 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Value" "Conn_01x12"
-			(at 0 -17.78 0)
+		(property "Value" "Conn_01x10"
+			(at 0 -15.24 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -57,7 +57,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Generic connector, single row, 01x12, script generated (kicad-library-utils/schlib/autogen/connector/)"
+		(property "Description" "Generic connector, single row, 01x10, script generated (kicad-library-utils/schlib/autogen/connector/)"
 			(at 0 0 0)
 			(effects
 				(font
@@ -84,27 +84,16 @@
 				(hide yes)
 			)
 		)
-		(symbol "Conn_01x12_1_1"
+		(symbol "Conn_01x10_1_1"
 			(rectangle
-				(start -1.27 13.97)
-				(end 1.27 -16.51)
+				(start -1.27 11.43)
+				(end 1.27 -13.97)
 				(stroke
 					(width 0.254)
 					(type default)
 				)
 				(fill
 					(type background)
-				)
-			)
-			(rectangle
-				(start -1.27 12.827)
-				(end 0 12.573)
-				(stroke
-					(width 0.1524)
-					(type default)
-				)
-				(fill
-					(type none)
 				)
 			)
 			(rectangle
@@ -217,19 +206,8 @@
 					(type none)
 				)
 			)
-			(rectangle
-				(start -1.27 -15.113)
-				(end 0 -15.367)
-				(stroke
-					(width 0.1524)
-					(type default)
-				)
-				(fill
-					(type none)
-				)
-			)
 			(pin passive line
-				(at -5.08 12.7 0)
+				(at -5.08 10.16 0)
 				(length 3.81)
 				(name "Pin_1"
 					(effects
@@ -247,7 +225,7 @@
 				)
 			)
 			(pin passive line
-				(at -5.08 10.16 0)
+				(at -5.08 7.62 0)
 				(length 3.81)
 				(name "Pin_2"
 					(effects
@@ -265,7 +243,7 @@
 				)
 			)
 			(pin passive line
-				(at -5.08 7.62 0)
+				(at -5.08 5.08 0)
 				(length 3.81)
 				(name "Pin_3"
 					(effects
@@ -283,7 +261,7 @@
 				)
 			)
 			(pin passive line
-				(at -5.08 5.08 0)
+				(at -5.08 2.54 0)
 				(length 3.81)
 				(name "Pin_4"
 					(effects
@@ -301,7 +279,7 @@
 				)
 			)
 			(pin passive line
-				(at -5.08 2.54 0)
+				(at -5.08 0 0)
 				(length 3.81)
 				(name "Pin_5"
 					(effects
@@ -319,7 +297,7 @@
 				)
 			)
 			(pin passive line
-				(at -5.08 0 0)
+				(at -5.08 -2.54 0)
 				(length 3.81)
 				(name "Pin_6"
 					(effects
@@ -337,7 +315,7 @@
 				)
 			)
 			(pin passive line
-				(at -5.08 -2.54 0)
+				(at -5.08 -5.08 0)
 				(length 3.81)
 				(name "Pin_7"
 					(effects
@@ -355,7 +333,7 @@
 				)
 			)
 			(pin passive line
-				(at -5.08 -5.08 0)
+				(at -5.08 -7.62 0)
 				(length 3.81)
 				(name "Pin_8"
 					(effects
@@ -373,7 +351,7 @@
 				)
 			)
 			(pin passive line
-				(at -5.08 -7.62 0)
+				(at -5.08 -10.16 0)
 				(length 3.81)
 				(name "Pin_9"
 					(effects
@@ -391,7 +369,7 @@
 				)
 			)
 			(pin passive line
-				(at -5.08 -10.16 0)
+				(at -5.08 -12.7 0)
 				(length 3.81)
 				(name "Pin_10"
 					(effects
@@ -401,42 +379,6 @@
 					)
 				)
 				(number "10"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin passive line
-				(at -5.08 -12.7 0)
-				(length 3.81)
-				(name "Pin_11"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "11"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin passive line
-				(at -5.08 -15.24 0)
-				(length 3.81)
-				(name "Pin_12"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "12"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1115,25 +1057,23 @@
 		(embedded_fonts no)
 	)
   )
-  (symbol (lib_id "Connector_Generic:Conn_01x12") (at 101.6 88.9 0) (unit 1)
+  (symbol (lib_id "Connector_Generic:Conn_01x10") (at 101.6 86.36 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 7dbe0c0b-4dc0-5adb-927a-2192b8d2b90e)
     (property "Reference" "J-CHAIN-MAIN-RH" (at 101.6 73.66 0) (effects (font (size 1.27 1.27))))
-    (property "Value" "12-way" (at 101.6 106.68 0) (effects (font (size 1.27 1.27))))
-    (property "Footprint" "woody:IDC-Header_2x06_P1.27mm_Samtec_SHF_Horizontal" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Value" "10-way" (at 101.6 106.68 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "woody:IDC-Header_2x05_P1.27mm_CNCTech_3220_Vertical" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "J-CHAIN" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 9=9 10=10 11=11 12=12" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 9=9 10=10" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "Note" "Main board, right_hand ribbon. Main-board numbering: pin k is conductor k" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Pins_source" "IDC header positions 1-12, the ribbon's conductor order (key-chain-loom.md)" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Manufacturer" "Samtec" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
-    (property "MPN" "SHF-106-01-L-D-RA" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "IDC header positions 1-10, the ribbon's conductor order (key-chain-loom.md)" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "CNC Tech" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "3220-10-0100-00" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "Assembly" "hand" (at 101.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (pin "1" (uuid 25fdce89-4599-5588-ad3c-aa184b29f291))
     (pin "10" (uuid 6f2b393b-2082-51b1-ad35-863a5e6db5da))
-    (pin "11" (uuid 1c41ad54-c745-53e0-8e2d-e480a246b866))
-    (pin "12" (uuid dcd95840-fc37-5a56-8d91-4fded0f84b6c))
     (pin "2" (uuid 102e511a-b1f9-5aeb-911b-12d69b5c1a66))
     (pin "3" (uuid a70ccbc4-90cc-52b6-b253-bbdc980310ed))
     (pin "4" (uuid 6f8a4354-2adc-5f10-9d48-28e797214445))
@@ -1144,25 +1084,23 @@
     (pin "9" (uuid 47a3dd32-d607-5566-939a-4d845fe1318b))
     (instances (project "key-chain-loom" (path "/deca1880-f796-509a-b41b-fda81b07e63f" (reference "J-CHAIN-MAIN-RH") (unit 1))))
   )
-  (symbol (lib_id "Connector_Generic:Conn_01x12") (at 203.2 88.9 0) (unit 1)
+  (symbol (lib_id "Connector_Generic:Conn_01x10") (at 203.2 93.98 0) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid c5a54137-67a3-589d-8203-f6ef70698089)
     (property "Reference" "J-CHAIN-KEY-RH" (at 203.2 73.66 0) (effects (font (size 1.27 1.27))))
-    (property "Value" "12-way" (at 203.2 106.68 0) (effects (font (size 1.27 1.27))))
-    (property "Footprint" "woody:IDC-Header_2x06_P1.27mm_Samtec_SHF_Horizontal" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Value" "10-way" (at 203.2 106.68 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "woody:IDC-Header_2x05_P1.27mm_CNCTech_3220_Vertical" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "J-CHAIN" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 9=9 10=10 11=11 12=12" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "right_hand key board: conductor k lands on pin 13-k - the cable's key-board socket has its notch reversed (FFSD -RN2)" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Pins_source" "IDC header positions 1-12; the cable's key-board socket is notch-reversed (Samtec -RN2), so conductor k lands on pin 13-k (key-chain-loom.md)" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Manufacturer" "Samtec" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
-    (property "MPN" "SHF-106-01-L-D-RA" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 9=9 10=10" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "right_hand key board: pin k is conductor k, the main board's pin k - a straight ribbon, both sockets crimped the same way" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "IDC header positions 1-10, the ribbon's conductor order (key-chain-loom.md)" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "CNC Tech" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "3220-10-0100-00" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "Assembly" "hand" (at 203.2 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (pin "1" (uuid 87278db1-7fd6-5e8f-8b90-b1cdb7686ded))
     (pin "10" (uuid f7b1cda4-ba1b-5d5d-85b0-eb41b6b4d5f5))
-    (pin "11" (uuid 758467ba-8fe8-528d-bb20-05cadbbff352))
-    (pin "12" (uuid d43cb739-4c1f-5bc3-9947-6c3221d9788e))
     (pin "2" (uuid b89f79d8-83f9-55b1-9c5b-79d2a0554f52))
     (pin "3" (uuid eeb9fefa-f824-51cd-9755-d983d23d8667))
     (pin "4" (uuid cb65c378-fa17-5698-98b8-4ac67c750da4))
@@ -1173,25 +1111,23 @@
     (pin "9" (uuid 2f880c12-4df1-522e-98c6-1af0e99eb50e))
     (instances (project "key-chain-loom" (path "/deca1880-f796-509a-b41b-fda81b07e63f" (reference "J-CHAIN-KEY-RH") (unit 1))))
   )
-  (symbol (lib_id "Connector_Generic:Conn_01x12") (at 304.8 88.9 0) (unit 1)
+  (symbol (lib_id "Connector_Generic:Conn_01x10") (at 304.8 86.36 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 510ba13d-ff1d-529f-9af3-510c758514c0)
     (property "Reference" "J-CHAIN-MAIN-LH" (at 304.8 73.66 0) (effects (font (size 1.27 1.27))))
-    (property "Value" "12-way" (at 304.8 106.68 0) (effects (font (size 1.27 1.27))))
-    (property "Footprint" "woody:IDC-Header_2x06_P1.27mm_Samtec_SHF_Horizontal" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Value" "10-way" (at 304.8 106.68 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "woody:IDC-Header_2x05_P1.27mm_CNCTech_3220_Vertical" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "J-CHAIN" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 9=9 10=10 11=11 12=12" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 9=9 10=10" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "Note" "Main board, left_hand ribbon - the chain end" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Pins_source" "IDC header positions 1-12, the ribbon's conductor order (key-chain-loom.md)" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Manufacturer" "Samtec" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
-    (property "MPN" "SHF-106-01-L-D-RA" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "IDC header positions 1-10, the ribbon's conductor order (key-chain-loom.md)" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "CNC Tech" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "3220-10-0100-00" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "Assembly" "hand" (at 304.8 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (pin "1" (uuid 4a624397-6c2f-5ebb-a79f-07cd49b4dd3d))
     (pin "10" (uuid 17aa9845-e1e5-5cba-9bc2-8168e4449389))
-    (pin "11" (uuid 295c3f3a-4a46-59b2-bd74-b12e67408cc3))
-    (pin "12" (uuid df9fc60b-1251-50e8-ab1e-9c919bfd164d))
     (pin "2" (uuid c357f006-a22c-5fa4-95c7-08acd28f8e0e))
     (pin "3" (uuid ba6bf601-550b-5d16-952f-e25314b74362))
     (pin "4" (uuid 4dab4477-40e8-58c2-a76a-1a7f2071a2ff))
@@ -1202,25 +1138,23 @@
     (pin "9" (uuid a01fee51-fdcd-54ab-a070-4cb48405a323))
     (instances (project "key-chain-loom" (path "/deca1880-f796-509a-b41b-fda81b07e63f" (reference "J-CHAIN-MAIN-LH") (unit 1))))
   )
-  (symbol (lib_id "Connector_Generic:Conn_01x12") (at 406.4 88.9 0) (unit 1)
+  (symbol (lib_id "Connector_Generic:Conn_01x10") (at 406.4 93.98 0) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 2d16a341-da74-5014-8441-2c0b793e982e)
     (property "Reference" "J-CHAIN-KEY-LH" (at 406.4 73.66 0) (effects (font (size 1.27 1.27))))
-    (property "Value" "12-way" (at 406.4 106.68 0) (effects (font (size 1.27 1.27))))
-    (property "Footprint" "woody:IDC-Header_2x06_P1.27mm_Samtec_SHF_Horizontal" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Value" "10-way" (at 406.4 106.68 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "woody:IDC-Header_2x05_P1.27mm_CNCTech_3220_Vertical" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "J-CHAIN" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 9=9 10=10 11=11 12=12" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "left_hand key board. REVERSED, like the right_hand one" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Pins_source" "IDC header positions 1-12; the cable's key-board socket is notch-reversed (Samtec -RN2), so conductor k lands on pin 13-k (key-chain-loom.md)" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Manufacturer" "Samtec" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
-    (property "MPN" "SHF-106-01-L-D-RA" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 9=9 10=10" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "left_hand key board: pin k is conductor k, the main board's pin k - a straight ribbon, both sockets crimped the same way" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins_source" "IDC header positions 1-10, the ribbon's conductor order (key-chain-loom.md)" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "CNC Tech" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "3220-10-0100-00" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (property "Assembly" "hand" (at 406.4 88.9 0) (effects (font (size 1.27 1.27)) hide))
     (pin "1" (uuid 9f24633a-37a1-5f92-a671-2abfe342101d))
     (pin "10" (uuid 520ae90d-cf2d-54c7-8dda-1bc6a9beb71d))
-    (pin "11" (uuid 34525163-adc4-50df-9061-ecf0ab1bcc7e))
-    (pin "12" (uuid 8293615e-e82b-580b-924f-bbcf89e92dad))
     (pin "2" (uuid 3c5fef22-d506-5269-b619-ed42080c0da9))
     (pin "3" (uuid 13393494-2a29-584a-b582-9b46d22b0c1f))
     (pin "4" (uuid 370cdebf-35c2-5ff3-b25a-4a40acc63a53))
@@ -1664,26 +1598,10 @@
     (property "Dir" "ref" (at 398.78 83.82 0) (effects (font (size 1.27 1.27)) hide))
     (property "From" "interfaces/key-chain-loom" (at 398.78 83.82 0) (effects (font (size 1.27 1.27)) hide))
     (property "Figure" "chain-conductors" (at 398.78 83.82 0) (effects (font (size 1.27 1.27)) hide)))
-  (wire (pts (xy 96.52 101.6) (xy 93.98 101.6)) (stroke (width 0) (type default)) (uuid d18dd3aa-3696-5230-8e9f-6295aa6043a6))
-  (label "CHAIN_SPARE_RH_11" (at 93.98 101.6 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 5d7ff2c8-aeb1-5c52-b380-82020f0a98de))
-  (wire (pts (xy 198.12 78.74) (xy 195.58 78.74)) (stroke (width 0) (type default)) (uuid cc63f351-038b-58cb-a062-1964639a98c0))
-  (label "CHAIN_SPARE_RH_11" (at 195.58 78.74 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 8a04a195-48ee-5c89-a7b2-78a057319df7))
-  (wire (pts (xy 96.52 104.14) (xy 93.98 104.14)) (stroke (width 0) (type default)) (uuid f9a1e54a-3c9f-5412-bf64-b6382fa26845))
-  (label "CHAIN_SPARE_RH_12" (at 93.98 104.14 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid ab4674b5-934e-5c4f-83fd-92599336a8fa))
-  (wire (pts (xy 198.12 76.2) (xy 195.58 76.2)) (stroke (width 0) (type default)) (uuid 7a4db399-4586-55fb-92ba-25f7c6fa2415))
-  (label "CHAIN_SPARE_RH_12" (at 195.58 76.2 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 175074d6-b008-55d1-86cb-b38811a1e306))
-  (wire (pts (xy 299.72 101.6) (xy 297.18 101.6)) (stroke (width 0) (type default)) (uuid 4ac625da-a6f5-5465-9539-1eabcc34f16f))
-  (label "CHAIN_SPARE_LH_11" (at 297.18 101.6 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 13220dcc-0722-5aaa-b931-f284539211e9))
-  (wire (pts (xy 401.32 78.74) (xy 398.78 78.74)) (stroke (width 0) (type default)) (uuid f6ccfb02-eee9-5695-a226-4e2097cfa293))
-  (label "CHAIN_SPARE_LH_11" (at 398.78 78.74 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 5dfca878-76e8-5180-83d4-c27425ee4046))
-  (wire (pts (xy 299.72 104.14) (xy 297.18 104.14)) (stroke (width 0) (type default)) (uuid 70c8cf73-58dc-582d-bc46-cd7e907eedec))
-  (label "CHAIN_SPARE_LH_12" (at 297.18 104.14 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid cd43b311-5e4c-5880-93bf-c01f1cd6b0ff))
-  (wire (pts (xy 401.32 76.2) (xy 398.78 76.2)) (stroke (width 0) (type default)) (uuid 948777c5-052a-5528-9e0d-571d149bb0b4))
-  (label "CHAIN_SPARE_LH_12" (at 398.78 76.2 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid 628ce91f-bdea-594e-a40e-56ade8074ff7))
   (wire (pts (xy 436.88 160.02) (xy 436.88 157.48)) (stroke (width 0) (type default)) (uuid 4466b45d-fda9-5717-961f-595c1e748290))
   (label "TVS_CHAIN_SPARE" (at 436.88 157.48 90) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid 3ffd3c09-b779-5aa9-ac5b-d91f4b179096))
   (text "Both ribbons, end to end. J-CHAIN-MAIN-RH/-LH, the series resistors, R-SER-TERM, the beads and U-TVS-CHAIN are on the MAIN board; J-CHAIN-KEY-RH and J-CHAIN-KEY-LH are each\nkey board's J-CHAIN. CBL-CHAIN is not a part: a main-board pin and the key-board pin its conductor reaches are one net. Which board carries which part: key-chain-loom.md,\n'Which board places what'. Below: the nets that carry two ports - a register's QH is the next register's SER - and CHAIN_QH_RT, which reaches no connector." (at 25.4 25.4 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid 0bb5c46e-e660-5426-b87f-bbc7063a854b))
-  (text "FROM THE HAND-WRITTEN NETLIST THIS SHEET REPLACES (the part notes are on each part's Note field):\n\nAUTHORITATIVE for connectivity. The drawings on key-chain-loom.md are a REPRESENTATION of this file.\n\nTHE HOP MAP IS HERE, AS NETS. Chain order MCU <- RT <- RH <- LT <- LH (config/key-layout.yaml). right_thumb and left_thumb are on the main board; right_hand and left_hand are on the key boards, one\nIDC ribbon each. Each ribbon carries its key board's SER in on conductor 6 and its QH out on conductor 8, so every hop is a named net below.\n\nTHE REGISTER SIDE IS PER INSTANCE. cluster/key-register is one schematic built four times (`replicated: 4`) with generic CHAIN_SER / CHAIN_QH pins, so it cannot declare which instance sits on which\nhop. This file does, with one port per instance pin (CHAIN_SER_RT ... CHAIN_QH_LH), and hardware/nets.yaml marks those nets `per_board:` - the checker prints them rather than pretending the register\ndeclares them.\n\nTHE KEY-BOARD END NUMBERS THE CONDUCTORS DIFFERENTLY, AND THE CABLE SETS IT. Same 2x6 1.27 mm right-angle IDC header at both ends, the key board's mounted upside down on its underside, facing the same\nway. A keyed socket always mates position k to header pin k; CBL-CHAIN is ordered with its notch reversed on the key-board end (Samtec -RN2), so conductor k is main-board pin k and key-board pin 13-k\n[datasheet, both full prints banked; key-chain-loom.md].\n\nTHE CABLE IS NOT A COMPONENT HERE. CBL-CHAIN is a straight conductor per pin, so each ribbon is modelled as the nets it joins: a main-board pin and the key-board pin it reaches are on the same net.\n\nTHE CHAIN'S 3V3 IS DEV_3V3 ON THE MAIN BOARD, and each ribbon's conductor 10 is behind its own ferrite bead (ADR 0018). So V3V3_CHAIN - the name the replicated cluster schematics use - is the same\nnode as DEV_3V3 for the two registers on the main board, and each key board's rail is its own net past its bead (V3V3_CHAIN_RH, V3V3_CHAIN_LH), `per_board:` in hardware/nets.yaml like the hop nets.\nThere is no fuse: short-circuit protection is the Matrix LDO's own current limit (key-chain-loom.md).\n\n[CHAIN_SER_RT] one per register instance - see the header\n\n[CHAIN_SCK] One net each: right_thumb and left_thumb by trace, the key boards by ribbon.\n\n--- the hop map, from the chain end toward the MCU ------------------\n\n[CHAIN_SER_LH] Chain end: IO33 (or the pull-up) into left_hand's SER, over its ribbon.\n\n[HOP_LH_LT] left_hand's QH back over its ribbon into left_thumb's SER.\n\n[HOP_LT_RH] left_thumb's QH out over the right_hand ribbon into right_hand's SER.\n\n[HOP_RH_RT] right_hand's QH back over its ribbon into right_thumb's SER.\n\n[CHAIN_QH_RT] ONE NET, TWO BOUNDARIES: right_thumb's QH is a main-board trace to the MCU's pin. It reaches no connector, so the TVS is not on it.\n\n[DEV_3V3] ONE NET, TWO BOUNDARIES: the Matrix's 3V3 arriving from carrier/carrier, and the chain rail the main-board registers and R-SER-TERM sit on.\n\n[V3V3_CHAIN_RH] Each key board's rail, past its ribbon's bead.\n\n[CHAIN_SPARE_RH_11] ADR 0009's rule: two spare conductors per ribbon, end to end, unallocated." (at 25.4 279.4 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid be950bfb-8199-5567-a48e-d9f2f1b4c8b7))
+  (text "FROM THE HAND-WRITTEN NETLIST THIS SHEET REPLACES (the part notes are on each part's Note field):\n\nAUTHORITATIVE for connectivity. The drawings on key-chain-loom.md are a REPRESENTATION of this file.\n\nTHE HOP MAP IS HERE, AS NETS. Chain order MCU <- RT <- RH <- LT <- LH (config/key-layout.yaml). right_thumb and left_thumb are on the main board; right_hand and left_hand are on the key boards, one\nIDC ribbon each. Each ribbon carries its key board's SER in on conductor 6 and its QH out on conductor 8, so every hop is a named net below.\n\nTHE REGISTER SIDE IS PER INSTANCE. cluster/key-register is one schematic built four times (`replicated: 4`) with generic CHAIN_SER / CHAIN_QH pins, so it cannot declare which instance sits on which\nhop. This file does, with one port per instance pin (CHAIN_SER_RT ... CHAIN_QH_LH), and hardware/nets.yaml marks those nets `per_board:` - the checker prints them rather than pretending the register\ndeclares them.\n\nBOTH ENDS NUMBER THE CONDUCTORS ALIKE. The same vertical 2x5 1.27 mm box header at both ends, the key board's mounted upside down on its underside. A keyed socket always mates position k to header\npin k, and CBL-CHAIN is a straight cable, so conductor k is pin k on both boards (key-chain-loom.md, Pin numbering).\n\nTHE CABLE IS NOT A COMPONENT HERE. CBL-CHAIN is a straight conductor per pin, so each ribbon is modelled as the nets it joins: a main-board pin and the key-board pin it reaches are on the same net.\n\nTHE CHAIN'S 3V3 IS DEV_3V3 ON THE MAIN BOARD, and each ribbon's conductor 10 is behind its own ferrite bead (ADR 0018). So V3V3_CHAIN - the name the replicated cluster schematics use - is the same\nnode as DEV_3V3 for the two registers on the main board, and each key board's rail is its own net past its bead (V3V3_CHAIN_RH, V3V3_CHAIN_LH), `per_board:` in hardware/nets.yaml like the hop nets.\nThere is no fuse: short-circuit protection is the Matrix LDO's own current limit (key-chain-loom.md).\n\n[CHAIN_SER_RT] one per register instance - see the header\n\n[CHAIN_SCK] One net each: right_thumb and left_thumb by trace, the key boards by ribbon.\n\n--- the hop map, from the chain end toward the MCU ------------------\n\n[CHAIN_SER_LH] Chain end: IO33 (or the pull-up) into left_hand's SER, over its ribbon.\n\n[HOP_LH_LT] left_hand's QH back over its ribbon into left_thumb's SER.\n\n[HOP_LT_RH] left_thumb's QH out over the right_hand ribbon into right_hand's SER.\n\n[HOP_RH_RT] right_hand's QH back over its ribbon into right_thumb's SER.\n\n[CHAIN_QH_RT] ONE NET, TWO BOUNDARIES: right_thumb's QH is a main-board trace to the MCU's pin. It reaches no connector, so the TVS is not on it.\n\n[DEV_3V3] ONE NET, TWO BOUNDARIES: the Matrix's 3V3 arriving from carrier/carrier, and the chain rail the main-board registers and R-SER-TERM sit on.\n\n[V3V3_CHAIN_RH] Each key board's rail, past its ribbon's bead." (at 25.4 279.4 0) (effects (font (size 1.27 1.27)) (justify left top)) (uuid be950bfb-8199-5567-a48e-d9f2f1b4c8b7))
   (symbol (lib_id "Device:R") (at 215.9 205.74 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 5cadd10f-c845-4955-9615-c2204caa8072)

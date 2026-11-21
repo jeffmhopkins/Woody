@@ -486,67 +486,71 @@ boards:
     value: 18.8
     status: settled
     source: "across the land pattern's two pad rows, outer end to outer end: rows 16.00 centre to centre plus one 2.80 pad [repo hardware/lib/woody.pretty/NXP_Case1351-01_SOP-8_P2.54mm.kicad_mod; calc 16.00 + 2.80 = 18.80]. Wider than the lead tips (sensor_leads), so it is what sets the sensor's inset from the main board's edge: the copper, not the part, must keep off the edge"
-  # THE KEY CHAIN'S CONNECTORS (owner, 2026-09-27, ADR 0017 amended): a
-  # through-hole 1.27 mm shrouded IDC header, right-angle, on each board -
-  # stacked, the key board's hanging from its underside over the main
-  # board's - and a flat IDC ribbon between them. Samtec SHF-106-01-L-D-RA
-  # and an FFSD-06-D-xx.xx-01-N-RN2 cable are the stand-ins; their full prints
-  # are banked (datasheets/connectors/SAMTEC-SHF-1XX-*-PRINT.pdf and
-  # SAMTEC-FFSD-*-PRINT.pdf).
+  # THE KEY CHAIN'S CONNECTORS (owner, 2026-11-21, ADR 0017 amended): a
+  # through-hole 1.27 mm shrouded box header, 2x5, standing straight up on
+  # each board - the key board's hanging from its underside over the main
+  # board's, mouth to mouth - and a flat ribbon between them with an IDC
+  # socket crimped at each end. CNC Tech 3220-10-0100-00 and 3230-10-0103-00;
+  # both drawings are banked (datasheets/connectors/CNCTECH-32*.pdf).
   chain_hdr_l:
-    value: 13.97
+    value: 12.65
     status: nominal
-    source: "SHF header length = positions per row x 1.27 + 6.35 REF, 6 per row [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 1]"
+    source: "the header's length, dimension C for 10 positions [datasheets/connectors/CNCTECH-3220-XX-0100-00-1.27MM-BOX-HEADER-VERTICAL.pdf]"
     decided_by: "M4, with J-CHAIN's part"
   chain_hdr_h:
-    value: 5.59
+    value: 5.4
     status: nominal
-    source: "the right-angle header's height off the board, .220 REF, standing on 0.51 ribs [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 1 fig 1]"
+    source: "the header's height off the board, 5.40 [datasheets/connectors/CNCTECH-3220-XX-0100-00-1.27MM-BOX-HEADER-VERTICAL.pdf]"
     decided_by: "M4, with J-CHAIN's part"
-  chain_hdr_d:
-    value: 5.33
+  chain_hdr_w:
+    value: 5.1
     status: nominal
-    source: "the right-angle shroud's depth, mouth to back, .210 REF [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 1]"
+    source: "the header across its two rows, along the body, 5.1 [datasheets/connectors/CNCTECH-3220-XX-0100-00-1.27MM-BOX-HEADER-VERTICAL.pdf]"
     decided_by: "M4, with J-CHAIN's part"
-  chain_hdr_pin_back:
-    value: 7.86
-    status: nominal
-    source: "from the mouth back to the far (odd) pin row: the depth 5.33 plus the odd row's bend 1.26 + 1.27 behind the back face, measured at the bend (note 7) [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 2 section C-C; calc]"
-    decided_by: "M4, with J-CHAIN's part"
-  chain_plug_proud:
-    value: 1.4
-    status: tbd
-    source: "how far the FFSD socket stands out of the header's mouth - NOT given by either print, which also say DO NOT SCALE; estimated as the socket's 5.08 height less a mouth-to-floor depth of about 3.67 that is not dimensioned. It sets where the cable leaves the socket and whether it clears the shroud. An estimate until a mated pair is measured [datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf sheet 1 and datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf sheet 2]"
-    decided_by: "M4, on the first mated pair"
-  chain_mb_shift:
-    value: 2.54
-    status: nominal
-    source: "how far the main board's chain header stands from straight under its key board's, toward the way both headers face (routing.chain_fold), for both hands. Turned to face the mouth (ADR 0017, the two Amendments of 2026-11-20), each main-board header put its ground pins 7 and 9 on the leg pad of the thumb switch beside it, LT4's and RT4's, copper to copper [the main board's layout, 2026-11-20]: chain_clear tests the switch pins' stubs, not their 3.4 mm pads. 2.54 leaves the pad its iron room (main-board README, Soldering-iron room). The ribbon takes up the offset in its fold, which moves half of it along the body (chain_hairpin_at)"
-    decided_by: "owner, 2026-11-20, in the working chat: 'Main-board headers 2.5 mm to mouth'"
-  chain_hdr_tail:
-    value: 2.15
-    status: nominal
-    source: "the header's tails below its seating plane, .085 REF [datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf, sheet 2 section C-C]"
-    decided_by: "M4"
-  chain_hdr_mouth_z:
-    value: 3.05
-    status: nominal
-    source: "the mouth's centre above the board: the 0.51 ribs plus half the 5.08 body [calc, datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf sheet 1 fig 1]"
-    decided_by: "M4"
-  chain_plug_h:
+  chain_hdr_pins_l:
     value: 5.08
     status: nominal
-    source: "the FFSD socket's height along its insertion, 5.08 +0.15/-0.08 [datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf, sheet 1 fig 1]"
+    source: "a pin row's length, first pin to last, dimension A for 10 positions [datasheets/connectors/CNCTECH-3220-XX-0100-00-1.27MM-BOX-HEADER-VERTICAL.pdf]"
+    decided_by: "M4, with J-CHAIN's part"
+  chain_plug_proud:
+    value: 2.9
+    status: nominal
+    source: "how far a mated socket, with its cover, stands out of the header's mouth: the socket over its cover, 6.40 [datasheets/connectors/CNCTECH-3230-XX-0103-00-1.27MM-IDC-SOCKET.pdf], less the mouth's depth, 3.5 [datasheets/connectors/CNCTECH-3220-XX-0100-00-1.27MM-BOX-HEADER-VERTICAL.pdf] [calc: 6.40 - 3.5]. From two drawings, not a mated pair"
+    decided_by: "M4, on the first mated pair"
+  chain_plug_cable:
+    value: 1.8
+    status: nominal
+    source: "the socket's cable face above the header's mouth, where the ribbon lies as it leaves: mating face to cable face, 5.30 [datasheets/connectors/CNCTECH-3230-XX-0103-00-1.27MM-IDC-SOCKET.pdf], less the mouth's depth, 3.5 [datasheets/connectors/CNCTECH-3220-XX-0100-00-1.27MM-BOX-HEADER-VERTICAL.pdf] [calc: 5.30 - 3.5]"
+    decided_by: "M4, on the first mated pair"
+  chain_mb_shift:
+    value: 0.0
+    status: nominal
+    source: "how far the main board's chain header stands from straight under its key board's, the way both ribbons leave (routing.chain_fold), for both hands. Zero: the two stand mouth to mouth (drc.echo 'key-chain sockets clear of each other, mouth to mouth'). The owner, 2026-11-21: 'If there's not enough room in between the boards, we'll just want to make sure and offset them enough' - it is what to raise if a thumb switch's pad or a mated pair asks for room; the ribbon takes it up in its fold"
+    decided_by: "the main board's layout, and M4 on the first mated pair"
+  chain_stub_room:
+    value: 2.4
+    status: nominal
+    source: "the least from either chain header's footprint (its body and 0.5) to a switch pin's stub, on its own board. A switch's pins are soldered by hand on the face the header stands on, so the header's courtyard keeps the main board's iron room, 2.0 from the pin's pad grown as a courtyard is (hardware/boards/main-board/layout.yaml iron_room; tools/pcb.py check_iron) [calc: 2.0 + the pad's growth 0.25 + the pad's radius 1.7 - the stub's 1.3 + the header's courtyard 0.25 - the footprint's 0.5]. It also decides which of the clear places along the body a header takes"
+    decided_by: "the main board's layout"
+  chain_hdr_tail:
+    value: 2.1
+    status: nominal
+    source: "the header's tails below its seating plane, 2.1 [datasheets/connectors/CNCTECH-3220-XX-0100-00-1.27MM-BOX-HEADER-VERTICAL.pdf]"
+    decided_by: "M4"
+  chain_plug_h:
+    value: 6.4
+    status: nominal
+    source: "the socket's height along its insertion, over its cover, 6.40 [datasheets/connectors/CNCTECH-3230-XX-0103-00-1.27MM-IDC-SOCKET.pdf]"
     decided_by: "M4"
   chain_plug_t:
     value: 3.05
     status: nominal
-    source: "the FFSD socket's thickness, .120 REF [datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf, sheet 1]"
+    source: "the socket's thickness across its two rows, 3.05 [datasheets/connectors/CNCTECH-3230-XX-0103-00-1.27MM-IDC-SOCKET.pdf]"
     decided_by: "M4"
   chain_plug_l:
-    value: 11.81
+    value: 14.34
     status: nominal
-    source: "the FFSD socket's length, positions per row x 1.27 + 4.19, 6 per row [datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf, sheet 1]"
+    source: "the socket's length over its cover's latches, dimension C for 10 positions [datasheets/connectors/CNCTECH-3230-XX-0103-00-1.27MM-IDC-SOCKET.pdf]"
     decided_by: "M4"
   # THE MATRIX AND THE UMBILICAL, onto the main board's tail end (owner,
   # 2026-09-26: "what about matrix led esp32 and ethercon wire connections?").
@@ -708,7 +712,7 @@ boards:
   main_neck_min:
     value: 8.0
     status: tbd
-    source: "[calc] ~20 nets cross the station (the key chain's 12 conductors, the breath sensor's lines, the LED row's data and backup lines, power) at 0.25 track / 0.25 gap is 10 mm on one layer, 5 mm on two; plus 0.5 mm copper keep-out from each cut edge is 6; 8 leaves room for a ground return beside them"
+    source: "[calc] ~20 nets cross the station (the key chain's lines, the breath sensor's lines, the LED row's data and backup lines, power) at 0.25 track / 0.25 gap is 10 mm on one layer, 5 mm on two; plus 0.5 mm copper keep-out from each cut edge is 6; 8 leaves room for a ground return beside them"
     decided_by: "M4 main board layout - the real net count and track widths"
   matrix_t:
     value: 1.6
@@ -1336,19 +1340,19 @@ routing:
     status: settled
     source: "CBL-MCU-RIBBON's flat cable, 3M 3754 (0.025 in pitch, 30 AWG): .025 +/- .003 in thick [ds connectors/3M-3754-FLAT-CABLE-0.025IN-30AWG-PVC.pdf, sheet 2]"
   chain_ribbon_w:
-    value: 7.62
+    value: 6.35
     status: nominal
-    source: "[calc] 12 conductors at 0.635 mm, the FFSD cable's 1.27 mm IDC pitch over two rows"
+    source: "[calc] 10 conductors at 0.635 mm, for a 1.27 mm IDC socket over two rows"
     decided_by: "M4, with the cable"
   chain_ribbon_t:
-    value: 0.8
+    value: 0.64
     status: tbd
-    source: "30 AWG flat cable's thickness [from memory]"
+    source: "0.025 in pitch, 30 AWG flat cable: .025 +/- .003 in thick [ds connectors/3M-3754-FLAT-CABLE-0.025IN-30AWG-PVC.pdf, sheet 2], the cable CBL-MCU-RIBBON is cut from"
     decided_by: "M4, with the cable"
   chain_bend_r:
     value: 1.0
     status: tbd
-    source: "the tightest turn the flat cable takes where it leaves a socket and turns along the body, and the least the fold may be (drc.echo 'key-chain ribbon fold no tighter than its bend radius') [drawing convention; 30 AWG PVC flat cable folds flatter than this]"
+    source: "the least radius the ribbon's one fold may have (drc.echo 'key-chain ribbon fold no tighter than its bend radius') [drawing convention; 30 AWG PVC flat cable folds flatter than this]"
     decided_by: "M4, on the first cable"
   chain_service:
     value: "raised"
@@ -1368,7 +1372,7 @@ routing:
   chain_fold:
     value: [-1, -1]
     status: nominal
-    source: "which way each ribbon's spare length folds closed, along the body (+1 toward the tail), for left_hand and right_hand, and with it which way both of that ribbon's headers face. Both fold toward the mouth (owner, 2026-11-20: 'Turn it' for the left hand and 'we do need to turn it' for the right; ADR 0017, the two Amendments of that date), so each key board's signal row, the row behind the header's mouth, faces its register and the ribbon does not lie under it (hardware/boards/key-board-lh/lh_layout.py, key-board-rh/rh_layout.py); chain_clear finds each header's place, and each hairpin must stop short of its board's columns (drc.echo 'key-chain ribbon hairpin clear of the columns', clash.txt)"
+    source: "which way each ribbon's spare length folds closed, along the body (+1 toward the tail), for left_hand and right_hand: the way the ribbon leaves both of its sockets. Both fold toward the mouth (owner, 2026-11-20: 'Turn it' for the left hand and 'we do need to turn it' for the right; ADR 0017, the two Amendments of that date), so the ribbon does not lie under either key board's register (hardware/boards/key-board-lh/lh_layout.py, key-board-rh/rh_layout.py); chain_clear finds each header's place, and each hairpin must stop short of its board's columns (drc.echo 'key-chain ribbon hairpin clear of the columns', clash.txt)"
     decided_by: "the clash check"
   ribbon_t:
     value: 1.0

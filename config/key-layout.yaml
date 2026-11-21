@@ -116,7 +116,7 @@ keys:
 
 # Shift register chain. One U-KEYS per cluster, ON THE BOARD ITS SWITCHES ARE
 # ALREADY ON: 4 devices, 32 bits, 19 used, 13 spare. The two thumb registers
-# are on the main board; each key board's register reaches it by one 12-way
+# are on the main board; each key board's register reaches it by one
 # IDC ribbon carrying its SER in and QH out (ADR 0017,
 # hardware/interfaces/key-chain-loom/).
 #

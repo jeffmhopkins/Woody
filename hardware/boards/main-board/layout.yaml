@@ -279,8 +279,8 @@ heights:
   PinHeader_1x03_P2.54mm_Vertical: 6.0   # [ds connectors/HANXIA-HX-PZ2.54-1x3P-TP-YQ.pdf: posts 6.00 +/-0.2 from the board; config/body.yaml boards.service_hdr_h] the service lead goes on with the lid off
   # the two 1.27 mm IDC headers by name - the lookup takes the FIRST key a footprint's name
   # contains, so the specific ones come before anything they would also match (#19 F5: a bare
-  # IDC-Header key gave both 4.9, under the Samtec's real height)
-  IDC-Header_2x06_P1.27mm_Samtec: 5.59   # [repo config/body.yaml boards.chain_hdr_h; ds SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf sheet 1, .220 REF]
+  # IDC-Header key gave both 4.9, under the chain header's real height)
+  IDC-Header_2x05_P1.27mm_CNCTech: 5.4   # [repo config/body.yaml boards.chain_hdr_h; ds CNCTECH-3220-XX-0100-00-1.27MM-BOX-HEADER-VERTICAL.pdf]
   IDC-Header_2x12_P1.27mm_XKB: 5.1       # [repo config/body.yaml boards.mcu_conn_h; ds XKB-X1270WR-2x12A-9TV01.pdf]
   LED_WS2815B: 1.65            # [repo pcb-geometry.echo led height]
   JST_PH_S3B-PH-SM4-TB: 5.5    # [repo config/body.yaml midi.hdr_sz, its height: side entry, the plug lies inside it (midi.hdr_plug_l)]
@@ -328,7 +328,7 @@ silk:
   at: [105.5, 37.0]         # mid-board between the switch pairs; the old place, [100.0, 45.5], is the breath pair's since #8 (#33)
   title: "WOODY main board"
   rev: "A"                  # owner, 2026-10-03: rev A on the first board fabricated (README, Ordering it, Revision)
-  date: "2026-11-20"
+  date: "2026-11-21"
 
 # No router: `route: false` keeps tools/pcb.py from running one on this board
 # (main_layout.py, ADR 0030).

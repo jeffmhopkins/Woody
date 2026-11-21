@@ -39,8 +39,7 @@ filled by `tools/sim.py`; `results.yaml` is generated.
   edge rate or IBIS model, so its impedance and edge are swept. **The main
   board's load on SCK and the key board's trace are assumptions** until the main
   board is laid out. Each is marked in `sims.yaml`.
-- **The ribbon is 3M 3754's characterisation:** the FFSD's wire and pitch.
-  Samtec publishes none for FFSD.
+- **The ribbon is 3M 3754's characterisation:** the flat cable `CBL-CHAIN` is cut from.
 - **Two timescales, two decks.** The rail sees the clock burst as its average
   current (`rail.cir`), and each edge's spike is drawn from the decoupler alone
   (`edge.cir`). Driving 5 ns ideal spikes into the bead's model gave a

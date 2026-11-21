@@ -42,6 +42,50 @@ def seat(fp, x, y, way):
     raise SystemExit(f"pcb_hand: no turn puts {fp.GetReference()}'s pad 1 toward {way}")
 
 
+def refit(board, comps, nets):
+    """A part whose sheet now names another footprint (a header changed for a different
+    connector) gets that footprint: same place, side and turn, its reference, value and
+    sheet path, and every pad on the net the sheets give it. pcb.py update-footprints
+    refuses this on purpose - the pads move, so the copper must be redrawn - and a layout
+    script redraws all of it. Returns the references changed."""
+    padnet = {(r, p): n for n, nodes in nets for r, p in nodes}
+    done = []
+    for fp in list(board.GetFootprints()):
+        ref = fp.GetReference()
+        want = comps.get(ref, {}).get("footprint")
+        have = f"{fp.GetFPID().GetLibNickname().wx_str()}:{fp.GetFPID().GetLibItemName().wx_str()}"
+        if not want or want == have:
+            continue
+        new = pcb.load_fp(want)
+        board.Add(new)
+        pos = fp.GetPosition()
+        new.SetPosition(pos)
+        if fp.IsFlipped():
+            new.Flip(pos, pcbnew.FLIP_DIRECTION_LEFT_RIGHT)
+        new.SetOrientation(fp.GetOrientation())
+        new.SetReference(ref)
+        new.SetValue(comps[ref]["value"])
+        new.SetPath(fp.GetPath())
+        new.SetExcludedFromBOM(comps[ref]["exclude_from_bom"])
+        new.SetDNP(fp.IsDNP())
+        new.SetExcludedFromPosFiles(fp.IsExcludedFromPosFiles())
+        for a, b in ((fp.Reference(), new.Reference()), (fp.Value(), new.Value())):
+            b.SetLayer(a.GetLayer())
+            b.SetTextSize(a.GetTextSize())
+            b.SetTextThickness(a.GetTextThickness())
+            b.SetVisible(a.IsVisible())
+        for pad in new.Pads():
+            n = padnet.get((ref, pad.GetNumber()))
+            ni = board.FindNet(n) if n else None
+            if n and ni is None:
+                raise SystemExit(f"pcb_hand: {ref} pad {pad.GetNumber()} is on {n}, a net this board does not have yet")
+            if ni is not None:
+                pad.SetNet(ni)
+        board.Delete(fp)
+        done.append(ref)
+    return done
+
+
 def seat_chain(fp, geo, jpin, face=None):
     """J-CHAIN where the body CAD puts it and facing the way it says (pcb.chain_target): the
     turn is found, as pcb.place_chain finds it for a new board. `jpin(k)` is where the
@@ -58,13 +102,13 @@ def seat_chain(fp, geo, jpin, face=None):
             cx, cy = pcb.pads_centre(fp)
             at = fp.GetPosition()
             fp.SetPosition(pcb.V(pcbnew.ToMM(at.x) + tx - cx, pcbnew.ToMM(at.y) + ty - cy))
-            for k in (1, 3, 11, 12):
+            for k in (1, 2, 9, 10):
                 got, want = body_xy(fp.FindPadByNumber(str(k)).GetPosition()), jpin(k)
                 if math.dist(got, want) > 0.06:
                     raise SystemExit(f"pcb_hand: J-CHAIN pin {k} is at {got}, and this layout is drawn for {want} - "
                                      "the body CAD moved the header (pcb-geometry.echo); move the script's header pins and what follows from them")
             return
-    raise SystemExit("pcb_hand: no turn puts J-CHAIN's mouth where the body CAD faces it")
+    raise SystemExit("pcb_hand: no turn puts J-CHAIN's even row where the body CAD faces it")
 
 
 # ---- a key's network, relative to its switch's centre -------------------------------------------

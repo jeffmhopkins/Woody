@@ -5,7 +5,7 @@
 inputs:
   tools/sim.py: 0312a1077b9afa80
   hardware/interfaces/key-chain-loom/sim/sims.yaml: da6edd9f25f8fa10
-  hardware/boards/key-board-lh/board-netlist.yaml: 8181c6b2d4cc36b6
+  hardware/boards/key-board-lh/board-netlist.yaml: 6b0cf15f551dd4b7
   hardware/interfaces/key-chain-loom/sim/rail.cir: 537b273e07928b72
   hardware/interfaces/key-chain-loom/sim/edge.cir: af73f23cc4332e65
   hardware/interfaces/key-chain-loom/sim/rail-ac.cir: 3bc2f2ac7bb9405b
@@ -16,7 +16,7 @@ inputs:
   hardware/cluster/key-switch-network/sim/sims.yaml: 28274e715669f42e
   bom:R-CHAIN-SER: 100R 1%
   bom:R-HOP-SER: 2k2 1%
-  drc:key-chain ribbon length (derived): '49.65'
+  drc:key-chain ribbon length (derived): '43.76'
   figure:key-press-time: 9.87 us
   figure:key-release-time: 138.7 us
   figure:key-scan-current: 1.43 mA per closed key, 27.3 mA at 19 closed
@@ -27,16 +27,16 @@ sims:
     corners: 9
     measures:
       kb_vpp:
-        nominal: 0.005401
-        min: 0.004066
-        min_at: esr_c6+ l_per_m- r_ldo+
-        max: 0.005414
+        nominal: 0.005435
+        min: 0.00406
+        min_at: esr_c6- l_per_m- r_ldo+
+        max: 0.005447
         max_at: esr_c6- l_per_m+ r_ldo-
       kb_step:
-        nominal: 0.000755
-        min: 0.000755
+        nominal: 0.000739
+        min: 0.000739
         min_at: nominal
-        max: 0.001726
+        max: 0.001709
         max_at: esr_c6- l_per_m- r_ldo+
       dev_vpp_clk:
         nominal: 5.0e-06
@@ -57,16 +57,16 @@ sims:
     corners: 9
     measures:
       kb_vpp:
-        nominal: 0.072403
-        min: 0.070869
+        nominal: 0.072444
+        min: 0.070899
         min_at: esr_c6+ l_per_m- r_ldo+
-        max: 0.072766
+        max: 0.072808
         max_at: esr_c6- l_per_m+ r_ldo-
       kb_step:
-        nominal: 0.000921
-        min: 0.000864
+        nominal: 0.000904
+        min: 0.000847
         min_at: esr_c6+ l_per_m- r_ldo-
-        max: 0.001935
+        max: 0.001912
         max_at: esr_c6- l_per_m+ r_ldo+
       dev_vpp_clk:
         nominal: 6.0e-06
@@ -86,10 +86,10 @@ sims:
     corners: 3
     measures:
       dv_edge:
-        nominal: 0.001012
-        min: 0.000942
+        nominal: 0.000998
+        min: 0.000928
         min_at: esr_c6-
-        max: 0.001405
+        max: 0.001385
         max_at: esr_c6+
     asserts:
     - expr: max['dv_edge'] < 0.05
@@ -101,10 +101,10 @@ sims:
     corners: 9
     measures:
       z_peak:
-        nominal: 2.49596
-        min: 1.20138
+        nominal: 2.54298
+        min: 1.21042
         min_at: esr_c6+ l_per_m- r_ldo+
-        max: 2.50759
+        max: 2.55374
         max_at: esr_c6- l_per_m+ r_ldo-
       f_peak:
         nominal: 29512.1
@@ -117,63 +117,63 @@ sims:
         min: 0.0186227
         min_at: esr_c6+ l_per_m+ r_ldo-
         max: 0.0186258
-        max_at: esr_c6- l_per_m- r_ldo+
+        max_at: esr_c6- l_per_m- r_ldo-
     asserts: []
   rail-impedance-without-bulk:
     corners: 9
     measures:
       z_peak:
-        nominal: 166.114
-        min: 146.829
+        nominal: 167.263
+        min: 147.871
         min_at: esr_c6+ l_per_m- r_ldo-
-        max: 203.767
+        max: 211.178
         max_at: esr_c6- l_per_m- r_ldo+
       f_peak:
-        nominal: 295121.0
+        nominal: 301995.0
         min: 295121.0
-        min_at: nominal
-        max: 301995.0
-        max_at: esr_c6- l_per_m- r_ldo+
-      z_1mhz:
-        nominal: 1.74616
-        min: 1.74542
         min_at: esr_c6- l_per_m+ r_ldo-
-        max: 1.74689
+        max: 301995.0
+        max_at: nominal
+      z_1mhz:
+        nominal: 1.74631
+        min: 1.74564
+        min_at: esr_c6- l_per_m+ r_ldo-
+        max: 1.74704
         max_at: esr_c6+ l_per_m- r_ldo+
     asserts: []
   sck-to-key-board:
     corners: 17
     measures:
       bs_rise:
-        nominal: 0.0185843
-        min: 0.0165032
-        min_at: c_main+ c_tvs+ r_drv+ tr_drv+
-        max: 0.0913146
+        nominal: 0.0189424
+        min: 0.0174408
+        min_at: c_main- c_tvs- r_drv+ tr_drv+
+        max: 0.0808855
         max_at: c_main+ c_tvs- r_drv- tr_drv-
       bs_fall:
-        nominal: 0.0184696
-        min: 0.0174189
-        min_at: c_main- c_tvs+ r_drv+ tr_drv+
-        max: 0.091109
+        nominal: 0.0188502
+        min: 0.0166275
+        min_at: c_main+ c_tvs+ r_drv+ tr_drv+
+        max: 0.0807464
         max_at: c_main+ c_tvs- r_drv- tr_drv-
       v_over:
-        nominal: 3.30583
-        min: 3.30456
+        nominal: 3.30598
+        min: 3.30425
         min_at: c_main- c_tvs- r_drv+ tr_drv+
-        max: 3.3298
-        max_at: c_main- c_tvs+ r_drv- tr_drv-
+        max: 3.3274
+        max_at: c_main+ c_tvs+ r_drv- tr_drv-
       v_under:
-        nominal: -0.00580989
-        min: -0.0309109
+        nominal: -0.00595358
+        min: -0.0263697
         min_at: c_main+ c_tvs+ r_drv- tr_drv-
-        max: -0.0045809
+        max: -0.00423582
         max_at: c_main- c_tvs- r_drv+ tr_drv+
       t_delay:
-        nominal: 9.50039e-09
-        min: 5.63643e-09
+        nominal: 9.5558e-09
+        min: 5.48618e-09
         min_at: c_main- c_tvs- r_drv- tr_drv-
-        max: 1.26686e-08
-        max_at: c_main+ c_tvs+ r_drv+ tr_drv-
+        max: 1.24878e-08
+        max_at: c_main+ c_tvs+ r_drv+ tr_drv+
     asserts:
     - expr: max['bs_rise'] < p['hyst_min'] and max['bs_fall'] < p['hyst_min']
       why: 'no double clock: after SCK crosses the register''s threshold, wherever in its spread, it never swings back through
@@ -187,68 +187,68 @@ sims:
     corners: 17
     measures:
       bs_rise:
-        nominal: 0.0718472
-        min: 0.0634994
+        nominal: 0.0729629
+        min: 0.0672806
         min_at: c_main+ c_tvs+ r_drv+ tr_drv+
-        max: 0.647469
+        max: 0.575114
         max_at: c_main- c_tvs- r_drv- tr_drv-
       bs_fall:
-        nominal: 0.0717927
-        min: 0.0636238
+        nominal: 0.072997
+        min: 0.0672837
         min_at: c_main+ c_tvs+ r_drv+ tr_drv+
-        max: 0.64746
+        max: 0.575108
         max_at: c_main- c_tvs- r_drv- tr_drv-
       v_over:
-        nominal: 3.32713
-        min: 3.32476
+        nominal: 3.3281
+        min: 3.32321
         min_at: c_main- c_tvs- r_drv+ tr_drv+
-        max: 3.56531
-        max_at: c_main+ c_tvs- r_drv- tr_drv-
+        max: 3.5362
+        max_at: c_main- c_tvs- r_drv- tr_drv-
       v_under:
-        nominal: -0.0271305
-        min: -0.265323
-        min_at: c_main+ c_tvs- r_drv- tr_drv-
-        max: -0.0247505
+        nominal: -0.0280634
+        min: -0.236187
+        min_at: c_main- c_tvs- r_drv- tr_drv-
+        max: -0.0232088
         max_at: c_main- c_tvs- r_drv+ tr_drv+
       t_delay:
-        nominal: 2.47427e-09
-        min: 9.49764e-10
+        nominal: 2.42924e-09
+        min: 9.10317e-10
         min_at: c_main- c_tvs- r_drv- tr_drv-
-        max: 3.36859e-09
-        max_at: c_main+ c_tvs+ r_drv+ tr_drv-
+        max: 3.24804e-09
+        max_at: c_main+ c_tvs+ r_drv+ tr_drv+
     asserts: []
   qh-to-main-board:
     corners: 5
     measures:
       bs_rise:
-        nominal: 0.00032017
-        min: 0.00015584
+        nominal: 0.00029491
+        min: 9.317e-05
         min_at: r_qh+ tr_qh+
-        max: 0.098429
+        max: 0.0773824
         max_at: r_qh- tr_qh-
       bs_fall:
-        nominal: 0.00032017
-        min: 0.000155844
+        nominal: 0.000294915
+        min: 9.31782e-05
         min_at: r_qh+ tr_qh+
-        max: 0.098429
+        max: 0.0773825
         max_at: r_qh- tr_qh-
       v_over:
-        nominal: 3.30008
-        min: 3.30004
+        nominal: 3.30007
+        min: 3.30003
         min_at: r_qh+ tr_qh+
-        max: 3.37039
+        max: 3.35279
         max_at: r_qh- tr_qh-
       v_under:
-        nominal: -8.19082e-05
-        min: -0.0703948
+        nominal: -6.66097e-05
+        min: -0.0527859
         min_at: r_qh- tr_qh-
-        max: -3.96638e-05
+        max: -2.64723e-05
         max_at: r_qh+ tr_qh+
       t_delay:
-        nominal: 9.07026e-10
-        min: 4.52287e-10
-        min_at: r_qh- tr_qh-
-        max: 1.35315e-09
+        nominal: 8.75079e-10
+        min: 4.3879e-10
+        min_at: r_qh- tr_qh+
+        max: 1.30696e-09
         max_at: r_qh+ tr_qh+
     asserts:
     - expr: max['bs_rise'] < p['hyst_min'] and max['bs_fall'] < p['hyst_min']
@@ -262,23 +262,23 @@ sims:
     corners: 65
     measures:
       clk_skew:
-        nominal: 1.30675e-08
-        min: 8.02953e-09
+        nominal: 1.31781e-08
+        min: 7.56143e-09
         min_at: c_main- c_tvs- r_drv- r_qh- tr_drv- tr_qh+
-        max: 1.73327e-08
-        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh+
+        max: 1.73145e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv- tr_qh-
       ser_delay:
-        nominal: 4.72637e-08
-        min: 3.47943e-08
-        min_at: c_main+ c_tvs- r_drv- r_qh- tr_drv+ tr_qh-
-        max: 5.88828e-08
-        max_at: c_main+ c_tvs+ r_drv+ r_qh+ tr_drv- tr_qh+
+        nominal: 4.69314e-08
+        min: 3.4348e-08
+        min_at: c_main+ c_tvs- r_drv+ r_qh- tr_drv- tr_qh-
+        max: 5.84853e-08
+        max_at: c_main- c_tvs+ r_drv- r_qh+ tr_drv+ tr_qh+
       hold_margin:
-        nominal: 3.41963e-08
-        min: 2.26207e-08
-        min_at: c_main+ c_tvs- r_drv+ r_qh- tr_drv+ tr_qh-
-        max: 4.69887e-08
-        max_at: c_main- c_tvs+ r_drv- r_qh+ tr_drv- tr_qh+
+        nominal: 3.37533e-08
+        min: 2.21082e-08
+        min_at: c_main+ c_tvs- r_drv+ r_qh- tr_drv- tr_qh-
+        max: 4.60675e-08
+        max_at: c_main- c_tvs+ r_drv- r_qh+ tr_drv+ tr_qh+
       need_tpd:
         nominal: 0.0
         min: 0.0
@@ -298,23 +298,23 @@ sims:
     corners: 65
     measures:
       clk_skew:
-        nominal: 1.30675e-08
-        min: 8.02953e-09
+        nominal: 1.31781e-08
+        min: 7.56143e-09
         min_at: c_main- c_tvs- r_drv- r_qh- tr_drv- tr_qh+
-        max: 1.73327e-08
-        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh+
+        max: 1.73145e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv- tr_qh-
       ser_delay:
-        nominal: 7.37633e-08
-        min: 5.49344e-08
-        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv- tr_qh-
-        max: 9.18575e-08
-        max_at: c_main+ c_tvs+ r_drv+ r_qh+ tr_drv- tr_qh+
+        nominal: 7.31466e-08
+        min: 5.44174e-08
+        min_at: c_main+ c_tvs- r_drv+ r_qh- tr_drv- tr_qh-
+        max: 9.12807e-08
+        max_at: c_main- c_tvs+ r_drv- r_qh+ tr_drv+ tr_qh+
       hold_margin:
-        nominal: 6.06958e-08
-        min: 4.2763e-08
-        min_at: c_main+ c_tvs- r_drv+ r_qh- tr_drv+ tr_qh-
-        max: 7.99627e-08
-        max_at: c_main- c_tvs+ r_drv- r_qh+ tr_drv- tr_qh+
+        nominal: 5.99685e-08
+        min: 4.21776e-08
+        min_at: c_main+ c_tvs- r_drv+ r_qh- tr_drv- tr_qh-
+        max: 7.88629e-08
+        max_at: c_main- c_tvs+ r_drv- r_qh+ tr_drv+ tr_qh+
       need_tpd:
         nominal: 0.0
         min: 0.0
@@ -334,29 +334,29 @@ sims:
     corners: 65
     measures:
       clk_skew:
-        nominal: 1.30675e-08
-        min: 8.02939e-09
+        nominal: 1.31781e-08
+        min: 7.56136e-09
         min_at: c_main- c_tvs- r_drv- r_qh- tr_drv- tr_qh-
-        max: 1.73327e-08
-        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh+
+        max: 1.73145e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh+ tr_drv- tr_qh+
       ser_delay:
-        nominal: 4.35404e-09
-        min: 1.65783e-09
+        nominal: 4.36226e-09
+        min: 1.62971e-09
         min_at: c_main- c_tvs- r_drv- r_qh- tr_drv- tr_qh-
-        max: 6.71261e-09
+        max: 6.70611e-09
         max_at: c_main+ c_tvs+ r_drv+ r_qh+ tr_drv- tr_qh+
       hold_margin:
-        nominal: -8.71341e-09
-        min: -1.52979e-08
-        min_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
-        max: -2.61908e-09
+        nominal: -8.81587e-09
+        min: -1.52664e-08
+        min_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv- tr_qh-
+        max: -2.21823e-09
         max_at: c_main- c_tvs- r_drv- r_qh+ tr_drv- tr_qh+
       need_tpd:
-        nominal: 8.71341e-09
-        min: 2.61908e-09
+        nominal: 8.81587e-09
+        min: 2.21823e-09
         min_at: c_main- c_tvs- r_drv- r_qh+ tr_drv- tr_qh+
-        max: 1.52979e-08
-        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+        max: 1.52664e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv- tr_qh-
     asserts:
     - expr: min['hold_margin'] < 0
       why: 'WHAT-IF: without R-HOP-SER the data beats right_hand''s clock at the worst corner, and the hop holds only if left_thumb''s
@@ -366,29 +366,29 @@ sims:
     corners: 65
     measures:
       clk_skew:
-        nominal: 1.30675e-08
-        min: 8.02939e-09
+        nominal: 1.31781e-08
+        min: 7.56136e-09
         min_at: c_main- c_tvs- r_drv- r_qh- tr_drv- tr_qh-
-        max: 1.73327e-08
-        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh+
-      ser_delay:
-        nominal: 6.03284e-09
-        min: 2.1599e-09
-        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv- tr_qh-
-        max: 9.1469e-09
+        max: 1.73145e-08
         max_at: c_main+ c_tvs+ r_drv+ r_qh+ tr_drv- tr_qh+
+      ser_delay:
+        nominal: 5.94192e-09
+        min: 2.24805e-09
+        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv- tr_qh-
+        max: 9.19236e-09
+        max_at: c_main- c_tvs+ r_drv- r_qh+ tr_drv+ tr_qh+
       hold_margin:
-        nominal: -7.03462e-09
-        min: -1.41617e-08
-        min_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
-        max: -7.00756e-10
+        nominal: -7.23621e-09
+        min: -1.4169e-08
+        min_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv- tr_qh-
+        max: -2.99878e-10
         max_at: c_main- c_tvs- r_drv- r_qh+ tr_drv- tr_qh+
       need_tpd:
-        nominal: 7.03462e-09
-        min: 7.00756e-10
+        nominal: 7.23621e-09
+        min: 2.99878e-10
         min_at: c_main- c_tvs- r_drv- r_qh+ tr_drv- tr_qh+
-        max: 1.41617e-08
-        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+        max: 1.4169e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv- tr_qh-
     asserts:
     - expr: min['hold_margin'] < 0
       why: 'WHAT-IF: without R-HOP-SER the data beats right_hand''s clock at the worst corner, and the hop holds only if left_thumb''s

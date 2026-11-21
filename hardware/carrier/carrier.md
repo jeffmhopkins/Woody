@@ -513,7 +513,7 @@ page and have no BOM entry yet.
 | `D-TVS-BREATH` ×2 | PESD12VL1BA: 12 V standoff, 19 pF, bidirectional, SOD-323 (#32) | `BREATH` and `AGND` legs | `[repo]` |
 | `R-SPI-SER` ×3 | `spi-series-r` | Series at the driving end on `SCLK`, `MOSI`, `CS`, between the pads and `J-UMB` — see §4 and `interfaces/spi-link` | `[repo] bom.csv` |
 | `U-TVS-SPI` | SP0504BAHT, **SOT-23-5** | `IO35`, `IO36`, `IO34` + spare, to `PWR_GND`: on the **pad side** of `R-SPI-SER` (owner, 2026-09-30; `cs-fall-reentry`) | `[repo]` |
-| **`J-CHAIN`** ×2 here | **2×6 1.27 mm shrouded IDC header, right-angle, through-hole** | **One per key-board ribbon (`CBL-CHAIN`), in the far band beside the LED row, under its key board's; the mates are on the key boards (`chain-connectors` in all). 4 signals, 5 alternating grounds, 3V3, 2 spare. Part open until M4. `key-chain-loom.md`** | ribbon decided (ADR 0017), part open |
+| **`J-CHAIN`** ×2 here | **2×5 1.27 mm shrouded box header, vertical, through-hole** | **One per key-board ribbon (`CBL-CHAIN`), in the far band beside the LED row, straight under its key board's; the mates are on the key boards (`chain-connectors` in all). 4 signals, 5 alternating grounds, 3V3 (`chain-conductors`). `key-chain-loom.md`** | decided (ADR 0017, amended 2026-11-21) |
 | `PCB-CARRIER` | 4-layer (ADR 0017 amendment), outline derived by the body CAD | The main board (ADR 0017). See *Still open* | `[repo]` `mechanical/drc.echo` "main board (derived)" |
 | `TP-*`, `LK-*` | none | A review (`D2`) asked for test points, shunt links and an LA header. **Not fitted** (owner, 2026-09-29): this is a one-off build, probed by hand at the parts' own pins | decided |
 
@@ -537,7 +537,7 @@ it, and power arrives down the umbilical. What terminates here:
 
 | From | Conductors | Connector |
 |---|---|---|
-| The two key boards, one IDC ribbon each (`CBL-CHAIN`) | `chain-conductors` each: four chain signals, five alternating grounds, 3V3, two spare — `key-chain-loom.md` | `J-CHAIN` IDC header, one per ribbon here; `chain-connectors` counts both ends |
+| The two key boards, one IDC ribbon each (`CBL-CHAIN`) | `chain-conductors` each: four chain signals, five alternating grounds, 3V3 — `key-chain-loom.md` | `J-CHAIN` IDC header, one per ribbon here; `chain-connectors` counts both ends |
 | The Matrix, on its carrier | 24 | `J-MCU` |
 | The umbilical, from the tail cap | 8 | `J-UMB` |
 | The console (TXD, RXD, GND) | 3 | `HDR-SERVICE` |
@@ -572,8 +572,8 @@ Ordered by what blocks what. The first two block layout.
 > `DIG_GND` tied to this board's ground at `J-UMB` (§4,
 > [`spi-link`](../interfaces/spi-link/spi-link.md)).
 
-> **Two items were decided rather than left open.** `J-CHAIN` is **12-way**
-> with a ground between every signal (§3). And the key pull-ups **may** share the
+> **Two items were decided rather than left open.** `J-CHAIN` carries
+> a ground between every signal (§3; `chain-conductors`). And the key pull-ups **may** share the
 > ADC's reference: 27.3 mA of play-rate load worth 3.4 LSB on a ~1594-count
 > playable span, as a gain term rather than an offset. **Accepted, not
 > ignored** — §2 exists so that when the breath reading twitches on a chord,

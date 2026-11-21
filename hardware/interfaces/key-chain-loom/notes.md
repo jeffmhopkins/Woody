@@ -47,7 +47,7 @@ while the netlist had it on `GND_CHAIN`; the redrawn page uses `GND_CHAIN`.
 
 ADR 0017 put the thumb clusters on the main board and gave each key board one
 flat flex ribbon with a ZIF connector at each end. The chain order and the
-12-way pinout were kept, so the bit map and firmware did not change.
+pinout (then 12-way, superseded 2026-11-21) were kept, so the bit map and firmware did not change.
 
 ## 2026-09-26 — `F-CHAIN` dropped, `U-TVS-CHAIN` fitted
 
@@ -102,9 +102,25 @@ An FFSD socket's cable leaves on the side away from its notch, and a
 straight cable would have left the key-board socket's ribbon rising into the
 key board. Ordered `-RN2`, notch reversed on the key-board end, that socket
 mates rotated 180°, its ribbon leaves downward like the main board's, and
-conductor k meets key-board pin 13 − k — the same map the flat-flex design
+conductor k then met (superseded 2026-11-21) key-board pin 13 − k — the same map the flat-flex design
 had. The key boards' sheets were renetted to it (3V3 on pin 3, signals on
 the odd pins); the same corrections moved the header's height, mouth and
 pin-row depth in `config/body.yaml` off the print, and the hairpin became a
 main-board leg on the board and a key-board leg just under its socket.
 ADR 0017's amendment was corrected in place the same day.
+
+## 2026-11-21 — vertical 2×5 headers, a straight cable
+
+Until ADR 0017's Amendment of this date `J-CHAIN` was a right-angle 2×6 header
+(Samtec SHF-106-01-L-D-RA) and `CBL-CHAIN` a bought Samtec FFSD cable with its
+second socket's notch reversed. A right-angle header sends the ribbon out
+along the board, so each end of the hairpin had a turn of its own at its
+socket as well as the fold between them. The owner asked for vertical headers
+so that the cable has one bend, and for parts that are common and stocked: the
+right-angle Samtec header had single-figure stock at one distributor and none
+at the assembler. No common vertical box header is made 12-way, so the two
+spare conductors (then pins 11 and 12 on the main board) went, and with a
+straight cable the reversed map (key-board pin 13 − k, superseded) went too:
+pin n is pin n at both ends. The headers' places, the ribbon's cut length and
+the room between the two mated sockets are the body CAD's
+(`mechanical/drc.echo`).

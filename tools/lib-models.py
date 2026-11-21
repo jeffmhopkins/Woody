@@ -112,32 +112,6 @@ def xkb_x1270wr_2x12a_9tv01():
     return [("body", body, BLACK), ("pins", fuse(*pins), GOLD)]
 
 
-def samtec_shf_106_01_l_d_ra():
-    """J-CHAIN. Samtec SHF-106-01-L-D-RA, datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf:
-    length 6 x 1.27 + 6.35 = 13.97 (sheet 1), body 5.08 on 0.51 ribs, 5.33 deep,
-    mouth centre 3.05 up (section C-C), the far (odd) row 1.26 + 1.27 behind the
-    back face and the near row 1.26, tails 0.41 square 2.15 past the seating
-    plane; the key in the wall on the board side (fig 2). The cavity's walls and
-    the key's width are not dimensioned on the print [est]."""
-    n, p = 6, 1.27
-    back, depth = 2.53, 5.33
-    y0, y1 = -3.81, 10.16
-    yc = (y0 + y1) / 2
-    zc = 3.05
-    body = box(back, back + depth, y0, y1, 0.51, 0.51 + 5.08)
-    ribs = fuse(box(back, back + depth, y0, y0 + 1.0, 0, 0.6), box(back, back + depth, y1 - 1.0, y1, 0, 0.6))
-    cav = box(back + depth - 4.0, back + depth + 1, yc - 11.2 / 2, yc + 11.2 / 2, zc - 3.3 / 2, zc + 3.3 / 2)  # [est]
-    key = box(back + depth - 4.0, back + depth + 1, yc - 1.0, yc + 1.0, 0, zc)                                 # [est] 2.0 wide
-    body = cut(fuse(body, ribs), cav, key)
-    tip = back + depth - 1.0                                              # [est]
-    pins = []
-    for k in range(n):
-        y = k * p
-        pins.append(rt_pin(0.0, y, zc + p / 2, tip, 0.41, 2.15))
-        pins.append(rt_pin(p, y, zc - p / 2, tip, 0.41, 2.15))
-    return [("body", body, BLACK), ("pins", fuse(*pins), GOLD)]
-
-
 def hanxia_pz254_1x8p_wz():
     """J-UMB. hanxia HX PZ2.54-1x8P WZ, datasheets/connectors/HANXIA-HX-PZ2.54-1x8P-WZ.pdf:
     insulator 2.50 x 2.50, (B - 0.2) = 20.12 long for 8 pins; the posts 6.00 past
@@ -183,9 +157,26 @@ def nxp_case_1351_01():
     return [("body", fuse(body, ports), WHITE), ("leads", fuse(*leads), TIN)]
 
 
+def cnctech_3220_10_0100_00():
+    """J-CHAIN. CNC Tech 3220-10-0100-00, datasheets/connectors/CNCTECH-3220-XX-0100-00-1.27MM-BOX-HEADER-VERTICAL.pdf
+    rev A: vertical, C 12.65 long (10 positions), 5.1 across (3.7 inside), 5.40 high
+    (3.5 deep inside), posts 0.40 square, tails 2.1 past the seating plane, key slot
+    in the wall over the odd row. The cavity's length, the slot's width and the
+    posts' height inside the mouth are not dimensioned for this size [est]."""
+    n, p = 5, 1.27
+    xc, yc = p / 2, (n - 1) * p / 2
+    L, W, H = 12.65, 5.1, 5.40
+    body = box(xc - W / 2, xc + W / 2, yc - L / 2, yc + L / 2, 0, H)
+    cav = box(xc - 3.7 / 2, xc + 3.7 / 2, yc - (L - 1.4) / 2, yc + (L - 1.4) / 2, H - 3.5, H + 1)   # [est] 0.7 end walls, as the long walls
+    key = box(xc - W / 2 - 1, xc, yc - 2.35 / 2, yc + 2.35 / 2, H - 3.5, H + 1)                        # [est] 2.35 wide, as the XKB family's
+    body = cut(body, cav, key)
+    pins = [box(x - 0.2, x + 0.2, k * p - 0.2, k * p + 0.2, -2.1, H - 0.6) for k in range(n) for x in (0.0, p)]   # [est] tips 0.6 under the mouth
+    return [("body", body, BLACK), ("pins", fuse(*pins), GOLD)]
+
+
 MODELS = {
     "XKB_X1270WR-2x12A-9TV01": xkb_x1270wr_2x12a_9tv01,
-    "Samtec_SHF-106-01-L-D-RA": samtec_shf_106_01_l_d_ra,
+    "CNCTech_3220-10-0100-00": cnctech_3220_10_0100_00,
     "Hanxia_HX_PZ2.54-1x8P_WZ": hanxia_pz254_1x8p_wz,
     "NXP_Case1351-01_MPXV4006DP": nxp_case_1351_01,
 }

@@ -278,12 +278,12 @@ figures:
 
   - id: chain-conductors
     quantity: Conductors per key-chain hop
-    value: "12"
+    value: "10"
     status: settled
     owner: hardware/interfaces/key-chain-loom/key-chain-loom.md
-    owner_note: "Moved from ADR 0001 on 2026-09-26: ADR 0001's chain section records the IDC version as decided and carries the flat-flex ribbon only as an amendment, while key-chain-loom.md states the live 12-way pinout (its ribbon table and the J-CHAIN row)." 
-    derivation: "4 signals + 5 alternating grounds + 3V3 + 2 spare, on a 12-conductor 1.27 mm IDC ribbon per key board (ADR 0017, amended 2026-09-27)"
-    forbidden: ["six conductors per hop", "SIX conductors per hop", "6 conductors per hop", "Six conductors leave", "six conductors leave", "Six conductors per hop", "Six conductors per"]
+    owner_note: "Moved from ADR 0001 on 2026-09-26: ADR 0001's chain section records the IDC version as decided and carries the flat-flex ribbon only as an amendment, while key-chain-loom.md states the live pinout (its ribbon table and the J-CHAIN row)." 
+    derivation: "4 signals + 5 alternating grounds + 3V3, on a 2x5 1.27 mm IDC ribbon per key board (ADR 0017, amended 2026-11-21: the two spare conductors of the 2x6 part went with it)"
+    forbidden: ["12-conductor 1.27", "12 conductors at 0.635", "12-way (2x6)", "free in a 12-way part", "12-way pinout", "11 spare, 12 spare", "SHF-106-01-L-D-RA-ND", "FFSD-06-D-<", "SIX conductors per hop", "6 conductors per hop", "Six conductors leave", "six conductors leave", "Six conductors per hop", "Six conductors per"]
     false_positive_note: >
       led-strip-drive.md's "the LED loom stays at 6 conductors" is a
       different loom entirely, and is not this figure.
@@ -302,7 +302,7 @@ figures:
     value: "4"
     status: settled
     owner: hardware/interfaces/key-chain-loom/key-chain-loom.md
-    derivation: "The thumb clusters are on the main board, so their part of the chain is traces (ADR 0017). Each of the two key boards has one 12-conductor IDC ribbon (CBL-CHAIN) plugged into a through-hole 2x6 1.27 mm right-angle shrouded IDC header at each end, one on the main board and one on the key board, carrying that board's SER in and QH out: 2 key boards x 2 ends = 4 (ADR 0017, amended 2026-09-27)"
+    derivation: "The thumb clusters are on the main board, so their part of the chain is traces (ADR 0017). Each of the two key boards has one IDC ribbon (CBL-CHAIN) plugged into a through-hole 2x5 1.27 mm vertical shrouded box header at each end, one on the main board and one on the key board, carrying that board's SER in and QH out: 2 key boards x 2 ends = 4 (ADR 0017, amended 2026-09-27 and 2026-11-21)"
     # ADR 0001 keeps the IDC version ("Eight connectors ... carrier 1, RT 2,
     # RH 2, LT 2, LH 1") as its record under an amendment note; those
     # spellings are deliberately not patterns here. "~4 connectors" is not a
@@ -311,22 +311,23 @@ figures:
 
   - id: key-board-chain-pinmap
     quantity: Key-board J-CHAIN pin for each main-board J-CHAIN pin (the ribbon's pin map)
-    value: "key-board pin = 13 - main-board pin"
+    value: "key-board pin = main-board pin"
     status: settled
     owner: hardware/interfaces/key-chain-loom/key-chain-loom.md
-    derivation: "A keyed socket always mates position k to header pin k, so the map is set by how the cable is built. Ordered -RN2 (notch reversed on the key-board end) the key-board socket mates rotated 180 degrees, and conductor k meets key-board pin 13 - k [datasheet, datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf and SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf; key-chain-loom.md]. The key boards' sheets and hardware/interfaces/key-chain-loom/netlist.yaml carry it."
+    derivation: "A keyed socket always mates position k to header pin k, so the map is set by how the cable is built. CBL-CHAIN is a straight ribbon, both sockets crimped the same way up and the same way round, so conductor k meets pin k at both ends (ADR 0017, amended 2026-11-21) [datasheets/connectors/CNCTECH-3230-XX-0103-00-1.27MM-IDC-SOCKET.pdf; key-chain-loom.md]. The key boards' sheets and hardware/interfaces/key-chain-loom/netlist.yaml carry it, and tools/kicad.py check holds them to it."
     # Tracked 2026-09-27 (review wave 2026-09-27-lh-key-board, K8-9): the map
     # moved twice in one day and was restated in ten files with no entry here.
     # GREPPED FIRST, corpus only, every spelling below: the ONLY hits were
     # key-chain-loom/notes.md's dated paragraph ("12 − k", "14 − k", "SER on
     # key-board pin 8"), which carries refutation wording.
-    forbidden: ["12 − n", "14 − n", "12−n", "14−n", "12-n", "14-n", "12 − k", "14 − k", "12−k", "14−k", "12-k", "14-k", "12 SCK, 10 SH/LD", "SER on key-board pin 8", "SER` on key-board pin 8", "3V3 on key-board pin 4", "3V3` on key-board pin 4", "FFC-CHAIN,controller", "ffc_conn_l:", "ffc_conn_w:", "ffc_conn_h:", "Molex_200528"]
+    forbidden: ["pin = 13 − main", "pin = 13 - main", "key-board pin 13 − k", "key-board pin 13-n", "pin 13 - k on the main board", "pin 13 − k on the main board", "KEY-BOARD PINOUT: 11 SCK", "12 − n", "14 − n", "12−n", "14−n", "12-n", "14-n", "12 − k", "14 − k", "12−k", "14−k", "12-k", "14-k", "12 SCK, 10 SH/LD", "SER on key-board pin 8", "SER` on key-board pin 8", "3V3 on key-board pin 4", "3V3` on key-board pin 4", "FFC-CHAIN,controller", "ffc_conn_l:", "ffc_conn_w:", "ffc_conn_h:", "Molex_200528"]
     false_positive_note: >
-      DO NOT add a bare "key-board pin 8" or "key-board pin 4". Under the live
-      map both are GROUNDS (key-board pins 4/6/8/10/12), so a correct sentence
-      about a ground fires on them. The retired map put SER on key-board pin 8
-      and 3V3 on pin 4, so only those pairings are patterns. "13-n", "13 − k"
-      and "13 − n" are the live map, never patterns. FFC-CHAIN, ffc_conn and
+      DO NOT add a bare "key-board pin 8" or "key-board pin 4": under the
+      live map pin 8 is QH and pin 4 SH/LD on both boards, and under the map
+      before it both were grounds, which the ADRs still narrate. "13 − n" and
+      "13 − k" as bare strings are not patterns either: ADR 0017's Amendments
+      narrate that map as the -RN2 cable's. Only the spellings that state it
+      as the live rule are. FFC-CHAIN, ffc_conn and
       200528 belong to the retired flat-flex/ZIF chain. As bare words they
       appear legitimately in dated history (notes.md, ADR 0017/0020, the
       tooling.md findings), not all of it within the refutation window, and a

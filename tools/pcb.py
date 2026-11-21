@@ -78,7 +78,7 @@ def cad_geometry(cluster):
         if kind == "switch":
             geo["switches"][rest[0]] = (float(rest[1]), float(rest[2]), float(rest[3]))
         elif kind == "chain":
-            # mouth x, centre y, which way the mouth faces along the body (+1 the tail), length, mouth to far pin row
+            # centre x, centre y, which way the even row stands along the body (+1 the tail), length, half the row spacing
             geo["chain"] = tuple(float(v) for v in rest[1:6])
         elif kind == "standoff":
             geo["standoffs"].append(tuple(float(v) for v in rest[1:6]))
@@ -202,7 +202,8 @@ def add_outline(board, segs):
 
 
 def chain_target(geo):
-    """Where J-CHAIN's pads must centre, in PCB mm, and which way (PCB x) its mouth faces."""
+    """Where J-CHAIN's pads must centre, in PCB mm, and which way (PCB x) its even row stands
+    from its odd one (pads 1 -> 2): the body CAD's `chain` line."""
     x, y, d, _, back = geo["chain"]
     return to_pcb(x - d * (back - 0.635), y), d
 
@@ -213,10 +214,9 @@ def pads_centre(fp):
 
 
 def place_chain(board, fp, geo, bottom=True):
-    """The chain header on the bottom, its mouth facing along the body the way
-    the body CAD says: the rotation is FOUND, not assumed - on the bottom KiCad
-    mirrors rotation, and the footprint's own frame puts the mouth at +x from
-    pin 1's row (pads 1 -> 2 point at the mouth)."""
+    """The chain header on the bottom, its even row along the body the way the
+    body CAD says (pads 1 -> 2): the rotation is FOUND, not assumed - on the
+    bottom KiCad mirrors rotation."""
     (tx, ty), d = chain_target(geo)
     for rot in (0, 90, 180, 270):
         place(board, fp, 0, 0, rot, bottom)
@@ -229,7 +229,7 @@ def place_chain(board, fp, geo, bottom=True):
         board.Remove(fp)
         if fp.IsFlipped():
             fp.Flip(fp.GetPosition(), pcbnew.FLIP_DIRECTION_LEFT_RIGHT)
-    raise SystemExit("pcb: no rotation puts J-CHAIN's mouth where the body CAD faces it")
+    raise SystemExit("pcb: no rotation puts J-CHAIN's even row where the body CAD faces it")
 
 
 def place(board, fp, x, y, rot, bottom):
@@ -555,8 +555,8 @@ def add_silk(board, lay, comps):
             silk_dot(board, dxd, pcbnew.ToMM(p1.y))   # its edge 0.39 off the pad: fab silk_to_pad
             placed_txt.append((dxd - 0.6, pcbnew.ToMM(p1.y) - 0.6, dxd + 0.6, pcbnew.ToMM(p1.y) + 0.6))
             put(ref, *above_or_below(x0, y0, x1, y1, ref))
-            # which way its mouth faces: pads 1 -> 2 point at it (place_chain); a
-            # header soldered backward puts 3V3 on a ground pin (key-chain-loom.md)
+            # which way its even row stands: pads 1 -> 2 point at it (place_chain); a
+            # header soldered backward takes its socket only with the ribbon twisted (key-chain-loom.md)
             mx = pcbnew.ToMM(p2.x - p1.x) > 0
             ax = x1 + 1.2 if mx else x0 - 1.2
             silk_arrow(board, ax, (y0 + y1) / 2, 1 if mx else -1)
@@ -599,7 +599,7 @@ def add_silk(board, lay, comps):
 def add_top_silk(board, lay, comps):
     """The switch side's silkscreen. J-CHAIN is soldered from this side and the
     board is lowered onto the switch pins top first, so it carries each key's name
-    and reference beside its switch (off its body), J-CHAIN's reference, pin 1 and the way its mouth faces, the MOUTH end,
+    and reference beside its switch (off its body), J-CHAIN's reference, pin 1 and the way its even row stands, the MOUTH end,
     and the board's title and revision. Not mirrored: it reads from above."""
     _TWB[0] = board
     for fp in board.GetFootprints():
@@ -652,7 +652,7 @@ def add_top_silk(board, lay, comps):
             x0, x1 = min(pcbnew.ToMM(b.GetLeft()) for b in bb) - 0.265, max(pcbnew.ToMM(b.GetRight()) for b in bb) + 0.265
             y0, y1 = min(pcbnew.ToMM(b.GetTop()) for b in bb) - 0.265, max(pcbnew.ToMM(b.GetBottom()) for b in bb) + 0.265
             put(ref, *beside(x0, y0, x1, y1, ref))
-            # its mouth faces the way pads 1 -> 2 point (place_chain)
+            # its even row stands the way pads 1 -> 2 point (place_chain)
             silk_arrow(board, (x1 + 1.0) if dx < 0 else (x0 - 1.0), (y0 + y1) / 2, 1 if dx < 0 else -1, top=True)
     # the MOUTH end: here the first switch leaves too narrow a strip for the word
     # across it, so it runs along the edge, the arrow beside it
@@ -2530,8 +2530,7 @@ def cmd_render(bdir, preview=None):
 def missing_models(board, bdir, env):
     """Every 3D model a footprint names, resolved as KiCad would: kicad-cli renders a part
     whose model is missing as nothing at all, exits 0 and says nothing. A footprint that
-    names no model (woody:IDC-Header_..._Samtec_SHF_Horizontal, the test pads, the
-    standoff holes) is not asked for one."""
+    names no model (the test pads, the standoff holes) is not asked for one."""
     out = {}
     for fp in board.GetFootprints():
         models = fp.Models()

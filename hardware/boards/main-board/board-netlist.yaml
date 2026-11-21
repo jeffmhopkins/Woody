@@ -635,7 +635,7 @@ components:
     sheet: service-uart
   J4:
     of: J-CHAIN
-    value: 12-way
+    value: 10-way
     pins:
     - 1
     - 2
@@ -647,11 +647,9 @@ components:
     - 8
     - 9
     - 10
-    - 11
-    - 12
   J5:
     of: J-CHAIN
-    value: 12-way
+    value: 10-way
     pins:
     - 1
     - 2
@@ -663,8 +661,6 @@ components:
     - 8
     - 9
     - 10
-    - 11
-    - 12
   J6:
     of: J-UMB
     value: 8-way 2.54mm right-angle pin header
@@ -1809,14 +1805,6 @@ nets:
   - U3.V+
   J1.6:
   - J1.6
-  J4.11:
-  - J4.11
-  J4.12:
-  - J4.12
-  J5.11:
-  - J5.11
-  J5.12:
-  - J5.12
   PWR_GND:
   - A1.GND
   - C10.2
@@ -1993,10 +1981,6 @@ external_endpoints:
 - D8.1
 - D9.1
 - J1.6
-- J4.11
-- J4.12
-- J5.11
-- J5.12
 - U1.CH4
 - U10.1
 - U10.5

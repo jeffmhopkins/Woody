@@ -3,7 +3,8 @@
 **Status:** Accepted; amended 2026-09-27 (the key-board chain: 1.27 mm IDC, *Amendment* below)
 and 2026-09-29 (four layers, and parts on both faces, *Amendment* below) and
 2026-10-04 (through-hole tails over the plate trimmed to a length, *Amendment* below) and
-2026-11-20 (both hands' chain headers face the mouth, two *Amendments* below); the
+2026-11-20 (both hands' chain headers face the mouth, two *Amendments* below) and
+2026-11-21 (the chain headers stand vertical and are 2×5, *Amendment* below); the
 wiring details are [ADR 0018](0018-main-board-wiring-decisions.md)
 
 Replaces the **centre board** and the two **thumb boards** with one board.
@@ -118,6 +119,12 @@ one big long board?")
 
 ## Amendment, 2026-09-27 — the key chain goes to through-hole IDC
 
+> **Superseded in its parts, 2026-11-21** (the last Amendment below): the
+> headers stand vertical and are 2×5, the cable is a straight one made up
+> here, and key-board pin n is main-board pin n. Through-hole IDC, one ribbon
+> per key board and the hairpin's place stand. What follows is the record of
+> the right-angle 2×6 design.
+
 *Corrected the same day against the banked full prints: the key-board pin
 map, the cable's part, the hairpin's legs and the header's height
 (`hardware/interfaces/key-chain-loom/notes.md` has what it said).*
@@ -132,7 +139,7 @@ with nothing to line up blind — but its parts, its path and its length change:
   (`chain-connectors`; stand-in Samtec SHF-106-01-L-D-RA,
   `datasheets/connectors/SAMTEC-SHF-1XX-01-X-D-XX-PRINT.pdf`).
   `chain-connectors` is unchanged.
-- **The cable is a flat IDC ribbon**, 12 conductors at 0.635 mm, with a 2×6
+- **The cable is a flat IDC ribbon** (superseded 2026-11-21, below), then 12 conductors at 0.635 mm, with a 2×6
   IDC socket at each end, bought as an assembled length, **its notch
   reversed on the key-board end** (stand-in Samtec FFSD-06-D-xx.xx-01-N-RN2,
   `datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf`). Its
@@ -325,3 +332,72 @@ body (right_hand)", "key-chain ribbon hairpin clear of the columns
 - `chain_fold`'s reason for folding the right hand toward the tail was the
   regulator block; the model's rule for the header's place still keeps the
   header and the hairpin off the main board's tall parts, wherever they fold.
+
+## Amendment, 2026-11-21 — the chain headers stand vertical, and are 2×5
+
+**The owner, 2026-11-21** (in the working chat, issue #49), on the right-angle
+headers of the 2026-09-27 Amendment: **"we might actually want straight on
+instead of 90° connectors"**, then **"I think maybe then vertical headers are
+what we want to do. If there's not enough room in between the boards, we'll
+just want to make sure and offset them enough. But this way the cable only has
+one bend in it"**. On the parts: **"when picking parts, we'll need to source
+that are common, not end of life and readily available"**. Asked to choose
+between the 12-way part and the common 10-way size, the owner chose
+**"10-way 2x5, common parts"**.
+
+**What changes.**
+
+- **`J-CHAIN` is a 2×5, 1.27 mm pitch, shrouded, keyed, vertical,
+  through-hole box header**, the same part at every `J-CHAIN` position
+  (`chain-connectors`, unchanged): CNC Tech 3220-10-0100-00
+  `[datasheets/connectors/CNCTECH-3220-XX-0100-00-1.27MM-BOX-HEADER-VERTICAL.pdf]`.
+  The main board's stands on its top; the key board's hangs from its underside
+  **mouth to mouth** with it, at the same place along the body
+  (`config/body.yaml` `boards.chain_mb_shift` is what to raise if they must be
+  offset).
+- **`CBL-CHAIN` is a straight ribbon made up here**: 0.635 mm flat cable with
+  a 2×5 IDC socket crimped at each end, both the same way up and the same way
+  round, CNC Tech 3230-10-0103-00
+  `[datasheets/connectors/CNCTECH-3230-XX-0103-00-1.27MM-IDC-SOCKET.pdf]`.
+  Nothing is built to order.
+- **The ribbon has one fold.** A socket goes in along the pins and its ribbon
+  leaves it flat, along the body, the way `routing.chain_fold` says; both
+  sockets' ribbons leave the same way and the spare length closes in one fold
+  between them (`mechanical/drc.echo` "key-chain ribbon fold no tighter than
+  its bend radius", "key-chain sockets clear of each other, mouth to mouth").
+  The 2026-09-27 Amendment's reasons 1, 3 and 4 stand; its reason 2
+  (right-angle headers, stacked) is superseded by this one.
+- **The two spare conductors go** (`chain-conductors`): the chain used ten of
+  the twelve. Pins 1 to 10 keep their signals.
+- **Key-board pin n is main-board pin n** (`key-board-chain-pinmap`): a
+  straight ribbon mates conductor n to pin n at both ends. The 2026-09-27
+  Amendment's map, key-board pin 13 − n, belonged to the `-RN2` cable and is
+  superseded with it. On every header the odd row is now the five grounds and
+  the even row the four signals and 3V3.
+- **Which way each header's key slot faces follows from the straight ribbon**:
+  the two sockets' keys face the same way along the flat ribbon, so, folded,
+  one faces the fold and the other faces away from it
+  (`hardware/interfaces/key-chain-loom/key-chain-loom.md`, *Pin numbering*).
+
+**Why the 12-way part was not kept vertical.** It fits, and it is not end of
+life; but the header and its built-to-length cable are made to order, with
+weeks of lead time and no stock held where it was looked for
+`[web, 2026-11-21: DigiKey's listings for SHF-106-01-L-D-TH and
+FFSD-06-D-02.00-01-N]`. The 2×5 is the size debug connectors use: the header
+is stocked in the hundreds of thousands
+`[web, 2026-11-21: https://www.digikey.co.uk/en/products/detail/cnc-tech/3220-10-0100-00/3883661]`,
+and CNC Tech's drawing does not list a 12-position size at all.
+
+**The Matrix's ribbon is not changed.** `J-MCU` and `J-MCU-C` stay
+right-angle: that header lies along the body, so a vertical socket would send
+its ribbon across the body, and between the header and the LED row there is no
+room for the ribbon's fold (`drc.echo` "J-MCU, its plug and the Matrix ribbon
+off the LED row").
+
+**What follows it.** The main board and both key boards are laid out again
+round the new footprint (`woody:IDC-Header_2x05_P1.27mm_CNCTech_3220_Vertical`),
+and `tools/kicad.py check` holds key-board pin k to main-board pin k. The body
+CAD stands each pair where the socket's latches, which are longer than the
+header, stay over both boards, and where each header's courtyard leaves a
+soldering iron's room beside the nearest switch pin (`boards.chain_stub_room`;
+`drc.echo` "chain headers on the left_hand boards clear of the switches").

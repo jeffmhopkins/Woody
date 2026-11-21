@@ -152,7 +152,7 @@
 		)
 		(embedded_fonts no)
 	)
-    (symbol "Connector_Generic:Conn_01x12"
+    (symbol "Connector_Generic:Conn_01x10"
 		(pin_names
 			(offset 1.016)
 			(hide yes)
@@ -161,15 +161,15 @@
 		(in_bom yes)
 		(on_board yes)
 		(property "Reference" "J"
-			(at 0 15.24 0)
+			(at 0 12.7 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Value" "Conn_01x12"
-			(at 0 -17.78 0)
+		(property "Value" "Conn_01x10"
+			(at 0 -15.24 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -194,7 +194,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Generic connector, single row, 01x12, script generated (kicad-library-utils/schlib/autogen/connector/)"
+		(property "Description" "Generic connector, single row, 01x10, script generated (kicad-library-utils/schlib/autogen/connector/)"
 			(at 0 0 0)
 			(effects
 				(font
@@ -221,27 +221,16 @@
 				(hide yes)
 			)
 		)
-		(symbol "Conn_01x12_1_1"
+		(symbol "Conn_01x10_1_1"
 			(rectangle
-				(start -1.27 13.97)
-				(end 1.27 -16.51)
+				(start -1.27 11.43)
+				(end 1.27 -13.97)
 				(stroke
 					(width 0.254)
 					(type default)
 				)
 				(fill
 					(type background)
-				)
-			)
-			(rectangle
-				(start -1.27 12.827)
-				(end 0 12.573)
-				(stroke
-					(width 0.1524)
-					(type default)
-				)
-				(fill
-					(type none)
 				)
 			)
 			(rectangle
@@ -354,19 +343,8 @@
 					(type none)
 				)
 			)
-			(rectangle
-				(start -1.27 -15.113)
-				(end 0 -15.367)
-				(stroke
-					(width 0.1524)
-					(type default)
-				)
-				(fill
-					(type none)
-				)
-			)
 			(pin passive line
-				(at -5.08 12.7 0)
+				(at -5.08 10.16 0)
 				(length 3.81)
 				(name "Pin_1"
 					(effects
@@ -384,7 +362,7 @@
 				)
 			)
 			(pin passive line
-				(at -5.08 10.16 0)
+				(at -5.08 7.62 0)
 				(length 3.81)
 				(name "Pin_2"
 					(effects
@@ -402,7 +380,7 @@
 				)
 			)
 			(pin passive line
-				(at -5.08 7.62 0)
+				(at -5.08 5.08 0)
 				(length 3.81)
 				(name "Pin_3"
 					(effects
@@ -420,7 +398,7 @@
 				)
 			)
 			(pin passive line
-				(at -5.08 5.08 0)
+				(at -5.08 2.54 0)
 				(length 3.81)
 				(name "Pin_4"
 					(effects
@@ -438,7 +416,7 @@
 				)
 			)
 			(pin passive line
-				(at -5.08 2.54 0)
+				(at -5.08 0 0)
 				(length 3.81)
 				(name "Pin_5"
 					(effects
@@ -456,7 +434,7 @@
 				)
 			)
 			(pin passive line
-				(at -5.08 0 0)
+				(at -5.08 -2.54 0)
 				(length 3.81)
 				(name "Pin_6"
 					(effects
@@ -474,7 +452,7 @@
 				)
 			)
 			(pin passive line
-				(at -5.08 -2.54 0)
+				(at -5.08 -5.08 0)
 				(length 3.81)
 				(name "Pin_7"
 					(effects
@@ -492,7 +470,7 @@
 				)
 			)
 			(pin passive line
-				(at -5.08 -5.08 0)
+				(at -5.08 -7.62 0)
 				(length 3.81)
 				(name "Pin_8"
 					(effects
@@ -510,7 +488,7 @@
 				)
 			)
 			(pin passive line
-				(at -5.08 -7.62 0)
+				(at -5.08 -10.16 0)
 				(length 3.81)
 				(name "Pin_9"
 					(effects
@@ -528,7 +506,7 @@
 				)
 			)
 			(pin passive line
-				(at -5.08 -10.16 0)
+				(at -5.08 -12.7 0)
 				(length 3.81)
 				(name "Pin_10"
 					(effects
@@ -538,42 +516,6 @@
 					)
 				)
 				(number "10"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin passive line
-				(at -5.08 -12.7 0)
-				(length 3.81)
-				(name "Pin_11"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "11"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin passive line
-				(at -5.08 -15.24 0)
-				(length 3.81)
-				(name "Pin_12"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "12"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -912,24 +854,22 @@
 		(embedded_fonts no)
 	)
   )
-  (symbol (lib_id "Connector_Generic:Conn_01x12") (at 45.72 101.6 0) (unit 1)
+  (symbol (lib_id "Connector_Generic:Conn_01x10") (at 45.72 106.68 0) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 4ebd3089-22ce-54ad-8347-5386be704727)
     (property "Reference" "J1" (at 45.72 86.36 0) (effects (font (size 1.27 1.27))))
-    (property "Value" "12-way" (at 45.72 119.38 0) (effects (font (size 1.27 1.27))))
-    (property "Footprint" "woody:IDC-Header_2x06_P1.27mm_Samtec_SHF_Horizontal" (at 45.72 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Value" "10-way" (at 45.72 119.38 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "woody:IDC-Header_2x05_P1.27mm_CNCTech_3220_Vertical" (at 45.72 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 45.72 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "J-CHAIN" (at 45.72 101.6 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 9=9 10=10 11=11 12=12" (at 45.72 101.6 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "key-board end of the chain ribbon: 1.27 mm IDC, right-angle, upside down on the underside; the cable's key-board socket has its notch reversed (FFSD -RN2), so main-board pin n arrives at pin 13-n - key-chain-loom.md" (at 45.72 101.6 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Manufacturer" "Samtec" (at 45.72 101.6 0) (effects (font (size 1.27 1.27)) hide))
-    (property "MPN" "SHF-106-01-L-D-RA" (at 45.72 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 9=9 10=10" (at 45.72 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "key-board end of the chain ribbon: 1.27 mm 2x5 box header, vertical, hanging from the underside mouth to mouth with the main board's; a straight ribbon, so pin n is conductor n, the main board's pin n - key-chain-loom.md" (at 45.72 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Manufacturer" "CNC Tech" (at 45.72 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "3220-10-0100-00" (at 45.72 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "" (at 45.72 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (property "Assembly" "hand" (at 45.72 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (pin "1" (uuid 21b5c15f-99a1-5e05-9827-c80a5290efa9))
     (pin "10" (uuid 74855a7f-28de-5b6b-87a9-c7a259fdf3b9))
-    (pin "11" (uuid 8c7f1da4-c7ba-58a2-b27a-5b0cb7168edf))
-    (pin "12" (uuid 3783c5bf-2a3c-5b40-920c-a38691c0e0bb))
     (pin "2" (uuid a59dc864-be4c-5a64-910c-1c74a34de126))
     (pin "3" (uuid 0503642f-b7ad-549f-88a8-d5b2f5f0578e))
     (pin "4" (uuid d2e71a9d-8d95-5a89-8c34-19ac21bdd907))
@@ -1187,8 +1127,6 @@
     (pin "1" (uuid eeca9511-7cb2-58e0-8dd0-41af18b44a0a))
     (instances (project "key-board-lh" (path "/a2d77fad-366b-59d5-8d08-ccdc7dd94a07" (reference "#PWR21") (unit 1))))
   )
-  (no_connect (at 40.64 91.44) (uuid 5c29cfcf-bf82-5ac7-aa57-d14f7e366332))
-  (no_connect (at 40.64 88.9) (uuid 81eb1aec-8a61-5d26-b0a4-f588332ad013))
   (wire (pts (xy 106.68 76.2) (xy 104.14 76.2)) (stroke (width 0) (type default)) (uuid c3195fe3-6e5a-5cba-a60c-de8864640381))
   (label "KEY_FREE3" (at 104.14 76.2 180) (fields_autoplaced) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid d5ddebfd-c252-560b-86ba-8b0e3ba18165))
   (wire (pts (xy 147.32 177.8) (xy 149.86 177.8)) (stroke (width 0) (type default)) (uuid 2685dd99-0db0-54b6-973e-1cf7b55c2542))

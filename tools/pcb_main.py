@@ -65,7 +65,7 @@ def geometry(cluster="main"):
         if kind == "switch":
             g["switches"][rest[0]] = tuple(f[:3])
         elif kind == "chain":
-            g["chains"][rest[0]] = tuple(f[:5])        # mouth x, centre y, facing (+1 tail), length, mouth to far row
+            g["chains"][rest[0]] = tuple(f[:5])        # centre x, centre y, the even row's side (+1 tail), length, half the row spacing
         elif kind == "connector":
             g["connectors"][rest[0]] = f
         elif kind == "part":

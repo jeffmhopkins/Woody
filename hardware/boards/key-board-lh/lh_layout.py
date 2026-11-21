@@ -25,12 +25,14 @@ THE FLOORPLAN, and why each part is where it is.
    THE CHAIN BUS THEREFORE RUNS UNDER THE REGISTER, between its pad rows: all four lines
    enter at the pin-8/9 end and turn into their pads from inside. Across that end, from
    the key row's side, they lie SCK, SH/LD, SER, QH - which is J-CHAIN's own pin order
-   (11, 9, 7, 5).
-2. J-CHAIN'S MOUTH FACES THE MOUTH END (owner, 2026-11-20: "Seems like maybe we could turn
-   the header 180"; config/body.yaml routing.chain_fold), so its signal row - the row
-   behind the mouth - faces the register, and the bus runs straight from the header's
-   pads into the register's end: no line wraps the header, none crosses another, no via.
-3. U1 stands just past the header's pin rows, its pin-8/9 end toward them and its key
+   (2, 4, 6, 8).
+2. J-CHAIN STANDS VERTICAL, ITS SIGNAL ROW TOWARD THE REGISTER (ADR 0017 amended
+   2026-11-21). The ribbon folds toward the mouth end (config/body.yaml routing.chain_fold)
+   and the socket on this end of it has its even row away from the fold, so the even row -
+   the four lines and 3V3 - faces the register and the odd row, all ground, faces the
+   mouth. The bus runs from the header's pads, each by one 45, into the register's end: no
+   line wraps the header, none crosses another, no via.
+3. U1 stands past the header's pin rows, its pin-8/9 end toward them and its key
    inputs (pins 3..6) facing the key row, so LH1..LH4 arrive in pin order from the side
    their switches are on, and LH5 leaves the far row toward its own switch.
 4. EACH KEY'S NETWORK STANDS OUTSIDE ITS OWN SWITCH'S PINS, the same way round all five:
@@ -39,7 +41,7 @@ THE FLOORPLAN, and why each part is where it is.
    node runs between them under both pins with the pull-up hanging from its middle, its
    rail end toward the near edge. Nothing passes between a pin and the pole, and the key
    line leaves whichever end of the node faces the register.
-5. 3V3 IS ONE TRUNK. Out of the header's pin 3 straight into C7 (the reservoir), along
+5. 3V3 IS ONE TRUNK. Out of the header's pin 10 straight into C7 (the reservoir), along
    the far row: R11 (the free input's pull-up), C8 across pins 12/13, under the body to
    pin 16 and C6 across 16/15; then on between LH5's and LH4's lines to their
    pull-ups, round LH4 and back along the near edge through the three row keys' pull-ups.
@@ -67,19 +69,21 @@ V33 = "V3V3_CHAIN_LH"
 
 # ---- the register and its own parts ------------------------------------------------------------
 # J-CHAIN's pads, once seated where the body CAD puts it (pcb_hand.seat_chain): the signal
-# row (odd pins) at JX, pin 1 at the far-edge end, 1.27 between pins.
-JX, JY1 = 83.36, 45.19
+# row (even pins) at JX, the ground row (odd pins) a pitch toward the mouth, pins 1 and 2
+# at the near-edge end, 1.27 between pins.
+JX, JY1 = 79.135, 39.29
+X_FAN = JX + 1.265            # where the bus turns onto its 45: clear of the header's pads
 
 
 def jpin(k):
-    return (JX if k % 2 else JX - PITCH, JY1 - PITCH * ((k - 1) // 2))
+    return (JX if k % 2 == 0 else JX - PITCH, JY1 + PITCH * ((k - 1) // 2))
 
 
 # U1's centre. x: pin 4 (LH3's input) 3.4 toward the tail from LH3's switch's centre (the
 # body CAD's LH3, pcb-geometry.echo), which leaves the bus room to step from the header's
-# 1.27 pitch to the channel's. y: SH/LD (J-CHAIN pin 9) runs dead straight from its pad down
-# the channel, half a pitch below the channel's middle line.
-UX, UY = 90.0 + 3.4 - PITCH / 2, jpin(9)[1] + 0.5
+# 1.27 pitch to the channel's. y: its far row's parts (C8, C6, R11, the 3V3 spine) clear of
+# the far edge; every bus line then steps from its header pad to its channel height, SCK least.
+UX, UY = 90.0 + 3.4 - PITCH / 2, 40.61
 
 
 def upin(n):
@@ -101,7 +105,7 @@ Y_VIA = Y_CAPS + 1.65         # C8's and C6's ground vias, past their pads
 # (x, y, which way pad 1 faces) - the way is found on the board, not assumed (pcb_hand.seat)
 PLACE = {
     "U1": (UX, UY, None),                                 # turned as rev A had it: pins 1..8 toward the key row
-    "C7": (85.3, jpin(3)[1] + 0.95, "-y"),                # C-BULK-CHAIN: its 3V3 pad level with J-CHAIN pin 3, one straight stub; ground end toward the far edge
+    "C7": (JX + 3.365, jpin(10)[1] + 0.95, "-y"),               # C-BULK-CHAIN: its 3V3 pad level with J-CHAIN pin 10, one straight stub clear of the header's courtyard; ground end toward the far edge
     "R11": (upin(11)[0] - 0.5, Y_RAIL - 0.9125, "+y"),    # FREE3's pull-up: pad 2 down onto pin 11, pad 1 on the spine
     "C8": (upin(12)[0] + 0.95, Y_CAPS, "-x"),             # across pins 12 (3V3) and 13 (ground)
     "C6": (upin(15)[0] + 0.95, Y_CAPS, "+x"),             # across pins 16 (VCC) and 15 (ground)
@@ -113,23 +117,23 @@ def routes(cu, sw):
 
     # -- the chain bus: straight out of J-CHAIN's signal row into the channel under U1. From
     # the key row's side the channel holds SCK, SH/LD, SER, QH at half-millimetre steps, the
-    # header's own order; each steps once from its pad's height to its channel height (SH/LD
-    # not at all) and turns into its pad from inside.
+    # header's own order; each leaves its pad straight, steps to its channel height on one 45
+    # from X_FAN - the header's pitch closing to the channel's - and turns into its pad from inside.
     (x9, y9), (x10, y10), (x1, y1), (x2, y2) = upin(9), upin(10), upin(1), upin(2)
-    j = jpin(5)
-    cu.track("/HOP_LH_LT", [j, (84.55, j[1]), (84.55 + j[1] - ch(0.5), ch(0.5)), (x9 - 0.5, ch(0.5)), (x9, ch(1.0)), (x9, y9)])
-    j = jpin(7)
-    cu.track("/CHAIN_SER_LH", [j, (84.55, j[1]), (84.55 + j[1] - ch(0), ch(0)), (x10 - 1.0, ch(0)), (x10, ch(1.0)), (x10, y10)])
-    j = jpin(9)
-    cu.track("/CHAIN_SHLD", [j, (x1 - 0.5, ch(-0.5)), (x1, ch(-1.0)), (x1, y1)])
-    j = jpin(11)
-    cu.track("/CHAIN_SCK", [j, (84.6, j[1]), (84.6 + ch(-1.0) - j[1], ch(-1.0)), (x2 - 0.3, ch(-1.0)), (x2, ch(-1.3)), (x2, y2)])
+    def fan(k, d):
+        (_, y) = jpin(k)
+        return [jpin(k), (X_FAN, y), (X_FAN + abs(y - ch(d)), ch(d))]
 
-    # -- 3V3, one trunk. Pin 3 straight into C7; up to the spine past the far row and along it
+    cu.track("/HOP_LH_LT", fan(8, 0.5) + [(x9 - 0.5, ch(0.5)), (x9, ch(1.0)), (x9, y9)])
+    cu.track("/CHAIN_SER_LH", fan(6, 0) + [(x10 - 1.0, ch(0)), (x10, ch(1.0)), (x10, y10)])
+    cu.track("/CHAIN_SHLD", fan(4, -0.5) + [(x1 - 0.5, ch(-0.5)), (x1, ch(-1.0)), (x1, y1)])
+    cu.track("/CHAIN_SCK", fan(2, -1.0) + [(x2 - 0.3, ch(-1.0)), (x2, ch(-1.3)), (x2, y2)])
+
+    # -- 3V3, one trunk. Pin 10 straight into C7; up to the spine past the far row and along it
     # through R11 to C8 and pin 12; under the body to pin 16 and out to C6; then between
     # LH5's line and LH4's down to LH5's pull-up, round LH4 by the tail side to its pull-up,
     # and back along the near edge through the row keys' pull-ups, ending at LH1's.
-    j, c7 = jpin(3), (PLACE["C7"][0], jpin(3)[1])
+    j, c7 = jpin(10), (PLACE["C7"][0], jpin(10)[1])
     r11 = (PLACE["R11"][0], Y_RAIL)
     x12, x16 = upin(12)[0], upin(16)[0]
     c6 = (upin(15)[0] + 1.9, Y_CAPS)
@@ -186,7 +190,7 @@ def routes(cu, sw):
     x15, y15 = upin(15)
     cu.track(GND, [(x15, y15), (x15, Y_VIA)])                       # pin 15 up through C6's ground pad
     cu.via(GND, (x15, Y_VIA))
-    c72 = (PLACE["C7"][0], jpin(3)[1] + 1.9)
+    c72 = (PLACE["C7"][0], jpin(10)[1] + 1.9)
     cu.track(GND, [c72, (c72[0], c72[1] + 1.5)])                    # C7's ground end
     cu.via(GND, (c72[0], c72[1] + 1.5))
 
@@ -200,10 +204,11 @@ LABELS = {"R11": (90.36, 48.45, 0)}
 
 def main():
     lay = yaml.safe_load(open(os.path.join(HERE, "layout.yaml")))
-    comps, _ = pcb.sheet_netlist(os.path.join(HERE, NAME + ".kicad_sch"))
+    comps, nets = pcb.sheet_netlist(os.path.join(HERE, NAME + ".kicad_sch"))
     geo = pcb.cad_geometry(CLUSTER)
     board = pcbnew.LoadBoard(SRC)
     pcb_hand.strip(board)
+    pcb_hand.refit(board, comps, nets)
     fps = {fp.GetReference(): fp for fp in board.GetFootprints()}
     pcb_hand.seat_chain(fps[pcb.ref_of(comps, "J-CHAIN")], geo, jpin)
     place = {**PLACE, **pcb_hand.key_places(comps, geo["switches"])}

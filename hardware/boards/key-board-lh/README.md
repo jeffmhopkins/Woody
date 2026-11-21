@@ -130,7 +130,7 @@ review of the copper set, 2026-11-20, and the next boards start from them:
 - **The chain's four lines run under the register**, between its pad rows,
   straight from the header: no line wraps a part and none crosses another.
 - **3V3 is one trunk on the parts face**, with no via.
-- **`J-CHAIN` faces the mouth** (ADR 0017, *Amendment, 2026-11-20*).
+- **`J-CHAIN` stands vertical, its signal (even) row toward the register** and its ground row toward the mouth (ADR 0017, *Amendment, 2026-11-21*).
 
 ### Making the next board from this one
 
@@ -278,7 +278,7 @@ add board area. Read the subtotal as a floor.
 | Machine-placed parts, 2 boards | about $2.61 | [calc: per board 5 × 0.0042 + 6 × 0.0046 + 5 × 0.0173 + 0.0189 + 0.0651 + 1.086 = $1.305, at the 2026-10-01 unit prices above; JLC adds attrition spares, so a little more] |
 | **JLC subtotal** | **about $18–19** | before shipping |
 | Shipping to the US | about $10–25 | *estimate* `[from memory]`. It depends on the method, and both designs ship together if ordered together |
-| Hand parts: J1 | $2.83 each | DigiKey SHF-106-01-L-D-RA-ND, 8 in stock, 4-week factory lead time `[web https://www.digikey.com/en/products/detail/samtec-inc/SHF-106-01-L-D-RA/8410402, 2026-10-01]` |
+| Hand parts: J1 | not read | DigiKey 1175-1627-ND (CNC Tech 3220-10-0100-00), Active and stocked on 2026-11-21 (its BOM row carries the source) |
 | Hand parts: switches, `CBL-CHAIN`, mount hardware | not priced here | Below |
 
 ### 7. Bought separately, for the hand assembly
@@ -291,11 +291,11 @@ read on 2026-09-27 except where dated; check stock at order.
   - Not the Silent, and not the Low Profile 3.0.
   - Gateron's own store sells the black-housing Red `[web https://www.gateron.com/products/gateron-ks-33-low-profile-switch-set, 2026-09-27]`. Whether it ships from a US warehouse is unverified, and its price could not be read on 2026-10-01 (the page carries none outside its script).
   - US sellers found (e.g. LumeKeebs) sell "KS-33 2.0 Red" without naming the housing or the code `[web https://lumekeebs.com/products/gateron-ks-33-low-profile-2-0-mechanical-switches, 2026-09-27]`, so check the code on the packaging.
-- **`J-CHAIN`**, Samtec SHF-106-01-L-D-RA.
-  - JLC/LCSC has none: C17202657, stock 0 on 2026-09-27 and again on 2026-10-01 `[JLC component-search API]`.
-  - DigiKey had **only 8**, with a **4-week factory lead time**, on 2026-09-27, 2026-09-30 and 2026-10-01 (above).
-  - An instrument takes `chain-connectors` of them: two on this pair of key boards and two on the main board. Eight is one build and its spares. Failing that, buy from Samtec direct (reel variants and samples).
-  - Its sourcing is open (its BOM row, and *Open* below).
+- **`J-CHAIN`**, CNC Tech 3220-10-0100-00, a vertical 2×5 1.27 mm shrouded box header.
+  - Stocked at DigiKey on 2026-11-21, status Active (its BOM row).
+  - Any keyed, shrouded, vertical 2×5 1.27 mm box header of the same pattern fits the pads; hold its height and mouth depth to `boards.chain_hdr_h` and `boards.chain_plug_proud` first (its BOM row says why).
+  - An instrument takes `chain-connectors` of them: two on this pair of key boards and two on the main board.
+  - The second source is not cleared: its drawing could not be banked (`datasheets/MANIFEST.csv`, the XKB row).
 - **The corner mount hardware.** At each corner: a spacer (`MECH-KB-SPACER`), and the column's standoff and screw (`MECH-COL-STANDOFF`, `MECH-COL-SCREW`), which are bought with the cassette.
   - What each must be, the quantities and the sources are those rows in `hardware/unplaced.csv`; their prices are not repeated here.
   - The spacers and standoffs are faced to length before fitting. The mount is described in *Assembling*, step 2.
@@ -342,8 +342,8 @@ that KiCad's DRC does not test are checked by `pcb.py` itself (above).
 ## Assembling the rest by hand
 
 1. **J1** (`J-CHAIN`; the part is on its BOM row and the sheet).
-   - It goes on the bottom side, **mouth toward the mouth end** (ADR 0017, *Amendment, 2026-11-20*). The silkscreen marks it: an arrow beside the header points out of its mouth, and pin 1's dot is behind the pins, away from the mouth.
-   - **Backward is 3V3 on ground.** The 2×6 pad grid fits the header either way round. Turned 180°, the header puts the ribbon's 3V3 on a ground pin (`key-chain-loom.md`). Fit it with its mouth at the arrow.
+   - It goes on the bottom side, standing straight out of the board, **its key slot toward the mouth end** (ADR 0017, *Amendment, 2026-11-21*). The silkscreen marks it: the header's outline, with a bar on the side the slot goes.
+   - **Backward will not take the ribbon.** The 2×5 pad grid fits the header either way round. Turned 180°, its slot faces away from the socket's key, and the socket goes in only with the ribbon twisted, which then puts 3V3 on a ground pin (`key-chain-loom.md`). Fit it with its slot at the bar.
    - Seat it flat and solder it from the top (switch) side.
    - The plate has **no window** over the tails. Seated flat, they stop short of the grounded plate (`mechanical/drc.echo` "J-CHAIN pin tails clear of the key plate"), so do not trim them or leave the header standing proud.
 2. **The corner mounts, and the switches.** Each of the board's four corners is one of the cassette's columns (ADR 0025; ADR 0020 Amendment 7; the section is `mechanical/renders/section-kb-mount.png`). From the top down: an M2.5 low-head screw whose head bears on the key plate's top face; the key plate; a spacer (Ettinger 5.52.015, faced to `hardware.kb_spacer_l`); the board; and the column's standoff, which is already threaded onto its stud in the bottom plate and clamps the main board. The screw goes down through the plate, the spacer and the board into the standoff. The key board is fitted on the bench, with the rest of the cassette, before anything goes into the wood.
@@ -354,10 +354,10 @@ that KiCad's DRC does not test are checked by `pcb.py` itself (above).
    - **Then** solder the switch pins, from the bottom. Soldering with the board fixed at depth is what holds it at the depth the pins were designed for (`switch.pcb_below_seat`). How far the hardware's tolerances can move it is `drc.echo` "key-board depth at the hardware's tolerance limits" (*Open* below). Soldering from the bottom needs the key plate, with its board, off the columns and turned over: do it before the cassette's ribbon is plugged at the main board, or with the plate held raised (step 3).
    - **Last, the cassette goes into the shell**, and the oak top is RTV-bonded onto the key plate (ADR 0025), the screws' heads finding their pockets. For service afterwards the silicone is cut and the screws come out from above.
 3. **The ribbon** (`CBL-CHAIN`).
-   - **Order it as** `FFSD-06-D-<code>-01-N-RN2`. `<code>` is `mechanical/drc.echo` "key-chain cable to order (FFSD length code)", **written with two digits before the point**: Samtec's field is `XX.XX` `[datasheets/connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf, part-number block]`, so a length under 10 in takes a leading zero, as DigiKey lists FFSD-06-D-06.00-01-N `[web https://www.digikey.com/en/products/detail/samtec-inc/FFSD-06-D-06-00-01-N/6678085, 2026-09-27]`. The print takes any overall length in that field above a 1.00 in minimum; it states increments only for the daisy-chain option, which this cable does not use (same print, sheet 1). Type the full part number into Samtec's configurator and check it echoes back before paying, since the series is non-returnable. It is the overall length in **inches**, over both sockets, as the FFSD print measures it, with the print's −0.125 in tolerance already covered. `-RN2` reverses the notch on the second socket. **Do not type the millimetre length** ("key-chain ribbon length (derived)") into the part number: read as inches, it orders a cable about 25 times too long.
+   - **Made up here, not bought assembled**: two IDC sockets crimped on a cut length of flat cable (its BOM row names the parts). Cut the cable to `mechanical/drc.echo` "key-chain ribbon to cut". Crimp both sockets on the **same face** of the ribbon with their keys facing the **same way along it**, pin 1 on the same edge conductor at both ends (`key-chain-loom.md`, *Pin numbering*).
    - **Meter every cable before it is first powered**, not only the first one. Check it by *Bring-up*, step 2.
    - Plug it in with the key plate held raised straight up off its columns, before the plate is screwed down (`routing.chain_service`, `routing.chain_raise`). That is the position its length was derived for.
-   - With `-RN2`, the main board's socket's cable leaves **upward** and the key board's leaves **downward**. The two face each other, and closed, the ribbon folds into a flat hairpin between the two plugs' heights (`key-chain-loom.md`). **A cable whose ends both leave downward is a standard cable, without `-RN2`, and it is wrong.**
+   - Closed, the ribbon leaves both sockets flat toward the mouth and makes one fold between them (`key-chain-loom.md`). **The two ends are not interchangeable:** the socket whose key faces away from the fold goes on the main board, the one whose key faces the fold on this board. A socket that only goes in with the ribbon twisted is the wrong end.
 4. **Conformal coat** (`MECH-COAT`), once the board has passed *Bring-up*: brush it on the bottom (parts) face only, with J1's mouth masked, and leave the switch side bare (`cluster-boards.md`, *Still open*, says why).
 
 ## Bring-up
@@ -370,23 +370,23 @@ key-board end):
 
 | J1 pin | Signal |
 |---|---|
-| 3 | 3V3 |
-| 4, 6, 8, 10, 12 | GND |
-| 11 | SCK |
-| 9 | SH/LD |
-| 7 | SER |
-| 5 | QH |
+| 10 | 3V3 |
+| 1, 3, 5, 7, 9 | GND |
+| 2 | SCK |
+| 4 | SH/LD |
+| 6 | SER |
+| 8 | QH |
 
 A clip lead on the header's pin tails, or a spare ribbon with an IDC plug cut
 open, is the bench harness.
 
-1. **No shorts.** Measure J1 pin 3 (3V3) to pin 4 (GND) with no power: it must not read as a short.
+1. **No shorts.** Measure J1 pin 10 (3V3) to pin 9 (GND) with no power: it must not read as a short.
 2. **Every cable's pinout, with a meter, before it is first powered.**
-   - With both ends free, conductor 10 at one end must reach the other socket's position 3 (3V3), and conductor 2 its position 11 (SCK).
-   - That is the `-RN2` map, key pin = 13 − main pin (`key-chain-loom.md`). The map is symmetric, so either end can be taken as the main-board end.
-   - A cable without `-RN2` looks right on the drawn route and puts 3V3 on a ground pin. Nothing mechanical shows it, so check every cable, spares and replacements included.
-3. **Tie SER.** Nothing drives SER on the bench, and a floating CMOS input draws current and shifts in undefined bits. Tie J1 pin 7 (SER) to a GND pin or to pin 3 (3V3).
-4. **Power.** Feed 3.3 V between J1 pin 3 (3V3) and a GND pin (current-limited to ~20 mA).
+   - With both ends free, conductor 10 at one end must reach the other socket's position 10 (3V3), and conductor 2 its position 2 (SCK): a straight cable (`key-board-chain-pinmap`, on `key-chain-loom.md`).
+   - No two neighbouring conductors may read as a short: a mis-crimped socket bridges them.
+   - Check every cable, spares and replacements included.
+3. **Tie SER.** Nothing drives SER on the bench, and a floating CMOS input draws current and shifts in undefined bits. Tie J1 pin 6 (SER) to a GND pin or to pin 10 (3V3).
+4. **Power.** Feed 3.3 V between J1 pin 10 (3V3) and a GND pin (current-limited to ~20 mA).
    - With no key pressed, and SER tied, the draw should be near zero: the register's quiescent current is microamps `[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.6]`. A reading of milliamps with no key pressed is a fault.
    - Each pressed key adds its pull-up's current (`key-scan-current`, on `key-switch-network.md`).
 5. **The chain.** Drive SH/LD low then high, then clock SCK, and watch QH.
@@ -394,7 +394,7 @@ open, is the bench harness.
    - Each key reads low while pressed.
    - Clocks past the 8th shift in the level SER is tied to.
    - Firmware normally does this; with a logic analyser on J1's pins it is visible without one.
-6. **The rail, in the instrument.** On the real main board and ribbon, scope the key board's VCC (J1 pin 3 to a GND pin, or across C6) while the chain shifts. `FB-CHAIN` and `C-DECOUPLE-165` form a lightly damped LC (the `FB-CHAIN` row). The simulation (`hardware/interfaces/key-chain-loom/sim/`, `rail-as-ordered`) keeps this rail well inside its limit with C7 fitted, and inside it even without C7 (`rail-without-bulk`), so expect at most a small ring after each burst and each key change. A larger one means the bead or the ribbon is not what the simulation assumes: record it in *Revisions*. The bench supply has no bead, so this step needs the main board.
+6. **The rail, in the instrument.** On the real main board and ribbon, scope the key board's VCC (J1 pin 10 to a GND pin, or across C6) while the chain shifts. `FB-CHAIN` and `C-DECOUPLE-165` form a lightly damped LC (the `FB-CHAIN` row). The simulation (`hardware/interfaces/key-chain-loom/sim/`, `rail-as-ordered`) keeps this rail well inside its limit with C7 fitted, and inside it even without C7 (`rail-without-bulk`), so expect at most a small ring after each burst and each key change. A larger one means the bead or the ribbon is not what the simulation assumes: record it in *Revisions*. The bench supply has no bead, so this step needs the main board.
 
 ## The silkscreen
 
@@ -427,11 +427,11 @@ is how the tools find it.
 network parts carry theirs the same way round the network, as the parts sit
 round the switch (the two resistors' along them, beside the column), with the
 key's name (LH1..LH5) beside its capacitor;
-J1's pin 1 dot and an arrow out of its mouth; `MOUTH` and an arrow at the
+J1's outline and the bar on its slot side; `MOUTH` and an arrow at the
 mouth end; the title block (`layout.yaml` `silk:`).
 
 **Switch side (top):** each switch's reference and key (`SW1 LH1`) beside it;
-J1 with pin 1's dot and the arrow out of its mouth, where it is soldered;
+J1's reference, where it is soldered;
 `MOUTH`; the title block again (`silk:` `top_at`).
 
 ## Revisions
@@ -441,6 +441,7 @@ J1 with pin 1's dot and the arrow out of its mouth, where it is soldered;
 | A | 2026-09-27 | First layout: every key's network the same T in the same place round its switch, six test pads in one row (QH, SER, GND, SCK, SH/LD, 3V3), C7 (`C-BULK-CHAIN`), silkscreen on both sides, no acute track junction (`pcb.py check` tests every join, a track ending mid-track included). Not yet ordered; re-laid out on the same date for the screwed corner mount (keep-outs from the nut and the spacer/washer; ADR 0020 Amendment 3 then moved the heads from plugged bores into blind pockets, which changes nothing on the board); on 2026-09-28, C7 made a fitted, machine-placed part (it had been a do-not-fit footprint; owner: it costs cents) and J-CHAIN's pads lengthened on their free side; the same day the corner mounts went to M2.5 for PEM studs pressed flush into the plate (ADR 0020 Amendment 4: larger holes and keep-outs, mounts 0.2 further in), and the washer dropped, the spacer taking its length; on 2026-09-29 re-laid out for the cassette's columns (ADR 0025): no bonded mount (Amendment 5's is superseded), the mouth end 0.6 and the tail end 0.2 longer, J-CHAIN 0.5 further toward the tail and the register, its decoupler, R11 and C7 moved 0.5 with it; on 2026-10-03 re-laid out for the KS-33's pin holes, Gateron's 3.0 mm on 3.4 mm pads (issue #6-1; ADR 0020 Amendment 8), each key's network 9.0 mm from its switch so its labels clear the bigger pads; on 2026-10-05 the mouth end lengthened and its two mounts moved with it, so the columns keep `hardware.col_web_min` of plate from the thumb switches' cutouts (issue #43; ADR 0025, Amendment 2026-10-05 (2)): the outline's mouth edge, H1, H2, their keep-outs and the pour's edge moved, every part and track where it was | git history of this directory |
 | B | 2026-10-03 | C8, the register's second decoupler (the shared REG sheet gained it for review #6-5; the right-hand board's C9), placed by hand under U1's ground pin 8 on the bottom face: its 3V3 pad squared onto the 3V3 track's 45-degree run, its ground pad onto pin 8's ground line, both 0.4 mm. Nothing else moved. `pcb.py check` passes. Not yet ordered | `key-board-lh.kicad_pcb`, `layout.yaml` |
 | C | 2026-11-20 | Laid out again, by hand (issue #48, ADR 0030): no router. `J-CHAIN` turned to face the mouth (ADR 0017, *Amendment, 2026-11-20*); the chain bus under the register; each key's resistor and capacitor outside its switch's pins; all signal and power copper on the parts face with no via; the switch-side face one whole ground plane and no pour on the parts face; relief spokes on every pin the plane joins. Reviewed by the owner as placement, then as copper. `pcb.py check` passes. Not yet ordered | `lh_layout.py`, `key-board-lh.kicad_pcb`, `layout.yaml` |
+| D | 2026-11-21 | `J-CHAIN` is a vertical 2×5 header (ADR 0017, *Amendment, 2026-11-21*; issue #49): new footprint, pinned as the main board's, where the body CAD stands it; the chain bus and 3V3 redrawn from its even row into the register, C7 moved beside its 3V3 pin. Nothing else moved. `pcb.py check` passes. Not yet ordered | `lh_layout.py`, `key-board-lh.kicad_pcb`, `key-board-lh.kicad_sch` |
 | — | 2026-10-04 | Silkscreen and title block read `rev A  2026-10-03` again, not B (review #6-7; the rule below). No copper moved; renders and `fab/` re-written | `key-board-lh.kicad_pcb`, `layout.yaml` `silk:` |
 
 **The letters in this table are design history.** The silkscreen and title
@@ -458,12 +459,11 @@ the row.
 | Open | Decided by |
 |---|---|
 | **The switch positions: check on the boards in hand (rev A).** Final for rev A (owner, 2026-10-04; ADR 0010, *Amendment, 2026-10-04*): `config/body.yaml` `layout.lh_gaps`, `layout.lh_offsets` and the rest are `settled` | the rev A boards in hand; a change is rev B |
-| The FFSD socket's stand-out from the header's mouth, `boards.chain_plug_proud`. The print does not dimension it, and it decides whether the cable clears the shroud's mouth at all, not only the ribbon's fold | M4, the first mated pair |
+| The socket's stand-out from the header's mouth and its cable face's height, `boards.chain_plug_proud` and `boards.chain_plug_cable`, read off the two drawings: they set the room between the two mated sockets and the fold's radius (`drc.echo` "key-chain sockets clear of each other, mouth to mouth") | M4, the first mated pair |
 | The mount's spacers, faced to `hardware.kb_spacer_l` (no stocked M2.5 spacer has that length), and the column's standoff and screw (`MECH-COL-STANDOFF`, `MECH-COL-SCREW`) | the first fit; M4, with the parts bought |
 | The board depth at the hardware's tolerance limits: the worst case reaches the window's shoulder end (`drc.echo` "key-board depth at the hardware's tolerance limits") | the first board, fitted |
 | The register's supply: JLC's stock is thin (above) | the first order |
-| J-CHAIN's supply: none at JLC, 8 at DigiKey (above); buy them with this order, or from Samtec. A stocked alternative is not a drop-in: its footprint is on three boards | the first order |
+| J-CHAIN's second source: the XKB part at LCSC is not cleared until its drawing is banked (above) | its drawing |
 | J-CHAIN's pads' ring is at JLC's absolute minimum on the sides facing a neighbour. The 1.27 mm pitch both ways leaves no room there. The pads are lengthened on their free side instead (`hardware/lib/README.md`, the IDC header's row); ask JLC's review to accept the thin side | the first order |
 | Part orientation in JLC's placement preview. The CPL carries JLC's convention and each part's offset from JLC's own footprint (*Ordering*, 4), but no order has yet confirmed it | the first order's preview (*Ordering*, 5); record any correction in *Revisions* |
-| No 3D model of J-CHAIN in the renders (Samtec's is behind a login; `datasheets/.manifest-R12.csv` records the attempt) | nothing blocks on it |
 | The main board's end of the ribbon | the main board's layout |

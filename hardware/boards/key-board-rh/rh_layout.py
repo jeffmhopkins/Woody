@@ -14,10 +14,11 @@ toward the tail, with a sixth key. The two registers have the same pins for the 
 for the four keys of the near row, so what decided that board decides this one:
 
 1. THE CHAIN BUS RUNS UNDER THE REGISTER, between its pad rows, in J-CHAIN's own pin order.
-2. THAT NEEDS J-CHAIN'S MOUTH TOWARD THE MOUTH END, as the left hand's is, and it keeps the
-   ribbon's hairpin from lying under the register (owner, 2026-11-20: "we do need to turn
-   it"; ADR 0017, the right hand's Amendment of that date; config/body.yaml
-   routing.chain_fold). The body CAD finds the turned header's place along the body.
+2. THAT NEEDS J-CHAIN'S SIGNAL ROW TOWARD THE REGISTER, as the left hand's is: the header
+   stands vertical, the ribbon folds toward the mouth end and its even row is the one away
+   from the fold (ADR 0017 amended 2026-11-21). That also keeps the ribbon's hairpin from
+   lying under the register (owner, 2026-11-20: "we do need to turn it"; config/body.yaml
+   routing.chain_fold). The body CAD finds the header's place along the body.
 3. U1 stands as close behind the header as the left hand's does (owner, 2026-11-20, chose
    "Register closer to the header"), so the bus is as short as on the left. That is level
    with RH3, as the left hand's register is level with LH3: RH1, RH2 and RH3 leave the tail
@@ -25,7 +26,7 @@ for the four keys of the near row, so what decided that board decides this one:
 4. EACH KEY'S NETWORK STANDS OUTSIDE ITS OWN SWITCH'S PINS (tools/pcb_hand.py, KEY_NET).
 5. The register's two decouplers each stand across a 3V3 pin and the ground pin beside
    it on the far row: C7 across pins 11 and 12, C9 across 16 and 15. RH6 and RH5 (pins 13
-   and 14) leave between them. C8, the reservoir, stands at J-CHAIN's 3V3 pin.
+   and 14) leave between them. C8, the reservoir, stands at J-CHAIN's 3V3 pin (10).
 6. RH6, the sixth key, is reached past RH5 and RH4 along the far edge and down the tail
    side of RH4's network.
 """
@@ -46,16 +47,17 @@ NAME, CLUSTER = "key-board-rh", "right_hand"
 SRC = os.path.join(HERE, NAME + ".kicad_pcb")
 V33 = "V3V3_CHAIN_RH"
 
-# J-CHAIN's pads where the body CAD puts the header (pcb_hand.seat_chain holds this script to it): the signal row (odd pins) at
-# JX, pin 1 at the far-edge end, 1.27 between pins.
-JX, JY1 = 191.36, 45.19
+# J-CHAIN's pads where the body CAD puts the header (pcb_hand.seat_chain holds this script to it): the signal row (even pins) at
+# JX, the ground row (odd pins) a pitch toward the mouth, pins 1 and 2 at the near-edge end, 1.27 between pins.
+JX, JY1 = 187.135, 39.29
+X_FAN = JX + 1.265            # where the bus turns onto its 45: clear of the header's pads
 
 
 def jpin(k):
-    return (JX if k % 2 else JX - PITCH, JY1 - PITCH * ((k - 1) // 2))
+    return (JX if k % 2 == 0 else JX - PITCH, JY1 + PITCH * ((k - 1) // 2))
 
 
-UX, UY = JX + 9.405, jpin(9)[1] + 0.5        # the left hand's distance from its header's signal row
+UX, UY = 198.0 + 3.4 - PITCH / 2, 40.61      # as the left hand's register stands to LH3 (the body CAD's RH3, pcb-geometry.echo), and at its height
 
 
 def upin(n):
@@ -77,7 +79,7 @@ Y_VIA = Y_CAPS + 1.65         # C7's and C9's ground vias, past their pads
 # (x, y, which way pad 1 faces)
 PLACE = {
     "U1": (UX, UY, None),                                              # as rev A has it: pins 1..8 toward the key row
-    "C8": (JX + 1.94, jpin(3)[1] + 0.95, "-y"),                        # C-BULK-CHAIN: its 3V3 pad level with J-CHAIN pin 3
+    "C8": (JX + 3.365, jpin(10)[1] + 0.95, "-y"),                      # C-BULK-CHAIN: its 3V3 pad level with J-CHAIN pin 10, clear of the header's courtyard
     "C7": ((upin(11)[0] + upin(12)[0]) / 2, Y_CAPS, "-x"),             # across pins 11 (3V3) and 12 (ground)
     "C9": ((upin(15)[0] + upin(16)[0]) / 2, Y_CAPS, "+x"),             # across pins 16 (VCC) and 15 (ground)
 }
@@ -86,17 +88,17 @@ PLACE = {
 def routes(cu, sw):
     ser, cap, pu1 = cu.keys(sw)
 
-    # -- the chain bus: straight out of J-CHAIN's signal row into the channel under U1, in the
-    # header's own order (the left-hand board's bus, 8 mm longer)
+    # -- the chain bus: out of J-CHAIN's signal row, each line by one 45 from X_FAN, into the
+    # channel under U1, in the header's own order (the left-hand board's bus)
     (x9, y9), (x10, y10), (x1, y1), (x2, y2) = upin(9), upin(10), upin(1), upin(2)
-    j = jpin(5)
-    cu.track("/HOP_RH_RT", [j, (JX + 1.19, j[1]), (JX + 1.19 + j[1] - ch(0.5), ch(0.5)), (x9 - 0.5, ch(0.5)), (x9, ch(1.0)), (x9, y9)])
-    j = jpin(7)
-    cu.track("/HOP_LT_RH", [j, (JX + 1.19, j[1]), (JX + 1.19 + j[1] - ch(0), ch(0)), (x10 - 1.0, ch(0)), (x10, ch(1.0)), (x10, y10)])
-    j = jpin(9)
-    cu.track("/CHAIN_SHLD", [j, (x1 - 0.5, ch(-0.5)), (x1, ch(-1.0)), (x1, y1)])
-    j = jpin(11)
-    cu.track("/CHAIN_SCK", [j, (JX + 1.24, j[1]), (JX + 1.24 + ch(-1.0) - j[1], ch(-1.0)), (x2 - 0.3, ch(-1.0)), (x2, ch(-1.3)), (x2, y2)])
+    def fan(k, d):
+        (_, y) = jpin(k)
+        return [jpin(k), (X_FAN, y), (X_FAN + abs(y - ch(d)), ch(d))]
+
+    cu.track("/HOP_RH_RT", fan(8, 0.5) + [(x9 - 0.5, ch(0.5)), (x9, ch(1.0)), (x9, y9)])
+    cu.track("/HOP_LT_RH", fan(6, 0) + [(x10 - 1.0, ch(0)), (x10, ch(1.0)), (x10, y10)])
+    cu.track("/CHAIN_SHLD", fan(4, -0.5) + [(x1 - 0.5, ch(-0.5)), (x1, ch(-1.0)), (x1, y1)])
+    cu.track("/CHAIN_SCK", fan(2, -1.0) + [(x2 - 0.3, ch(-1.0)), (x2, ch(-1.3)), (x2, y2)])
 
     # -- the corridor between RH3's capacitor and RH5's resistor: RH3, RH4, 3V3, RH5 side by side
     xl3 = cap["RH3"][0] + 1.3
@@ -105,11 +107,11 @@ def routes(cu, sw):
     assert xl5 + 0.125 + 0.2 <= ser["RH5"][0] - 0.725 + 1e-6, "RH5's line fouls its own resistor"
     x6c = ser["RH6"][0] - 1.7     # RH6's way down, between the trunk's ring round RH4 and RH6's own resistor
 
-    # -- 3V3, one trunk. Pin 3 into C8; the spine past the far row to C7 and pin 11; under the
+    # -- 3V3, one trunk. Pin 10 into C8; the spine past the far row to C7 and pin 11; under the
     # body to pin 16 and C9; down the corridor to RH5's pull-up; round RH4 by the tail side;
     # then one rail along the near edge, out to RH6's pull-up one way and through RH4's and
     # the row keys' the other. The ring meets that rail square.
-    j, c8 = jpin(3), (PLACE["C8"][0], jpin(3)[1])
+    j, c8 = jpin(10), (PLACE["C8"][0], jpin(10)[1])
     x11, x16 = upin(11)[0], upin(16)[0]
     c9 = (PLACE["C9"][0] + 0.9125, Y_CAPS)
     yr5, yr4, yr = pu1["RH5"][1], pu1["RH4"][1], pu1["RH3"][1]
@@ -154,17 +156,18 @@ def routes(cu, sw):
         x, y = upin(n)
         cu.track(GND, [(x, y), (x, Y_VIA)])
         cu.via(GND, (x, Y_VIA))
-    c82 = (PLACE["C8"][0], jpin(3)[1] + 1.9)
+    c82 = (PLACE["C8"][0], jpin(10)[1] + 1.9)
     cu.track(GND, [c82, (c82[0], c82[1] + 1.5)])
     cu.via(GND, (c82[0], c82[1] + 1.5))
 
 
 def main():
     lay = yaml.safe_load(open(os.path.join(HERE, "layout.yaml")))
-    comps, _ = pcb.sheet_netlist(os.path.join(HERE, NAME + ".kicad_sch"))
+    comps, nets = pcb.sheet_netlist(os.path.join(HERE, NAME + ".kicad_sch"))
     geo = pcb.cad_geometry(CLUSTER)
     board = pcbnew.LoadBoard(SRC)
     pcb_hand.strip(board)
+    pcb_hand.refit(board, comps, nets)
     fps = {fp.GetReference(): fp for fp in board.GetFootprints()}
     pcb_hand.seat_chain(fps[pcb.ref_of(comps, "J-CHAIN")], geo, jpin)
     place = {**PLACE, **pcb_hand.key_places(comps, geo["switches"])}

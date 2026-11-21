@@ -61,7 +61,7 @@ components:
     sheet: REG
   J1:
     of: J-CHAIN
-    value: 12-way
+    value: 10-way
     pins:
     - 1
     - 2
@@ -73,8 +73,6 @@ components:
     - 8
     - 9
     - 10
-    - 11
-    - 12
   R1:
     of: R-KEY-SER
     value: 100R 1%
@@ -210,16 +208,16 @@ components:
     sheet: REG
 nets:
   /CHAIN_SCK:
-  - J1.11
+  - J1.2
   - U1.CLK
   /CHAIN_SER_LH:
-  - J1.7
+  - J1.6
   - U1.SER
   /CHAIN_SHLD:
-  - J1.9
+  - J1.4
   - U1.SHLD
   /HOP_LH_LT:
-  - J1.5
+  - J1.8
   - U1.QH
   /KEY_FREE3:
   - R11.2
@@ -273,11 +271,11 @@ nets:
   - C6.2
   - C7.2
   - C8.2
-  - J1.10
-  - J1.12
-  - J1.4
-  - J1.6
-  - J1.8
+  - J1.1
+  - J1.3
+  - J1.5
+  - J1.7
+  - J1.9
   - SW1.2
   - SW2.2
   - SW3.2
@@ -286,17 +284,13 @@ nets:
   - U1.C
   - U1.CLKINH
   - U1.GND
-  J1.1:
-  - J1.1
-  J1.2:
-  - J1.2
   U1.QH_BAR:
   - U1.QH_BAR
   V3V3_CHAIN_LH:
   - C6.1
   - C7.1
   - C8.1
-  - J1.3
+  - J1.10
   - R10.1
   - R11.1
   - R2.1
@@ -306,6 +300,4 @@ nets:
   - U1.B
   - U1.VCC
 external_endpoints:
-- J1.1
-- J1.2
 - U1.QH_BAR

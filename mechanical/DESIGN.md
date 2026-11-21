@@ -308,22 +308,23 @@ only as good as those envelopes. Group the report's lines by these causes
 (read the counts there, not here):
 
 1. **Each key board is on a ribbon** (owner, 2026-09-26, ADR 0017), not a
-   blind-mating header — and since 2026-09-27 a **through-hole IDC** one
-   (ADR 0017's amendment): a 2×6 1.27 mm shrouded right-angle header on each
-   board (`boards.chain_hdr_*`), the key board's **hanging from its underside
-   directly over the main board's** — stacked, at the same place along the
-   body — both in the far band beside the LED row and **both mouths facing
-   the same way along the body**, clear of the switch pins above and below.
-   The ribbon comes out of both plugs and **folds back on itself: closed, it
-   is a flat hairpin lying along the body**: the `-RN2` cable leaves the main
-   board's socket upward and the key board's downward, facing each other,
-   and both legs lie between the two plugs' heights, running the same way to
-   the fold, so it never stands across the LED row's light
-   (`renders/section-ribbon.png`; *"key-chain ribbon closed: hairpin leg and
-   fold radius"*, *"key-chain ribbon fold no tighter than its bend radius"*,
-   *"key-chain ribbon hairpin inside the body"*, *"key-chain ribbon hairpin
-   clear of the columns"*). Which way each hand's hairpin folds is
-   `routing.chain_fold`, which says why. **Its length is the service
+   blind-mating header — a **through-hole IDC** one, and since 2026-11-21
+   (ADR 0017's Amendment of that date) on **vertical** headers: a 2×5 1.27 mm
+   shrouded box header on each board (`boards.chain_hdr_*`), the main
+   board's standing on its top and the key board's **hanging from its
+   underside straight over it, mouth to mouth** — in the far band beside the
+   LED row, clear of the switch pins above and below, each with a soldering
+   iron's room from the nearest switch pin (`boards.chain_stub_room`). The
+   two mated sockets stand in the gap between the boards with air between
+   their covers (*"key-chain sockets clear of each other, mouth to mouth"*).
+   The ribbon leaves both sockets flat, the same way along the body, and
+   **makes one fold: closed, it is a flat hairpin lying along the body**
+   between the two sockets' cable faces, so it never stands across the LED
+   row's light (`renders/section-ribbon.png`; *"key-chain ribbon closed:
+   hairpin leg and fold radius"*, *"key-chain ribbon fold no tighter than its
+   bend radius"*, *"key-chain ribbon hairpin inside the body"*, *"key-chain
+   ribbon hairpin clear of the columns"*). Which way each hand's hairpin
+   folds is `routing.chain_fold`, which says why. **Its length is the service
    position's** (owner: long enough "to have the top off and still connect
    the ribbon before tightening down"; since the cassette, ADR 0025,
    tightening down is screwing the key plate onto its columns): the key
@@ -332,17 +333,15 @@ only as good as those envelopes. Group the report's lines by these causes
    `routing.chain_raise`, `routing.chain_slack`; *"key-chain ribbon length
    (derived)"*). A ribbon long enough to lay the plate beside the body would
    fold into a hairpin that reaches the left-hand board's tail column. The
-   cable is ordered by *"key-chain cable to order (FFSD length code)"*, which
-   is the FFSD part number's length field, in inches. The key header's pin
-   tails stop short of the plate (above).
+   cable is made up and cut to *"key-chain ribbon to cut"*. The key header's
+   pin tails stop short of the plate (above).
 2. **The hardware pages follow**: `hardware/interfaces/key-chain-loom/`
    describes the two ribbons (`J-CHAIN`, `CBL-CHAIN`) and the thumb chain in
    traces, and `chain-connectors` is derived from them. The key-board header
-   is the main board's part mounted upside down, facing the same way, and the
-   cable is ordered with its second socket's notch reversed (`-RN2`), which
-   is what sends the two ends' cables toward each other; that makes the key
-   board's pin numbers differ from the main board's — `key-chain-loom.md`
-   says how.
+   is the main board's part mounted upside down, and the cable is a straight
+   one, so a pin has the same number at both ends
+   (`key-board-chain-pinmap`); which socket goes on which board is
+   `key-chain-loom.md`'s to say.
 3. **The breath tube** is short: the inlet's inner barb in the mouth cap (#36, *The breath inlet* in the README), then one clear tube, no trap (ADR 0003, 2026-10-05): along the inlet's axis, an S toward the near side and one U back onto the sensor's port, at `routing.tube_bend_r` and no tighter (*"breath tube bends no tighter than routing.tube_bend_r"*), across the LED row (*"breath tube crosses the LED row clear of it"*), all in the mouth band; the board has a
    slot in front of the sensor's lower port.
 4. **The U-bolt has the middle station to itself** (ADR 0025: the lid
@@ -391,8 +390,8 @@ soldered to the main board, with no socket; how it is fitted and swapped is in
 the key boards' ribbon connector was deeper than the envelope assumed, and
 on a 1.6 mm board the KS-33's pins would show only about 0.1 mm below it.
 Both were settled in ADR 0020: the key boards are `boards.key_board_t` thick,
-and the connector's envelope now comes from the IDC header's banked full print
-(`boards.chain_hdr_*`, ADR 0017's 2026-09-27 amendment). The model
+and the connector's envelope now comes from the header's banked drawing
+(`boards.chain_hdr_*`, ADR 0017's amendments). The model
 now exports each key board's outline (`export/key-board-*.dxf`) and its
 switch and connector positions (`export/pcb-geometry.echo`), which the PCB is
 placed from. The main board's the same way: `export/main-board.dxf` is its

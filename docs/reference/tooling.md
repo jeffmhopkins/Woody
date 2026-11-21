@@ -241,7 +241,7 @@ finished one (review #6-3). The commit gate still runs the full check.
   `hardware/interfaces/spi-link/netlist.yaml`: the main board's and the
   adapter's `J-UMB` against `J-UMB`, the adapter's etherCON against
   `J-UMB-INST`, the module main board's against `J-UMB-MOD`;
-- a key board's `J-CHAIN` pins are netted differently from the ribbon's other end in `hardware/interfaces/key-chain-loom/netlist.yaml` (pin k on the key board against pin 13 − k on the main board);
+- a key board's `J-CHAIN` pins are netted differently from the ribbon's other end in `hardware/interfaces/key-chain-loom/netlist.yaml` (pin k on the key board against pin k on the main board: `key-board-chain-pinmap`);
 - a board's register is wired differently from
   `hardware/cluster/key-marker-and-bits/allocation.yaml`, that file disagrees
   with the table in `key-marker-and-bits.md` §4, or it names a key that is not
@@ -334,7 +334,7 @@ assemble and bring it up, what is open.
 |---|---|
 | Netlist, footprints, references | the board's KiCad sheets (§3); a part's footprint is its sheet's `Footprint` field |
 | Board outline | `mechanical/export/key-board-lh.dxf` — the body CAD's key board |
-| Switch, ribbon-connector and corner-mount positions, which way the connector's mouth faces, each mount's hole and keep-out sizes (the nut across its corners, and the spacer, each grown by `hardware.kb_mount_float`), board thickness | `mechanical/export/pcb-geometry.echo` — the body CAD |
+| Switch, ribbon-connector and corner-mount positions, which way the connector's even row stands, each mount's hole and keep-out sizes (the nut across its corners, and the spacer, each grown by `hardware.kb_mount_float`), board thickness | `mechanical/export/pcb-geometry.echo` — the body CAD |
 | Switch 3D model height | `config/body.yaml` `switch.pcb_below_seat` |
 | Each key network's three parts | `layout.yaml` `networks:` — ONE `pattern` for every key, relative to the key's switch in the body CAD: the T's junction `offset`, the `axis` S and P lie along, the side the series resistor sits (`leg`) and the side the capacitor hangs (`c`); `except:` for a key that cannot take it, with its own `at` and the reason. `network_parts` expands it into a T round the key's node, finding each key's three parts by BOM row (`Row`) and the sheet they sit on (LH1..LH5) - references are plain numbers - and `add_silk` labels every T the same way. `layout` exits on an `except:` key that names no switch, an `axis` other than x or y, a `leg` or `c` other than ±1, a switch not at 0° without its own `at`, and **a key whose three KEY pads are not the three pads nearest its T's junction**. That is a layout-time test only: after a hand edit, `check` holds the switches where the body CAD puts them, and nothing holds the networks' positions round them |
 | Which connections and nets route first | `layout.yaml` `connect_first:` — pad-to-pad connections routed before anything else, each with a `max_mm` that **every `check` holds** (the decoupler's return to the register's ground pin). Then `route_first:` — after the power rail, before the rest: nets whose pads can be reached from one side only (a 1.27 mm header's far row) |
@@ -418,7 +418,7 @@ prints which, exits 1, and leaves any existing board as it was.
 - the body CAD disagreeing (`check_cad`): the board's thickness against
   `boards.key_board_t` and the echo, its outline against the DXF, each switch's
   position and rotation (on top) and its 3D model's height, each mount hole's
-  position, and `J-CHAIN`'s position, the way its mouth faces, and its side
+  position, and `J-CHAIN`'s position, the way its even row stands, and its side
   (the bottom);
 - a part on the key board's switch side, which is pressed against the switch
   housings, or one underneath taller than the echo's `smt_height_max`, J-CHAIN
@@ -924,10 +924,9 @@ families:
 
 - **The ribbon connector was deeper than the body CAD assumed.** The CAD
   then took its envelope from the footprint's size (ADR 0020 point 5). Since
-  ADR 0017's amendment `J-CHAIN` is a through-hole 2×6 1.27 mm shrouded
-  right-angle IDC header, stand-in Samtec SHF-106-01-L-D-RA, and the CAD's
-  envelope is `boards.chain_hdr_*`, from its banked full print. Its source is
-  open (none stocked at JLC - the board's README).
+  ADR 0017's amendments `J-CHAIN` is a through-hole 1.27 mm shrouded header
+  (its BOM row names the part), and the CAD's envelope is
+  `boards.chain_hdr_*`, from its banked drawing.
 - **Nothing held the board.** The first layout had no mounting at all. Now
   the board is a rectangle across the cavity, hung at each corner on an
   M2.5 stud pressed flush into the plate (ADR 0020, Amendment 4; the board
