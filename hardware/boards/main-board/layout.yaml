@@ -74,8 +74,7 @@ planes:
 # U-ADC (U2) between its VSS (pin 4, the island side) and its digital pins (5-8,
 # the plane side): the moat runs along U2's centreline. The outline (body mm)
 # keeps off the mouth-end mount H9 and the column mount at x 40 (both PWR_GND,
-# ADR 0025), and out of the band of LED13 (D20) and LED12's corner (the LEDs
-# return to PWR_GND). pcb.py check holds: every AGND_INST pad on the island but
+# ADR 0025), and out of the LED row's band (the LEDs return to PWR_GND). pcb.py check holds: every AGND_INST pad on the island but
 # the pair's far end, no other plane net's pad on it, one tie.
 islands:
   - net: AGND_INST
@@ -105,7 +104,7 @@ islands:
     # stands astride its edge and the ADC's three SPI lines cross beside it. CS and the ADC's
     # 3V3 arrive on the bottom face and come up inside the island, so neither crosses its edge.
     outline: [[7.5, 15.6], [15.6, 15.6], [15.6, 10.0], [31.9, 10.0], [31.9, 15.6], [49.4, 15.6],
-              [49.4, 25.7], [34.7, 25.7], [34.7, 27.0], [29.3, 27.0], [29.3, 25.7], [21.2, 25.7],
+              [49.4, 25.7], [21.2, 25.7],
               [21.2, 45.0], [30.6, 45.0], [30.6, 49.5], [7.5, 49.5]]
     # its one pad off the island: the breath pair's AGND leg ends at R-SER-BREATH-INST
     # beside J-UMB (breath-sense-link.md)
@@ -219,16 +218,15 @@ mounts:
 ubolt:
   copper_keepout: 0.5
 
-# J-MCU and J-UMB, from the echo's insulator extent (x0, x1) and centre y. Each is
-# placed by its pad row farthest from the mouth - the connectors' mouths face the
-# tail - at `back_row_at` from x0 or x1. Both are the woody.pretty footprints
-# (hardware/lib/README.md). J-MCU: the body 5.40 along the body and its far tail
-# row 2.60 behind the body's back [ds XKB-X1270WR-2x12A-9TV01.pdf rev A1 side
-# view; config/body.yaml boards.mcu_conn_w], so 8.00 in front of the mouth face x1
-# [calc: 5.40 + 2.60]. J-UMB: the Hanxia header's pin row 1.80 in front of its
-# insulator [ds HANXIA-HX-PZ2.54-1x8P-WZ.pdf; calc: 4.30 mating face to tail - 2.50].
+# J-MCU and J-UMB, from the echo's insulator extent (x0, x1) and centre y. Both are the
+# woody.pretty footprints (hardware/lib/README.md). J-MCU stands straight up, its rows
+# along the body (ADR 0018, Amendment of 2026-11-21): the echo gives the way its ribbon
+# leaves, and its near pad row stands `back_row_at` inside the insulator's near face, as
+# J-MCU-C's does on the Matrix carrier (hardware/boards/matrix-carrier/layout.yaml).
+# J-UMB's mouth faces the tail: its pin row 1.80 in front of its insulator
+# [ds HANXIA-HX-PZ2.54-1x8P-WZ.pdf; calc: 4.30 mating face to tail - 2.50].
 connectors:
-  J-MCU: {row: J-MCU, rot: 0, back_row_from: x1, back_row_at: -8.00}
+  J-MCU: {row: J-MCU, rot: 0, back_row_from: x0, back_row_at: 2.29}
   J-UMB: {row: J-UMB, rot: 0, back_row_from: x0, back_row_at: -1.80}
 
 # Parts whose courtyard is MEANT to lie off the board (pcb.py check_courtyards).
@@ -251,7 +249,8 @@ keepouts:
   "ribbon left_hand": {except_rows: [J-CHAIN]}
   "ribbon right_hand": {except_rows: [J-CHAIN]}
   "regulator block": {part: REGULATOR-BLOCK, except_rows: [U-BUCK, C-BUCK-OUT]}
-  # J-MCU's mated plug and the Matrix ribbon's rise over it (pcb-geometry.echo): no part there but J-MCU itself
+  # J-MCU's own body, with its socket standing on it (pcb-geometry.echo): no part there but J-MCU itself.
+  # The ribbon's fold beyond it is high enough for parts to stand under.
   "Matrix ribbon": {except_rows: [J-MCU]}
 
 # How tall each footprint family stands on the top face, for the height rooms
@@ -281,7 +280,7 @@ heights:
   # contains, so the specific ones come before anything they would also match (#19 F5: a bare
   # IDC-Header key gave both 4.9, under the chain header's real height)
   IDC-Header_2x05_P1.27mm_CNCTech: 5.4   # [repo config/body.yaml boards.chain_hdr_h; ds CNCTECH-3220-XX-0100-00-1.27MM-BOX-HEADER-VERTICAL.pdf]
-  IDC-Header_2x12_P1.27mm_XKB: 5.1       # [repo config/body.yaml boards.mcu_conn_h; ds XKB-X1270WR-2x12A-9TV01.pdf]
+  IDC-Header_2x12_P1.27mm_Vertical: 5.4  # [repo config/body.yaml boards.mcu_conn_h]
   LED_WS2815B: 1.65            # [repo pcb-geometry.echo led height]
   JST_PH_S3B-PH-SM4-TB: 5.5    # [repo config/body.yaml midi.hdr_sz, its height: side entry, the plug lies inside it (midi.hdr_plug_l)]
   PinHeader_1x08: 2.5          # [repo config/body.yaml boards.umb_joint_h]

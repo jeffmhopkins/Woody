@@ -5,7 +5,7 @@
 prototype's timing) and [ADR 0016](0016-one-strip-on-the-centre-board.md)
 (one strip on the centre board, whose "LEDs populated directly on the centre
 board ... not decided here" this decides). Each carries a dated note pointing
-here. Numbering: 0025–0027 are taken. **Amended 2026-09-30** (the layout goes ahead of the diffusion test, *Amendment* below), 2026-10-02 (a fourteenth LED) and twice 2026-10-03 (one row at equal margins; then thirteen again, the tail-end LED removed: *Amendments* below), 2026-10-04 (Standard PCBA, white on every board: *Amendment* below), and 2026-11-20 (the empty place is the Matrix ribbon's, not the tail end's: *Amendment* below).
+here. Numbering: 0025–0027 are taken. **Amended 2026-09-30** (the layout goes ahead of the diffusion test, *Amendment* below), 2026-10-02 (a fourteenth LED) and twice 2026-10-03 (one row at equal margins; then thirteen again, the tail-end LED removed: *Amendments* below), 2026-10-04 (Standard PCBA, white on every board: *Amendment* below), 2026-11-20 (the empty place is the Matrix ribbon's, not the tail end's: *Amendment* below), and 2026-11-21 (the row respaced: an LED each side of the Matrix ribbon, and one pitch from there to the mouth end: *Amendment* below).
 
 ## Context
 
@@ -378,3 +378,53 @@ same day), he chose **"The empty tail-end place"**.
    its output back to LED 2 on the bottom face under the driver.
 5. **Firmware**: thirteen pixels in the same order; pixel 0 stands two pitches
    from pixel 1 (`firmware/README.md`, *The lights*).
+
+## Amendment, 2026-11-21 — the row respaced from the ribbon to the mouth end
+
+**The owner, 2026-11-21**, of a render of the lit instrument with the
+key-chain headers turned vertical (#49): *"I think we need to respace and
+renumber the LEDs too so that no LEDs line up against the shroud like this or
+are blocked by the big components or ribbons."* Then, of the placements shown
+in the working chat the same day: *"there should be one on either side of the
+matrix ribbon cable"*, *"go back to the original count and then just space
+them out better"*, and *"I want that led that was on the front side of the
+ribbon of the matrix carrier to be at the same distance from the ribbon cable
+as the other sides LED. And then I want you to take the remaining LEDs and
+spread them out to the top of the instrument."*
+
+1. **The row is no longer set by the board's ends.** The amendment of
+   2026-10-03 spread fourteen places at one pitch with equal margins; this one
+   replaces it. `config/body.yaml` holds three figures instead:
+   `lighting.led_tail_x` (LED 1, past the Matrix ribbon), `lighting.led_ribbon_x`
+   (LED 2, before the ribbon and the same distance from its edge) and
+   `lighting.led_pitch` (LEDs 2 to `lighting.led_count`, at one pitch from
+   LED 2 to the mouth end). `lighting.led_slots` and `lighting.led_empty_slot`
+   are gone. `mechanical/drc.echo` *"LED row on the main board"* prints the
+   centres.
+2. **One LED stands level with the right-hand key-chain header.** The first
+   ask was that none should. But the two headers stand a fixed distance apart,
+   and with LED 2 fixed beside the ribbon and the row running to the mouth end
+   no single pitch clears both `[calc: every start and pitch tried against the
+   two headers and the U-bolt, 2026-11-21]`. The owner was shown a row with
+   eleven at one pitch and a wider step before the ribbon, which cleared both,
+   and chose consistent spacing over it: *"The top 12 LEDs need to have
+   consistent spacing. That 12th LED should be the one right there along the
+   edge of the ribbon cable."* He was told which LED lands at the header.
+   `mechanical/drc.echo` prints it as a note, *"LED row and the chain
+   headers"*; the left-hand header and the U-bolt (*"LED row off the U-bolt
+   station"*) are clear. If the lit instrument shows it, the remedy is to move
+   that header along the board, not the LEDs.
+3. **The count stays at thirteen**, and the chain and references are
+   unchanged: `D-LED-1` (`D8`) is first on the data line with its `DIN2`
+   grounded. A fourteenth LED was chosen and withdrawn the same morning; it
+   never reached the schematic.
+4. **The reference turns a quarter turn.** The mouth-end LED stands where
+   `U-REF-BREATH`'s pads were, so `U-REF-BREATH` (`U4`) is turned and moved a millimetre: its
+   output pin now faces its capacitors and its input pin its input parts, and
+   the analog island's notch under it is gone
+   (`hardware/boards/main-board/layout.yaml`, `main_layout.py`).
+5. **The side-light diffusion test (ROADMAP) still decides** the count and the
+   pitch, and now also whether the LED at the right-hand header shows on the
+   far side.
+6. **The main board follows** (`hardware/boards/main-board/README.md`,
+   revision O).

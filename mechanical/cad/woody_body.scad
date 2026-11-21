@@ -1101,8 +1101,8 @@ module tail_equipment() {
 }
 
 // THE LEDS (ADR 0028): WS2815B-V1 on the main board's top face, one row down
-// the centreline between the thumb switches' two rows of pins, at one pitch with
-// equal margins to the board's ends (amendment 2026-10-03), LEDs up, lighting both
+// the centreline between the thumb switches' two rows of pins, one each side of the
+// Matrix ribbon and one pitch from there to the mouth end (amendment 2026-11-21), LEDs up, lighting both
 // acrylic sides through the cavity (ADR 0016's light path). Placed with the main board below.
 module led_row() {
     P(C_LED, false, "LED row") for (n = [1 : lighting_led_count]) let(c = led_xy(n))
@@ -1191,33 +1191,22 @@ module sensor_3d() {
     }
 }
 sensor_room = under_keys(sensor_c, [boards_sensor_body, boards_sensor_leads]) ? cb_room : gap_room;
-// THE LED ROW (ADR 0028, amendments of 2026-10-03): lighting.led_slots places on the
-// centreline, between the thumb switches' two rows of pins, at ONE pitch, with EQUAL
-// margins to the main board's two ends - the owner: "all the 14 LEDs equidistant from
-// board extents, and rework all components around them" - and lighting.led_count LEDs in
-// all of them but one, lighting.led_empty_slot: the place the Matrix ribbon rises over (the
-// amendment of 2026-11-20). The slots set the pitch, the count fills them. The even tiling - half a pitch
-// at each end - is the aim (led_p_even); the breath sensor at the mouth end is the one
-// thing that holds an LED off it (its courtyard, which an LED's must clear by
-// boards.board_clear), so the mouth-end margin is the larger of the two and the tail end
-// takes the same. Nothing else bounds it: the tail end mounts step clear of the LEDs
-// (cb_ends, so_clear), J-MCU stands in a gap of the row (jm_c), and the row must end
+// THE LED ROW (ADR 0028, amendments of 2026-10-03 and 2026-11-21): on the centreline,
+// between the thumb switches' two rows of pins. LED 1 stands past the Matrix ribbon at
+// lighting.led_tail_x and LED 2 before it at lighting.led_ribbon_x, the same distance from
+// the ribbon's edge; LEDs 2 to led_count stand at ONE pitch, lighting.led_pitch, from LED 2
+// to the mouth end (the owner, 2026-11-21). So one LED stands on each side of the ribbon
+// and none under it. The row must stand past the breath sensor and end
 // short of J-UMB's pads (drc.echo 'LED row on the main board'). Numbered along the data
 // line: LED 1 at the tail end, where the data arrives from U-LVLSHIFT; LED led_count at
 // the mouth end.
 led_y = W / 2;
 led_n = lighting_led_count;
 mb_ends = [cb_x[0], ua_x0];                                   // the main board's mouth and tail edges
-led_slots = lighting_led_slots;                               // the places the pitch is set by
-led_p_even = (mb_ends[1] - mb_ends[0]) / led_slots;           // half a pitch at each end
+led_pitch = lighting_led_pitch;
 led_lo = sensor_c[0] + boards_sensor_lead_row / 2 + boards_board_clear + lighting_led_court[0] / 2;   // past the breath sensor
 led_hi = ju_tail_x - 2.54 / 2 - boards_board_clear - lighting_led_court[0] / 2;                        // short of J-UMB's pads
-led_margin = max(led_p_even / 2, led_lo - mb_ends[0]);        // the same at both ends
-led_pitch = (mb_ends[1] - mb_ends[0] - 2 * led_margin) / (led_slots - 1);
-// Slot 1 is the tail-end place. LED n stands in slot n, stepping over the empty one.
-led_empty = lighting_led_empty_slot;
-function led_slot(n) = n < led_empty ? n : n + 1;
-function led_xy(n) = [mb_ends[1] - led_margin - (led_slot(n) - 1) * led_pitch, led_y];
+function led_xy(n) = [n == 1 ? lighting_led_tail_x : lighting_led_ribbon_x - (n - 2) * led_pitch, led_y];
 // J-MCU's place is ONE config figure, boards.mcu_conn_at [x, y, way]: its insulator's
 // centre and the way the ribbon leaves both sockets (90 toward the far side). J-MCU and
 // J-MCU-C STAND STRAIGHT UP, their rows along the body (the owner's choice, 2026-11-21:
@@ -1840,9 +1829,17 @@ module drc_report() {
         drc(undef, "equal bands (mouth = between hands)", band,
             str("mm each; set by the ", band == mouth_req ? "mouth end" : "minimum gap",
                 " - mouth needs ", mouth_req, ", gap minimum ", layout_gap, "; the tail is sized on its own"));
-    drc(led_xy(led_n)[0] >= led_lo - 1e-6 && led_xy(1)[0] <= led_hi + 1e-6 && led_slots == led_n + 1 && led_empty >= 1 && led_empty <= led_slots, "LED row on the main board",
-        [led_n, led_slots, led_empty, led_pitch, led_margin, led_xy(led_n)[0], led_xy(1)[0], [led_lo, led_hi], led_p_even],
-        "LEDs, the places the row is laid out for and the one place left empty, counted from the tail (ADR 0028, amended 2026-10-03: one row, equal margins to the board's ends; 2026-11-20: the empty place is the Matrix ribbon's), their pitch, the margin from each end to the end place, the mouth-end (LED led_count) and tail-end (LED 1) centres along the body, the span their centres may take (past the breath sensor's courtyard + board_clear, short of J-UMB's pads + board_clear), and the even tiling's pitch (half a pitch at each end), which the sensor's bound overrides at the mouth");
+    drc(led_xy(led_n)[0] >= led_lo - 1e-6 && led_xy(1)[0] <= led_hi + 1e-6 && led_xy(1)[0] - led_xy(2)[0] >= led_pitch, "LED row on the main board",
+        [led_n, led_pitch, led_xy(led_n)[0], led_xy(2)[0], led_xy(1)[0], [led_lo, led_hi], [led_xy(led_n)[0] - mb_ends[0], mb_ends[1] - led_xy(1)[0]]],
+        "LEDs, the pitch of LEDs 2 to led_count (ADR 0028, amended 2026-11-21: an LED each side of the Matrix ribbon, and one pitch from the one before it to the mouth end), the mouth-end centre (LED led_count), the centre of LED 2 on the ribbon's mouth side and of LED 1 on its tail side, the span the centres may take (past the breath sensor's courtyard + board_clear, short of J-UMB's pads + board_clear), and the margins from the board's mouth and tail edges to the end centres");
+    // THE LEDS AND THE KEY-CHAIN HEADERS (a NOTE, not a rule). The owner asked first that no
+    // LED line up against a header's shroud, then fixed both ends of the even row (ADR 0028
+    // amendment, 2026-11-21); the headers stand a fixed distance apart, so one LED stands level
+    // with one of them. Printed per header: mm along the body from the header's body to the
+    // nearest LED's courtyard, negative where they overlap.
+    let(off = [for (cl = chain_ribbon_cls) min([for (n = [1 : led_n]) abs(led_xy(n)[0] - mb_chain_x(cl)) - (boards_chain_hdr_w + lighting_led_court[0]) / 2])])
+        drc(undef, "LED row and the chain headers", off,
+            "mm along the body, per header, from the header's body to the nearest LED's courtyard (negative: that LED stands level with the header and shines into its shroud on the far side; ADR 0028 amendment 2026-11-21, point 2)");
     // EVERY LED CLEAR OF ITS NEIGHBOURS (ADR 0028 amendment, 2026-10-03): each courtyard on
     // the board and boards.board_clear clear of J-MCU and the regulator block; clear of the
     // mounts' nut keep-outs and HDR-SERVICE's pads. Its 100 nF is the layout's (layout.yaml led_caps).
@@ -2011,9 +2008,8 @@ module drc_report() {
     drc(total(neck) >= boards_main_neck_min, "main board neck at the U-bolt station", [neck, total(neck), total(neck_out)],
         str("mm of board across the station, strip by strip, their total on the inner layers, and on the outer layers less 0.5 copper keep-out round each washer and nut; every trace from one half to the other passes here (boards.main_neck_min ", boards_main_neck_min, ")"));
     // THE LED ROW OFF THE STATION (ADR 0028): no LED between the U-bolt's legs - every
-    // courtyard off the station's line - and every LED clear of the nuts' keep-out. Since
-    // the 2026-10-03 amendment the row is set by the board's ends, not shifted to put the
-    // station exactly midway between two LEDs; the third figure is how far it is off that.
+    // courtyard off the station's line - and every LED clear of the nuts' keep-out. The
+    // third figure is how far the station is off the midpoint between its two LEDs.
     led_dx = [for (n = [1 : lighting_led_count]) abs(led_xy(n)[0] - ubolt_c[0]) - lighting_led_court[0] / 2];
     led_nut = min([for (n = [1 : lighting_led_count], u = ubolt_legs()) rect_gap(u, led_xy(n), lighting_led_court, 0)]) - ubolt_keep_r;
     led_mid = min([for (n = [1 : led_n - 1]) abs((led_xy(n)[0] + led_xy(n + 1)[0]) / 2 - ubolt_c[0])]);

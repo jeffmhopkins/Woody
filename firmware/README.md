@@ -252,11 +252,13 @@ Pins: `SCK` IO38, `SH/LD` IO7, chain-end `SER` IO33, `QH` IO40.
   clamp is a setting E1 confirms, not a constant.
 - **Thirteen pixels (`lighting.led_count`), one row, tail end first.** The
   data line reaches the row's tail end first (ADR 0028, amendments of
-  2026-10-03: one row at one pitch, thirteen LEDs in fourteen places), so a frame
+  2026-10-03 and 2026-11-21), so a frame
   is pixel 0 for the tail-end LED, then pixels 1–12 toward the mouth end. The
-  row's one empty place is between pixels 0 and 1, over the Matrix ribbon
-  (`lighting.led_empty_slot`, ADR 0028's amendment of 2026-11-20), so those two
-  stand two pitches apart.
+  row is not at one pitch end to end: pixels 0 and 1 stand either side of the
+  Matrix ribbon (`lighting.led_tail_x`, `lighting.led_ribbon_x`), about two
+  pitches apart, and pixels 1–12 stand at `lighting.led_pitch` to the mouth
+  end (ADR 0028's amendment of 2026-11-21;
+  `mechanical/drc.echo`, *"LED row on the main board"*, prints the centres).
   Anything drawn *along* the body (the breath bar, a sweep) addresses pixels
   0–12 in order;
   every pixel is a step of it. Every pixel takes the same gain: no LED stands

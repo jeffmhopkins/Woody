@@ -4,8 +4,9 @@
 on the main board since 2026-09-30**
 ([ADR 0028](../../../docs/decisions/0028-on-board-leds.md)): WS2815B-V1
 on the top face, `lighting.led_count` of them on one data line, in one row
-down the centreline at one pitch with equal margins to the board's ends (ADR
-0028's amendment of 2026-10-03), the data arriving at its tail end — in place of
+down the centreline, one each side of the Matrix ribbon and one pitch from
+there to the mouth end (ADR 0028's amendment of 2026-11-21), the data arriving
+at its tail end — in place of
 the strip ADR 0016 laid there. The directory keeps its name. What the
 circuit used to be is in [`notes.md`](notes.md).
 
@@ -233,11 +234,12 @@ needs to be distance equalized and centered just like the other leds"*, then
 *"all the 14 LEDs equidistant from board extents"* (ADR 0028's first amendment
 of 2026-10-03). The same day he removed its tail-end LED and kept the rest
 where they stood: *"Keep current layout, remove bottom one"* (ADR 0028's
-second amendment of 2026-10-03), so thirteen LEDs fill the row's fourteen
-places from the mouth end (`lighting.led_slots`). Since 2026-11-20 the empty
-place is the second from the tail, where the Matrix ribbon rises, and `D-LED-1`
-stands in the tail-end place (`lighting.led_empty_slot`; ADR 0028's amendment
-of that date). The data still arrives at
+second amendment of 2026-10-03). Since 2026-11-21 the row is set by the
+Matrix ribbon, not by the board's ends: `D-LED-1` stands past the ribbon
+(`lighting.led_tail_x`), `D-LED-2` before it, the same distance from its edge
+(`lighting.led_ribbon_x`), and `D-LED-2` to `D-LED-13` at one pitch to the
+mouth end (`lighting.led_pitch`; ADR 0028's amendment of that date).
+The data still arrives at
 the tail: `R-LED-SER` → `D-LED-1` (the row's tail end) → … → `D-LED-13` (its
 mouth end), the chain renumbered from the tail with each part kept. The
 backup line is ADR 0028 point 5: `D-LED-1`'s `DIN2` to GND, `D-LED-2`'s `DIN2`

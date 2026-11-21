@@ -1403,33 +1403,36 @@ routing:
 
 # ------------------------------------------------------------ lighting ----
 lighting:
-  # THE LEDS (ADR 0028, amended 2026-10-03): WS2815B-V1 reflowed on the main board's top
-  # face, LEDs up, lighting both acrylic sides through the cavity. ONE ROW down the
-  # centreline at one pitch, with EQUAL MARGINS to the main board's two ends (the owner,
-  # 2026-10-03: "all the 14 LEDs equidistant from board extents, and rework all components
-  # around them"). The pitch is DERIVED, not set here: woody_body.scad spreads led_slots
-  # places over the board with half a pitch at each end where it can, and the breath sensor
-  # holds the mouth-end place further in, so both margins take that (drc.echo 'LED row on
-  # the main board' prints the pitch and the margins). led_count LEDs fill the places from
-  # the places but one, led_empty_slot: the second from the tail, over which the Matrix
-  # ribbon rises from J-MCU (the owner, 2026-11-20, ADR 0028's amendment of that date).
-  # Numbered along the data line: LED 1 at the tail end, where the data arrives; LED
-  # led_count at the mouth end.
+  # THE LEDS (ADR 0028, amended 2026-10-03 and 2026-11-21): WS2815B-V1 reflowed on the main
+  # board's top face, LEDs up, lighting both acrylic sides through the cavity. ONE ROW down
+  # the centreline: LED 1 past the Matrix ribbon at led_tail_x, LED 2 before it at
+  # led_ribbon_x, the same distance from the ribbon's edge, and LEDs 2 to led_count at ONE
+  # PITCH, led_pitch, from LED 2 to the mouth end. So one LED stands on each side of the
+  # ribbon and none under it (the owner, 2026-11-21, ADR 0028's amendment of that date;
+  # drc.echo 'LED row on the main board', 'LED row and the chain headers', 'LED row off the
+  # U-bolt station'). The margins to the board's two ends are not equal. Numbered along
+  # the data line: LED 1 at the tail end, where the data arrives; LED led_count at the
+  # mouth end.
   led_count:
     value: 13
     status: settled
-    source: "owner: thirteen, 2026-09-30 (ADR 0028), the count the 60/m strip gave over the same run; a fourteenth, 2026-10-02 ('Add it', ADR 0028 amendment), in the row 2026-10-03; thirteen again later that day, the tail-end one removed: 'remove that bottom led again' / 'Keep current layout, remove bottom one' (ADR 0028 amendment, second of 2026-10-03)"
-    decided_by: "the side-light diffusion test (ROADMAP): the count, and through the board's length the pitch it gives"
-  led_slots:
-    value: 14
+    source: "owner: thirteen, 2026-09-30 (ADR 0028), the count the 60/m strip gave over the same run; a fourteenth, 2026-10-02 ('Add it', ADR 0028 amendment), in the row 2026-10-03; thirteen again later that day, the tail-end one removed: 'remove that bottom led again' / 'Keep current layout, remove bottom one' (ADR 0028 amendment, second of 2026-10-03); thirteen kept on the respaced row: 'go back to the original count and then just space them out better' (2026-11-21)"
+    decided_by: "the side-light diffusion test (ROADMAP)"
+  led_pitch:
+    value: 19.7
     status: settled
-    source: "the places the row's pitch and margins are set by (woody_body.scad led_pitch): fourteen, the row as laid out with equal margins on 2026-10-03, when the owner then removed its tail-end LED and kept the rest where they stood ('Keep current layout, remove bottom one', ADR 0028 amendment, second of 2026-10-03). led_count LEDs fill them from the mouth end"
-    decided_by: "the side-light diffusion test (ADR 0028): with led_count, the pitch and where the row ends at the tail"
-  led_empty_slot:
-    value: 2
+    source: "mm between neighbours, LED 2 to LED led_count. Owner, 2026-11-21: 'The top 12 LEDs need to have consistent spacing. That 12th LED should be the one right there along the edge of the ribbon cable' (ADR 0028, amendment of 2026-11-21) [calc: twelve LEDs from led_ribbon_x to the mouth end; this pitch puts the mouth-end LED at 243.0 - 11 x 19.7 = 26.3, past the breath sensor, and the U-bolt station 8.2 from the nearest LED's centre]"
+    decided_by: "the side-light diffusion test (ADR 0028)"
+  led_ribbon_x:
+    value: 243.0
     status: settled
-    source: "the one place of led_slots that holds no LED, counted from the tail end (1 is the tail-end place): the second, which the Matrix ribbon rises over from J-MCU. Owner, 2026-11-20, of the routed main board: 'move the LEDs on either side of the matrix ribbon connector so that it doesn't get blocked', then 'The empty tail-end place' for the LED that stood there (ADR 0028, amendment of 2026-11-20). It was 1, the tail-end place, from 2026-10-03"
-    decided_by: "the side-light diffusion test (ADR 0028), with the count"
+    source: "mm along the body to LED 2's centre, on the Matrix ribbon's mouth side. Owner, 2026-11-21: 'I want that led that was on the front side of the ribbon of the matrix carrier to be at the same distance from the ribbon cable as the other sides LED' (ADR 0028, amendment of 2026-11-21) [calc: the ribbon lies over x 254.65 to 271.16; led_tail_x 282.85 is 11.69 past it; 254.65 - 11.69 = 242.96, carried as 243.0]"
+    decided_by: "the side-light diffusion test (ADR 0028)"
+  led_tail_x:
+    value: 282.85
+    status: settled
+    source: "mm along the body to LED 1's centre, past the Matrix ribbon and short of J-UMB: the LED on the ribbon's tail side. Owner, 2026-11-21: 'one on either side of the matrix ribbon' (ADR 0028, amendment of 2026-11-21); the place it has had since 2026-11-20, as near the ribbon as the surge diode and the LED's capacitor between it and the LED driver allow"
+    decided_by: "the side-light diffusion test (ADR 0028)"
   led_view_angle:
     value: 120
     status: tbd
