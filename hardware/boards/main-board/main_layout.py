@@ -695,8 +695,9 @@ def registers():
         y2, y4, y6, y8, y10 = (jpin(k)[1] for k in (2, 4, 6, 8, 10))
         # (it passes the clamp 0.4 lower than it enters the register, so the clamp's ground via stands
         # between it and the pad and not in the pad)
-        T("CHAIN_SCK", [f"{j}.2", (X(JX - (y2 - 37.5)), 37.5), (X(72.05), 37.5), (X(72.05), 37.9), f"{tvs}.1"])
-        T("CHAIN_SCK", [(X(72.05), 37.9), (X(70.3), 37.9), (X(69.74), 37.9), (X(68.67), 38.97), f"{u}.2"])   # x 67: where the right hand's via stands
+        T("CHAIN_SCK", [f"{j}.2", (X(JX - (y2 - 37.5)), 37.5), (X(72.05), 37.5), (X(71.1), 37.5), (X(70.7), 37.9), (X(70.3), 37.9),
+                        (X(69.74), 37.9), (X(68.67), 38.97), f"{u}.2"])   # x 70.3: where the right hand's via stands
+        T("CHAIN_SCK", [(X(72.05), 37.5), f"{tvs}.1"])
         # SH/LD: straight from pin 4 between the clamp's rows into pin 1
         T("CHAIN_SHLD", [f"{j}.4", (X(73.95), y4), (X(69.94), y4), f"{u}.1"])
         T("CHAIN_SHLD", [(X(73.95), y4), f"{tvs}.3"])
