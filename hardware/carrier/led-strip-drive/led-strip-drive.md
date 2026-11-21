@@ -234,14 +234,19 @@ needs to be distance equalized and centered just like the other leds"*, then
 of 2026-10-03). The same day he removed its tail-end LED and kept the rest
 where they stood: *"Keep current layout, remove bottom one"* (ADR 0028's
 second amendment of 2026-10-03), so thirteen LEDs fill the row's fourteen
-places from the mouth end (`lighting.led_slots`). The data still arrives at
+places from the mouth end (`lighting.led_slots`). Since 2026-11-20 the empty
+place is the second from the tail, where the Matrix ribbon rises, and `D-LED-1`
+stands in the tail-end place (`lighting.led_empty_slot`; ADR 0028's amendment
+of that date). The data still arrives at
 the tail: `R-LED-SER` → `D-LED-1` (the row's tail end) → … → `D-LED-13` (its
 mouth end), the chain renumbered from the tail with each part kept. The
 backup line is ADR 0028 point 5: `D-LED-1`'s `DIN2` to GND, `D-LED-2`'s `DIN2`
 from the feed, `LED_DI`, so `R-LED-SER` still drives two inputs. The feed runs
-from `R-LED-SER` beside `U-LVLSHIFT` out to the tail-end LED, about 21 mm, and
-back to the next, about 20 mm: ~5 pF of trace `[from memory, ~1.2 pF/cm over a
-plane]` beside the inputs' 30 pF; `sim/` carries 8 pF, the bound it was set
-at, until the board is routed. Every LED stands the same distance from the
+from `R-LED-SER` beside `U-LVLSHIFT` out to the tail-end LED, about 32 mm, and
+from the same resistor to the next, about 20 mm, 47 mm of copper in all `[repo
+hardware/boards/main-board/main_layout.py, leds()]`: ~6 pF of trace `[from
+memory, ~1.2 pF/cm over a plane]` beside the inputs' 30 pF; `sim/` carries
+8 pF, the bound it was set at before the board was routed, which the routed
+board is inside. Every LED stands the same distance from the
 acrylic, so firmware gives none of them its own gain (`firmware/README.md`,
 *The lights*). What the corner LED was is in [`notes.md`](notes.md).

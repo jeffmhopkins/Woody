@@ -148,8 +148,9 @@ Several things can claim each end, and the largest wins:
   plug was right-angle until issue #37 took it away.
 - **The lights are a row of LEDs on the main board** (ADR 0028; before it
   one strip, ADR 0016): `lighting.led_count` WS2815B-V1 at one pitch, equal
-  margins to the main board's ends (ADR 0028 amendment 2026-10-03; the pitch
-  is drc.echo's *"LED row on the main board"*), LEDs up down the board's
+  margins to the main board's ends, one place left empty where the Matrix
+  ribbon rises (ADR 0028 amendments 2026-10-03 and 2026-11-20; the pitch and
+  the empty place are drc.echo's *"LED row on the main board"*), LEDs up down the board's
   centreline, between the thumb switches' two rows of pins, lighting both sides
   through the cavity. The row is shifted along the body so the U-bolt station
   falls midway between two LEDs (*"LED row on the main board"*, *"LED row off
@@ -370,7 +371,7 @@ only as good as those envelopes. Group the report's lines by these causes
    0021): the etherCON is soldered to its adapter, and J-UMB, a right-angle
    header, is soldered into the adapter and the tongue (*"J-UMB on the main
    board's tongue…"*, *"J-UMB's row lands on the adapter clear of the
-   etherCON's footprint"*). The LED row stops short of J-MCU. The rows are
+   etherCON's footprint"*). The LED row leaves the place over the Matrix ribbon empty (`lighting.led_empty_slot`). The rows are
    `J-MCU` and `CBL-MCU-RIBBON` (`hardware/carrier/`), `J-UMBILICAL-INST`,
    `J-UMB` and `PCB-UMB-ADAPTER` (`hardware/interfaces/spi-link/`).
 6. **The tail is clear.** The etherCON and its adapter, J-UMB, the MIDI jack,

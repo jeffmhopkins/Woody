@@ -5,7 +5,7 @@
 prototype's timing) and [ADR 0016](0016-one-strip-on-the-centre-board.md)
 (one strip on the centre board, whose "LEDs populated directly on the centre
 board ... not decided here" this decides). Each carries a dated note pointing
-here. Numbering: 0025–0027 are taken. **Amended 2026-09-30** (the layout goes ahead of the diffusion test, *Amendment* below), 2026-10-02 (a fourteenth LED) and twice 2026-10-03 (one row at equal margins; then thirteen again, the tail-end LED removed: *Amendments* below), and 2026-10-04 (Standard PCBA, white on every board: *Amendment* below).
+here. Numbering: 0025–0027 are taken. **Amended 2026-09-30** (the layout goes ahead of the diffusion test, *Amendment* below), 2026-10-02 (a fourteenth LED) and twice 2026-10-03 (one row at equal margins; then thirteen again, the tail-end LED removed: *Amendments* below), 2026-10-04 (Standard PCBA, white on every board: *Amendment* below), and 2026-11-20 (the empty place is the Matrix ribbon's, not the tail end's: *Amendment* below).
 
 ## Context
 
@@ -345,3 +345,33 @@ closed this way, not by a leaded finish and not by green mask:
 The order sheets are `hardware/boards/key-board-lh/README.md` (both key
 boards; the right-hand page cites it) and `hardware/boards/main-board/README.md`,
 *Ordering it*.
+
+## Amendment, 2026-11-20 — the empty place is the Matrix ribbon's
+
+**The owner, 2026-11-20**, of the main board laid out by hand (#48, ADR 0030):
+*"I would only ask if it's possible to move the LEDs on either side of the
+matrix ribbon connector so that it doesn't get blocked."* The row's LED 1
+stood in its second place from the tail, which is where the Matrix ribbon
+rises from `J-MCU`. Asked where that LED should go (the working chat, the
+same day), he chose **"The empty tail-end place"**.
+
+1. **The row's empty place is the second from the tail**, not the first:
+   `config/body.yaml` `lighting.led_empty_slot`. The pitch, the margins and
+   the other twelve LEDs are where the amendments of 2026-10-03 put them, and
+   `lighting.led_count` and `lighting.led_slots` are unchanged.
+   `mechanical/drc.echo` *"LED row on the main board"* prints the empty place
+   with the rest.
+2. **The chain and the references are unchanged.** The moved LED is still
+   `D-LED-1` (`D8` on the main board), first on the data line with its `DIN2`
+   grounded, and `D-LED-2`'s `DIN2` is still on the feed. There are two pitches
+   between LED 1 and LED 2 and one between every other pair.
+3. **What this gives back** is the second amendment of 2026-10-03, which took
+   an LED out of the tail-end place. The count stays at thirteen: this moves an
+   LED, it does not add one. The side-light diffusion test (ROADMAP) still
+   decides the count and the pitch, and now also whether the gap over the
+   ribbon shows on the sides.
+4. **The main board follows** (`hardware/boards/main-board/README.md`, revision
+   M): `U-LVLSHIFT` and its parts a step toward the mouth, the feed to LED 1 and
+   its output back to LED 2 on the bottom face under the driver.
+5. **Firmware**: thirteen pixels in the same order; pixel 0 stands two pitches
+   from pixel 1 (`firmware/README.md`, *The lights*).

@@ -174,24 +174,30 @@ PLACE.update({
     "L1": (247.8, 17.9, ("BUCK_IN", "W")),
     "Q2": (237.9, 19.45, ("INST_5V", "E")), "C208": (242.1, 20.6, ("INST_5V", "W")),   # its regulator side toward the regulator
     "R45": (43.8, 19.55, ("3V3", "E")),    # the ADC chip-select pull-up over R47, sharing its 3V3
-    # the LED driver, pin 1 toward the tail: its LED output leaves under the body to R11 below
-    # the first LED's data pad, its MIDI outputs leave the far end, IO6 comes up its tail side
-    "U6": (270.9, 30.0, ("1", "SE")),
-    "R11": (265.43, TRIO, ("LED_DI", "N")), "C12": (268.43, 23.6, ("INST_5V", "N")),
-    "R10": (275.6, 25.4, ("IO1", "N")),
-    "R51": (268.43, 37.5, ("RING_DRV", "S")), "R50": (271.43, 37.5, ("TIP_DRV", "S")),
+    # the LED driver, pin 1 toward the tail, on the mouth side of the Matrix ribbon's rise. Its
+    # LED output leaves under the body to R11; its MIDI outputs leave the far end
+    "U6": (264.4, 30.0, ("1", "SE")),
+    "R11": (259.3, TRIO, ("LED_DI", "N")), "C12": (261.93, 23.6, ("INST_5V", "N")),
+    "R10": (269.1, 24.8, ("IO1", "N")),
+    "R51": (261.93, 37.5, ("RING_DRV", "S")), "R50": (264.93, 37.5, ("TIP_DRV", "S")),
+    "R49": (258.75, 32.54, ("IO2", "E")),   # IO2's pull-up at the driver's pin, its 3V3 from the line going north there
+    # the first LED stands in the row's tail-end place, clear of the Matrix ribbon (owner,
+    # 2026-11-20). On its mouth side in the row: the surge diode, then the LED's capacitor,
+    # whose 12 V passes between the diode's pads
+    "D8": (282.85, 28.5, None),
+    "D3": (276.35, 28.5, ("UMBILICAL", "N")), "C26": (272.4, 28.5, "+x"),
+    "C46": (274.6, 34.2, ("INST_POS12", "W")),
     # the nest round J-MCU's tail end, in the order the lines arrive: IO6's pull-up where it
     # crosses 3V3, IO2's on a branch of 3V3, the clamp astride the three SPI lines, the three
     # series resistors, and CS's pull-up closing the row
-    "R48": (276.72, 20.81, ("IO6", "N")), "R49": (279.0, 24.5, ("IO2", "N")),
+    "R48": (276.72, 20.81, ("IO6", "N")),
     "U1": (277.0, 16.85, ("1", "NE")),
     "R1": (280.3, SPI_Y, ("SCLK", "N")), "R2": (283.3, SPI_Y, ("MOSI", "N")), "R3": (286.3, SPI_Y, ("CS_MOD", "N")),
     "R40": (289.0, SPI_Y - 0.55, ("IO34", "S")),
     "R46": (285.5, 15.6, ("TXD_HDR", "W")),
     # at the umbilical's pins: the reverse-polarity diode astride SCLK and MOSI, its pads on
     # the 12 V pin and the ground pin; the surge diode on a stub beside it
-    "D2": (290.5, 28.2, ("UMBILICAL", "N")), "D3": (283.75, 29.6, ("UMBILICAL", "N")),
-    "C46": (280.6, 28.0, ("INST_POS12", "N")),
+    "D2": (290.5, 28.2, ("UMBILICAL", "N")),
     "NT1": (293.6, 19.61, ("DIG_GND", "E")),
     # the breath pair's resistors on their pins' own lines; a clamp hanging from each line
     "R38": (281.3, 37.39, ("BREATH_SENSE", "E")), "R39": (281.3, 34.85, ("AGND_SENSE", "E")),
@@ -237,7 +243,7 @@ PLACE.update({
     "C202": (21.75, 47.4, ("VS", "S")), "C201": (24.75, 47.4, ("VS", "S")), "C8": (27.75, 47.4, ("VS", "S")),
 })
 LED_CAP_DX = -6.5             # each LED's 100 nF: this far from its LED's centre, in the row, a millimetre between courtyards
-KEEP_CAP = ("C37", "C38")     # the two at the analog island keep their places (#33)
+KEEP_CAP = ("C37", "C38", "C26")   # the two at the analog island keep their places (#33); the first LED's is beyond the surge diode
 
 # Every part not named above keeps the place the reviewed board gave it.
 
@@ -372,6 +378,7 @@ def jx(n):
     return 255.28 + 1.27 * ((n - 1) // 2)
 
 
+TRUNK, LANE_D1, LANE_DI = 28.3, 29.05, 29.75   # three bottom lanes under the LED driver: 3V3, and the first LED's two data lines
 HWY = 56.0      # where tail()'s bottom lanes hand over to analog()'s
 # The five lines that run the board's length on the bottom face, south of the LED row and
 # north of the near-row switches. From the regulator they hold LANE, which clears the U-bolt's
@@ -408,7 +415,7 @@ def power():
     stage 3); its trunk starts by R49 and runs the bottom face toward the mouth."""
     # 12 V entry and the inrush switch
     T("UMBILICAL_POS12", ["J6.3", (290.5, 32.31)], 0.8)
-    T("UMBILICAL_POS12", ["D2.1", "D3.1"], 0.6)
+    T("UMBILICAL_POS12", [(290.5, 32.31), (278.16, 32.31), "D3.1"], 0.6)   # to the surge diode, north of the first LED
     T("UMBILICAL_POS12", ["J6.3", (297.6, 32.31), (297.6, 16.4)], 0.6)
     T("UMBILICAL_POS12", ["Q1.2", "C39.1", (297.6, 16.4), (298.85, 16.4)], 0.5)
     T("INRUSH_GATE", ["Q1.1", "C39.2", (298.85, 14.5)])
@@ -450,12 +457,15 @@ def power():
     T("INST_5V_A", ["J1.2", (255.28, 23.5), (238.84, 23.5), "Q2.3"], 0.5)
     T("INST_5V_A", ["Q2.3", "U13.4"], 0.5)
     T("INST_5V_A", ["C208.1", (241.15, 23.5)], PWR)
-    T("INST_5V_A", ["J1.2", (255.28, 14.3), (265.53, 24.55), (267.0, 24.55)], PWR, "B")
-    via("INST_5V_A", 267.0, 24.55, "C12.1", PWR)
+    T("INST_5V_A", ["J1.2", (255.28, 16.58), (263.25, 24.55)], PWR, "B")
+    via("INST_5V_A", 263.25, 24.55, "C12.1", PWR)
     T("INST_5V_A", ["U6.14", "C12.1"], PWR)
     # the 3V3 trunk
-    via("DEV_3V3", 280.4, 23.59, "R49.1")
-    T("DEV_3V3", [(280.4, 23.59), (280.4, 28.4), (262.9, 28.4), (256.7, 22.2), (244.0, 22.2),
+    # the 3V3 trunk: from a via between IO6's pull-up and the SPI resistors, north-west under
+    # the surge diode to a lane under the LED driver, south of the two LED data lines there,
+    # and down to R37's via
+    via("DEV_3V3", 278.4, 21.5, (278.4, 19.9))
+    T("DEV_3V3", [(278.4, 21.5), (271.6, TRUNK), (256.7, TRUNK), (256.7, 22.2), (244.0, 22.2),
                   (242.2, 24.0)] + step("DEV_3V3"), 0.3, "B")
     via("DEV_3V3", 256.7, 22.2, "R37.2")
 
@@ -484,11 +494,13 @@ def tail():
     T("IO35", [(277.95, 16.85), "U1.1"])
     top("IO36", 11, 9.05, 271.4, [(271.4, 14.98), (275.47, 19.05), (282.29, 19.05), "R2.1"])
     T("IO36", [(276.05, 19.05), "U1.3"])
-    top("DEV_3V3", 15, 9.55, 270.9, [(270.9, 15.15), (275.65, 19.9), "R48.1", (279.0, 19.9), (289.0, 19.9)])
-    T("DEV_3V3", [(279.0, 19.9), "R49.1"])
-    top("IO6", 21, 10.05, 270.4, [(270.4, 15.4), (276.9, 21.9), (276.9, 31.27), "U6.5"])
-    # the module's SPI, from its resistors to J-UMB
-    T("SCLK", ["J6.4", (288.7, 29.77), (280.3, 21.37), "R1.2"])
+    top("DEV_3V3", 15, 9.55, 270.9, [(270.9, 15.15), (275.65, 19.9), "R48.1", (289.0, 19.9)])
+    # IO6 goes straight on north past the header's end, between R10 and the first LED's
+    # capacitor, to the driver; its pull-up hangs on a branch
+    top("IO6", 21, 10.05, 270.4, [(270.4, 31.27), "U6.5"])
+    T("IO6", [(270.4, 15.7), (270.7, 15.7), "R48.2"])
+    # the module's SPI, from its resistors to J-UMB: SCLK comes down the tail side of the first LED
+    T("SCLK", ["J6.4", (287.6, 29.77), (287.6, 27.3), (281.26, 20.96), "R1.2"])
     T("MOSI", ["J6.5", (288.3, 27.23), (283.3, 22.23), "R2.2"])
     T("CS_MOD", ["J6.7", (287.49, 22.15), "R3.2"])
     # the breath pair's last step to J-UMB
@@ -497,28 +509,28 @@ def tail():
     T("AGND_SENSE", ["J6.2", "R39.2"])
     T("AGND_SENSE", [(293.25, 34.85), "D6.1"])
     # MIDI out
-    T("MIDI_TIP_DRV", ["U6.6", (271.43, 32.54), "R50.1"])
+    T("MIDI_TIP_DRV", ["U6.6", (264.93, 32.54), "R50.1"])
     T("MIDI_RING_DRV", ["U6.8", "R51.1"])
     T("MIDI_TIP_R", ["R50.2", "FB3.1"])
-    T("MIDI_RING_R", ["R51.2", (268.43, 40.5), (269.88, 41.95), "FB4.1"])
+    T("MIDI_RING_R", ["R51.2", (261.93, 40.5), (263.38, 41.95), "FB4.1"])
     T("MIDI_TIP", ["FB3.2", (279.0, 38.96), (279.44, 39.4), (283.75, 39.4), (285.0, 40.65)])
     T("MIDI_TIP", [(282.9, 39.4), (282.9, 40.0)])
     T("MIDI_RING", ["FB4.2", (278.9, 41.95), (279.55, 42.6), (284.4, 42.6)])
     T("MIDI_RING", ["U12.3", (282.64, 42.6)])
     via("PWR_GND", 281.5, 41.0, "U12.2")
     T("PWR_GND", [(280.55, 40.05), (281.5, 41.0), (280.55, 41.95)])
-    # the LED driver
-    T("GATE_A_OUT", ["U6.3", (270.9, 28.73), (270.9, 21.9), (270.6, 21.6), (266.82, 21.6), "R11.1"])
-    T("LED_DI", ["R11.2", "D8.4"])
-    VIAS.append(("IO2", 270.0, 24.3))
-    T("IO2", [(270.0, 24.3), (270.0, 32.54), "U6.9"])
-    via("IO2", 279.0, 26.6, "R49.2")
-    VIAS.append(("IO1", 275.6, 27.46))
-    T("IO1", ["U6.2", (275.6, 27.46), "R10.1"])
+    # the LED driver. Under its body, between the pin rows: its LED output going south to R11,
+    # and IO2 coming north from a via to pin 9
+    T("GATE_A_OUT", ["U6.3", (265.5, 28.73), (265.2, 28.43), (265.2, 21.9), (264.9, 21.6), (260.69, 21.6), "R11.1"])
+    VIAS.append(("IO2", 264.17, 22.3))
+    T("IO2", [(264.17, 22.3), (264.17, 31.9), (263.53, 32.54), "U6.9"])
+    T("IO2", ["R49.2", "U6.9"])
+    via("DEV_3V3", 256.7, 32.54, "R49.1")
+    VIAS.append(("IO1", 268.3, 27.46))
+    T("IO1", ["U6.2", (268.3, 27.46), (269.1, 26.66), "R10.1"])
     # the even row, bottom face
-    T("IO1", ["J1.12", (261.63, 17.2), (271.89, 27.46), (275.6, 27.46)], FINE, "B")
-    T("IO2", ["J1.16", (264.17, 18.47), (270.0, 24.3)], FINE, "B")
-    T("IO2", [(270.0, 24.3), (272.3, 26.6), (279.0, 26.6)], FINE, "B")
+    T("IO1", ["J1.12", (261.63, 20.79), (268.3, 27.46)], FINE, "B")
+    T("IO2", ["J1.16", (264.17, 22.3)], FINE, "B")
     T("U0TXD", ["J1.22", (267.98, 14.2), (269.38, 15.6), (287.6, 15.6)], FINE, "B")
     T("U0RXD", ["J1.18", (265.44, 14.0), (267.84, 16.4), (288.2, 16.4), (288.8, 15.8), (288.8, 10.45),
                 (287.75, 9.4)], FINE, "B")
@@ -543,12 +555,15 @@ def tail():
     T("CHAIN_SER_LH", ["R36.2", (255.2, 25.36), "R37.1"])
     VIAS.append(("CHAIN_SER_LH", 255.2, 25.36))
     # the chain's return to J-MCU pin 24, on top under the three bodies to a via beyond them
-    T("CHAIN_QH_RT", ["J1.24", (269.25, 20.8), (268.95, 21.1), (262.0, 21.1), (258.65, 24.45), (246.35, 24.45),
-                      (245.6, 25.2)])
+    T("CHAIN_QH_RT", ["J1.24", (269.25, 20.8), (268.95, 21.1), (258.4, 21.1), (258.1, 21.4), (258.1, 24.0),
+                      (257.65, 24.45), (246.35, 24.45), (245.6, 25.2)])
     VIAS.append(("CHAIN_QH_RT", 245.6, 25.2))
 
 
-LED_X0, LED_PITCH = 262.98, 19.869     # D8's centre, and the step toward the mouth to each next LED
+LED_PITCH = 19.869                     # the step toward the mouth from each LED to the next
+# D8 stands in the row's tail-end place, D9 two steps toward the mouth: the place between them
+# is the Matrix ribbon's, and empty
+LED_X = {"D8": 282.85, **{f"D{9 + k}": 243.111 - LED_PITCH * k for k in range(12)}}
 
 
 def leds():
@@ -557,14 +572,25 @@ def leds():
     row of data pads. The second starts at the same data pad, runs under that LED between its
     two columns of pads, comes out on the far side over the unused pad, and drops to the row
     of backup pads. So two lines lie in every gap, one on each row, and none cross."""
-    x = {f"D{8 + k}": LED_X0 - LED_PITCH * k for k in range(13)}
+    x = LED_X
     nets = [("LED_DI", None, "D8", "D9")] + [(f"LED_D{k}", f"D{7 + k}", f"D{8 + k}", f"D{9 + k}") for k in range(1, 13)]
+    # round the first LED, which stands beyond the driver: each of its two lines takes a lane
+    # under the driver on the bottom face. The driver's output goes north from R11 to a via,
+    # and on along the top to the second LED's backup pad
+    T("LED_DI", ["R11.2", (259.3, 30.65), (259.0, 30.95), (246.41, 30.95), "D9.6"])
+    VIAS.append(("LED_DI", 259.3, LANE_DI))
+    T("LED_DI", [(259.3, LANE_DI), (280.45, LANE_DI), (283.3, 26.9)], SIG, "B")
+    via("LED_DI", 283.3, 26.9, "D8.4")
+    via("LED_D1", 278.45, 26.9, "D8.3")
+    T("LED_D1", [(278.45, 26.9), (276.3, LANE_D1), (258.0, LANE_D1)], SIG, "B")
+    VIAS.append(("LED_D1", 258.0, LANE_D1))
+    T("LED_D1", [(258.0, LANE_D1), (255.85, 26.9), "D9.4"])
     for net, a, b, c in nets:
         if net == "LED_D12":     # the analog island reaches under the reference here: round its corner
             T(net, ["D19.3", (36.0, 26.9), (35.2, 27.7), (28.8, 27.7), (28.0, 26.9), "D20.4"])
-        elif a:
+        elif a and a != "D8":
             T(net, [f"{a}.3", f"{b}.4"])
-        if c not in x or c == "D21":
+        if c not in x or c == "D21" or b == "D8":
             continue
         xb = x[b]
         over = [(xb + 1.2, 26.9), (xb + 1.2, 30.15), (xb + 0.4, 30.95)]
@@ -731,7 +757,7 @@ def v3():
     VIAS.append(("DEV_3V3", 215.0, 30.9))
     T("DEV_3V3", [(215.0, 30.9), (216.5, 30.9), "R30.1"])
     # north of the right header
-    T("DEV_3V3", [(264.0, 28.4), (264.0, 34.6), (263.3, 35.3), (191.55, 35.3), (190.85, 36.0), (190.85, 44.6)], W, "B")
+    T("DEV_3V3", [(256.7, TRUNK), (256.7, 34.6), (256.0, 35.3), (191.55, 35.3), (190.85, 36.0), (190.85, 44.6)], W, "B")
     VIAS.append(("DEV_3V3", 190.85, 44.6))
     T("DEV_3V3", [(190.85, 44.6), (190.85, 46.0), (190.55, 46.3), (176.24, 46.3), (175.94, 46.0), "FB2.1"])
     for x, r in ((222.5, "R24.1"), (212.5, "R26.1")):
@@ -744,24 +770,21 @@ def planes_in():
     beside it, on the side nothing passes: one via per pad, or one between two pads that
     face each other."""
     G, P12 = "PWR_GND", "INST_POS12"
-    x = {f"D{8 + k}": LED_X0 - LED_PITCH * k for k in range(13)}
+    x = LED_X
     cap = {"D8": "C26", "D9": "C27", "D10": "C28", "D11": "C29", "D12": "C30", "D13": "C31", "D14": "C32",
            "D15": "C33", "D16": "C34", "D17": "C35", "D18": "C36"}
     for d, xb in x.items():
-        if d == "D8":                                               # the 3V3 trunk passes under here: a step north
-            T(G, ["D8.5", (265.8, 28.5), (266.6, 29.3)], PWR)
-            VIAS.append((G, 266.6, 29.3))
-        else:
-            via(G, xb + 3.6, 28.5, f"{d}.5", PWR)                   # the LED's ground pad, toward the tail
+        via(G, xb + 3.6, 28.5, f"{d}.5", PWR)                       # the LED's ground pad, toward the tail
         if d in cap:                                                # its capacitor a step toward the mouth
             T(P12, [f"{cap[d]}.1", f"{d}.2"], PWR)
-            VIAS.append((P12, xb - 4.0, 28.5))
-            if d != "D8":
+            if d == "D8":                                           # ...the first LED's beyond the surge diode
+                VIAS.append((P12, 278.5, 28.5))
+                via(G, 271.45, 26.75, "C26.2", PWR)
+            else:
+                VIAS.append((P12, xb - 4.0, 28.5))
                 via(G, xb - 8.6, 28.5, f"{cap[d]}.2", PWR)
     T(G, ["D8.5", "D8.6"], PWR)
-    # the first LED's capacitor and C45 beside it share a ground via; C45's 12 V has its own
-    T(G, ["C45.2", (254.25, 28.5), "C26.2"], PWR)
-    VIAS.append((G, 254.25, 28.5))
+    via(G, 254.25, 28.5, "C45.2", PWR)
     via(P12, 250.0, 28.5, "C45.1", PWR)
     # the two LEDs at the analog island, whose capacitors stand north of them
     T(P12, ["D20.2", (23.6, 28.5), "C38.1"], PWR)
@@ -794,21 +817,23 @@ def planes_in():
     T(G, [(167.5, 30.9), (167.5, 32.98), "C14.2"], PWR)
     T(G, ["U8.11", (167.59, 33.51), "C14.2"])
     via(G, 172.68, 34.4, "U8.15", PWR)
-    # the tail end. The LEDs' level shifter: its two ground pins side by side share the first
-    # LED's via, the others one each on the side no line passes
+    # the tail end. The LED driver: pins 12 and 13 share a via under the body, the others
+    # one each, all clear of the three lanes on the bottom face
     T(G, ["U6.13", "U6.12"])
-    T(G, ["U6.12", (267.17, 28.73), (266.6, 29.3)])
-    via(G, 266.7, 31.27, "U6.10")
-    via(G, 275.1, 30.0, "U6.4")
-    via(G, 275.1, 33.81, "U6.7")
-    VIAS.append((G, 273.38, 24.49))                                 # between pin 1 and R10's ground end
-    T(G, ["U6.1", (273.38, 24.49), "R10.2"])
-    via(G, 270.0, 22.65, "C12.2", PWR)
+    via(G, 263.4, 27.46, "U6.13")
+    via(G, 263.4, 31.27, "U6.10")
+    VIAS.append((G, 268.5, 30.5))
+    T(G, ["U6.4", (268.0, 30.0), (268.5, 30.5)])
+    via(G, 268.6, 33.81, "U6.7")
+    VIAS.append((G, 266.88, 24.5))                                  # between pin 1 and R10's ground end
+    T(G, ["U6.1", (266.88, 24.5), (267.49, 23.89), "R10.2"])
+    VIAS.append((G, 260.75, 23.2))
+    T(G, ["C12.2", (261.3, 22.65), (260.75, 23.2)], PWR)
     VIAS.append((G, 277.0, 17.99))                                  # U1's ground pin is shut in by IO35 and IO36: a via in the pad
-    via(P12, 282.2, 28.95, "C46.1", PWR)
-    via(G, 282.1, 27.05, "C46.2", PWR)
-    T(G, [(282.1, 27.05), (283.0, 27.05)], PWR)                     # ...which is the clamp's second (#8-6)
-    via(G, 285.4, 27.6, "D3.2", PWR)
+    via(P12, 272.3, 34.2, "C46.1", PWR)
+    via(G, 275.55, 35.6, "C46.2", PWR)
+    via(G, 276.35, 24.6, "D3.2", PWR)                               # the clamp's two (#8-6)
+    via(G, 274.5, 26.5, "D3.2", PWR)
     via(G, 283.6, 45.0, "J7.3", PWR)
     via(G, 290.4, 12.6, "J2.3", PWR)
     VIAS.append((G, 291.6, 19.61))                                  # in the net tie's own pad: bare copper, no solder

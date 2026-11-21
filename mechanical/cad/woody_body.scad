@@ -1194,8 +1194,8 @@ sensor_room = under_keys(sensor_c, [boards_sensor_body, boards_sensor_leads]) ? 
 // centreline, between the thumb switches' two rows of pins, at ONE pitch, with EQUAL
 // margins to the main board's two ends - the owner: "all the 14 LEDs equidistant from
 // board extents, and rework all components around them" - and lighting.led_count LEDs in
-// them from the mouth end, the tail-end place left empty since the second amendment ("Keep
-// current layout, remove bottom one"). The slots set the pitch, the count fills them. The even tiling - half a pitch
+// all of them but one, lighting.led_empty_slot: the place the Matrix ribbon rises over (the
+// amendment of 2026-11-20). The slots set the pitch, the count fills them. The even tiling - half a pitch
 // at each end - is the aim (led_p_even); the breath sensor at the mouth end is the one
 // thing that holds an LED off it (its courtyard, which an LED's must clear by
 // boards.board_clear), so the mouth-end margin is the larger of the two and the tail end
@@ -1213,8 +1213,10 @@ led_lo = sensor_c[0] + boards_sensor_lead_row / 2 + boards_board_clear + lightin
 led_hi = ju_tail_x - 2.54 / 2 - boards_board_clear - lighting_led_court[0] / 2;                        // short of J-UMB's pads
 led_margin = max(led_p_even / 2, led_lo - mb_ends[0]);        // the same at both ends
 led_pitch = (mb_ends[1] - mb_ends[0] - 2 * led_margin) / (led_slots - 1);
-// LED n in slot n + (led_slots - led_n), slot 1 at the tail end: the empty slots are the tail's
-function led_xy(n) = [mb_ends[1] - led_margin - (n - 1 + led_slots - led_n) * led_pitch, led_y];
+// Slot 1 is the tail-end place. LED n stands in slot n, stepping over the empty one.
+led_empty = lighting_led_empty_slot;
+function led_slot(n) = n < led_empty ? n : n + 1;
+function led_xy(n) = [mb_ends[1] - led_margin - (led_slot(n) - 1) * led_pitch, led_y];
 // J-MCU's place is ONE config figure, boards.mcu_conn_at [x, y, facing]: its insulator's
 // centre and the way its mouth faces (0 toward the tail, 90 toward the far side, 270 the
 // near side). Off the LED row since 2026-10-03 (the owner: "This connector needs moved to the
@@ -1880,9 +1882,9 @@ module drc_report() {
         drc(undef, "equal bands (mouth = between hands)", band,
             str("mm each; set by the ", band == mouth_req ? "mouth end" : "minimum gap",
                 " - mouth needs ", mouth_req, ", gap minimum ", layout_gap, "; the tail is sized on its own"));
-    drc(led_xy(led_n)[0] >= led_lo - 1e-6 && led_xy(1)[0] <= led_hi + 1e-6, "LED row on the main board",
-        [led_n, led_slots, led_pitch, led_margin, led_xy(led_n)[0], led_xy(1)[0], [led_lo, led_hi], led_p_even],
-        "LEDs and the places the row is laid out for (ADR 0028, amended 2026-10-03: one row, equal margins to the board's ends; the tail-end places empty), their pitch, the margin from each end to the end place, the mouth-end (LED led_count) and tail-end (LED 1) centres along the body, the span their centres may take (past the breath sensor's courtyard + board_clear, short of J-UMB's pads + board_clear), and the even tiling's pitch (half a pitch at each end), which the sensor's bound overrides at the mouth");
+    drc(led_xy(led_n)[0] >= led_lo - 1e-6 && led_xy(1)[0] <= led_hi + 1e-6 && led_slots == led_n + 1 && led_empty >= 1 && led_empty <= led_slots, "LED row on the main board",
+        [led_n, led_slots, led_empty, led_pitch, led_margin, led_xy(led_n)[0], led_xy(1)[0], [led_lo, led_hi], led_p_even],
+        "LEDs, the places the row is laid out for and the one place left empty, counted from the tail (ADR 0028, amended 2026-10-03: one row, equal margins to the board's ends; 2026-11-20: the empty place is the Matrix ribbon's), their pitch, the margin from each end to the end place, the mouth-end (LED led_count) and tail-end (LED 1) centres along the body, the span their centres may take (past the breath sensor's courtyard + board_clear, short of J-UMB's pads + board_clear), and the even tiling's pitch (half a pitch at each end), which the sensor's bound overrides at the mouth");
     // EVERY LED CLEAR OF ITS NEIGHBOURS (ADR 0028 amendment, 2026-10-03): each courtyard on
     // the board and boards.board_clear clear of J-MCU and the regulator block; clear of the
     // mounts' nut keep-outs and HDR-SERVICE's pads. Its 100 nF is the layout's (layout.yaml led_caps).
