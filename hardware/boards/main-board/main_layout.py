@@ -358,23 +358,19 @@ def breath_pair():
     """STAGE 1: THE BREATH PAIR, bottom face, the buffer's output and its AGND leg side by side
     from the buffer along the far edge to their series resistors at J-UMB, over an AGND strip
     in layer 3. The signal is the far-side line, so the AGND leg is between it and every key.
-    Round each far mount both step inboard at 45 degrees, pass under it and step back. Two
-    mounts with nothing between them at that level share one step, and after the last mount
-    the pair stays inboard to its resistors."""
+    Round each far mount both step inboard at 45 degrees, pass under it and step back."""
     ya, yo = PAIR_Y
     sig = [(16.6, 28.4), (16.6, yo - 0.3), (16.9, yo)]
     ret = [(17.9, 27.41), (17.9, 28.6), (17.1, 29.4), (17.1, ya - 0.3), (17.4, ya)]
-    lo, bo = 42.7, 1.33                       # the signal's line under a mount, and its half-length there
-    la, ba = 42.2, 1.53
-    m = MOUNTS_FAR
-    for a, b in ((m[0], m[0]), (m[1], m[2])):
-        sig += [(a - bo - (yo - lo), yo), (a - bo, lo), (b + bo, lo), (b + bo + (yo - lo), yo)]
-        ret += [(a - ba - (ya - la), ya), (a - ba, la), (b + ba, la), (b + ba + (ya - la), ya)]
-    # in under the last mount and on at that level, then past H11's mouth side to the
-    # resistors: the AGND leg inside the turn, so it arrives on the mouth side of the signal's
-    # via and steps in under it
-    sig += [(m[3] - bo - (yo - lo), yo), (m[3] - bo, lo), (278.6 - (lo - 41.0), lo), (278.6, 41.0), (278.6, 37.39)]
-    ret += [(m[3] - ba - (ya - la), ya), (m[3] - ba, la), (277.9 - (la - 40.5), la), (277.9, 40.5), (277.9, 35.55), (278.6, 34.85)]
+    for cx in MOUNTS_FAR:
+        lo, bo = 42.7, 1.33                   # the signal's line under the mount, and its half-length there
+        la, ba = 42.2, 1.53
+        sig += [(cx - bo - (yo - lo), yo), (cx - bo, lo), (cx + bo, lo), (cx + bo + (yo - lo), yo)]
+        ret += [(cx - ba - (ya - la), ya), (cx - ba, la), (cx + ba, la), (cx + ba + (ya - la), ya)]
+    # down past H11's mouth side to the resistors: the AGND leg inside the turn, so it arrives
+    # on the mouth side of the signal's via and steps in under it
+    ret += [(271.3, ya), (277.9, 40.5), (277.9, 35.55), (278.6, 34.85)]
+    sig += [(271.3 + 0.707, yo), (278.6, yo - (278.6 - 271.3 - 0.707)), (278.6, 37.39)]
     T("SENSOR_BUFFERED_OUT", sig, SIG, "B")
     T("AGND_INST", ret, SIG, "B")
     via("SENSOR_BUFFERED_OUT", 278.6, 37.39, "R38.1")
