@@ -291,7 +291,7 @@ scripts:
                            hardware/boards/main-board/main-board.kicad_pcb, hardware/boards/main-board/layout.yaml,
                            hardware/boards/key-board-lh/key-board-lh.kicad_pcb, hardware/boards/key-board-lh/layout.yaml,
                            hardware/boards/key-board-rh/key-board-rh.kicad_pcb, hardware/boards/key-board-rh/layout.yaml,
-                           datasheets/led/WS2815B-5050-3D.step, datasheets/mechanical/GATERON-KS-33-3D.step,
+                           datasheets/led/WS2815B-5050-3D.step, datasheets/mechanical/GATERON-KS-33-3D.step, datasheets/connectors/JST-S3B-PH-SM4-TB-3D.step,
                            hardware/lib/woody.3dshapes/Hanxia_HX_PZ2.54-1x8P_WZ.step, hardware/lib/woody.3dshapes/NXP_Case1351-01_MPXV4006DP.step,
                            hardware/lib/woody.3dshapes/Samtec_SHF-106-01-L-D-RA.step, hardware/lib/woody.3dshapes/XKB_X1270WR-2x12A-9TV01.step,
                            mechanical/module/blender/studio_small_08_1k.hdr,
@@ -353,6 +353,70 @@ scripts:
     out: mechanical/renders/photo-underside.png
     stamp: Woody body
     note: "Sides rendered clear (config/render.yaml side_glass) to show the inside; the instrument's sides are frosted (ADR 0009)."
+    layout_sensitive: true
+  - name: photo-lit-frosted
+    title: "The light study: the LED row lit white in a dark room, the sides frosted as the instrument has them - what reaches the near side shows on it. Ribbons out"
+    cmd: [tools/render-instrument.py, --view, lit-frosted]
+    inputs: *photo_inputs
+    out: mechanical/renders/photo-lit-frosted.png
+    stamp: Woody body
+    note: "Sides frosted, as built (ADR 0009). The sheet's diffusion and the LEDs' level are picture conventions, not measurements."
+    layout_sensitive: true
+  - name: photo-lit-frosted-ribbons
+    title: "The light study, sides frosted, with the ribbons in"
+    cmd: [tools/render-instrument.py, --view, lit-frosted-ribbons]
+    inputs: *photo_inputs
+    out: mechanical/renders/photo-lit-frosted-ribbons.png
+    stamp: Woody body
+    note: "Sides frosted, as built (ADR 0009). The sheet's diffusion and the LEDs' level are picture conventions, not measurements."
+    layout_sensitive: true
+  - name: photo-lit-clear
+    title: "The light study: the LED row lit white in a dark room, the sides clear smoke - what stands in the light shows. Ribbons out"
+    cmd: [tools/render-instrument.py, --view, lit-clear]
+    inputs: *photo_inputs
+    out: mechanical/renders/photo-lit-clear.png
+    stamp: Woody body
+    note: "Sides rendered clear to show the inside; the instrument's sides are frosted (ADR 0009). The LEDs' level is a picture convention."
+    layout_sensitive: true
+  - name: photo-lit-clear-ribbons
+    title: "The light study, sides clear smoke, with the ribbons in"
+    cmd: [tools/render-instrument.py, --view, lit-clear-ribbons]
+    inputs: *photo_inputs
+    out: mechanical/renders/photo-lit-clear-ribbons.png
+    stamp: Woody body
+    note: "Sides rendered clear to show the inside; the instrument's sides are frosted (ADR 0009). The LEDs' level is a picture convention."
+    layout_sensitive: true
+  - name: photo-lit-frosted-far
+    title: "The light study: the LED row lit white in a dark room, the sides frosted as the instrument has them - what reaches the far side shows on it. Ribbons out, from the far side"
+    cmd: [tools/render-instrument.py, --view, lit-frosted-far]
+    inputs: *photo_inputs
+    out: mechanical/renders/photo-lit-frosted-far.png
+    stamp: Woody body
+    note: "Sides frosted, as built (ADR 0009). The sheet's diffusion and the LEDs' level are picture conventions, not measurements."
+    layout_sensitive: true
+  - name: photo-lit-frosted-ribbons-far
+    title: "The light study, sides frosted, with the ribbons in, from the far side"
+    cmd: [tools/render-instrument.py, --view, lit-frosted-ribbons-far]
+    inputs: *photo_inputs
+    out: mechanical/renders/photo-lit-frosted-ribbons-far.png
+    stamp: Woody body
+    note: "Sides frosted, as built (ADR 0009). The sheet's diffusion and the LEDs' level are picture conventions, not measurements."
+    layout_sensitive: true
+  - name: photo-lit-clear-far
+    title: "The light study: the LED row lit white in a dark room, the sides clear smoke - what stands in the light shows. Ribbons out, from the far side"
+    cmd: [tools/render-instrument.py, --view, lit-clear-far]
+    inputs: *photo_inputs
+    out: mechanical/renders/photo-lit-clear-far.png
+    stamp: Woody body
+    note: "Sides rendered clear to show the inside; the instrument's sides are frosted (ADR 0009). The LEDs' level is a picture convention."
+    layout_sensitive: true
+  - name: photo-lit-clear-ribbons-far
+    title: "The light study, sides clear smoke, with the ribbons in, from the far side"
+    cmd: [tools/render-instrument.py, --view, lit-clear-ribbons-far]
+    inputs: *photo_inputs
+    out: mechanical/renders/photo-lit-clear-ribbons-far.png
+    stamp: Woody body
+    note: "Sides rendered clear to show the inside; the instrument's sides are frosted (ADR 0009). The LEDs' level is a picture convention."
     layout_sensitive: true
 
 # THE FABRICATION FILES, continued (issue #42): tools/fab.py makes each folder's

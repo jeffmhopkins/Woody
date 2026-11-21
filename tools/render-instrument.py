@@ -349,6 +349,11 @@ SHELL = ["oak top", "oak bottom", "side left", "side right", "mouth cap", "tail 
 # (PICTURE CONVENTIONS: a direction from the subject, a lens, and the box in
 # model mm it frames - None frames everything drawn), the picture's size, and
 # whether the LED row is lit.
+# What the four light-study views share. PICTURE CONVENTIONS: the camera, the room at a
+# twelfth of the studio's light, the exposure, the LEDs' level.
+LIT = dict(explode=None, cam=(-0.16, -1.0, 0.20), lens=60, frame=None, size=(1920, 1080), leds=True,
+           led_white=True, led_strength=40.0, room=0.08, exposure=1.2)
+LIT_FAR = (0.16, 1.0, 0.20)     # the near view's camera, turned about the instrument to face the far side
 VIEWS = {
     "hero": dict(hide=["ribbons"], explode=None,
                  cam=(-0.62, -1.0, 0.40), lens=60, frame=None, size=(1920, 1080), leds=False),
@@ -368,6 +373,20 @@ VIEWS = {
                        cam=(0.75, -0.95, 0.85), lens=55, frame=((205, 2, 5), (326, 55, 30)), size=(1920, 1080), leds=True),
     "underside": dict(hide=["oak bottom", "ribbons"], explode=None,
                       cam=(-0.35, -0.55, -1.0), lens=50, frame=((100, 0, 0), (326, 57, 39)), size=(1920, 1080), leds=False),
+    # THE LIGHT STUDY (owner, 2026-11-20: "how the patterns of the LEDs actually contribute to
+    # lighting inside the instrument"): the whole instrument assembled, from the near side, the
+    # room nearly dark, every LED of the row white at one level. Twice over: the sides frosted as
+    # the instrument has them, so what reaches a side shows on it, and clear smoke, so what
+    # stands in the light shows; each with the ribbons in and with them out.
+    "lit-frosted": dict(hide=["ribbons"], side="frosted-lit", **LIT),
+    "lit-frosted-ribbons": dict(hide=[], side="frosted-lit", **LIT),
+    "lit-clear": dict(hide=["ribbons"], side="clear-smoke", **LIT),
+    "lit-clear-ribbons": dict(hide=[], side="clear-smoke", **LIT),
+    # ...and the same four from the far side
+    "lit-frosted-far": dict(hide=["ribbons"], side="frosted-lit", **{**LIT, "cam": LIT_FAR}),
+    "lit-frosted-ribbons-far": dict(hide=[], side="frosted-lit", **{**LIT, "cam": LIT_FAR}),
+    "lit-clear-far": dict(hide=["ribbons"], side="clear-smoke", **{**LIT, "cam": LIT_FAR}),
+    "lit-clear-ribbons-far": dict(hide=[], side="clear-smoke", **{**LIT, "cam": LIT_FAR}),
 }
 
 
@@ -406,6 +425,24 @@ def principled(name, color, rough, metal=0.0, **kw):
 
 def nodes(m):
     return m.node_tree.nodes, m.node_tree.links
+
+
+def frosted_lit(name):
+    """The frosted side for the light study: a sheet that passes light DIFFUSELY (a
+    translucent lobe, which the renderer can aim at the LEDs, where rough glass cannot)
+    under the same grey surface. What shows on its outside is the light falling on its
+    inside. PICTURE CONVENTION: the split and the tint, not a measured sheet."""
+    m = principled(name, "#4A4D52", 0.48)
+    N, Lk = nodes(m)
+    tr = N.new("ShaderNodeBsdfTranslucent")
+    tr.inputs["Color"].default_value = srgb("#B4B8BE")
+    mix = N.new("ShaderNodeMixShader")
+    mix.inputs["Fac"].default_value = 0.75
+    out = next(n for n in N if n.type == "OUTPUT_MATERIAL")
+    Lk.new(N["Principled BSDF"].outputs["BSDF"], mix.inputs[1])
+    Lk.new(tr.outputs["BSDF"], mix.inputs[2])
+    Lk.new(mix.outputs["Shader"], out.inputs["Surface"])
+    return m
 
 
 def brushed(name, color, rough, aniso):
@@ -565,7 +602,9 @@ class Mats:
         self.zinc = principled("zinc-plated steel", "#AEB2B6", 0.34, 1.0)
         # THE SIDES ARE FROSTED in the instrument (ADR 0009 'Finishes'); these
         # photographs draw them clear on purpose (config/render.yaml render.side_glass)
-        if side_glass == "clear-smoke":
+        if side_glass == "frosted-lit":
+            self.side = frosted_lit("frosted acrylic, dark grey, lit from inside")
+        elif side_glass == "clear-smoke":
             self.side = principled("acrylic, clear smoke (render only)", "#B3B8BE", 0.02, 0.0, **{"Transmission Weight": 1.0, "IOR": 1.49})
         else:
             self.side = principled("frosted acrylic, dark grey", "#4A4D52", 0.48, 0.0, **{"Transmission Weight": 0.7, "IOR": 1.49})
@@ -591,8 +630,8 @@ class Mats:
               "U-bolt nut *", "U-bolt washer *", "U-bolt spacer *"], M.zinc),
             (["cap *", "cap socket *"], M.keycap),
             (["IDC plug *", "etherCON", "USB-C plug", "USB-C receptacle", "Matrix USB-C receptacle", "Matrix harness *",
-              "Matrix header *", "J-MCU-C"], M.black),
-            (["ribbon *", "Matrix ribbon", "USB-C lead"], M.ribbon),
+              "Matrix header *", "J-MCU-C", "MIDI jack*"], M.black),
+            (["ribbon *", "Matrix ribbon", "USB-C lead", "MIDI lead"], M.ribbon),
             (["breath *"], M.silicone),
             (["Matrix board", "Matrix underside parts", "Matrix carrier"], M.matrix_pcb), (["Matrix LEDs"], M.matrix_led),
             (["Matrix carrier *"], M.zinc),     # its spacers, washers, inserts and screws
@@ -736,7 +775,7 @@ def import_board(name, glb):
     return root, body
 
 
-def led_glow(root, name, lit):
+def led_glow(root, name, lit, white=False, strength=7.0):
     """The WS2815s: each LED's lens is the yellowish material of its model. Lit,
     each glows its own colour along the row (PICTURE CONVENTION: a soft
     teal-to-violet sweep), so the row reads as RGB."""
@@ -754,8 +793,8 @@ def led_glow(root, name, lit):
             col = c.data.materials[0].node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value
             if not (col[0] > 0.8 and col[2] < col[0] - 0.15):
                 continue
-            rgb = colorsys.hsv_to_rgb(0.48 + 0.30 * i / max(1, len(xs) - 1), 0.85, 1.0)
-            kw = {"Emission Color": (*rgb, 1.0), "Emission Strength": 7.0} if lit else {"Transmission Weight": 0.5}
+            rgb = (1.0, 1.0, 1.0) if white else colorsys.hsv_to_rgb(0.48 + 0.30 * i / max(1, len(xs) - 1), 0.85, 1.0)
+            kw = {"Emission Color": (*rgb, 1.0), "Emission Strength": strength} if lit else {"Transmission Weight": 0.5}
             c.data.materials.clear()
             c.data.materials.append(principled(f"LED {r}", (0.9, 0.9, 0.85, 1.0), 0.15, 0.0, **kw))
             lenses += 1
@@ -772,7 +811,7 @@ def build(view, sdir, solids, boards):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     sc = bpy.context.scene
     sc.unit_settings.system = "METRIC"
-    M = Mats(cfg_value(cfg, "render.side_glass"), branding_colours())
+    M = Mats(V.get("side") or cfg_value(cfg, "render.side_glass"), branding_colours())
 
     members = {g: [] for g in GROUPS}
     drawn = {}
@@ -816,7 +855,7 @@ def build(view, sdir, solids, boards):
         root.location.z = ((cad_board[0][2] + cad_board[1][2]) - (lo[2] + hi[2])) / 2 * MM   # mid-planes together
         print(f"render-instrument: {name} at z {cad_board[0][2]:.2f} mm, plan agrees with the body CAD to {max(off):.3f} mm", flush=True)
         if name == "main-board":
-            nleds = led_glow(root, name, V["leds"])
+            nleds = led_glow(root, name, V["leds"], V.get("led_white", False), V.get("led_strength", 7.0))
         members[g].append(root)
 
     # the explode (config/render.yaml), every group it names checked against GROUPS
@@ -873,7 +912,7 @@ def setup(sc, members, view, preview):
     sc.cycles.seed = 0
     sc.view_settings.view_transform = "AgX"
     sc.view_settings.look = "AgX - Medium High Contrast"
-    sc.view_settings.exposure = -0.3 if V["leds"] else 0.3
+    sc.view_settings.exposure = V.get("exposure", -0.3 if V["leds"] else 0.3)
     sc.render.image_settings.file_format = "PNG"
     sc.render.image_settings.color_depth = "8"
     sc.render.film_transparent = False
@@ -897,7 +936,7 @@ def setup(sc, members, view, preview):
     Lk.new(tc.outputs["Generated"], mp.inputs["Vector"])
     Lk.new(mp.outputs["Vector"], env.inputs["Vector"])
     probe = N.new("ShaderNodeBackground")
-    probe.inputs["Strength"].default_value = 0.08 if V["leds"] else 0.6 if V["cam"][2] < 0 else 0.25
+    probe.inputs["Strength"].default_value = (V["room"] if "room" in V else 0.08 if V["leds"] else 0.6 if V["cam"][2] < 0 else 0.25)
     Lk.new(env.outputs["Color"], probe.inputs["Color"])
     plain = N.new("ShaderNodeBackground")
     plain.inputs["Color"].default_value = srgb("#2a2a2d")
@@ -923,7 +962,7 @@ def setup(sc, members, view, preview):
         o.rotation_euler = (c - o.location).normalized().to_track_quat("-Z", "Y").to_euler()
     # picture: a big soft key from the upper front-left, a cool rim from behind,
     # a warm low fill, and a strip overhead to draw a highlight along the oak
-    k = 0.25 if V["leds"] else 1.0
+    k = V["room"] if "room" in V else 0.25 if V["leds"] else 1.0
     area("key", (-0.30, -0.40, 0.55), 20 * k, (1.0, 0.96, 0.92), 0.6)
     area("rim", (0.5, 1.6, 1.1), 20 * k, (0.85, 0.92, 1.0), 0.3, 0.9)
     area("fill", (0.35, -0.55, -0.05 if V["cam"][2] > 0 else -0.35), 3 * k, (1.0, 0.93, 0.86), 0.7)

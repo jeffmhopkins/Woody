@@ -51,6 +51,24 @@ picture's footer.
 
 ![The cassette alone, pulled apart in its build order](renders/photo-cassette.png)
 
+### The light study
+
+The LED row lit white at one level in a nearly dark room, the whole instrument
+assembled (owner, 2026-11-20: to see "how the patterns of the LEDs actually
+contribute to lighting inside the instrument"). Frosted sides are the
+instrument's own (ADR 0009) and show what light reaches a side; clear smoke
+sides show what stands in the light. **How far the frosted sheet spreads the
+light and how bright the LEDs are drawn are picture conventions, not
+measurements**: read these for where the shadows fall, and the side-light
+diffusion test (ROADMAP) for how even the sides are.
+
+| | Near side | Far side |
+|---|---|---|
+| Frosted, ribbons in | ![](renders/photo-lit-frosted-ribbons.png) | ![](renders/photo-lit-frosted-ribbons-far.png) |
+| Frosted, ribbons out | ![](renders/photo-lit-frosted.png) | ![](renders/photo-lit-frosted-far.png) |
+| Clear smoke, ribbons in | ![](renders/photo-lit-clear-ribbons.png) | ![](renders/photo-lit-clear-ribbons-far.png) |
+| Clear smoke, ribbons out | ![](renders/photo-lit-clear.png) | ![](renders/photo-lit-clear-far.png) |
+
 ## The maker's mark
 
 ![The maker's mark on the oak top, between the mouth cap and the first key](renders/photo-logo.png)
