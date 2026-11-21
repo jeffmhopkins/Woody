@@ -177,7 +177,7 @@ PLACE.update({
     # the LED driver, pin 1 toward the tail, on the mouth side of the Matrix ribbon's rise. Its
     # LED output leaves under the body to R11; its MIDI outputs leave the far end
     "U6": (264.4, 30.0, ("1", "SE")),
-    "R11": (259.3, 23.9, ("LED_DI", "N")), "C12": (261.93, 23.6, ("INST_5V", "N")),
+    "R11": (265.5, 23.6, ("GATE_A_OUT", "N")), "C12": (261.93, 23.6, ("INST_5V", "N")),
     "R10": (269.1, 24.8, ("IO1", "N")),
     "R51": (261.93, 37.5, ("RING_DRV", "S")), "R50": (264.93, 37.5, ("TIP_DRV", "S")),
     "R49": (258.75, 32.54, ("IO2", "E")),   # IO2's pull-up at the driver's pin, its 3V3 from the line going north there
@@ -245,6 +245,7 @@ PLACE.update({
 })
 LED_CAP_DX = -6.5             # each LED's 100 nF: this far from its LED's centre, in the row, a millimetre between courtyards
 KEEP_CAP = ("C38", "C26")     # the mouth-end LED's stands north of it, off the sensor; the first LED's is beyond the surge diode
+PLACE["C11"] = (237.0, 12.5, ("BUCK_IN", "N"))   # its input pad level with the inductor and the regulator
 PLACE["C38"] = (26.3, 33.0, ("INST_POS12", "W"))
 
 # Every part not named above keeps the place the reviewed board gave it.
@@ -439,8 +440,7 @@ def power():
     # pad, since each carries a supply's pulse current (#8-6)
     two("INST_POS12", 209.5, 20.2)       # C44.1
     two("INST_POS12", 209.5, 13.0)       # C10.1
-    T("BUCK_IN", ["L1.2", (241.5, 17.9), (240.9, 17.3), (240.9, 10.6), (240.1, 9.8), "C11.1",
-                  (231.05, 9.8), "U5.1"], 0.6)
+    T("BUCK_IN", [(244.05, 15.4), (237.0, 15.4), (226.1, 15.4)], 0.6)   # one straight line: inductor, input capacitor, regulator
     T("BUCK_A_OUT", ["U5.3", (219.9, 14.75), (218.52, 16.13), "C43.1", (218.52, 19.5), (219.22, 20.2), (222.4, 20.2),
                      (223.15, 19.45), "C207.2", "U13.3"], 0.5)
     T("BUCK_A_OUT", ["U13.3", (232.16, 18.5), "Q2.2"], 0.5)
@@ -451,7 +451,7 @@ def power():
         via("PWR_GND", x, y, pad, PWR)
     T("PWR_GND", [(222.9, 18.3), (222.9, 17.2)], PWR)
     VIAS.append(("PWR_GND", 222.9, 17.2))
-    two("PWR_GND", 237.0, 17.55, 2.35)   # C11.2
+    two("PWR_GND", 237.0, 12.15, 2.35)   # C11.2, under its body
     two("PWR_GND", 214.9, 20.2)          # C44.2
     two("PWR_GND", 214.9, 13.0)          # C10.2
     # 5 V
@@ -519,7 +519,7 @@ def tail():
     T("PWR_GND", [(280.55, 40.05), (281.5, 41.0), (280.55, 41.95)])
     # the LED driver. Under its body, between the pin rows: its LED output going south to R11,
     # and IO2 coming north from a via to pin 9
-    T("GATE_A_OUT", ["U6.3", (265.5, 28.73), (265.2, 28.43), (265.2, 21.9), (264.9, 21.6), (260.69, 21.6), "R11.1"])
+    T("GATE_A_OUT", ["U6.3", (265.8, 28.73), (265.5, 28.43), "R11.1"])
     VIAS.append(("IO2", 264.17, 22.3))
     T("IO2", [(264.17, 22.3), (264.17, 31.9), (263.53, 32.54), "U6.9"])
     T("IO2", ["R49.2", "U6.9"])
@@ -536,24 +536,30 @@ def tail():
     T("TXD_HDR", ["R46.2", (284.0, 15.01), "J2.1"])
     via("U0RXD", 287.75, 9.4, "J2.2")
     # the odd row, bottom face: under the row, north past the header's mouth end
-    low("IO39", 23, 14.25, 251.95, [(247.5, 18.7), (239.4, 18.7), (235.8, 22.3)] + step("IO39"), 0.0)
-    low("IO7", 19, 14.65, 252.3, [(252.3, 16.6), (251.6, 17.3)])
-    low("IO38", 17, 15.05, 252.7, [(252.7, 18.1), (252.4, 18.4)])
-    low("IO37", 13, 15.45, 253.1, [(253.1, 18.8), (252.8, 19.1), (239.6, 19.1), (236.0, 22.7)] + step("IO37"))
-    low("IO36", 11, 15.85, 253.5, [(253.5, 19.2), (253.2, 19.5), (239.8, 19.5), (236.2, 23.1)] + step("IO36"))
-    low("IO35", 9, 16.25, 253.9, [(253.9, 19.6), (253.6, 19.9), (240.0, 19.9), (236.4, 23.5)] + step("IO35"))
+    # the four lane lines turn once, 45 degrees, from under the row straight into their lanes;
+    # IO7 and IO38 end at vias between them and go north on top to their resistors
+    def lane_in(net, n, y, xc):
+        d = LANE[net] - y
+        T(net, [f"J1.{n}", (jx(n), y + c), (jx(n) - c, y), (xc, y), (xc - d, LANE[net])] + step(net), FINE, "B")
+
+    lane_in("IO39", 23, 14.25, 251.0)
+    lane_in("IO37", 13, 15.45, 253.6)
+    lane_in("IO36", 11, 15.85, 254.0)
+    lane_in("IO35", 9, 16.25, 254.4)
+    low("IO7", 19, 14.65, 251.9, [(251.0, 15.55)], 0.0)
+    low("IO38", 17, 15.05, 252.75, [(252.3, 15.5)], 0.0)
     T("IO33", ["J1.5", (257.825, 16.45), (257.525, 16.15), (254.6, 16.15), (254.3, 16.45), "R36.1"])
-    VIAS.append(("IO7", 251.6, 17.3))
-    T("IO7", [(251.6, 17.3), (251.6, 20.9), (250.7, 21.8), (249.39, 21.8), "R35.1"])
-    VIAS.append(("IO38", 252.4, 18.4))
-    T("IO38", [(252.4, 18.4), (252.4, 21.79), "R34.1"])
+    VIAS.append(("IO7", 251.0, 15.55))
+    T("IO7", [(251.0, 15.55), (251.0, 20.19), "R35.1"])
+    VIAS.append(("IO38", 252.3, 15.5))
+    T("IO38", [(252.3, 15.5), (252.3, 21.89), "R34.1"])
     # the chain's three outputs: a via between the pads, then the bottom face toward the mouth
     via("CHAIN_SHLD", 249.2, 25.81, "R35.2")
     via("CHAIN_SCK", 252.2, 25.81, "R34.2")
     T("CHAIN_SER_LH", ["R36.2", (255.2, 25.81), "R37.1"])
     VIAS.append(("CHAIN_SER_LH", 255.2, 25.81))
     # the chain's return to J-MCU pin 24, on top under the three bodies to a via beyond them
-    T("CHAIN_QH_RT", ["J1.24", (269.25, 20.8), (268.95, 21.1), (258.4, 21.1), (258.1, 21.4), (258.1, 24.45),
+    T("CHAIN_QH_RT", ["J1.24", (269.25, 20.8), (268.95, 21.1), (260.1, 21.1), (258.1, 23.1), (258.1, 24.45),
                       (257.65, 24.9), (246.35, 24.9), (245.6, 25.65)])
     VIAS.append(("CHAIN_QH_RT", 245.6, 25.65))
 
@@ -577,7 +583,7 @@ def leds():
     # round the first LED, which stands beyond the driver: each of its two lines takes a lane
     # under the driver on the bottom face. The driver's output goes north from R11 to a via,
     # and on along the top to the second LED's backup pad
-    T("LED_DI", ["R11.2", (259.3, 30.65), (259.0, 30.95), (246.3, 30.95), "D9.6"])
+    T("LED_DI", ["R11.2", (265.5, 21.9), (265.2, 21.6), (260.4, 21.6), (259.3, 22.7), (259.3, 30.65), (259.0, 30.95), (246.3, 30.95), "D9.6"])
     VIAS.append(("LED_DI", 259.3, LANE_DI))
     T("LED_DI", [(259.3, LANE_DI), (280.45, LANE_DI), (283.3, 26.9)], SIG, "B")
     via("LED_DI", 283.3, 26.9, "D8.4")
