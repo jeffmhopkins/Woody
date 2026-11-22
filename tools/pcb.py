@@ -1929,6 +1929,101 @@ def check_tracks(board):
     return bad
 
 
+def check_joints(board):
+    """HOW TRACKS MEET (owner, 2026-11-22). check_tracks holds the fab's rule, no wedge under
+    90 degrees (IPC-2221's acid trap; KiCad's DRC has no angle test). This holds the rest of
+    what a hand-laid board is drawn to, on one net and one layer:
+      corner    two tracks turn by 45 degrees, never 90 in one step;
+      branch    three or more meet as a T: one line runs straight through and the branch
+                leaves it square, so no Y and no arrowhead;
+      pad       two tracks at one pad run straight through it, turn 45 across it, or stand
+                square on the pad's own axes - never two diagonals closing on its centre;
+      circle    a track that touches a round pad or a via of its net is on a line through
+                the centre, so it neither clips the ring nor turns inside it.
+    A point on a pad's copper is that pad's; a point with no pad is a corner or a branch."""
+    bad = []
+    mm = pcbnew.ToMM
+    tracks = [t for t in board.GetTracks() if type(t) is pcbnew.PCB_TRACK]
+    arms = {}
+    for t in tracks:
+        for e, o in ((t.GetStart(), t.GetEnd()), (t.GetEnd(), t.GetStart())):
+            if (o.x, o.y) != (e.x, e.y):
+                arms.setdefault((t.GetNetname(), t.GetLayer(), e.x, e.y), []).append(
+                    math.degrees(math.atan2(o.y - e.y, o.x - e.x)) % 360)
+    boxes, rounds = [], []
+
+    def at(x, y):
+        return f"({mm(x) - OX:.2f}, {OY - mm(y):.2f})"      # the body frame, as the layout scripts write it
+
+    for fp in board.GetFootprints():
+        for pad in fp.Pads():
+            c = pad.GetPosition()
+            bb = pad.GetBoundingBox()
+            boxes.append((pad.GetNetname(), bb.GetLeft(), bb.GetRight(), bb.GetTop(), bb.GetBottom(),
+                          f"{fp.GetReference()}.{pad.GetNumber()}", pad.GetOrientation().AsDegrees(), [l for l in (pcbnew.F_Cu, pcbnew.B_Cu) if pad.IsOnLayer(l)],
+                          not pad.GetDrillSize().x))
+            sx, sy = pad.GetSize(pcbnew.F_Cu).x, pad.GetSize(pcbnew.F_Cu).y
+            if pad.GetShape(pcbnew.F_Cu) == pcbnew.PAD_SHAPE_CIRCLE or (pad.GetShape(pcbnew.F_Cu) == pcbnew.PAD_SHAPE_OVAL and sx == sy):
+                rounds.append((pad.GetNetname(), None, c.x, c.y, sx / 2, f"{fp.GetReference()}.{pad.GetNumber()}"))
+    vias = set()
+    for v in board.GetTracks():
+        if type(v) is pcbnew.PCB_VIA:
+            c = v.GetPosition()
+            vias.add((c.x, c.y))
+            rounds.append((v.GetNetname(), None, c.x, c.y, v.GetWidth(pcbnew.F_Cu) / 2, "a via"))
+            for k in boxes:     # ADR 0030: no via in a pad - solder runs down it. A through-hole pad is its own hole.
+                if k[8] and not k[5].startswith("NT") and k[1] < c.x < k[2] and k[3] < c.y < k[4]:      # its hole is in the pad; a net tie's pad is bare copper, never soldered
+                    bad.append(f"error: [joints] a {v.GetNetname()} via at {at(c.x, c.y)} stands in {k[5]}'s pad - stand it clear of the pad")
+
+    def gap(a, b):
+        d = abs(a - b) % 360
+        return min(d, 360 - d)
+
+
+    for (net, layer, x, y), angs in sorted(arms.items()):
+        angs = sorted(set(round(a, 1) for a in angs))
+        if len(angs) < 2:
+            continue
+        where = f"{net} on {board.GetLayerName(layer)} at {at(x, y)}"
+        pairs = [gap(a, b) for i, a in enumerate(angs) for b in angs[i + 1:]]
+        on = [k for k in boxes if k[0] == net and layer in k[7] and k[1] <= x <= k[2] and k[3] <= y <= k[4]]
+        if on:                  # anywhere on the pad's copper: a turn the pad covers is the pad's entry
+            name, rot = on[0][5], on[0][6]
+            for i, a in enumerate(angs):
+                for b in angs[i + 1:]:
+                    g = gap(a, b)
+                    square = abs(g - 90) < 1 and all(abs(((k - rot) % 90 + 45) % 90 - 45) < 1 for k in (a, b))
+                    if g < 134 and not square:
+                        bad.append(f"error: [joints] {where}: two tracks close on {name} at {g:.0f} deg - "
+                                   f"give the pad one entry and join them off it, or run straight through it")
+        elif (x, y) in vias:
+            continue            # a via is a circle: its tracks leave its centre, at any angle to each other
+        elif len(angs) == 2:
+            if abs(pairs[0] - 135) > 1 and abs(pairs[0] - 180) > 1:
+                bad.append(f"error: [joints] {where}: a corner of {pairs[0]:.0f} deg - turn by 45 at a time")
+        else:
+            through = [(a, b) for i, a in enumerate(angs) for b in angs[i + 1:] if abs(gap(a, b) - 180) < 1]
+            if not through or any(abs(gap(k, through[0][0]) - 90) > 1 for k in angs if k not in through[0]):
+                bad.append(f"error: [joints] {where}: {len(angs)} tracks meet at {', '.join(f'{p:.0f}' for p in sorted(pairs))} deg - "
+                           f"make it a T: one line straight through, the branch square to it")
+    for net, _, cx, cy, r, name in rounds:
+        for t in tracks:
+            if t.GetNetname() != net:
+                continue
+            a, b = t.GetStart(), t.GetEnd()
+            dx, dy = b.x - a.x, b.y - a.y
+            l2 = dx * dx + dy * dy
+            if not l2:
+                continue
+            k = max(0.0, min(1.0, ((cx - a.x) * dx + (cy - a.y) * dy) / l2))
+            d = math.hypot(a.x + k * dx - cx, a.y + k * dy - cy)
+            off = abs((cx - a.x) * dy - (cy - a.y) * dx) / math.sqrt(l2)
+            if d < r + t.GetWidth() / 2 - 1000 and off > 20000:
+                bad.append(f"error: [joints] {net} on {board.GetLayerName(t.GetLayer())}: a track meets {name} at {at(cx, cy)} "
+                           f"{mm(off):.2f} mm off its centre line - bring it in on a line through the centre")
+    return bad
+
+
 def track_path_mm(board, pa, pb):
     """The shortest route in the net's own tracks and vias from pad pa to pad pb
     (pad objects), in mm, or None: the pour does not count - it is what a signal
@@ -2229,6 +2324,8 @@ def cmd_check(bdir):
     if lay.get("fab"):
         bad += check_silk(board, lay["fab"])
     bad += check_tracks(board)
+    if lay.get("route") is False:      # a board laid out by hand (ADR 0030); the routed module boards are not drawn to it
+        bad += check_joints(board)
     bad += check_title(board, lay)
     bad += check_pair_guard(board, lay)
     bad += check_holes(board, lay)

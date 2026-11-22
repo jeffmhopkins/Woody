@@ -307,8 +307,8 @@ def analog():
     T("REF_MINUS", ["U3.2", (17.4, 24.86), (18.2, 24.06)])
     T("REF_MINUS", ["U3.2", (15.5, 24.86), (13.5, 22.86), "C9.1"])
     # VS: from R-ISO-REF through R-FB-REF's pad, straight up to the sensor's pin and its capacitors
-    T("VS", [(20.5, 21.41), (20.5, 44.95), (19.75, 45.7), (16.22, 45.7), (15.42, 46.5), "U10.2"], PWR)
-    T("VS", [(20.5, 44.95), (21.75, 46.2), "C202.1"], PWR)
+    T("VS", [(20.5, 21.41), (20.5, 45.7), (16.22, 45.7), (15.42, 46.5), "U10.2"], PWR)
+    T("VS", [(20.5, 45.7), (21.25, 45.7), (21.75, 46.2), "C202.1"], PWR)      # a T: the trunk meets one level line square
     T("VS", ["C202.1", "C201.1", "C8.1"], PWR)
     # the reference's input: one bus through the north pads of its parts, then down between
     # C-REF-IN's pads and the reference's own into pin 2
@@ -317,11 +317,11 @@ def analog():
     T("ADC_VDD", ["R47.2", (42.89, 16.3), (42.54, 15.95), (30.47, 15.95), "U2.8"], PWR)
     T("ADC_VDD", [(37.47, 15.95), "C2.1"], PWR)
     T("ADC_VDD", [(32.03, 15.95), "C42.1"], PWR)
-    T("ADC_VDD", [(30.47, 15.95), (29.6, 15.95), "C3.1"], PWR)
+    T("ADC_VDD", [(30.47, 15.95), (30.0, 15.95), (29.6, 16.35), "C3.1"], PWR)
     # 12 V for the buffer, its capacitor at the pin; and for the reference's input resistor
     T("INST_POS12", ["U3.8", (10.6, 23.59), (9.96, 22.95), "C204.1"], PWR)
     via("INST_POS12", 8.9, 24.25, "C204.1", PWR)
-    T("INST_POS12", ["R6.1", (47.5, 22.64), (47.5, 20.6)], PWR)
+    T("INST_POS12", ["R6.1", (47.9, 22.64), (47.5, 22.24), (47.5, 20.6)], PWR)
     via("INST_POS12", 47.5, 20.6)
     # every analog ground pad to the island under it, by its own via
     for pad, x, y in (("U10.3", 12.88, 45.3), ("C203.2", 9.95, 25.55), ("C204.2", 8.9, 19.9), ("U3.4", 17.9, 27.41),
@@ -331,8 +331,8 @@ def analog():
                       ("C202.2", 23.25, 48.35), ("C201.2", 26.25, 48.35), ("C8.2", 29.25, 48.35), ("NT2.1", 31.5, 15.2)):
         via(A, x, y, pad, PWR)
     T(A, ["U2.3", "U2.4"], PWR)
-    T(A, ["D1.2", (45.9, 21.2), (45.9, 20.9)], PWR)
-    via(A, 45.9, 20.9)
+    T(A, ["D1.2", (45.9, 20.3)], PWR)      # one 45 from the pad's centre to the via's
+    via(A, 45.9, 20.3)
     T(A, ["C4.2", (40.76, 21.56), (40.3, 21.1)], PWR)
     via(A, 40.3, 21.1)
     # the one tie: NT-AGND astride the island's edge beside the ADC's digital pins, its plane side
@@ -345,7 +345,7 @@ def analog():
     # one entry at the pull-up's pad (owner, 2026-11-22: no two tracks meeting in a pad): pad, via and
     # the line on toward pin 1 stand in a row, the via level with the pad's centre
     via("IO39", 41.35, 19.55)
-    T("IO39", ["R45.2", (41.35, 19.55), (40.45, 18.65), (27.23, 18.65), (26.58, 18.0), (26.58, 14.76), (25.98, 14.16)])
+    T("IO39", ["R45.2", (41.35, 19.55), (39.85, 19.55), (38.95, 18.65), (27.23, 18.65), (26.58, 18.0), (26.58, 14.76), (25.98, 14.16)])
     via("ADC_CLK", 32.7, 12.88, "U2.7")
     via("IO37", 34.0, 11.62, "U2.6")
     via("ADC_DIN", 33.35, 10.34, "U2.5")
@@ -467,7 +467,7 @@ def power():
     two("INST_POS12", 209.5, 13.0)       # C10.1
     T("BUCK_IN", [(244.05, 15.4), (237.0, 15.4), (226.1, 15.4)], 0.6)   # one straight line: inductor, input capacitor, regulator
     T("BUCK_A_OUT", ["U5.3", (221.02, 17.84), "C43.1", (222.63, 19.45), "C207.2", "U13.3"], 0.5)
-    T("BUCK_A_OUT", ["U13.3", (232.16, 18.5), "Q2.2"], 0.5)
+    T("BUCK_A_OUT", ["U13.3", (232.16, 19.0), (232.66, 18.5), "Q2.2"], 0.5)
     T("BUCK_A_OUT", ["U13.3", (233.0, 19.45), (233.3, 19.75), (233.3, 21.05), (233.6, 21.35), "U13.6"])
     T("USBOR_GATE", ["U13.5", "Q2.1"])
     T("USBOR_VCAP", ["C207.1", "U13.1"])
@@ -495,9 +495,9 @@ def power():
     via("DEV_3V3", 278.4, 21.5, (278.4, 20.25), FINE)
     k3 = LANE["DEV_3V3"]
     # one width for its whole run (owner, 2026-11-22: no stepped track)
-    T("DEV_3V3", [(278.4, 21.5), (271.6, TRUNK), (256.7, TRUNK), (256.7, 22.2), (256.2, 22.2), (256.2 - (k3 - 22.2), k3), (64.2, k3)], 0.3, "B")
+    T("DEV_3V3", [(278.4, 21.5), (271.6, TRUNK), (256.7, TRUNK), (256.7, 22.2), (256.2, 22.2), (256.2 - (k3 - 22.2), k3), (64.7, k3), (64.2, k3 + 0.5)], 0.3, "B")
     VIAS.append(("DEV_3V3", 256.7, 22.2))
-    T("DEV_3V3", ["R37.2", (257.0, 22.5), (256.7, 22.2)])
+    T("DEV_3V3", ["R37.2", (256.7, 23.69), (256.7, 22.2)])      # steps inside its pad, then straight down to the via
 
 
 def tail():
@@ -578,14 +578,15 @@ def tail():
     # the odd row, bottom face: under the row, north past the header's mouth end
     # the four lane lines turn once, 45 degrees, from under the row straight into their lanes;
     # IO7 and IO38 end at vias between them and go north on top to their resistors
+    VIA_RUN = 0.5      # a lane runs this far level with its via before it steps onto its lane: no turn inside the via's ring
     def lane_in(net, n, y, xc):
         d = LANE[net] - y
         pts = [f"J1.{n}", (jx(n), y + c), (jx(n) - c, y), (xc, y), (xc - d, LANE[net])]
         if net in SER:              # the lane stops at a via, crosses its resistor on top, and starts again
             e, w, vy = SER[net]
             k = vy - LANE[net]
-            T(net, pts + [(e + k, LANE[net]), (e, vy)], FINE, "B")
-            T(AFTER[net], [(w, vy), (w - k, LANE[net])] + step(net), FINE, "B")
+            T(net, pts + [(e + VIA_RUN + k, LANE[net]), (e + VIA_RUN, vy), (e, vy)], FINE, "B")
+            T(AFTER[net], [(w, vy), (w - VIA_RUN, vy), (w - VIA_RUN - k, LANE[net])] + step(net), FINE, "B")
             VIAS.extend([(net, e, vy), (AFTER[net], w, vy)])
         else:
             T(net, pts + step(net), FINE, "B")
@@ -766,7 +767,7 @@ def registers():
         if lh:
             T("V3V3_CHAIN_LH", [f"{fb}.2", (X(JX - (FB_Y - y10)), FB_Y), f"{j}.10"])
         else:
-            T("V3V3_CHAIN_RH", [f"{fb}.2", (X(CX - 1.06), FB_TURN), (X(JX - (FB_TURN - y10)), FB_TURN), f"{j}.10"])
+            T("V3V3_CHAIN_RH", [f"{fb}.2", (X(CX - 1.06), FB_TURN + 0.4), (X(CX - 1.06 + 0.4), FB_TURN), (X(JX - (FB_TURN - y10)), FB_TURN), f"{j}.10"])
         # the hop into this register: from the header's pin 8 through its resistor (pre-fab review F1),
         # then one straight line to the clamp's pad 5 with a via on it, and on the bottom face to a via
         # under the register's body. The clamp's channel is the C of the RC, on the register's side
@@ -819,7 +820,7 @@ def v3():
         VIAS.append(("DEV_3V3", x, y))
         T("DEV_3V3", [(x, y)] + top)
     # the left register: one via under pin 16; the row's parts on a bus along their south side
-    T("DEV_3V3", [(64.2, lane(64.2)), (64.2, 32.4), (67.94, 32.4), (69.94, 34.4)], W, "B")
+    T("DEV_3V3", [(64.2, lane(64.2) + 0.5), (64.2, 32.4), (67.94, 32.4), (69.94, 34.4)], W, "B")
     VIAS.append(("DEV_3V3", 69.94, 34.4))
     T("DEV_3V3", [(69.94, 34.4), "U7.16"])
     T("DEV_3V3", ["U7.16", (70.115, 36.2), "C13.1"])
@@ -828,12 +829,12 @@ def v3():
     T("DEV_3V3", [(66.14, 32.0), "C206.1"])
     T("DEV_3V3", ["C206.1", "U7.13"])
     # ...and round the hop's via to the far side: the far key's pull-up and the header's bead
-    T("DEV_3V3", [(64.2, 32.4), (61.9, 32.4), (61.2, 33.1), (61.2, 42.8), (61.9, 43.5), (68.1, 43.5), (68.5, 43.9), (68.6, 44.0), (70.9, 44.0)], W, "B")
-    via("DEV_3V3", 68.5, 43.9, "R14.1")
+    T("DEV_3V3", [(64.2, 32.4), (61.9, 32.4), (61.2, 33.1), (61.2, 42.8), (61.9, 43.5), (68.0, 43.5), (68.5, 44.0), (70.9, 44.0)], W, "B")
+    via("DEV_3V3", 68.5, 44.0, "R14.1")
     VIAS.append(("DEV_3V3", 70.9, 44.0))   # south of the breath pair's strip; up past the hop's resistor to the bead
     T("DEV_3V3", [(70.9, 44.0), (70.9, FB_Y - 1.04), "FB1.1"])
     # the left hand's other pull-ups
-    tap(80.2, 30.9, [(80.2, 31.05), "R12.1"])
+    tap(78.75, 31.09, ["R12.1"])      # the via stands beside the pad, level with it, not in it
     tap(89.81, 30.9, ["R18.1"])
     tap(117.4, 30.9, [(117.4, 42.69), "R16.1"])
     # the right hand's

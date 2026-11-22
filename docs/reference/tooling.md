@@ -396,6 +396,16 @@ prints which, exits 1, and leaves any existing board as it was.
   which KiCad's DRC has no test for (`check_tracks`). Joins at a shared end
   and a track ending in the middle of another are both tested; a wedge whose
   apex a via or pad of the net fills is not a trap and is exempt;
+- on a board laid out by hand (`route: false`), how tracks meet
+  (`check_joints`; owner, 2026-11-22). A corner turns by 45°, never 90° in one
+  step. Three or more tracks meet as a T: one line straight through, the
+  branch square to it. Two tracks at one pad run straight through it, turn 45°
+  across it, or stand square on the pad's own axes; two diagonals closing on
+  its centre fail. A track that touches a round pad or a via of its net is on
+  a line through the centre, so it neither clips the ring nor turns inside it.
+  A via whose hole is in a surface-mount pad fails (ADR 0030); a net tie's pad
+  is bare copper and exempt. A turn that a pad's own copper covers is that
+  pad's entry and is judged by the pad rule;
 - a board with a `layout.yaml` `silk:` block whose title block (title,
   revision, date - the Gerber job's "Revision") differs from it, or whose
   silkscreen lacks the title or its `rev <rev>  <date>` line (`check_title`;
