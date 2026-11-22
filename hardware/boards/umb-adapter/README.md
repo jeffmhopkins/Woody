@@ -8,9 +8,9 @@ the main board's `J-UMB` plugs into. Nothing else is on it: the clamps are on
 the main board at `J-UMB`, and the connector's G (shield) tab goes nowhere —
 its housing is plastic, isolated to panel ground [ds].
 
-> **Status: laid out, `tools/pcb.py check` passes.** The socket's drawing is
-> not banked, so its height and pad pattern are the library footprint's
-> (*Open*). Its outline is the flange's, `mechanical/cad/woody_body.scad`
+> **Status: laid out, `tools/pcb.py check` passes.** The socket's pad
+> pattern is checked against its maker's drawing, hand included
+> (`interfaces/spi-link/bom.csv`, `J-UMB-SKT`). Its outline is the flange's, `mechanical/cad/woody_body.scad`
 > "umbilical adapter"; its thickness is `config/body.yaml`
 > `boards.umb_adapter_t`.
 
@@ -41,7 +41,7 @@ tail end.
 | Item | Decided by |
 |---|---|
 | The NE8FAV's footprint (`woody:Neutrik_NE8FAV_etherCON_Vertical`, `hardware/lib/README.md`) is drawn from Neutrik's layout, mirrored because Neutrik draws it from the solder side | The first adapter, with the connector pushed into it before soldering |
-| `J-UMB-SKT`'s height off the board and its pad pattern, and the hand of that pattern: the lead of pin 7 must be on the side away from the main board, clear of the G tab's pad (`interfaces/spi-link/bom.csv`, `J-UMB-SKT`) | Samtec's drawing for the part, banked; then the part on the first adapter |
+| `J-UMB-SKT` on its pads: the pattern is one hand's only, and the part's order code names the hand (`interfaces/spi-link/bom.csv`, `J-UMB-SKT`: how to tell it with the part in hand) | The part against the bare board before soldering |
 
 ## Ordering
 

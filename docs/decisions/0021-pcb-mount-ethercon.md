@@ -733,5 +733,5 @@ standing on the main board (the tail re-laid).
 
 | Open | What decides it |
 |---|---|
-| The socket's height off the adapter (`boards.umb_socket_d`) and its pad pattern, both from the library footprint and a catalogue page | Samtec's drawing for the part, banked; then the part in hand on the first adapter |
+| The socket stands a little taller off the adapter than `boards.umb_socket_d` says: the figure was read from the first part considered, and the part chosen for its hand is `J-UMB-SKT`'s row (`hardware/interfaces/spi-link/bom.csv`) | The next edit of `config/body.yaml`, with the rebuild it brings; until then the difference is inside the main board's mounting holes' play |
 | Whether the posts seat fully with the etherCON screwed to the tail cap | The first adapter and main board in the body |
