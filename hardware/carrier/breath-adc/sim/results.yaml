@@ -4,7 +4,7 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/carrier/breath-adc/sim/sims.yaml: e4cd44e21d55a6f1
+  hardware/carrier/breath-adc/sim/sims.yaml: 372a5c85cc3b9597
   hardware/carrier/breath-adc/netlist.yaml: 1d8b68ea80628f1f
   hardware/carrier/breath-adc/sim/adc-ac.cir: 92db36d52ceba839
   hardware/carrier/breath-adc/sim/adc.cir: 3d5f71307efa775a
