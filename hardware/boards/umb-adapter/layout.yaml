@@ -23,7 +23,7 @@ rules:
   via_min: 0.66
   drill_min: 0.3
   edge_clearance: 0.3
-  power_track: 0.5
+  power_track: 0.6
 
 fab:
   house: JLCPCB
@@ -38,13 +38,13 @@ fab:
   silk: Black
   copper_oz: 1
 
-# The supply's two conductors at the main board's width for them (its layout.yaml
-# net_classes: power12_in): the etherCON's contact, not the track, is the limit
+# The supply's two conductors, wider than the signals (the pre-fab review, 2026-11-22):
+# the etherCON's contact, not the track, is the limit
 # (hardware/interfaces/spi-link/bom.csv J-UMBILICAL-INST).
 net_classes:
   power12_in:
     nets: [/UMBILICAL_POS12, /PWR_GND]
-    track: 0.5
+    track: 0.6
 
 # Parts whose courtyard is MEANT to lie off the board (pcb.py check_courtyards).
 courtyard_overhang:
@@ -55,7 +55,7 @@ courtyard_overhang:
 silk:
   title: "WOODY umbilical adapter"
   rev: "A"
-  date: "2026-11-21"
+  date: "2026-11-22"
 
 # No router: adapter_layout.py (ADR 0030).
 route: false
