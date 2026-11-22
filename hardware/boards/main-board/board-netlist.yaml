@@ -1051,6 +1051,18 @@ components:
     - 1
     - 2
     sheet: midi-out
+  R52:
+    of: R-HOP-SER
+    value: 2k2 1%
+    pins:
+    - 1
+    - 2
+  R53:
+    of: R-HOP-SER
+    value: 2k2 1%
+    pins:
+    - 1
+    - 2
   R6:
     of: R-REF-IN
     value: 330R 1%
@@ -1356,7 +1368,7 @@ nets:
   - NT1.1
   /HOP_LH_LT:
   - J4.8
-  - U7.SER
+  - R52.1
   /HOP_LT_QH:
   - R44.1
   - U7.QH
@@ -1364,8 +1376,15 @@ nets:
   - J5.6
   - R44.2
   - U11.CH3
+  /HOP_LT_SER:
+  - R52.2
+  - U7.SER
+  - U9.CH4
   /HOP_RH_RT:
   - J5.8
+  - R53.1
+  /HOP_RT_SER:
+  - R53.2
   - U11.CH4
   - U8.SER
   /IO1:
@@ -1949,8 +1968,6 @@ nets:
   - U7.QH_BAR
   U8.QH_BAR:
   - U8.QH_BAR
-  U9.CH4:
-  - U9.CH4
   UMBILICAL_POS12:
   - C39.1
   - D2.K
@@ -1995,4 +2012,3 @@ external_endpoints:
 - U6.4Y
 - U7.QH_BAR
 - U8.QH_BAR
-- U9.CH4

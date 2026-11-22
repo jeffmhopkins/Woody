@@ -112,7 +112,7 @@ nets:
   CHAIN_SER_RT:
     kind: signal
     domain: digital
-    carries: "right_thumb's SER, on the main board: right_hand's QH arriving on the right_hand ribbon's conductor 8"
+    carries: "right_thumb's SER, on the main board: right_hand's QH arriving on the right_hand ribbon's conductor 8, through R-HOP-SER-RH"
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register]
     per_board: true
@@ -129,7 +129,7 @@ nets:
   CHAIN_SER_LT:
     kind: signal
     domain: digital
-    carries: "left_thumb's SER, on the main board: left_hand's QH arriving on the left_hand ribbon's conductor 8"
+    carries: "left_thumb's SER, on the main board: left_hand's QH arriving on the left_hand ribbon's conductor 8, through R-HOP-SER-LH"
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register]
     per_board: true

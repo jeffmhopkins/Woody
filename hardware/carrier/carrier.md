@@ -509,7 +509,7 @@ page and have no BOM entry yet.
 | `J-UMBILICAL-INST`, `PCB-UMB-ADAPTER` | NE8FAV on its adapter board | The instrument's etherCON behind the tail cap, and the board that carries it to `J-UMB`; `interfaces/spi-link`'s rows | `[ds]` NE8FAV; adapter **open**, M4 |
 | `U-KEYS`, `R-KEY-PU`, `R-KEY-SER`, `C-KEY`, `C-DECOUPLE-165` | — | **Half of them are on this board since ADR 0017**: the `right_thumb` and `left_thumb` clusters. The other two clusters are on the key boards. Counts per cluster are `cluster-boards.md`'s component table | `[repo] 0017, bom.csv` |
 | **`R-CHAIN-SER`** ×3 | **100 Ω** | **Open — series at the driving end on `SCK`, `SH/LD` and the chain-end `SER`. Edge-rate damping, not termination; E14 decides. `key-chain-loom.md`** | open |
-| `U-TVS-CHAIN` | SP0504BAHTG, 4-ch array, SOT-23-5 | **Fitted** (ADR 0018) — the three MCU nets the ribbon connectors expose, for service handling with the lid off; fourth channel spare. `key-chain-loom.md` | candidate |
+| `U-TVS-CHAIN` | SP0504BAHTG, 4-ch array, SOT-23-5 | **Fitted** (ADR 0018) — the three MCU nets the ribbon connectors expose, for service handling with the lid off; the fourth channel is on `left_thumb`'s `SER`, behind `R-HOP-SER`. `key-chain-loom.md` | candidate |
 | `FB-CHAIN` ×2 | Ferrite bead, 0805, low DCR | One per key-board ribbon on its 3V3 conductor: isolation. **No fuse** — a skewed ribbon's short is limited by the Matrix LDO itself (ADR 0018). `key-chain-loom.md` | part **open** |
 | `U-BUF` | OPA2197IDR | ½ reference buffer, ½ breath buffer, both on +12 V | `[repo]` |
 | `U-BREATH` | MPXV4006DP, case 1351-01, surface mount, soldered down | P1 to the tube, P2 open to the cavity | `[ds]` pp.1, 6, 7 |

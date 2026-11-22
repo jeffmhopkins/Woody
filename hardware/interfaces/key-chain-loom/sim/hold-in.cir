@@ -1,0 +1,46 @@
+* The two hops that run from a key board INTO a main-board thumb register: left_hand ->
+* left_thumb (HOP_LH_LT, J4 pin 8) and right_hand -> right_thumb (HOP_RH_RT, J5 pin 8).
+* SCK as hold.cir: the GPIO, R-CHAIN-SER, the main board's node m (both arrays, both
+* thumbs' CLK inputs, trace: the thumb register's CLK is here) and the two ribbons; the
+* key board's CLK is at the far end of its ribbon (rx). The key board's QH is launched
+* when SCK at rx crosses ITS V_T+ (vt_lt, the lowest), with no tpd, as an edge of tr_qh
+* behind the register's output resistance; it comes back on the same ribbon's conductor 8
+* to the main board's J-CHAIN (j), then through R-HOP-SER (hop_in_fit) to the thumb
+* register's SER (ser), where a U-TVS-CHAIN channel sits (tvs_ser). The thumb register
+* samples SER when SCK at m crosses its own V_T+; SER hold is 0 ns
+* [SN74HCS165-ti-scls828a.pdf p.7]. q_up = 1: QH rises; 0: QH falls.
+VDRV src 0 PULSE(0 {{vcc}} 20n {{tr_drv}} {{tr_drv}} 480n 1u)
+RDRV src a {{r_drv}}
+RSER a m {{R-CHAIN-SER}}
+CTVS m 0 {{c_tvs}}
+CTVSJ5 m 0 {{c_tvs_j5}}
+CMAIN m 0 {{c_main}}
+TLH m 0 rx 0 Z0={{z0_ribbon}} TD={{td_rib}}
+CRX rx 0 {{ci}}
+CKB rx 0 {{c_kb}}
+TRH m 0 rxr 0 Z0={{z0_ribbon}} TD={{td_rib}}
+CRXR rxr 0 {{ci}}
+CKBR rxr 0 {{c_kb}}
+* the key board register's clock event, with no propagation delay at all, and its output edge
+BTRIG trig 0 V = 0.5 * (1 + tanh((v(rx) - {{vt_lt}}) * 50))
+RSHP trig shp 1k
+CSHP shp 0 {{c_shape}}
+BQ qsrc 0 V = {{q0}} + ({{q1}} - {{q0}}) * v(shp)
+RQ qsrc qk {{r_qh}}
+CQK qk 0 {{c_kb}}
+TQH qk 0 j 0 Z0={{z0_ribbon}} TD={{td_rib}}
+* a U-TVS-CHAIN channel on the connector side (tvs_conn: HOP_RH_RT as it was until 2026-11-21)
+CTVSC j 0 {{c_tvs_conn}}
+RHOP j ser {{r_hop_in}}
+* the U-TVS-CHAIN channel on the register side of R-HOP-SER, and the thumb register's SER
+CTVSS ser 0 {{c_tvs_ser}}
+CSER ser 0 {{c_rx_main}}
+.options method=gear
+.control
+tran 20p 300n 0 20p
+wrdata rx.dat v(rx)
+wrdata m.dat v(m)
+wrdata ser.dat v(ser)
+quit
+.endc
+.end

@@ -100,6 +100,8 @@ JX, JY2 = 77.865, 39.29       # J-CHAIN's signal column (even pins, the mouth si
 UX, UY = 65.5, 38.5           # the register: a clamp's width from the header, so the chain's lines are short (owner, 2026-11-21)
 CX = 73.0                     # the column between the register and the header's body
 LOW, HIGH = 33.2, 46.5        # the two lines every row and comb of the far band stands on
+FB_TURN = 45.15               # the right bead's line back to its header, midway between the bead's pads and the resistor's
+FB_Y, HOP_R_Y = 46.3, 44.0    # each header's bead, and the resistor of the hop that arrives on its pin 8
 GAP = 32.0                    # a comb in a gap between LEDs: a millimetre lower, clear of the header's nose above it
 SIDE, END = 3.0, 4.5          # 0805s side by side, and end to end
 
@@ -118,7 +120,8 @@ def block(dx, r):
     p = {
         r["U"]: (UX + dx, UY, ("1", (4.445, 2.475))),               # key row toward the far edge, pin 1 at the header end
         r["TVS"]: (CX + dx, jpin(4)[1], ("1", (-0.95, -1.1375))),    # SH/LD passes between its rows, level with pad 4
-        r["FB"]: (CX + dx, 44.0, "-x"),                              # pad 2 just under the header's pad 10, one line and a short 45 away
+        r["FB"]: (CX + dx, FB_Y, "+x" if dx else "-x"),              # north of the hop's resistor, pad 1 toward where its 3V3 arrives
+        r["HOP"]: (CX - 0.125 + dx, HOP_R_Y, ("SER", "W")),          # the hop's resistor: its register-side pad straight under the clamp's pad 5
         r["C16"]: (CX - 1.3 + dx, 35.25, ("3V3", "N")),              # on end hard beside pin 16
     }
     p.update(comb(62.5 + dx, HIGH, "N", *r["far_mouth"]))            # above the register
@@ -128,9 +131,9 @@ def block(dx, r):
 
 
 PLACE = {}
-PLACE.update(block(0, {"U": "U7", "TVS": "U9", "FB": "FB1", "C16": "C13",
+PLACE.update(block(0, {"U": "U7", "TVS": "U9", "FB": "FB1", "HOP": "R52", "C16": "C13",
                        "far_mouth": ("R15", "C16", "R14"), "far_tail": ("R19", "C18", "R18"), "near_tail": ("R17", "C17", "R16")}))
-PLACE.update(block(RH, {"U": "U8", "TVS": "U11", "FB": "FB2", "C16": "C205",
+PLACE.update(block(RH, {"U": "U8", "TVS": "U11", "FB": "FB2", "HOP": "R53", "C16": "C205",
                         "far_mouth": ("R23", "C20", "R22"), "far_tail": ("R27", "C22", "R26"), "near_tail": ("R25", "C21", "R24")}))
 # the near-row key on the mouth side, in a gap between LEDs: the left hand's under its header's nose, the right hand's before its register
 PLACE.update(comb(74.0, GAP, "N", "R13", "C15", "R12"))
@@ -668,24 +671,16 @@ def chain():
     T("HOP_LT_QH", ["R44.1", (57.23, 34.9), (59.93, 34.9), "U7.9"])
 
 
-HOP_Y = 42.65                 # each hop's line from its header's pin 8 toward the mouth, on the bottom face
-
-
-HOP_TOP = 42.75               # ...and the right hand's on the top face, between the clamp's pad 4 and the bead's pad 2
-
-
-def hop_out(y8, y=HOP_Y):
-    """From pin 8 straight out past its neighbours' pad ends, then one 45 down to y."""
-    return [(JX - 1.3, y8), (JX - 1.3 - (y8 - y), y)]
+HOP_Y = 42.95                 # each hop's via, between its resistor's pad and the clamp's pad 5, and its line on the bottom face
 
 
 def registers():
     """STAGE 4d: THE TWO REGISTERS, top face but for each hop's line under its register. What
     both hands share is drawn once and placed twice."""
-    for dx, u, tvs, j, fb, hop, x1, x2, x3, x4, sw_far, sw_tail, far_mouth, far_tail, near_tail in (
-            (0, "U7", "U9", "J4", "FB1", "HOP_LH_LT", "KEY_LT1", "KEY_LT2", "KEY_LT3", "KEY_LT4", "SW2", "SW4",
+    for dx, u, tvs, j, fb, rhop, hop, ser, x1, x2, x3, x4, sw_far, sw_tail, far_mouth, far_tail, near_tail in (
+            (0, "U7", "U9", "J4", "FB1", "R52", "HOP_LH_LT", "HOP_LT_SER", "KEY_LT1", "KEY_LT2", "KEY_LT3", "KEY_LT4", "SW2", "SW4",
              ("R15", "C16", "R14"), ("R19", "C18", "R18"), ("R17", "C17", "R16")),
-            (RH, "U8", "U11", "J5", "FB2", "HOP_RH_RT", "KEY_RT1", "KEY_RT2", "KEY_RT3", "KEY_RT4", "SW6", "SW8",
+            (RH, "U8", "U11", "J5", "FB2", "R53", "HOP_RH_RT", "HOP_RT_SER", "KEY_RT1", "KEY_RT2", "KEY_RT3", "KEY_RT4", "SW6", "SW8",
              ("R23", "C20", "R22"), ("R27", "C22", "R26"), ("R25", "C21", "R24"))):
         def X(x):
             return x + dx
@@ -703,12 +698,23 @@ def registers():
         T("CHAIN_SHLD", [(X(73.95), y4), f"{tvs}.3"])
         # pins 6 and 10 of the header
         T("CHAIN_SER_LH" if lh else "HOP_LT_RH", [f"{tvs}.4", (X(JX - 0.1325), y6 - 0.1325), f"{j}.6"])
-        T("V3V3_CHAIN_LH" if lh else "V3V3_CHAIN_RH", [f"{fb}.2", (X(JX - (y10 - 44.0)), 44.0), f"{j}.10"])
-        # the hop into this register: from the header's pin 8 on the bottom face to a via under the body
-        # (it leaves the pad straight, then drops to HOP_Y past pad 6's end: 3V3's line lies just north)
-        T(hop, [f"{j}.8"] + [(X(x), y) for x, y in hop_out(y8)] + [(X(62.33 + HOP_Y - 38.0), HOP_Y), (X(62.33), 38.0)], FINE, "B")
-        VIAS.append((hop, X(62.33), 38.0))
-        T(hop, [(X(62.33), 38.0), f"{u}.10"])
+        # (the left bead's 3V3 comes up from the mouth side, so its pad 2 faces the header; the right
+        # bead's arrives along the far band from the tail, so its pad 2 is the far one and turns back
+        # between the bead and the hop's resistor)
+        if lh:
+            T("V3V3_CHAIN_LH", [f"{fb}.2", (X(JX - (FB_Y - y10)), FB_Y), f"{j}.10"])
+        else:
+            T("V3V3_CHAIN_RH", [f"{fb}.2", (X(CX - 1.06), FB_TURN), (X(JX - (FB_TURN - y10)), FB_TURN), f"{j}.10"])
+        # the hop into this register: from the header's pin 8 through its resistor (pre-fab review F1),
+        # then one straight line to the clamp's pad 5 with a via on it, and on the bottom face to a via
+        # under the register's body. The clamp's channel is the C of the RC, on the register's side
+        xr = CX - 0.125 + 0.825                 # the resistor's header-side pad
+        T(hop, [f"{j}.8", (X(xr + HOP_R_Y - y8), y8), f"{rhop}.1"])
+        T(ser, [f"{rhop}.2", (X(CX - 0.95), HOP_Y), f"{tvs}.5"])
+        VIAS.append((ser, X(CX - 0.95), HOP_Y))
+        T(ser, [(X(CX - 0.95), HOP_Y), (X(62.33 + HOP_Y - 38.0), HOP_Y), (X(62.33), 38.0)], FINE, "B")
+        VIAS.append((ser, X(62.33), 38.0))
+        T(ser, [(X(62.33), 38.0), f"{u}.10"])
         # the far row's two keys: each switch's line south of its ground pin to its resistor
         T(leg2, [f"{sw_far}.1", (X(46.95), 41.85), (X(58.76), 41.85), f"{far_mouth[0]}.2"])
         T(leg4, [f"{sw_tail}.1", (X(86.95), 41.85), (X(94.76), 41.85), f"{far_tail[0]}.2"])
@@ -722,8 +728,6 @@ def registers():
                (X(67.41), 42.1), f"{u}.3"])
         T(x3, [f"{near_tail[0]}.1", (X(107.61), 48.3), (X(69.9), 48.3), (X(69.6), 48.0), (X(69.6), 43.2), (X(69.3), 42.9),
                (X(66.44), 42.9), (X(66.14), 42.6), f"{u}.4"])
-    # the hop's line reaches the right register's clamp on top
-    T("HOP_RH_RT", ["J5.8"] + [(x + RH, y) for x, y in hop_out(jpin(8)[1], HOP_TOP)] + [(CX + RH - 0.95 + HOP_TOP - (jpin(4)[1] + 1.1375), HOP_TOP), "U11.5"])
     # the left hand's near mouth-side key: up past the supply capacitor, under the register to pin 6
     T("KEY_LT1", ["R13.1", "C15.1", "R12.2"])
     T("KEY_LT1", ["R13.1", (74.0, 36.24), (73.2, 37.04), (70.9, 37.04), (70.54, 37.4), (64.39, 37.4), (63.59, 38.2), "U7.6"])
@@ -764,7 +768,8 @@ def v3():
     # ...and round the hop's via to the far side: the far key's pull-up and the header's bead
     T("DEV_3V3", [(64.2, 32.4), (61.9, 32.4), (61.2, 33.1), (61.2, 42.8), (61.9, 43.5), (68.1, 43.5), (68.5, 43.9), (68.6, 44.0), (70.9, 44.0)], W, "B")
     via("DEV_3V3", 68.5, 43.9, "R14.1")
-    via("DEV_3V3", 70.9, 44.0, "FB1.1")
+    VIAS.append(("DEV_3V3", 70.9, 44.0))   # south of the breath pair's strip; up past the hop's resistor to the bead
+    T("DEV_3V3", [(70.9, 44.0), (70.9, FB_Y - 1.04), "FB1.1"])
     # the left hand's other pull-ups
     tap(80.2, 30.9, [(80.2, 31.05), "R12.1"])
     tap(89.81, 30.9, ["R18.1"])
@@ -782,7 +787,7 @@ def v3():
     # north of the right header
     T("DEV_3V3", [(256.7, TRUNK), (256.7, 34.6), (256.0, 35.3), (191.55, 35.3), (190.85, 36.0), (190.85, 44.6)], W, "B")
     VIAS.append(("DEV_3V3", 190.85, 44.6))
-    T("DEV_3V3", [(190.85, 44.6), (190.85, 46.0), (190.55, 46.3), (180.24, 46.3), (179.94, 46.0), "FB2.1"])
+    T("DEV_3V3", [(190.85, 44.6), (190.85, 46.0), (190.55, FB_Y), "FB2.1"])
     for x, r in ((222.5, "R24.1"), (212.5, "R26.1")):
         T("DEV_3V3", [(x, 35.3), (x, 44.3)], W, "B")
         via("DEV_3V3", x, 44.3, r)
@@ -1081,6 +1086,23 @@ def main():
     comps, nets = pcb.sheet_netlist(os.path.join(HERE, NAME + ".kicad_sch"))
     geo = pcb_main.geometry("main")
     board = pcbnew.LoadBoard(SRC)
+    # a part the sheet has gained since the board was last written (KiCad's "update PCB from
+    # schematic"): its footprint as pcb.py's builder makes one, seated from PLACE below
+    have = {fp.GetReference() for fp in board.GetFootprints()}
+    for ref in sorted(set(PLACE) - have):
+        c = comps[ref]
+        fp = pcb.load_fp(c["footprint"])
+        fp.SetReference(ref)
+        fp.SetValue(c["value"])
+        fp.SetPath(pcbnew.KIID_PATH(c["path"]))
+        fp.SetExcludedFromBOM(c["exclude_from_bom"])
+        fp.Reference().SetLayer(pcbnew.F_Fab)
+        fp.Reference().SetTextSize(pcbnew.VECTOR2I(pcbnew.FromMM(0.5), pcbnew.FromMM(0.5)))
+        fp.Reference().SetTextThickness(pcbnew.FromMM(0.08))
+        for g in fp.GraphicalItems():      # the library's silk strokes at the board house's minimum line
+            if g.GetLayer() == pcbnew.F_SilkS and g.GetClass() == "PCB_SHAPE":
+                g.SetWidth(max(g.GetWidth(), pcbnew.FromMM(pcb.layout_yaml(HERE)["fab"]["silk_line_min"])))
+        board.Add(fp)
     # every pad's net from the sheet
     padnet = {(r, p): n for n, nodes in nets for r, p in nodes}
     for fp in board.GetFootprints():

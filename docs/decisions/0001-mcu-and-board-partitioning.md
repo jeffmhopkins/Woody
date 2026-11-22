@@ -506,6 +506,12 @@ A5-2 and A5-3).
   holds with the `CLK`→`QH` delay taken as zero, at every corner and on both
   edges — `hop-hold-lt-to-rh` asserts it, and `hop-hold-without-series-r`
   records the race without it.)*
+  *(Amended 2026-11-21, owner, on the pre-fab review's F1: "Good to
+  implement". **The other two hops, from a key board into a thumb register,
+  race the same way and each gets the same resistor**, at its main-board
+  header's pin 8, with an array channel on the register's side of it as the
+  capacitor. `key-chain-loom.md`, *The hop hold time*;
+  `hop-hold-key-board-to-thumb` asserts it.)*
 - **Both firmware rules above, and every other condition the hardware places
   on firmware, are now listed in `firmware/README.md`, *What the hardware
   requires*.** The README said "fire immediately on press" until this date,

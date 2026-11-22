@@ -49,6 +49,9 @@ params:
   q_up:    {value: 1, source: "1: left_thumb's QH rises at the clock; 0: it falls (each sim sets it)"}
   hop_fit: {value: 1, source: "1: R-HOP-SER fitted at left_thumb's QH on HOP_LT_RH, as netlisted (owner, 2026-10-01); 0: the WHAT-IF without it, QH straight into the ribbon"}
   tpd_bench: {value: 12.0e-9, source: "without R-HOP-SER, the CLK-to-QH delay left_thumb would need for the hop to hold at the worst corner. Unpublished [SN74HCS165-ti-scls828a.pdf p.7 gives a maximum only], which is why the resistor is fitted"}
+  hop_in_fit: {value: 1, source: "1: R-HOP-SER fitted at the main board's J-CHAIN pin 8 on each hop from a key board into a thumb register, as netlisted (owner, 2026-11-21); 0: the WHAT-IF without it (hold-in.cir)"}
+  tvs_ser: {value: 1, source: "1: a U-TVS-CHAIN channel on the thumb register's side of that R-HOP-SER, as netlisted (owner, 2026-11-21); 0: none"}
+  tvs_conn: {value: 0, source: "1: the channel on the connector side with no resistor after it, as HOP_RH_RT had it until 2026-11-21 (a WHAT-IF); 0: as netlisted"}
   setup_budget: {value: 100.0e-9, source: "the hop's data must reach right_hand's SER well inside the 1 us clock period (f_clk): a tenth of a half period [assumption: a generous bound, the setup itself is 1-2 orders smaller - SN74HCS165-ti-scls828a.pdf p.7]"}
 
 vary:
@@ -86,6 +89,9 @@ derived:
   c_shape: "v['tr_qh'] / 2.2 / 1000.0"
   r_qh_hop: "v['r_qh'] + v['R-HOP-SER'] * v['hop_fit']"
   c_tvs_j5: "max(v['c_tvs'] * v['tvs_j5'], 1e-18)"
+  r_hop_in: "max(v['R-HOP-SER'] * v['hop_in_fit'], 1.0)"
+  c_tvs_ser: "max(v['c_tvs'] * v['tvs_ser'], 1e-18)"
+  c_tvs_conn: "max(v['c_tvs'] * v['tvs_conn'], 1e-18)"
   q0: "0.0 if v['q_up'] else v['vcc']"
   q1: "v['vcc'] if v['q_up'] else 0.0"
 
@@ -166,11 +172,10 @@ sims:
       - expr: "max['v_over'] < p['vcc_over'] and min['v_under'] > -0.5"
         why: "and without overshoot past its input clamp"
   - name: hop-hold-lt-to-rh
-    # A5-2 of the 2026-10-01 pre-layout review. The one hop whose downstream register is
-    # clocked later than its upstream one: left_thumb on the main board feeds right_hand
-    # over right_hand's ribbon, and right_hand's CLK arrives through the same ribbon. The
-    # other two hops run the other way (their downstream register is on the main board,
-    # clocked first) and cannot race. Worst thresholds on purpose: left_thumb clocks at
+    # A5-2 of the 2026-10-01 pre-layout review. The hop whose downstream register is on a
+    # key board: left_thumb on the main board feeds right_hand over right_hand's ribbon,
+    # and right_hand's CLK arrives through the same ribbon. The other two hops run the
+    # other way and have their own run, hop-hold-key-board-to-thumb. Worst thresholds on purpose: left_thumb clocks at
     # the LOWEST V_T+ (earliest), right_hand at the HIGHEST (latest), and right_hand's SER
     # registers a change at the near edge of its band (earliest). tpd is ZERO (hold.cir):
     # with R-HOP-SER fitted (owner, 2026-10-01) the hop must hold without any
@@ -201,3 +206,49 @@ sims:
       - expr: "min['hold_margin'] < 0"
         why: "WHAT-IF: without R-HOP-SER the data beats right_hand's clock at the worst corner, and the hop holds only if left_thumb's unpublished CLK-to-QH delay is at least need_tpd - why the resistor is fitted"
     post: *hold_post
+  - name: hop-hold-key-board-to-thumb
+    # F1 of the 2026-11-21 pre-fab review. The two hops that run the other way: a key
+    # board's register feeds a thumb register on the main board (HOP_LH_LT, HOP_RH_RT).
+    # The clock reaches the key board a ribbon's flight after the main board, but that
+    # flight is a fraction of a nanosecond and the thresholds' spread on the RC edge is
+    # many: with the key board's register clocking at the LOWEST V_T+ and the thumb
+    # register at the HIGHEST, the key board goes first. Both hops are the same circuit
+    # as netlisted: R-HOP-SER at the J-CHAIN's pin 8, a U-TVS-CHAIN channel and the
+    # register's SER after it. tpd is ZERO, as in hold.cir
+    deck: hold-in.cir
+    vary: [r_drv, tr_drv, c_tvs, c_main, r_qh, tr_qh]
+    sweep: {q_up: [1, 0]}
+    measures: &holdin_meas [clk_skew, ser_delay, hold_margin, need_tpd]
+    asserts:
+      - expr: "min['hold_margin'] > 0"
+        why: "F1: with R-HOP-SER at the J-CHAIN and a U-TVS-CHAIN channel behind it, the key board's data reaches the thumb register's SER after that register's clock at every corner and on both edges, with the key board register's CLK-to-QH delay taken as ZERO"
+      - expr: "max['ser_delay'] < p['setup_budget']"
+        why: "and the RC still delivers the data within 100 ns of the clock, against a 1 us period"
+    post: &holdin_post
+      clk_skew: "cross(w['m'], p['vtp_max'], 0) - cross(w['rx'], p['vtp_min'], 0)"
+      ser_delay: "(cross(w['ser'], p['vtp_min'], 0) if p['q_up'] else cross(w['ser'], p['vtm_max'], 0)) - cross(w['rx'], p['vtp_min'], 0)"
+      hold_margin: "(cross(w['ser'], p['vtp_min'], 0) if p['q_up'] else cross(w['ser'], p['vtm_max'], 0)) - cross(w['m'], p['vtp_max'], 0)"
+      need_tpd: "max(0.0, cross(w['m'], p['vtp_max'], 0) - (cross(w['ser'], p['vtp_min'], 0) if p['q_up'] else cross(w['ser'], p['vtm_max'], 0)))"
+  - name: hop-hold-lh-lt-without-rc
+    # A WHAT-IF, recorded: HOP_LH_LT as the netlist had it until 2026-11-21, the ribbon
+    # straight into left_thumb's SER with no resistor and no array channel
+    deck: hold-in.cir
+    vary: [r_drv, tr_drv, c_tvs, c_main, r_qh, tr_qh]
+    sweep: {q_up: [1, 0]}
+    set: {hop_in_fit: 0, tvs_ser: 0}
+    measures: *holdin_meas
+    asserts:
+      - expr: "min['hold_margin'] < 0"
+        why: "WHAT-IF: without the RC the key board's data beats left_thumb's clock at the worst corner, and the hop holds only if left_hand's unpublished CLK-to-QH delay is at least need_tpd - why the resistor is fitted"
+    post: *holdin_post
+  - name: hop-hold-rh-rt-without-r
+    # The same for HOP_RH_RT as it was: U-TVS-CHAIN-RH's channel on the net, no resistor
+    deck: hold-in.cir
+    vary: [r_drv, tr_drv, c_tvs, c_main, r_qh, tr_qh]
+    sweep: {q_up: [1, 0]}
+    set: {hop_in_fit: 0, tvs_ser: 0, tvs_conn: 1}
+    measures: *holdin_meas
+    asserts:
+      - expr: "min['hold_margin'] < 0"
+        why: "WHAT-IF: the array's capacitance alone, behind only the register's output resistance, does not hold the hop either"
+    post: *holdin_post

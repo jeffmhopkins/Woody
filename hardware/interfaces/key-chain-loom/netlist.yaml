@@ -180,6 +180,28 @@ components:
     note: 'At left_thumb''s QH on the main board, before HOP_LT_RH leaves for the right_hand ribbon (owner, 2026-10-01;
       pre-layout review A5-2): its RC with the ribbon delays the hop''s data past right_hand''s clock, so the hop
       holds with no CLK-to-QH delay at all (key-chain-loom.md, The hop hold time; key-chain-loom/sim hop-hold-lt-to-rh)'
+  R-HOP-SER-LH:
+    of: R-HOP-SER
+    value: 2k2 1%
+    pins:
+    - 1
+    - 2
+    note: 'At the main board''s left_hand J-CHAIN, on the ribbon''s conductor 8, before left_thumb''s SER (owner,
+      2026-11-21; pre-fab review F1): left_hand on its key board can clock before left_thumb when the two registers''
+      thresholds sit at opposite ends of their band, and this resistor with U-TVS-CHAIN''s channel behind it delays
+      the hop''s data past left_thumb''s clock, so the hop holds with no CLK-to-QH delay at all (key-chain-loom.md,
+      The hop hold time; key-chain-loom/sim hop-hold-key-board-to-thumb)'
+  R-HOP-SER-RH:
+    of: R-HOP-SER
+    value: 2k2 1%
+    pins:
+    - 1
+    - 2
+    note: 'At the main board''s right_hand J-CHAIN, on the ribbon''s conductor 8, before right_thumb''s SER (owner,
+      2026-11-21; pre-fab review F1): right_hand on its key board can clock before right_thumb when the two registers''
+      thresholds sit at opposite ends of their band, and this resistor with U-TVS-CHAIN-RH''s channel behind it
+      delays the hop''s data past right_thumb''s clock, so the hop holds with no CLK-to-QH delay at all (key-chain-loom.md,
+      The hop hold time; key-chain-loom/sim hop-hold-key-board-to-thumb)'
   R-SER-TERM:
     value: 10k
     pins:
@@ -196,7 +218,9 @@ components:
     - CH4
     - GND
     note: FITTED (ADR 0018). On the three MCU nets the ribbon connectors expose, at the left_hand J-CHAIN (main
-      board J4). The fourth channel is spare. U-TVS-CHAIN-RH guards the right_hand J-CHAIN (owner, 2026-10-03, D2)
+      board J4). The fourth channel is on HOP_LT_SER, left_thumb's SER behind R-HOP-SER-LH, where its capacitance
+      is the C of that hop's RC (owner, 2026-11-21). U-TVS-CHAIN-RH guards the right_hand J-CHAIN (owner, 2026-10-03,
+      D2)
   U-TVS-CHAIN-RH:
     of: U-TVS-CHAIN
     value: SP0504BAHTG 4-channel 5V array
@@ -207,8 +231,9 @@ components:
     - CH4
     - GND
     note: 'FITTED (owner, 2026-10-03, D2: ''Yes, all 4 channels''). The second array, AT THE right_hand J-CHAIN
-      (main board J5): CH1 CHAIN_SCK, CH2 CHAIN_SHLD, CH3 HOP_LT_RH, CH4 HOP_RH_RT, ground with a via at pin 2.
-      J5 exposes the same two MCU pins J4 does, and U-TVS-CHAIN is at J4, a board''s length away'
+      (main board J5): CH1 CHAIN_SCK, CH2 CHAIN_SHLD, CH3 HOP_LT_RH, CH4 HOP_RT_SER (right_thumb''s SER, behind
+      R-HOP-SER-RH: the C of that hop''s RC, owner 2026-11-21), ground at pin 2. J5 exposes the same two MCU pins
+      J4 does, and U-TVS-CHAIN is at J4, a board''s length away'
 nets:
   CHAIN_SCK:
   - port: CHAIN_SCK
@@ -267,9 +292,9 @@ nets:
   - U-TVS-CHAIN-RH.GND
   HOP_LH_LT:
   - port: CHAIN_QH_LH
-  - port: CHAIN_SER_LT
   - J-CHAIN-KEY-LH.8
   - J-CHAIN-MAIN-LH.8
+  - R-HOP-SER-LH.1
   HOP_LT_QH:
   - port: CHAIN_QH_LT
   - R-HOP-SER.1
@@ -279,11 +304,18 @@ nets:
   - J-CHAIN-MAIN-RH.6
   - R-HOP-SER.2
   - U-TVS-CHAIN-RH.CH3
+  HOP_LT_SER:
+  - port: CHAIN_SER_LT
+  - R-HOP-SER-LH.2
+  - U-TVS-CHAIN.CH4
   HOP_RH_RT:
   - port: CHAIN_QH_RH
-  - port: CHAIN_SER_RT
   - J-CHAIN-KEY-RH.8
   - J-CHAIN-MAIN-RH.8
+  - R-HOP-SER-RH.1
+  HOP_RT_SER:
+  - port: CHAIN_SER_RT
+  - R-HOP-SER-RH.2
   - U-TVS-CHAIN-RH.CH4
   IO7:
   - port: IO7
@@ -294,8 +326,6 @@ nets:
   IO38:
   - port: IO38
   - R-CHAIN-SER-SCK.1
-  TVS_CHAIN_SPARE:
-  - U-TVS-CHAIN.CH4
   V3V3_CHAIN_LH:
   - port: V3V3_CHAIN_LH
   - FB-CHAIN-LH.2
@@ -309,5 +339,3 @@ nets:
   CHAIN_QH_RT:
   - port: CHAIN_QH_RT
   - port: IO40
-external_endpoints:
-- TVS_CHAIN_SPARE

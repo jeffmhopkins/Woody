@@ -41,7 +41,7 @@ The `Dir` and `Peer` columns are defined once in
 | `SCK` (pin 2) | main → all four registers | out | MCU IO38 → `cluster/key-register` | `chain-conductors` | One net: two registers by trace, two over the ribbons. `R-CHAIN-SER` at the driving end |
 | `SH/LD` (pin 4) | main → all four registers | out | MCU IO7 → `cluster/key-register` | `chain-conductors` | One net, like `SCK`. A glitch here reloads every register mid-shift — the whole 32-bit word |
 | `SER` (pin 6) | main → key board | out | → `cluster/key-register` | `chain-connectors` | **The key board's own serial input**, on both ribbons. On the `right_hand` ribbon it is `left_thumb`'s `QH`, through `R-HOP-SER`; on the `left_hand` ribbon it is the chain end, `IO33` and `R-SER-TERM` |
-| `QH` (pin 8) | key board → main | in | `cluster/key-register` → | `chain-connectors` | **The key board's own serial output**, on both ribbons. `right_hand`'s goes to `right_thumb`'s `SER`; `left_hand`'s to `left_thumb`'s |
+| `QH` (pin 8) | key board → main | in | `cluster/key-register` → | `chain-connectors` | **The key board's own serial output**, on both ribbons. `right_hand`'s goes to `right_thumb`'s `SER`; `left_hand`'s to `left_thumb`'s, each through an `R-HOP-SER` at the main board's header |
 | `QH` of `right_thumb` | main board only | in → out | `cluster/key-register` → MCU IO40 | `marker-bits`, `free-bits` | Bit 0 onward. **Reaches no connector** — a trace from the register to the MCU's pins |
 | `GND` ×5 (pins 1, 3, 5, 7, 9) | both | ref | `cluster/key-register`, `cluster/key-switch-network`, `cluster/key-marker-and-bits` | `chain-conductors` | One between every signal, and against pin 10 |
 | `3V3` (pin 10) | main → key boards | out | MCU board's 3V3 (`DEV_3V3`) → `right_thumb`/`left_thumb` direct, and → one `FB-CHAIN` per ribbon → the key board's `cluster/key-register`, `cluster/key-switch-network`, `cluster/key-marker-and-bits`; shared with `carrier/breath-adc` | `key-pullup-qty` | **It is also the MCP3202's reference** — `carrier.md` §2 carries that argument. No fuse (ADR 0018) |
@@ -77,6 +77,7 @@ by a cable that is not a part. Each board draws its own parts:
 | `R-CHAIN-SER-SCK`, `-SHLD`, `-SER` | `R-CHAIN-SER` | `main-board` | `R34`, `R35`, `R36` |
 | `R-SER-TERM` | `R-SER-TERM` | `main-board` | `R37` |
 | `R-HOP-SER` | `R-HOP-SER` | `main-board` | `R44` |
+| `R-HOP-SER-LH`, `R-HOP-SER-RH` | `R-HOP-SER` | `main-board` | `R52` (at `J4`), `R53` (at `J5`) |
 | `FB-CHAIN-RH`, `FB-CHAIN-LH` | `FB-CHAIN` | `main-board` | `FB2`, `FB1` |
 | `U-TVS-CHAIN` | `U-TVS-CHAIN` | `main-board` | `U9` |
 | `U-TVS-CHAIN-RH` | `U-TVS-CHAIN` | `main-board` | `U11` |
@@ -176,8 +177,11 @@ and `key-layout.yaml`'s order stands.
                               3V3     (the pull-up is on this net only)
 
    IO40  ◄───────────────────────── RT's QH  (a trace; no connector)
-                                     8 QH    right_hand ribbon: RT's SER
-                                             left_hand ribbon:  LT's SER
+
+   RT's SER ◄──┬──[R-HOP-SER-RH 2k2]──── 8 QH    right_hand ribbon
+               └── U-TVS-CHAIN-RH's fourth channel, to GND_CHAIN
+   LT's SER ◄──┬──[R-HOP-SER-LH 2k2]──── 8 QH    left_hand ribbon
+               └── U-TVS-CHAIN's fourth channel, to GND_CHAIN
 
    3V3   ──┬─────────────────────────► RT/LT VCC and R-SER-TERM (DEV_3V3)
            ├──[FB-CHAIN 600R]──────────► 10 3V3  right_hand ribbon
@@ -185,9 +189,11 @@ and `key-layout.yaml`'s order stands.
    GND   ─────────────────────────────►  1 3 5 7 9  both ribbons
 
    [U-TVS-CHAIN SP0504BAHTG] on SCK, SH/LD and the chain-end SER, to GND_CHAIN,
-   at the left_hand J-CHAIN; its fourth channel is spare. Fitted (ADR 0018).
-   [U-TVS-CHAIN-RH SP0504BAHTG] on SCK, SH/LD, HOP_LT_RH and HOP_RH_RT, to
+   at the left_hand J-CHAIN; its fourth channel is on LT's SER. Fitted (ADR 0018).
+   [U-TVS-CHAIN-RH SP0504BAHTG] on SCK, SH/LD, HOP_LT_RH and RT's SER, to
    GND_CHAIN, at the right_hand J-CHAIN. Fitted (owner, 2026-10-03, D2).
+   The channel on a thumb register's SER is on the register's side of its
+   R-HOP-SER: its capacitance is the C of that hop's RC (owner, 2026-11-21).
 ```
 
 ### The key-board end
@@ -371,11 +377,11 @@ hardware requires*, carries it.
 Every page argued the hop's **setup** — `QH` → next `SER` is data sampled a
 whole period later. The **hold** is the other side of the same edge: the
 downstream register samples `SER` on the `CLK`↑ that makes the upstream `QH`
-change, so `QH` must not reach it before its own clock does. Two of the three
-hops cannot race: `left_hand` → `left_thumb` and `right_hand` → `right_thumb`
-feed a main-board register, which is clocked first. The third,
-**`left_thumb` → `right_hand` (`HOP_LT_RH`)**, feeds a key-board register
-clocked at the far end of its ribbon, through `R-CHAIN-SER`'s RC.
+change, so `QH` must not reach it before its own clock does. **All three hops
+can race** (the third paragraph below has the two this section first called
+safe). The first found was **`left_thumb` → `right_hand` (`HOP_LT_RH`)**: it
+feeds a key-board register clocked at the far end of its ribbon, through
+`R-CHAIN-SER`'s RC.
 
 The ribbon's flight is the same for `SCK` and for the hop, so it cancels. What
 is left is the thresholds: the registers' `V_T+` can sit anywhere in a band
@@ -402,11 +408,37 @@ within 92 ns of the clock, against a 1 µs period. Those numbers include
 and spends part of the 100 ns the run allows for setup. Whatever delay the part
 really has is added margin.
 
+**The two hops into a thumb register race too, and carry the same RC** (owner,
+2026-11-21; pre-fab review F1; `sim/`, `hop-hold-key-board-to-thumb`).
+`left_hand` → `left_thumb` (`HOP_LH_LT`) and `right_hand` → `right_thumb`
+(`HOP_RH_RT`) feed a main-board register, and this section said until then
+that they could not race because that register is clocked first. It is
+clocked first by the ribbon's flight alone, which is a fraction of a
+nanosecond (`td_rib` in `sim/`), while the thresholds' spread on the same RC
+clock edge is the 8–17 ns above and works in either direction. With the key
+board's register at the lowest `V_T+` and the thumb register at the highest,
+the key board clocks first and its data reached the thumb register's `SER`
+4.7–15.9 ns before that register's clock on `HOP_LH_LT`, and 1.0–14.7 ns before
+on `HOP_RH_RT`, which had `U-TVS-CHAIN-RH`'s fourth channel on it and no
+resistor (`hop-hold-lh-lt-without-rc`, `hop-hold-rh-rt-without-r`, recorded).
+
+**So each has an `R-HOP-SER` at its main-board header's pin 8, and an array
+channel on the register's side of it**: `R-HOP-SER-LH` with `U-TVS-CHAIN`'s
+fourth channel, which was spare, and `R-HOP-SER-RH` with `U-TVS-CHAIN-RH`'s
+fourth, moved from the connector's side of the net to the register's. The
+channel's capacitance is the C of the RC, and behind the resistor it still
+clamps what a hand puts on the header's pin. With the propagation delay taken
+as zero the data now arrives after the thumb register's clock by 14.0–37.8 ns
+on a rising bit and 28.8–65.1 ns on a falling one, at every corner, and within
+78 ns of the clock (`hop-hold-key-board-to-thumb`, asserted; one run covers
+both hops, which are the same circuit).
+
 **E14 confirms it** on the real boards: scope `right_hand`'s `CLK` (its
 `J-CHAIN` pin 2) against the hop's data at `right_hand`'s `SER` (pin 6), both
 at the register's pins, and show `SER` still steady for at least 1 ns after
 `CLK` crosses mid-rail at both edges of the data, with the marker counter at
-zero over a long run. A failure would duplicate a bit and shift the frame,
+zero over a long run; then the same at each thumb register (`CLK` at its pin
+2, `SER` at its pin 10). A failure would duplicate a bit and shift the frame,
 which the marker reports as a framing error, not a wrong note.
 
 **The other hops' inputs get no pull-up** (owner, 2026-09-30: "B"). With a

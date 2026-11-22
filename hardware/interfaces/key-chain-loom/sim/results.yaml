@@ -4,7 +4,7 @@
 
 inputs:
   tools/sim.py: 0312a1077b9afa80
-  hardware/interfaces/key-chain-loom/sim/sims.yaml: da6edd9f25f8fa10
+  hardware/interfaces/key-chain-loom/sim/sims.yaml: 73ee96f5e2b84a4c
   hardware/boards/key-board-lh/board-netlist.yaml: 6b0cf15f551dd4b7
   hardware/interfaces/key-chain-loom/sim/rail.cir: 537b273e07928b72
   hardware/interfaces/key-chain-loom/sim/edge.cir: af73f23cc4332e65
@@ -12,6 +12,7 @@ inputs:
   hardware/interfaces/key-chain-loom/sim/sck.cir: 88f751c4748b4dfa
   hardware/interfaces/key-chain-loom/sim/qh.cir: 8c6cb42b05dc8c84
   hardware/interfaces/key-chain-loom/sim/hold.cir: 4ef3976a5ad38fff
+  hardware/interfaces/key-chain-loom/sim/hold-in.cir: d8306efba5446443
   datasheets/discrete-and-power/BLM21SP601SN1-murata-spice.lib: e858b365fef2f77b
   hardware/cluster/key-switch-network/sim/sims.yaml: 28274e715669f42e
   bom:R-CHAIN-SER: 100R 1%
@@ -393,4 +394,204 @@ sims:
     - expr: min['hold_margin'] < 0
       why: 'WHAT-IF: without R-HOP-SER the data beats right_hand''s clock at the worst corner, and the hop holds only if left_thumb''s
         unpublished CLK-to-QH delay is at least need_tpd - why the resistor is fitted'
+      pass: true
+  hop-hold-key-board-to-thumb[q_up=1]:
+    corners: 65
+    measures:
+      clk_skew:
+        nominal: 1.30591e-08
+        min: 7.96339e-09
+        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv+ tr_qh-
+        max: 1.7025e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh+
+      ser_delay:
+        nominal: 3.85678e-08
+        min: 2.59079e-08
+        min_at: c_main- c_tvs- r_drv+ r_qh- tr_drv- tr_qh-
+        max: 5.02234e-08
+        max_at: c_main+ c_tvs+ r_drv- r_qh+ tr_drv+ tr_qh+
+      hold_margin:
+        nominal: 2.55088e-08
+        min: 1.40327e-08
+        min_at: c_main+ c_tvs- r_drv+ r_qh- tr_drv+ tr_qh-
+        max: 3.77663e-08
+        max_at: c_main- c_tvs+ r_drv- r_qh+ tr_drv+ tr_qh+
+      need_tpd:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
+    asserts:
+    - expr: min['hold_margin'] > 0
+      why: 'F1: with R-HOP-SER at the J-CHAIN and a U-TVS-CHAIN channel behind it, the key board''s data reaches the thumb
+        register''s SER after that register''s clock at every corner and on both edges, with the key board register''s CLK-to-QH
+        delay taken as ZERO'
+      pass: true
+    - expr: max['ser_delay'] < p['setup_budget']
+      why: and the RC still delivers the data within 100 ns of the clock, against a 1 us period
+      pass: true
+  hop-hold-key-board-to-thumb[q_up=0]:
+    corners: 65
+    measures:
+      clk_skew:
+        nominal: 1.30591e-08
+        min: 7.96339e-09
+        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv+ tr_qh-
+        max: 1.7025e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh+
+      ser_delay:
+        nominal: 5.95073e-08
+        min: 4.06584e-08
+        min_at: c_main- c_tvs- r_drv+ r_qh- tr_drv- tr_qh-
+        max: 7.75615e-08
+        max_at: c_main+ c_tvs+ r_drv- r_qh+ tr_drv+ tr_qh+
+      hold_margin:
+        nominal: 4.64482e-08
+        min: 2.87832e-08
+        min_at: c_main+ c_tvs- r_drv+ r_qh- tr_drv+ tr_qh-
+        max: 6.51044e-08
+        max_at: c_main- c_tvs+ r_drv- r_qh+ tr_drv+ tr_qh+
+      need_tpd:
+        nominal: 0.0
+        min: 0.0
+        min_at: nominal
+        max: 0.0
+        max_at: nominal
+    asserts:
+    - expr: min['hold_margin'] > 0
+      why: 'F1: with R-HOP-SER at the J-CHAIN and a U-TVS-CHAIN channel behind it, the key board''s data reaches the thumb
+        register''s SER after that register''s clock at every corner and on both edges, with the key board register''s CLK-to-QH
+        delay taken as ZERO'
+      pass: true
+    - expr: max['ser_delay'] < p['setup_budget']
+      why: and the RC still delivers the data within 100 ns of the clock, against a 1 us period
+      pass: true
+  hop-hold-lh-lt-without-rc[q_up=1]:
+    corners: 65
+    measures:
+      clk_skew:
+        nominal: 1.30591e-08
+        min: 7.96337e-09
+        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv+ tr_qh-
+        max: 1.7025e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh+
+      ser_delay:
+        nominal: 2.45692e-09
+        min: 9.51123e-10
+        min_at: c_main- c_tvs+ r_drv+ r_qh- tr_drv- tr_qh-
+        max: 3.29134e-09
+        max_at: c_main+ c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+      hold_margin:
+        nominal: -1.06021e-08
+        min: -1.5937e-08
+        min_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+        max: -4.67617e-09
+        max_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+      need_tpd:
+        nominal: 1.06021e-08
+        min: 4.67617e-09
+        min_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+        max: 1.5937e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+    asserts:
+    - expr: min['hold_margin'] < 0
+      why: 'WHAT-IF: without the RC the key board''s data beats left_thumb''s clock at the worst corner, and the hop holds
+        only if left_hand''s unpublished CLK-to-QH delay is at least need_tpd - why the resistor is fitted'
+      pass: true
+  hop-hold-lh-lt-without-rc[q_up=0]:
+    corners: 65
+    measures:
+      clk_skew:
+        nominal: 1.30591e-08
+        min: 7.96337e-09
+        min_at: c_main- c_tvs- r_drv- r_qh- tr_drv+ tr_qh-
+        max: 1.7025e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh+
+      ser_delay:
+        nominal: 3.46591e-09
+        min: 1.29111e-09
+        min_at: c_main- c_tvs+ r_drv+ r_qh- tr_drv- tr_qh-
+        max: 4.58919e-09
+        max_at: c_main+ c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+      hold_margin:
+        nominal: -9.59316e-09
+        min: -1.55974e-08
+        min_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+        max: -3.37831e-09
+        max_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+      need_tpd:
+        nominal: 9.59316e-09
+        min: 3.37831e-09
+        min_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+        max: 1.55974e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+    asserts:
+    - expr: min['hold_margin'] < 0
+      why: 'WHAT-IF: without the RC the key board''s data beats left_thumb''s clock at the worst corner, and the hop holds
+        only if left_hand''s unpublished CLK-to-QH delay is at least need_tpd - why the resistor is fitted'
+      pass: true
+  hop-hold-rh-rt-without-r[q_up=1]:
+    corners: 65
+    measures:
+      clk_skew:
+        nominal: 1.30591e-08
+        min: 7.96336e-09
+        min_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+        max: 1.7025e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh+ tr_drv+ tr_qh-
+      ser_delay:
+        nominal: 4.32433e-09
+        min: 1.77832e-09
+        min_at: c_main- c_tvs- r_drv+ r_qh- tr_drv- tr_qh-
+        max: 6.58691e-09
+        max_at: c_main+ c_tvs+ r_drv- r_qh+ tr_drv+ tr_qh+
+      hold_margin:
+        nominal: -8.73475e-09
+        min: -1.47102e-08
+        min_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+        max: -2.83351e-09
+        max_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+      need_tpd:
+        nominal: 8.73475e-09
+        min: 2.83351e-09
+        min_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+        max: 1.47102e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+    asserts:
+    - expr: min['hold_margin'] < 0
+      why: 'WHAT-IF: the array''s capacitance alone, behind only the register''s output resistance, does not hold the hop
+        either'
+      pass: true
+  hop-hold-rh-rt-without-r[q_up=0]:
+    corners: 65
+    measures:
+      clk_skew:
+        nominal: 1.30591e-08
+        min: 7.96336e-09
+        min_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+        max: 1.7025e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh+ tr_drv+ tr_qh-
+      ser_delay:
+        nominal: 5.81695e-09
+        min: 2.28148e-09
+        min_at: c_main- c_tvs- r_drv+ r_qh- tr_drv- tr_qh-
+        max: 8.92004e-09
+        max_at: c_main+ c_tvs+ r_drv- r_qh+ tr_drv+ tr_qh+
+      hold_margin:
+        nominal: -7.24212e-09
+        min: -1.40244e-08
+        min_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+        max: -1.02499e-09
+        max_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+      need_tpd:
+        nominal: 7.24212e-09
+        min: 1.02499e-09
+        min_at: c_main- c_tvs- r_drv- r_qh+ tr_drv+ tr_qh+
+        max: 1.40244e-08
+        max_at: c_main+ c_tvs+ r_drv+ r_qh- tr_drv+ tr_qh-
+    asserts:
+    - expr: min['hold_margin'] < 0
+      why: 'WHAT-IF: the array''s capacitance alone, behind only the register''s output resistance, does not hold the hop
+        either'
       pass: true
