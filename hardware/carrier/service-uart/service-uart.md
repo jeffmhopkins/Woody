@@ -25,7 +25,7 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `U0TXD` (IO43), `U0RXD` (IO44) | in/out | `carrier/carrier` | — | The real-time board's console pair, to `HDR-SERVICE`; `U0TXD` through `R-TXD-SER` |
+| `U0TXD` (IO43), `U0RXD` (IO44) | in/out | `carrier/carrier` | — | The real-time board's console pair, to `HDR-SERVICE`; `U0TXD` through `R-TXD-SER`, `U0RXD` through `R-RXD-SER` |
 | GND | ref | `carrier/power-entry-instrument` | `dig-gnd-topology` | The `PWR_GND` pour |
 
 ## The service header
@@ -38,10 +38,11 @@ two agree.*
   HDR-SERVICE  1×3, 2.54 mm, on the main board (lid off):
 
     pin   1            2            3
-          TXD_HDR      U0RXD(IO44)  GND
+          TXD_HDR      RXD_HDR      GND
           └─ console pair ─┘
 
   U0TXD(IO43) ──[R-TXD-SER 499R 1%]── TXD_HDR ── pin 1     (at J-MCU pin 22)
+  U0RXD(IO44) ──[R-RXD-SER 1k 1%]──── RXD_HDR ── pin 2     (beside the header)
 ```
 
 **The part is surface mount** (owner, 2026-10-06: *"I think I would prefer to have it a surface
@@ -66,8 +67,7 @@ with the lid off since issue #37 removed the tail receptacle — and, when that 
 mode with its own `BOOT` and `RESET` buttons with the lid off (they are on
 its back, under the carrier's notch side, and reachable once the lid is
 lifted). The procedure is `firmware/README.md`'s. **`EN` and `IO0` are no
-longer wired out**: no button wires, no ribbon conductors (`J-MCU` pins 23
-and 24 are on no net), no header pins.
+longer wired out**: no button wires, no ribbon conductors, no header pins.
 
 **`EN` keeps only the Matrix's own `R8`** — 10 kΩ to its 3V3 and `Key1` to
 `GND`, no capacitor `[repo] datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-SCHEMATIC.pdf`.
@@ -90,3 +90,4 @@ for it is a power cycle with the umbilical's soft start (ADR 0021 amendment
 |---|---|---|---|
 | `HDR-SERVICE` | **1×3**, 2.54 mm | The real-time board's UART pair and GND | `[repo] bom.csv`; decided (ADR 0018; owner, 2026-10-03) |
 | `R-TXD-SER` | 499 Ω 1 % | In series with `U0TXD`, at `J-MCU` pin 22 | `[ds]` Espressif guidelines p.16 |
+| `R-RXD-SER` | 1 kΩ 1 % | In series with `U0RXD`, beside `HDR-SERVICE` pin 2: limits what the header pin can push into `IO44` (pre-fab review, 2026-11-22) | `[repo] bom.csv` |

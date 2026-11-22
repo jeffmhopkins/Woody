@@ -797,6 +797,10 @@ boards:
     source: "[overhang past the board's edge, reach in from it, width across, its axis below the Matrix's underside], measured off the vendor STEP [3D, datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-3D.stp, mesh extents, review #19 F1]; its depth below the board is boards.matrix_under_h. The plug's overmould (openings.usb_overmold) is centred on that axis"
     decided_by: "calipers on the Matrix in hand"
   # CBL-MCU-RIBBON's IDC socket, at each end (the same part both ends).
+  # THE THREE BELOW ARE AN ENVELOPE. CBL-MCU-RIBBON is a Samtec FFSD assembly since
+  # 2026-11-22 (ADR 0018, Amendment of that date), whose socket is no larger in any
+  # direction than the one these were read from [ds connectors/SAMTEC-FFSD-XX-X-XX.XX-01-PRINT.pdf],
+  # so they are kept until M4 measures a mated pair.
   mcu_plug_t:
     value: 3.05
     status: nominal

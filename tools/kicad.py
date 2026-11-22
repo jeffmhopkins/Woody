@@ -803,8 +803,9 @@ def check_umbilical(board_docs):
 # THE MATRIX ON ITS OWN CARRIER BOARD (ADR 0021 amendment 2026-10-03; until then on the
 # right-hand key board's rails). The carrier circuit's sheet holds the Matrix (U-MCU-RT, its
 # pads) and J-MCU, netted as one node per conductor; the matrix-carrier board draws the parts
-# between them: J-MCU-C, the ribbon's other end, hung upside down so its pin k is J-MCU's pin
-# 25 - k; HDR-MATRIX x2, headers through the Matrix's pad rows. Each of those pins is named for
+# between them: J-MCU-C, the ribbon's other end, hung upside down and turned half a turn, so its
+# pin k is J-MCU's pin k and the ribbon is made pin 1 to pin 1 (ADR 0018, Amendment of
+# 2026-11-22); HDR-MATRIX x2, headers through the Matrix's pad rows. Each of those pins is named for
 # what it meets (a J-MCU pin number, or a U-MCU-RT pin name in its Pins field) and must be on
 # the net the carrier puts that on.
 CARRIER = os.path.join(ROOT, "hardware", "carrier", "netlist.yaml")
@@ -815,7 +816,7 @@ MATRIX_ALIAS = {}
 
 def check_matrix(board_docs):
     """The Matrix's connectors on its board against the carrier's sheet: J-MCU-C pin k on the
-    net of J-MCU pin 25 - k, each HDR-MATRIX pin on the net of the U-MCU-RT pin
+    net of J-MCU pin k, each HDR-MATRIX pin on the net of the U-MCU-RT pin
     it is named for (a pad the carrier leaves on no net may be left open). A part missing, or
     on another board, is a failure: the Matrix would have no way in."""
     docs = dict(board_docs)
@@ -850,7 +851,7 @@ def check_matrix(board_docs):
             problems.append(f"matrix: {MATRIX_BOARD} has {len(refs)} {row} part(s), not {n}")
         for ref in refs:
             for pin in doc["components"][ref]["pins"]:
-                key = f"J-MCU.{25 - int(pin)}" if row == "J-MCU-C" else f"U-MCU-RT.{pin}"
+                key = f"J-MCU.{int(pin)}" if row == "J-MCU-C" else f"U-MCU-RT.{pin}"
                 want = cnet.get(key)
                 net, size = got.get(f"{ref}.{pin}", (None, 0))
                 if want is None:

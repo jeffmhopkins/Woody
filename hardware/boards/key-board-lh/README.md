@@ -464,6 +464,6 @@ the row.
 | The board depth at the hardware's tolerance limits: the worst case reaches the window's shoulder end (`drc.echo` "key-board depth at the hardware's tolerance limits") | the first board, fitted |
 | The register's supply: JLC's stock is thin (above) | the first order |
 | J-CHAIN's second source: the XKB part at LCSC is not cleared until its drawing is banked (above) | its drawing |
-| J-CHAIN's pads' ring is at JLC's absolute minimum on the sides facing a neighbour. The 1.27 mm pitch both ways leaves no room there. The pads are lengthened on their free side instead (`hardware/lib/README.md`, the IDC header's row); ask JLC's review to accept the thin side | the first order |
+| J-CHAIN's pads' ring is at JLC's absolute minimum on the sides facing a neighbour. The 1.27 mm pitch both ways leaves no room there. The pads are lengthened on their free side instead (`hardware/lib/README.md`, the IDC header's row); the hole is the one the header's drawing asks for (`datasheets/connectors/CNCTECH-3220-XX-0100-00-1.27MM-BOX-HEADER-VERTICAL.pdf`, *Recommended PCB layout*) and stays (pre-fab review, issue #52 F6). Ask JLC's review to accept the thin side | the first order |
 | Part orientation in JLC's placement preview. The CPL carries JLC's convention and each part's offset from JLC's own footprint (*Ordering*, 4), but no order has yet confirmed it | the first order's preview (*Ordering*, 5); record any correction in *Revisions* |
 | The main board's end of the ribbon | the main board's layout |

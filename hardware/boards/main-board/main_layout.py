@@ -167,12 +167,13 @@ PLACE.update({
 # line takes a via between two of their pads to the bottom trunk.
 # Each resistor then stands where its line arrives, and nothing crosses on a face.
 TRIO = 24.35                  # the chain's three series resistors: fed from J-MCU's mouth end by vias under them
+SER_Y = {"IO35": 24.4, "IO36": 23.6}   # the ADC branch's series resistors: MOSI's on its vias' line, SCLK's passing north of it
 SPI_Y = 19.65                  # the umbilical's SPI resistors, a row under its pins; 3V3 and IO36 pass under their bodies
 BUS_U, BUS_G = 16.4, 14.5     # the inrush switch's two buses, UMBILICAL_POS12 over INRUSH_GATE
 COL = (293.95, 296.4, 298.85) # ...and its three columns
 PLACE.update({
     "R35": (248.3, TRIO, ("IO7", "S")), "R34": (251.3, TRIO, ("IO38", "S")), "R36": (254.3, TRIO, ("IO33", "S")),
-    "R37": (256.7, TRIO + 0.55, ("3V3", "S")),   # SER's pull-up, its SER pad level with R36's; QH passes under its body
+    "R37": (257.0, TRIO + 0.55, ("3V3", "S")),   # SER's pull-up, its SER pad level with R36's; QH passes under its body
     "C45": (252.0, 28.5, "-x"),            # in the LED capacitors' row, a millimetre from the first one
     "L1": (246.3, 17.9, ("BUCK_IN", "W")),
     "Q2": (237.9, 19.45, ("INST_5V", "E")), "C208": (241.35, 23.0, ("INST_5V", "N")),   # its regulator side toward the regulator
@@ -197,6 +198,11 @@ PLACE.update({
     "R1": (280.3, SPI_Y, ("SCLK", "N")), "R2": (283.3, SPI_Y, ("MOSI", "N")), "R3": (286.3, SPI_Y, ("CS_MOD", "N")),
     "R40": (289.0, SPI_Y - 0.55, ("IO34", "S")),
     "R46": (285.5, 15.6, ("TXD_HDR", "W")),
+    # RXD's series resistor beside the header, its header pad toward pin 2 (pre-fab review S3)
+    "R56": (289.2, 15.95, ("RXD_HDR", "W")),
+    # the ADC branch's two series resistors (pre-fab review S1), on top over the long lanes a
+    # little way from J-MCU, where the board is clear: SCLK's outside, MOSI's inside it
+    "R54": (227.0, SER_Y["IO35"], ("IO35", "E")), "R55": (223.0, SER_Y["IO36"], ("IO36", "E")),
     # at the umbilical's pins: the reverse-polarity diode astride SCLK and MOSI, its pads on
     # the 12 V pin and the ground pin; the surge diode on a stub beside it
     "D2": (290.5, 28.2, ("UMBILICAL", "N")),
@@ -339,18 +345,19 @@ def analog():
     via("IO39", 42.0, 20.2)
     T("IO39", [(42.0, 20.2), (42.65, 19.55)])
     T("IO39", ["R45.2", (41.99, 18.65), (27.23, 18.65), (26.58, 18.0), (26.58, 14.76), (25.98, 14.16)])
-    via("IO35", 32.7, 12.88, "U2.7")
+    via("ADC_CLK", 32.7, 12.88, "U2.7")
     via("IO37", 34.0, 11.62, "U2.6")
-    via("IO36", 32.7, 10.34, "U2.5")
-    via("DEV_3V3", 46.72, 23.6)
-    T("DEV_3V3", [(46.72, 23.6), (46.72, 17.75), (46.22, 17.25), "R47.1"])
+    via("ADC_DIN", 32.7, 10.34, "U2.5")
+    # the ADC's own 3V3 (tail() draws its lane): up at a via on the block's tail side, through
+    # the chip-select pull-up's pad, and down to the supply resistor
+    VIAS.append(("DEV_3V3", 46.72, 21.65))
+    T("DEV_3V3", [(46.72, 21.65), (46.72, 17.75), (46.22, 17.25), "R47.1"])
     T("DEV_3V3", [(46.72, 19.55), "R45.1"])
     # the five bottom lanes from J-MCU end here; tail() draws them as far as HWY
     T("IO39", [(HWY, MOUTH["IO39"]), (43.35, 21.55), (42.0, 20.2)], FINE, "B")
     T("IO37", [(HWY, MOUTH["IO37"]), (34.4, 21.95), (34.0, 21.55), (34.0, 11.62)], FINE, "B")
-    T("IO36", [(HWY, MOUTH["IO36"]), (33.75, 22.35), (33.35, 21.95), (33.35, 10.99), (32.7, 10.34)], FINE, "B")
-    T("IO35", [(HWY, MOUTH["IO35"]), (33.1, 22.75), (32.7, 22.35), (32.7, 12.88)], FINE, "B")
-    T("DEV_3V3", [(HWY, MOUTH["DEV_3V3"]), (46.72, 23.6)], 0.3, "B")
+    T("ADC_DIN", [(HWY, MOUTH["IO36"]), (33.75, 22.35), (33.35, 21.95), (33.35, 10.99), (32.7, 10.34)], FINE, "B")
+    T("ADC_CLK", [(HWY, MOUTH["IO35"]), (33.1, 22.75), (32.7, 22.35), (32.7, 12.88)], FINE, "B")
 
 
 MOUNTS_FAR = (37.8, 121.7, 145.8, 247.7)      # the far column mounts the breath pair steps round
@@ -380,28 +387,41 @@ def breath_pair():
     via("AGND_INST", 278.6, 34.85, "R39.1")
 
 
+# THE ADC BRANCH'S SERIES RESISTORS (pre-fab review S1). IO35 and IO36 are the two lanes next
+# to the 3V3 trunk, so each leaves its lane for a via on the trunk's side, crosses its resistor
+# on top, and comes back down to the same lane; MOSI's two vias stand inside SCLK's two, where
+# SCLK's lane is away on top. net: (the lane's via toward the tail, toward the mouth, their y)
+SER = {"IO35": (229.0, 220.2, 24.0), "IO36": (224.775, 221.225, 23.6)}
+AFTER = {"IO35": "ADC_CLK", "IO36": "ADC_DIN"}       # each line's name beyond its resistor
+
+
 def jx(n):
     """J-MCU pin n's x: two rows of twelve, the odd row nearest the near edge."""
     return 255.28 + 1.27 * ((n - 1) // 2)
 
 
 TRUNK, LANE_D1, LANE_DI = 28.3, 29.05, 29.75   # three bottom lanes under the LED driver: 3V3, and the first LED's two data lines
-HWY = 48.0      # where tail()'s bottom lanes hand over to analog()'s
+HWY = 44.8      # where tail()'s bottom lanes hand over to analog()'s
 # The five lines that run the board's length on the bottom face, south of the LED row and
 # north of the near-row switches. They hold LANE, which clears the U-bolt's leg, in one
 # straight run to the analog block (owner, 2026-11-21: no jog on the way). There, where 3V3
 # leaves them, they step once, together, to MOUTH, which lets 3V3 come up inside the analog
 # island south of REF_VIN's line.
-LANE = {"IO39": 22.3, "IO37": 22.7, "IO36": 23.1, "IO35": 23.5, "DEV_3V3": 24.0}
-MOUTH = {"IO39": 21.55, "IO37": 21.95, "IO36": 22.35, "IO35": 22.75, "DEV_3V3": 23.6}
-STEP_X = 49.6    # the step, at the analog block's tail side
+# 3V3's lane stands a via's room off IO35's (2026-11-22), which is what lets the ADC branch's
+# series resistors be reached from the lanes; it carries the key pull-ups only, and ends at
+# the last of them. The ADC's own 3V3 is a sixth lane, beside IO39's on the side away from 3V3's (ADC_3V3_Y),
+# and it is that lane which sets how near the U-bolt's leg the six may come.
+LANE = {"IO39": 22.55, "IO37": 22.95, "IO36": 23.35, "IO35": 23.75, "DEV_3V3": 24.7}
+ADC_3V3_Y = 22.15
+MOUTH = {"IO39": 21.55, "IO37": 21.95, "IO36": 22.35, "IO35": 22.75}
+STEP_X = 46.45    # the step, inside the analog block, past the via the ADC's own 3V3 comes up at
 
 
 def step(net):
     """A lane's step from LANE to MOUTH, each a little before the one south of it so the
     diagonals keep the lanes' spacing."""
     i = list(LANE).index(net)
-    x = STEP_X - 0.166 * i - (0.1 if net == "DEV_3V3" else 0)
+    x = STEP_X - 0.166 * i
     d = LANE[net] - MOUTH[net]
     return [(x, LANE[net]), (x - d, MOUTH[net]), (HWY, MOUTH[net])]
 
@@ -459,7 +479,10 @@ def power():
     two("PWR_GND", 214.9, 13.0)          # C10.2
     # 5 V
     T("INST_5V_A", ["J1.3", "J1.1", "J1.2"], 0.5)
-    T("INST_5V_A", ["J1.2", (255.58, 19.1), (255.58, 23.65), (255.28, 23.95), (240.4, 23.95), (238.84, 22.39), "Q2.3"], PWR)
+    # the Matrix's whole supply: 0.8 mm, necked to 0.7 past R36's pad and under the three chain
+    # resistors' bodies, which is all the room there is (pre-fab review S5)
+    T("INST_5V_A", ["J1.2", (255.28, 19.95), (255.74, 20.41), (255.74, 23.75), (255.49, 24.0), (246.9, 24.0)], 0.7)
+    T("INST_5V_A", [(246.9, 24.0), (240.45, 24.0), (238.84, 22.39), "Q2.3"], 0.8)
     T("INST_5V_A", ["Q2.3", "U13.4"], 0.5)
     T("INST_5V_A", ["J1.2", (255.285, 20.0), (255.585, 20.3), (259.0, 20.3), (263.25, 24.55)], PWR, "B")
     via("INST_5V_A", 263.25, 24.55, "C12.1", PWR)
@@ -469,8 +492,10 @@ def power():
     # the surge diode to a lane under the LED driver, south of the two LED data lines there,
     # and down to R37's via
     via("DEV_3V3", 278.4, 21.5, (278.4, 20.25), FINE)
-    T("DEV_3V3", [(278.4, 21.5), (271.6, TRUNK), (256.7, TRUNK), (256.7, 22.2), (256.2, 22.2), (254.4, 24.0)] + step("DEV_3V3"), 0.3, "B")
-    via("DEV_3V3", 256.7, 22.2, "R37.2")
+    k3 = LANE["DEV_3V3"]
+    T("DEV_3V3", [(278.4, 21.5), (271.6, TRUNK), (256.7, TRUNK), (256.7, 22.2), (256.2, 22.2), (256.2 - (k3 - 22.2), k3), (64.2, k3)], 0.3, "B")
+    VIAS.append(("DEV_3V3", 256.7, 22.2))
+    T("DEV_3V3", ["R37.2", (257.0, 22.5), (256.7, 22.2)])
 
 
 def tail():
@@ -495,12 +520,19 @@ def tail():
     T("IO35", [(277.95, 16.85), "U1.1"])
     T("IO36", ["J1.11", (261.635, 15.75), (261.935, 15.45), (271.1, 15.45), (275.5, 19.85), (281.64, 19.85), "R2.1"], FINE)
     T("IO36", [(276.05, 19.85), "U1.3"], FINE)
-    T("DEV_3V3", ["J1.15", (264.175, 16.15), (264.475, 15.85), (270.9, 15.85), (275.3, 20.25), (289.0, 20.25)], FINE)
+    T("DEV_3V3", ["J1.15", (264.175, 16.15), (264.475, 15.85), (270.5, 15.85), (274.9, 20.25), (289.0, 20.25)], FINE)
+    # THE ADC'S OWN 3V3 (pre-fab review S2): it leaves 3V3 at a via as soon as the line is out
+    # from under the header's row, before anything else is fed, and runs to the ADC alone: under
+    # the row south of the six lanes, then a sixth lane south of the other five, to a via at
+    # the analog block's tail side. The key pull-ups' current is in none of it
+    VIAS.append(("DEV_3V3", 272.0, 17.35))
+    T("DEV_3V3", [(272.0, 17.35), (272.0, 14.15), (271.7, 13.85), (251.0, 13.85), (251.0 - (ADC_3V3_Y - 13.85), ADC_3V3_Y),
+                  (46.72 + ADC_3V3_Y - 21.65, ADC_3V3_Y), (46.72, 21.65)], FINE, "B")
     T("DEV_3V3", [(276.72, 20.25), "R48.1"], FINE)
     # IO6 turns north past the header's end, between R10 and the first LED's capacitor, to
     # the driver; its pull-up hangs on a branch
     T("IO6", ["J1.21", (267.985, 16.55), (268.285, 16.25), (270.1, 16.25), (270.4, 16.55), (270.4, 29.6), (268.73, 31.27), "U6.5"], FINE)
-    T("IO6", [(270.4, 17.0), (270.8, 17.0), (276.41, 22.61), "R48.2"], FINE)
+    T("IO6", [(270.4, 17.3), (270.8, 17.3), (276.11, 22.61), "R48.2"], FINE)
     # the module's SPI, from its resistors to J-UMB: SCLK comes down the tail side of the first LED
     T("SCLK", ["J6.4", (290.07, 29.77), (281.41, 21.11), "R1.2"])
     T("MOSI", ["J6.5", (288.3, 27.23), (283.3, 22.23), "R2.2"])
@@ -533,20 +565,39 @@ def tail():
     # the even row, bottom face
     T("IO1", ["J1.12", (261.63, 20.79), (268.3, 27.46)], FINE, "B")
     T("IO2", ["J1.16", (264.17, 22.3)], FINE, "B")
-    T("U0TXD", ["J1.22", (267.985, 19.8), (268.285, 20.1), (270.5, 20.1), (275.0, 15.6), (287.6, 15.6)], FINE, "B")
-    T("U0RXD", ["J1.18", (265.445, 20.2), (265.745, 20.5), (271.3, 20.5), (275.4, 16.4), (288.2, 16.4), (288.8, 15.8), (288.8, 10.45),
-                (287.75, 9.4)], FINE, "B")
-    via("U0TXD", 287.6, 15.6, "R46.1")
+    T("U0TXD", ["J1.22", (267.985, 19.8), (268.285, 20.1), (270.5, 20.1), (275.0, 15.6), (287.4, 15.6)], FINE, "B")
+    T("U0RXD", ["J1.18", (265.445, 20.2), (265.745, 20.5), (271.3, 20.5), (275.4, 16.4), (289.375, 16.4), (290.025, 17.05)], FINE, "B")
+    via("U0TXD", 287.4, 15.6, "R46.1")
     T("TXD_HDR", ["R46.2", (284.0, 15.01), "J2.1"])
-    via("U0RXD", 287.75, 9.4, "J2.2")
+    # RXD comes up beside its series resistor; from the resistor one line on top between the
+    # header's two outer pads to pin 2
+    via("U0RXD", 290.025, 17.05, "R56.1")
+    T("RXD_HDR", ["R56.2", (288.2, 15.775), (288.2, 10.25), (287.35, 9.4), "J2.2"], FINE)
     # the odd row, bottom face: under the row, north past the header's mouth end
     # the four lane lines turn once, 45 degrees, from under the row straight into their lanes;
     # IO7 and IO38 end at vias between them and go north on top to their resistors
     def lane_in(net, n, y, xc):
         d = LANE[net] - y
-        T(net, [f"J1.{n}", (jx(n), y + c), (jx(n) - c, y), (xc, y), (xc - d, LANE[net])] + step(net), FINE, "B")
+        pts = [f"J1.{n}", (jx(n), y + c), (jx(n) - c, y), (xc, y), (xc - d, LANE[net])]
+        if net in SER:              # the lane stops at a via, crosses its resistor on top, and starts again
+            e, w, vy = SER[net]
+            k = vy - LANE[net]
+            T(net, pts + [(e + k, LANE[net]), (e, vy)], FINE, "B")
+            T(AFTER[net], [(w, vy), (w - k, LANE[net])] + step(net), FINE, "B")
+            VIAS.extend([(net, e, vy), (AFTER[net], w, vy)])
+        else:
+            T(net, pts + step(net), FINE, "B")
 
-    lane_in("IO39", 23, 14.25, 251.0)
+    # SCLK's resistor: from its via up to the resistor's line, through the resistor, on past
+    # MOSI's, and down to the via its lane starts again from
+    r, (e, w, vy) = SER_Y["IO35"], SER["IO35"]
+    T("IO35", [(e, vy), (e - (r - vy), r), "R54.1"], FINE)
+    T("ADC_CLK", ["R54.2", (w + (r - vy), r), (w, vy)], FINE)
+    # MOSI's: its two vias and its resistor on one line
+    e, w, vy = SER["IO36"]
+    T("IO36", [(e, vy), "R55.1"], FINE)
+    T("ADC_DIN", ["R55.2", (w, vy)], FINE)
+    lane_in("IO39", 23, 14.25, 251.2)
     lane_in("IO37", 13, 15.45, 253.6)
     lane_in("IO36", 11, 15.85, 254.0)
     lane_in("IO35", 9, 16.25, 254.4)
@@ -560,11 +611,11 @@ def tail():
     # the chain's three outputs: a via between the pads, then the bottom face toward the mouth
     via("CHAIN_SHLD", 249.2, 25.81, "R35.2")
     via("CHAIN_SCK", 252.2, 25.81, "R34.2")
-    T("CHAIN_SER_LH", ["R36.2", (255.2, 25.81), "R37.1"])
+    T("CHAIN_SER_LH", ["R36.2", (255.2, 25.81), "R37.1"])   # R37 stands off R36 by the 5 V line's width
     VIAS.append(("CHAIN_SER_LH", 255.2, 25.81))
     # the chain's return to J-MCU pin 24, on top under the three bodies to a via beyond them
     T("CHAIN_QH_RT", ["J1.24", (269.25, 20.8), (268.95, 21.1), (260.1, 21.1), (258.1, 23.1), (258.1, 24.45),
-                      (257.65, 24.9), (246.35, 24.9), (245.6, 25.65)])
+                      (257.65, 24.9), (246.35, 24.9), (245.6, 25.65)], FINE)
     VIAS.append(("CHAIN_QH_RT", 245.6, 25.65))
 
 
@@ -653,7 +704,7 @@ def chain():
     VIAS.append(("CHAIN_QH_RT", 170.5, q - 0.4))
     T("CHAIN_QH_RT", [(170.5, q - 0.4), (169.06, 32.64), "U8.9"])
     # SER, to the left header's pin 6
-    T("CHAIN_SER_LH", [(255.2, 25.81), (254.34, 24.95), (248.2, 24.95), (247.9, 25.25), (247.9, e - c), (247.9 - c, e),
+    T("CHAIN_SER_LH", [(255.2, 25.81), (254.54, 25.15), (248.0, 25.15), (247.9, 25.25), (247.9, e - c), (247.9 - c, e),
                        (xe + c, e), (xe, e + c), (xe, y6 - c), (xe + c, y6), "J4.6"], FINE, "B")
     # SH/LD, to pin 4 of both
     T("CHAIN_SHLD", [(249.2, 25.81), (249.2, h - c), (249.2 - c, h), (xh + RH, h)], FINE, "B")
@@ -749,7 +800,7 @@ def v3():
     draw it); from it a line goes north under the LED row to each via, and each via's parts
     hang from it on top. North of the right hand's header a second lane leaves the trunk at
     the tail end and passes under SW8's pole."""
-    lane = lambda x: LANE["DEV_3V3"] if x > STEP_X else MOUTH["DEV_3V3"]   # noqa: E731
+    lane = lambda x: LANE["DEV_3V3"]   # noqa: E731
     W = 0.3
 
     def tap(x, y, top):
@@ -920,7 +971,7 @@ def planes(board, geo):
     for z in board.Zones():
         if not z.GetIsRuleArea() and z.GetNetname() == "PWR_GND":
             z.SetPadConnection(pcbnew.ZONE_CONNECTION_THERMAL)
-    # J-MCU's four ground pins too: a 1.27 mm header leaves room for one spoke where the
+    # J-MCU's ground pins too: a 1.27 mm header leaves room for one spoke where the
     # rules ask two, the same exception the carrier's end of this ribbon takes (ADR 0030)
     for fp in board.GetFootprints():
         ref = fp.GetReference()

@@ -94,7 +94,8 @@ do that too"*.
    `hardware/boards/matrix-carrier/README.md`, *The ribbon's pins*, and the
    sheet `matrix-carrier.kicad_sch` owns it. The main board's `J-MCU` takes
    pin 25 − *k* for `J-MCU-C` pin *k*, as before (ADR 0021, *Amendment,
-   2026-10-03*); only which line is on which conductor has moved.
+   2026-10-03*; superseded 2026-11-22, when the header was turned and pin
+   *k* became pin *k*: ADR 0018, *Amendment, 2026-11-22*); only which line is on which conductor has moved.
 2. **Every line on the top face, the bottom face one whole ground plane.**
    One via, the Matrix's ground pad's. `carrier_layout.py` writes out every
    track and replaces `carrier_routes.py`.

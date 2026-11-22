@@ -8,14 +8,14 @@ circuit: carrier/service-uart
 title: Service UART header
 page: service-uart.md
 ports:
-  U0RXD:
-    dir: in
-    from: carrier/carrier
   PWR_GND:
     dir: ref
     from: module/power-entry
     figure: dig-gnd-topology
   U0TXD:
+    dir: in
+    from: carrier/carrier
+  U0RXD:
     dir: in
     from: carrier/carrier
 components:
@@ -25,9 +25,17 @@ components:
     - 1
     - 2
     - 3
-    note: 'THREE PINS: 1 TXD, 2 RXD, 3 GND - the UART and its ground. EN and IO0 were pins 4 and 5 until the owner
-      chose to program and recover the Matrix over its own USB-C only (2026-10-03, ADR 0021 amendment 2026-10-03):
-      its BOOT and RESET buttons do both with the lid off'
+    note: 'THREE PINS: 1 TXD (through R-TXD-SER), 2 RXD (through R-RXD-SER), 3 GND - the UART and its ground. EN
+      and IO0 were pins 4 and 5 until the owner chose to program and recover the Matrix over its own USB-C only
+      (2026-10-03, ADR 0021 amendment 2026-10-03): its BOOT and RESET buttons do both with the lid off'
+  R-RXD-SER:
+    value: 1k 1%
+    pins:
+    - 1
+    - 2
+    note: 'U0RXD''s series resistor (pre-fab review S3, 2026-11-22), beside HDR-SERVICE pin 2: it limits what a
+      strike on the pin, or an adapter at the wrong voltage, can push into IO44, as R-TXD-SER does for IO43. 1 kohm
+      against the pad''s input leakage and a UART''s edge rate costs nothing'
   R-TXD-SER:
     value: 499R 1%
     pins:
@@ -41,12 +49,15 @@ nets:
   PWR_GND:
   - port: PWR_GND
   - HDR-SERVICE.3
+  RXD_HDR:
+  - HDR-SERVICE.2
+  - R-RXD-SER.2
   TXD_HDR:
   - HDR-SERVICE.1
   - R-TXD-SER.2
   U0RXD:
   - port: U0RXD
-  - HDR-SERVICE.2
+  - R-RXD-SER.1
   U0TXD:
   - port: U0TXD
   - R-TXD-SER.1

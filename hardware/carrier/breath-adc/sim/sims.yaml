@@ -228,7 +228,7 @@ sims:
         why: "and with it stuck there once 3V3 is up - the page's 'fails high' case, (0.6 x INST_POS12 - V_F - 3.3 V) / 6 kohm"
   # --- #12 item 3: the converter's ripple reaching the conversion. The MCP3202's VDD is its
   # reference, and it is the dev board's 3V3, regulated from the 5 V rail the R-78E5.0 makes:
-  # INST_5V_A -> CBL-MCU-RIBBON's three 5 V conductors (and its four grounds back) -> the
+  # INST_5V_A -> CBL-MCU-RIBBON's three 5 V conductors (and its grounds back) -> the
   # Matrix's VCC_5V -> the ME6217 -> its one 3V3 conductor -> C-ADC-BULK and C-DEC-ADC at
   # U-ADC. A code error ratiometric to the input: (V_in / VREF) x (dVREF / VREF) x 4096.
   - name: vdd-ripple

@@ -53,9 +53,10 @@ mounts:
 # Amendment of 2026-11-21): its pad row nearer the near edge 2.29 in from the insulator's
 # near face [calc: half the envelope's width, boards.mcu_conn_w, less half the row spacing],
 # the pads centred along the echo's box. The echo's 90 is the way the ribbon leaves its
-# socket, toward the far side. Its pin 25-k carries J-MCU's pin k.
+# socket, toward the far side. TURNED HALF A TURN (rot: 180; owner, 2026-11-22; pre-fab review
+# F3): its key toward the far side, facing J-MCU, and its pin k carries J-MCU's pin k.
 connectors:
-  J-MCU-C: {row: J-MCU-C, rot: 0, back_row_from: x0, back_row_at: 2.29, bottom: true}
+  J-MCU-C: {row: J-MCU-C, rot: 180, back_row_from: x0, back_row_at: 2.29, bottom: true}
 
 # Parts whose courtyard is MEANT to lie off the board (pcb.py check_courtyards).
 courtyard_overhang:
@@ -81,10 +82,10 @@ underside_rows: [J-MCU-C]
 # SURFACE MOUNT (hanxia TP-YQ): nothing comes through to the underside, where J-MCU-C's
 # insulator lies under the 5V..IO1 row's first pins, and the bottom face is one whole plane.
 parts:
-  J2: [272.97, 17.07, 90]        # HDR-MATRIX, the 5V..IO1 row
-  J3: [272.97, 39.93, 90]        # HDR-MATRIX, the IO33..RX row
+  J2: [277.22, 17.07, 90]        # HDR-MATRIX, the 5V..IO1 row
+  J3: [277.22, 39.93, 90]        # HDR-MATRIX, the IO33..RX row
 
-# PWR_GND poured on the bottom face only, whole: J-MCU-C's four grounds and the mounts join it
+# PWR_GND poured on the bottom face only, whole: J-MCU-C's grounds and the mounts join it
 # there, and the Matrix's pad-row GND reaches it through the board's one via. The top face
 # carries every line and has no pour (ADR 0030).
 planes:
@@ -94,8 +95,8 @@ silk:
   at: [[252.5, 17.8], [262.0, 17.8]]   # the arm's top face beside J-MCU-C's tails (it hangs underneath)
   search: true
   title: "WOODY Matrix carrier"
-  rev: "D"
-  date: "2026-11-21"
+  rev: "E"
+  date: "2026-11-22"
 
 # No router: `route: false` keeps tools/pcb.py from running one on this board
 # (carrier_layout.py, ADR 0030).
