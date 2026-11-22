@@ -41,7 +41,7 @@ import pcbnew       # noqa: E402
 import yaml         # noqa: E402
 import pcb          # noqa: E402  (frames, the sheets' netlist, the silkscreen steps; nothing that routes)
 import pcb_hand     # noqa: E402  (what every hand-laid board shares: seating, the key pattern, the plane's rules)
-from pcb_hand import GND, PITCH, PW, X_CAP, mouth_end, tail_end      # noqa: E402
+from pcb_hand import CORRIDOR, EXIT, GND, PITCH, PW, X_CAP, mouth_end, tail_end      # noqa: E402
 
 NAME, CLUSTER = "key-board-rh", "right_hand"
 SRC = os.path.join(HERE, NAME + ".kicad_pcb")
@@ -98,11 +98,10 @@ def routes(cu, sw):
     cu.track("/HOP_RH_RT", fan(8, 0.5) + [(x9 - 0.5, ch(0.5)), (x9, ch(1.0)), (x9, y9)])
     cu.track("/HOP_LT_RH", fan(6, 0) + [(x10 - 1.0, ch(0)), (x10, ch(1.0)), (x10, y10)])
     cu.track("/CHAIN_SHLD", fan(4, -0.5) + [(x1 - 0.5, ch(-0.5)), (x1, ch(-1.0)), (x1, y1)])
-    cu.track("/CHAIN_SCK", fan(2, -1.0) + [(x2 - 0.3, ch(-1.0)), (x2, ch(-1.3)), (x2, y2)])
+    cu.track("/CHAIN_SCK", fan(2, -1.0) + [(x2 - 0.2, ch(-1.0)), (x2, ch(-1.2)), (x2, y2)])
 
     # -- the corridor between RH3's capacitor and RH5's resistor: RH3, RH4, 3V3, RH5 side by side
-    xl3 = cap["RH3"][0] + 1.3
-    xl4, xt, xl5 = xl3 + 0.6, xl3 + 1.2, xl3 + 1.8
+    xl3, xl4, xt, xl5 = (cap["RH3"][0] + d for d in CORRIDOR)
     xw = xl3                      # the rail's way back up to the row keys, where RH3's line has left for its pin
     assert xl5 + 0.125 + 0.2 <= ser["RH5"][0] - 0.725 + 1e-6, "RH5's line fouls its own resistor"
     x6c = ser["RH6"][0] - 1.7     # RH6's way down, between the trunk's ring round RH4 and RH6's own resistor
@@ -113,12 +112,11 @@ def routes(cu, sw):
     # the row keys' the other. The ring meets that rail square.
     j, c8 = jpin(10), (PLACE["C8"][0], jpin(10)[1])
     x11, x16 = upin(11)[0], upin(16)[0]
-    c9 = (PLACE["C9"][0] + 0.9125, Y_CAPS)
     yr5, yr4, yr = pu1["RH5"][1], pu1["RH4"][1], pu1["RH3"][1]
     xe = sw["RH4"][0] + X_CAP + 1.3      # round RH4, outside its capacitor
-    cu.track(V33, [j, c8, (c8[0] + 1.0, c8[1]), (c8[0] + 1.0 + Y_RAIL - c8[1], Y_RAIL), (x11 - 0.5, Y_RAIL), (x11, Y_RAIL - 0.5),
-                   (x11, Y_CAPS), upin(11), (x11, ch(1.7)), (x11 + 0.8, ch(0.9)), (x16 - 0.8, ch(0.9)), (x16, ch(1.7)), upin(16),
-                   (x16, Y_CAPS), c9, (xt, c9[1] - (xt - c9[0])), (xt, yr5 + 3.0), (xt + 3.0, yr5),
+    cu.track(V33, [(x16, ch(0.9)), upin(16), (x16, Y_CAPS)], PW)       # a T off the bar: straight up through pin 16 into C9
+    cu.track(V33, [j, c8, (c8[0] + EXIT, c8[1]), (c8[0] + EXIT + Y_RAIL - c8[1], Y_RAIL), (x11 - 0.5, Y_RAIL), (x11, Y_RAIL - 0.5),
+                   (x11, Y_CAPS), upin(11), (x11, ch(1.19)), (x11 + 0.29, ch(0.9)), (xt - 0.5, ch(0.9)), (xt, ch(0.4)), (xt, yr5 + 3.0), (xt + 3.0, yr5),
                    pu1["RH5"], (xe - 6.3, yr5), (xe, yr5 - 6.3), (xe, yr4)], PW)
     cu.track(V33, [pu1["RH6"], pu1["RH4"], (xw + 3.8, yr4), (xw + 3.8 - (yr - yr4), yr),     # one diagonal between the two rails (owner, 2026-11-20)
                   
@@ -130,10 +128,10 @@ def routes(cu, sw):
     # pin rows (owner, 2026-11-20: "should do a full diagonal kind of like the other one
     # does"), then runs along and turns up into pin 6
     (xc, yc), lvl = cap["RH1"], ch(-4.0)
-    cu.track("/KEY_RH1", [(xc, yc), (xc + 0.8, yc), (xc + 0.8 + lvl - yc, lvl), (x6 - 0.5, lvl), (x6, lvl + 0.5), (x6, y6)])
+    cu.track("/KEY_RH1", [(xc, yc), (xc + EXIT, yc), (xc + EXIT + lvl - yc, lvl), (x6 - 0.25, lvl), (x6, lvl + 0.25), (x6, y6)])
     # RH2: the same, one diagonal from its capacitor to stand under pin 5
     xc, yc = cap["RH2"]
-    cu.track("/KEY_RH2", [(xc, yc), (xc + 0.8, yc), (x5, yc + x5 - xc - 0.8), (x5, y5)])
+    cu.track("/KEY_RH2", [(xc, yc), (xc + EXIT, yc), (x5, yc + x5 - xc - EXIT), (x5, y5)])
     # RH3 and RH4 go up the corridor side by side, and each takes one diagonal to the foot of
     # its pin (owner, 2026-11-20: "this spot should just be one diagonal going down to the left")
     cu.track("/KEY_RH3", tail_end(cap, "RH3") + [(xl3, 31.5), (x4, 31.5 + xl3 - x4), (x4, y4)])
@@ -142,7 +140,7 @@ def routes(cu, sw):
     # Each comes down to its key on one long diagonal rather than round a square corner (owner,
     # 2026-11-20: "need to be routed diagonally down"): RH5's runs beside the rail's, RH6's passes
     # the far side of RH5's switch.
-    D5, D6 = 2.5, 14.0         # as long as C9's pad and RH5's ground pin allow
+    D5, D6 = 2.4, 14.0         # as long as C9's pad and RH5's ground pin allow
     cu.track("/KEY_RH5", [(x14, y14), (x14, Y_VIA + 0.55), (x14 + 0.5, Y_VIA + 1.05), (xl5 - D5, Y_VIA + 1.05), (xl5, Y_VIA + 1.05 - D5)]
              + mouth_end(ser, "RH5", xl5)[::-1])
     cu.track("/KEY_RH6", [(x13, y13), (x13, Y_VIA + 1.15), (x13 + 0.5, Y_VIA + 1.65), (x6c - D6, Y_VIA + 1.65), (x6c, Y_VIA + 1.65 - D6)]

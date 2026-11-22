@@ -1929,7 +1929,14 @@ def check_tracks(board):
     return bad
 
 
-def check_joints(board):
+PAD_CLEAR = MM(0.3)      # how far a track runs straight out of a surface-mount pad before it may turn or branch
+
+
+def pads_at(k):
+    return ((k[1] + k[2]) // 2, (k[3] + k[4]) // 2)
+
+
+def check_joints(board, exempt=()):
     """HOW TRACKS MEET (owner, 2026-11-22). check_tracks holds the fab's rule, no wedge under
     90 degrees (IPC-2221's acid trap; KiCad's DRC has no angle test). This holds the rest of
     what a hand-laid board is drawn to, on one net and one layer:
@@ -1938,6 +1945,9 @@ def check_joints(board):
                 leaves it square, so no Y and no arrowhead;
       pad       two tracks at one pad run straight through it, turn 45 across it, or stand
                 square on the pad's own axes - never two diagonals closing on its centre;
+      exit      a track leaves a surface-mount pad straight, square to the pad's edge, and
+                neither turns nor branches until it is PAD_CLEAR beyond the pad; it may end
+                at a via or another pad sooner;
       circle    a track that touches a round pad or a via of its net is on a line through
                 the centre, so it neither clips the ring nor turns inside it.
     A point on a pad's copper is that pad's; a point with no pad is a corner or a branch."""
@@ -2006,6 +2016,34 @@ def check_joints(board):
             if not through or any(abs(gap(k, through[0][0]) - 90) > 1 for k in angs if k not in through[0]):
                 bad.append(f"error: [joints] {where}: {len(angs)} tracks meet at {', '.join(f'{p:.0f}' for p in sorted(pairs))} deg - "
                            f"make it a T: one line straight through, the branch square to it")
+    # a surface-mount pad's exits (owner, 2026-11-22: "the cleanest tracks leaving all pads")
+    ends = {}
+    for t in tracks:
+        for e in (t.GetStart(), t.GetEnd()):
+            ends[(e.x, e.y, t.GetLayer())] = ends.get((e.x, e.y, t.GetLayer()), 0) + 1
+    for k in boxes:
+        if not k[8]:
+            continue
+        net, L, R, T_, B, name, rot, layers = k[:8]
+        if name in exempt:           # layout.yaml joints_exempt: a pad with no room for the exit, and why
+            continue
+        for t in tracks:
+            if t.GetNetname() != net or t.GetLayer() not in layers:
+                continue
+            a, c = t.GetStart(), t.GetEnd()
+            ia, ic = L <= a.x <= R and T_ <= a.y <= B, L <= c.x <= R and T_ <= c.y <= B
+            if ia == ic:
+                continue
+            i, o = (a, c) if ia else (c, a)
+            ang = math.degrees(math.atan2(o.y - i.y, o.x - i.x))
+            if abs(((ang - rot) % 90 + 45) % 90 - 45) > 1:
+                bad.append(f"error: [joints] {net} on {board.GetLayerName(t.GetLayer())}: a track leaves {name} at {at(*pads_at(k))} on a slant - "
+                           f"leave the pad straight, square to its edge")
+                continue
+            d = max(L - o.x, o.x - R, T_ - o.y, o.y - B)
+            if d < PAD_CLEAR - 1000 and (o.x, o.y) not in vias and ends[(o.x, o.y, t.GetLayer())] > 1:
+                bad.append(f"error: [joints] {net} on {board.GetLayerName(t.GetLayer())}: a track from {name} at {at(*pads_at(k))} turns or branches "
+                           f"{mm(d):.2f} mm from the pad - run straight until it is {mm(PAD_CLEAR):g} mm clear of the pad")
     for net, _, cx, cy, r, name in rounds:
         for t in tracks:
             if t.GetNetname() != net:
@@ -2325,7 +2363,7 @@ def cmd_check(bdir):
         bad += check_silk(board, lay["fab"])
     bad += check_tracks(board)
     if lay.get("route") is False:      # a board laid out by hand (ADR 0030); the routed module boards are not drawn to it
-        bad += check_joints(board)
+        bad += check_joints(board, lay.get("joints_exempt") or {})
     bad += check_title(board, lay)
     bad += check_pair_guard(board, lay)
     bad += check_holes(board, lay)

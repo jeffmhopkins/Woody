@@ -118,9 +118,9 @@ def routes(cu):
             y = 34.175 + 0.45 * (n - 1)
             return p + [(x, y - C), (x - C, y), (px + C, y), (px, y + C), (px, py)]
         if n == 4:                                   # pad 4's foot is just to the left of its way up
-            return p + [(x, 36.0), (x - 0.775, 36.775), (x - 0.775, py)]
+            return p + [(x, 35.85), (x - 0.775, 36.625), (x - 0.775, py)]      # clear of the pad before it turns
         if n == 5:
-            return p + [(x, py - (px - x)), (px, py)]
+            return p + [(x, 39.8 - (px - x)), (px, 39.8), (px, py)]      # one 45 to stand under the pad, then straight in
         return p + [(x, 33.2), (px, 33.2 + px - x), (px, py)]
 
     # J3 pads 1..3: front columns 9, 8, 7. Each dips 0.6 to pass under J2 pad 1's foot, then
@@ -175,6 +175,8 @@ def routes(cu):
     t("/IO2", back[9] + up(287.42 + MX, band[10], 13.0) + [(289.185 + MX, 14.765), (289.185 + MX, 17.7), (289.685 + MX, 18.2), (j2(9)[0], 18.2)])
     t("/IO1", back[13] + up(287.87 + MX, band[11], 12.36) + [(289.775 + MX, 14.265), (289.775 + MX, 17.0), (290.075 + MX, 17.3), (291.9 + MX, 17.3),
                                                               (292.3 + MX, 16.9), (294.0 + MX, 16.9), (295.0 + MX, 15.9), (j2(10)[0], 15.9)])
+    # IO3 ends on one 45 into pad 8: the mount's pad is 0.37 mm under the pad and IO1 stands 0.34 mm from its side, so no line
+    # can run straight for pcb.PAD_CLEAR before the pad (layout.yaml joints_exempt)
     t("/IO3", back[15] + up(288.32 + MX, band[12], 12.015) + [(290.75 + MX, 14.445)])
 
     # ---- 5V: three pins strapped at the header's far end, one lane along the arm into J2 pad 1 --

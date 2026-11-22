@@ -102,6 +102,12 @@ silk:
     J2: {1: "5V", 10: "IO1"}
     J3: {1: "IO33", 10: "RX"}
 
+# THE ONE PAD WHOSE LINE CANNOT LEAVE IT STRAIGHT (tools/pcb.py check_joints, the exit rule): the pad, and the reason.
+joints_exempt:
+  J2.8: >-
+    IO3 enters on one 45. The near mount's pad is 0.37 mm under the pad and IO1 stands 0.34 mm
+    from its mouth side, between it and pad 7, so no line reaches it with a straight run before the pad.
+
 # No router: `route: false` keeps tools/pcb.py from running one on this board
 # (carrier_layout.py, ADR 0030).
 route: false
