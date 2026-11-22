@@ -109,6 +109,13 @@ One host, two devices, two clocks (`interfaces/spi-link`, *The two SPI
 hosts*). Pins: `SCLK` IO35, `MOSI` IO36, `CS_MOD` IO34, `MISO` IO37 (the ADC's
 `DOUT` only), `CS_ADC` IO39 (`hardware/carrier/netlist.yaml`).
 
+- **No LED update during an ADC transaction** (pre-fab review, 2026-11-22).
+  The LED data (IO1) lies between `MOSI` and `MISO` on the Matrix ribbon with
+  no ground between (`hardware/carrier/carrier.md`, *The pin map*), so the
+  row's and the matrix's writes are kept out of the time `CS_ADC` is low.
+- **Fix IO35 and IO36's drive strength in code**, at the default or below,
+  never the maximum: the breath ADC hangs on a long branch of both lines
+  behind `R-ADC-SER` (`hardware/carrier/breath-adc/breath-adc.md`).
 - **DAC8568 (`CS_MOD`): SPI mode 1** (CPOL 0, CPHA 1), **2 MHz**, one 32-bit
   frame per transaction, six frames per pass. The DAC clocks `DIN` on `SCLK`'s
   falling edge `[ds DAC8568CIPW.pdf p.6]`, so the host must launch on the

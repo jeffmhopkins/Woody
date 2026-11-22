@@ -18,12 +18,12 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `SCK` | in | `interfaces/key-chain-loom` | `chain-conductors` | One net to all four devices: a trace on the main board; on a key board, ribbon conductor 2 = key-board `J-CHAIN` pin 11 |
-| `SH/LD` | in | `interfaces/key-chain-loom` | `chain-conductors` | The chain bus: a trace on the main board; on a key board, ribbon conductor 4 = key-board `J-CHAIN` pin 9. Level-sensitive: while it is LOW the parallel inputs load, asynchronously; the state captured is the inputs' when it returns HIGH |
-| `SER` | in | `interfaces/key-chain-loom` | `chain-connectors` | Point to point: the next device's `QH`, or at the chain end `IO33` and its pull-up. On a key board it is always ribbon conductor 6 = key-board `J-CHAIN` pin 7. Which device feeds which is the hop map in the key-chain netlist |
-| `QH` | out | `interfaces/key-chain-loom` | `chain-connectors` | Toward the MCU: on a key board, ribbon conductor 8 = key-board `J-CHAIN` pin 5; `right_thumb`'s is a trace to the MCU. Bit 0 is the `H` input of the `right_thumb` device |
+| `SCK` | in | `interfaces/key-chain-loom` | `chain-conductors` | One net to all four devices: a trace on the main board; on a key board, ribbon conductor 2, `J-CHAIN` pin 2 (`key-board-chain-pinmap`) |
+| `SH/LD` | in | `interfaces/key-chain-loom` | `chain-conductors` | The chain bus: a trace on the main board; on a key board, ribbon conductor 4, `J-CHAIN` pin 4. Level-sensitive: while it is LOW the parallel inputs load, asynchronously; the state captured is the inputs' when it returns HIGH |
+| `SER` | in | `interfaces/key-chain-loom` | `chain-connectors` | Point to point: the next device's `QH`, or at the chain end `IO33` and its pull-up. On a key board it is always ribbon conductor 6, `J-CHAIN` pin 6. Which device feeds which is the hop map in the key-chain netlist |
+| `QH` | out | `interfaces/key-chain-loom` | `chain-connectors` | Toward the MCU: on a key board, ribbon conductor 8, `J-CHAIN` pin 8; `right_thumb`'s is a trace to the MCU. Bit 0 is the `H` input of the `right_thumb` device |
 | `A`…`H` | in | `cluster/key-switch-network`, `cluster/key-marker-and-bits` | `marker-bits`, `free-bits` | Eight parallel inputs per device: a switch network, a marker strap or a free bit |
-| `3V3` | in | `interfaces/key-chain-loom` | — | The chain's 3V3 rail: a trace on the main board; on a key board, ribbon conductor 10 = key-board `J-CHAIN` pin 3. `C-DECOUPLE-165` is the local reservoir this input has no other source for |
+| `3V3` | in | `interfaces/key-chain-loom` | — | The chain's 3V3 rail: a trace on the main board; on a key board, ribbon conductor 10, `J-CHAIN` pin 10. `C-DECOUPLE-165` is the local reservoir this input has no other source for |
 | `GND` | ref | `interfaces/key-chain-loom` | `chain-conductors` | The main board's ground; on a key board, the ribbon's five alternating grounds. `C-DECOUPLE-165` returns here, at the package |
 
 ## §1 The device
@@ -87,10 +87,10 @@ hops safe is what they carry.** `QH` → next `SER` is data, sampled at the
 is at most 14 ns and hold 0 ns over temperature `[same, p.7]`, so ringing on
 `QH`, whose round trip over a hop is a few nanoseconds, has had hundreds of
 nanoseconds to settle before it is sampled `[calc; judgment, not measured]`.
-That is the **setup** side; the **hold** side, at the same edge, is held for the
-one hop that races, `left_thumb` → `right_hand`, by `R-HOP-SER` on the main
-board rather than by this part's unpublished minimum `CLK`→`QH` delay
-(2026-10-01, A5-2: `key-chain-loom.md`, *The hop hold time*).
+That is the **setup** side; the **hold** side, at the same edge, is held on
+each of the three hops by an `R-HOP-SER` on the main board rather than by this
+part's unpublished minimum `CLK`→`QH` delay (2026-10-01, A5-2, and 2026-11-21,
+F1: `key-chain-loom.md`, *The hop hold time*).
 Every register input the chain drives (`SER`, `CLK`, `SH/LD`) is a Schmitt
 input, hysteresis at least 0.2 V at 2 V and 0.4 V at 4.5 V `[same, p.6]`. The
 edge-sensitive nets, `SCK` and `SH/LD`, are driven by the MCU, not by this

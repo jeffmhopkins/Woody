@@ -7,8 +7,8 @@ inputs:
   hardware/interfaces/system/sim/sims.yaml: b9f276978e889230
   hardware/module/breath-receive-stage/netlist.yaml: dab496982d183718
   hardware/interfaces/breath-sense-link/netlist.yaml: 589dc991272a7d9c
-  hardware/carrier/netlist.yaml: a435789376b4a4b0
-  hardware/carrier/power-entry-instrument/netlist.yaml: 34a972189d3e5b5d
+  hardware/carrier/netlist.yaml: f042d5527e6a9ded
+  hardware/carrier/power-entry-instrument/netlist.yaml: 4b0e42d8ca8b1e04
   hardware/carrier/breath-excitation-reference/netlist.yaml: 2d5ee10b223dc95d
   hardware/carrier/led-strip-drive/netlist.yaml: e4c3ffbbe5c48f52
   hardware/module/power-entry/netlist.yaml: 14fd898035959809

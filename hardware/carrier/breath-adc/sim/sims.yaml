@@ -92,7 +92,7 @@ vary:
   t_r12:      {tol: [-0.42, 0.5], source: "0.093 and 0.24 s about 0.16"}
   t_ss:       {tol: [-0.667, 2.333], source: "1 and 10 ms about 3"}
   is_clamp:   {tol: [-0.9, 9.0], source: "a decade either way"}
-  len_rib:    {tol: [0.0, 2.99], source: "37.6 mm as drawn to 150 mm"}
+  len_rib:    {tol: [0.0, 2.99], source: "from the length as drawn to four times it, which covers the bought ribbon and its fallback (CBL-MCU-RIBBON)"}
   l_rib_m:    {tol: [-0.5, 0.5]}
   c_vcc5:     {tol: [-0.5, 0.0], source: "X5R/X7R DC-bias loss at 5 V [assumption: to half]"}
   c_ldo:      {tol: [-0.4, 0.0], source: "DC-bias loss at 3.3 V [assumption: to 60 %]"}
@@ -228,7 +228,7 @@ sims:
         why: "and with it stuck there once 3V3 is up - the page's 'fails high' case, (0.6 x INST_POS12 - V_F - 3.3 V) / 6 kohm"
   # --- #12 item 3: the converter's ripple reaching the conversion. The MCP3202's VDD is its
   # reference, and it is the dev board's 3V3, regulated from the 5 V rail the R-78E5.0 makes:
-  # INST_5V_A -> CBL-MCU-RIBBON's three 5 V conductors (and its four grounds back) -> the
+  # INST_5V_A -> CBL-MCU-RIBBON's three 5 V conductors (and its grounds back) -> the
   # Matrix's VCC_5V -> the ME6217 -> its one 3V3 conductor -> C-ADC-BULK and C-DEC-ADC at
   # U-ADC. A code error ratiometric to the input: (V_in / VREF) x (dVREF / VREF) x 4096.
   - name: vdd-ripple

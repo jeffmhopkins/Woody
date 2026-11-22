@@ -12,12 +12,6 @@ ports:
     dir: in
     from: carrier/breath-excitation-reference
     figure: sensor-full-scale
-  IO35:
-    dir: in
-    from: carrier/carrier
-  IO36:
-    dir: in
-    from: carrier/carrier
   IO37:
     dir: out
     to: carrier/carrier
@@ -28,6 +22,12 @@ ports:
     dir: ref
     from: carrier/power-entry-instrument
   DEV_3V3:
+    dir: in
+    from: carrier/carrier
+  IO35:
+    dir: in
+    from: carrier/carrier
+  IO36:
     dir: in
     from: carrier/carrier
 components:
@@ -58,6 +58,28 @@ components:
     pins:
     - 1
     - 2
+  R-ADC-SER-CLK:
+    of: R-ADC-SER
+    value: 47R 1%
+    pins:
+    - 1
+    - 2
+    note: 'In series in SCLK into U-ADC, at the J-MCU end of the branch (pre-fab review S1, 2026-11-22): IO35 leaves
+      J-MCU for the module''s SPI launch one way and for U-ADC the other, on a branch as long as the board with
+      no load on it but the ADC''s pin, and this resistor ends the branch at its source so an edge does not ring
+      back through the ADC''s threshold. 47 ohm in the review''s 33 to 68 ohm; the value is settled at E11 on the
+      scope, at U-ADC''s pin (breath-adc.md, The SPI branch)'
+  R-ADC-SER-DIN:
+    of: R-ADC-SER
+    value: 47R 1%
+    pins:
+    - 1
+    - 2
+    note: 'In series in MOSI into U-ADC, at the J-MCU end of the branch (pre-fab review S1, 2026-11-22): IO36 leaves
+      J-MCU for the module''s SPI launch one way and for U-ADC the other, on a branch as long as the board with
+      no load on it but the ADC''s pin, and this resistor ends the branch at its source so an edge does not ring
+      back through the ADC''s threshold. 47 ohm in the review''s 33 to 68 ohm; the value is settled at E11 on the
+      scope, at U-ADC''s pin (breath-adc.md, The SPI branch)'
   R-ADC-VDD:
     value: 10R 1%
     pins:
@@ -108,6 +130,12 @@ components:
       from the dev board''s LDO, the rail the key pull-ups load. CH1 is tied to AGND_INST (owner, 2026-10-03, D5):
       a known zero for a self-test, and no floating input beside CH0'
 nets:
+  ADC_CLK:
+  - R-ADC-SER-CLK.2
+  - U-ADC.CLK
+  ADC_DIN:
+  - R-ADC-SER-DIN.2
+  - U-ADC.DIN
   ADC_IN:
   - C-AA-ADC.1
   - R-ADCDIV-L.1
@@ -134,10 +162,10 @@ nets:
   - R-CS-PULL-ADC.1
   IO35:
   - port: IO35
-  - U-ADC.CLK
+  - R-ADC-SER-CLK.1
   IO36:
   - port: IO36
-  - U-ADC.DIN
+  - R-ADC-SER-DIN.1
   IO37:
   - port: IO37
   - U-ADC.DOUT

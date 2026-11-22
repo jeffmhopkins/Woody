@@ -13,6 +13,7 @@ plate_top,switch.cutout_r,nominal,0.5,"M1, the kerf coupon that settles the cuto
 plate_top,switch.keycap_top_above_seat,nominal,9.0,"calipers on a cap on its switch (M1) would make it settled; a visual match at scale cannot resolve a few tenths, which is the oak top's thickness tolerance. It SETS BOTH oak panel thicknesses (flush rule, stack above)",no,a working estimate the part can be cut to
 plate_top,boards.sensor_lead_row,tbd,10.2,M4 footprint,yes,M4 footprint
 plate_top,boards.umb_adapter_t,tbd,1.6,"M4, with the board ordered",yes,"M4, with the board ordered"
+plate_top,boards.umb_socket_d,nominal,7.37,"the socket in hand on the first adapter: a catalogue sheet's height, not the part's print",no,a working estimate the part can be cut to
 plate_top,boards.kb_end_margin,tbd,8.8,"M4, with the boards laid out",yes,"M4, with the boards laid out"
 plate_top,boards.kb_tail_margin,nominal,10.3,"M3, with the key positions; hardware.col_pocket_wall, which sets it",no,a working estimate the part can be cut to
 plate_top,boards.board_clear,tbd,1.5,"M4, with the boards laid out",yes,"M4, with the boards laid out"
@@ -57,6 +58,7 @@ plate_bottom,boards.chain_plug_l,nominal,14.34,M4,no,a working estimate the part
 plate_bottom,boards.mcu_conn_l,nominal,21.59,"M4, on the part bought",no,a working estimate the part can be cut to
 plate_bottom,boards.mcu_conn_w,nominal,5.85,"M4, on the part bought",no,a working estimate the part can be cut to
 plate_bottom,boards.umb_adapter_t,tbd,1.6,"M4, with the board ordered",yes,"M4, with the board ordered"
+plate_bottom,boards.umb_socket_d,nominal,7.37,"the socket in hand on the first adapter: a catalogue sheet's height, not the part's print",no,a working estimate the part can be cut to
 plate_bottom,boards.umb_parts_d,nominal,14,"M4 main board layout, routed",no,a working estimate the part can be cut to
 plate_bottom,boards.mcu_conn_tail,nominal,2.1,"M4, on the part bought",no,a working estimate the part can be cut to
 plate_bottom,boards.mcu_conn_at,nominal,"[262.27, 18.17, 90]",the main board's layout and the Matrix carrier's,no,a working estimate the part can be cut to
@@ -107,6 +109,7 @@ oak_top,layout.gap,nominal,50.0,,no,a working estimate the part can be cut to
 oak_top,switch.keycap_top_above_seat,nominal,9.0,"calipers on a cap on its switch (M1) would make it settled; a visual match at scale cannot resolve a few tenths, which is the oak top's thickness tolerance. It SETS BOTH oak panel thicknesses (flush rule, stack above)",no,a working estimate the part can be cut to
 oak_top,boards.sensor_lead_row,tbd,10.2,M4 footprint,yes,M4 footprint
 oak_top,boards.umb_adapter_t,tbd,1.6,"M4, with the board ordered",yes,"M4, with the board ordered"
+oak_top,boards.umb_socket_d,nominal,7.37,"the socket in hand on the first adapter: a catalogue sheet's height, not the part's print",no,a working estimate the part can be cut to
 oak_top,boards.kb_end_margin,tbd,8.8,"M4, with the boards laid out",yes,"M4, with the boards laid out"
 oak_top,boards.kb_tail_margin,nominal,10.3,"M3, with the key positions; hardware.col_pocket_wall, which sets it",no,a working estimate the part can be cut to
 oak_top,boards.board_clear,tbd,1.5,"M4, with the boards laid out",yes,"M4, with the boards laid out"
@@ -154,6 +157,7 @@ oak_bottom,layout.gap,nominal,50.0,,no,a working estimate the part can be cut to
 oak_bottom,switch.keycap_top_above_seat,nominal,9.0,"calipers on a cap on its switch (M1) would make it settled; a visual match at scale cannot resolve a few tenths, which is the oak top's thickness tolerance. It SETS BOTH oak panel thicknesses (flush rule, stack above)",no,a working estimate the part can be cut to
 oak_bottom,boards.sensor_lead_row,tbd,10.2,M4 footprint,yes,M4 footprint
 oak_bottom,boards.umb_adapter_t,tbd,1.6,"M4, with the board ordered",yes,"M4, with the board ordered"
+oak_bottom,boards.umb_socket_d,nominal,7.37,"the socket in hand on the first adapter: a catalogue sheet's height, not the part's print",no,a working estimate the part can be cut to
 oak_bottom,boards.kb_tail_margin,nominal,10.3,"M3, with the key positions; hardware.col_pocket_wall, which sets it",no,a working estimate the part can be cut to
 oak_bottom,boards.board_clear,tbd,1.5,"M4, with the boards laid out",yes,"M4, with the boards laid out"
 oak_bottom,openings.matrix_window,nominal,22.0,,no,a working estimate the part can be cut to
@@ -202,6 +206,7 @@ side,layout.gap,nominal,50.0,,no,a working estimate the part can be cut to
 side,switch.keycap_top_above_seat,nominal,9.0,"calipers on a cap on its switch (M1) would make it settled; a visual match at scale cannot resolve a few tenths, which is the oak top's thickness tolerance. It SETS BOTH oak panel thicknesses (flush rule, stack above)",no,a working estimate the part can be cut to
 side,boards.sensor_lead_row,tbd,10.2,M4 footprint,yes,M4 footprint
 side,boards.umb_adapter_t,tbd,1.6,"M4, with the board ordered",yes,"M4, with the board ordered"
+side,boards.umb_socket_d,nominal,7.37,"the socket in hand on the first adapter: a catalogue sheet's height, not the part's print",no,a working estimate the part can be cut to
 side,boards.kb_tail_margin,nominal,10.3,"M3, with the key positions; hardware.col_pocket_wall, which sets it",no,a working estimate the part can be cut to
 side,boards.board_clear,tbd,1.5,"M4, with the boards laid out",yes,"M4, with the boards laid out"
 side,openings.matrix_window,nominal,22.0,,no,a working estimate the part can be cut to
@@ -221,6 +226,7 @@ matrix_window,layout.underside_clear,tbd,3.0,M4,yes,M4
 matrix_window,layout.gap,nominal,50.0,,no,a working estimate the part can be cut to
 matrix_window,boards.sensor_lead_row,tbd,10.2,M4 footprint,yes,M4 footprint
 matrix_window,boards.umb_adapter_t,tbd,1.6,"M4, with the board ordered",yes,"M4, with the board ordered"
+matrix_window,boards.umb_socket_d,nominal,7.37,"the socket in hand on the first adapter: a catalogue sheet's height, not the part's print",no,a working estimate the part can be cut to
 matrix_window,boards.kb_tail_margin,nominal,10.3,"M3, with the key positions; hardware.col_pocket_wall, which sets it",no,a working estimate the part can be cut to
 matrix_window,boards.board_clear,tbd,1.5,"M4, with the boards laid out",yes,"M4, with the boards laid out"
 matrix_window,openings.matrix_window,nominal,22.0,,no,a working estimate the part can be cut to

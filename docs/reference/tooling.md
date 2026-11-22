@@ -298,8 +298,8 @@ What the export can carry beyond one port per net (added with the interfaces,
   naming. `kicad.py` reads which ports sit on the net off the sheet's wires
   (`label_groups`), because KiCad's netlist names one label and lists only
   pins. A net of two ports and no local label is refused.
-- **A spare pin whose net has a name of its own** (`TVS_CHAIN_SPARE`) keeps
-  the name as a label. A lone labelled pin with no port is exported as an
+- **A spare pin whose net has a name of its own** keeps the name as a label
+  (`U-TVS-CHAIN`'s fourth channel did, until it was given a net on 2026-11-21). A lone labelled pin with no port is exported as an
   external endpoint.
 - **Parts the page's drawing shows and another circuit owns** (`foreign:` in
   the netlist): one line of sheet text each,

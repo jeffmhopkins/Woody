@@ -12,7 +12,7 @@ inputs:
   hardware/module/breath-receive-stage/netlist.yaml: dab496982d183718
   hardware/interfaces/breath-sense-link/netlist.yaml: 589dc991272a7d9c
   hardware/carrier/breath-excitation-reference/netlist.yaml: 2d5ee10b223dc95d
-  hardware/carrier/breath-adc/netlist.yaml: 60647f404552f147
+  hardware/carrier/breath-adc/netlist.yaml: 1d8b68ea80628f1f
   hardware/module/power-entry/netlist.yaml: 14fd898035959809
   hardware/module/breath-output-stage/sim/bos.cir: e297daeb2283a454
   hardware/module/breath-output-stage/sim/bos-ac.cir: 7b123bcb1e263136

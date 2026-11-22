@@ -5,16 +5,16 @@
       "Application": "Pcbnew",
       "Version": "9.0.9-9.0.9~ubuntu24.04.1"
     },
-    "CreationDate": "2026-11-21T14:19:25+00:00"
+    "CreationDate": "2026-11-22T05:02:42+00:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
       "Name": "matrix-carrier",
       "GUID": "6d617472-6978-42d6-9361-72726965722e",
-      "Revision": "D"
+      "Revision": "E"
     },
     "Size": {
-      "X": 45.7,
+      "X": 49.385,
       "Y": 42.1
     },
     "LayerNumber": 2,

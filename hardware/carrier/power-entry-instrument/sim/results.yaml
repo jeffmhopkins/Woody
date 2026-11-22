@@ -5,13 +5,13 @@
 inputs:
   tools/sim.py: 0312a1077b9afa80
   hardware/carrier/power-entry-instrument/sim/sims.yaml: 74df1b0396d96b17
-  hardware/carrier/power-entry-instrument/netlist.yaml: 34a972189d3e5b5d
+  hardware/carrier/power-entry-instrument/netlist.yaml: 4b0e42d8ca8b1e04
   hardware/module/umbilical-load-switch/netlist.yaml: 43e16b03f8e519eb
   hardware/module/power-entry/netlist.yaml: 14fd898035959809
   hardware/carrier/led-strip-drive/netlist.yaml: e4c3ffbbe5c48f52
   hardware/carrier/power-entry-instrument/sim/pei-z.cir: 7142ec09b25a23ab
   hardware/carrier/power-entry-instrument/sim/pei-start.cir: a6ebb516eedc017e
-  hardware/carrier/power-entry-instrument/sim/pei-pwm.cir: 9a3106a2fc613c56
+  hardware/carrier/power-entry-instrument/sim/pei-pwm.cir: 09750bd10d8c9237
   hardware/carrier/power-entry-instrument/sim/pei-or.cir: 6955961510f33cb8
   hardware/module/umbilical-load-switch/sim/lt1641.inc: 59be165ccd4451a6
   hardware/module/umbilical-load-switch/sim/sims.yaml: cadec99739eed8eb

@@ -51,12 +51,17 @@ TW, NW, PW = 0.25, 0.2, 0.4          # a line, a line necked through the one tig
 C = 0.3                              # a 45-degree corner
 GND, V5, V33 = "PWR_GND", "/INST_5V_A", "/DEV_3V3"
 
-# THE RIBBON'S PIN ORDER, J-MCU-C pin -> net. Column i (0 nearest the Matrix) holds the back
-# row's pin 2i+1 and the front row's pin 2i+2.
+# THE RIBBON'S ORDER ALONG THE HEADER, by PLACE: place q -> net. Column i (0 nearest the Matrix)
+# holds the back row's place 2i+1 and the front row's place 2i+2. THE PAD AT PLACE q IS PIN
+# 25 - q: the header is turned half a turn (owner, 2026-11-22; pre-fab review F3), its key
+# toward the far side, so that its pin k is J-MCU's pin k and a ribbon made pin 1 to pin 1
+# joins them. No pad moved when it was turned; only the numbers did. Place 19 (pin 6) is the
+# ribbon's spare, on ground at both ends.
+MX = 3.685                           # how far the Matrix stands from where this was first drawn: half of what the tail grew by (boards.umb_socket_d), 2026-11-22
 PINS = {
     2: "/IO39", 4: "/IO6", 6: "/IO7", 8: "/IO38", 10: V33, 12: "/IO37", 14: "/IO36", 16: "/IO35", 18: "/IO34", 20: "/IO33",
     22: V5, 24: V5,
-    1: "/IO40", 3: "/U0TXD", 5: GND, 7: "/U0RXD", 9: "/IO2", 11: GND, 13: "/IO1", 15: "/IO3", 17: GND, 19: None,
+    1: "/IO40", 3: "/U0TXD", 5: GND, 7: "/U0RXD", 9: "/IO2", 11: GND, 13: "/IO1", 15: "/IO3", 17: GND, 19: GND,
     21: GND, 23: V5,
 }
 
@@ -66,11 +71,11 @@ def j1(k):
 
 
 def j2(n):                    # the near pad row, 5V..IO1: odd pins' feet toward the far side
-    return (272.97 + 2.54 * (n - 1), 18.67 if n % 2 else 15.47)
+    return (272.97 + MX + 2.54 * (n - 1), 18.67 if n % 2 else 15.47)
 
 
 def j3(n):                    # the far pad row, IO33..RX
-    return (272.97 + 2.54 * (n - 1), 41.53 if n % 2 else 38.33)
+    return (272.97 + MX + 2.54 * (n - 1), 41.53 if n % 2 else 38.33)
 
 
 def routes(cu):
@@ -102,7 +107,7 @@ def routes(cu):
     # the six lines for J3's pads 1..6 go round by the strip between J2 and the USB-C slot,
     # turn up beside the slot's end, and the first three come back over the slot
     strip = {1: 22.65, 2: 22.2, 3: 21.75, 4: 21.3, 5: 20.85, 6: 20.4}
-    col = {n: 280.325 + 0.45 * (n - 1) for n in range(1, 7)}       # their way up, beside the slot
+    col = {n: 280.325 + MX + 0.45 * (n - 1) for n in range(1, 7)}       # their way up, beside the slot
 
     def far(n):
         """Along strip lane n, up beside the slot, and into J3 pad n."""
@@ -120,49 +125,56 @@ def routes(cu):
 
     # J3 pads 1..3: front columns 9, 8, 7. Each dips 0.6 to pass under J2 pad 1's foot, then
     # goes up between J2's pads 1 and 2, necked to 0.2 there: the one neck on the board.
-    for n, i, c, gx in ((1, 9, 289.24, 273.82), (2, 8, 288.6, 274.25), (3, 7, 287.96, 274.68)):
+    for n, i, c, gx in ((1, 9, 289.24, 273.82 + MX), (2, 8, 288.6, 274.25 + MX), (3, 7, 287.96, 274.68 + MX)):
         y, net, s = north[i] - 0.6, net_of(i), strip[n]
-        t(net, rise(i) + [(c - north[i], north[i]), (c - y, y), (272.9, y)])
-        t(net, [(272.9, y), (gx - 0.2, y), (gx, y + 0.2), (gx, s - C), (gx + C, s)], NW)
+        t(net, rise(i) + [(c - north[i], north[i]), (c - y, y), (272.9 + MX, y)])
+        t(net, [(272.9 + MX, y), (gx - 0.2, y), (gx, y + 0.2), (gx, s - C), (gx + C, s)], NW)
         t(net, [(gx + C, s)] + far(n))
 
-    # J3 pads 4, 5: front columns 6 and 5, up between J2's pads 2 and 3
-    for n, i, lane, c, gx in ((4, 6, 0, 287.32, 276.36), (5, 5, 1, 286.68, 276.81)):
+    # J3 pads 4, 5: front columns 6 and 5, up between J2's pads 2 and 3. Every line that passes
+    # between two of J2's pads stands evenly in the gap: the same room pad to line, line to line
+    # and line to pad (owner, 2026-11-21: centred between pads that are soldered by hand)
+    for n, i, lane, c, gx in ((4, 6, 0, 287.32, 276.485 + MX), (5, 5, 1, 286.68, 277.075 + MX)):
         t(net_of(i), fall(i, lane, c) + up(gx, band[lane], strip[n] - C) + [(gx + C, strip[n])] + far(n))
     # 3V3: front column 4, wide from where it leaves the arm, straight up into J2 pad 3
     i, c = 4, 285.93
     t(V33, rise(i) + [(c - north[i], north[i]), (c - north[i] + 0.4, north[i] - 0.4)])     # narrow until clear of its neighbours' lanes
     t(V33, [(c - north[i] + 0.4, north[i] - 0.4), (c - band[2], band[2])] + up(j2(3)[0], band[2], j2(3)[1]), PW)
     # J3 pad 6: front column 3, up between J2's pads 3 and 4
-    t(net_of(3), fall(3, 3, 285.18) + up(278.9, band[3], strip[6] - C) + [(278.9 + C, strip[6])] + far(6))
+    t(net_of(3), fall(3, 3, 285.18) + up(279.32 + MX, band[3], strip[6] - C) + [(279.32 + MX + C, strip[6])] + far(6))
     # IO7 and IO6 straight up into J2's pads 4 and 5
     t("/IO7", fall(2, 4, 284.54) + up(j2(4)[0], band[4], j2(4)[1]))
     t("/IO6", fall(1, 5, 283.9) + up(j2(5)[0], band[5], j2(5)[1]))
 
-    def diag_up(net, pts, lane, gx, y0, n):
-        """Along band lane `lane`, up column gx to y0, across at 45 to stand under J3 pad n, and into it."""
+    def diag_up(net, pts, lane, gx, y0, n, jog=None):
+        """Along band lane `lane`, up column gx to y0, across at 45 to stand under J3 pad n, and into it.
+        `jog` = (y, x): at height y the column steps at 45 to x, to stand evenly between J2's pads."""
         px, py = j3(n)
-        t(net, pts + up(gx, band[lane], y0) + [(px, y0 + px - gx), (px, py)])
+        if jog:
+            jy, jx = jog
+            t(net, pts + up(gx, band[lane], jy) + [(jx, jy + jx - gx), (jx, y0), (px, y0 + px - jx), (px, py)])
+        else:
+            t(net, pts + up(gx, band[lane], y0) + [(px, y0 + px - gx), (px, py)])
 
     # ---- column 0: both pins straight out toward the Matrix, onto lanes 6 and 7 ----------------
     x, y = j1(2)
-    diag_up("/IO39", [(x, y), (282.2 - y, y), (282.2 - band[6], band[6])], 6, 283.98, 33.68, 7)
+    diag_up("/IO39", [(x, y), (282.2 - y, y), (282.2 - band[6], band[6])], 6, 284.105 + MX, 33.68, 7)
     x, y = j1(1)
-    diag_up("/IO40", [(x, y), (270.0, y), (270.0 + y - band[7], band[7])], 7, 284.43, 30.28, 8)
+    diag_up("/IO40", [(x, y), (270.0, y), (270.0 + y - band[7], band[7])], 7, 284.695 + MX, 30.28, 8)
 
     # ---- the back row: five lanes under the header ---------------------------------------------
     back = {}
     for k, lane in ((3, 8), (7, 9), (9, 10), (13, 11), (15, 12)):
         x, y = j1(k)
         back[k] = [(x, y), (x, band[lane] + C), (x + C, band[lane])]
-    diag_up("/U0TXD", back[3], 8, 286.52, 31.22, 9)
-    diag_up("/U0RXD", back[7], 9, 286.97, 27.67, 10)
+    diag_up("/U0TXD", back[3], 8, 286.52 + MX, 31.22, 9, (13.4, 286.645 + MX))
+    diag_up("/U0RXD", back[7], 9, 286.97 + MX, 27.67, 10, (13.2, 287.235 + MX))
 
     # IO2, IO1 and IO3 pass the near mount on its mouth side
-    t("/IO2", back[9] + up(287.42, band[10], 13.0) + [(289.095, 14.675), (289.095, 17.7), (289.595, 18.2), (j2(9)[0], 18.2)])
-    t("/IO1", back[13] + up(287.87, band[11], 12.36) + [(289.545, 14.035), (289.545, 16.8), (290.045, 17.3), (291.9, 17.3),
-                                                         (292.3, 16.9), (294.0, 16.9), (295.0, 15.9), (j2(10)[0], 15.9)])
-    t("/IO3", back[15] + up(288.32, band[12], 12.015) + [(290.75, 14.445)])
+    t("/IO2", back[9] + up(287.42 + MX, band[10], 13.0) + [(289.185 + MX, 14.765), (289.185 + MX, 17.7), (289.685 + MX, 18.2), (j2(9)[0], 18.2)])
+    t("/IO1", back[13] + up(287.87 + MX, band[11], 12.36) + [(289.775 + MX, 14.265), (289.775 + MX, 17.0), (290.075 + MX, 17.3), (291.9 + MX, 17.3),
+                                                              (292.3 + MX, 16.9), (294.0 + MX, 16.9), (295.0 + MX, 15.9), (j2(10)[0], 15.9)])
+    t("/IO3", back[15] + up(288.32 + MX, band[12], 12.015) + [(290.75 + MX, 14.445)])
 
     # ---- 5V: three pins strapped at the header's far end, one lane along the arm into J2 pad 1 --
     t(V5, [j1(23), j1(24), j1(22), (j1(22)[0], 18.67 - C), (j1(22)[0] + C, 18.67), j2(1)], PW)
@@ -194,11 +206,11 @@ def main():
     pcb_hand.refit(board, comps, nets)
     j = next(f for f in board.GetFootprints() if f.GetReference() == "J1")
     for k, net in PINS.items():
-        pad = j.FindPadByNumber(str(k))
+        pad = j.FindPadByNumber(str(25 - k))
         got = pcb_hand.body_xy(pad.GetPosition())
         assert abs(got[0] - j1(k)[0]) < 0.01 and abs(got[1] - j1(k)[1]) < 0.01, (k, got, j1(k))
         if net is None:              # on no net: KiCad's own name for such a pad, so the sheet's parity holds
-            net = f"unconnected-({j.GetReference()}-Pin_{k}-Pad{k})"
+            net = f"unconnected-({j.GetReference()}-Pin_{25 - k}-Pad{25 - k})"
             if board.FindNet(net) is None:
                 board.Add(pcbnew.NETINFO_ITEM(board, net))
         pad.SetNetCode(board.FindNet(net).GetNetCode())
@@ -228,7 +240,7 @@ def main():
     # (it overhangs the arm's end, and pcb.fit_footprint_silk takes such an outline off)
     pcb.fit_footprint_silk(board, lay["fab"])
     pcb.silk_text(board, "J1", *pcb.to_pcb(262.27, 16.5))
-    pcb.silk_text(board, "J-MCU-C KEY: NEAR EDGE", *pcb.to_pcb(262.27, 18.3))
+    pcb.silk_text(board, "J-MCU-C KEY: FAR SIDE", *pcb.to_pcb(262.27, 18.3))
     pcbnew.SaveBoard(SRC, board)
     pcb_hand.fill(SRC)
     print(f"carrier_layout: {cu.segments()} track segment(s), {len(cu.vias)} via(s); wrote {os.path.relpath(SRC, ROOT)}")

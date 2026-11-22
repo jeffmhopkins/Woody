@@ -1,8 +1,8 @@
 # Key chain — simulation
 
 The chain between the main board and the left-hand key board:
-- **its 3V3 rail:** FB-CHAIN, the ribbon, `C-DECOUPLE-165`, and the do-not-fit
-  `C-BULK-CHAIN`;
+- **its 3V3 rail:** FB-CHAIN, the ribbon, `C-DECOUPLE-165`, and `C-BULK-CHAIN`,
+  fitted and left off;
 - **its signals over the ribbon:** SCK out to the key board's register, and QH
   back to the next register.
 
@@ -27,8 +27,10 @@ filled by `tools/sim.py`; `results.yaml` is generated.
 | `sck-to-key-board` | SCK at the register, with both chain arrays on the main board's node (`U-TVS-CHAIN` and `U-TVS-CHAIN-RH`, `tvs_j5`): no swing back through its hysteresis (no double clock), no overshoot past its clamp |
 | `sck-without-series-resistor` | the same with `R-CHAIN-SER` shorted: at the strong-drive corner it double-clocks and passes the clamp. This is what the resistor is for (recorded) |
 | `qh-to-main-board` | QH, with no series resistor, at the next register's SER: no false edge, no overshoot past its clamp |
-| `hop-hold-lt-to-rh` | the one hop whose downstream register is clocked later (`left_thumb` → `right_hand`), at the worst threshold pair, with **no** propagation delay, `R-HOP-SER` fitted as netlisted (2.2 kΩ at `left_thumb`'s `QH`, owner 2026-10-01): the data reaches `right_hand`'s `SER` after its clock at every corner and on both edges (`hold_margin` > 0: 22.6 ns rising, 42.8 ns falling at the worst corner), and within 100 ns of it (`ser_delay`: 59 / 92 ns worst). Both arrays fitted (owner, 2026-10-03, D2): `U-TVS-CHAIN-RH`'s 30 pF on `SCK` at the main board and on `HOP_LT_RH` behind `R-HOP-SER` (`tvs_j5`), the latter the RC that moved both numbers |
+| `hop-hold-lt-to-rh` | the hop whose downstream register is on a key board (`left_thumb` → `right_hand`), at the worst threshold pair, with **no** propagation delay, `R-HOP-SER` fitted as netlisted (2.2 kΩ at `left_thumb`'s `QH`, owner 2026-10-01): the data reaches `right_hand`'s `SER` after its clock at every corner and on both edges (`hold_margin` > 0: 22.6 ns rising, 42.8 ns falling at the worst corner), and within 100 ns of it (`ser_delay`: 59 / 92 ns worst). Both arrays fitted (owner, 2026-10-03, D2): `U-TVS-CHAIN-RH`'s 30 pF on `SCK` at the main board and on `HOP_LT_RH` behind `R-HOP-SER` (`tvs_j5`), the latter the RC that moved both numbers |
 | `hop-hold-without-series-r` | a what-if: `QH` straight into the ribbon, as until 2026-10-01. The clock skew is 8–17 ns and the data beats `right_hand`'s clock, so the hop would hold only on a `CLK`→`QH` delay of ~15 ns that TI does not publish (recorded, asserted to fail) |
+| `hop-hold-key-board-to-thumb` | the two hops from a key board into a thumb register (`HOP_LH_LT`, `HOP_RH_RT`; one circuit, `hold-in.cir`), with the key board's register at the lowest threshold and the thumb register at the highest, **no** propagation delay, `R-HOP-SER` at the header's pin 8 and a `U-TVS-CHAIN` channel behind it as netlisted (owner, 2026-11-21): the data reaches the thumb register's `SER` after its clock at every corner and on both edges (`hold_margin` > 0: 14.0 ns rising, 28.8 ns falling at the worst corner), and within 100 ns of it (`ser_delay`: 50 / 78 ns worst) |
+| `hop-hold-lh-lt-without-rc`, `hop-hold-rh-rt-without-r` | what-ifs: those two hops as they were until 2026-11-21, the first with nothing on the line and the second with an array channel and no resistor. The data beats the thumb register's clock by up to 16 ns and 15 ns (recorded, asserted to fail) |
 
 ## What a result is worth, and what is assumed
 

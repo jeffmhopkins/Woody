@@ -70,8 +70,8 @@ the ribbon to it (*The Matrix and the umbilical at the tail end*, below).
                                  │                     │
        ┌─────────────────────────▼─────────────────────▼──────────────┐
        │  J-MCU — CBL-MCU-RIBBON to the ESP32-S3-Matrix, its carrier  │
-       │   5V×3 GND×4 3V3 | IO7 … IO1 | IO33 … IO40 | IO43 IO44       │
-       │   IO6 (pin 23) + IO2 MIDI | pin 24 unused | IO3 — 24 cond.   │
+       │   5V×3 GND×5 3V3 | IO7 … IO1 | IO33 … IO40 | IO43 IO44       │
+       │   IO6 + IO2 MIDI | IO3 spare | pins: netlist.yaml — 24 cond. │
        │   (onboard: IMU GPIO10-13, 8×8 matrix GPIO14, USB GPIO19/20) │
        └──┬──────┬──────────┬────────────┬───────────┬────────────────┘
           │      │          │            │           │
@@ -214,8 +214,17 @@ carrier's `layout.yaml` `rules: power_track` width, about 1.2 mΩ per mm at
 1 oz `[calc: 1.72e-8 Ω·m / (0.4 mm × 35 µm); the length is the layout's]`,
 so ~30 mm of it adds ~36 mΩ, about **1.2 LSB more** at 19 keys `[calc]`.
 The return has no such track: the Matrix's ground pad is on the carrier's
-pour, and from there the ribbon's four grounds carry it, ~0.3 LSB
-`[calc: 27.3 mA × 8.5 mΩ = 0.23 mV]`. Same kind of error, same E11 test.
+pour, and from there the ribbon's five grounds carry it, ~0.2 LSB
+`[calc: 27.3 mA × 6.8 mΩ = 0.19 mV]`. Same kind of error, same E11 test.
+
+**On the main board the ADC's 3V3 is a track of its own.** `R-ADC-VDD` is fed
+by its own lane the length of the board, leaving the 3V3 line at a via just
+past `J-MCU`'s rows; the key pull-ups' lane leaves that line further on and
+runs beside it. The pull-ups' current therefore shares only the top-face
+track from `J-MCU` pin 15 to that via with the ADC, about 10 mm of the
+board's fine width `[calc from `main_layout.py`'s points: ~2.5 mΩ per mm at
+1 oz, ~25 mΩ, 0.67 mV at 19 keys]`, about **0.8 LSB**, and none of the
+pull-ups' lane's own drop reaches the reference.
 
 **Still fine, and no longer negligible.** 3.4 LSB is 0.2 % of the ~1594-count
 playable span, and because it is the reference moving it is a gain error rather
@@ -264,6 +273,8 @@ and its two `J-CHAIN`. The section number is kept because other pages cite `carr
               │ │ ├── [R-CS-PULL-INST 10k 1%] to 3V3 (J-MCU pin 15): CS held high while the ESP32 boots
               │ │ │
         [U-TVS-SPI 4-ch array to PWR_GND]  on the PAD side of R-SPI-SER (cs-fall-reentry)
+  IO35 SCK  ──[R-ADC-SER 47R 1%]── MCP3202 CLK    one in each line, at the J-MCU end
+  IO36 MOSI ──[R-ADC-SER 47R 1%]── MCP3202 DIN    of the branch (breath-adc.md)
   IO37 MISO ── MCP3202 DOUT only (never leaves the board)
   IO39 CS   ── MCP3202 CS
 ```
@@ -341,7 +352,7 @@ Two connectors on this board's tail end, one for each thing that is not on it
                                                     │
         │ the carrier's tracks and pour             │ the adapter's tracks and
   J-MCU-C   2 × 12, hung under the carrier          │ J-UMB-SKT, its socket
-        │ CBL-MCU-RIBBON, 24-way IDC, pin 25-n      │
+        │ CBL-MCU-RIBBON, 24-way IDC, pin n to pin n│
         ▼                                           ▼
   J-MCU  2 × 12, 1.27 mm ──── main board, tail end ──── J-UMB  1 × 8, 2.54 mm, right-angle,
                                                         soldered here, plugged into J-UMB-SKT
@@ -371,15 +382,14 @@ row.
 |---|---|---|---|
 | GPIO the instrument uses | 12 | their pads, on `HDR-MATRIX` | [`netlist.yaml`](netlist.yaml) |
 | 5V | 3 | the 5V pad, on `HDR-MATRIX` | current, below |
-| GND | 4 | the GND pad, on the carrier's pour | current, and the ADC's reference, below |
+| GND | 5 | the GND pad, on the carrier's pour | current, and the ADC's reference, below; the fifth is the way `EN` had, grounded at both ends on 2026-11-22 (pre-fab review) |
 | 3V3 | 1 | the 3V3 pad | the Matrix's LDO: the chain's rail and the ADC's reference |
-| `IO6`, the MIDI out's tip line (was `IO0`) | 1 | pin 23, its pad on `HDR-MATRIX`, since issue #37 | [`midi-out`](midi-out/midi-out.md) |
-| none (was `EN`) | 1 | pin 24: not wired out since 2026-10-03 (the Matrix is programmed over USB only, ADR 0021, *Amendment, 2026-10-03*); it cannot be routed on the carrier (`midi-out.md`, *The ribbon conductors*) | [`service-uart`](service-uart/service-uart.md) |
+| `IO6`, the MIDI out's tip line (was `IO0`) | 1 | its pad on `HDR-MATRIX`, since issue #37 | [`midi-out`](midi-out/midi-out.md) |
 | `IO2` (the MIDI out's ring line since issue #37) and spare `IO3` | 2 | their pads | ADR 0009's spare conductors; `IO3`–`IO5` are spare (ADR 0007) |
 
 The pad rows carry one ground pad and one 5 V pad
 `[repo] datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-pinout.png`. On the
-carrier the three 5 V conductors and the four grounds meet again before they
+carrier the three 5 V conductors and the five grounds meet again before they
 reach the Matrix, so the count sets what the ribbon and its two sockets
 carry; the carrier's copper and the one header pin of each carry the rest
 (`HDR-MATRIX`, 3 A a contact).
@@ -391,7 +401,7 @@ contacts are therefore rated against what the regulator can deliver —
 `U-BUCK`'s 1 A (R-78E5.0-1.0,
 [`power-entry-instrument`](power-entry-instrument/power-entry-instrument.md))
 — not against `matrix-led-current`. `[calc]`, sharing equally: 1 A ÷ 3 ≈
-**0.33 A per 5 V contact** and 1 A ÷ 4 = 0.25 A per ground, against ~1 A per
+**0.33 A per 5 V contact** and 1 A ÷ 5 = 0.2 A per ground, against ~1 A per
 1.27 mm box-header contact `[from memory]`. One of each would have sat at the
 limit.
 
@@ -409,24 +419,25 @@ illustrative, not the model's:
 
 at the regulator's 1 A:
   one ground    1 A × 34 mΩ          = 34 mV   → 34 mV / 3.3 V × 4096  = 42 LSB
-  four grounds  1 A × (34 mΩ ÷ 4)    = 8.5 mV  → 8.5 mV / 3.3 V × 4096 = 10.5 LSB
+  five grounds  1 A × (34 mΩ ÷ 5)    = 6.8 mV  → 6.8 mV / 3.3 V × 4096 = 8.4 LSB
 ```
 
-**~42 LSB full scale on one ground, ~10 on four**, moving with the display.
-The four-way split assumes the conductors share equally, which needs equal
+**~42 LSB full scale on one ground, ~8 on five**, moving with the display.
+The five-way split assumes the conductors share equally, which needs equal
 lengths and sound joints. The Matrix's carrier has no other way to this
-board, so the four grounds carry all of it: this is the estimate, not a
+board, so the five grounds carry all of it: this is the estimate, not a
 bound. E11 — breath output clean while the
 matrix is exercised — is what confirms it.
 
 **The pin map** — ribbon conductor n is `J-MCU` pin n
 `[from memory: IDC numbering; confirm on the socket's drawing]`, and
-`J-MCU-C` pin 25 − n on the Matrix carrier, which hangs that header upside down
-(`CBL-MCU-RIBBON`; `tools/kicad.py check` holds the carrier's sheet to this
-one). [`netlist.yaml`](netlist.yaml) is authoritative:
+`J-MCU-C` pin n on the Matrix carrier, which hangs that header upside down and
+turned half a turn, so a ribbon made pin 1 to pin 1 joins them (owner,
+2026-11-22; ADR 0018, *Amendment, 2026-11-22*; `CBL-MCU-RIBBON`;
+`tools/kicad.py check` holds the carrier's sheet to this one). [`netlist.yaml`](netlist.yaml) is authoritative:
 
 ```
-  pin  1 5V     2 5V     3 5V     4 GND    5 IO33   6 —
+  pin  1 5V     2 5V     3 5V     4 GND    5 IO33   6 GND
   pin  7 IO34   8 GND    9 IO35  10 IO3   11 IO36  12 IO1
   pin 13 IO37  14 GND   15 3V3   16 IO2   17 IO38  18 IO44
   pin 19 IO7   20 GND   21 IO6   22 IO43  23 IO39  24 IO40
@@ -436,10 +447,12 @@ one). [`netlist.yaml`](netlist.yaml) is authoritative:
 ribbon pins"; ADR 0030, *Amendment, 2026-11-20*): its layout puts every line
 on one face with no crossing, so each pin is where its Matrix pad's line
 arrives (`hardware/boards/matrix-carrier/README.md`, *The ribbon's pins*).
-It still carries three 5 V and four grounds, and the three umbilical SPI
+It carries three 5 V and five grounds (the spare, pin 6, is the fifth), and the three umbilical SPI
 lines still run over the unbroken `PWR_GND` plane from `J-MCU` to `J-UMB`
 (ADR 0018). Along the ribbon, conductor beside conductor:
 
+- `IO33` and `IO34` (the chain's data in and `CS_MOD`) have the fifth ground
+  between them.
 - `IO35` (`SCLK`) has a ground on one side and `IO3` on the other, which
   firmware drives low (`firmware/README.md`), so it is shielded both ways.
 - `IO38` (chain `SCK`) sits between `IO2` and `IO44` (`RX`). `IO2` is static
@@ -447,11 +460,11 @@ lines still run over the unbroken `PWR_GND` plane from `J-MCU` to `J-UMB`
 - `IO7` (`SH/LD`) sits between `RX` and a ground.
 - **`IO1`, the LED data, lies between `IO36` (`MOSI`) and `IO37` (`MISO`),
   the SPI bus the breath ADC is read on.** The old order kept every fast line
-  between quiet ones, and this one does not here. *Open*: E11 (breath output
-  clean while the Matrix is exercised) decides it. If E11 shows breath
-  samples disturbed while the LEDs update, the order moves again, at both
-  ends (`carrier_layout.py` `PINS` and this sheet together), or firmware
-  keeps LED updates out of ADC reads.
+  between quiet ones, and this one does not here. **So the firmware sends no
+  LED update during an ADC transaction** (pre-fab review, 2026-11-22: a
+  requirement, `firmware/README.md`). E11 (breath output clean while the
+  Matrix is exercised) confirms it; if it does not, the order moves again, at
+  both ends (`carrier_layout.py` `PINS` and this sheet together).
 - `IO6` (the MIDI out's tip) sits between a ground and `IO43` (`TX`), two
   slow UART lines side by side.
 
@@ -502,14 +515,14 @@ page and have no BOM entry yet.
 |---|---|---|---|
 | `U-MCU-RT` | ESP32-S3-Matrix | The instrument. On its own carrier, hung from the oak top, not on this board; reached by `CBL-MCU-RIBBON` | `[repo]` |
 | `J-MCU` | 2 × 12, 1.27 mm shrouded box header, vertical | The Matrix's connector, at the tail end. Pin map decided (ADR 0018) — *The Matrix and the umbilical at the tail end* | pin map decided; `[ds]` part, stock thin (its BOM row) |
-| `CBL-MCU-RIBBON` | 24-way flat ribbon, 0.635 mm, IDC socket each end | From `J-MCU-C` on the Matrix carrier into `J-MCU`; both sockets on one face of the ribbon, crimped end for end (its BOM row) | `[ds]` sockets and ribbon; part **open**, M4 |
-| `J-MCU-C` | as `J-MCU` | The ribbon's carrier end, hung mouth down under the Matrix carrier's arm, beside `J-MCU`; pin k is `J-MCU` pin 25 − k | `[repo]` |
+| `CBL-MCU-RIBBON` | 24-way flat ribbon, 0.635 mm, IDC socket each end | From `J-MCU-C` on the Matrix carrier into `J-MCU`; a bought Samtec FFSD assembly, pin 1 to pin 1 (its BOM row) | `[ds]` sockets and ribbon; part **open**, M4 |
+| `J-MCU-C` | as `J-MCU` | The ribbon's carrier end, hung mouth down under the Matrix carrier's arm, beside `J-MCU`, its key toward the far side; pin k is `J-MCU` pin k | `[repo]` |
 | `HDR-MATRIX` ×2 | 1 × 10 2.54 mm pin header, surface mount | The Matrix on its carrier (`hardware/boards/matrix-carrier/`), its pad rows on the posts | `[ds]` |
 | `J-UMB` | 1 × 8, 2.54 mm right-angle pin header | Where the umbilical reaches this board, at its tail end: soldered into it and plugged into `J-UMB-SKT` on `PCB-UMB-ADAPTER` (ADR 0021); `interfaces/spi-link`'s row | `[from memory]` envelope; part **open**, M4 |
 | `J-UMBILICAL-INST`, `PCB-UMB-ADAPTER` | NE8FAV on its adapter board | The instrument's etherCON behind the tail cap, and the board that carries it to `J-UMB`; `interfaces/spi-link`'s rows | `[ds]` NE8FAV; adapter **open**, M4 |
 | `U-KEYS`, `R-KEY-PU`, `R-KEY-SER`, `C-KEY`, `C-DECOUPLE-165` | — | **Half of them are on this board since ADR 0017**: the `right_thumb` and `left_thumb` clusters. The other two clusters are on the key boards. Counts per cluster are `cluster-boards.md`'s component table | `[repo] 0017, bom.csv` |
 | **`R-CHAIN-SER`** ×3 | **100 Ω** | **Open — series at the driving end on `SCK`, `SH/LD` and the chain-end `SER`. Edge-rate damping, not termination; E14 decides. `key-chain-loom.md`** | open |
-| `U-TVS-CHAIN` | SP0504BAHTG, 4-ch array, SOT-23-5 | **Fitted** (ADR 0018) — the three MCU nets the ribbon connectors expose, for service handling with the lid off; fourth channel spare. `key-chain-loom.md` | candidate |
+| `U-TVS-CHAIN` | SP0504BAHTG, 4-ch array, SOT-23-5 | **Fitted** (ADR 0018) — the three MCU nets the ribbon connectors expose, for service handling with the lid off; the fourth channel is on `left_thumb`'s `SER`, behind `R-HOP-SER`. `key-chain-loom.md` | candidate |
 | `FB-CHAIN` ×2 | Ferrite bead, 0805, low DCR | One per key-board ribbon on its 3V3 conductor: isolation. **No fuse** — a skewed ribbon's short is limited by the Matrix LDO itself (ADR 0018). `key-chain-loom.md` | part **open** |
 | `U-BUF` | OPA2197IDR | ½ reference buffer, ½ breath buffer, both on +12 V | `[repo]` |
 | `U-BREATH` | MPXV4006DP, case 1351-01, surface mount, soldered down | P1 to the tube, P2 open to the cavity | `[ds]` pp.1, 6, 7 |

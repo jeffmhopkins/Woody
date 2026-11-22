@@ -170,6 +170,17 @@ star, it would be in the difference. Same net, `AGND_INST`, so the netlist
 does not change: it is a layout rule — `R1b`'s star end is a trace of its own
 from pin 3's pad, not a via into the pour. E11 is still the test of the whole run.
 
+**As the main board is laid out, both taps stand a little off the sensor's
+pins** `[repo: main-board.kicad_pcb; calc, pre-fab review 2026-11-22, S6]`.
+The `AGND_SENSE` leg starts at `U-BUF`'s ground pin, beside the sensor, not at
+pin 3's own pad; the analog return's drop between the two, tens of
+microvolts, is in the difference as a fixed offset, and `TRIM-BREATH-ZERO`
+takes it out with the sensor's own. `R-FB-REF` takes `VS` from the `VS` track
+some 27 mm before pin 2, so that length's drop at the sensor's supply current
+is outside the reference's loop: tens of parts per million of `VS`, steady,
+and so set out with the span at calibration. Neither is worth a track of its own on this board;
+a later layout that has the room takes both at the pins.
+
 ### NXP's Figure 3, at the sensor
 
 **Fitted 2026-10-01 (owner): 1.0 µF and 0.01 µF on `VS`, 470 pF on `VOUT`,

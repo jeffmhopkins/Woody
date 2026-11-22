@@ -27,7 +27,7 @@ The `Dir` and `Peer` columns are defined once in
 |---|---|---|---|---|
 | buffered sensor output | in | `interfaces/breath-sense-link` | `sensor-full-scale`, `breath-working-point` | The breath buffer, drawn in `carrier.md` §2. Arrives at `R-ADCDIV-U`; the same node feeds `R1` and the umbilical |
 | `DEV_3V3` → `ADC_VDD` (`VDD`/`VREF`) | in | `J-MCU`, `interfaces/key-chain-loom` | — | The dev board's LDO, into `ADC_VDD` through `R-ADC-VDD` (*The reference's filter*, below). The MCP3202 has no `VREF` pin. **The key pull-ups load this same node** — that argument stays in `carrier.md` §2. It arrives down `CBL-MCU-RIBBON`, regulated against the Matrix's ground, so the Matrix's LED return current can move it: `carrier.md`, *The Matrix and the umbilical at the tail end* |
-| SPI2 `SCLK`, `MOSI`, `DOUT` | in/out | `J-MCU`, `interfaces/spi-link` | `loop-budget` | One host shared with the DAC8568, clocked slower than the DAC, per `carrier.md` §4 |
+| SPI2 `SCLK`, `MOSI`, `DOUT` | in/out | `J-MCU`, `interfaces/spi-link` | `loop-budget` | One host shared with the DAC8568, clocked slower than the DAC, per `carrier.md` §4. `SCLK` and `MOSI` each through an `R-ADC-SER` (*The SPI branch*, below) |
 | `CS_ADC` (IO39) | in | `J-MCU` | — | This device's own chip select on the shared host, and a carrier-local net, pulled up to 3V3 by `R-CS-PULL-ADC` (below). **Not `CS_MOD`**, the DAC's, which leaves on `J-UMB` |
 | `AGND_INST` | ref | `carrier/power-entry-instrument` | — | The instrument analog star, drawn `AGND-local` in `carrier.md` §2 and tied to `PWR_GND` at one point. `R-ADCDIV-L` and `C-AA-ADC` return here. **Not `AGND_SENSE`** (the umbilical conductor) and **not `AGND_MOD`** |
 | CH1 | — | — | — | Tied to `AGND_INST` (owner, 2026-10-03, D5; #14 A7): firmware can read a known zero for a self-test, and no floating input sits beside CH0 |
@@ -251,6 +251,28 @@ does for `CS_MOD`. Its static current is zero while deselected.
 
 ---
 
+### The SPI branch — `R-ADC-SER`
+
+`IO35` (`SCLK`) and `IO36` (`MOSI`) leave `J-MCU` two ways: to `R-SPI-SER` and
+the module, and along the whole board to this ADC. The second is a long
+branch with nothing on its end but a CMOS input, so an edge launched into it
+comes back, and the pre-fab review (S1, 2026-11-22) found the ring-back at the
+ADC's pin close to its input threshold at the pads' default drive and through
+it at their maximum `[review: the reviewer's own lossless decks; no repository
+sim and no board yet]`.
+
+Two things answer it, and neither touches the module's launch:
+
+- **A series resistor in each line at the `J-MCU` end of the branch**
+  (`R-ADC-SER`, its value and why on its BOM row), which ends the branch at
+  its source. It stands after the split, so `R-SPI-SER` still sees the pad
+  alone.
+- **Firmware fixes both pads' drive strength** at the default or below
+  (`firmware/README.md`, *SPI2*).
+
+*Open*: a repository sim of this node (`interfaces/spi-link/sim` has none),
+and E11's scope at `U-ADC` pins 5 and 7, which settles the value.
+
 ## Component table
 
 *Rows moved verbatim from `carrier.md`'s component table.*
@@ -263,4 +285,5 @@ does for `CS_MOD`. Its static current is zero while deselected.
 | `C-ADC-BULK` | 10 µF X7R | Reservoir at MCP3202 `VDD`/`VREF`, beside the 100 nF | `[ds]` + `[calc]`; the PWM question is E9's |
 | `R-ADC-VDD` | 10 Ω 1 % | The reference's filter: `DEV_3V3` to `ADC_VDD` (owner, 2026-10-03) | `[sim]` `vdd-ripple`, `vdd-load` |
 | `C-ADC-VDD` | 22 µF X5R 25 V | The filter's capacitor at pin 8 | `[ds]` Samsung CL31A226KAHNNNE + `[web]` its DC-bias curve |
+| `R-ADC-SER` ×2 | 47 Ω 1 % | In series in `SCLK` and `MOSI` at the `J-MCU` end of the branch to this ADC (*The SPI branch*) | `[review]` S1, value open until E11 |
 | `R-CS-PULL-ADC` | 10 kΩ 1 % | `CS_ADC`'s idle pull-up to 3V3, beside pin 1: holds the ADC deselected from reset until firmware drives `IO39` | `[ds]` ESP32-S3 datasheet p.17–18 |

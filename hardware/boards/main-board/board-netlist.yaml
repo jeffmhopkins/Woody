@@ -1051,6 +1051,39 @@ components:
     - 1
     - 2
     sheet: midi-out
+  R52:
+    of: R-HOP-SER
+    value: 2k2 1%
+    pins:
+    - 1
+    - 2
+  R53:
+    of: R-HOP-SER
+    value: 2k2 1%
+    pins:
+    - 1
+    - 2
+  R54:
+    of: R-ADC-SER
+    value: 47R 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-adc
+  R55:
+    of: R-ADC-SER
+    value: 47R 1%
+    pins:
+    - 1
+    - 2
+    sheet: breath-adc
+  R56:
+    of: R-RXD-SER
+    value: 1k 1%
+    pins:
+    - 1
+    - 2
+    sheet: service-uart
   R6:
     of: R-REF-IN
     value: 330R 1%
@@ -1356,7 +1389,7 @@ nets:
   - NT1.1
   /HOP_LH_LT:
   - J4.8
-  - U7.SER
+  - R52.1
   /HOP_LT_QH:
   - R44.1
   - U7.QH
@@ -1364,8 +1397,15 @@ nets:
   - J5.6
   - R44.2
   - U11.CH3
+  /HOP_LT_SER:
+  - R52.2
+  - U7.SER
+  - U9.CH4
   /HOP_RH_RT:
   - J5.8
+  - R53.1
+  /HOP_RT_SER:
+  - R53.2
   - U11.CH4
   - U8.SER
   /IO1:
@@ -1386,14 +1426,14 @@ nets:
   - A1.IO35
   - J1.9
   - R1.1
+  - R54.1
   - U1.CH1
-  - U2.CLK
   /IO36:
   - A1.IO36
   - J1.11
   - R2.1
+  - R55.1
   - U1.CH2
-  - U2.DIN
   /IO37:
   - A1.IO37
   - J1.13
@@ -1520,7 +1560,7 @@ nets:
   /U0RXD:
   - A1.IO44
   - J1.18
-  - J2.2
+  - R56.1
   /U0TXD:
   - A1.IO43
   - J1.22
@@ -1531,6 +1571,12 @@ nets:
   /V3V3_CHAIN_RH:
   - FB2.2
   - J5.10
+  /breath-adc/ADC_CLK:
+  - R54.2
+  - U2.CLK
+  /breath-adc/ADC_DIN:
+  - R55.2
+  - U2.DIN
   /breath-adc/ADC_IN:
   - C1.1
   - R4.2
@@ -1660,6 +1706,9 @@ nets:
   /power-entry-instrument/USBOR_VCAP:
   - C207.1
   - U13.VCAP
+  /service-uart/RXD_HDR:
+  - J2.2
+  - R56.2
   /service-uart/TXD_HDR:
   - J2.1
   - R46.2
@@ -1803,8 +1852,6 @@ nets:
   - R43.2
   - R6.1
   - U3.V+
-  J1.6:
-  - J1.6
   PWR_GND:
   - A1.GND
   - C10.2
@@ -1865,6 +1912,7 @@ nets:
   - J1.14
   - J1.20
   - J1.4
+  - J1.6
   - J1.8
   - J2.3
   - J4.1
@@ -1949,8 +1997,6 @@ nets:
   - U7.QH_BAR
   U8.QH_BAR:
   - U8.QH_BAR
-  U9.CH4:
-  - U9.CH4
   UMBILICAL_POS12:
   - C39.1
   - D2.K
@@ -1980,7 +2026,6 @@ external_endpoints:
 - D20.DO
 - D8.1
 - D9.1
-- J1.6
 - U1.CH4
 - U10.1
 - U10.5
@@ -1995,4 +2040,3 @@ external_endpoints:
 - U6.4Y
 - U7.QH_BAR
 - U8.QH_BAR
-- U9.CH4

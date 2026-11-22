@@ -77,7 +77,8 @@ the ends; its sheet gives 65 dB at 1 kHz only).
 **Without the filter it failed at every corner** — 14.5 LSB nominal, 2.8 at
 the best corner, 115 at the worst, where the ribbon's inductance resonates
 with the capacitors at either end inside the 200–500 kHz band searched. The
-drawn ribbon is 37.6 mm, ~26 nH: it filters nothing at 330 kHz.
+ribbon (`len_rib`, read from `mechanical/drc.echo`) is tens of nanohenries:
+it filters nothing at 330 kHz.
 **With it** (`vdd-ripple`): `R-ADC-VDD` damps that LC and makes a pole with
 the pin's capacitance, and the worst corner is 0.32 LSB. `rip_budget_mv`
 says what the bench can be held to — the largest 330 kHz ripple on

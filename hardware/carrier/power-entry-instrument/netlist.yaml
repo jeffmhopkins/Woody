@@ -50,7 +50,7 @@ components:
     - 1
     - 2
     note: 'The Miller capacitor: gate to drain, through R-INRUSH-GD. It sets the ramp: dV/dt = I(R-INRUSH-G) / C,
-      about 400 V/s, 0.23 A into the instrument''s 570 uF'
+      and the ramp times the capacitance behind the FET is the inrush current (power-entry-instrument.md, The numbers)'
   C-INRUSH-GS:
     value: 1uF 50V X7R
     pins:

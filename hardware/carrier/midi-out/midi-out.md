@@ -11,9 +11,8 @@ centred etherCON, and `J-MIDI` turned to a side-entry header facing the tail
 controller. The connector on the main PCB should be a 90deg facing the
 rear"*; *"TRS can go in corner"*; [ADR 0021](../../../docs/decisions/0021-pcb-mount-ethercon.md),
 *Amendment, 2026-10-07*). The oak-bottom arrangement is in [`notes.md`](notes.md).
-**The parts are on the sheet and in the BOM; `main-board.kicad_pcb` still has
-the top-entry `J7` where the oak-bottom design put it**, and moves with the
-board's half of #45 (*Placement*, below). **Amended 2026-10-05 (#39):** `R-MIDI` is
+**The parts are on the sheet, in the BOM and on `main-board.kicad_pcb`**, `J7` the
+side-entry header there since the board's half of #45 (*Placement*, below). **Amended 2026-10-05 (#39):** `R-MIDI` is
 182 Ω 1 % and the rail comes through an ideal-diode OR (*Amendment*, below).
 
 **The sheet:** [`midi-out.sch.png`](midi-out.sch.png) (KiCad:
@@ -227,8 +226,8 @@ GPIO0, 3, 45 and 46 `[ds ESP32-S3-datasheet-v2.2.pdf p.32]`.
 
 ## The ribbon conductors
 
-The tip line is **IO6, on `J-MCU` pin 21** (`J-MCU-C` pin 4), and the ring
-line **IO2, on `J-MCU` pin 16** (`J-MCU-C` pin 9). The order is the Matrix
+The tip line is **IO6, on `J-MCU` pin 21**, and the ring
+line **IO2, on `J-MCU` pin 16**; `J-MCU-C` numbers them the same. The order is the Matrix
 carrier's, which routes every line on one face
 (`hardware/boards/matrix-carrier/README.md`, *The ribbon's pins*).
 

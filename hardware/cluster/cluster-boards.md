@@ -249,9 +249,9 @@ of a key board's `J-CHAIN` land on register pins, which carry the part's own
 HBM rating of ±4000 V `[datasheets/logic/SN74HCS165-ti-scls828a.pdf p.4]` —
 a component handling rating (JS-001; TI's own footnote is about safe
 manufacturing), not a system-level IEC 61000-4-2 rating for a contact touched
-with the lid off. The exposure is accepted, not protected. The
-array's spare fourth channel stays spare: one channel cannot cover the three
-hops. `key-chain-loom.md` has the argument.
+with the lid off. The exposure is accepted, not protected. On the
+main board each array's fourth channel is on a thumb register's `SER`, behind
+that hop's `R-HOP-SER` (owner, 2026-11-21). `key-chain-loom.md` has the argument.
 
 ---
 

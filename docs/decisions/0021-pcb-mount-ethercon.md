@@ -513,7 +513,8 @@ altogether (below).
    board, so the LED row's band and cone are untouched.
 4. **`J-MCU-C` hangs under the carrier's arm, straight above `J-MCU`**, its
    mouth the same way, and pin *k* carries `J-MCU` pin 25 − *k*, as
-   `J-MCU-KB` did; `tools/kicad.py check` (`check_matrix`) now holds the
+   `J-MCU-KB` did (superseded 2026-11-22: the header is turned and pin *k*
+   is pin *k*, ADR 0018, *Amendment, 2026-11-22*); `tools/kicad.py check` (`check_matrix`) now holds the
    carrier's sheet to the carrier circuit's netlist. Closed, the ribbon's
    service slack folds flat in four legs between the two headers, short of
    the LED row's band (*"Matrix ribbon closed: its folds between the

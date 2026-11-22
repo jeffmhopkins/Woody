@@ -165,3 +165,29 @@ closed: its legs and fold over the main board"*.
 
 Nothing in decisions 1–5 changes: the allocation, the protection and the
 grounds are as they were.
+
+## Amendment, 2026-11-22: `J-MCU-C` turned, a bought ribbon, a fifth ground
+
+The pre-fab review (F3) found that the cable above cannot be bought: the
+sockets it named are obsolete, and a stocked assembly is made pin 1 to
+pin 1, not end for end. The owner's answers, 2026-11-22: *"if we have to
+turn 180° so it's fitting just fine that's fine"*, and for the cable *"put 2
+and 1/2 in with 2 in of fallback"*.
+
+1. **`J-MCU-C` is fitted half a turn round, its key toward the far side.**
+   No pad of the carrier moves; its pins are renumbered, so `J-MCU-C` pin
+   *k* is `J-MCU` pin *k* (`check_matrix`). This replaces "pin 25 − *n*"
+   above and in ADR 0021 and ADR 0030. `J-MCU` and the main board do not
+   change.
+2. **`CBL-MCU-RIBBON` is a bought Samtec FFSD assembly**, both sockets on one
+   face, pin 1 to pin 1. Its BOM row names the length and the fallback. In
+   the body the two keys face opposite ways across the body and nothing
+   stands proud of either header's wall.
+3. **The spare way, pin 6, is a fifth ground**, tied to `PWR_GND` on the
+   main board and on the carrier (review S4). It lies between `IO33` and
+   `IO34` on the ribbon.
+4. **The Matrix stands further toward the tail**, centred in the window of
+   the longer tail (owner, 2026-11-22: *"make it longer and then re-center
+   The matrix"*; the body's side of it is the umbilical adapter's work). The
+   carrier's arm is longer by the same amount and `J-MCU-C` stays where it
+   was, beside `J-MCU`.

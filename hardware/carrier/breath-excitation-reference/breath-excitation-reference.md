@@ -40,11 +40,12 @@ unretrofittable". The other of the two parts, `R1b`, is in the breath chain and
 stays on [`carrier.md`](../carrier.md).*
 
 **`R-ISO-REF` — and without it the reference buffer oscillates.** As a bare
-follower into the sensor's 100 nF decoupler the reference half has **1.5° of
-phase margin** `[sim, A4]` against TI's specified `Zo` = 375 Ω
-`[SBOS737C p.8]`. The part this page originally drew — a 10 Ω resistor with
-feedback taken at `VS` — **does not fix it**: in-loop `R_ISO` buys nothing at
-*any* value, 1.5° at 10 Ω and 1.5° at 37.4 Ω. It is compensated instead with
+follower into the sensor's 100 nF decoupler the reference half has **under
+ten degrees of phase margin** on TI's own model of the part (`sim/`,
+`loop-bare-follower`), against TI's specified `Zo` = 375 Ω
+`[SBOS737C p.8]`. A resistor in series with feedback taken at `VS` **does not
+fix it**: in-loop `R_ISO` buys nothing (`loop-in-loop-riso-only`, no better
+than the bare follower). It is compensated instead with
 TI's own dual-feedback network, and the four parts are drawn above.
 
 **The compensation is TI's Figure 56, adapted.** `[SBOS737C §8.2.3 p.30,
