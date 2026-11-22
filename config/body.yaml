@@ -252,8 +252,8 @@ layout:
     source: "owner, 2026-09-26: 'copy the same space above the left keys to between the hands and at the bottom'. Since the matrix was centred (same day) it equalizes the mouth end and the space between the hands only; the tail is sized by its own contents"
   gap_matches_matrix:
     value: false
-    status: nominal
-    source: "OFF since 2026-11-22, pending the owner: the tail grew by boards.umb_socket_d for J-UMB's socket and the Matrix was re-centred in it, which makes the last-key-to-window gap larger than the gap between the hands; left on, the rule answers by moving the right hand down the body, and the key boards and the main board are laid out where the keys are. Off, the gap is layout.gap and no key moves. The rule it switches was the owner's, 2026-09-26: the gap between the key groups is the same as the gap from the last keys to the LED matrix - clear space, cap edge to cap edge and cap edge to window edge. Overrides equal_bands for the gap; equal_bands then only sets the mouth end, and gap stays a minimum"
+    status: settled
+    source: "OFF since 2026-11-22 (owner, shown both in plan: the Matrix fully centred, the last key to the window larger than the gap between the hands): the tail grew by boards.umb_socket_d for J-UMB's socket and the Matrix was re-centred in it, which makes the last-key-to-window gap larger than the gap between the hands; left on, the rule answers by moving the right hand down the body, and the key boards and the main board are laid out where the keys are. Off, the gap is layout.gap and no key moves. The rule it switches was the owner's, 2026-09-26: the gap between the key groups is the same as the gap from the last keys to the LED matrix - clear space, cap edge to cap edge and cap edge to window edge. Overrides equal_bands for the gap; equal_bands then only sets the mouth end, and gap stays a minimum"
   matrix_centred:
     value: true
     status: settled
