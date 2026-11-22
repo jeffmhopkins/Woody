@@ -12,15 +12,16 @@ connector's axis, x to the right and y DOWN, seen from the tail (the panel side)
 the board's front face. Across the body the far side is on the right.
 
 THERE IS NOTHING TO PLACE. The etherCON (J1) stands on the body CAD's axis on the front
-face. J-UMB's posts (J2) come through from the rear on the row the header on the main board
-holds them in, 7.7 below the axis, and pin k is where the main board's pin k stands
-(tools/pcb_adapter.py check_cad holds each pad to it).
+face. J-UMB's socket (J2) stands on the rear face on the row the main board's header holds
+its posts in, 7.7 below the axis, pin k over the main board's post k (tools/pcb_adapter.py
+check_cad holds each pad to it). It is surface mount: nothing passes through the board under
+the etherCON, whose body stands against the front face.
 
 THE EIGHT LINES RUN STRAIGHT, ALL ON THE REAR FACE. Seen from the tail the etherCON's pin 1
 is on the LEFT (an RJ45 jack with its latch notch down) and J-UMB's pin 1, as the main board
 numbers it, is on the RIGHT. The cable's pin map is written for that (owner, 2026-11-22):
 the etherCON's pin 9 - n carries J-UMB's pin n, so each line leaves its contact straight
-down and steps out at 45 degrees onto the post below it, and no two cross.
+down and steps out at 45 degrees to the socket's pad below it, and no two cross.
 
 1. ONE FACE, NO VIA, NO POUR. Every pad is a through-hole. No conductor of the umbilical is
    a plane's: PWR_GND, DIG_GND and AGND_SENSE are three separate returns until the main
@@ -71,17 +72,23 @@ def contact(n):
     return 9 - n
 
 
-def straight(n):
-    """The etherCON's contact for J-UMB's pin n straight down, then at 45 onto the post."""
+SKT_OFF = 1.65                # the socket's pads either side of its row (the library footprint), turn about
+FAN_Y = ROW - SKT_OFF - 0.95 - 0.5   # every diagonal is done by here: the upper pads' top edge, less half a millimetre
+
+
+def straight(n, pad):
+    """The etherCON's contact for J-UMB's pin n straight down, out at 45 degrees to stand over
+    the socket's pad n, and down into it. A pad on the row's lower side is reached between
+    two of the upper side's, 4.08 apart."""
     x, y = j1(contact(n))
-    tx, ty = j2(n)
+    tx, ty = pad
     assert abs(tx - 2 * x) < 1e-6, (n, x, tx)
-    return [(x, y), (x, ty - abs(tx - x)), (tx, ty)]
+    return [(x, y), (x, FAN_Y - abs(tx - x)), (tx, FAN_Y), (tx, ty)]
 
 
-def routes():
+def routes(pads):
     """(net, width, points, layer) for all eight lines, on the rear face."""
-    return [(NET[n], WIDTH.get(n, TW), straight(n), B) for n in range(1, 9)]
+    return [(NET[n], WIDTH.get(n, TW), straight(n, pads[n]), B) for n in range(1, 9)]
 
 
 def main():
@@ -98,7 +105,7 @@ def main():
     board = pcb.new_board(HERE, lay, geo)
     pcb.add_outline(board, pcb.dxf_segments(os.path.join(ROOT, "mechanical", "export", lay["outline"])))
     netinfo, fps = pcb.load_parts(board, comps, nets)
-    je, ju = fps[pcb.ref_of(comps, "J-UMBILICAL-INST")], fps[pcb.ref_of(comps, "J-UMB")]
+    je, ju = fps[pcb.ref_of(comps, "J-UMBILICAL-INST")], fps[pcb.ref_of(comps, "J-UMB-SKT")]
     for (ref, pin), net in {(r, p): n for n, nodes in nets for r, p in nodes}.items():
         want = NET[int(pin)] if ref == ju.GetReference() else NET[9 - int(pin)]
         if want != net:
@@ -107,34 +114,32 @@ def main():
     # the etherCON: its origin on the axis, on the front face, latch up
     board.Add(je)
     je.SetPosition(pcb.V(*at((0, 0))))
-    # J-UMB's posts: the header's insulator is against the REAR face, so the footprint is
-    # flipped; then turned and moved until pin 1 and pin 8 are where the main board has them
+    # J-UMB's socket stands on the REAR face, so the footprint is flipped; then turned until
+    # pin 1 and pin 8 are over the main board's posts 1 and 8, its row on the body CAD's
     board.Add(ju)
-    ju.SetPosition(pcb.V(*at(j2(1))))
+    ju.SetPosition(pcb.V(*at((0, ROW))))
     ju.Flip(ju.GetPosition(), pcbnew.FLIP_DIRECTION_LEFT_RIGHT)
+    own = lambda q: ((pcbnew.ToMM(q.x) - at((0, 0))[0]), (pcbnew.ToMM(q.y) - at((0, 0))[1]))
     for rot in (0, 90, 180, 270):
         ju.SetOrientationDegrees(rot)
-        p1 = ju.FindPadByNumber("1").GetPosition()
-        ju.Move(pcb.V(*at(j2(1))) - p1)
-        p8 = ju.FindPadByNumber("8").GetPosition()
-        w = at(j2(8))
-        if abs(pcbnew.ToMM(p8.x) - w[0]) < 1e-3 and abs(pcbnew.ToMM(p8.y) - w[1]) < 1e-3:
+        pads = {k: own(ju.FindPadByNumber(str(k)).GetPosition()) for k in range(1, 9)}
+        if all(abs(pads[k][0] - j2(k)[0]) < 1e-3 and abs(abs(pads[k][1] - ROW) - SKT_OFF) < 1e-3 for k in range(1, 9)):
             break
     else:
-        sys.exit("adapter_layout: no turn puts J-UMB's pin 8 at the row's other end")
-    # the header itself is the main board's part (its sheet's J-UMB, fitted there): this
-    # footprint is the holes its posts come through, so it carries no model of a header
-    ju.Models().clear()
+        sys.exit("adapter_layout: no turn puts the socket's pads over J-UMB's posts")
+    # the pad beside the etherCON's G tab must be on the row's UPPER side, away from it: with
+    # the other hand of this footprint (Pin1Left) it would stand 0.25 from the tab's pad
+    if pads[7][1] > ROW:
+        sys.exit("adapter_layout: the socket's pad 7 is on the lower side, against the etherCON's G tab - the sheet wants the footprint's other hand")
     for fp in (je, ju):                      # their values are their BOM rows' words, longer than the board
         fp.Value().SetVisible(False)
     for k in range(1, 9):
-        for fp, want in ((je, j1(k)), (ju, j2(k))):
-            q = fp.FindPadByNumber(str(k)).GetPosition()
-            w = at(want)
-            assert abs(pcbnew.ToMM(q.x) - w[0]) < 1e-3 and abs(pcbnew.ToMM(q.y) - w[1]) < 1e-3, (fp.GetReference(), k)
+        q = je.FindPadByNumber(str(k)).GetPosition()
+        w = at(j1(k))
+        assert abs(pcbnew.ToMM(q.x) - w[0]) < 1e-3 and abs(pcbnew.ToMM(q.y) - w[1]) < 1e-3, k
 
     n_seg = 0
-    for net, w, pts, layer in routes():
+    for net, w, pts, layer in routes(pads):
         for a, b in zip(pts, pts[1:]):
             t = pcbnew.PCB_TRACK(board)
             t.SetStart(pcb.V(*at(a)))
@@ -157,9 +162,9 @@ def main():
     pcb.fit_footprint_silk(board, lay["fab"])
     pcb.silk_text(board, silk["title"], *at((0, 2.2)))
     pcb.silk_text(board, f"rev {silk['rev']}  {silk['date']}", *at((0, 4.0)))
-    pcb.silk_text(board, "1", *at((j2(1)[0], ROW + 3.0)))
-    pcb.silk_text(board, "8", *at((j2(8)[0] - 1.6, ROW + 3.0)))
-    pcb.silk_text(board, "J-UMB", *at((1.3, ROW + 3.0)))
+    pcb.silk_text(board, "1", *at((j2(1)[0], ROW + 3.8)))
+    pcb.silk_text(board, "8", *at((j2(8)[0] - 1.6, ROW + 3.8)))
+    pcb.silk_text(board, "J-UMB", *at((1.3, ROW + 3.8)))
 
     pcb.save(board, OUT)
     pro = os.path.join(HERE, NAME + ".kicad_pro")

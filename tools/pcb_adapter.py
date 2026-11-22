@@ -57,6 +57,9 @@ def to_own(px, py):
     return (px - pcb.OX, pcb.OY - py)
 
 
+SKT_PAD_OFF = 1.65   # KiCad's PinSocket_1x08_P2.54mm_Vertical_SMD: pad centres from the row
+
+
 def pad_own(p):
     q = p.GetPosition()
     return to_own(pcbnew.ToMM(q.x), pcbnew.ToMM(q.y))
@@ -114,16 +117,17 @@ def check_cad(board, lay, comps):
         bad.append(f"error: [cad] {j1.GetReference()} (the etherCON) stands at {tuple(round(v, 2) for v in got)}, turned {j1.GetOrientationDegrees():g}"
                    f"{', on the REAR face' if j1.IsFlipped() else ''}; the body CAD puts its axis at ({ax}, {az}), latch up, on the face toward the tail")
     # J-UMB's posts: on the rear face, on the body CAD's row, each where the main board holds that pin
-    j2 = fp_of[pcb.ref_of(comps, "J-UMB")]
+    j2 = fp_of[pcb.ref_of(comps, "J-UMB-SKT")]
     (y0, z0), (y1, z1), pitch = geo["row"]
     if not j2.IsFlipped():
-        bad.append(f"error: [cad] {j2.GetReference()} (J-UMB) is on the face toward the tail; its insulator stands against the REAR face")
+        bad.append(f"error: [cad] {j2.GetReference()} (J-UMB-SKT) is on the face toward the tail; the socket stands on the REAR face")
     mref, row = main_board_row()
     for p in j2.Pads():
         n = p.GetNumber()
         py, pz = pad_own(p)
-        if abs(pz - z0) > 0.02 or not (y0 - 0.02 <= py <= y1 + 0.02):
-            bad.append(f"error: [cad] {j2.GetReference()} pad {n} is at ({py:.2f}, {pz:.2f}); the body CAD's J-UMB row runs across {y0:g}..{y1:g} at {z0:g} up")
+        # a surface-mount socket's pads stand either side of its row, turn about: the row is midway
+        if abs(abs(pz - z0) - SKT_PAD_OFF) > 0.02 or not (y0 - 0.02 <= py <= y1 + 0.02):
+            bad.append(f"error: [cad] {j2.GetReference()} pad {n} is at ({py:.2f}, {pz:.2f}); the body CAD's J-UMB row runs across {y0:g}..{y1:g} at {z0:g} up, the socket's pads {SKT_PAD_OFF} either side of it")
         if n not in row:
             bad.append(f"error: [cad] {j2.GetReference()} pad {n}: the main board's {mref} has no such pin")
             continue
@@ -134,9 +138,10 @@ def check_cad(board, lay, comps):
             bad.append(f"error: [cad] {j2.GetReference()} pad {n} is {p.GetNetname()}; the main board's {mref} pin {n} is {mnet}")
     # the header's insulator ends on this board's rear face (ADR 0021): the main board's pad
     # row, the row's distance to the insulator's back and the insulator's depth say where
-    back = float(body["boards"]["umb_joint_row_back"]["value"]) + float(body["boards"]["umb_joint_d"]["value"])
+    back = (float(body["boards"]["umb_joint_row_back"]["value"]) + float(body["boards"]["umb_joint_d"]["value"])
+            + float(body["boards"]["umb_socket_d"]["value"]))
     mx = next(iter(row.values()))[0]
     if abs(mx + back - geo["rear_x"]) > 0.02:
-        bad.append(f"error: [cad] the main board's {mref} pad row stands at {mx:.2f} along the body, so its insulator's face is at {mx + back:.2f}; "
+        bad.append(f"error: [cad] the main board's {mref} pad row stands at {mx:.2f} along the body, so its insulator's face and the socket (boards.umb_socket_d) end at {mx + back:.2f}; "
                    f"the body CAD puts the adapter's rear face at {geo['rear_x']:g}")
     return bad
