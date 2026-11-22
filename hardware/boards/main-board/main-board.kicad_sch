@@ -2661,7 +2661,7 @@
     (property "Datasheet" "" (at 106.68 530.86 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "J-UMB" (at 106.68 530.86 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8" (at 106.68 530.86 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "On the main board's tongue, soldered into it and into the umbilical adapter, where the carrier's nets reach the umbilical. Pin N is J-UMB-INST pin N through the adapter's tracks; D-REVSHUNT and U-TVS-SPI sit at it" (at 106.68 530.86 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "On the main board's tongue, soldered into it and plugged into J-UMB-SKT on the umbilical adapter, where the carrier's nets reach the umbilical. Pin N is J-UMB-INST pin 9 - N through the socket and the adapter's tracks; D-REVSHUNT and U-TVS-SPI sit at it" (at 106.68 530.86 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins_source" "pin N is the etherCON's pin N through the adapter (ADR 0021)" (at 106.68 530.86 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "hanxia" (at 106.68 530.86 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "HX PZ2.54-1x8P WZ" (at 106.68 530.86 0) (effects (font (size 1.27 1.27)) hide))

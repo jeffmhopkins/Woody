@@ -53,7 +53,7 @@ the ribbon to it (*The Matrix and the umbilical at the tail end*, below).
    │  (nothing else since issue #37: the MIDI jack is in the     │
    │   oak bottom beside it, carrier/midi-out)                   │
    └──────────────┬──────────────────────────────────────────────┘
-                  │ PCB-UMB-ADAPTER: 8 tracks, pin N to pin N (ADR 0021)
+                  │ PCB-UMB-ADAPTER: 8 tracks, contact 9-N to pin N    
                   │
    ┌──────────────▼──────────────────────────────────────────────────────┐
    │ J-UMB   1 BREATH   2 AGND   3 +12V   6 PWR_GND   4 SCLK   5 MOSI      │
@@ -350,12 +350,12 @@ Two connectors on this board's tail end, one for each thing that is not on it
   U-MCU-RT  ESP32-S3-Matrix                   J-UMBILICAL-INST  etherCON NE8FAV,
     two pad rows: HDR-MATRIX ×2                 soldered to PCB-UMB-ADAPTER
                                                     │
-        │ the carrier's tracks and pour             │ the adapter's tracks,
-  J-MCU-C   2 × 12, hung under the carrier          │ pin N to pin N
+        │ the carrier's tracks and pour             │ the adapter's tracks and
+  J-MCU-C   2 × 12, hung under the carrier          │ J-UMB-SKT, its socket
         │ CBL-MCU-RIBBON, 24-way IDC, pin n to pin n│
         ▼                                           ▼
   J-MCU  2 × 12, 1.27 mm ──── main board, tail end ──── J-UMB  1 × 8, 2.54 mm, right-angle,
-                                                        soldered into the adapter and the tongue
+                                                        soldered here, plugged into J-UMB-SKT
 ```
 
 **`J-MCU` replaces the dev-board sockets.** The Matrix sits on a carrier
@@ -477,12 +477,12 @@ is the line that switches (`midi-out.md`, *The ribbon conductors*).
 
 **`J-UMB` is where the umbilical reaches this board** (ADR 0021). The
 instrument's etherCON, `J-UMBILICAL-INST`, is soldered to its own small board,
-`PCB-UMB-ADAPTER`, behind the tail cap; the adapter's tracks run its pin N to
-pin N of `J-UMB`, a right-angle header soldered into the adapter and into a
-**tongue** of this board that runs on from its tail end. So every "`J-UMB`
-pin N" on these pages is this board's end of the umbilical *and* the same
-conductor as the etherCON's pin N, and the pin map is `umbilical-pinmap`
-either way. The clamps and the reverse shunt drawn "at the connector" on
+`PCB-UMB-ADAPTER`, behind the tail cap. `J-UMB` is a right-angle header
+soldered into this board's tail end, and its posts plug into `J-UMB-SKT`, the
+socket on the adapter's rear face. So every "`J-UMB` pin N" on these pages is
+this board's end of the umbilical's conductor N, as `umbilical-pinmap`
+numbers them; the etherCON carries it on contact 9 − N
+(`interfaces/spi-link`). The clamps and the reverse shunt drawn "at the connector" on
 these pages are at `J-UMB`, on this board. The +12 V and `PWR_GND` path must
 be rated above the module's current-limit trip (`R-ILIM`,
 [`umbilical-load-switch`](../module/umbilical-load-switch/umbilical-load-switch.md)),
@@ -518,7 +518,7 @@ page and have no BOM entry yet.
 | `CBL-MCU-RIBBON` | 24-way flat ribbon, 0.635 mm, IDC socket each end | From `J-MCU-C` on the Matrix carrier into `J-MCU`; a bought Samtec FFSD assembly, pin 1 to pin 1 (its BOM row) | `[ds]` sockets and ribbon; part **open**, M4 |
 | `J-MCU-C` | as `J-MCU` | The ribbon's carrier end, hung mouth down under the Matrix carrier's arm, beside `J-MCU`, its key toward the far side; pin k is `J-MCU` pin k | `[repo]` |
 | `HDR-MATRIX` ×2 | 1 × 10 2.54 mm pin header, surface mount | The Matrix on its carrier (`hardware/boards/matrix-carrier/`), its pad rows on the posts | `[ds]` |
-| `J-UMB` | 1 × 8, 2.54 mm right-angle pin header | Where the umbilical reaches this board, on its tongue: soldered into it and into `PCB-UMB-ADAPTER` (ADR 0021); `interfaces/spi-link`'s row | `[from memory]` envelope; part **open**, M4 |
+| `J-UMB` | 1 × 8, 2.54 mm right-angle pin header | Where the umbilical reaches this board, at its tail end: soldered into it and plugged into `J-UMB-SKT` on `PCB-UMB-ADAPTER` (ADR 0021); `interfaces/spi-link`'s row | `[from memory]` envelope; part **open**, M4 |
 | `J-UMBILICAL-INST`, `PCB-UMB-ADAPTER` | NE8FAV on its adapter board | The instrument's etherCON behind the tail cap, and the board that carries it to `J-UMB`; `interfaces/spi-link`'s rows | `[ds]` NE8FAV; adapter **open**, M4 |
 | `U-KEYS`, `R-KEY-PU`, `R-KEY-SER`, `C-KEY`, `C-DECOUPLE-165` | — | **Half of them are on this board since ADR 0017**: the `right_thumb` and `left_thumb` clusters. The other two clusters are on the key boards. Counts per cluster are `cluster-boards.md`'s component table | `[repo] 0017, bom.csv` |
 | **`R-CHAIN-SER`** ×3 | **100 Ω** | **Open — series at the driving end on `SCK`, `SH/LD` and the chain-end `SER`. Edge-rate damping, not termination; E14 decides. `key-chain-loom.md`** | open |

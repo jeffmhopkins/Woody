@@ -17,8 +17,8 @@ components:
     - 7
     - 8
   J2:
-    of: J-UMB
-    value: 8-way 2.54mm right-angle pin header
+    of: J-UMB-SKT
+    value: 8-way 2.54mm socket
     pins:
     - 1
     - 2

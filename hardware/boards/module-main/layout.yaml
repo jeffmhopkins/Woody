@@ -282,7 +282,7 @@ isolation:
   bridge: []
 
 # THE BREATH PAIR (breath-receive-stage.md: the in-amp's input pair symmetric):
-# BREATH_SENSE and AGND_SENSE from the etherCON's pins 1 and 2 side by side on the
+# BREATH_SENSE and AGND_SENSE from the etherCON's two contacts side by side on the
 # rear to the receive stage's series resistors, up the board's left edge.
 pairs:
   - nets: [/BREATH_SENSE, /AGND_SENSE]

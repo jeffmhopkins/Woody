@@ -1535,7 +1535,7 @@ components:
 nets:
   /AGND_SENSE:
   - D4.C
-  - J3.2
+  - J3.7
   - R16.1
   /BREATH_INAMP_OUT:
   - R27.1
@@ -1553,14 +1553,14 @@ nets:
   - U7.OUTB
   /BREATH_SENSE:
   - D5.C
-  - J3.1
+  - J3.8
   - R17.1
   /BREATH_SHAPED:
   - J2.1
   - R60.2
   - U8.OUTB
   /CS_MOD:
-  - J3.7
+  - J3.2
   - R12.1
   - R70.1
   /DAC_AVDD:
@@ -1634,7 +1634,7 @@ nets:
   - J2.20
   - R56.2
   /MOSI:
-  - J3.5
+  - J3.4
   - R11.1
   - R69.1
   /OFFSET_WIPER:
@@ -1658,7 +1658,7 @@ nets:
   - J2.6
   - R31.1
   /SCLK:
-  - J3.4
+  - J3.5
   - R10.1
   - R68.1
   /SCLK_DAC:
@@ -1671,7 +1671,7 @@ nets:
   - U4.3Y
   /UMBILICAL_POS12:
   - D14.A
-  - J3.3
+  - J3.6
   - Q1.S
   - Q1.S2
   - Q1.S3
@@ -2105,7 +2105,7 @@ nets:
   - C48.2
   - C49.2
   - C50.2
-  - J3.8
+  - J3.1
   - NT2.1
   - NT3.2
   - R10.2
@@ -2227,7 +2227,7 @@ nets:
   - C40.2
   - C8.2
   - C9.2
-  - J3.6
+  - J3.3
   - J5.1
   - J5.2
   - NT3.1

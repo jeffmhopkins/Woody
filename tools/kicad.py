@@ -763,7 +763,7 @@ def check_through(board_docs):
 # what"), so each board draws its own connector and this holds it to the sheet.
 UMBILICAL_ENDS = [
     ("main-board", "J-UMB", "J-UMB"),
-    ("umb-adapter", "J-UMB", "J-UMB"),
+    ("umb-adapter", "J-UMB-SKT", "J-UMB-SKT"),
     ("umb-adapter", "J-UMBILICAL-INST", "J-UMB-INST"),
     ("module-main", "J-UMBILICAL", "J-UMB-MOD"),
 ]

@@ -1,6 +1,6 @@
 ECHO: "PCB", "umb", "board", "thickness", 1.6, "side", "the etherCON on the face toward the tail; J-UMB's insulator against the rear face"
 ECHO: "PCB", "umb", "axis", "J-UMBILICAL-INST", 28.5, 19.05, 0
 ECHO: "PCB", "umb", "row", "J-UMB", 19.61, 11.35, 37.39, 11.35, 2.54
-ECHO: "PCB", "umb", "rear", "x", 299.9
+ECHO: "PCB", "umb", "rear", "x", 307.27
 ECHO: "PCB", "umb", "level", "main board top", 10.1
 ECHO: "PCB", "umb", "level", "oak bottom", 6

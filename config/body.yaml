@@ -574,7 +574,7 @@ boards:
     decided_by: "M4, on the part bought"
   # The umbilical (ADR 0021): the etherCON on its own adapter board, which a
   # right-angle 2.54 mm header joins to a tongue of the main board. The
-  # header is J-UMB, 8 pins, pin N = etherCON pin N.
+  # header is J-UMB, 8 pins; it plugs into J-UMB-SKT on the adapter (umb_socket_d).
   umb_adapter_t:
     value: 1.6
     status: tbd
@@ -599,10 +599,10 @@ boards:
     status: settled
     source: "J-UMB's insulator along the body, behind the adapter: the hanxia HX PZ2.54-1x8P WZ's 2.50 mm square insulator [ds HANXIA-HX-PZ2.54-1x8P-WZ.pdf]"
   umb_socket_d:
-    value: 8.5
+    value: 7.37
     status: nominal
-    source: "J-UMB's socket along the body, between the header's insulator and the adapter's rear face: a standard single-row 2.54 mm surface-mount socket's insulator height, 8.5 [from memory: the common height across makers; the part and its drawing are not banked yet]. Owner, 2026-11-22: 'I really want this socketed connection for fitment issues ... make the instrument a little bit longer'. The body's length grows by this and the main board's tail end does not move"
-    decided_by: "the socket bought: its banked drawing's insulator height"
+    source: "J-UMB's socket along the body, between the header's insulator and the adapter's rear face: Samtec SSM -SV's body height off its board [ds datasheets/connectors/SAMTEC-SSM-2.54MM-SMT-SOCKET.pdf, the -SV view]. J-UMB's posts go in by their own length, inside the socket's insertion range on the same sheet. Owner, 2026-11-22: 'I really want this socketed connection for fitment issues ... make the instrument a little bit longer'. The body's length grows by this and the main board's tail end does not move"
+    decided_by: "the socket in hand on the first adapter: a catalogue sheet's height, not the part's print"
   umb_joint_h:
     value: 2.5
     status: settled

@@ -22,6 +22,15 @@ module CAD (ADR 0024, `mechanical/module/export/`), not from this project.
 > The mask colour is **not decided** (green in `layout.yaml` until the owner
 > says; *Open*). The sheets are the source and pass KiCad's ERC.
 
+> **The etherCON's copper is laid for the other order of contacts
+> (2026-11-22).** The sheet wires `J3` contact 9 − N to conductor N
+> (`umbilical-pinmap`; ADR 0021, Amendment of that date); the board's eight
+> lines at `J3` still land as they did, so `pcb.py check` reports the parity
+> there too. Not re-routed on its own: the owner, the same day, *"We're going
+> to completely relay out the module so it doesn't matter."* The parts round
+> the jack are placed for the old order, analog to its left and the SPI
+> receiver to its right, and want mirroring in that layout.
+
 What each circuit does, and why, is on its page:
 - [`power-entry`](../../module/power-entry/power-entry.md)
 - [`umbilical-load-switch`](../../module/umbilical-load-switch/umbilical-load-switch.md)

@@ -82,8 +82,8 @@ underside_rows: [J-MCU-C]
 # SURFACE MOUNT (hanxia TP-YQ): nothing comes through to the underside, where J-MCU-C's
 # insulator lies under the 5V..IO1 row's first pins, and the bottom face is one whole plane.
 parts:
-  J2: [277.22, 17.07, 90]        # HDR-MATRIX, the 5V..IO1 row
-  J3: [277.22, 39.93, 90]        # HDR-MATRIX, the IO33..RX row
+  J2: [276.655, 17.07, 90]        # HDR-MATRIX, the 5V..IO1 row
+  J3: [276.655, 39.93, 90]        # HDR-MATRIX, the IO33..RX row
 
 # PWR_GND poured on the bottom face only, whole: J-MCU-C's grounds and the mounts join it
 # there, and the Matrix's pad-row GND reaches it through the board's one via. The top face

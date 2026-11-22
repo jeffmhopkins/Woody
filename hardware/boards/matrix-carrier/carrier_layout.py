@@ -57,7 +57,7 @@ GND, V5, V33 = "PWR_GND", "/INST_5V_A", "/DEV_3V3"
 # toward the far side, so that its pin k is J-MCU's pin k and a ribbon made pin 1 to pin 1
 # joins them. No pad moved when it was turned; only the numbers did. Place 19 (pin 6) is the
 # ribbon's spare, on ground at both ends.
-MX = 4.25                            # how far the Matrix stands from where this was first drawn (the tail 8.5 longer, 2026-11-22)
+MX = 3.685                           # how far the Matrix stands from where this was first drawn: half of what the tail grew by (boards.umb_socket_d), 2026-11-22
 PINS = {
     2: "/IO39", 4: "/IO6", 6: "/IO7", 8: "/IO38", 10: V33, 12: "/IO37", 14: "/IO36", 16: "/IO35", 18: "/IO34", 20: "/IO33",
     22: V5, 24: V5,
