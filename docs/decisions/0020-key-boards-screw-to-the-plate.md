@@ -649,7 +649,7 @@ the plate and only its pins go through the board. Gateron's drawing agrees.
   the seat, so 1.0 mm shows below the board to solder [calc]. That is more
   than the 1.2 mm board at the old depth left.
 - **The pin holes are larger:** 2.2 mm on 2.8 mm pads (superseded by
-  Amendment 8: 3.0 mm on 3.4 mm)
+  Amendment 8: 3.0 mm, on the pads `hardware/lib/README.md` gives)
   (`hardware/lib/woody.pretty/SW_Gateron_KS33_1u`). Each pin is a 0.45 mm
   blade that flares to about 2 mm wide where it leaves the housing, and the
   hole's top now meets that flare [3D, sectioned; `hardware/lib/README.md`].
@@ -757,10 +757,11 @@ hole's 1.10 mm radius, and Gateron gives the pins' positions with no tolerance
 of their own, so the drawing's general ±0.2 mm applies [ds
 `GATERON-KS-33-VENDOR-SPEC-DRAWING.pdf` sheet 6].
 
-- **The holes are Gateron's own ⌀3.00** (sheet 6, *PCB Layout*), on 3.4 mm pads:
+- **The holes are Gateron's own ⌀3.00** (sheet 6, *PCB Layout*), on the pads `hardware/lib/README.md` gives:
   1.5 mm of radius against a 1.36 mm worst case [calc: 1.162 + 0.2], and a
-  0.2 mm ring, over JLC's 0.18 mm two-layer minimum [ds
-  `datasheets/fab/JLCPCB-PCB-CAPABILITIES.pdf`]. The review's 2.6 mm on 3.0
+  ring at the two-layer figure the board house recommends [ds
+  `datasheets/fab/JLCPCB-PCB-CAPABILITIES.pdf`] (superseded 2026-11-22: this
+  amendment chose a narrower pad, over the minimum only; issue #57 F6-1). The review's 2.6 mm on 3.0
   cleared the nominal root by 0.14 mm and not the tolerance.
 - **The footprint is shared**, so all three boards take it: the left-hand key
   board re-laid out (its networks 9.0 mm from their switches, where 9.4 put a

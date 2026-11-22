@@ -147,7 +147,7 @@ board's top face, the root's farthest point is 1.162 mm from pin 2's hole
 centre and 1.092 mm from pin 1's [3D, sectioned at 0.005 mm below the housing;
 issue #6-1], before the drawing's general ±0.2 mm on the pins' positions
 [ds sheet 6, tolerance block]. The holes are Gateron's own, **3.0 mm**
-(sheet 6 *PCB Layout*, ⌀3.00), on 3.4 mm pads (`hardware/lib/README.md`):
+(sheet 6 *PCB Layout*, ⌀3.00), on the pads `hardware/lib/README.md` gives:
 1.5 mm of radius against a 1.36 mm worst case [calc: 1.162 + 0.2], and 1.42
 at JLC's −0.08 finish. The old 1.3 mm holes passed only the 1.0 mm blade,
 which is why the board used to sit lower, at 3.2–3.6 mm; the 2.2 mm holes of

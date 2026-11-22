@@ -1152,12 +1152,20 @@ def finish(board, lay, comps):
         # R32's reference stands a hair under the clearance from C36's: a step toward its own part, between the two
         if d.GetClass() == "PCB_TEXT" and d.GetText() == "R32":
             d.Move(pcbnew.VECTOR2I(0, -pcbnew.FromMM(0.07)))
-    for g in board.FindFootprintByReference("D2").GraphicalItems():
-        # D-TVS's outline runs on past its pad to D6's: both strokes stop level with the pad's end
-        if g.GetLayer() == pcbnew.F_SilkS and g.GetClass() == "PCB_SHAPE" and g.GetStart().x == g.GetEnd().x:
-            ys = sorted((g.GetStart().y, g.GetEnd().y))
-            g.SetStart(pcbnew.VECTOR2I(g.GetStart().x, ys[0] + pcbnew.FromMM(0.3)))
-            g.SetEnd(pcbnew.VECTOR2I(g.GetStart().x, ys[1]))
+    d2 = board.FindFootprintByReference("D2")
+    ref = pcb.load_fp(d2.GetFPIDAsString())      # the library's strokes: this board's own have been cut before
+    ref.SetPosition(d2.GetPosition())
+    ref.SetOrientation(d2.GetOrientation())
+    want = sorted((g.GetStart().x, sorted((g.GetStart().y, g.GetEnd().y))) for g in ref.GraphicalItems()
+                  if g.GetLayer() == pcbnew.F_SilkS and g.GetClass() == "PCB_SHAPE" and g.GetStart().x == g.GetEnd().x)
+    have = sorted((g for g in d2.GraphicalItems()
+                   if g.GetLayer() == pcbnew.F_SilkS and g.GetClass() == "PCB_SHAPE" and g.GetStart().x == g.GetEnd().x), key=lambda g: g.GetStart().x)
+    assert len(want) == len(have) == 2, (len(want), len(have))
+    for g, (x, ys) in zip(have, want):
+        # D-TVS's outline runs on past its pad to D6's: both strokes stop level with the pad's end.
+        # FROM THE LIBRARY'S STROKE EACH TIME: cut from the board's own, each run cut a little more
+        g.SetStart(pcbnew.VECTOR2I(x, ys[0] + pcbnew.FromMM(0.3)))
+        g.SetEnd(pcbnew.VECTOR2I(x, ys[1]))
     pcb.silk_off_vias(board)
     import pcb_silk
     pcb_silk.complete(board, lay, comps)       # what is still missing: references, connector names, pin 1 (#54)
