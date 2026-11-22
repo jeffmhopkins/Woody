@@ -43,6 +43,13 @@ tail end.
 | The NE8FAV's footprint (`woody:Neutrik_NE8FAV_etherCON_Vertical`, `hardware/lib/README.md`) is drawn from Neutrik's layout, mirrored because Neutrik draws it from the solder side | The first adapter, with the connector pushed into it before soldering |
 | `J-UMB-SKT`'s height off the board and its pad pattern, and the hand of that pattern: the lead of pin 7 must be on the side away from the main board, clear of the G tab's pad (`interfaces/spi-link/bom.csv`, `J-UMB-SKT`) | Samtec's drawing for the part, banked; then the part on the first adapter |
 
+## Ordering
+
+The two notches in the upper edge are meant: each opens one of the etherCON's
+plastic-post holes to the edge, because the hole stands too near it to leave a
+web (review 2026-11-22 F2-1). The unplated drill file still lists both holes,
+inside the notches. If the board house asks, the routed notch is the intent.
+
 ## Revisions
 
 | Rev | Date | What changed | Where |
@@ -50,4 +57,4 @@ tail end.
 | — | 2026-09-29 | Schematic. Not laid out | git history of this directory |
 | A | 2026-11-22 | Laid out: the etherCON, `J-UMB-SKT` and eight straight tracks on the rear face | `adapter_layout.py` |
 | B | 2026-11-22 | Each line's 45 ends a little sooner, so the track runs straight for longer before the socket's pad (`PAD_RUN`, `docs/reference/tooling.md` §4; owner, 2026-11-22; issue #52) | `adapter_layout.py` |
-| C | 2026-11-22 | Fabrication review fix (issue #57, F2): the outline is notched at the etherCON's two upper posts, whose holes stood too near the edge to drill (`config/body.yaml` `ethercon.post_*`). `pcb.py check` passes. |
+| C | 2026-11-22 | Fabrication review fix (issue #57, F2): the outline is notched at the etherCON's two upper posts, whose holes stood too near the edge to drill (`config/body.yaml` `ethercon.post_*`). `pcb.py check` passes. | `adapter_layout.py`, `mechanical/cad/umb_adapter.scad` |
