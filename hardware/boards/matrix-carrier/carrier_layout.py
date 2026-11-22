@@ -131,41 +131,48 @@ def routes(cu):
         t(net, [(272.9 + MX, y), (gx - 0.2, y), (gx, y + 0.2), (gx, s - C), (gx + C, s)], NW)
         t(net, [(gx + C, s)] + far(n))
 
-    # J3 pads 4, 5: front columns 6 and 5, up between J2's pads 2 and 3
-    for n, i, lane, c, gx in ((4, 6, 0, 287.32, 276.36 + MX), (5, 5, 1, 286.68, 276.81 + MX)):
+    # J3 pads 4, 5: front columns 6 and 5, up between J2's pads 2 and 3. Every line that passes
+    # between two of J2's pads stands evenly in the gap: the same room pad to line, line to line
+    # and line to pad (owner, 2026-11-21: centred between pads that are soldered by hand)
+    for n, i, lane, c, gx in ((4, 6, 0, 287.32, 276.485 + MX), (5, 5, 1, 286.68, 277.075 + MX)):
         t(net_of(i), fall(i, lane, c) + up(gx, band[lane], strip[n] - C) + [(gx + C, strip[n])] + far(n))
     # 3V3: front column 4, wide from where it leaves the arm, straight up into J2 pad 3
     i, c = 4, 285.93
     t(V33, rise(i) + [(c - north[i], north[i]), (c - north[i] + 0.4, north[i] - 0.4)])     # narrow until clear of its neighbours' lanes
     t(V33, [(c - north[i] + 0.4, north[i] - 0.4), (c - band[2], band[2])] + up(j2(3)[0], band[2], j2(3)[1]), PW)
     # J3 pad 6: front column 3, up between J2's pads 3 and 4
-    t(net_of(3), fall(3, 3, 285.18) + up(278.9 + MX, band[3], strip[6] - C) + [(278.9 + MX + C, strip[6])] + far(6))
+    t(net_of(3), fall(3, 3, 285.18) + up(279.32 + MX, band[3], strip[6] - C) + [(279.32 + MX + C, strip[6])] + far(6))
     # IO7 and IO6 straight up into J2's pads 4 and 5
     t("/IO7", fall(2, 4, 284.54) + up(j2(4)[0], band[4], j2(4)[1]))
     t("/IO6", fall(1, 5, 283.9) + up(j2(5)[0], band[5], j2(5)[1]))
 
-    def diag_up(net, pts, lane, gx, y0, n):
-        """Along band lane `lane`, up column gx to y0, across at 45 to stand under J3 pad n, and into it."""
+    def diag_up(net, pts, lane, gx, y0, n, jog=None):
+        """Along band lane `lane`, up column gx to y0, across at 45 to stand under J3 pad n, and into it.
+        `jog` = (y, x): at height y the column steps at 45 to x, to stand evenly between J2's pads."""
         px, py = j3(n)
-        t(net, pts + up(gx, band[lane], y0) + [(px, y0 + px - gx), (px, py)])
+        if jog:
+            jy, jx = jog
+            t(net, pts + up(gx, band[lane], jy) + [(jx, jy + jx - gx), (jx, y0), (px, y0 + px - jx), (px, py)])
+        else:
+            t(net, pts + up(gx, band[lane], y0) + [(px, y0 + px - gx), (px, py)])
 
     # ---- column 0: both pins straight out toward the Matrix, onto lanes 6 and 7 ----------------
     x, y = j1(2)
-    diag_up("/IO39", [(x, y), (282.2 - y, y), (282.2 - band[6], band[6])], 6, 283.98 + MX, 33.68, 7)
+    diag_up("/IO39", [(x, y), (282.2 - y, y), (282.2 - band[6], band[6])], 6, 284.105 + MX, 33.68, 7)
     x, y = j1(1)
-    diag_up("/IO40", [(x, y), (270.0, y), (270.0 + y - band[7], band[7])], 7, 284.43 + MX, 30.28, 8)
+    diag_up("/IO40", [(x, y), (270.0, y), (270.0 + y - band[7], band[7])], 7, 284.695 + MX, 30.28, 8)
 
     # ---- the back row: five lanes under the header ---------------------------------------------
     back = {}
     for k, lane in ((3, 8), (7, 9), (9, 10), (13, 11), (15, 12)):
         x, y = j1(k)
         back[k] = [(x, y), (x, band[lane] + C), (x + C, band[lane])]
-    diag_up("/U0TXD", back[3], 8, 286.52 + MX, 31.22, 9)
-    diag_up("/U0RXD", back[7], 9, 286.97 + MX, 27.67, 10)
+    diag_up("/U0TXD", back[3], 8, 286.52 + MX, 31.22, 9, (13.4, 286.645 + MX))
+    diag_up("/U0RXD", back[7], 9, 286.97 + MX, 27.67, 10, (13.2, 287.235 + MX))
 
     # IO2, IO1 and IO3 pass the near mount on its mouth side
-    t("/IO2", back[9] + up(287.42 + MX, band[10], 13.0) + [(289.095 + MX, 14.675), (289.095 + MX, 17.7), (289.595 + MX, 18.2), (j2(9)[0], 18.2)])
-    t("/IO1", back[13] + up(287.87 + MX, band[11], 12.36) + [(289.545 + MX, 14.035), (289.545 + MX, 16.8), (290.045 + MX, 17.3), (291.9 + MX, 17.3),
+    t("/IO2", back[9] + up(287.42 + MX, band[10], 13.0) + [(289.185 + MX, 14.765), (289.185 + MX, 17.7), (289.685 + MX, 18.2), (j2(9)[0], 18.2)])
+    t("/IO1", back[13] + up(287.87 + MX, band[11], 12.36) + [(289.775 + MX, 14.265), (289.775 + MX, 17.0), (290.075 + MX, 17.3), (291.9 + MX, 17.3),
                                                               (292.3 + MX, 16.9), (294.0 + MX, 16.9), (295.0 + MX, 15.9), (j2(10)[0], 15.9)])
     t("/IO3", back[15] + up(288.32 + MX, band[12], 12.015) + [(290.75 + MX, 14.445)])
 

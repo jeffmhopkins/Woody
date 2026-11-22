@@ -167,7 +167,7 @@ PLACE.update({
 # line takes a via between two of their pads to the bottom trunk.
 # Each resistor then stands where its line arrives, and nothing crosses on a face.
 TRIO = 24.35                  # the chain's three series resistors: fed from J-MCU's mouth end by vias under them
-SER_Y = {"IO35": 24.4, "IO36": 23.6}   # the ADC branch's series resistors: MOSI's on its vias' line, SCLK's passing north of it
+SER_Y = {"IO35": 24.5, "IO36": 23.6}   # the ADC branch's series resistors: MOSI's on its vias' line, SCLK's passing north of it
 SPI_Y = 19.65                  # the umbilical's SPI resistors, a row under its pins; 3V3 and IO36 pass under their bodies
 BUS_U, BUS_G = 16.4, 14.5     # the inrush switch's two buses, UMBILICAL_POS12 over INRUSH_GATE
 COL = (293.95, 296.4, 298.85) # ...and its three columns
@@ -481,8 +481,8 @@ def power():
     T("INST_5V_A", ["J1.3", "J1.1", "J1.2"], 0.5)
     # the Matrix's whole supply: 0.8 mm, necked to 0.7 past R36's pad and under the three chain
     # resistors' bodies, which is all the room there is (pre-fab review S5)
-    T("INST_5V_A", ["J1.2", (255.28, 19.95), (255.74, 20.41), (255.74, 23.75), (255.49, 24.0), (246.9, 24.0)], 0.7)
-    T("INST_5V_A", [(246.9, 24.0), (240.45, 24.0), (238.84, 22.39), "Q2.3"], 0.8)
+    T("INST_5V_A", ["J1.2", (255.28, 19.95), (255.74, 20.41), (255.74, 23.85), (255.49, 24.1), (246.9, 24.1)], 0.7)
+    T("INST_5V_A", [(246.9, 24.1), (240.55, 24.1), (238.84, 22.39), "Q2.3"], 0.8)
     T("INST_5V_A", ["Q2.3", "U13.4"], 0.5)
     T("INST_5V_A", ["J1.2", (255.285, 20.0), (255.585, 20.3), (259.0, 20.3), (263.25, 24.55)], PWR, "B")
     via("INST_5V_A", 263.25, 24.55, "C12.1", PWR)
@@ -493,7 +493,16 @@ def power():
     # and down to R37's via
     via("DEV_3V3", 278.4, 21.5, (278.4, 20.25), FINE)
     k3 = LANE["DEV_3V3"]
-    T("DEV_3V3", [(278.4, 21.5), (271.6, TRUNK), (256.7, TRUNK), (256.7, 22.2), (256.2, 22.2), (256.2 - (k3 - 22.2), k3), (64.2, k3)], 0.3, "B")
+    T("DEV_3V3", [(278.4, 21.5), (271.6, TRUNK), (256.7, TRUNK), (256.7, 22.2), (256.2, 22.2), (256.2 - (k3 - 22.2), k3), (253.0, k3)], 0.3, "B")
+    # the lane is as wide as its run allows (owner, 2026-11-21: supply tracks wider where there
+    # is room): 0.55 with its edge toward the switches where it was, necked to the 0.3 above
+    # only past the two series resistors' vias
+    kw = k3 - 0.09
+    T("DEV_3V3", [(253.0, k3), (252.91, kw)], 0.3, "B")
+    T("DEV_3V3", [(252.91, kw), (230.29, kw)], 0.48, "B")
+    T("DEV_3V3", [(230.29, kw), (230.2, k3), (219.3, k3), (219.21, kw)], 0.3, "B")
+    T("DEV_3V3", [(219.21, kw), (64.59, kw)], 0.48, "B")
+    T("DEV_3V3", [(64.59, kw), (64.5, k3), (64.2, k3)], 0.3, "B")
     VIAS.append(("DEV_3V3", 256.7, 22.2))
     T("DEV_3V3", ["R37.2", (257.0, 22.5), (256.7, 22.2)])
 
@@ -526,7 +535,7 @@ def tail():
     # the row south of the six lanes, then a sixth lane south of the other five, to a via at
     # the analog block's tail side. The key pull-ups' current is in none of it
     VIAS.append(("DEV_3V3", 272.0, 17.35))
-    T("DEV_3V3", [(272.0, 17.35), (272.0, 14.15), (271.7, 13.85), (251.0, 13.85), (251.0 - (ADC_3V3_Y - 13.85), ADC_3V3_Y),
+    T("DEV_3V3", [(272.0, 17.35), (272.0, 14.05), (271.7, 13.75), (251.1, 13.75), (251.1 - (ADC_3V3_Y - 13.75), ADC_3V3_Y),
                   (46.72 + ADC_3V3_Y - 21.65, ADC_3V3_Y), (46.72, 21.65)], FINE, "B")
     T("DEV_3V3", [(276.72, 20.25), "R48.1"], FINE)
     # IO6 turns north past the header's end, between R10 and the first LED's capacitor, to
@@ -547,10 +556,10 @@ def tail():
     T("MIDI_RING_DRV", ["U6.8", "R51.1"])
     T("MIDI_TIP_R", ["R50.2", "FB3.1"])
     T("MIDI_RING_R", ["R51.2", (261.93, 40.5), (263.38, 41.95), "FB4.1"])
-    T("MIDI_TIP", ["FB3.2", (283.75, 39.4), (285.0, 40.65)])
-    T("MIDI_TIP", [(282.9, 39.4), (282.9, 40.0)])
-    T("MIDI_RING", ["FB4.2", (278.9, 41.95), (279.55, 42.6), (284.4, 42.6)])
-    T("MIDI_RING", ["U12.3", (282.64, 42.6)])
+    T("MIDI_TIP", ["FB3.2", (277.3, 39.4), (277.45, 39.25), (283.6, 39.25), (285.0, 40.65)])
+    T("MIDI_TIP", [(282.9, 39.25), (282.9, 40.0)])
+    T("MIDI_RING", ["FB4.2", (278.9, 41.95), (279.65, 42.7), (284.4, 42.7)])
+    T("MIDI_RING", ["U12.3", (282.64, 42.7)])
     via("PWR_GND", 281.5, 41.0, "U12.2")
     T("PWR_GND", [(280.55, 40.05), (281.5, 41.0), (280.55, 41.95)])
     # the LED driver. Under its body, between the pin rows: its LED output going south to R11,
@@ -565,8 +574,8 @@ def tail():
     # the even row, bottom face
     T("IO1", ["J1.12", (261.63, 20.79), (268.3, 27.46)], FINE, "B")
     T("IO2", ["J1.16", (264.17, 22.3)], FINE, "B")
-    T("U0TXD", ["J1.22", (267.985, 19.8), (268.285, 20.1), (270.5, 20.1), (275.0, 15.6), (287.4, 15.6)], FINE, "B")
-    T("U0RXD", ["J1.18", (265.445, 20.2), (265.745, 20.5), (271.3, 20.5), (275.4, 16.4), (289.375, 16.4), (290.025, 17.05)], FINE, "B")
+    T("U0TXD", ["J1.22", (267.985, 19.8), (268.385, 20.2), (270.6, 20.2), (275.2, 15.6), (287.4, 15.6)], FINE, "B")
+    T("U0RXD", ["J1.18", (265.445, 20.2), (265.845, 20.6), (271.4, 20.6), (275.6, 16.4), (289.375, 16.4), (290.025, 17.05)], FINE, "B")
     via("U0TXD", 287.4, 15.6, "R46.1")
     T("TXD_HDR", ["R46.2", (284.0, 15.01), "J2.1"])
     # RXD comes up beside its series resistor; from the resistor one line on top between the
@@ -597,17 +606,17 @@ def tail():
     e, w, vy = SER["IO36"]
     T("IO36", [(e, vy), "R55.1"], FINE)
     T("ADC_DIN", ["R55.2", (w, vy)], FINE)
-    lane_in("IO39", 23, 14.25, 251.2)
-    lane_in("IO37", 13, 15.45, 253.6)
-    lane_in("IO36", 11, 15.85, 254.0)
-    lane_in("IO35", 9, 16.25, 254.4)
-    low("IO7", 19, 14.65, 251.9, [(251.0, 15.55)], 0.0)
-    low("IO38", 17, 15.05, 252.75, [(252.3, 15.5)], 0.0)
+    lane_in("IO39", 23, 14.15, 251.3)
+    lane_in("IO37", 13, 15.35, 253.6)
+    lane_in("IO36", 11, 15.75, 254.0)
+    lane_in("IO35", 9, 16.15, 254.4)
+    low("IO7", 19, 14.55, 251.9, [(251.0, 15.45)], 0.0)
+    low("IO38", 17, 14.95, 252.75, [(252.3, 15.4)], 0.0)
     T("IO33", ["J1.5", (257.825, 16.45), (257.525, 16.15), (254.6, 16.15), (254.3, 16.45), "R36.1"])
-    VIAS.append(("IO7", 251.0, 15.55))
-    T("IO7", [(251.0, 15.55), (251.0, 20.19), "R35.1"])
-    VIAS.append(("IO38", 252.3, 15.5))
-    T("IO38", [(252.3, 15.5), (252.3, 21.89), "R34.1"])
+    VIAS.append(("IO7", 251.0, 15.45))
+    T("IO7", [(251.0, 15.45), (251.0, 20.19), "R35.1"])
+    VIAS.append(("IO38", 252.3, 15.4))
+    T("IO38", [(252.3, 15.4), (252.3, 21.89), "R34.1"])
     # the chain's three outputs: a via between the pads, then the bottom face toward the mouth
     via("CHAIN_SHLD", 249.2, 25.81, "R35.2")
     via("CHAIN_SCK", 252.2, 25.81, "R34.2")
@@ -652,8 +661,11 @@ def leds():
         if c not in x or c == "D21" or b == "D8":
             continue
         xb = x[b]
-        over = [(xb + 1.6, 26.9), (xb + 1.2, 27.3), (xb + 1.2, 30.15), (xb + 0.4, 30.95)]
-        T(net, [f"{b}.4"] + over + [(xb - 3.5, 30.95), (xb - 4.35, 30.1), f"{c}.6"])
+        # under the next LED's unused pad 1, a hand-soldered pad: 0.375 off it. LED_D10 passes
+        # between that pad and the hop's line, and stands midway
+        k = 0.0 if net == "LED_D10" else 0.15
+        over = [(xb + 1.6, 26.9), (xb + 1.2, 27.3), (xb + 1.2, 30.15), (xb + 0.4 - k, 30.95 + k)]
+        T(net, [f"{b}.4"] + over + [(xb - 3.5 + k, 30.95 + k), (xb - 4.35, 30.1), f"{c}.6"])
 
 
 def legs():
@@ -777,7 +789,7 @@ def registers():
         # the two tail-side keys: along the far band over the header, down beside the register
         T(x4, [f"{far_tail[0]}.1", (X(70.4), 47.41), (X(70.1), 47.11), (X(70.1), 42.7), (X(69.8), 42.4), (X(67.71), 42.4),
                (X(67.41), 42.1), f"{u}.3"])
-        T(x3, [f"{near_tail[0]}.1", (X(107.61), 48.3), (X(69.9), 48.3), (X(69.6), 48.0), (X(69.6), 43.2), (X(69.3), 42.9),
+        T(x3, [f"{near_tail[0]}.1", (X(107.46), 48.45), (X(70.05), 48.45), (X(69.6), 48.0), (X(69.6), 43.2), (X(69.3), 42.9),
                (X(66.44), 42.9), (X(66.14), 42.6), f"{u}.4"])
     # the left hand's near mouth-side key: up past the supply capacitor, under the register to pin 6
     T("KEY_LT1", ["R13.1", "C15.1", "R12.2"])
@@ -828,9 +840,9 @@ def v3():
     # the right hand's
     tap(158.2, 30.9, [(156.5, 30.9), "R20.1"])
     tap(173.18, 30.9, ["C14.1", (173.18, 34.2), (172.87, 34.51), "U8.12"])
-    T("DEV_3V3", ["U8.12", (172.87, 37.05), (173.17, 37.35), (177.64, 37.35), (177.94, 37.05), "U8.16"])
+    T("DEV_3V3", ["U8.12", (172.87, 37.05), (173.32, 37.5), (177.49, 37.5), (177.94, 37.05), "U8.16"])
     T("DEV_3V3", ["U8.16", (178.115, 36.2), "C205.1"])
-    T("DEV_3V3", [(173.5, 37.35), (173.5, 43.4), (175.69, 45.59), "R22.1"], FINE)
+    T("DEV_3V3", [(173.5, 37.5), (173.5, 43.4), (175.69, 45.59), "R22.1"], FINE)
     tap(198.0, 30.9, [(196.5, 30.9), "R28.1"])
     T("DEV_3V3", [(213.4, lane(213.4)), (213.4, 29.3), (215.0, 30.9)], W, "B")     # round C28's ground via
     VIAS.append(("DEV_3V3", 215.0, 30.9))
@@ -866,7 +878,7 @@ def planes_in():
     via(G, 254.25, 28.5, "C45.2", PWR)
     via(P12, 250.0, 28.5, "C45.1", PWR)
     # the mouth-end LED, whose capacitor stands north of it: 12 V passes between its two columns of pads
-    T(P12, ["D20.2", (24.1, 28.5), (25.35, 29.75), "C38.1"], PWR)
+    T(P12, ["D20.2", (24.5, 28.5), (25.35, 29.35), "C38.1"], PWR)
     via(P12, 25.35, 34.4, "C38.1", PWR)
     via(G, 28.45, 33.0, "C38.2", PWR)
     via(P12, 37.9, 34.0, "C47.1", PWR)
