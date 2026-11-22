@@ -49,3 +49,4 @@ tail end.
 |---|---|---|---|
 | — | 2026-09-29 | Schematic. Not laid out | git history of this directory |
 | A | 2026-11-22 | Laid out: the etherCON, `J-UMB-SKT` and eight straight tracks on the rear face | `adapter_layout.py` |
+| B | 2026-11-22 | Each line's 45 ends a little sooner, so the track runs straight for longer before the socket's pad (`PAD_RUN`, `docs/reference/tooling.md` §4; owner, 2026-11-22; issue #52) | `adapter_layout.py` |

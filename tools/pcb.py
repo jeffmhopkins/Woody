@@ -1930,6 +1930,7 @@ def check_tracks(board):
 
 
 PAD_CLEAR = MM(0.3)      # how far a track runs straight out of a surface-mount pad before it may turn or branch
+PAD_RUN = 1.2            # ...and never less than this many of its own widths: a wide track's 0.3 mm is a nub (owner, 2026-11-22)
 
 
 def pads_at(k):
@@ -2021,6 +2022,27 @@ def check_joints(board, exempt=()):
     for t in tracks:
         for e in (t.GetStart(), t.GetEnd()):
             ends[(e.x, e.y, t.GetLayer())] = ends.get((e.x, e.y, t.GetLayer()), 0) + 1
+    # a track's free end is on a pad, a via or another track's centre line: a stub that overshoots the line it joins is a nub
+    for t in tracks:
+        for e in (t.GetStart(), t.GetEnd()):
+            if ends[(e.x, e.y, t.GetLayer())] > 1 or (e.x, e.y) in vias:
+                continue
+            if any(k[0] == t.GetNetname() and t.GetLayer() in k[7] and k[1] <= e.x <= k[2] and k[3] <= e.y <= k[4] for k in boxes):
+                continue
+            hit = False
+            for u in tracks:
+                if u is t or u.GetLayer() != t.GetLayer() or u.GetNetname() != t.GetNetname():
+                    continue
+                (ax, ay), (bx, by) = (u.GetStart().x, u.GetStart().y), (u.GetEnd().x, u.GetEnd().y)
+                dx, dy = bx - ax, by - ay
+                ll = dx * dx + dy * dy
+                s = ((e.x - ax) * dx + (e.y - ay) * dy) / ll if ll else 0
+                if 0 <= s <= 1 and math.hypot(e.x - ax - s * dx, e.y - ay - s * dy) < 5000:
+                    hit = True
+                    break
+            if not hit:
+                bad.append(f"error: [joints] {t.GetNetname()} on {board.GetLayerName(t.GetLayer())}: a track ends at {at(e.x, e.y)} on nothing - "
+                           f"end it on a pad, a via or the centre line of the track it joins")
     for k in boxes:
         if not k[8]:
             continue
@@ -2032,6 +2054,11 @@ def check_joints(board, exempt=()):
                 continue
             a, c = t.GetStart(), t.GetEnd()
             ia, ic = L <= a.x <= R and T_ <= a.y <= B, L <= c.x <= R and T_ <= c.y <= B
+            if not ia and not ic and a.x != c.x and a.y != c.y:      # a diagonal that clips the pad on its way past
+                n = 40
+                if any(L < a.x + (c.x - a.x) * j // n < R and T_ < a.y + (c.y - a.y) * j // n < B for j in range(1, n)):
+                    bad.append(f"error: [joints] {net} on {board.GetLayerName(t.GetLayer())}: a diagonal cuts across {name} at {at(*pads_at(k))} - "
+                               f"pass through the pad straight, or stay off it")
             if ia == ic:
                 continue
             i, o = (a, c) if ia else (c, a)
@@ -2040,10 +2067,15 @@ def check_joints(board, exempt=()):
                 bad.append(f"error: [joints] {net} on {board.GetLayerName(t.GetLayer())}: a track leaves {name} at {at(*pads_at(k))} on a slant - "
                            f"leave the pad straight, square to its edge")
                 continue
-            d = max(L - o.x, o.x - R, T_ - o.y, o.y - B)
-            if d < PAD_CLEAR - 1000 and (o.x, o.y) not in vias and ends[(o.x, o.y, t.GetLayer())] > 1:
+            w = t.GetWidth() // 2
+            over = max(L - (i.x - w), (i.x + w) - R) if a.x == c.x else max(T_ - (i.y - w), (i.y + w) - B)
+            if over > MM(0.02):
+                bad.append(f"error: [joints] {net} on {board.GetLayerName(t.GetLayer())}: a track enters {name} at {at(*pads_at(k))} hanging "
+                           f"{mm(over):.2f} mm off the pad's side - stand the track within the pad's width")
+            d, need = max(L - o.x, o.x - R, T_ - o.y, o.y - B), max(PAD_CLEAR, int(PAD_RUN * t.GetWidth()))
+            if d < need - 1000 and (o.x, o.y) not in vias and ends[(o.x, o.y, t.GetLayer())] > 1:
                 bad.append(f"error: [joints] {net} on {board.GetLayerName(t.GetLayer())}: a track from {name} at {at(*pads_at(k))} turns or branches "
-                           f"{mm(d):.2f} mm from the pad - run straight until it is {mm(PAD_CLEAR):g} mm clear of the pad")
+                           f"{mm(d):.2f} mm from the pad - run straight until it is {mm(need):.2f} mm clear of the pad")
     for net, _, cx, cy, r, name in rounds:
         for t in tracks:
             if t.GetNetname() != net:

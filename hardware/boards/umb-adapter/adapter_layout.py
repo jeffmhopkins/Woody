@@ -73,7 +73,7 @@ def contact(n):
 
 
 SKT_OFF = 1.65                # the socket's pads either side of its row (the library footprint), turn about
-FAN_Y = ROW - SKT_OFF - 0.95 - 0.5   # every diagonal is done by here: the upper pads' top edge, less half a millimetre
+FAN_Y = ROW - SKT_OFF - 0.95 - 0.75  # every diagonal is done by here: the upper pads' top edge, less the straight run a track of this width owes a pad (pcb.PAD_RUN)
 
 
 def straight(n, pad):

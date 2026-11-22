@@ -410,8 +410,15 @@ prints which, exits 1, and leaves any existing board as it was.
   pad straight and square to the pad's edge, and neither turns nor branches
   until it is `PAD_CLEAR` beyond the pad (owner, 2026-11-22: "the cleanest
   tracks leaving all pads"); it may end sooner at a via or another pad, and it
-  may enter a pad off its centre. A pad with no room for that is named, with
-  the reason, under `joints_exempt:` in the board's `layout.yaml`;
+  may enter a pad off its centre. That straight run is never less than
+  `PAD_RUN` of the track's own widths, so a wide track does not leave a nub;
+  a track entering a pad stands within the pad's width, not hanging off its
+  side; a diagonal does not cut across a pad of its net on the way past; and
+  a track's free end is on a pad, a via or the centre line of the track it
+  joins, so no stub pokes past its line (owner, 2026-11-22: "barely a trace
+  outside the pad when it could be routed better"). A pad with no room for
+  the exit is named, with the reason, under `joints_exempt:` in the board's
+  `layout.yaml`;
 - a board with a `layout.yaml` `silk:` block whose title block (title,
   revision, date - the Gerber job's "Revision") differs from it, or whose
   silkscreen lacks the title or its `rev <rev>  <date>` line (`check_title`;
