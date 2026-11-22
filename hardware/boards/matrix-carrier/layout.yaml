@@ -74,7 +74,7 @@ courtyard_overhang:
 # the Matrix, HDR-MATRIX's plastic (config/body.yaml boards.matrix_hdr_h). Its posts go on
 # through the Matrix and are cut flush; the plastic is what stands on this board.
 heights:
-  PinHeader_1x10: 2.5            # [ds connectors/HANXIA-HX-PZ2.54-1x10P-TP-YQ.pdf, the insulator]
+  PinHeader_1x10: 3.2            # [ds connectors/HANXIA-HX-PZ2.54-1x10P-TP-YQ.pdf, end view: the board to the top of the insulator, which stands on its feet]
 underside_rows: [J-MCU-C]
 
 # HDR-MATRIX, pin 1 at the Matrix's USB-C edge (pcb-geometry.echo 'matrix' 'pins'): the
