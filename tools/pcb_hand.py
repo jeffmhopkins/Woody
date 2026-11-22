@@ -121,6 +121,9 @@ def seat_chain(fp, geo, jpin, face=None):
 # mouth side of the leg pin, the capacitor on the tail side of the ground pin. The node runs
 # between the two under both pins, DROP below the centre, with the pull-up hanging from its
 # middle. Its two ends are free, and the key line leaves from the one facing the register.
+EXIT = 1.05                   # from a key part's pad centre, level, to the first turn: 0.3 mm clear of the pad (pcb.PAD_CLEAR)
+# the corridor of four lines beside a column key: two key lines, 3V3, a key line, from the capacitor outward
+CORRIDOR = (1.3, 1.75, 2.275, 2.8)
 DROP = 8.5                    # the node: clear of the ground pin's relief ring above it; the pull-up below it clear of the board's near edge
 X_SER, X_CAP = -7.8, 6.0      # the two parts' columns: a millimetre of mask between pad and pin
 KEY_NET = {
@@ -181,15 +184,18 @@ class Copper:
 
     def keys(self, switches):
         """Each key, the same copper at every one: a neck from each pin straight out to its
-        part, and the node from the resistor's lower pad down at 45, along under both pins
-        through the pull-up, and up at 45 into the capacitor's lower pad. Returns each
-        node's mouth end, its tail end, and each pull-up's rail pad."""
+        part, and the node out of the resistor's lower pad level, toward the switch, clear of
+        the pad (EXIT) before it goes down at 45, along under both pins through the pull-up,
+        up at 45, and level into the capacitor's lower pad (owner, 2026-11-22: every track
+        leaves a pad straight). Returns each node's mouth end, its tail end, and each
+        pull-up's rail pad."""
         ser = {k: (x + X_SER, y - 4.7 - 1.825) for k, (x, y, _) in switches.items()}
         cap = {k: (x + X_CAP, y - 5.75 - 1.825) for k, (x, y, _) in switches.items()}
         pu1 = {k: (x - 0.94, y - DROP - 1.825) for k, (x, y, _) in switches.items()}
         for k, (sx, sy, _) in switches.items():
-            ry, cy = sy - DROP - ser[k][1], sy - DROP - cap[k][1]
-            self.track("/KEY_" + k, [ser[k], (ser[k][0] - ry, sy - DROP), (cap[k][0] + cy, sy - DROP), cap[k]])
+            ry, cy = ser[k][1] - (sy - DROP), cap[k][1] - (sy - DROP)
+            self.track("/KEY_" + k, [ser[k], (ser[k][0] + EXIT, ser[k][1]), (ser[k][0] + EXIT + ry, sy - DROP),
+                                     (cap[k][0] - EXIT - cy, sy - DROP), (cap[k][0] - EXIT, cap[k][1]), cap[k]])
             self.track(f"/{k}/SWITCH_LEG", [(sx - 4.4, sy - 4.7), (sx + X_SER, sy - 4.7)])
             self.track(GND, [(sx + 2.6, sy - 5.75), (sx + X_CAP, sy - 5.75)])
         return ser, cap, pu1
@@ -223,13 +229,15 @@ class Copper:
 # A key line steps sideways off the end pad of its node, clear of the pad above it, and climbs.
 def tail_end(cap, k):
     (x, y) = cap[k]
-    return [(x, y), (x + 0.8, y), (x + 1.3, y + 0.5)]
+    return [(x, y), (x + EXIT, y), (x + 1.3, y + 1.3 - EXIT)]
 
 
 def mouth_end(ser, k, to):
     """To the column x = `to`, mouth side of the resistor."""
     (x, y) = ser[k]
-    return [(x, y), (to + 0.5, y), (to, y + 0.5)]
+    d = min(0.5, x - EXIT - to)             # the turn stands clear of the pad
+    assert d >= 0.25, f"{k}: the column at {to} is too near its resistor's pad for a clean turn"
+    return [(x, y), (to + d, y), (to, y + d)]
 
 
 def no_parts_face_pour(board):

@@ -406,7 +406,12 @@ prints which, exits 1, and leaves any existing board as it was.
   a line through the centre, so it neither clips the ring nor turns inside it.
   A via whose hole is in a surface-mount pad fails (ADR 0030); a net tie's pad
   is bare copper and exempt. A turn that a pad's own copper covers is that
-  pad's entry and is judged by the pad rule;
+  pad's entry and is judged by the pad rule. A track leaves a surface-mount
+  pad straight and square to the pad's edge, and neither turns nor branches
+  until it is `PAD_CLEAR` beyond the pad (owner, 2026-11-22: "the cleanest
+  tracks leaving all pads"); it may end sooner at a via or another pad, and it
+  may enter a pad off its centre. A pad with no room for that is named, with
+  the reason, under `joints_exempt:` in the board's `layout.yaml`;
 - a board with a `layout.yaml` `silk:` block whose title block (title,
   revision, date - the Gerber job's "Revision") differs from it, or whose
   silkscreen lacks the title or its `rev <rev>  <date>` line (`check_title`;
