@@ -156,11 +156,12 @@ def routes(cu):
         else:
             t(net, pts + up(gx, band[lane], y0) + [(px, y0 + px - gx), (px, py)])
 
-    # ---- column 0: both pins straight out toward the Matrix, onto lanes 6 and 7 ----------------
+    # ---- column 0: both pins out toward the Matrix on one 45 from the pad's centre, onto lanes 6 and 7
+    # (owner, 2026-11-22: a track leaves a pin on a line through its centre) ----
     x, y = j1(2)
-    diag_up("/IO39", [(x, y), (282.2 - y, y), (282.2 - band[6], band[6])], 6, 284.105 + MX, 33.68, 7)
+    diag_up("/IO39", [(x, y), (x + y - band[6], band[6])], 6, 284.105 + MX, 33.68, 7)
     x, y = j1(1)
-    diag_up("/IO40", [(x, y), (270.0, y), (270.0 + y - band[7], band[7])], 7, 284.695 + MX, 30.28, 8)
+    diag_up("/IO40", [(x, y), (x + y - band[7], band[7])], 7, 284.695 + MX, 30.28, 8)
 
     # ---- the back row: five lanes under the header ---------------------------------------------
     back = {}

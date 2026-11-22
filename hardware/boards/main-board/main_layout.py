@@ -347,7 +347,7 @@ def analog():
     T("IO39", ["R45.2", (41.99, 18.65), (27.23, 18.65), (26.58, 18.0), (26.58, 14.76), (25.98, 14.16)])
     via("ADC_CLK", 32.7, 12.88, "U2.7")
     via("IO37", 34.0, 11.62, "U2.6")
-    via("ADC_DIN", 32.7, 10.34, "U2.5")
+    via("ADC_DIN", 33.35, 10.34, "U2.5")
     # the ADC's own 3V3 (tail() draws its lane): up at a via on the block's tail side, through
     # the chip-select pull-up's pad, and down to the supply resistor
     VIAS.append(("DEV_3V3", 46.72, 21.65))
@@ -356,7 +356,7 @@ def analog():
     # the five bottom lanes from J-MCU end here; tail() draws them as far as HWY
     T("IO39", [(HWY, MOUTH["IO39"]), (43.35, 21.55), (42.0, 20.2)], FINE, "B")
     T("IO37", [(HWY, MOUTH["IO37"]), (34.4, 21.95), (34.0, 21.55), (34.0, 11.62)], FINE, "B")
-    T("ADC_DIN", [(HWY, MOUTH["IO36"]), (33.75, 22.35), (33.35, 21.95), (33.35, 10.99), (32.7, 10.34)], FINE, "B")
+    T("ADC_DIN", [(HWY, MOUTH["IO36"]), (33.75, 22.35), (33.35, 21.95), (33.35, 10.34)], FINE, "B")
     T("ADC_CLK", [(HWY, MOUTH["IO35"]), (33.1, 22.75), (32.7, 22.35), (32.7, 12.88)], FINE, "B")
 
 
@@ -443,8 +443,8 @@ def power():
     stage 3); its trunk starts by R49 and runs the bottom face toward the mouth."""
     # 12 V entry and the inrush switch
     T("UMBILICAL_POS12", ["J6.3", (290.5, 32.31)], 0.8)
-    T("UMBILICAL_POS12", [(290.5, 32.31), (278.16, 32.31), "D3.1"], 0.6)   # to the surge diode, north of the first LED
-    T("UMBILICAL_POS12", ["J6.3", (296.4, 32.31), (297.6, 31.11), (297.6, 16.4)], 0.6)
+    T("UMBILICAL_POS12", [(290.5, 32.31), (278.16, 32.31), "D3.1"], 0.8)   # to the surge diode, north of the first LED
+    T("UMBILICAL_POS12", ["J6.3", (297.6, 30.31), (297.6, 16.4)], 0.6)   # leaves the pin on a line through its centre
     T("UMBILICAL_POS12", ["Q1.2", "C39.1", (297.6, 16.4), (298.85, 16.4)], 0.5)
     T("INRUSH_GATE", ["Q1.1", "C39.2", (298.25, 14.5), (298.85, 13.9), "R42.1"])
     T("INRUSH_GATE", ["Q1.1", "C40.1"])
@@ -482,7 +482,7 @@ def power():
     # the Matrix's whole supply: 0.8 mm, necked to 0.7 past R36's pad and under the three chain
     # resistors' bodies, which is all the room there is (pre-fab review S5)
     T("INST_5V_A", ["J1.2", (255.28, 19.95), (255.74, 20.41), (255.74, 23.85), (255.49, 24.1), (246.9, 24.1)], 0.7)
-    T("INST_5V_A", [(246.9, 24.1), (240.55, 24.1), (238.84, 22.39), "Q2.3"], 0.8)
+    T("INST_5V_A", [(246.9, 24.1), (240.55, 24.1), (238.84, 22.39), "Q2.3"], 0.7)
     T("INST_5V_A", ["Q2.3", "U13.4"], 0.5)
     T("INST_5V_A", ["J1.2", (255.285, 20.0), (255.585, 20.3), (259.0, 20.3), (263.25, 24.55)], PWR, "B")
     via("INST_5V_A", 263.25, 24.55, "C12.1", PWR)
@@ -493,16 +493,8 @@ def power():
     # and down to R37's via
     via("DEV_3V3", 278.4, 21.5, (278.4, 20.25), FINE)
     k3 = LANE["DEV_3V3"]
-    T("DEV_3V3", [(278.4, 21.5), (271.6, TRUNK), (256.7, TRUNK), (256.7, 22.2), (256.2, 22.2), (256.2 - (k3 - 22.2), k3), (253.0, k3)], 0.3, "B")
-    # the lane is as wide as its run allows (owner, 2026-11-21: supply tracks wider where there
-    # is room): 0.55 with its edge toward the switches where it was, necked to the 0.3 above
-    # only past the two series resistors' vias
-    kw = k3 - 0.09
-    T("DEV_3V3", [(253.0, k3), (252.91, kw)], 0.3, "B")
-    T("DEV_3V3", [(252.91, kw), (230.29, kw)], 0.48, "B")
-    T("DEV_3V3", [(230.29, kw), (230.2, k3), (219.3, k3), (219.21, kw)], 0.3, "B")
-    T("DEV_3V3", [(219.21, kw), (64.59, kw)], 0.48, "B")
-    T("DEV_3V3", [(64.59, kw), (64.5, k3), (64.2, k3)], 0.3, "B")
+    # one width for its whole run (owner, 2026-11-22: no stepped track)
+    T("DEV_3V3", [(278.4, 21.5), (271.6, TRUNK), (256.7, TRUNK), (256.7, 22.2), (256.2, 22.2), (256.2 - (k3 - 22.2), k3), (64.2, k3)], 0.3, "B")
     VIAS.append(("DEV_3V3", 256.7, 22.2))
     T("DEV_3V3", ["R37.2", (257.0, 22.5), (256.7, 22.2)])
 
@@ -556,7 +548,7 @@ def tail():
     T("MIDI_RING_DRV", ["U6.8", "R51.1"])
     T("MIDI_TIP_R", ["R50.2", "FB3.1"])
     T("MIDI_RING_R", ["R51.2", (261.93, 40.5), (263.38, 41.95), "FB4.1"])
-    T("MIDI_TIP", ["FB3.2", (277.3, 39.4), (277.45, 39.25), (283.6, 39.25), (285.0, 40.65)])
+    T("MIDI_TIP", ["FB3.2", (283.75, 39.4), (285.0, 40.65)])
     T("MIDI_TIP", [(282.9, 39.25), (282.9, 40.0)])
     T("MIDI_RING", ["FB4.2", (278.9, 41.95), (279.65, 42.7), (284.4, 42.7)])
     T("MIDI_RING", ["U12.3", (282.64, 42.7)])
@@ -668,13 +660,19 @@ def leds():
         T(net, [f"{b}.4"] + over + [(xb - 3.5 + k, 30.95 + k), (xb - 4.35, 30.1), f"{c}.6"])
 
 
+# Every line leaves a switch's pin straight for KEY_EXIT from the pin's centre before its first turn
+# (owner, 2026-11-22: "a common length of 90 degree track that comes off"; no short stub that turns
+# again). It is the key boards' neck length, so the three boards agree.
+KEY_EXIT = 3.4
+
+
 def legs():
     """STAGE 4b: THE NEAR ROW'S FOUR KEYS. Each switch's line has the bottom lanes and the LED
     row between it and its resistor. It crosses the lanes on top, takes a via between the
     lanes and the LED row, passes under the LED row on the bottom face, and comes up beside
     its resistor."""
     v = 25.4                                   # the row of vias between the lanes and the LED data pads
-    T("/LT1/SWITCH_LEG", ["SW1.1", (54.4, 14.7), (65.1, v)])
+    T("/LT1/SWITCH_LEG", ["SW1.1", (54.4, 13.8 + KEY_EXIT), (54.4 + v - 13.8 - KEY_EXIT, v), (65.1, v)])
     T("/LT1/SWITCH_LEG", [(65.1, v), (70.6, 30.9), (72.75, 30.9)], SIG, "B")
     T("/LT1/SWITCH_LEG", [(72.75, 30.9), (74.0, 30.9), "R13.2"])
     T("/LT3/SWITCH_LEG", ["SW3.1", (94.4, v)])
@@ -760,7 +758,7 @@ def registers():
         T("CHAIN_SHLD", [f"{j}.4", (X(73.95), y4), (X(69.94), y4), f"{u}.1"])
         T("CHAIN_SHLD", [(X(73.95), y4), f"{tvs}.3"])
         # pins 6 and 10 of the header
-        T("CHAIN_SER_LH" if lh else "HOP_LT_RH", [f"{tvs}.4", (X(JX - 0.1325), y6 - 0.1325), f"{j}.6"])
+        T("CHAIN_SER_LH" if lh else "HOP_LT_RH", [f"{tvs}.4", (X(73.95 + 0.1325), y6), f"{j}.6"])   # level with the pin's centre; the step is in the clamp's pad
         # (the left bead's 3V3 comes up from the mouth side, so its pad 2 faces the header; the right
         # bead's arrives along the far band from the tail, so its pad 2 is the far one and turns back
         # between the bead and the hop's resistor)
@@ -779,8 +777,8 @@ def registers():
         VIAS.append((ser, X(62.33), 38.0))
         T(ser, [(X(62.33), 38.0), f"{u}.10"])
         # the far row's two keys: each switch's line south of its ground pin to its resistor
-        T(leg2, [f"{sw_far}.1", (X(46.95), 41.85), (X(58.76), 41.85), f"{far_mouth[0]}.2"])
-        T(leg4, [f"{sw_tail}.1", (X(86.95), 41.85), (X(94.76), 41.85), f"{far_tail[0]}.2"])
+        T(leg2, [f"{sw_far}.1", (X(45.6 + KEY_EXIT), 43.2), (X(45.6 + KEY_EXIT + 1.35), 41.85), (X(58.76), 41.85), f"{far_mouth[0]}.2"])
+        T(leg4, [f"{sw_tail}.1", (X(85.6 + KEY_EXIT), 43.2), (X(85.6 + KEY_EXIT + 1.35), 41.85), (X(94.76), 41.85), f"{far_tail[0]}.2"])
         # each comb's key line: resistor, capacitor, pull-up
         for n, (r, cp, pu) in ((x2, far_mouth), (x4, far_tail), (x3, near_tail)):
             T(n, [f"{r}.1", f"{cp}.1", f"{pu}.2"])
