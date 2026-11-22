@@ -73,11 +73,11 @@ ECHO: "PCB", "main", "keepout", "J-MIDI and CBL-MIDI's plug (proposed)", 283.1, 
 ECHO: "PCB", "main", "keepout", "Matrix ribbon", 250.655, 15.245, 273.885, 21.095, 0
 ECHO: "PCB", "main", "keepout", "Matrix ribbon fold", 254.65, 21.095, 269.89, 38.975, 7.2
 ECHO: "PCB", "main", "board", "thickness", 1.6, "smt_height_max", 2.62, "side", "parts on top; the thumb switches from below, their footprints on the underside"
-ECHO: "PCB", "matrix", "board", "thickness", 1.6, "smt_height_max", 2.5, "side", "HDR-MATRIX on top under the Matrix; J-MCU-C hung from the underside"
+ECHO: "PCB", "matrix", "board", "thickness", 1.6, "smt_height_max", 3.2, "side", "HDR-MATRIX on top under the Matrix; J-MCU-C hung from the underside"
 ECHO: "PCB", "matrix", "connector", "J-MCU-C", 251.475, 273.065, 12.02, 5.85, 1, 90
 ECHO: "PCB", "matrix", "pins", "HDR-MATRIX row 0", 276.655, 17.07, 299.515, 17.07, 2.54
 ECHO: "PCB", "matrix", "pins", "HDR-MATRIX row 1", 276.655, 39.93, 299.515, 39.93, 2.54
 ECHO: "PCB", "matrix", "standoff", "M2.5", 295.385, 11, 2.7, 4.5, 5, "hang"
 ECHO: "PCB", "matrix", "standoff", "M2.5", 280.785, 46, 2.7, 4.5, 5, "hang"
 ECHO: "PCB", "matrix", "standoff", "M2.5", 295.385, 46, 2.7, 4.5, 5, "hang"
-ECHO: "PCB", "matrix", "keepout", "elsewhere", 275.585, 7.5, 301.085, 49.5, 2.5
+ECHO: "PCB", "matrix", "keepout", "elsewhere", 275.585, 7.5, 301.085, 49.5, 3.2

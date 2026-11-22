@@ -245,6 +245,7 @@ exports:
   - {name: dxf-matrix-window, src: mechanical/cad/woody_body.scad, out: mechanical/export/matrix-window.dxf, defines: {part: "matrix_window"}}
   - {name: dxf-oak-rebates, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-rebates.dxf, defines: {part: "oak_rebates"}}
   - {name: dxf-oak-pockets, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-pockets.dxf, defines: {part: "oak_pockets"}}
+  - {name: dxf-oak-plug-pocket, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-plug-pocket.dxf, defines: {part: "oak_plug_pocket"}}
   - {name: dxf-oak-inserts, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-inserts.dxf, defines: {part: "oak_inserts"}}
   - {name: dxf-oak-relief, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-relief.dxf, defines: {part: "oak_relief"}}
   - {name: dxf-oak-logo, src: mechanical/cad/woody_body.scad, out: mechanical/export/oak-logo.dxf, defines: {part: "oak_logo"}}
@@ -455,6 +456,10 @@ scripts:
     cmd: [tools/fab.py, dxf, --from, mechanical/export/oak-pockets.dxf, --part, oak_top, --name, fab-dxf-oak-top-pockets]
     inputs: [mechanical/export/oak-pockets.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
     out: mechanical/fab/oak/oak-top-pockets.dxf
+  - name: fab-dxf-oak-top-plug-pocket
+    cmd: [tools/fab.py, dxf, --from, mechanical/export/oak-plug-pocket.dxf, --part, oak_top, --name, fab-dxf-oak-top-plug-pocket]
+    inputs: [mechanical/export/oak-plug-pocket.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
+    out: mechanical/fab/oak/oak-top-plug-pocket.dxf
   - name: fab-dxf-oak-top-inserts
     cmd: [tools/fab.py, dxf, --from, mechanical/export/oak-inserts.dxf, --part, oak_top, --name, fab-dxf-oak-top-inserts]
     inputs: [mechanical/export/oak-inserts.dxf, mechanical/export/fab-geometry.echo, config/body.yaml, config/key-layout.yaml]
@@ -532,7 +537,7 @@ scripts:
   - name: fab-pdf-oak-top
     title: The oak top's one-page drawing for the shop
     cmd: [tools/fab.py, drawing, --part, oak_top, --name, fab-pdf-oak-top]
-    inputs: [mechanical/export/fab-geometry.echo, config/key-layout.yaml, hardware/bom.csv, mechanical/export/oak-grooves.dxf, mechanical/export/oak-inserts.dxf, mechanical/export/oak-logo.dxf, mechanical/export/oak-pockets.dxf, mechanical/export/oak-rebates.dxf, mechanical/export/oak-relief.dxf, mechanical/export/oak-top.dxf, tools/cad.py, mechanical/outputs.yaml, mechanical/cad/woody_body.scad, mechanical/cad/fab_parts.scad, mechanical/cad/generated/params.scad, config/body.yaml]
+    inputs: [mechanical/export/fab-geometry.echo, config/key-layout.yaml, hardware/bom.csv, mechanical/export/oak-grooves.dxf, mechanical/export/oak-inserts.dxf, mechanical/export/oak-logo.dxf, mechanical/export/oak-plug-pocket.dxf, mechanical/export/oak-pockets.dxf, mechanical/export/oak-rebates.dxf, mechanical/export/oak-relief.dxf, mechanical/export/oak-top.dxf, tools/cad.py, mechanical/outputs.yaml, mechanical/cad/woody_body.scad, mechanical/cad/fab_parts.scad, mechanical/cad/generated/params.scad, config/body.yaml]
     out: mechanical/fab/oak/oak-top.pdf
   - name: fab-pdf-oak-bottom
     title: The oak bottom's one-page drawing for the shop

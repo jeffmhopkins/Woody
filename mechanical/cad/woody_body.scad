@@ -50,7 +50,7 @@ figure = false;       // set true by a figure that includes this file
 origin = "mouth";
 
 LAYERS = ["plate_top", "oak_top", "oak_bottom", "oak_grooves", "plate_bottom", "side",
-          "mouth_cap", "tail_cap", "matrix_window", "oak_rebates", "oak_pockets", "oak_inserts", "oak_relief", "oak_logo"];
+          "mouth_cap", "tail_cap", "matrix_window", "oak_rebates", "oak_pockets", "oak_plug_pocket", "oak_inserts", "oak_relief", "oak_logo"];
 
 $fn = 40;
 EPS = 0.01;           // drawing convention: coplanar-face nudge
@@ -572,8 +572,10 @@ module oak_rebates_2d() { translate([-x_in0, 0]) translate(matrix_xy) offset(r =
 // (drc.echo "column screw pockets leave wood over them"). Frame: as the oak panels.
 col_pocket_depth = hardware_col_screw_head_h + hardware_col_pocket_clear;
 // ...and one over the Matrix's USB-C, where a recovery plug's overmould rises
-// past the oak's underside (review #19 F1; lid off since issue #37): the same
-// depth, cut in the same pass, ending at the window's rebate.
+// past the oak's underside (review #19 F1; lid off since issue #37): as deep
+// as the overmould needs (usb_pocket_need), which is deeper than the column
+// pockets since the Matrix stands on HDR-MATRIX's real height, so a layer of
+// its own (oak_plug_pocket_2d), ending at the window's rebate.
 function usb_oak_pocket() = let(x1 = min(matrix_xy[0] - boards_matrix_board / 2 - boards_matrix_usb[0] + openings_usb_pocket_clear, matrix_xy[0] - matrix_rebate / 2))
     [usb_plug_x0 - 0.5, matrix_xy[1] - usb_plug_w / 2 - 0.5, x1, matrix_xy[1] + usb_plug_w / 2 + 0.5];
 // THE MATRIX CARRIER'S INSERTS (hardware.mx_insert_*): blind holes drilled up
@@ -585,8 +587,10 @@ module oak_inserts_2d() { translate([-x_in0, 0]) for (m = mx_mounts) translate(m
 module oak_relief_2d() { translate([-x_in0, 0]) translate(matrix_xy) square(boards_matrix_board + 1, center = true); }
 module oak_pockets_2d() { translate([-x_in0, 0]) {
     for (m = columns()) translate(m) circle(d = hardware_col_pocket_d);
-    if (usb_pocket_need > 0) let(q = usb_oak_pocket()) translate([q[0], q[1]]) square([q[2] - q[0], q[3] - q[1]]);
 } }
+module oak_plug_pocket_2d() { translate([-x_in0, 0])
+    if (usb_pocket_need > 0) let(q = usb_oak_pocket()) translate([q[0], q[1]]) square([q[2] - q[0], q[3] - q[1]]);
+}
 
 // THE MAKER'S MARK (owner, 2026-10-01: "Logo should be here, scale as
 // appropriate" - the plain oak between the mouth cap's seam and the first cap
@@ -711,6 +715,7 @@ module lid(dz = 0) {
             linear_extrude(oak_top_t) oak_top_2d();
             translate([0, 0, -EPS]) linear_extrude(stack_groove_depth + EPS) oak_grooves_2d();
             translate([0, 0, -EPS]) linear_extrude(col_pocket_depth + EPS) oak_pockets_2d();
+            if (usb_pocket_need > 0) translate([0, 0, -EPS]) linear_extrude(usb_pocket_need + EPS) oak_plug_pocket_2d();
             translate([0, 0, -EPS]) linear_extrude(hardware_mx_insert_l + EPS) oak_inserts_2d();
             translate([0, 0, -EPS]) linear_extrude(openings_matrix_relief_d + EPS) oak_relief_2d();
             translate([0, 0, oak_top_t - openings_matrix_acrylic_t]) linear_extrude(openings_matrix_acrylic_t + EPS) oak_rebates_2d();
@@ -2168,9 +2173,9 @@ module drc_report() {
     // underside, which is pocketed over it so the Matrix can be reflashed on the
     // lifted lid.
     let(q = usb_oak_pocket(), rebate_x0 = matrix_xy[0] - matrix_rebate / 2)
-        drc(usb_pocket_need <= col_pocket_depth && q[2] <= rebate_x0 + 0.01,
-            "recovery USB-C plug clear of the oak top", [usb_plug_top, usb_pocket_need, col_pocket_depth],
-            "mm: a recovery plug's overmould top (openings.usb_overmold, centred on boards.matrix_usb); the oak pocket over it the overmould needs (openings.usb_pocket_clear of air) and the depth it is cut, the column pockets' (oak-pockets.dxf), ending at the window's rebate");
+        drc(oak_top_t - usb_pocket_need >= hardware_col_pocket_skin - 0.01 && q[2] <= rebate_x0 + 0.01,
+            "recovery USB-C plug clear of the oak top", [usb_plug_top, usb_pocket_need, oak_top_t - usb_pocket_need, hardware_col_pocket_skin],
+            "mm: a recovery plug's overmould top (openings.usb_overmold, centred on boards.matrix_usb); the depth of the oak pocket over it, cut to what the overmould needs (openings.usb_pocket_clear of air; oak-plug-pocket.dxf); the wood left over the pocket, against hardware.col_pocket_skin; the pocket ending at the window's rebate");
     // J-MIDI (issue #45: side entry, facing the tail) under the Matrix
     // carrier: the header, which its plug's housing does not rise past, clear
     // of the carrier's underside and its mounting screws' heads, and on the board.
@@ -2317,7 +2322,7 @@ module drc_report() {
     mw = plate_x1 - (top_last + plate_cutout / 2);
     drc(mw >= 3, "key plate beyond the last key cutout", mw, "mm of aluminium; the plate stops short of the Matrix");
     lip_t = oak_top_t - openings_matrix_acrylic_t - openings_matrix_relief_d;
-    drc(lip_t >= 2, "oak lip under the frosted window", lip_t, str("mm thick, ", openings_matrix_lip, " mm wide; the acrylic sits flush on it"));
+    drc(lip_t >= openings_matrix_lip_t_min - 0.01, "oak lip under the frosted window", [lip_t, openings_matrix_lip_t_min], str("mm thick, against openings.matrix_lip_t_min; ", openings_matrix_lip, " mm wide; the acrylic sits flush on it"));
     // ROUNDED CORNERS (issue #43): a routed slot's inside corner, round, still
     // clears a cap's corner drawn square; and the Matrix's LED array clears
     // the window opening's rounded corners
@@ -2446,6 +2451,7 @@ module part_2d(p) {
     else if (p == "matrix_window") matrix_window_2d();
     else if (p == "oak_rebates") oak_rebates_2d();
     else if (p == "oak_pockets") oak_pockets_2d();
+    else if (p == "oak_plug_pocket") oak_plug_pocket_2d();
     else if (p == "oak_inserts") oak_inserts_2d();
     else if (p == "oak_relief") oak_relief_2d();
     else if (p == "matrix_carrier") matrix_carrier_2d();
