@@ -361,6 +361,17 @@
 			(uuid "407d98c1-06f6-4d22-9c2a-dace96ab7482")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/../../lib/woody.3dshapes/Hanxia_HX_PZ2.54-1x10P_TP-YQ.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "MountingHole:MountingHole_2.7mm_M2.5_Pad_TopBottom"
 		(layer "F.Cu")
@@ -815,6 +826,17 @@
 			(uuid "a84ed6e2-6c3d-4b09-8e03-21d4c9c54666")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/../../lib/woody.3dshapes/Hanxia_HX_PZ2.54-1x10P_TP-YQ.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "MountingHole:MountingHole_2.7mm_M2.5_Pad_TopBottom"
 		(layer "F.Cu")

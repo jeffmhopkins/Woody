@@ -466,6 +466,17 @@
 			(uuid "97b4f4f9-6253-419a-8e25-85322da8daba")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/../../lib/woody.3dshapes/Neutrik_NE8FAV.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "Connector_PinSocket_2.54mm:PinSocket_1x08_P2.54mm_Vertical_SMD_Pin1Right"
 		(layer "B.Cu")

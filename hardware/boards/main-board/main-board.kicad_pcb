@@ -27042,6 +27042,17 @@
 			(uuid "b41549e5-fdf7-4c30-8136-df72b978f1c0")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/../../lib/woody.3dshapes/Hanxia_HX_PZ2.54-1x3P_TP-YQ.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "Diode_SMD:D_SOD-123"
 		(layer "F.Cu")
