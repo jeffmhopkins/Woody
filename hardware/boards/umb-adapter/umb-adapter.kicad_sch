@@ -602,7 +602,7 @@
     (instances (project "umb-adapter" (path "/a3759628-f357-5c0e-86e3-2f01e7e2b31f" (reference "J1") (unit 1))))
   )
   (symbol (lib_id "Connector_Generic:Conn_01x08") (at 177.8 88.9 0) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no)
+    (in_bom no) (on_board yes) (dnp no)
     (uuid 0d3c389f-f36f-55cb-8e5d-608340be1665)
     (property "Reference" "J2" (at 177.8 78.74 0) (effects (font (size 1.27 1.27))))
     (property "Value" "8-way 2.54mm right-angle pin header" (at 177.8 101.6 0) (effects (font (size 1.27 1.27))))

@@ -1,0 +1,61 @@
+# THE LIMITS THE UMBILICAL ADAPTER IS HELD TO, and where its two connectors come from -
+# tools/pcb.py check, `kind: adapter` (tools/pcb_adapter.py). The copper is laid out by hand:
+# adapter_layout.py, beside this file, builds the board and writes out every track, and says
+# why each is where it is (ADR 0030). No router runs on this board.
+#
+# FROM THE BODY CAD, NOT HERE (mechanical/cad/umb_adapter.scad; mechanical/export/
+# umb-adapter.dxf and umb-adapter-geometry.echo): the outline, the thickness, the etherCON's
+# axis and J-UMB's row. Which end of that row is pin 1 comes from the main board's own J-UMB,
+# pad by pad. THIS BOARD'S FRAME is its own: across the body (y) and up (z), seen from the
+# tail, the etherCON's face toward the viewer.
+
+kind: adapter
+outline: umb-adapter.dxf
+layers: 2
+
+# The key boards' rules and board house, so one order makes them and this board.
+rules:
+  track: 0.25
+  track_min: 0.2
+  clearance: 0.2
+  via: 0.7
+  via_drill: 0.3
+  via_min: 0.66
+  drill_min: 0.3
+  edge_clearance: 0.3
+  power_track: 0.5
+
+fab:
+  house: JLCPCB
+  hole_clearance: 0.28
+  hole_to_hole: 0.45
+  annular_min: 0.18
+  silk_text_min: 1.0
+  silk_line_min: 0.15
+  silk_to_pad: 0.15
+  finish: "HAL lead-free"
+  mask: White               # ADR 0028: the instrument's boards are white
+  silk: Black
+  copper_oz: 1
+
+# The supply's two conductors at the main board's width for them (its layout.yaml
+# net_classes: power12_in): the etherCON's contact, not the track, is the limit
+# (hardware/interfaces/spi-link/bom.csv J-UMBILICAL-INST).
+net_classes:
+  power12_in:
+    nets: [/UMBILICAL_POS12, /PWR_GND]
+    track: 0.5
+
+# Parts whose courtyard is MEANT to lie off the board (pcb.py check_courtyards).
+courtyard_overhang:
+  J1:
+    reason: "the board is the etherCON's flange outline (ADR 0021), and the footprint's courtyard takes in the PUSH tab, which stands above the flange in the tail cap's recess, and a quarter millimetre round the flange. Plastic in front of the board, past its edge; no pad off the board"
+    source: "config/body.yaml ethercon.flange_w, flange_h, tab_top; hardware/lib/README.md Neutrik_NE8FAV_etherCON_Vertical"
+
+silk:
+  title: "WOODY umbilical adapter"
+  rev: "A"
+  date: "2026-11-21"
+
+# No router: adapter_layout.py (ADR 0030).
+route: false

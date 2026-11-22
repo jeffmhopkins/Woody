@@ -2146,6 +2146,8 @@ def cad_export_problems(lay):
     import cad
     if lay.get("kind") == "module":     # the module's own CAD and its exports
         want = {"mechanical/module/export/pcb-geometry.echo", "mechanical/module/export/" + lay["outline"]}
+    elif lay.get("kind") == "adapter":  # the umbilical adapter's own exports (mechanical/cad/umb_adapter.scad)
+        want = {"mechanical/export/umb-adapter-geometry.echo", "mechanical/export/" + lay["outline"]}
     else:
         want = {"mechanical/export/pcb-geometry.echo",
                 "mechanical/export/" + (lay["outline"] if lay.get("kind") == "main"
@@ -2241,6 +2243,9 @@ def cmd_check(bdir):
         bad += pcb_module.check_cad(board, lay, comps)
         for b in pcb_module.check_b2b(board, bdir, lay):
             (notes if b.startswith("note:") else bad).append(b)
+    elif lay.get("kind") == "adapter":
+        import pcb_adapter
+        bad += pcb_adapter.check_cad(board, lay, comps)
     else:
         bad += check_cad(board, lay, cad_geometry(lay["cluster"]), comps)
     if lay.get("planes") or lay.get("islands"):

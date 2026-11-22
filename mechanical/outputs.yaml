@@ -253,6 +253,11 @@ exports:
   - {name: dxf-key-board-rh, src: mechanical/cad/woody_body.scad, out: mechanical/export/key-board-rh.dxf, defines: {part: "key_board_right_hand"}}
   - {name: dxf-matrix-carrier, src: mechanical/cad/woody_body.scad, out: mechanical/export/matrix-carrier.dxf, defines: {part: "matrix_carrier"}}
   - {name: pcb-geometry, src: mechanical/cad/woody_body.scad, out: mechanical/export/pcb-geometry.echo, defines: {part: "pcb_geom"}}
+# THE UMBILICAL ADAPTER (hardware/boards/umb-adapter): its outline and its
+# connectors' places, in its own frame (across the body and up, seen from the
+# tail), from mechanical/cad/umb_adapter.scad, which draws nothing of its own.
+  - {name: dxf-umb-adapter, src: mechanical/cad/umb_adapter.scad, out: mechanical/export/umb-adapter.dxf, defines: {adapter: "outline"}}
+  - {name: umb-adapter-geometry, src: mechanical/cad/umb_adapter.scad, out: mechanical/export/umb-adapter-geometry.echo, defines: {adapter: "geom"}}
 # THE FABRICATION FILES (issue #42; mechanical/fab/README.md), one folder per
 # material so each goes to one shop as it is: each oak part's own solid, from
 # mechanical/cad/fab_parts.scad, in its part frame; the tail cap's router pass,
