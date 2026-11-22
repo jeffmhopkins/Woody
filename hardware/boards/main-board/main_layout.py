@@ -342,9 +342,10 @@ def analog():
     # the ADC's four digital lines and its 3V3 arrive on the bottom face (digital(), below) and
     # come up here: CS at its pull-up, then on the top face over the row and down between two
     # ground pads into pin 1; the other three by a via each beside their pins
-    via("IO39", 42.0, 20.2)
-    T("IO39", [(42.0, 20.2), (42.65, 19.55)])
-    T("IO39", ["R45.2", (41.99, 18.65), (27.23, 18.65), (26.58, 18.0), (26.58, 14.76), (25.98, 14.16)])
+    # one entry at the pull-up's pad (owner, 2026-11-22: no two tracks meeting in a pad): pad, via and
+    # the line on toward pin 1 stand in a row, the via level with the pad's centre
+    via("IO39", 41.35, 19.55)
+    T("IO39", ["R45.2", (41.35, 19.55), (40.45, 18.65), (27.23, 18.65), (26.58, 18.0), (26.58, 14.76), (25.98, 14.16)])
     via("ADC_CLK", 32.7, 12.88, "U2.7")
     via("IO37", 34.0, 11.62, "U2.6")
     via("ADC_DIN", 33.35, 10.34, "U2.5")
@@ -354,7 +355,7 @@ def analog():
     T("DEV_3V3", [(46.72, 21.65), (46.72, 17.75), (46.22, 17.25), "R47.1"])
     T("DEV_3V3", [(46.72, 19.55), "R45.1"])
     # the five bottom lanes from J-MCU end here; tail() draws them as far as HWY
-    T("IO39", [(HWY, MOUTH["IO39"]), (43.35, 21.55), (42.0, 20.2)], FINE, "B")
+    T("IO39", [(HWY, MOUTH["IO39"]), (43.35, 21.55), (41.35, 19.55)], FINE, "B")
     T("IO37", [(HWY, MOUTH["IO37"]), (34.4, 21.95), (34.0, 21.55), (34.0, 11.62)], FINE, "B")
     T("ADC_DIN", [(HWY, MOUTH["IO36"]), (33.75, 22.35), (33.35, 21.95), (33.35, 10.34)], FINE, "B")
     T("ADC_CLK", [(HWY, MOUTH["IO35"]), (33.1, 22.75), (32.7, 22.35), (32.7, 12.88)], FINE, "B")

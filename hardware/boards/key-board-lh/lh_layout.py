@@ -146,9 +146,13 @@ def routes(cu, sw):
     # 2026-11-20: "some of the 3 volt rail looks like it could use more diagonal").
     xe = sw["LH4"][0] + X_CAP + 1.3      # round LH4, outside its capacitor
     xw = sw["LH3"][0] + X_CAP + 1.3      # back up to the row keys' rail, mouth side of LH4's line
+    # C6 hangs off the trunk by its own short neck: the trunk turns below the pad and does not
+    # fold back inside it (owner, 2026-11-22: no two tracks meeting at a point in a pad)
+    c6t = (c6[0], UY + 3.45 + c6[0] - x16)
+    cu.track(V33, [c6t, c6], PW)
     cu.track(V33, [j, c7, (c7[0] + 1.0, c7[1]), (c7[0] + 1.0 + Y_RAIL - c7[1], Y_RAIL), r11, (x12 - 0.5, Y_RAIL), (x12, Y_RAIL - 0.5),
                 (x12, Y_CAPS), upin(12), (x12, ch(1.7)), (x12 + 0.8, ch(0.9)), (x16 - 0.8, ch(0.9)), (x16, ch(1.7)), upin(16),
-                (x16, UY + 3.45), (c6[0], UY + 3.45 + c6[0] - x16), c6, (xt, c6[1] - (xt - c6[0])), (xt, yr5 + 3.0), (xt + 3.0, yr5),
+                (x16, UY + 3.45), c6t, (xt, c6t[1] - (xt - c6[0])), (xt, yr5 + 3.0), (xt + 3.0, yr5),
                 pu1["LH5"], (xe - 6.3, yr5), (xe, yr5 - 6.3), (xe, yr4 + 1.5), (xe - 1.5, yr4), pu1["LH4"], (xw + 3.8, yr4),
                 (xw + 3.8 - (yr - yr4), yr), pu1["LH3"], pu1["LH2"], pu1["LH1"]], PW)
 
