@@ -251,9 +251,9 @@ layout:
     status: settled
     source: "owner, 2026-09-26: 'copy the same space above the left keys to between the hands and at the bottom'. Since the matrix was centred (same day) it equalizes the mouth end and the space between the hands only; the tail is sized by its own contents"
   gap_matches_matrix:
-    value: true
+    value: false
     status: settled
-    source: "owner, 2026-09-26: the gap between the key groups is the same as the gap from the last keys to the LED matrix - clear space, cap edge to cap edge and cap edge to window edge. Overrides equal_bands for the gap; equal_bands then only sets the mouth end, and gap stays a minimum"
+    source: "OFF since 2026-11-22 (owner, shown both in plan: the Matrix fully centred, the last key to the window larger than the gap between the hands): the tail grew by boards.umb_socket_d for J-UMB's socket and the Matrix was re-centred in it, which makes the last-key-to-window gap larger than the gap between the hands; left on, the rule answers by moving the right hand down the body, and the key boards and the main board are laid out where the keys are. Off, the gap is layout.gap and no key moves. The rule it switches was the owner's, 2026-09-26: the gap between the key groups is the same as the gap from the last keys to the LED matrix - clear space, cap edge to cap edge and cap edge to window edge. Overrides equal_bands for the gap; equal_bands then only sets the mouth end, and gap stays a minimum"
   matrix_centred:
     value: true
     status: settled
@@ -598,6 +598,11 @@ boards:
     value: 2.5
     status: settled
     source: "J-UMB's insulator along the body, behind the adapter: the hanxia HX PZ2.54-1x8P WZ's 2.50 mm square insulator [ds HANXIA-HX-PZ2.54-1x8P-WZ.pdf]"
+  umb_socket_d:
+    value: 8.5
+    status: nominal
+    source: "J-UMB's socket along the body, between the header's insulator and the adapter's rear face: a standard single-row 2.54 mm surface-mount socket's insulator height, 8.5 [from memory: the common height across makers; the part and its drawing are not banked yet]. Owner, 2026-11-22: 'I really want this socketed connection for fitment issues ... make the instrument a little bit longer'. The body's length grows by this and the main board's tail end does not move"
+    decided_by: "the socket bought: its banked drawing's insulator height"
   umb_joint_h:
     value: 2.5
     status: settled

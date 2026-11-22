@@ -156,7 +156,13 @@ rt_last_rel = max([for (i = [0 : count("right_thumb") - 1]) rt_rel(i)[0]]);
 // then nothing is plugged into the Matrix with the lid on.)
 usb_behind = 0;
 ec_stack_d = boards_umb_adapter_t + ethercon_pcb_setback;   // the adapter's rear face to the flange's front face
-behind_matrix = usb_behind + layout_tail_clear + ec_stack_d + ends_tail_cap_t;
+// THE SOCKETED JOINT (owner, 2026-11-22): J-UMB plugs into a socket on the adapter's rear
+// face, boards.umb_socket_d deep, so the adapter stands that far behind the main board's
+// tail end. The body is that much longer, and the main board's end stays where it was.
+// With the Matrix centred the tail grows by TWICE what is added behind it, so half the
+// socket's depth is added here (drc.echo 'J-UMB's socket between the main board and the adapter').
+umb_socket_behind = layout_matrix_centred ? boards_umb_socket_d / 2 : boards_umb_socket_d;
+behind_matrix = usb_behind + layout_tail_clear + umb_socket_behind + ec_stack_d + ends_tail_cap_t;
 // IN FRONT OF IT: nothing with the lid on since issue #37 (ADR 0015 amendment
 // 2026-10-04). The Matrix's own USB-C is a recovery port, plugged with the lid
 // lifted off: the recovery plug below is drawn for its fit in the oak's pocket
@@ -173,7 +179,7 @@ usb_front = 0;   // the recovery plug is lid-off: it claims no body length
 usb_plug_w = openings_usb_ext_overmold_w;   // across the body: the recovery cable's plug
 equip_start_rel = plate_cutout / 2 + tail_margin + layout_tail_clear;
 tail_claims_rel = [
-    top_last_rel + equip_start_rel + boards_umb_joint_d + ec_stack_d + ends_tail_cap_t,
+    top_last_rel + equip_start_rel + boards_umb_joint_d + boards_umb_socket_d + ec_stack_d + ends_tail_cap_t,
     top_last_rel + plate_cutout / 2 + tail_margin + layout_tail_clear + boards_matrix_board + behind_matrix,
     rt_last_rel + rc / 2 + layout_underside_clear + ends_tail_cap_t];
 // The LED matrix CENTRED in the space after the keys (owner, 2026-09-26):
@@ -490,12 +496,13 @@ ec_c = [W / 2 + ethercon_offset_y, z_floor + ec_clear + ec_fl[1] / 2];    // eth
 ec_panel_x = L - ends_tail_cap_t;                  // the flange's front face, on the tail cap's inside face
 ec_pcb_x1 = ec_panel_x - ethercon_pcb_setback;     // the adapter's front face
 ua_x0 = ec_pcb_x1 - boards_umb_adapter_t;          // the adapter's rear face
+ju_x1 = ua_x0 - boards_umb_socket_d;               // J-UMB's mating face and the main board's tail end: the socket's mouth
 // The bottom plate's end, short of J-UMB's TAILS, and its width, as the key
 // plate's. The tails stand below the tongue further than the plate is below
 // it, so the plate stops a pad and the parts clearance before the tail row,
 // and they stand over the oak (drc.echo 'through-hole tails under the main
 // board clear of the bottom plate').
-ju_tail_x = ua_x0 - boards_umb_joint_d - boards_umb_joint_row_back;   // J-UMB's tail row, along the body
+ju_tail_x = ju_x1 - boards_umb_joint_d - boards_umb_joint_row_back;   // J-UMB's tail row, along the body
 bplate_x1 = ju_tail_x - boards_pin_pad / 2 - boards_board_clear;
 bplate_y = [u_y0 + stack_plate_side_clear, W - u_y0 - stack_plate_side_clear];
 // The panel holes, upper left and lower right seen from the front ([ds]);
@@ -680,7 +687,7 @@ plate_x1 = min(matrix_xy[0] - boards_matrix_board / 2 - 1,
 usb_plug_x0 = openings_matrix_usb_to_tail ? matrix_xy[0] + boards_matrix_board / 2 : matrix_xy[0] - boards_matrix_board / 2 - usb_plug_d;
 // The tail equipment starts at the first of that plug and J-UMB, behind the
 // etherCON's adapter.
-tail_equip_x = min(usb_plug_x0, ua_x0 - boards_umb_joint_d);
+tail_equip_x = min(usb_plug_x0, ju_x1 - boards_umb_joint_d);
 
 // U-bolt in the inter-hand gap on the bottom face (ADR 0009); legs ACROSS the
 // body, since the shortened gap has no room along it beside the left thumb line.
@@ -965,7 +972,7 @@ module pcb_geometry() {
     // tongue and whose posts go through the adapter; its insulator's extent along x (it stands against the
     // adapter's rear face), centre y, pin count, pitch, and its row's
     // height above the top face, where it meets the adapter.
-    echo("PCB", "main", "connector", "J-UMB", ua_x0 - boards_umb_joint_d, ua_x0, ec_c[0], 8, 2.54, boards_umb_joint_row_h);
+    echo("PCB", "main", "connector", "J-UMB", ju_x1 - boards_umb_joint_d, ju_x1, ec_c[0], 8, 2.54, boards_umb_joint_row_h);
     // The breath sensor: its centre, the ports toward +x (the tail), its
     // body and lead span (the lead TIPS), and its land pattern's width
     // across the pad rows (boards.sensor_land_w, wider than the lead span);
@@ -1010,7 +1017,7 @@ module pcb_geometry() {
     // in J-MCU's socket and under the Matrix ribbon's closed fold.
     for (cl = ["left_hand", "right_hand"]) let(r = kb_rect(cl))
         echo("PCB", "main", "keepout", str("under key board ", cl), r[0], r[1], r[2], r[3], cb_room);
-    echo("PCB", "main", "keepout", "elsewhere", cb_x[0], cb_y[0], ua_x0, cb_y[1], gap_room);
+    echo("PCB", "main", "keepout", "elsewhere", cb_x[0], cb_y[0], ju_x1, cb_y[1], gap_room);
     for (cl = chain_ribbon_cls) let(sp = chain_span(mb_chain_x(cl), chain_dir(cl)))
         echo("PCB", "main", "keepout", str("ribbon ", cl), sp[0], chain_y - boards_chain_hdr_l / 2, sp[1], chain_y + boards_chain_hdr_l / 2, 0);
     // J-MIDI (config/body.yaml midi.hdr_at, placed by the layout), a side-entry
@@ -1202,7 +1209,7 @@ sensor_room = under_keys(sensor_c, [boards_sensor_body, boards_sensor_leads]) ? 
 // the mouth end.
 led_y = W / 2;
 led_n = lighting_led_count;
-mb_ends = [cb_x[0], ua_x0];                                   // the main board's mouth and tail edges
+mb_ends = [cb_x[0], ju_x1];                                   // the main board's mouth and tail edges
 led_pitch = lighting_led_pitch;
 led_lo = sensor_c[0] + boards_sensor_lead_row / 2 + boards_board_clear + lighting_led_court[0] / 2;   // past the breath sensor
 led_hi = ju_tail_x - 2.54 / 2 - boards_board_clear - lighting_led_court[0] / 2;                        // short of J-UMB's pads
@@ -1382,7 +1389,7 @@ module tail_wiring_3d() {
         translate([jm_plug[0], jm_plug[1], cb_top + e_mb + boards_mcu_conn_h + boards_mcu_plug_proud - boards_mcu_plug_h]) cube([boards_mcu_plug_l, boards_mcu_plug_t, boards_mcu_plug_h]);
     P([0.25, 0.25, 0.30], false, "IDC plug Matrix carrier")
         translate([jk_plug[0], jk_plug[1], mx_carrier_bot + explode - boards_mcu_conn_h - boards_mcu_plug_proud]) cube([boards_mcu_plug_l, boards_mcu_plug_t, boards_mcu_plug_h]);
-    P([0.10, 0.10, 0.10], false, "J-UMB") translate([ua_x0 - boards_umb_joint_d, ec_c[0] - ju_l / 2, cb_top + e_mb]) cube([boards_umb_joint_d, ju_l, boards_umb_joint_h]);
+    P([0.10, 0.10, 0.10], false, "J-UMB") translate([ju_x1 - boards_umb_joint_d, ec_c[0] - ju_l / 2, cb_top + e_mb]) cube([boards_umb_joint_d, ju_l, boards_umb_joint_h]);
     // Swept as a strip of the ribbon's width along the body, bending in (y, z).
     P([0.72, 0.72, 0.74], false, "Matrix ribbon") let(p = mcu_path_at(mcu_zm + e_mb, mcu_zk + explode)) for (i = [0 : len(p) - 2])
         hull() for (q = [p[i], p[i + 1]]) translate([boards_mcu_conn_at[0], q[0], q[1]]) cube([routing_mcu_ribbon_w, routing_mcu_ribbon_t, routing_mcu_ribbon_t], center = true);
@@ -1425,7 +1432,7 @@ module cb_2d() {
             // (drc.echo 'main board's tail end runs full width beside the
             // etherCON adapter'). "tongue" keeps the old outline: the adapter's
             // width, flush with the board's edge on the near side (tongue_board_y).
-            translate([cb_x[1] - EPS, cb_tail_y[0]]) square([ua_x0 - cb_x[1] + EPS, cb_tail_y[1] - cb_tail_y[0]]);
+            translate([cb_x[1] - EPS, cb_tail_y[0]]) square([ju_x1 - cb_x[1] + EPS, cb_tail_y[1] - cb_tail_y[0]]);
         }
         // No slot in front of the sensor's lower port (owner, 2026-10-05: "No
         // cutout, it'll be fine"): the barb stands just clear of the board's top
@@ -1595,7 +1602,7 @@ function so_clear(p) = let(r = mb_keep_d / 2 + 0.5)
     && max(abs(p[0] - (jm_x0 + jm_x1) / 2) - jm_sz[0] / 2, abs(p[1] - jm_y) - jm_sz[1] / 2) >= r
     // J-UMB and, in front of it, the band its footprint and the parts that
     // sit at the connector need (boards.umb_parts_d), not just its insulator
-    && max(abs(p[0] - (ua_x0 - umb_band_d / 2)) - umb_band_d / 2, abs(p[1] - ec_c[0]) - ju_l / 2) >= r + 1;
+    && max(abs(p[0] - (ju_x1 - umb_band_d / 2)) - umb_band_d / 2, abs(p[1] - ec_c[0]) - ju_l / 2) >= r + 1;
 function first_clear(cs) = let(ok = [for (c = cs) if (so_clear(c)) c]) len(ok) > 0 ? ok[0] : undef;
 // THE COLUMNS (ADR 0025) stand where the key boards' mounts are, and they are
 // vertical: the main board's mount IS the key board's. Each is also tried up
@@ -1617,7 +1624,7 @@ n_cols = len(cb_cols);
 // among them, which still binds the near-side one: J-UMB spans that line -
 // and the pair then stands at the one x both reach (tail_pair_x).
 col_line_y = [min([for (m = columns()) m[1]]), max([for (m = columns()) m[1]])];
-tail_mount_x0 = min(ua_x0 - 4, bplate_x1 - hardware_stud_edge);
+tail_mount_x0 = min(ju_x1 - 4, bplate_x1 - hardware_stud_edge);
 function tail_clear(p) = so_clear(p) && p[0] <= bplate_x1 - hardware_stud_edge
     && min([for (w = bplate_windows) rect_gap(p, [(w[0] + w[2]) / 2, (w[1] + w[3]) / 2], [w[2] - w[0], w[3] - w[1]], 0)])
        >= max(hardware_stud_edge, hardware_kb_spacer_od / 2 + hardware_kb_mount_float + 0.5)
@@ -1646,7 +1653,7 @@ module centre_board_3d() {
         for (cl = chain_ribbon_cls) let(sp = chain_span(mb_chain_x(cl), chain_dir(cl)), x0 = sp[0], x1 = sp[1])
             translate([x0 - 0.5, chain_y - boards_chain_hdr_l / 2 - 0.5]) square([x1 - x0 + 1, boards_chain_hdr_l + 1]);
         translate([jm_x0 - 0.5, jm_y - jm_sz[1] / 2 - 0.5]) square(jm_sz + [1, 1]);
-        translate([ua_x0 - boards_umb_joint_d - 0.5, ec_c[0] - ju_l / 2 - 0.5]) square([boards_umb_joint_d + 1, ju_l + 1]);
+        translate([ju_x1 - boards_umb_joint_d - 0.5, ec_c[0] - ju_l / 2 - 0.5]) square([boards_umb_joint_d + 1, ju_l + 1]);
         // nothing under J-MCU's socket, which overhangs its header's ends
         let(r = jm_plug) translate([r[0] - 0.5, r[1] - 0.5]) square([r[2] - r[0] + 1, r[3] - r[1] + 1]);
         translate(sensor_c) square([boards_sensor_body + 1, boards_sensor_leads + 1], center = true);
@@ -1804,10 +1811,12 @@ module drc_report() {
             ? "the etherCON behind it" : "its own half-width in front of it, clear of the key board") : tail_names[search(max(tail_claims_rel), tail_claims_rel)[0]],
         str(tail_req, " mm after the last key"));
     echo("DRC", "INFO", "behind the Matrix, to the tail face", behind_matrix,
-         str("mm = clearance ", layout_tail_clear, " + the etherCON's adapter ", boards_umb_adapter_t,
+         str("mm = clearance ", layout_tail_clear, " + J-UMB's socket's share ", umb_socket_behind, " + the etherCON's adapter ", boards_umb_adapter_t,
              " + the connector to its flange ", ethercon_pcb_setback, " + tail cap ", ends_tail_cap_t, " - J-UMB passes under the Matrix"));
     under_m = matrix_board_z - boards_matrix_under_h;
     m_x1 = matrix_xy[0] + boards_matrix_board / 2 + usb_behind;
+    drc(abs(ua_x0 - ju_x1 - boards_umb_socket_d) < 0.01 && mb_ends[1] == ju_x1, "J-UMB's socket between the main board and the adapter", [boards_umb_socket_d, ju_x1, ua_x0],
+        "mm: the socket's depth (boards.umb_socket_d), and along the body the main board's tail end and the adapter's rear face it stands between");
     drc(ua_x0 >= m_x1 + layout_tail_clear - 0.01, "etherCON adapter behind the Matrix", ua_x0 - m_x1,
         "mm from the Matrix's tail edge (and any plug off it) to the adapter's rear face; the adapter stands the connector's full height");
     drc(cb_top + boards_umb_joint_h <= under_m, "J-UMB passes under the Matrix", under_m - cb_top - boards_umb_joint_h,
@@ -2086,8 +2095,8 @@ module drc_report() {
             x == undef ? "none found" : [x, chain_stub_gap(x, cl),
                                          chain_col_gap(sp, boards_chain_hdr_l) - col_keep_r],
             "mm: the headers' centres along the body; either header to the nearest switch's pins and pole (against boards.chain_stub_room); and to the nearest column's hex, off its axis (against 0.5)");
-    drc(cb_tail_y[1] - cb_tail_y[0] >= ju_l + 2 * boards_board_clear && ua_x0 > cb_x[1], "J-UMB on the main board's tongue, against the etherCON's adapter",
-        [ua_x0 - cb_x[1], cb_tail_y[1] - cb_tail_y[0] - ju_l],
+    drc(cb_tail_y[1] - cb_tail_y[0] >= ju_l + 2 * boards_board_clear && ju_x1 > cb_x[1], "J-UMB on the main board's tongue, against the etherCON's adapter",
+        [ju_x1 - cb_x[1], cb_tail_y[1] - cb_tail_y[0] - ju_l],
         str("mm: the board's length past the right-hand key board (the tongue, ", boards_main_tail == "full" ? "full width since 2026-10-02" : "the adapter's width",
             "), and its width there less J-UMB's pin row"));
     if (boards_main_tail == "tongue")
@@ -2099,7 +2108,7 @@ module drc_report() {
     // cut away - past the right-hand key board, beside the adapter's width. The
     // USB-C extension's receptacle and lead stood over it until issue #37; now
     // J-MIDI stands in it (below), and nothing else at the board's height.
-    if (boards_main_tail == "full") let(corner = [ua_x0 - cb_x[1], cb_y[1] - tongue_y[1]])
+    if (boards_main_tail == "full") let(corner = [ju_x1 - cb_x[1], cb_y[1] - tongue_y[1]])
         drc(tongue_y[0] >= cb_y[0] - 0.01,
             "main board's tail end runs full width beside the etherCON adapter", corner,
             "mm: the corner the old tongue cut away (along the body, across), now board; J-MIDI is proposed in it (drc 'J-MIDI and its plug under the Matrix carrier')");
@@ -2168,7 +2177,7 @@ module drc_report() {
     let(top = cb_top + midi_hdr_sz[2],
         under = mx_carrier_bot - hardware_col_screw_head_h,
         r = [midi_hdr_at[0] - midi_hdr_sz[0] / 2, midi_hdr_at[1] - midi_hdr_sz[1] / 2, midi_hdr_at[0] + midi_hdr_sz[0] / 2, midi_hdr_at[1] + midi_hdr_sz[1] / 2],
-        on = min(r[0] - cb_x[0], ua_x0 - r[2], r[1] - cb_y[0], cb_y[1] - r[3]))
+        on = min(r[0] - cb_x[0], ju_x1 - r[2], r[1] - cb_y[0], cb_y[1] - r[3]))
         drc(under - top >= boards_board_clear && on >= boards_board_clear, "J-MIDI and its plug under the Matrix carrier", [under - top, on],
             "mm: the header's top (midi.hdr_sz) under the carrier's mounting screws' heads, the lowest thing over the corner (against boards.board_clear); the header inside the board's edges (against board_clear)");
     // THE KEY CHAIN'S RIBBONS (ADR 0017, amended 2026-09-27): long enough to
@@ -2364,8 +2373,8 @@ module drc_report() {
         g_oak = midi_upper ? z_oak_top_bot - (midi_c[1] + r) : (midi_c[1] - r) - z_floor,
         jk = [midi_tab_x, midi_c[0] - r, midi_c[1] - r, x_in1, midi_c[0] + r, midi_c[1] + r],
         g_ad = box_gap(jk, [ua_x0, ec_c[0] - ec_fl[0] / 2, ec_c[1] - ec_fl[1] / 2, ec_pcb_x1, ec_c[0] + ec_fl[0] / 2, ec_c[1] + ec_fl[1] / 2]),
-        g_mb = box_gap(jk, [cb_x[0], cb_y[0], cb_z, ua_x0, cb_y[1], cb_top]),
-        g_ju = box_gap(jk, [ua_x0 - boards_umb_joint_d, ec_c[0] - ju_l / 2, cb_top, ua_x0, ec_c[0] + ju_l / 2, cb_top + boards_umb_joint_h]))
+        g_mb = box_gap(jk, [cb_x[0], cb_y[0], cb_z, ju_x1, cb_y[1], cb_top]),
+        g_ju = box_gap(jk, [ju_x1 - boards_umb_joint_d, ec_c[0] - ju_l / 2, cb_top, ju_x1, ec_c[0] + ju_l / 2, cb_top + boards_umb_joint_h]))
         drc(min(g_flange, g_side, g_oak, g_ad, g_mb, g_ju) >= midi_jack_clear - 0.001, "MIDI jack behind the tail cap", [g_flange, g_side, g_oak, g_ad, g_mb, g_ju],
             str("mm: the collar (", midi_jack_collar[0], " across, the body ", midi_jack_body[0], " behind it) to the etherCON's flange, to the side's inside face, to the ",
                 midi_upper ? "oak top's underside" : "floor", "; the jack, tabs included, to the umbilical adapter, to the main board and to J-UMB (each against midi.jack_clear ", midi_jack_clear, ")"));
@@ -2373,7 +2382,7 @@ module drc_report() {
     // J-UMB's pad row, and its plug's lead clear of J-UMB's insulator and the
     // adapter as it passes them into the lane.
     let(r = [midi_hdr_at[0] - midi_hdr_sz[0] / 2, midi_hdr_at[1] - midi_hdr_sz[1] / 2, midi_hdr_front, midi_hdr_at[1] + midi_hdr_sz[1] / 2],
-        on = min(r[0] - cb_x[0], ua_x0 - r[2], r[1] - cb_y[0], cb_y[1] - r[3]),
+        on = min(r[0] - cb_x[0], ju_x1 - r[2], r[1] - cb_y[0], cb_y[1] - r[3]),
         pads = [ju_tail_x - boards_pin_pad / 2, ec_c[0] - 3.5 * 2.54 - boards_pin_pad / 2, ju_tail_x + boards_pin_pad / 2, ec_c[0] + 3.5 * 2.54 + boards_pin_pad / 2],
         g_pads = max(pads[0] - r[2], r[1] - pads[3], pads[1] - r[3]),
         lead_r = 1.5,
