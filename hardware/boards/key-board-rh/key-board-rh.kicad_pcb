@@ -5549,6 +5549,17 @@
 			)
 		)
 	)
+	(gr_circle
+		(center 243.065 110.71)
+		(end 243.365 110.71)
+		(stroke
+			(width 0.18)
+			(type default)
+		)
+		(fill yes)
+		(layer "B.SilkS")
+		(uuid "6b6d0bdc-41be-4417-b452-945d43b88073")
+	)
 	(gr_line
 		(start 202.2 101.5)
 		(end 202.2 141.5)
@@ -6131,6 +6142,18 @@
 		(at 237.06 128.4875 0)
 		(layer "B.SilkS")
 		(uuid "e759b4e4-b424-43b7-a38f-509857a869fb")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.18)
+			)
+			(justify mirror)
+		)
+	)
+	(gr_text "J-CHAIN"
+		(at 240.335442 108.195 0)
+		(layer "B.SilkS")
+		(uuid "54395606-084c-4541-8c45-d81d718e5b29")
 		(effects
 			(font
 				(size 1 1)

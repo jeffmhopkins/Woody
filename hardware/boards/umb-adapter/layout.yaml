@@ -56,6 +56,7 @@ silk:
   title: "WOODY umbilical adapter"
   rev: "A"
   date: "2026-11-22"
+  no_ref: {J1: "the etherCON covers the front face; the rear says J-UMB and numbers its pins"}   # tools/pcb_silk.py, #54
 
 # No router: adapter_layout.py (ADR 0030).
 route: false

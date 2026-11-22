@@ -242,6 +242,8 @@ def main():
     pcb.fit_footprint_silk(board, lay["fab"])
     pcb.silk_text(board, "J1", *pcb.to_pcb(262.27, 16.5))
     pcb.silk_text(board, "J-MCU-C KEY: FAR SIDE", *pcb.to_pcb(262.27, 18.3))
+    import pcb_silk
+    pcb_silk.complete(board, lay, comps)       # pin 1 marks, and the Matrix rows' end pins (layout.yaml silk: pins:, #54)
     pcbnew.SaveBoard(SRC, board)
     pcb_hand.fill(SRC)
     print(f"carrier_layout: {cu.segments()} track segment(s), {len(cu.vias)} via(s); wrote {os.path.relpath(SRC, ROOT)}")
