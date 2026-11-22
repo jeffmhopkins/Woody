@@ -284,9 +284,9 @@ clashes:
 # THE PHOTOGRAPHS (owner, 2026-10-01): tools/render-instrument.py, Blender
 # Cycles on the CPU, as the module's are (mechanical/module/outputs.yaml). The
 # shell and cassette are the body CAD's own solids, one STL per named solid;
-# the main board and the key boards are their .kicad_pcb, exported with every
+# the five boards are their .kicad_pcb, exported with every
 # part's 3D model and the copper, placed in the CAD's frame and checked
-# against its outline. Slow - tens of minutes each - so they rebuild only when
+# against its outline; the Matrix is Waveshare's model. Slow - tens of minutes each - so they rebuild only when
 # what they show moved. config/render.yaml holds the explode distances.
 scripts:
   - name: photo-hero
@@ -296,7 +296,11 @@ scripts:
                            hardware/boards/main-board/main-board.kicad_pcb, hardware/boards/main-board/layout.yaml,
                            hardware/boards/key-board-lh/key-board-lh.kicad_pcb, hardware/boards/key-board-lh/layout.yaml,
                            hardware/boards/key-board-rh/key-board-rh.kicad_pcb, hardware/boards/key-board-rh/layout.yaml,
+                           hardware/boards/matrix-carrier/matrix-carrier.kicad_pcb, hardware/boards/matrix-carrier/layout.yaml,
+                           hardware/boards/umb-adapter/umb-adapter.kicad_pcb, hardware/boards/umb-adapter/layout.yaml,
                            datasheets/led/WS2815B-5050-3D.step, datasheets/mechanical/GATERON-KS-33-3D.step, datasheets/connectors/JST-S3B-PH-SM4-TB-3D.step,
+                           hardware/lib/woody.3dshapes/Hanxia_HX_PZ2.54-1x3P_TP-YQ.step, hardware/lib/woody.3dshapes/Hanxia_HX_PZ2.54-1x10P_TP-YQ.step,
+                           datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-3D.stp, hardware/lib/woody.3dshapes/Neutrik_NE8FAV.step,
                            hardware/lib/woody.3dshapes/Hanxia_HX_PZ2.54-1x8P_WZ.step, hardware/lib/woody.3dshapes/NXP_Case1351-01_MPXV4006DP.step,
                            hardware/lib/woody.3dshapes/CNCTech_3220-10-0100-00.step, hardware/lib/woody.3dshapes/XKB_X1270WV-2x12.step,
                            mechanical/module/blender/studio_small_08_1k.hdr,

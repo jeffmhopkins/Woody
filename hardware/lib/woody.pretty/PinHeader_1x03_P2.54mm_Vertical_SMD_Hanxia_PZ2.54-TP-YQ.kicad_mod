@@ -180,4 +180,15 @@
 		(uuid "a673ff67-b264-5a1c-9c17-1b55f3bb78d3")
 	)
 	(embedded_fonts no)
+	(model "${KIPRJMOD}/../../lib/woody.3dshapes/Hanxia_HX_PZ2.54-1x3P_TP-YQ.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
 )
