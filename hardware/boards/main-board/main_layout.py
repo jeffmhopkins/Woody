@@ -245,10 +245,10 @@ PLACE.update({
     # that hangs on it in ONE row above it, in signal order from the mouth
     "U2": (28.0, 12.25, ("1", "NW")),
     "R4": (15.5, ADC_ROW, ("SENSOR_BUFFERED", "W")), "R5": (20.0, ADC_ROW, ("ADC_IN", "W")),
-    "C1": (24.5, ADC_ROW, ("ADC_IN", "W")), "C3": (28.65, ADC_ROW, ("ADC_VDD", "E")),
+    "C1": (24.5, ADC_ROW, ("ADC_IN", "W")), "C3": (29.05, ADC_ROW, ("ADC_VDD", "E")),
     "C42": (33.5, ADC_ROW, ("ADC_VDD", "W")), "C2": (38.95, ADC_ROW, ("ADC_VDD", "W")),
     "R47": (43.8, ADC_ROW, ("ADC_VDD", "W")),
-    "NT2": (32.15, 15.2, None),          # astride the island's edge where the ADC's three SPI lines cross it
+    "NT2": (32.15, 15.05, None),          # astride the island's edge where the ADC's three SPI lines cross it
     # the sensor's supply capacitors beside its far pins, 3 mm apart
     "C202": (21.75, 47.4, ("VS", "S")), "C201": (24.75, 47.4, ("VS", "S")), "C8": (27.75, 47.4, ("VS", "S")),
 })
@@ -317,10 +317,10 @@ def analog():
     # C-REF-IN's pads and the reference's own into pin 2
     T("REF_VIN", ["R6.2", (48.25, 24.5), (37.44, 24.5), (37.04, 24.1), (37.04, 21.75), (36.66, 21.37), "U4.2"], 0.3)
     # the ADC's supply: a bus under the row, a stub up into each capacitor, into pin 8
-    T("ADC_VDD", ["R47.2", (42.888, 16.32), (42.518, 15.95), (30.47, 15.95), "U2.8"], PWR)
+    T("ADC_VDD", ["R47.2", (42.888, 16.32), (42.518, 15.95), (30.0, 15.95)], PWR)
     T("ADC_VDD", [(37.47, 15.95), "C2.1"], PWR)
     T("ADC_VDD", [(32.03, 15.95), "C42.1"], PWR)
-    T("ADC_VDD", [(30.47, 15.95), (29.945, 15.95), (29.6, 16.295), "C3.1"], PWR)
+    T("ADC_VDD", ["C3.1", (30.0, 14.155)], PWR)       # the decoupler straight onto the supply pin, the bus teeing into it
     # 12 V for the buffer, its capacitor at the pin; and for the reference's input resistor
     T("INST_POS12", ["U3.8", (10.07, 23.595), (9.415, 24.25), (8.85, 24.25)], PWR)      # pin, via, capacitor: straight out of the pin, one step up, level into the via
     VIAS.append(("INST_POS12", 8.85, 24.25))
@@ -330,9 +330,9 @@ def analog():
     # every analog ground pad to the island under it, by its own via
     for pad, x, y in (("U10.3", 12.88, 45.3), ("C203.2", 9.95, 25.505), ("C204.2", 8.9, 19.9), ("U3.4", 17.9, 27.41),
                       ("C7.2", 24.0, 23.5), ("C5.2", 28.45, 23.44), ("U4.4", 33.5, 23.91), ("R5.2", 20.91, 18.4),
-                      ("C1.2", 25.45, 18.45), ("C3.2", 27.7, 16.1), ("C42.2", 36.22, ADC_ROW), ("C2.2", 41.69, ADC_ROW),
+                      ("C1.2", 25.45, 18.45), ("C3.2", 28.1, 16.1), ("C42.2", 36.22, ADC_ROW), ("C2.2", 41.69, ADC_ROW),
                       ("U2.3", 23.75, 11.62), ("C6.2", 38.5, 21.2),
-                      ("C202.2", 23.25, 48.35), ("C201.2", 26.25, 48.35), ("C8.2", 29.25, 48.35), ("NT2.1", 31.5, 15.2)):
+                      ("C202.2", 23.25, 48.35), ("C201.2", 26.25, 48.35), ("C8.2", 29.25, 48.35), ("NT2.1", 31.5, 15.05)):
         via(A, x, y, pad, PWR)
     T(A, ["U2.3", "U2.4"], PWR)
     via(A, 43.5, 21.2, "D1.2", PWR)      # straight out of the pad to its via
@@ -340,8 +340,8 @@ def analog():
     via(A, 40.2, 21.25)
     # the one tie: NT-AGND astride the island's edge beside the ADC's digital pins, its plane side
     # taken clear of the three bottom-face lines to its via
-    T("PWR_GND", ["NT2.2", (34.2, 15.2), (34.8, 14.6)], PWR)
-    via("PWR_GND", 34.8, 14.6)
+    T("PWR_GND", ["NT2.2", (34.85, 15.05)], PWR)
+    via("PWR_GND", 34.85, 15.05)
     # the ADC's four digital lines and its 3V3 arrive on the bottom face (digital(), below) and
     # come up here: CS at its pull-up, then on the top face over the row and down between two
     # ground pads into pin 1; the other three by a via each beside their pins
@@ -486,8 +486,8 @@ def power():
     T("INST_5V_A", ["J1.3", "J1.1", "J1.2"], 0.5)
     # the Matrix's whole supply: 0.8 mm, necked to 0.7 past R36's pad and under the three chain
     # resistors' bodies, which is all the room there is (pre-fab review S5)
-    T("INST_5V_A", ["J1.2", (255.28, 19.95), (255.74, 20.41), (255.74, 23.85), (255.49, 24.1), (246.9, 24.1)], 0.7)
-    T("INST_5V_A", [(246.9, 24.1), (240.55, 24.1), (238.84, 22.39), "Q2.3"], 0.7)
+    T("INST_5V_A", ["J1.2", (255.28, 19.95), (255.74, 20.41), (255.74, 23.7), (255.49, 23.95), (246.9, 23.95)], 0.6)
+    T("INST_5V_A", [(246.9, 23.95), "C208.1", (239.9, 23.95), (238.837, 22.887), "Q2.3"], 0.6)
     T("INST_5V_A", ["Q2.3", "U13.4"], 0.5)
     T("INST_5V_A", ["J1.2", (255.285, 20.0), (255.585, 20.3), (259.0, 20.3), (263.25, 24.55)], PWR, "B")
     via("INST_5V_A", 263.25, 24.55, "C12.1", PWR)

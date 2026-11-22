@@ -2072,6 +2072,10 @@ def check_joints(board, exempt=()):
             if over > MM(0.02):
                 bad.append(f"error: [joints] {net} on {board.GetLayerName(t.GetLayer())}: a track enters {name} at {at(*pads_at(k))} hanging "
                            f"{mm(over):.2f} mm off the pad's side - stand the track within the pad's width")
+            ahead = ((B - i.y) if i.y > o.y else (i.y - T_)) if a.x == c.x else ((R - i.x) if i.x > o.x else (i.x - L))
+            if w - ahead > MM(0.02):
+                bad.append(f"error: [joints] {net} on {board.GetLayerName(t.GetLayer())}: a track ends in {name} at {at(*pads_at(k))} with its "
+                           f"end {mm(w - ahead):.2f} mm out of the pad's far side - narrow the track, or enter the pad along its length")
             d, need = max(L - o.x, o.x - R, T_ - o.y, o.y - B), max(PAD_CLEAR, int(PAD_RUN * t.GetWidth()))
             if d < need - 1000 and (o.x, o.y) not in vias and ends[(o.x, o.y, t.GetLayer())] > 1:
                 bad.append(f"error: [joints] {net} on {board.GetLayerName(t.GetLayer())}: a track from {name} at {at(*pads_at(k))} turns or branches "

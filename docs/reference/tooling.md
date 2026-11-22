@@ -416,7 +416,9 @@ prints which, exits 1, and leaves any existing board as it was.
   side; a diagonal does not cut across a pad of its net on the way past; and
   a track's free end is on a pad, a via or the centre line of the track it
   joins, so no stub pokes past its line (owner, 2026-11-22: "barely a trace
-  outside the pad when it could be routed better"). A pad with no room for
+  outside the pad when it could be routed better"); and a track ending in a
+  pad is no wider than the pad lets it be, so its round end does not stand
+  out of the pad's far side. A pad with no room for
   the exit is named, with the reason, under `joints_exempt:` in the board's
   `layout.yaml`;
 - a board with a `layout.yaml` `silk:` block whose title block (title,
