@@ -165,6 +165,8 @@ def main():
     pcb.silk_text(board, "1", *at((j2(1)[0], ROW + 3.8)))
     pcb.silk_text(board, "8", *at((j2(8)[0] - 1.6, ROW + 3.8)))
     pcb.silk_text(board, "J-UMB", *at((1.3, ROW + 3.8)))
+    import pcb_silk
+    pcb_silk.complete(board, lay, comps)       # the socket's reference and pin 1 mark (#54)
 
     pcb.save(board, OUT)
     pro = os.path.join(HERE, NAME + ".kicad_pro")

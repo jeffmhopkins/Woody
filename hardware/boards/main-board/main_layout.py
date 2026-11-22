@@ -1139,6 +1139,8 @@ def finish(board, lay, comps):
             g.SetStart(pcbnew.VECTOR2I(g.GetStart().x, ys[0] + pcbnew.FromMM(0.3)))
             g.SetEnd(pcbnew.VECTOR2I(g.GetStart().x, ys[1]))
     pcb.silk_off_vias(board)
+    import pcb_silk
+    pcb_silk.complete(board, lay, comps)       # what is still missing: references, connector names, pin 1 (#54)
     pcbnew.SaveBoard(SRC, board)
     pcb_hand.fill(SRC)
 

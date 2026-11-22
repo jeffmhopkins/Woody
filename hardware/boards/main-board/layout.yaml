@@ -328,6 +328,9 @@ silk:
   title: "WOODY main board"
   rev: "A"                  # owner, 2026-10-03: rev A on the first board fabricated (README, Ordering it, Revision)
   date: "2026-11-21"
+  # what plugs in, beside each connector (tools/pcb_silk.py, #54). J2, the service header, has
+  # room for its reference and pin 1 mark only: from pin 1, TX, RX, GND (the service-uart sheet)
+  names: {J1: "J-MCU", J4: "J-CHAIN LH", J5: "J-CHAIN RH", J6: "J-UMB", J7: "J-MIDI"}
 
 # No router: `route: false` keeps tools/pcb.py from running one on this board
 # (main_layout.py, ADR 0030).

@@ -3,7 +3,7 @@
 
     python3 tools/pcb.py layout hardware/boards/key-board-lh   # write <board>.kicad_pcb (refuses if it exists; --force)
     python3 tools/pcb.py check  hardware/boards/key-board-lh   # DRC + schematic parity + fab limits + CAD agreement
-    python3 tools/pcb.py render hardware/boards/key-board-lh   # 3D top/bottom and 2D copper PNGs, fab/ (refuses a board that fails check)
+    python3 tools/pcb.py render hardware/boards/key-board-lh   # 3D top/bottom, 2D copper and silkscreen PNGs, fab/ (refuses a board that fails check)
     python3 tools/pcb.py stackup hardware/boards/key-board-lh  # mask/silk colours and finish rewritten from layout.yaml fab:
     python3 tools/pcb.py finish hardware/boards/main-board     # a routed board's missing connections tried again, with rip-up
     python3 tools/pcb.py route hardware/boards/module-main     # a placed board (layout --no-route) routed in place, resumably
@@ -2578,10 +2578,14 @@ def cmd_render(bdir, preview=None):
                            capture_output=True, text=True, env=env, check=True)
             outs.append(o)
         # every copper layer: a key board's two, a four-layer board's inner planes between
-        # (seen from above, as the top is)
+        # (seen from above, as the top is). Copper and outline only: the bottom plot used to
+        # carry B.Fab, whose values and references print over the tracks and each other and
+        # were read as the silkscreen (#54 S1). The silkscreen has its own two plots, each
+        # with its face's pad openings - what the board house prints, and nothing else
         inner = [f"In{k}.Cu" for k in range(1, pcbnew.LoadBoard(pcb).GetCopperLayerCount() - 1)]
         plots = [("F.Cu,Edge.Cuts", "copper-top", False)] + [(f"{L},Edge.Cuts", f"copper-in{k}", False) for k, L in enumerate(inner, 1)] \
-            + [("B.Cu,Edge.Cuts,B.Fab", "copper-bottom", True)]
+            + [("B.Cu,Edge.Cuts", "copper-bottom", True)] \
+            + [("F.Silkscreen,F.Mask,Edge.Cuts", "silk-top", False), ("B.Silkscreen,B.Mask,Edge.Cuts", "silk-bottom", True)]
         for layers, tag, mirror in plots:
             svg = os.path.join(t, tag + ".svg")
             args = ["kicad-cli", "pcb", "export", "svg", "--layers", layers, "--page-size-mode", "2",
