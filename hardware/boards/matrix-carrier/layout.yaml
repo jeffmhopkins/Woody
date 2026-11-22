@@ -97,6 +97,10 @@ silk:
   title: "WOODY Matrix carrier"
   rev: "E"
   date: "2026-11-22"
+  # which way round the Matrix sits: the end pins of each of its two rows (tools/pcb_silk.py, #54)
+  pins:
+    J2: {1: "5V", 10: "IO1"}
+    J3: {1: "IO33", 10: "RX"}
 
 # No router: `route: false` keeps tools/pcb.py from running one on this board
 # (carrier_layout.py, ADR 0030).

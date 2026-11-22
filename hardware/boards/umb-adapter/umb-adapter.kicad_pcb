@@ -58,7 +58,7 @@
 			)
 			(layer "dielectric 1"
 				(type "core")
-				(thickness 1.510)
+				(thickness 1.51)
 				(material "FR4")
 				(epsilon_r 4.5)
 				(loss_tangent 0.02)
@@ -1067,6 +1067,17 @@
 			)
 		)
 	)
+	(gr_circle
+		(center 97.39 134.915)
+		(end 97.69 134.915)
+		(stroke
+			(width 0.18)
+			(type default)
+		)
+		(fill yes)
+		(layer "B.SilkS")
+		(uuid "e783ecff-aa8e-4d1a-a4c0-eb5848d7b72e")
+	)
 	(gr_line
 		(start 76 118.45)
 		(end 76 143.45)
@@ -1106,6 +1117,18 @@
 		)
 		(layer "Edge.Cuts")
 		(uuid "5149f292-a1f3-4d0d-a46b-8bb9872c9268")
+	)
+	(gr_text "J2"
+		(at 77.41901 134.695 0)
+		(layer "B.SilkS")
+		(uuid "61eb80e6-ea5f-44aa-9533-37af63fd37b1")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.18)
+			)
+			(justify mirror)
+		)
 	)
 	(gr_text "8"
 		(at 78.009999 142.45 0)

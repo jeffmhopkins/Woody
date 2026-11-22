@@ -275,5 +275,7 @@ def finish(board, lay, comps, out, labels=None):
     for ref, (x, y, angle) in (labels or {}).items():
         pcb.silk_text(board, ref, *pcb.to_pcb(x, y), angle=angle)
     pcb.silk_off_vias(board)
+    import pcb_silk
+    pcb_silk.complete(board, lay, comps)       # what is still missing: references, connector names, pin 1 (#54)
     pcbnew.SaveBoard(out, board)
     fill(out)

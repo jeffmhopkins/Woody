@@ -200,10 +200,9 @@ def routes(cu, sw):
 
 
 
-# R11 stands between C8 and J-CHAIN with a part or a pad on every side the silkscreen step
-# tries, so its reference is put by hand in the clear strip between it and the far edge,
-# directly over it: nearer R11 than anything else, and C8's own reference reads the other way.
-LABELS = {"R11": (90.36, 48.45, 0)}
+# No reference is put by hand: where the silkscreen step's fixed places are all taken,
+# pcb_silk.complete (pcb_hand.finish) finds the nearest clear one (#54).
+LABELS = {}
 
 
 def main():
