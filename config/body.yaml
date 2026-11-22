@@ -574,7 +574,7 @@ boards:
     decided_by: "M4, on the part bought"
   # The umbilical (ADR 0021): the etherCON on its own adapter board, which a
   # right-angle 2.54 mm header joins to a tongue of the main board. The
-  # header is J-UMB, 8 pins, pin N = etherCON pin N.
+  # header is J-UMB, 8 pins; it plugs into J-UMB-SKT on the adapter (umb_socket_d).
   umb_adapter_t:
     value: 1.6
     status: tbd

@@ -66,7 +66,7 @@ the two agree, and where they do not the netlist wins.*
        │                                    └──────────────┬─────────┘           │
        │                                                   │               [NT-UMB-MOD] at the etherCON
        │                                   [C-ISO-Y 22nF], ISO_VIN_POS to PWR_GND │
-       │                                                   │               DIG_GND ──► umbilical pin 8
+       │                                                   │               DIG_GND ──► umbilical conductor 8
        │                                               ISO_VIN_NEG                │
        │                                   the choke's −12 V winding              │
        │                                                   │               [NT-DIG-MOD] at the star
@@ -586,9 +586,10 @@ Layers 1 and 3 carry parts and signals; the analog rails route on layer 3
 over the analog region. The DAC8568 sits at the boundary with its digital
 pins toward the plane, and its one `GND` pin on the analog region.
 
-**Why the instrument's return ties at the etherCON (ADR 0027).** Pins 6 and 8
-are tied at the instrument (ADR 0018), so the instrument's current comes back
-on both. With `NT-UMB-MOD` at the connector, the half on pin 8 steps across to
+**Why the instrument's return ties at the etherCON (ADR 0027).** Conductors 6
+and 8 (`umbilical-pinmap`) are tied at the instrument (ADR 0018), so the
+instrument's current comes back on both. With `NT-UMB-MOD` at the connector,
+the half on conductor 8 steps across to
 `PWR_GND` there and goes straight back to `U-ISO`: **no DC current of the
 instrument's crosses the `DIG_GND` plane, the star or the ribbon**. What
 `NT-DIG-MOD` carries is constant and the module's own — the level shifter's
@@ -601,7 +602,7 @@ the opposite: the DAC's ground *"would be connected directly to an analog
 ground plane. This plane would be separate from the ground connection for the
 digital components until they were connected at the power-entry point of the
 system"* `[ds DAC8568CIPW.pdf p.49]`. And the umbilical makes it worse than
-usual: pin 8 (`DIG_GND`) and pin 6 (`PWR_GND`) are tied together at the
+usual: conductor 8 (`DIG_GND`) and conductor 6 (`PWR_GND`) are tied together at the
 instrument (ADR 0018), so they are two parallel conductors carrying the
 instrument's return, about half each `[calc: two equal 24 AWG conductors,
 2 m]`. With a bridge under the DAC, that half would cross the analog region

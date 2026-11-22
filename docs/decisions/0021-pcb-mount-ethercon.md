@@ -2,7 +2,7 @@
 
 **Status:** Accepted. Decided by the owner, 2026-09-29. It settles ADR 0004's
 open question *which etherCON variant at each end* **for the instrument's end
-only**; the module's end is [ADR 0023](0023-module-ethercon-and-two-boards.md). **Amended twice on 2026-10-02**: the main board's tail end runs full width (*Amendment* below), and the Matrix moves onto the right-hand key board, with no ESD protection added to the USB (*Amendment, 2026-10-02 (2)*). **Amended again on 2026-10-03**: the Matrix moves onto a carrier board of its own, hung from the oak top, the right-hand key board goes back to its original length, and the Matrix is programmed over its own USB-C only (*Amendment, 2026-10-03*). **Amended on 2026-10-07**: the etherCON is centred on the tail face, the MIDI jack moves from the oak bottom to a corner of the tail face beside it, and `J-MIDI` becomes a side-entry header facing the tail (*Amendment, 2026-10-07*).
+only**; the module's end is [ADR 0023](0023-module-ethercon-and-two-boards.md). **Amended twice on 2026-10-02**: the main board's tail end runs full width (*Amendment* below), and the Matrix moves onto the right-hand key board, with no ESD protection added to the USB (*Amendment, 2026-10-02 (2)*). **Amended again on 2026-10-03**: the Matrix moves onto a carrier board of its own, hung from the oak top, the right-hand key board goes back to its original length, and the Matrix is programmed over its own USB-C only (*Amendment, 2026-10-03*). **Amended on 2026-10-07**: the etherCON is centred on the tail face, the MIDI jack moves from the oak bottom to a corner of the tail face beside it, and `J-MIDI` becomes a side-entry header facing the tail (*Amendment, 2026-10-07*). **Amended on 2026-11-22**: `J-UMB` plugs into a socket on the adapter instead of being soldered into it, the body is longer by that socket, the Matrix is centred again, and the etherCON's contacts carry the conductors in reverse order (*Amendment, 2026-11-22*).
 
 ## Context
 
@@ -30,17 +30,19 @@ main board down and mount it directly to that."*
 
 2. **It is soldered to a small board of its own, the umbilical adapter**
    (`PCB-UMB-ADAPTER`). The adapter stands parallel to the tail cap, the
-   flange's outline in size. Its tracks run each etherCON pin to the
-   same-numbered pin of `J-UMB`, and it carries nothing else.
+   flange's outline in size. Its tracks run each etherCON contact to one
+   pin of `J-UMB`, and it carries nothing else beside that joint. *(Which
+   contact to which pin, and how the joint is made: Amendment, 2026-11-22.)*
 
 3. **`J-UMB` is now a 1 × 8, 2.54 mm right-angle pin header, soldered into
    both boards.** Its insulator lies on a **tongue of the main board**, its
    tails go down through the tongue and its posts through the adapter. The
    tongue runs from the main board's tail end to the adapter's rear face.
-   Pin N is still etherCON pin N, so
-   every "`J-UMB` pin N" on the carrier's pages still means the same
-   conductor. There is no cable and no mated contact between the etherCON
-   and the main board. `CBL-UMB-PATCH` is gone.
+   Every "`J-UMB` pin N" on the carrier's pages still means the same
+   conductor. There is no cable between the etherCON
+   and the main board. `CBL-UMB-PATCH` is gone. *(Since 2026-11-22 the
+   posts plug into a socket on the adapter, and the etherCON's contact for
+   pin N is 9 − N: Amendment of that date.)*
 
 4. **Latch up.** ADR 0009 turned the NE8FDP 90° so that its 26 × 31 flange
    fitted the body's height. The NE8FAV's flange is square, so that reason
@@ -667,3 +669,68 @@ routes into `J-UMB` and `J7` follow. The board is laid out separately, from
 | The TRS plug's overmould beside the etherCON cable connector's shell, both outside the face; and a thumb reaching the PUSH tab past the plug | `ethercon.recess_margin`'s decision, with J-UMBILICAL-CABLE and a TRS lead in hand |
 | How far CBL-MIDI's housing stands past J-MIDI's face (`midi.hdr_plug_l`, from the through-hole header's mated drawing) | the SMT header's own mated drawing, or the parts in hand |
 | The jack's hole and its counterbore round the nut (`midi.hole_d`, `cbore_clear`) | a test hole in an offcut of the tail cap's oak, with the part and the socket that turns its nut |
+
+## Amendment, 2026-11-22 — `J-UMB` plugs into the adapter; the body is longer; the contacts are reversed
+
+Decided by the owner while the adapter was laid out. Three answers, in the
+order they were given.
+
+### What is decided
+
+1. **The reversal is in the cable's numbering, not on a board.** Seen from
+   the tail, the etherCON's contact 1 is on the left and `J-UMB`'s pin 1, as
+   the main board has it, on the right. Wiring contact N to pin N crosses
+   all eight lines on the adapter; turning `J-UMB` round moves the main
+   board's finished tail. Owner: *"No, you don't need a reverse it from the
+   main board. We reverse it on the other side of the ethernet connection."*
+   So the adapter's tracks run straight, and **each etherCON carries
+   conductor N of `umbilical-pinmap` on its contact 9 − N.** The figure
+   numbers the conductors as `J-UMB` numbers its pins, as it always has, so
+   no instrument page moves. The cable is straight, so the module's
+   etherCON carries the same reversed order
+   (`hardware/interfaces/spi-link/spi-link.md`). The four twisted pairs of
+   contacts mirror onto themselves: every conductor keeps its partner.
+
+2. **`J-UMB` plugs into the adapter.** Owner: *"I really want this socketed
+   connection for fitment issues."* `J-UMB-SKT`, a surface-mount 1 × 8
+   socket, stands on the adapter's rear face and takes the posts of the
+   main board's header. It is surface mount because the etherCON's body
+   stands against the adapter's front face over the whole row, so nothing
+   can pass through the board there. This puts one mated contact back into
+   each conductor; point 3's "soldered into both boards" no longer holds.
+
+3. **The body is longer by the socket, and the main board's tail does not
+   move.** Owner: *"Can we avoid having to relay out the tail if we just
+   make the instrument a little bit longer?"* and then *"let's go ahead and
+   make it longer and then re-center The matrix."* The adapter stands
+   `boards.umb_socket_d` behind the main board's tail end
+   (`mechanical/drc.echo`, *"J-UMB's socket between the main board and the
+   adapter"*), the tail claims that much more, and the Matrix sits midway
+   between the last key and the tail face again. To centre it fully the
+   rule that held the gap between the hands equal to the keys-to-Matrix gap
+   is off (`layout.gap_matches_matrix`, owner, 2026-11-22): no key moves.
+
+### Considered and set aside
+
+A socket in line with the posts (it reversed the main board's pin order and
+moved its header), a top-entry pair, a flat-flex and an IDC ribbon (each a
+cable inside the body again), and the header on the adapter with sockets
+standing on the main board (the tail re-laid).
+
+### What this changes
+
+- **The module's etherCON** is wired to the reversed order on its sheet
+  (`hardware/boards/module-main`, `J3`). **Its copper is not**: the owner,
+  2026-11-22, *"We're going to completely relay out the module so it doesn't
+  matter."* `tools/kicad.py check` reports the board's parity until then.
+- **The Matrix carrier's arm** is longer by the Matrix's move
+  (`hardware/boards/matrix-carrier`, laid out separately).
+- **The main board** is unchanged: `J-UMB`, its band of parts and the board's
+  outline are where they were.
+
+### Open, and what decides each
+
+| Open | What decides it |
+|---|---|
+| The socket's height off the adapter (`boards.umb_socket_d`) and its pad pattern, both from the library footprint and a catalogue page | Samtec's drawing for the part, banked; then the part in hand on the first adapter |
+| Whether the posts seat fully with the etherCON screwed to the tail cap | The first adapter and main board in the body |

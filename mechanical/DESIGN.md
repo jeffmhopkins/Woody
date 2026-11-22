@@ -370,7 +370,9 @@ only as good as those envelopes. Group the report's lines by these causes
    has no LED (*"Matrix ribbon closed: its legs and fold over the main
    board"*, *"Matrix ribbon crosses the LED row over no LED"*). **The umbilical has no cable inside the body** (ADR
    0021): the etherCON is soldered to its adapter, and J-UMB, a right-angle
-   header, is soldered into the adapter and the tongue (*"J-UMB on the main
+   header soldered into the main board, plugs into the socket on the
+   adapter's rear face (*"J-UMB's socket between the main board and the
+   adapter"*; *"J-UMB on the main
    board's tongue…"*, *"J-UMB's row lands on the adapter clear of the
    etherCON's footprint"*). The LED row has an LED each side of the Matrix ribbon and none under it (`lighting.led_tail_x`, `lighting.led_ribbon_x`). The rows are
    `J-MCU` and `CBL-MCU-RIBBON` (`hardware/carrier/`), `J-UMBILICAL-INST`,

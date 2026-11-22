@@ -69,33 +69,44 @@ to the net this sheet puts pin N on:
 | Part on this sheet | BOM row | Board | On that board today |
 |---|---|---|---|
 | `J-UMB-INST` | `J-UMBILICAL-INST` | `hardware/boards/umb-adapter` | `J1` |
-| `J-UMB` | `J-UMB` | `hardware/boards/main-board` (its tails) **and** `umb-adapter` (its posts): one part, bought and fitted once | main board `J6` (`Assembly` hand); adapter `J2` (`Assembly` none) |
+| `J-UMB` | `J-UMB` | `hardware/boards/main-board` | `J6` |
+| `J-UMB-SKT` | `J-UMB-SKT` | `hardware/boards/umb-adapter` | `J2` |
 | `J-UMB-MOD` | `J-UMBILICAL` (`module/power-entry`'s row) | `hardware/boards/module-main` | `J3` |
 | `CABLE-UMB`, the adapter's tracks | — | no board: straight conductors, not parts | — |
 
 **`tools/kicad.py check` holds every board's connector to this sheet**, pin
-by pin and by net name: the main board's `J6` and the adapter's `J2` against
-`J-UMB`, the adapter's `J1` against `J-UMB-INST`, and the module main board's
+by pin and by net name: the main board's `J6` against `J-UMB`, the adapter's `J2`
+against `J-UMB-SKT` and its `J1` against `J-UMB-INST`, and the module main board's
 etherCON against `J-UMB-MOD` — the same way it holds `J-CHAIN` to the key
 chain's sheet. A pin moved on a board's sheet is reported by name.
 
 ## The instrument's connector — the etherCON on its adapter, and `J-UMB`
 
-*Added with ADR 0017 and rewritten with ADR 0021; not part of the verbatim
-consolidation below.*
+*Added with ADR 0017, rewritten with ADR 0021 and again with its amendment
+of 2026-11-22; not part of the verbatim consolidation below.*
 
 The etherCON at the instrument end is `J-UMBILICAL-INST`, an NE8FAV (`J-UMB-INST`
 in [`netlist.yaml`](netlist.yaml)). It sits behind the tail cap and is
-soldered to a small board of its own, `PCB-UMB-ADAPTER`, whose tracks run its
-pin N to pin N of **`J-UMB`**. `J-UMB` is a right-angle pin header soldered into
-both the adapter and a tongue of the main board. There is no cable and no
-mated contact inside the body. So:
+soldered to a small board of its own, `PCB-UMB-ADAPTER`. **`J-UMB`** is a
+right-angle pin header soldered into the main board's tail end, and its posts
+plug into **`J-UMB-SKT`**, a surface-mount socket on the adapter's rear face
+(owner, 2026-11-22: a joint that plugs, for fitting the two boards to the
+body). There is no cable inside the body, and one mated contact per
+conductor. So:
 
-- **"`J-UMB` pin N" on every instrument page is the main board's end of the
-  umbilical, and the same conductor as the etherCON's pin N.** The pin map is
-  `umbilical-pinmap` at every connector in the chain, and the adapter has
-  none of its own to get wrong: eight straight tracks, the same argument this
-  circuit makes for `CABLE-UMB`.
+- **`umbilical-pinmap` numbers the umbilical's conductors as `J-UMB` numbers
+  its pins, and each etherCON carries conductor N on its contact 9 − N.**
+  Seen from the tail, the etherCON's contact 1 is on the left and `J-UMB`'s
+  pin 1 on the right, so the adapter's eight tracks run straight down from
+  contact to socket pad on one face, with no via and no crossing, and the
+  reversal is in the numbering (owner, 2026-11-22: *"We reverse it on the
+  other side of the ethernet connection"*). `CABLE-UMB` is straight, contact
+  to contact, so the module's etherCON carries the same map and its board
+  wires contact 9 − N to conductor N's net. A conductor's two partners in
+  its twisted pair are the same two as before: the four pairs of contacts
+  mirror onto themselves.
+- **"`J-UMB` pin N" on every instrument page is the main board's end of
+  conductor N.** Nothing on the main board moved.
 - **The pairs stay side by side on the adapter.** The pairing is the argument
   on this page, and the adapter's few millimetres are the last stretch of the
   same line.
@@ -124,8 +135,9 @@ mated contact inside the body. So:
   `dig-gnd-topology`.
 
 **Netlisted here, beside both etherCONs**, because it carries this circuit's
-pin map and all eight of its nets: each net is `J-UMB`, `J-UMB-INST` and
-`J-UMB-MOD` pin N, and the carrier's nets reach it as this circuit's ports.
+pin map and all eight of its nets: each net is `J-UMB` and `J-UMB-SKT` pin N
+and both etherCONs' contact 9 − N, and the carrier's nets reach it as this
+circuit's ports.
 `J-UMB`'s part is chosen (the row in this circuit's [`bom.csv`](bom.csv));
 its drawing settles the insulator in `config/body.yaml` `boards.umb_joint_*`.
 
