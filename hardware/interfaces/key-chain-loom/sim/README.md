@@ -1,8 +1,8 @@
 # Key chain — simulation
 
 The chain between the main board and the left-hand key board:
-- **its 3V3 rail:** FB-CHAIN, the ribbon, `C-DECOUPLE-165`, and the do-not-fit
-  `C-BULK-CHAIN`;
+- **its 3V3 rail:** FB-CHAIN, the ribbon, `C-DECOUPLE-165`, and `C-BULK-CHAIN`,
+  fitted and left off;
 - **its signals over the ribbon:** SCK out to the key board's register, and QH
   back to the next register.
 

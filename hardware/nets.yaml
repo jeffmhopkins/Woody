@@ -47,21 +47,21 @@ nets:
   # chain's to say.
   V3V3_CHAIN_RH:
     kind: power
-    carries: "right_hand key board's 3V3: FB-CHAIN on the main board, then conductor 10 of its ribbon (main-board J-CHAIN pin 10, key-board pin 3)"
+    carries: "right_hand key board's 3V3: FB-CHAIN on the main board, then conductor 10 of its ribbon (J-CHAIN pin 10 at both ends, key-board-chain-pinmap)"
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register, cluster/key-switch-network, cluster/key-marker-and-bits]
     per_board: true
 
   V3V3_CHAIN_LH:
     kind: power
-    carries: "left_hand key board's 3V3: FB-CHAIN on the main board, then conductor 10 of its ribbon (main-board J-CHAIN pin 10, key-board pin 3)"
+    carries: "left_hand key board's 3V3: FB-CHAIN on the main board, then conductor 10 of its ribbon (J-CHAIN pin 10 at both ends, key-board-chain-pinmap)"
     driver: interfaces/key-chain-loom
     receivers: [cluster/key-register, cluster/key-switch-network, cluster/key-marker-and-bits]
     per_board: true
 
   GND_CHAIN:
     kind: reference
-    carries: "Chain return: the main board's ground, and five alternating grounds on each ribbon: main-board J-CHAIN pins 1/3/5/7/9, key-board pins 4/6/8/10/12"
+    carries: "Chain return: the main board's ground, and five alternating grounds on each ribbon: J-CHAIN pins 1/3/5/7/9 at both ends (key-board-chain-pinmap)"
     figure: chain-conductors
     origin: interfaces/key-chain-loom
     note: "It is the main board's ground pour, carried to each key board by its ribbon's five grounds - a separate name for those conductors, not a separate node."
@@ -154,7 +154,7 @@ nets:
   CHAIN_QH_RH:
     kind: signal
     domain: digital
-    carries: "right_hand's QH, back on its ribbon's conductor 8 (key-board J-CHAIN pin 5, main-board pin 8) to right_thumb's SER"
+    carries: "right_hand's QH, back on its ribbon's conductor 8 (J-CHAIN pin 8 at both ends, key-board-chain-pinmap) to right_thumb's SER"
     figure: chain-connectors
     driver: cluster/key-register
     receivers: [interfaces/key-chain-loom]
@@ -171,7 +171,7 @@ nets:
   CHAIN_QH_LH:
     kind: signal
     domain: digital
-    carries: "left_hand's QH, back on its ribbon's conductor 8 (key-board J-CHAIN pin 5, main-board pin 8) to left_thumb's SER"
+    carries: "left_hand's QH, back on its ribbon's conductor 8 (J-CHAIN pin 8 at both ends, key-board-chain-pinmap) to left_thumb's SER"
     figure: chain-connectors
     driver: cluster/key-register
     receivers: [interfaces/key-chain-loom]

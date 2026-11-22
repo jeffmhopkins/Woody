@@ -4,7 +4,7 @@
 * at its lowest R_DS(on) (r_on_z, the least damping, as pei-z.cir takes it); then INST_POS12:
 * C-STRIP-BULK with its ESR, the LED row and the other 12 V loads, and behind L-BUCK-IN,
 * C-BUCK-IN with its ESR and the buck as a constant-power load (v_on and up, as pei-start.cir).
-* D-TVS-PWR's capacitance is left out (nF against C-STRIP-BULK's 470 uF).
+* D-TVS-PWR's capacitance is left out (nF against C-STRIP-BULK's hundreds of uF).
 * THE ROW: every WS2815B-V1 (n:D-LED) in phase, the row's quiescent plus a pulse of pw_i_row_pk at pw_f,
 * duty pw_duty, starting pw_t_start into the run. The buck's input power swings by pw_p_mx in phase
 * (led-pwm-matrix; 0 in led-pwm). The 12 V loads are currents at v_nom and up, resistive

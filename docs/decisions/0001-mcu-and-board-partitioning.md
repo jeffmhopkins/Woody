@@ -86,11 +86,11 @@ TAIL   dev board on a passive carrier: MCU, IMU, 8×8 matrix, breath sensor,
        since ADR 0021 the etherCON is soldered to an adapter that J-UMB,
        a right-angle header, joins to the main board - no cable inside)
         |
-        |  (since ADR 0017: thumbs on traces, key boards on 12-way ribbons,
-        |   1.27 mm IDC since its 2026-09-27 amendment)
-        |  ONE chained run, 12 conductors per hop (2x6 IDC), passing through
+        |  (since ADR 0017: thumbs on traces, key boards on ribbons,
+        |   1.27 mm IDC, one 2x5 header an end since its 2026-11-21 amendment)
+        |  ONE chained run, `chain-conductors` per hop, passing through
         |  each cluster board in turn: SCK, SH/LD, serial in, serial out,
-        |  a ground between every signal, 3V3, and two spares
+        |  a ground between every signal, and 3V3
         |
 BODY   four key cluster boards — switches, ONE 74HC165 each, its decoupling,
        and that cluster's key networks. Every switch-to-chip link is a trace.
@@ -169,7 +169,7 @@ topology**, and the decision has to be made on something else.
 
 **On the something else, per-cluster wins on three counts and loses on one.**
 It wins on hand-joint count (about 4 connectors against about 46 wires, in a
-strap-worn instrument that is not opened casually), on loom width (12 conductors per hop
+strap-worn instrument that is not opened casually), on loom width (`chain-conductors` per hop
 against 40–56 mm of ribbon sharing channels with the LED strips and the breath
 tube), and on carrier area — the tail version added 4 ICs and 63 passives to a
 two-layer board already about 82 % covered, with a 22 mm hole through it.

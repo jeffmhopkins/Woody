@@ -2581,7 +2581,7 @@
     (property "Datasheet" "" (at 162.56 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Row" "C-INRUSH-GD" (at 162.56 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins" "1=1 2=2" (at 162.56 142.24 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Note" "The Miller capacitor: gate to drain, through R-INRUSH-GD. It sets the ramp: dV/dt = I(R-INRUSH-G) / C, about 400 V/s, 0.23 A into the instrument's 570 uF" (at 162.56 142.24 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Note" "The Miller capacitor: gate to drain, through R-INRUSH-GD. It sets the ramp: dV/dt = I(R-INRUSH-G) / C, and the ramp times the capacitance behind the FET is the inrush current (power-entry-instrument.md, The numbers)" (at 162.56 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins_source" "a ceramic capacitor: either way round" (at 162.56 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Samsung Electro-Mechanics" (at 162.56 142.24 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "CL21B223KBANNNC" (at 162.56 142.24 0) (effects (font (size 1.27 1.27)) hide))

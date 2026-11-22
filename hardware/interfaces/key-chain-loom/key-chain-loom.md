@@ -49,8 +49,8 @@ The `Dir` and `Peer` columns are defined once in
 | `R-CHAIN-SER`, `R-SER-TERM`, `R-HOP-SER`, `U-TVS-CHAIN`, `U-TVS-CHAIN-RH`, `FB-CHAIN` | main | — | — | — | This circuit's parts, all on the main board |
 | the 32 bits | all four registers | — | `cluster/key-marker-and-bits` | `marker-bits`, `free-bits` | Allocated in `config/key-layout.yaml`. The chain order is unchanged |
 
-Pin numbers in this table are the **main-board** header's. The key board's
-header numbers the same conductors differently — see *The ribbon*, below.
+Pin numbers in this table are the same at both ends of a ribbon
+(`key-board-chain-pinmap`; *The ribbon*, below).
 
 ---
 

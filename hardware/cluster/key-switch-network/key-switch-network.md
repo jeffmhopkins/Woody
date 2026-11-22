@@ -18,7 +18,7 @@ The `Dir` and `Peer` columns are defined once in
 
 | Node | Dir | Peer | Figure | Note |
 |---|---|---|---|---|
-| `3V3` | in | `interfaces/key-chain-loom` | `key-pullup-qty` | The chain's 3V3 rail: a trace on the main board; on a key board, ribbon conductor 10 = key-board `J-CHAIN` pin 3. What `R-KEY-PU` pulls to. It is also the MCP3202's reference, which is what makes the static draw a live trade rather than a free one |
+| `3V3` | in | `interfaces/key-chain-loom` | `key-pullup-qty` | The chain's 3V3 rail: a trace on the main board; on a key board, ribbon conductor 10, `J-CHAIN` pin 10 (`key-board-chain-pinmap`). What `R-KEY-PU` pulls to. It is also the MCP3202's reference, which is what makes the static draw a live trade rather than a free one |
 | key input node | out | `cluster/key-register` | `key-release-time`, `key-press-time` | One node: the register input, `R-KEY-PU`, `C-KEY` and `R-KEY-SER` all sit on it. Where the three passives are placed along it is the board's layout — on a key board, beside their own switch, with the node trace running to the register over the ground pour (`hardware/boards/key-board-lh/layout.yaml`) |
 | `SW` | in | `SW1-n` (`SW-THUMB` is an option on LT) | — | The KS-33 in its plate cutout, `cluster-boards.md` §5. Pressed = pulled LOW, through `R-KEY-SER` |
 | `GND` | ref | `interfaces/key-chain-loom` | — | The main board's ground; on a key board, the ribbon's five alternating grounds. `C-KEY` and the closed switch both return here |
@@ -38,7 +38,7 @@ else; `tools/check-netlist.py` prints that shortfall by name every run.*
 
 
 ```
-   3V3 (the chain rail: a main-board trace, or ribbon conductor 10 = key-board J-CHAIN pin 3)
+   3V3 (the chain rail: a main-board trace, or ribbon conductor 10, J-CHAIN pin 10)
     │
     └──[R-KEY-PU 2k2 1%]──┬────────────────────► 74HCS165 parallel input
                           │                 │

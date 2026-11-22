@@ -320,7 +320,7 @@ figures:
     # GREPPED FIRST, corpus only, every spelling below: the ONLY hits were
     # key-chain-loom/notes.md's dated paragraph ("12 − k", "14 − k", "SER on
     # key-board pin 8"), which carries refutation wording.
-    forbidden: ["pin = 13 − main", "pin = 13 - main", "key-board pin 13 − k", "key-board pin 13-n", "pin 13 - k on the main board", "pin 13 − k on the main board", "KEY-BOARD PINOUT: 11 SCK", "12 − n", "14 − n", "12−n", "14−n", "12-n", "14-n", "12 − k", "14 − k", "12−k", "14−k", "12-k", "14-k", "12 SCK, 10 SH/LD", "SER on key-board pin 8", "SER` on key-board pin 8", "3V3 on key-board pin 4", "3V3` on key-board pin 4", "FFC-CHAIN,controller", "ffc_conn_l:", "ffc_conn_w:", "ffc_conn_h:", "Molex_200528"]
+    forbidden: ["pin = 13 − main", "pin = 13 - main", "key-board pin 13 − k", "key-board pin 13-n", "pin 13 - k on the main board", "pin 13 − k on the main board", "KEY-BOARD PINOUT: 11 SCK", "12 − n", "14 − n", "12−n", "14−n", "12-n", "14-n", "12 − k", "14 − k", "12−k", "14−k", "12-k", "14-k", "12 SCK, 10 SH/LD", "SER on key-board pin 8", "SER` on key-board pin 8", "3V3 on key-board pin 4", "3V3` on key-board pin 4", "key-board pin 3)", "key-board pin 7)", "key-board J-CHAIN pin 5", "key-board J-CHAIN pin 3", "key-board pins 4/6/8/10/12", "key-board `J-CHAIN` pin", "12 conductors per hop", "FFC-CHAIN,controller", "ffc_conn_l:", "ffc_conn_w:", "ffc_conn_h:", "Molex_200528"]
     false_positive_note: >
       DO NOT add a bare "key-board pin 8" or "key-board pin 4": under the
       live map pin 8 is QH and pin 4 SH/LD on both boards, and under the map

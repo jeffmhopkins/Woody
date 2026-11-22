@@ -92,7 +92,7 @@ vary:
   t_r12:      {tol: [-0.42, 0.5], source: "0.093 and 0.24 s about 0.16"}
   t_ss:       {tol: [-0.667, 2.333], source: "1 and 10 ms about 3"}
   is_clamp:   {tol: [-0.9, 9.0], source: "a decade either way"}
-  len_rib:    {tol: [0.0, 2.99], source: "37.6 mm as drawn to 150 mm"}
+  len_rib:    {tol: [0.0, 2.99], source: "from the length as drawn to four times it, which covers the bought ribbon and its fallback (CBL-MCU-RIBBON)"}
   l_rib_m:    {tol: [-0.5, 0.5]}
   c_vcc5:     {tol: [-0.5, 0.0], source: "X5R/X7R DC-bias loss at 5 V [assumption: to half]"}
   c_ldo:      {tol: [-0.4, 0.0], source: "DC-bias loss at 3.3 V [assumption: to 60 %]"}
