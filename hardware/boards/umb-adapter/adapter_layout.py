@@ -30,7 +30,7 @@ down and steps out at 45 degrees to the socket's pad below it, and no two cross.
    at x stands at 2x: every line drops to the row less its own |x| and then runs the diagonal.
    The diagonals each side are parallel, 1.8 apart.
 3. THE UPPER ROW'S LINES PASS BETWEEN THE LOWER ROW'S PADS, 1.34 clear between pad edges:
-   the widest line through there is a power line with 0.37 each side.
+   every line is the supply's width (owner, 2026-11-22: there is the room), with 0.37 each side.
 4. THE PAIRS STAY SIDE BY SIDE (hardware/interfaces/spi-link/spi-link.md) because the order
    is kept: each of the cable's four pairs lands on the same two posts it always did.
 """
@@ -50,7 +50,7 @@ import pcb_adapter  # noqa: E402  the body CAD's exports for this board
 NAME = "umb-adapter"
 OUT = os.path.join(HERE, NAME + ".kicad_pcb")
 F, B = pcbnew.F_Cu, pcbnew.B_Cu
-TW, PW = 0.25, 0.6            # layout.yaml rules: track, power_track
+TW, PW = 0.6, 0.6             # layout.yaml rules: track, power_track
 PITCH = 2.54
 ROW = 7.7                     # J-UMB's row below the axis: this layout is drawn for it (main() checks the body CAD still says so)
 

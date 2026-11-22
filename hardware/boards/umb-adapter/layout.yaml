@@ -15,7 +15,7 @@ layers: 2
 
 # The key boards' rules and board house, so one order makes them and this board.
 rules:
-  track: 0.25
+  track: 0.6                # every line at the supply's width (owner, 2026-11-22: the board has the room)
   track_min: 0.2
   clearance: 0.2
   via: 0.7
