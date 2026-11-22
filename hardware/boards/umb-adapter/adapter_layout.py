@@ -16,28 +16,22 @@ face. J-UMB's posts (J2) come through from the rear on the row the header on the
 holds them in, 7.7 below the axis, and pin k is where the main board's pin k stands
 (tools/pcb_adapter.py check_cad holds each pad to it).
 
-WHAT IS DECIDED HERE IS HOW EIGHT LINES CHANGE SIDES. Seen from the tail the etherCON's
-pin 1 is on the LEFT (an RJ45 jack with its latch notch down) and J-UMB's pin 1, as the main
-board numbers it, is on the RIGHT. So every line must end on the other side of the board
-from where it starts, in the reverse of the order it left in, and no two can do that on one
-face by the short way: any two direct lines cross.
+THE EIGHT LINES RUN STRAIGHT, ALL ON THE REAR FACE. Seen from the tail the etherCON's pin 1
+is on the LEFT (an RJ45 jack with its latch notch down) and J-UMB's pin 1, as the main board
+numbers it, is on the RIGHT. The cable's pin map is written for that (owner, 2026-11-22):
+the etherCON's pin 9 - n carries J-UMB's pin n, so each line leaves its contact straight
+down and steps out at 45 degrees onto the post below it, and no two cross.
 
-1. THE TWO MIDDLE LINES GO STRAIGHT DOWN, ONE ON EACH FACE. SCLK (pin 4) on the rear face
-   and MOSI (pin 5) on the front, crossing each other as an X between the etherCON's pins
-   and the row. They are the shortest lines on the board and the fastest signals.
-2. THE THREE LINES EACH SIDE OF THEM GO OVER THE TOP. Pins 6, 7 and 8 leave upward on the
-   front face, run across above the etherCON's contacts, and come down the LEFT side into the
-   row's left half. Pins 1, 2 and 3 do the same on the rear face down the RIGHT side. The
-   line that starts furthest from its side takes the outermost lane and lands on the
-   outermost pad, so within a face nothing crosses.
-3. THE PAIRS STAY SIDE BY SIDE (hardware/interfaces/spi-link/spi-link.md): BREATH_SENSE
-   with AGND_SENSE (1, 2) down the right, CS_MOD with DIG_GND (7, 8) down the left.
-4. NO VIA, NO POUR. Every pad is a through-hole, so each line starts and ends on the face
-   it runs on. No conductor of the umbilical is a plane's: PWR_GND, DIG_GND and AGND_SENSE
-   are three separate returns until the main board joins them (ADR 0018), so a pour here
-   would belong to one of them and couple it to the other two.
-5. THE LANES. Over the top they run between the upper contact row and the latch's plated
-   slot; down each side between the end contact and the housing's post hole (unplated).
+1. ONE FACE, NO VIA, NO POUR. Every pad is a through-hole. No conductor of the umbilical is
+   a plane's: PWR_GND, DIG_GND and AGND_SENSE are three separate returns until the main
+   board joins them (ADR 0018), so a pour here would belong to one of them.
+2. THE ROW IS TWICE AS WIDE AS THE CONTACTS (2.54 against 1.27), so the post for the contact
+   at x stands at 2x: every line drops to the row less its own |x| and then runs the diagonal.
+   The diagonals each side are parallel, 1.8 apart.
+3. THE UPPER ROW'S LINES PASS BETWEEN THE LOWER ROW'S PADS, 1.34 clear between pad edges:
+   the widest line through there is a power line with 0.42 each side.
+4. THE PAIRS STAY SIDE BY SIDE (hardware/interfaces/spi-link/spi-link.md) because the order
+   is kept: each of the cable's four pairs lands on the same two posts it always did.
 """
 import json
 import os
@@ -70,51 +64,24 @@ def j2(k):
     return (8.89 - PITCH * (k - 1), ROW)
 
 NET = {1: "/BREATH_SENSE", 2: "/AGND_SENSE", 3: "/UMBILICAL_POS12", 4: "/SCLK",
-       5: "/MOSI", 6: "/PWR_GND", 7: "/CS_MOD", 8: "/DIG_GND"}      # checked against the sheet in main()
+       5: "/MOSI", 6: "/PWR_GND", 7: "/CS_MOD", 8: "/DIG_GND"}      # by J-UMB's pin n; checked against the sheet in main()
 WIDTH = {3: PW, 6: PW}
-
-# OVER THE TOP: three lanes between the upper contact row (its pads' tops at -5.25) and the
-# latch slot's plated pad (its lower edge at -8.75). The outermost lane is the top one.
-LANE = (-8.2, -7.6, -6.75)
-# DOWN A SIDE: three columns between the end contact (its pad's edge 5.05 from the axis) and
-# the post hole (8.425 out, 1.7 across, unplated: its edge at 7.58). The outermost is nearest
-# the hole. The middle one is the row's own pad, so that line comes straight down into it.
-COL = (6.85, 6.35, 5.725)
-C = 1.0                       # the corner cut where a lane turns down a side
+def contact(n):
+    """The etherCON's pin that carries J-UMB's pin n."""
+    return 9 - n
 
 
-def over_the_top(k, lane, side):
-    """Pin k of the etherCON up to its lane, across, down its column on `side` (-1 the left,
-    +1 the right) and into J-UMB's pad k. The outer and inner lines step sideways at 45
-    degrees onto their pads; the middle one meets its pad straight."""
-    x, y = j1(k)
-    cx, ly = side * COL[lane], LANE[lane]
-    tx, ty = j2(k)
-    pts = [(x, y), (x, ly), (cx - side * C, ly), (cx, ly + C)]
-    step = abs(tx - cx)
-    pts += [(cx, ty - step), (tx, ty)] if step > 1e-6 else [(tx, ty)]
-    return pts
-
-
-def straight_down(k):
-    """Pin k straight down between the lower row's contacts, then at 45 onto its pad."""
-    x, y = j1(k)
-    tx, ty = j2(k)
+def straight(n):
+    """The etherCON's contact for J-UMB's pin n straight down, then at 45 onto the post."""
+    x, y = j1(contact(n))
+    tx, ty = j2(n)
+    assert abs(tx - 2 * x) < 1e-6, (n, x, tx)
     return [(x, y), (x, ty - abs(tx - x)), (tx, ty)]
 
 
 def routes():
-    """(net, width, points, layer) for all eight lines."""
-    out = []
-    # the front face: MOSI straight down; PWR_GND, CS_MOD, DIG_GND over the top and down the left
-    out.append((5, straight_down(5), F))
-    for lane, k in enumerate((8, 7, 6)):
-        out.append((k, over_the_top(k, lane, -1), F))
-    # the rear face: SCLK straight down; BREATH_SENSE, AGND_SENSE, +12 V over the top and down the right
-    out.append((4, straight_down(4), B))
-    for lane, k in enumerate((1, 2, 3)):
-        out.append((k, over_the_top(k, lane, +1), B))
-    return [(NET[k], WIDTH.get(k, TW), pts, layer) for k, pts, layer in out]
+    """(net, width, points, layer) for all eight lines, on the rear face."""
+    return [(NET[n], WIDTH.get(n, TW), straight(n), B) for n in range(1, 9)]
 
 
 def main():
@@ -133,8 +100,9 @@ def main():
     netinfo, fps = pcb.load_parts(board, comps, nets)
     je, ju = fps[pcb.ref_of(comps, "J-UMBILICAL-INST")], fps[pcb.ref_of(comps, "J-UMB")]
     for (ref, pin), net in {(r, p): n for n, nodes in nets for r, p in nodes}.items():
-        if NET[int(pin)] != net:
-            sys.exit(f"adapter_layout: the sheet puts {ref} pin {pin} on {net}; this layout is drawn for {NET[int(pin)]}")
+        want = NET[int(pin)] if ref == ju.GetReference() else NET[9 - int(pin)]
+        if want != net:
+            sys.exit(f"adapter_layout: the sheet puts {ref} pin {pin} on {net}; this layout is drawn for {want}")
 
     # the etherCON: its origin on the axis, on the front face, latch up
     board.Add(je)
