@@ -1,9 +1,9 @@
 id,slice,line,severity,verdict,headline
-F1-1,F,10,high,NOT ADDRESSED,F1-1 — main-board: seven via holes stand in or against an SMD pad's mask opening
-F1-2,F,43,medium,NOT ADDRESSED,"F1-2 — the ""no via in a pad"" check tests the via's centre, not its hole"
-F2-1,F,52,high,NOT ADDRESSED,F2-1 — umb-adapter: two unplated post holes are 0.15 mm from the board edge
-F3-1,F,72,medium,NOT ADDRESSED,F3-1 — the 1.27 mm headers' plated holes have a 0.185 mm ring
-F4-1,F,95,medium,NOT ADDRESSED,F4-1 — main-board: both inner planes run 0.3 mm from the U-bolt cut-outs
-F5-1,F,110,low,NOT ADDRESSED,F5-1 — J1's ground pins join their plane with no thermal relief
-F6-1,F,127,low,NOT ADDRESSED,F6-1 — the 2-layer boards' vias and large plated holes have a 0.2 mm ring
-F7-1,F,141,advisory,NOT ADDRESSED,F7-1 — supply return through spokes in 0.5 oz inner copper
+F1-1,F,10,high,recorded,F1-1 — main-board: seven via holes stand in or against an SMD pad's mask opening
+F1-2,F,43,medium,recorded,"F1-2 — the ""no via in a pad"" check tests the via's centre, not its hole"
+F2-1,F,52,high,recorded,F2-1 — umb-adapter: two unplated post holes are 0.15 mm from the board edge
+F3-1,F,72,medium,recorded,F3-1 — the 1.27 mm headers' plated holes have a 0.185 mm ring
+F4-1,F,95,medium,recorded,F4-1 — main-board: both inner planes run 0.3 mm from the U-bolt cut-outs
+F5-1,F,110,low,recorded,F5-1 — J1's ground pins join their plane with no thermal relief
+F6-1,F,127,low,recorded,F6-1 — the 2-layer boards' vias and large plated holes have a 0.2 mm ring
+F7-1,F,141,advisory,recorded,F7-1 — supply return through spokes in 0.5 oz inner copper
