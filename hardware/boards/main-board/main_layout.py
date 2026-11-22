@@ -232,7 +232,7 @@ PLACE.update({
     # the reference buffer's feedback: C9 and R9 under the pins they serve, R7 and R8 in the
     # corridor VS climbs; REF_5V passes between R7's pads and between R8's to reach pin 3 inside VS
     "C9": (13.5, REF_LINE, ("REF_MINUS", "N")), "R9": (16.5, REF_LINE, ("BUF_OUT", "N")),
-    "R7": (20.6, REF_LINE, ("VS", "N")), "R8": (19.55, 24.0, ("VS", "E")),
+    "R7": (20.6, REF_LINE, ("VS", "N")), "R8": (19.55, 24.865, ("VS", "E")),
     # the reference, tailward on the same line: its output capacitors on the line, its input
     # parts hanging from REF_VIN's bus beyond it, the 12 V end last
     "C7": (24.0, REF_LINE + 0.95, ("REF_5V", "S")), "C5": (27.0, REF_LINE + 1.46, ("REF_5V", "S")),
@@ -295,7 +295,7 @@ def analog():
                               (13.25, 17.25), "R4.1"])
     via("SENSOR_BUFFERED_OUT", 16.6, 28.4)
     # the divider, the anti-alias capacitor, the ADC's input: under the row, clear of CS over it
-    T("ADC_IN", ["R4.2", "R5.1", (19.09, 16.5), (19.39, 16.2), (23.55, 16.2)])
+    T("ADC_IN", ["R4.2", "R5.1", (19.09, 16.1), (19.49, 15.7), (23.55, 15.7)])      # clear of the pad before it turns
     T("ADC_IN", ["C1.1", (23.55, 13.9), (24.57, 12.88), "U2.2"])
     # the reference: straight out of its pin, through its two capacitors, between R-ISO-REF's
     # pads, up under R-FB-REF's body, into the buffer's + input
@@ -304,8 +304,10 @@ def analog():
     T("BUF_OUT", ["U3.1", (16.5, 23.59), "R9.1"])
     T("BUF_OUT", ["R9.1", (17.2, 21.41), (19.02, 19.59), "R7.1"])
     T("AC_FB_MID", ["C9.2", (13.5, 19.57), (16.5, 19.57), "R9.2"])
-    T("REF_MINUS", ["U3.2", (17.4, 24.86), (18.2, 24.06)])
-    T("REF_MINUS", ["U3.2", (15.5, 24.86), (13.5, 22.86), "C9.1"])
+    # the - input: R-FB-REF stands level with pin 2, so the line runs straight through the pin's pad into it;
+    # the other way it leaves the pad straight before it turns for C9 (owner, 2026-11-22)
+    T("REF_MINUS", ["U3.2", "R8.2"])
+    T("REF_MINUS", ["U3.2", (15.1, 24.86), (13.5, 23.26), "C9.1"])
     # VS: from R-ISO-REF through R-FB-REF's pad, straight up to the sensor's pin and its capacitors
     T("VS", [(20.5, 21.41), (20.5, 45.7), (16.22, 45.7), (15.42, 46.5), "U10.2"], PWR)
     T("VS", [(20.5, 45.7), (21.25, 45.7), (21.75, 46.2), "C202.1"], PWR)      # a T: the trunk meets one level line square
