@@ -35,9 +35,10 @@ main board's `J-MCU`, which the Matrix ribbon (`CBL-MCU-RIBBON`) joins.
   back row toward the near one, each pin on a lane of its own.
 - **Three lines neck to the layout's `track_min`** where they pass together
   between two feet of the near pad row. It is the only neck on the board.
-- **J-MCU-C's ground pins join the plane whole**, without thermal
-  spokes: the neighbouring pads leave room for one spoke only. They take more
-  heat to solder by hand. The mounts join it whole too, being bolted.
+- **J-MCU-C's ground pins meet the plane through one relief spoke each**:
+  the neighbouring pads leave room for one only, and `matrix-carrier.kicad_dru`
+  lets those pins pass with one where the board's rule asks two (ADR 0030,
+  Amendment of 2026-11-22). The mounts join the plane solid, being bolted.
 
 ## The ribbon's pins
 
@@ -84,3 +85,4 @@ nearest the Matrix. Pin 6 is the ribbon's spare, on ground at both ends.
 | F | 2026-11-22 | Every line that passes between two of J2's pads stands evenly in the gap, the same room pad to line, line to line and line to pad (owner, 2026-11-21; issue #52 W1); the two service lines step into place by a small 45 degree jog once they are clear of the band. The three necked lines between pads 1 and 2 were already even. `pcb.py check` passes | `carrier_layout.py`, `matrix-carrier.kicad_pcb` |
 | G | 2026-11-22 | `IO39` and `IO40` leave J-MCU-C's pins on one 45 degree line from the pad's centre, with no short level piece first (owner, 2026-11-22: a track leaves a pin on a line through its centre; issue #52). |
 | H | 2026-11-22 | The lines into `J3` pads 4 and 5 run clear of the pad before they turn, and pad 5's stands under the pad on one 45 and enters it straight (the exit rule in `check_joints`, `docs/reference/tooling.md` §4; owner, 2026-11-22; issue #52). `IO3` still enters `J2` pad 8 on one 45: the near mount's pad and `IO1` leave no room for a straight run, recorded under `joints_exempt:` in `layout.yaml`. |
+| I | 2026-11-22 | Fabrication review fixes (issue #57, F5, F6): `J-MCU-C`'s ground pins are relieved by one spoke each (`matrix-carrier.kicad_dru`; ADR 0030, Amendment of 2026-11-22), and the via takes the two-layer recommended ring. `pcb.py check` passes. |

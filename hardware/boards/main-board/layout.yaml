@@ -22,7 +22,7 @@ rules:
   track: 0.25
   track_min: 0.2
   clearance: 0.2
-  via: 0.7                  # 0.4 over the 0.3 drill, as the key boards' (their layout.yaml)
+  via: 0.7                  # 0.4 over the 0.3 drill: the board house's recommended ring on four layers. The two-layer boards' vias are wider (their layout.yaml)
   via_drill: 0.3
   via_min: 0.66
   drill_min: 0.3
@@ -214,9 +214,12 @@ mounts:
 # The U-bolt legs' holes are the DXF's (unplated, routed). On the outer layers no
 # copper within 0.5 mm of what bears there (the washer and nut above, the spacer
 # below), the margin the body CAD's neck rule takes (mechanical/cad/woody_body.scad,
-# "main board neck at the U-bolt station"); the planes run on past the holes.
+# "main board neck at the U-bolt station"). The inner planes stand `plane_keepout`
+# back from each hole's wall: the board house routes the hole to its outline tolerance,
+# and a steel leg passes through it (review 2026-11-22 F4-1).
 ubolt:
   copper_keepout: 0.5
+  plane_keepout: 1.0
 
 # J-MCU and J-UMB, from the echo's insulator extent (x0, x1) and centre y. Both are the
 # woody.pretty footprints (hardware/lib/README.md). J-MCU stands straight up, its rows

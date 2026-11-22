@@ -217,13 +217,13 @@ def main():
             if board.FindNet(net) is None:
                 board.Add(pcbnew.NETINFO_ITEM(board, net))
         pad.SetNetCode(board.FindNet(net).GetNetCode())
-        if net == GND:               # boxed in by its neighbours' pads: one spoke is all that fits, so it joins whole
-            pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
+        if net == GND:               # boxed in by its neighbours' pads: one spoke is all that fits, and matrix-carrier.kicad_dru lets it pass with one (review 2026-11-22 F5-1)
+            pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_THERMAL)
     for f in board.GetFootprints():                      # the mounts are bolted, not soldered: whole
         if f.GetReference().startswith("H"):
             for pad in f.Pads():
                 pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
-    cu = pcb_hand.Copper()
+    cu = pcb_hand.Copper(yaml.safe_load(open(LAY)))
     routes(cu)
     cu.draw(board)
     lay = yaml.safe_load(open(LAY))

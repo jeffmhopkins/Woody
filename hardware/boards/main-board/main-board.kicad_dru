@@ -1,0 +1,8 @@
+(version 1)
+
+# J-MCU's ground pins. A 1.27 mm header boxes each pin in on three sides, so one
+# relief spoke is all the plane can give it; the board's rule asks two everywhere
+# else. hardware/boards/main-board/main_layout.py; ADR 0030; review 2026-11-22 F5-1.
+(rule "J-MCU ground pins: one spoke"
+  (condition "A.Type == 'Pad' && A.memberOfFootprint('J1')")
+  (constraint min_resolved_spokes 1))

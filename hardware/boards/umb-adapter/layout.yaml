@@ -18,7 +18,7 @@ rules:
   track: 0.6                # every line at the supply's width (owner, 2026-11-22: the board has the room)
   track_min: 0.2
   clearance: 0.2
-  via: 0.7
+  via: 0.8                  # a 0.25 ring on the 0.3 drill, the board house's recommended ring on two layers (review 2026-11-22 F6-1)
   via_drill: 0.3
   via_min: 0.66
   drill_min: 0.3

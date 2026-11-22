@@ -1002,6 +1002,22 @@ ethercon:
     value: 3.2
     status: settled
     source: "[ds] ST-NE8FAV"
+  # The two plastic posts beside the latch, through the adapter. They stand so
+  # near the flange's upper edge, which is the adapter's, that a drilled hole
+  # leaves no web the board house can hold: the adapter's outline opens each
+  # into a notch (mechanical/cad/umb_adapter.scad; review 2026-11-22 F2-1).
+  post_dx:
+    value: 11.6
+    status: settled
+    source: "[repo] hardware/lib/woody.pretty/Neutrik_NE8FAV_etherCON_Vertical, the two upper unplated holes, each side of the axis; drawn from ST-NE8FAV's PCB layout (hardware/lib/README.md)"
+  post_above:
+    value: 11.5
+    status: settled
+    source: "[repo] the same two holes, above the axis"
+  post_d:
+    value: 1.7
+    status: settled
+    source: "[repo] the same two holes' drill"
   panel_max:
     value: 3.0
     status: settled

@@ -13,7 +13,16 @@ include <woody_body.scad>
 figure = true;
 adapter = "geom";
 
-module umb_adapter_2d() translate([ec_c[0] - ec_fl[0] / 2, ec_c[1] - ec_fl[1] / 2]) square(ec_fl);
+// The flange's outline, less a notch at each of the etherCON's two upper posts:
+// their holes stand too near the upper edge to be drilled (ethercon.post_*).
+module umb_adapter_2d() {
+    assert(!ethercon_rotated, "the post notches are drawn for the latch-up connector");
+    difference() {
+        translate([ec_c[0] - ec_fl[0] / 2, ec_c[1] - ec_fl[1] / 2]) square(ec_fl);
+        for (s = [-1, 1]) hull() for (up = [0, ec_fl[1]])
+            translate([ec_c[0] + s * ethercon_post_dx / 2, ec_c[1] + ethercon_post_above + up]) circle(d = ethercon_post_d, $fn = 48);
+    }
+}
 
 if (adapter == "outline") umb_adapter_2d();
 else {

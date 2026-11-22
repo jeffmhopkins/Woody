@@ -15,7 +15,7 @@ import pcbnew
 import pcb          # frames, the sheets' netlist, the silkscreen steps; nothing that routes
 
 TW, PW = 0.25, 0.4            # signal and 3V3 (layout.yaml rules: track, power_track)
-VIA, DRILL = 0.7, 0.3         # layout.yaml rules: via, via_drill
+DRILL = 0.3                   # layout.yaml rules: via_drill; the via's own width is each board's rules.via
 GND = "GND_CHAIN"
 PITCH = 1.27                  # the register's and the header's pin pitch
 BODY = ("SW", "J", "H")       # what the body CAD places, not a board's script
@@ -170,8 +170,8 @@ class Copper:
     track says otherwise; the switch-side face is ground and nothing else. Each line is a
     list of points in the body frame, drawn at 0, 45 and 90 degrees."""
 
-    def __init__(self):
-        self.tracks, self.vias = [], []
+    def __init__(self, lay):
+        self.tracks, self.vias, self.via_w = [], [], lay["rules"]["via"]
 
     def track(self, net, pts, w=TW, layer=pcbnew.B_Cu):
         for a, b in zip(pts, pts[1:]):
@@ -217,7 +217,7 @@ class Copper:
         for net, p in self.vias:
             v = pcbnew.PCB_VIA(board)
             v.SetPosition(pcb.V(*pcb.to_pcb(*p)))
-            v.SetWidth(pcbnew.F_Cu, pcb.MM(VIA))
+            v.SetWidth(pcbnew.F_Cu, pcb.MM(self.via_w))
             v.SetDrill(pcb.MM(DRILL))
             v.SetNet(board.FindNet(net))
             board.Add(v)

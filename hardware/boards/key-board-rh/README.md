@@ -104,6 +104,7 @@ with the latest layout's date until a board is fabricated
 | D | 2026-11-21 | `J-CHAIN` is a vertical 2×5 header, as the left-hand board's (ADR 0017, *Amendment, 2026-11-21*; issue #49): new footprint where the body CAD stands it, the chain bus and 3V3 redrawn from its even row, C8 moved beside its 3V3 pin. Nothing else moved. `pcb.py check` passes. Not yet ordered | `rh_layout.py`, `key-board-rh.kicad_pcb`, `key-board-rh.kicad_sch` |
 | E | 2026-11-22 | Every track leaves every pad straight and runs clear of it before it turns (the exit rule in `check_joints`, `docs/reference/tooling.md` §4; owner, 2026-11-22; issue #52). Each key's node leaves its resistor and its capacitor level before it dips under the switch's pins (`tools/pcb_hand.py`). The 3V3 trunk runs under the register's body from pin 11 to the corridor, with a T up through pin 16 into `C9`, and no longer leaves `C9` on a diagonal. `pcb.py check` passes. Not yet ordered | `rh_layout.py`, `key-board-rh.kicad_pcb` |
 | F | 2026-11-22 | The 3V3 trunk's straight runs out of its pads are lengthened to suit its width (`PAD_RUN`, `docs/reference/tooling.md` §4; owner, 2026-11-22; issue #52): its bar under the register stands nearer the middle of the channel. `pcb.py check` passes. Not yet ordered | `rh_layout.py`, `key-board-rh.kicad_pcb` |
+| G | 2026-11-22 | Fabrication review fix (issue #57, F6): the ground vias take the two-layer recommended ring (`layout.yaml` `rules.via`). `pcb.py check` passes. |
 
 ## Open, and what decides each
 

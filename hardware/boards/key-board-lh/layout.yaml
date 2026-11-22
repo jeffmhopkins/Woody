@@ -16,7 +16,7 @@ rules:
   track: 0.25
   track_min: 0.2
   clearance: 0.2
-  via: 0.7                  # 0.4 over the 0.3 drill: JLC asks a via 0.1 over its hole (0.15 preferred), and KiCad's one annular rule also holds it to the PTH ring in fab: below
+  via: 0.8                  # a 0.25 ring on the 0.3 drill, the board house's recommended ring on two layers (review 2026-11-22 F6-1)
   via_drill: 0.3
   via_min: 0.66
   drill_min: 0.3

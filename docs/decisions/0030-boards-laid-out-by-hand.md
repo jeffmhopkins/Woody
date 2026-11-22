@@ -105,7 +105,7 @@ do that too"*.
 4. **Two things this layout does that the key boards' do not**, both for want
    of room at a 1.27 mm header: three lines neck to the layout's `track_min`
    through one gap in the near pad row, and `J-MCU-C`'s four ground pins join
-   the plane whole, with no thermal spokes. The owner was told of both with
+   the plane whole, with no thermal spokes (superseded 2026-11-22: one spoke each, the last amendment below). The owner was told of both with
    the trial.
 
 **The main board followed the same day** (next amendment): `J-MCU`'s sheet
@@ -134,7 +134,7 @@ changes or adds:
    and has no guard tracks: the band it runs in carries nothing else on its
    layer, and the 3W keep-off is checked on the board.
 4. **A soldered ground pin meets the plane through relief spokes**, as the key
-   boards' ground pads do. `J-MCU`'s four ground pins join it whole, for the
+   boards' ground pads do. `J-MCU`'s ground pins join it whole (superseded 2026-11-22: one spoke each, the last amendment below), for the
    same want of room as `J-MCU-C`'s above; the mounts join it whole because
    they are clamped, not soldered, and stay plated on `PWR_GND` (ADR 0025).
 5. **No via stands in a pad** (owner, 2026-11-21: *"better just to do the jogs
@@ -148,6 +148,38 @@ changes or adds:
    Process*].
 6. **The chain's pin order at each `J-CHAIN` is unchanged.** The board routes
    with it.
+
+## Amendment, 2026-11-22 — the fabrication review (issue #57)
+
+A cold review read the five controller boards' copper against the board
+house's banked capability page (`docs/review/2026-11-22-copper-fab-review/`).
+The owner: *"Can we fix everything ... and then also keep outside the 0.2 mm
+clearance where we just have to change some positioning"*. What that changed
+in the rules above:
+
+1. **"No via in a pad" is measured at the hole.** A via's hole stands
+   `VIA_DAM` (`tools/pcb.py`) clear of every surface-mount pad's edge, so
+   solder mask can stand between them. `check_joints` tests the hole's edge;
+   it had tested the via's centre, and seven holes stood in or against a pad.
+2. **`J-MCU`'s and `J-MCU-C`'s ground pins are relieved.** Superseded: both
+   amendments above say these pins join their plane whole, for want of room
+   for two spokes. Each now has the one spoke the header's pitch leaves, and
+   each board's `.kicad_dru` lets those pins pass with one where the board's
+   rule asks two. The main board's supply return (`J-UMB`'s ground pin) and the
+   regulator's ground pin stand their spokes on the diagonals, where all four
+   reach the plane.
+3. **The two-layer boards' vias take the recommended ring** (each board's
+   `layout.yaml` `rules.via`). The main board's stay as they were, which is
+   the recommended ring on four layers.
+4. **The main board's inner planes stand back from the U-bolt legs' holes**
+   (`layout.yaml` `ubolt.plane_keepout`).
+5. **The adapter's outline is notched at the etherCON's two upper posts**
+   (`config/body.yaml` `ethercon.post_*`; `mechanical/cad/umb_adapter.scad`),
+   whose holes stood too near the edge to be drilled.
+
+Left as it was, by the owner's choice the same day: the 1.27 mm headers' pads.
+Their pitch fixes pad width plus gap, so a wider ring there costs the
+clearance rule, and the owner kept the rule.
 
 ## Open, and what decides each
 

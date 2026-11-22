@@ -388,6 +388,11 @@ def build(bdir, lay):
     for j, (x, y, hole, top, under) in enumerate(geo["ubolts"], 1):
         rule_area(board, Point(x, y).buffer(top / 2 + ub["copper_keepout"], 32), f"U-bolt leg {j} top", ["F.Cu"], footprints=True)
         rule_area(board, Point(x, y).buffer(under / 2 + ub["copper_keepout"], 32), f"U-bolt leg {j} underside", ["B.Cu"], footprints=True)
+        # the routed hole's edge wanders by the outline's tolerance, and a steel leg passes
+        # through it: the inner planes stand back from it too (review 2026-11-22 F4-1)
+        inner = [L for L in ("In1.Cu", "In2.Cu") if lay.get("layers", 2) >= 4]
+        if inner and ub.get("plane_keepout"):
+            rule_area(board, Point(x, y).buffer(hole / 2 + ub["plane_keepout"], 32), f"U-bolt leg {j} planes", inner)
     # the key networks: the key boards' T, on the TOP face here
     nw = lay.get("networks") or {}
     net_parts = pcb.network_parts({"networks": {k: v for k, v in nw.items() if k != "spare"}}, {"switches": geo["switches"]}, comps)

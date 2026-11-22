@@ -170,7 +170,7 @@ def main():
     pcb_hand.seat_chain(fps[pcb.ref_of(comps, "J-CHAIN")], geo, jpin)
     place = {**PLACE, **pcb_hand.key_places(comps, geo["switches"])}
     pcb_hand.seat_all(board, place)
-    cu = pcb_hand.Copper()
+    cu = pcb_hand.Copper(lay)
     if "--place-only" not in sys.argv:
         routes(cu, geo["switches"])
         cu.draw(board)

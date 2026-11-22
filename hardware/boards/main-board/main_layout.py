@@ -199,7 +199,7 @@ PLACE.update({
     "R40": (289.0, SPI_Y - 0.55, ("IO34", "S")),
     "R46": (284.913, 15.6, ("TXD_HDR", "W")),      # its header-side pad over J-UART pin 1
     # RXD's series resistor beside the header, its header pad toward pin 2 (pre-fab review S3)
-    "R56": (289.2, 15.95, ("RXD_HDR", "W")),
+    "R56": (289.1, 15.95, ("RXD_HDR", "W")),
     # the ADC branch's two series resistors (pre-fab review S1), on top over the long lanes a
     # little way from J-MCU, where the board is clear: SCLK's outside, MOSI's inside it
     "R54": (226.95, SER_Y["IO35"], ("IO35", "E")), "R55": (223.0, SER_Y["IO36"], ("IO36", "E")),
@@ -328,9 +328,9 @@ def analog():
     T("INST_POS12", ["R6.1", (48.25, 21.35), (47.5, 20.6)], PWR)      # straight out of the pad, one 45 into the via
     via("INST_POS12", 47.5, 20.6)
     # every analog ground pad to the island under it, by its own via
-    for pad, x, y in (("U10.3", 12.88, 45.3), ("C203.2", 9.95, 25.505), ("C204.2", 8.9, 19.9), ("U3.4", 17.9, 27.41),
-                      ("C7.2", 24.0, 23.5), ("C5.2", 28.45, 23.44), ("U4.4", 33.5, 23.91), ("R5.2", 20.91, 18.4),
-                      ("C1.2", 25.45, 18.45), ("C3.2", 28.1, 16.1), ("C42.2", 36.22, ADC_ROW), ("C2.2", 41.69, ADC_ROW),
+    for pad, x, y in (("U10.3", 12.88, 45.3), ("C203.2", 10.05, 25.505), ("C204.2", 8.9, 19.9), ("U3.4", 17.9, 27.41),
+                      ("C7.2", 24.0, 23.5), ("C5.2", 28.45, 23.44), ("U4.4", 33.5, 23.91), ("R5.2", 20.912, 16.4),
+                      ("C1.2", 25.45, 16.3), ("C3.2", 28.1, 16.1), ("C42.2", 36.22, ADC_ROW), ("C2.2", 41.69, ADC_ROW),
                       ("U2.3", 23.75, 11.62), ("C6.2", 38.5, 21.2),
                       ("C202.2", 23.25, 48.35), ("C201.2", 26.25, 48.35), ("C8.2", 29.25, 48.35), ("NT2.1", 31.5, 15.05)):
         via(A, x, y, pad, PWR)
@@ -454,15 +454,16 @@ def power():
     T("INRUSH_GATE", ["C39.2", "D21.1"])
     T("INRUSH_MILLER", ["C40.2", (293.95, 8.8)])
     # the switch's drain into the plane carries the whole instrument: three vias on one bar (#8-6)
-    via("INST_POS12", 291.0, 15.45, "Q1.3", 0.5)
-    T("INST_POS12", [(291.0, 14.5), (291.0, 16.4)], 0.5)
-    VIAS.extend([("INST_POS12", 291.0, 14.5), ("INST_POS12", 291.0, 16.4)])
+    via("INST_POS12", 290.9, 15.45, "Q1.3", 0.5)
+    T("INST_POS12", [(290.9, 14.5), (290.9, 16.4)], 0.5)
+    VIAS.extend([("INST_POS12", 290.9, 14.5), ("INST_POS12", 290.9, 16.4)])
     via("INST_POS12", 291.1, 8.8, "R43.2")
     T("PWR_GND", ["J6.6", (291.5, 24.69)], 0.8)
     T("DIG_GND", ["J6.8", "NT1.1"], 0.5)
-    # the regulator: 12 V up from the plane below the inductor, then the loop
-    for at, x in (((248.1, 15.5), 248.1), ((249.0, 15.5), 249.0)):
-        via("INST_POS12", x, 14.9, at, PWR)
+    # the regulator: 12 V up from the plane beside the inductor's pad, then the loop. Beside, not
+    # below: H7's bearing keeps vias out there, and a hole against the pad drinks its paste (review 2026-11-22 F1-1)
+    for y in (15.6, 16.6):
+        via("INST_POS12", 247.2, y, (248.2, y), PWR)
     # the bulk capacitors, the regulator's input capacitor and its output capacitor: two vias a
     # pad, since each carries a supply's pulse current (#8-6)
     two("INST_POS12", 209.5, 20.2)       # C44.1
@@ -572,14 +573,14 @@ def tail():
     # the even row, bottom face
     T("IO1", ["J1.12", (261.63, 20.79), (268.3, 27.46)], FINE, "B")
     T("IO2", ["J1.16", (264.17, 22.3)], FINE, "B")
-    T("U0TXD", ["J1.22", (267.985, 19.8), (268.385, 20.2), (270.6, 20.2), (275.2, 15.6), (287.4, 15.6)], FINE, "B")
-    T("U0RXD", ["J1.18", (265.445, 20.2), (265.845, 20.6), (271.4, 20.6), (275.6, 16.4), (289.375, 16.4), (290.025, 17.05)], FINE, "B")
-    via("U0TXD", 287.4, 15.6, "R46.1")
+    T("U0TXD", ["J1.22", (267.985, 19.8), (268.385, 20.2), (270.6, 20.2), (275.2, 15.6), (287.3, 15.6)], FINE, "B")
+    T("U0RXD", ["J1.18", (265.445, 20.2), (265.845, 20.6), (271.4, 20.6), (275.6, 16.4), (289.275, 16.4), (289.925, 17.05)], FINE, "B")
+    via("U0TXD", 287.3, 15.6, "R46.1")
     T("TXD_HDR", ["R46.2", "J2.1"])
     # RXD comes up beside its series resistor; from the resistor one line on top between the
     # header's two outer pads to pin 2
-    via("U0RXD", 290.025, 17.05, "R56.1")
-    T("RXD_HDR", ["R56.2", (288.2, 15.775), (288.2, 10.25), (287.35, 9.4), "J2.2"], FINE)
+    via("U0RXD", 289.925, 17.05, "R56.1")
+    T("RXD_HDR", ["R56.2", (288.1, 15.775), (288.1, 10.15), (287.35, 9.4), "J2.2"], FINE)
     # the odd row, bottom face: under the row, north past the header's mouth end
     # the four lane lines turn once, 45 degrees, from under the row straight into their lanes;
     # IO7 and IO38 end at vias between them and go north on top to their resistors
@@ -617,10 +618,10 @@ def tail():
     VIAS.append(("IO38", 252.3, 15.4))
     T("IO38", [(252.3, 15.4), (252.3, 21.025), (251.3, 22.025), "R34.1"])
     # the chain's three outputs: a via between the pads, then the bottom face toward the mouth
-    via("CHAIN_SHLD", 249.2, 25.81, "R35.2")
-    via("CHAIN_SCK", 252.2, 25.81, "R34.2")
-    T("CHAIN_SER_LH", ["R36.2", (255.2, 25.81), "R37.1"])   # R37 stands off R36 by the 5 V line's width
-    VIAS.append(("CHAIN_SER_LH", 255.2, 25.81))
+    via("CHAIN_SHLD", 249.6, 25.81, "R35.2")
+    via("CHAIN_SCK", 252.6, 25.81, "R34.2")
+    T("CHAIN_SER_LH", ["R36.2", (255.74, 25.81), "R37.1"])   # R37 stands off R36 by the 5 V line's width
+    VIAS.append(("CHAIN_SER_LH", 255.74, 25.81))
     # the chain's return to J-MCU pin 24, on top under the three bodies to a via beyond them
     T("CHAIN_QH_RT", ["J1.24", (269.25, 20.8), (268.95, 21.1), (260.1, 21.1), (258.1, 23.1), (258.1, 24.45),
                       (257.65, 24.9), (246.35, 24.9), (245.6, 25.65)], FINE)
@@ -722,14 +723,14 @@ def chain():
     VIAS.append(("CHAIN_QH_RT", 170.5, q - 0.4))
     T("CHAIN_QH_RT", [(170.5, q - 0.4), (169.06, 32.64), "U8.9"])
     # SER, to the left header's pin 6
-    T("CHAIN_SER_LH", [(255.2, 25.81), (254.54, 25.15), (248.0, 25.15), (247.9, 25.25), (247.9, e - c), (247.9 - c, e),
+    T("CHAIN_SER_LH", [(255.74, 25.81), (255.08, 25.15), (248.0, 25.15), (247.9, 25.25), (247.9, e - c), (247.9 - c, e),
                        (xe + c, e), (xe, e + c), (xe, y6 - c), (xe + c, y6), "J4.6"], FINE, "B")
     # SH/LD, to pin 4 of both
-    T("CHAIN_SHLD", [(249.2, 25.81), (249.2, h - c), (249.2 - c, h), (xh + RH, h)], FINE, "B")
+    T("CHAIN_SHLD", [(249.6, 25.81), (249.2, 26.21), (249.2, h - c), (249.2 - c, h), (xh + RH, h)], FINE, "B")
     T("CHAIN_SHLD", [(xh + RH, h), (xh + RH, y4 - c), (xh + RH + c, y4), "J5.4"], FINE, "B")
     T("CHAIN_SHLD", [(xh + RH, h), (xh + c, h), (xh, h + c), (xh, y4 - c), (xh + c, y4), "J4.4"], FINE, "B")
     # SCK, to pin 2 of both
-    T("CHAIN_SCK", [(252.2, 25.81), (252.2, SCK_E - c), (252.2 - c, SCK_E), (JX + RH + 1.5, SCK_E), (JX + RH, SCK_E + 1.5), "J5.2"], FINE, "B")
+    T("CHAIN_SCK", [(252.6, 25.81), (252.6, SCK_E - c), (252.6 - c, SCK_E), (JX + RH + 1.5, SCK_E), (JX + RH, SCK_E + 1.5), "J5.2"], FINE, "B")
     VIAS.append(("CHAIN_SCK", SCK_VX + RH, 38.32))
     T("CHAIN_SCK", [(SCK_VX + RH, 38.32), (SCK_VX + RH - (38.32 - k), k), (JX + 1.0, k), (JX, k + 1.0), "J4.2"], FINE, "B")
     # the hop between the hands
@@ -972,9 +973,14 @@ def planes(board, geo):
     lay = pcb.layout_yaml(HERE)
     outline = pcb_main.board_polygon(pcb_main.outline_segments(lay, geo))
     for z in list(board.Zones()):
-        if not z.GetIsRuleArea() or z.GetZoneName().endswith(" moat"):
+        if not z.GetIsRuleArea() or z.GetZoneName().endswith((" moat", " planes")):
             board.Remove(z)
             GONE.append(z)
+    # the inner planes stand back from the U-bolt legs' routed holes, as pcb_main.build
+    # draws it (layout.yaml ubolt.plane_keepout; review 2026-11-22 F4-1)
+    for j, (x, y, hole, top, under) in enumerate(geo["ubolts"], 1):
+        pcb_main.rule_area(board, pcb_main.Point(x, y).buffer(hole / 2 + lay["ubolt"]["plane_keepout"], 32),
+                           f"U-bolt leg {j} planes", ["In1.Cu", "In2.Cu"])
     isl = pcb_main.island_polys(lay)
     for pl in lay.get("planes") or []:
         region = outline
@@ -992,13 +998,20 @@ def planes(board, geo):
     for z in board.Zones():
         if not z.GetIsRuleArea() and z.GetNetname() == "PWR_GND":
             z.SetPadConnection(pcbnew.ZONE_CONNECTION_THERMAL)
-    # J-MCU's ground pins too: a 1.27 mm header leaves room for one spoke where the
-    # rules ask two, the same exception the carrier's end of this ribbon takes (ADR 0030)
+    # J-MCU's ground pins too, by the one spoke a 1.27 mm header leaves room for: away from
+    # the other row. main-board.kicad_dru lets these pins pass with one where the board's
+    # rule asks two (review 2026-11-22 F5-1; they joined the plane whole before)
     for fp in board.GetFootprints():
         ref = fp.GetReference()
         for pad in fp.Pads():
-            if ref.startswith("H") or (ref == "J1" and pad.GetNetname() == "PWR_GND"):
+            if ref.startswith("H"):
                 pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
+            elif ref == "J1" and pad.GetNetname() == "PWR_GND":
+                pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_THERMAL)
+            elif (ref, pad.GetNumber()) in (("J6", "6"), ("U5", "2")):
+                # the supply's return and the regulator's ground, each between two neighbours in a
+                # row: on the diagonals all four spokes reach the plane (review 2026-11-22 F7-1)
+                pad.SetThermalSpokeAngleDegrees(45)
     return lay
 
 
@@ -1045,7 +1058,7 @@ def draw_copper(board):
     for name in (n.GetNetname() for n in board.GetNetInfo().NetsByName().values()):
         full.setdefault(str(name).split("/")[-1], []).append(str(name))
     pad = {(fp.GetReference(), p.GetNumber()): pcb_hand.body_xy(p.GetPosition()) for fp in board.GetFootprints() for p in fp.Pads()}
-    cu = pcb_hand.Copper()
+    cu = pcb_hand.Copper(pcb.layout_yaml(HERE))
     tracks, vias = copper()
 
     def net(n):

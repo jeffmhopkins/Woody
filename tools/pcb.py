@@ -1930,6 +1930,7 @@ def check_tracks(board):
 
 
 PAD_CLEAR = MM(0.3)      # how far a track runs straight out of a surface-mount pad before it may turn or branch
+VIA_DAM = MM(0.25)      # a via's hole to an SMD pad's edge: mask must stand between them or paste runs down the hole (review 2026-11-22 F1-1)
 PAD_RUN = 1.2            # ...and never less than this many of its own widths: a wide track's 0.3 mm is a nub (owner, 2026-11-22)
 
 
@@ -1982,9 +1983,13 @@ def check_joints(board, exempt=()):
             c = v.GetPosition()
             vias.add((c.x, c.y))
             rounds.append((v.GetNetname(), None, c.x, c.y, v.GetWidth(pcbnew.F_Cu) / 2, "a via"))
+            m = v.GetDrillValue() // 2 + VIA_DAM - 1000
             for k in boxes:     # ADR 0030: no via in a pad - solder runs down it. A through-hole pad is its own hole.
-                if k[8] and not k[5].startswith("NT") and k[1] < c.x < k[2] and k[3] < c.y < k[4]:      # its hole is in the pad; a net tie's pad is bare copper, never soldered
-                    bad.append(f"error: [joints] a {v.GetNetname()} via at {at(c.x, c.y)} stands in {k[5]}'s pad - stand it clear of the pad")
+                # THE HOLE'S EDGE, NOT THE VIA'S CENTRE (review 2026-11-22 F1-2): a centre on the pad's edge passed with half the hole in the mask opening
+                if k[8] and not k[5].startswith("NT") and k[1] - m < c.x < k[2] + m and k[3] - m < c.y < k[4] + m:      # a net tie's pad is bare copper, never soldered
+                    d = max(k[1] - c.x, c.x - k[2], k[3] - c.y, c.y - k[4]) - v.GetDrillValue() // 2
+                    bad.append(f"error: [joints] a {v.GetNetname()} via at {at(c.x, c.y)} has its hole {mm(d):.3f} mm from {k[5]}'s pad - "
+                               f"stand the hole {mm(VIA_DAM):.2f} mm clear, so mask can stand between them")
 
     def gap(a, b):
         d = abs(a - b) % 360

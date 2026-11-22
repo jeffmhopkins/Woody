@@ -404,7 +404,10 @@ prints which, exits 1, and leaves any existing board as it was.
   across it, or stand square on the pad's own axes; two diagonals closing on
   its centre fail. A track that touches a round pad or a via of its net is on
   a line through the centre, so it neither clips the ring nor turns inside it.
-  A via whose hole is in a surface-mount pad fails (ADR 0030); a net tie's pad
+  A via whose hole is in a surface-mount pad, or nearer its edge than `VIA_DAM`,
+  fails (ADR 0030; the hole's edge is measured, not the via's centre, since a
+  centre on the pad's edge passed with half the hole in the mask opening:
+  review 2026-11-22 F1-2); a net tie's pad
   is bare copper and exempt. A turn that a pad's own copper covers is that
   pad's entry and is judged by the pad rule. A track leaves a surface-mount
   pad straight and square to the pad's edge, and neither turns nor branches
@@ -937,7 +940,9 @@ families:
   figure is the page's PTH ring; for vias it asks only a diameter 0.1 mm over
   the hole (0.15 preferred) `[datasheets/fab/JLCPCB-PCB-CAPABILITIES.pdf, "Vias"
   and "PTH annular ring"]`, but KiCad's one annular-width rule applies to both,
-  so the vias grew to 0.7 on 0.3 as well - over both figures.
+  so the vias grew to 0.7 on 0.3 as well - over both figures. The two-layer
+  boards' vias have since grown again, to the ring that page recommends on two
+  layers (each board's `layout.yaml` `rules.via`; review 2026-11-22 F6-1).
 - **KiCad's Python API cannot set the stackup** (finish, mask and silk colour,
   copper weight), and the zone fill re-saves the board: `pcb.py` writes the
   whole stackup into the saved file after the fill (`set_stackup`).
