@@ -222,13 +222,13 @@ PLACE.update({
     "R43": (COL[0] - 0.9, 8.8, ("MILLER", "E")),
 })
 # ---- the analog block, at the mouth end ---------------------------------------------------------
-ADC_ROW = 17.25               # the ADC's row: divider, anti-alias, decoupling, bulk, supply resistor
+ADC_ROW = 17.5               # the ADC's row: divider, anti-alias, decoupling, bulk, supply resistor
 REF_LINE = 20.5               # REF_5V's line from the reference to the buffer; the feedback parts stand on it
 PLACE.update({
     # the buffer under the sensor's near edge, turned so SENSOR_RAW drops into pin 5 on the mouth
     # side and VS leaves on the tail side: the two no longer cross under the sensor
     "U3": (14.0, 25.5, ("5", "NW")),
-    "C203": (8.9, 26.5, ("SENSOR_RAW", "N")), "C204": (8.9, 22.0, ("INST_POS12", "N")),
+    "C203": (8.9, 26.455, ("SENSOR_RAW", "N")), "C204": (8.9, 22.0, ("INST_POS12", "N")),
     # the reference buffer's feedback: C9 and R9 under the pins they serve, R7 and R8 in the
     # corridor VS climbs; REF_5V passes between R7's pads and between R8's to reach pin 3 inside VS
     "C9": (13.5, REF_LINE, ("REF_MINUS", "N")), "R9": (16.5, REF_LINE, ("BUF_OUT", "N")),
@@ -255,8 +255,8 @@ PLACE.update({
 LED_CAP_DX = -6.5             # each LED's 100 nF: this far from its LED's centre, in the row, a millimetre between courtyards
 KEEP_CAP = ("C38", "C26")     # the mouth-end LED's stands north of it, off the sensor; the first LED's is beyond the surge diode
 PLACE["C11"] = (237.0, 12.5, ("BUCK_IN", "N"))   # its input pad level with the inductor and the regulator
-PLACE["C43"] = (220.0, 18.3, ("BUCK_A_OUT", "E"))   # its output pad over the regulator's output pin
-PLACE["C38"] = (26.3, 33.0, ("INST_POS12", "W"))
+PLACE["C43"] = (219.545, 18.5, ("BUCK_A_OUT", "E"))   # its output pad over the regulator's output pin
+PLACE["C38"] = (26.85, 33.0, ("INST_POS12", "W"))
 
 # Every part not named above keeps the place the reviewed board gave it.
 
@@ -285,14 +285,14 @@ def analog():
     A = "AGND_INST"
     # the sensor's output: down the mouth edge clear of the sensor's unused pads, through its
     # capacitor's pad, into the buffer's + input
-    T("SENSOR_RAW", ["U10.4", (10.34, 45.9), (9.2, 44.76), (9.2, 28.01), (9.8, 27.41), "U3.5"])
+    T("SENSOR_RAW", ["U10.4", (10.34, 45.9), (9.2, 44.76), (9.2, 27.405), "U3.5"])      # down into its capacitor's pad, and level out of it into the pin
     # the buffer's output: one trunk under its own body, pins 6 and 7 a stub each. North it
     # leaves between pins 5 and 4 for the breath pair's via; south between pins 8 and 1, round
     # the mouth side of the feedback capacitor, into the ADC's divider
     T("SENSOR_BUFFERED_OUT", ["U3.6", (12.9, 26.14)])
     T("SENSOR_BUFFERED_OUT", ["U3.7", (12.9, 24.86)])
-    T("SENSOR_BUFFERED_OUT", [(16.6, 28.4), (13.2, 28.4), (12.9, 28.1), (12.9, 22.9), (11.9, 21.9), (11.9, 18.6),
-                              (13.25, 17.25), "R4.1"])
+    T("SENSOR_BUFFERED_OUT", [(16.6, 28.4), (13.2, 28.4), (12.9, 28.1), (12.9, 22.9), (11.9, 21.9), (11.9, 18.85),
+                              (13.25, ADC_ROW), "R4.1"])
     via("SENSOR_BUFFERED_OUT", 16.6, 28.4)
     # the divider, the anti-alias capacitor, the ADC's input: under the row, clear of CS over it
     T("ADC_IN", ["R4.2", "R5.1", (19.09, 16.1), (19.49, 15.7), (23.55, 15.7)])      # clear of the pad before it turns
@@ -311,25 +311,26 @@ def analog():
     # VS: from R-ISO-REF through R-FB-REF's pad, straight up to the sensor's pin and its capacitors
     # the trunk steps once, clear of the island's inside corner, and runs straight up into C202's pad as far
     # toward the sensor as the pad allows; the capacitors' row starts where it lands
-    T("VS", [(20.5, 21.41), (20.5, 44.9), (21.25, 45.65), (21.25, 46.45), "C202.1", "C201.1", "C8.1"], PWR)
+    T("VS", [(20.5, 21.41), (20.5, 44.72), (21.25, 45.47), (21.25, 46.45), "C202.1", "C201.1", "C8.1"], PWR)
     T("VS", ["U10.2", (15.42, 45.7), (16.92, 44.2), (20.5, 44.2)], PWR)      # a T square off the trunk; one 45 and straight up into the sensor's pad
     # the reference's input: one bus through the north pads of its parts, then down between
     # C-REF-IN's pads and the reference's own into pin 2
-    T("REF_VIN", ["R6.2", (48.25, 24.5), (37.44, 24.5), (37.04, 24.1), (37.04, 21.77), (36.64, 21.37), "U4.2"], 0.3)
+    T("REF_VIN", ["R6.2", (48.25, 24.5), (37.44, 24.5), (37.04, 24.1), (37.04, 21.75), (36.66, 21.37), "U4.2"], 0.3)
     # the ADC's supply: a bus under the row, a stub up into each capacitor, into pin 8
-    T("ADC_VDD", ["R47.2", (42.89, 16.25), (42.59, 15.95), (30.47, 15.95), "U2.8"], PWR)
+    T("ADC_VDD", ["R47.2", (42.888, 16.32), (42.518, 15.95), (30.47, 15.95), "U2.8"], PWR)
     T("ADC_VDD", [(37.47, 15.95), "C2.1"], PWR)
     T("ADC_VDD", [(32.03, 15.95), "C42.1"], PWR)
-    T("ADC_VDD", [(30.47, 15.95), (29.875, 15.95), (29.6, 16.225), "C3.1"], PWR)
+    T("ADC_VDD", [(30.47, 15.95), (29.945, 15.95), (29.6, 16.295), "C3.1"], PWR)
     # 12 V for the buffer, its capacitor at the pin; and for the reference's input resistor
-    T("INST_POS12", ["U3.8", (10.25, 23.595), (9.595, 24.25), (8.9, 24.25)], PWR)      # pin, via, capacitor: straight out of the pin, one step up, level into the via
-    via("INST_POS12", 8.9, 24.25, "C204.1", PWR)
+    T("INST_POS12", ["U3.8", (10.07, 23.595), (9.415, 24.25), (8.85, 24.25)], PWR)      # pin, via, capacitor: straight out of the pin, one step up, level into the via
+    VIAS.append(("INST_POS12", 8.85, 24.25))
+    T("INST_POS12", [(8.85, 24.25), (8.85, 22.95)], PWR)
     T("INST_POS12", ["R6.1", (48.25, 21.35), (47.5, 20.6)], PWR)      # straight out of the pad, one 45 into the via
     via("INST_POS12", 47.5, 20.6)
     # every analog ground pad to the island under it, by its own via
-    for pad, x, y in (("U10.3", 12.88, 45.3), ("C203.2", 9.95, 25.55), ("C204.2", 8.9, 19.9), ("U3.4", 17.9, 27.41),
+    for pad, x, y in (("U10.3", 12.88, 45.3), ("C203.2", 9.95, 25.505), ("C204.2", 8.9, 19.9), ("U3.4", 17.9, 27.41),
                       ("C7.2", 24.0, 23.5), ("C5.2", 28.45, 23.44), ("U4.4", 33.5, 23.91), ("R5.2", 20.91, 18.4),
-                      ("C1.2", 25.45, 18.45), ("C3.2", 27.7, 16.1), ("C42.2", 36.22, 17.25), ("C2.2", 41.69, 17.25),
+                      ("C1.2", 25.45, 18.45), ("C3.2", 27.7, 16.1), ("C42.2", 36.22, ADC_ROW), ("C2.2", 41.69, ADC_ROW),
                       ("U2.3", 23.75, 11.62), ("C6.2", 38.5, 21.2),
                       ("C202.2", 23.25, 48.35), ("C201.2", 26.25, 48.35), ("C8.2", 29.25, 48.35), ("NT2.1", 31.5, 15.2)):
         via(A, x, y, pad, PWR)
@@ -347,14 +348,14 @@ def analog():
     # one entry at the pull-up's pad (owner, 2026-11-22: no two tracks meeting in a pad): pad, via and
     # the line on toward pin 1 stand in a row, the via level with the pad's centre
     via("IO39", 41.35, 19.55)
-    T("IO39", ["R45.2", (41.35, 19.55), (39.85, 19.55), (38.95, 18.65), (26.95, 18.65), (26.3, 18.0), (26.3, 14.155)])      # straight into pin 1 across its long edge
+    T("IO39", ["R45.2", (41.35, 19.55), (39.85, 19.55), (39.2, 18.9), (27.2, 18.9), (26.3, 18.0), (26.3, 14.155)])      # straight into pin 1 across its long edge
     via("ADC_CLK", 32.7, 12.88, "U2.7")
     via("IO37", 34.0, 11.62, "U2.6")
     via("ADC_DIN", 33.35, 10.34, "U2.5")
     # the ADC's own 3V3 (tail() draws its lane): up at a via on the block's tail side, through
     # the chip-select pull-up's pad, and down to the supply resistor
     VIAS.append(("DEV_3V3", 46.72, 21.65))
-    T("DEV_3V3", [(46.72, 21.65), (46.72, 17.75), (46.22, 17.25), "R47.1"])
+    T("DEV_3V3", [(46.72, 21.65), (46.72, 18.0), (46.22, ADC_ROW), "R47.1"])
     T("DEV_3V3", [(46.72, 19.55), "R45.1"])
     # the five bottom lanes from J-MCU end here; tail() draws them as far as HWY
     T("IO39", [(HWY, MOUTH["IO39"]), (42.8, 19.55), (41.35, 19.55)], FINE, "B")      # down at once, clear of the diode's via
@@ -445,10 +446,9 @@ def power():
     the header on the bottom face to the LED driver. 3V3 is J-MCU pin 15 round the tail end (drawn in
     stage 3); its trunk starts by R49 and runs the bottom face toward the mouth."""
     # 12 V entry and the inrush switch
-    T("UMBILICAL_POS12", ["J6.3", (290.5, 32.31)], 0.8)
-    T("UMBILICAL_POS12", [(290.5, 32.31), (278.51, 32.31), (277.55, 31.35), (276.35, 31.35)], 0.8)   # to the surge diode, north of the first LED
-    T("UMBILICAL_POS12", ["J6.3", (297.6, 30.31), (297.6, 16.4)], 0.6)   # leaves the pin on a line through its centre
-    T("UMBILICAL_POS12", ["Q1.2", "C39.1", (297.6, 16.4), (298.85, 16.4)], 0.5)
+    T("UMBILICAL_POS12", ["J6.3", (294.64, 31.35), (276.35, 31.35)], 0.8)      # one 45 out of the pin, then one straight line into the surge diode's pad, north of the first LED   # to the surge diode, north of the first LED
+    T("UMBILICAL_POS12", ["J6.3", (297.1, 32.31), (298.85, 30.56), "R41.1"], 0.6)   # level out of the pin, one 45, and straight down into R41's pad
+    T("UMBILICAL_POS12", ["Q1.2", "C39.1", "R41.1"], 0.5)
     T("INRUSH_GATE", ["Q1.1", "C39.2", "R41.2", "R42.1"])
     T("INRUSH_GATE", ["Q1.1", "C40.1"])
     T("INRUSH_GATE", ["C39.2", "D21.1"])
@@ -468,15 +468,17 @@ def power():
     two("INST_POS12", 209.5, 20.2)       # C44.1
     two("INST_POS12", 209.5, 13.0)       # C10.1
     T("BUCK_IN", [(244.05, 15.4), (237.0, 15.4), (226.1, 15.4)], 0.6)   # one straight line: inductor, input capacitor, regulator
-    T("BUCK_A_OUT", ["U5.3", (221.02, 18.3), (222.35, 18.3), (223.5, 19.45), "C207.2", "U13.3"], 0.5)      # straight up into C43's pad, and out of it level
-    T("BUCK_A_OUT", ["U13.3", (232.16, 18.85), (232.51, 18.5), "Q2.2"], 0.5)
+    # the regulator's output: straight up into C43's pad, which stands over the pin, and one level line from the pad to the
+    # OR-ing switch; the controller's pin and its capacitor each hang from that line by a stub, square to it (owner, 2026-11-22)
+    T("BUCK_A_OUT", ["U5.3", "C43.1", "Q2.2"], 0.5)
+    T("BUCK_A_OUT", [(229.8, 18.5), "C207.2"])
+    T("BUCK_A_OUT", [(232.163, 18.5), "U13.3"])
     T("BUCK_A_OUT", ["U13.3", (233.125, 19.45), (233.3, 19.625), (233.3, 21.175), (233.475, 21.35), "U13.6"])      # between the pin rows: all the room there is for the two turns
     T("USBOR_GATE", ["U13.5", "Q2.1"])
     T("USBOR_VCAP", ["C207.1", "U13.1"])
-    for pad, x, y in (("U13.2", 231.0, 20.4), ("C208.2", 241.35, 20.6), ("C43.2", 217.1, 18.3)):
+    for pad, x, y in (("U13.2", 231.0, 20.4), ("C208.2", 241.35, 20.6), ("C43.2", 218.07, 16.9)):
         via("PWR_GND", x, y, pad, PWR)
-    T("PWR_GND", [(217.1, 18.3), (217.1, 17.2)], PWR)
-    VIAS.append(("PWR_GND", 217.1, 17.2))
+    via("PWR_GND", 218.07, 20.1, "C43.2", PWR)      # its second via, straight out of the pad's other side
     two("PWR_GND", 237.0, 12.15, 2.35)   # C11.2, under its body
     two("PWR_GND", 214.9, 20.2)          # C44.2
     two("PWR_GND", 214.9, 13.0)          # C10.2
@@ -552,7 +554,7 @@ def tail():
     T("MIDI_TIP_R", ["R50.2", "FB3.1"])
     T("MIDI_RING_R", ["R51.2", (261.93, 40.5), (263.38, 41.95), "FB4.1"])
     T("MIDI_TIP", ["FB3.2", (284.2, 39.4), (285.0, 40.2), (285.0, 41.0)])
-    T("MIDI_TIP", [(282.9, 39.25), (282.9, 40.0)])
+    T("MIDI_TIP", [(282.637, 39.4), "U12.1"])
     T("MIDI_RING", ["FB4.2", (278.9, 41.95), (279.65, 42.7), (284.4, 42.7)])
     T("MIDI_RING", ["U12.3", (282.64, 42.7)])
     via("PWR_GND", 281.5, 41.0, "U12.2")
@@ -789,7 +791,7 @@ def registers():
         for n, (r, cp, pu) in ((x2, far_mouth), (x4, far_tail), (x3, near_tail)):
             T(n, [f"{r}.1", f"{cp}.1", f"{pu}.2"])
         # the far mouth-side key: down between its resistor and capacitor to pin 5
-        T(x2, [(X(64.0), 47.41), (X(64.0), 44.36), (X(64.86), 43.5), f"{u}.5"])
+        T(x2, [(X(64.0), 47.412), (X(64.0), 44.36), (X(64.86), 43.5), f"{u}.5"])
         # the two tail-side keys: along the far band over the header, down beside the register
         T(x4, [f"{far_tail[0]}.1", (X(70.4), 47.41), (X(70.1), 47.11), (X(70.1), 43.05), (X(69.8), 42.75), (X(67.805), 42.75),
                (X(67.405), 42.35), f"{u}.3"])
@@ -846,7 +848,6 @@ def v3():
     tap(173.18, 30.9, ["C14.1", (173.18, 34.25), (172.865, 34.565), "U8.12"])
     T("DEV_3V3", ["U8.12", (172.865, 37.3), (173.315, 37.75), (177.495, 37.75), (177.945, 37.3), "U8.16"])
     T("DEV_3V3", ["U8.16", (178.115, 36.2), "C205.1"])
-    T("DEV_3V3", [(173.5, 37.75), (173.5, 43.588), (175.5, 45.588), "R22.1"], FINE)
     tap(198.0, 30.9, [(196.5, 30.9), "R28.1"])
     T("DEV_3V3", [(213.4, lane(213.4)), (213.4, 29.3), (215.0, 30.9)], W, "B")     # round C28's ground via
     VIAS.append(("DEV_3V3", 215.0, 30.9))
@@ -855,6 +856,9 @@ def v3():
     T("DEV_3V3", [(256.7, TRUNK), (256.7, 34.6), (256.0, 35.3), (191.55, 35.3), (190.85, 36.0), (190.85, 44.6)], W, "B")
     VIAS.append(("DEV_3V3", 190.85, 44.6))
     T("DEV_3V3", [(190.85, 44.6), (190.85, 46.0), (190.55, FB_Y), "FB2.1"])
+    # ...and on along the bottom face, north of the header's pins, to the far key's pull-up: a via under its pad, as the left hand's
+    T("DEV_3V3", [(190.85, 44.6), (190.85, 45.15), (190.55, 45.45), (177.65, 45.45), (176.5, 44.3)], W, "B")
+    via("DEV_3V3", 176.5, 44.3, "R22.1")
     for x, r in ((222.5, "R24.1"), (212.5, "R26.1")):
         T("DEV_3V3", [(x, 35.3), (x, 44.3)], W, "B")
         via("DEV_3V3", x, 44.3, r)
@@ -882,21 +886,18 @@ def planes_in():
     via(G, 254.25, 28.5, "C45.2", PWR)
     via(P12, 250.0, 28.5, "C45.1", PWR)
     # the mouth-end LED, whose capacitor stands north of it: 12 V passes between its two columns of pads
-    T(P12, ["D20.2", (24.9, 28.5), (25.35, 28.95), "C38.1"], PWR)
-    via(P12, 25.35, 34.4, "C38.1", PWR)
-    via(G, 28.45, 33.0, "C38.2", PWR)
+    T(P12, ["D20.2", (25.08, 28.5), (25.9, 29.32), "C38.1"], PWR)
+    via(P12, 25.9, 34.4, "C38.1", PWR)
+    via(G, 29.0, 33.0, "C38.2", PWR)
     via(P12, 37.9, 34.0, "C47.1", PWR)
     via(G, 40.95, 32.65, "C47.2", PWR)
     # the key combs' capacitors
     for pad, vx, vy in (("C15.2", 75.5, 30.9), ("C19.2", 155.0, 30.9), ("C23.2", 192.0, 30.9), ("C24.2", 212.0, 30.9),
                         ("C16.2", 65.5, 44.3), ("C18.2", 101.5, 44.3), ("C17.2", 111.5, 44.3),
-                        ("C20.2", 172.8, 44.7), ("C22.2", 209.5, 44.3), ("C21.2", 219.5, 44.3)):
+                        ("C20.2", 173.5, 44.3), ("C22.2", 209.5, 44.3), ("C21.2", 219.5, 44.3)):
         VIAS.append((G, vx, vy))
         py = 31.05 if vy < 40 else 45.55
         px = float({"C15": 77.0, "C19": 153.5, "C23": 193.5, "C24": 213.5}.get(pad[:3], vx))
-        if pad == "C20.2":       # hemmed in by the key's line and the pull-up's 3V3: straight down from the pad's mouth side, the only way out
-            T(G, [(vx, vy), (vx, py)])
-            continue
         T(G, [(vx, vy), (px, vy), pad] if vy < 40 else [(vx, vy), pad], PWR)
     # the registers
     via(G, 59.9, 40.97, "U7.8", PWR)
@@ -922,8 +923,8 @@ def planes_in():
     via(G, 268.6, 33.81, "U6.7")
     VIAS.append((G, 266.88, 24.5))                                  # between pin 1 and R10's ground end
     T(G, ["U6.1", (266.88, 24.5), (267.49, 23.89), "R10.2"])
-    VIAS.append((G, 260.4, 23.15))
-    T(G, ["C12.2", (260.9, 22.65), (260.4, 23.15)], PWR)
+    VIAS.append((G, 260.22, 23.15))
+    T(G, ["C12.2", (260.72, 22.65), (260.22, 23.15)], PWR)
     via(G, 277.0, 19.2, "U1.2")                                     # U1's ground via: just off the pad, IO36 and 3V3 passing north of it
     via(P12, 272.3, 34.2, "C46.1", PWR)
     via(G, 275.55, 35.6, "C46.2", PWR)

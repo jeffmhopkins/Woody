@@ -114,9 +114,9 @@ def routes(cu, sw):
     x11, x16 = upin(11)[0], upin(16)[0]
     yr5, yr4, yr = pu1["RH5"][1], pu1["RH4"][1], pu1["RH3"][1]
     xe = sw["RH4"][0] + X_CAP + 1.3      # round RH4, outside its capacitor
-    cu.track(V33, [(x16, ch(0.9)), upin(16), (x16, Y_CAPS)], PW)       # a T off the bar: straight up through pin 16 into C9
-    cu.track(V33, [j, c8, (c8[0] + EXIT, c8[1]), (c8[0] + EXIT + Y_RAIL - c8[1], Y_RAIL), (x11 - 0.5, Y_RAIL), (x11, Y_RAIL - 0.5),
-                   (x11, Y_CAPS), upin(11), (x11, ch(1.19)), (x11 + 0.29, ch(0.9)), (xt - 0.5, ch(0.9)), (xt, ch(0.4)), (xt, yr5 + 3.0), (xt + 3.0, yr5),
+    cu.track(V33, [(x16, ch(0.3)), upin(16), (x16, Y_CAPS)], PW)       # a T off the bar: straight up through pin 16 into C9
+    cu.track(V33, [j, c8, (c8[0] + EXIT + 0.2, c8[1]), (c8[0] + EXIT + 0.2 + Y_RAIL - c8[1], Y_RAIL), (x11 - 0.5, Y_RAIL), (x11, Y_RAIL - 0.5),
+                   (x11, Y_CAPS), upin(11), (x11, ch(1.0)), (x11 + 0.7, ch(0.3)), (xt - 0.5, ch(0.3)), (xt, ch(-0.2)), (xt, yr5 + 3.0), (xt + 3.0, yr5),
                    pu1["RH5"], (xe - 6.3, yr5), (xe, yr5 - 6.3), (xe, yr4)], PW)
     cu.track(V33, [pu1["RH6"], pu1["RH4"], (xw + 3.8, yr4), (xw + 3.8 - (yr - yr4), yr),     # one diagonal between the two rails (owner, 2026-11-20)
                   

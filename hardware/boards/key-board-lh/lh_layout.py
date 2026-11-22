@@ -98,9 +98,9 @@ def ch(d):
     return UY + d
 
 
-Y_CAPS = UY + 5.41            # C8, C6: far enough past U1's pads that a pin's line leaves its pad straight, steps once at 45 and enters the capacitor straight (pcb.PAD_CLEAR each end)
-NECK = (UY + 3.75, 0.63)      # that step: where it starts, and how far - a capacitor's pad pitch less the pins'
-Y_RAIL = UY + 6.94            # the 3V3 spine past the far row: through R11.1
+Y_CAPS = UY + 5.77            # C8, C6: far enough past U1's pads that a pin's line leaves its pad straight, steps once at 45 and enters the capacitor straight (pcb.PAD_CLEAR each end)
+NECK = (UY + 3.93, 0.63)      # that step: where it starts, and how far - a capacitor's pad pitch less the pins'
+Y_RAIL = UY + 7.48            # the 3V3 spine past the far row: through R11.1
 Y_VIA = Y_CAPS + 1.65         # C8's and C6's ground vias, past their pads
 
 # (x, y, which way pad 1 faces) - the way is found on the board, not assumed (pcb_hand.seat)
@@ -151,9 +151,9 @@ def routes(cu, sw):
     # level bar and does not fold back inside it (owner, 2026-11-22: no two tracks meeting at a
     # point in a pad, and a branch is a T)
     ny, nd = NECK
-    cu.track(V33, [(x16, ch(0.9)), upin(16), (x16, ny), (x16 + nd, ny + nd), (x16 + nd, Y_CAPS)], PW)       # a T off the bar: up through pin 16 and into C6
-    cu.track(V33, [j, c7, (c7[0] + EXIT, c7[1]), (c7[0] + EXIT + Y_RAIL - c7[1], Y_RAIL), r11, (x12 - 0.5, Y_RAIL), (x12, Y_RAIL - 0.5),
-                (x12, Y_CAPS), upin(12), (x12, ch(1.19)), (x12 + 0.29, ch(0.9)), (xt - 0.5, ch(0.9)), (xt, ch(0.4)), (xt, yr5 + 3.0), (xt + 3.0, yr5),
+    cu.track(V33, [(x16, ch(0.3)), upin(16), (x16, ny), (x16 + nd, ny + nd), (x16 + nd, Y_CAPS)], PW)       # a T off the bar: up through pin 16 and into C6
+    cu.track(V33, [j, c7, (c7[0] + EXIT + 0.2, c7[1]), (c7[0] + EXIT + 0.2 + Y_RAIL - c7[1], Y_RAIL), r11, (x12 - 0.5, Y_RAIL), (x12, Y_RAIL - 0.5),
+                (x12, Y_CAPS), upin(12), (x12, ch(1.0)), (x12 + 0.7, ch(0.3)), (xt - 0.5, ch(0.3)), (xt, ch(-0.2)), (xt, yr5 + 3.0), (xt + 3.0, yr5),
                 pu1["LH5"], (xe - 6.3, yr5), (xe, yr5 - 6.3), (xe, yr4 + 1.5), (xe - 1.5, yr4), pu1["LH4"], (xw + 3.8, yr4),
                 (xw + 3.8 - (yr - yr4), yr), pu1["LH3"], pu1["LH2"], pu1["LH1"]], PW)
 
@@ -175,8 +175,8 @@ def routes(cu, sw):
     cu.track("/KEY_LH3", tail_end(cap, "LH3") + [(xl3, 31.5), (x4, 31.5 + xl3 - x4), (x4, y4)])
     cu.track("/KEY_LH4", mouth_end(ser, "LH4", xl4) + [(xl4, 32.1), (x3, 32.1 + xl4 - x3), (x3, y3)])
     # LH5: out of the far row between C8 and C6, over C6's ground via, and straight down the corridor
-    cu.track("/KEY_LH5", [(x14, y14), (x14, ny), (x14 + 0.3, ny + 0.3), (x14 + 0.3, Y_VIA + 0.55), (x14 + 0.8, Y_VIA + 1.05),
-                       (xl5 - 2.0, Y_VIA + 1.05), (xl5, Y_VIA - 0.95)] + mouth_end(ser, "LH5", xl5)[::-1])
+    cu.track("/KEY_LH5", [(x14, y14), (x14, ny), (x14 + 0.3, ny + 0.3), (x14 + 0.3, Y_VIA + 0.5), (x14 + 0.8, Y_VIA + 1.0),
+                       (xl5 - 2.0, Y_VIA + 1.0), (xl5, Y_VIA - 1.0)] + mouth_end(ser, "LH5", xl5)[::-1])
     # the free input: pin 11 up into its pull-up
     x11, y11 = upin(11)
     cu.track("/KEY_FREE3", [(x11, y11), (x11, Y_RAIL - 1.825)])      # straight up into its pull-up's pad
