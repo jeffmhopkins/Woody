@@ -3,7 +3,7 @@ ECHO: "DRC", "INFO", "tbd parameters in play", 66, ["stack_cap_clear", "stack_ca
 ECHO: "DRC", "INFO", "overall length (derived)", 334.3, "mm = 13.1614 in; mouth cap to LH1 50, keys 184 centre to centre, last key to tail face 100.3"
 ECHO: "DRC", "NOTE", "what the mouth end needs", "the first top key", "25 mm from the mouth cap to LH1"
 ECHO: "DRC", "NOTE", "what the tail end needs", "the LED matrix centred after the keys, with the etherCON behind it", "100.3 mm after the last key"
-ECHO: "DRC", "INFO", "behind the Matrix, to the tail face", 33.15, "mm = clearance 3 + the etherCON's adapter 1.6 + the connector to its flange 18.3 + tail cap 6 - J-UMB passes under the Matrix"
+ECHO: "DRC", "INFO", "behind the Matrix, to the tail face", 33.15, "mm = clearance 3 + J-UMB's socket's share 4.25 + the etherCON's adapter 1.6 + the connector to its flange 18.3 + tail cap 6 - J-UMB passes under the Matrix"
 ECHO: "DRC", "PASS", "J-UMB's socket between the main board and the adapter", [8.5, 299.9, 308.4], "mm: the socket's depth (boards.umb_socket_d), and along the body the main board's tail end and the adapter's rear face it stands between"
 ECHO: "DRC", "PASS", "etherCON adapter behind the Matrix", 7.25, "mm from the Matrix's tail edge (and any plug off it) to the adapter's rear face; the adapter stands the connector's full height"
 ECHO: "DRC", "PASS", "J-UMB passes under the Matrix", 15.54, "mm below the Matrix's underside parts"
