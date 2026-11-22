@@ -13,10 +13,12 @@ they stand at that revision, with KiCad 9.0.9. Every figure below is `[test]`.
 | F3-1 | **left, owner's choice** (2026-11-22) | Rings unchanged at 0.185 mm |
 | F4-1 | **closed** | `PWR_GND` (In1) and `INST_POS12` (In2) are 1.0 mm from both U-bolt cut-outs (was 0.3); new rule areas "U-bolt leg 1 planes", "U-bolt leg 2 planes" on In1 and In2 |
 | F5-1 | **closed** | J1's ground pins on main-board In1 and matrix-carrier B.Cu each reach the plane by a spoke. `img/after-F5-1-J1-main.png` |
-| F6-1 | **closed for the vias** | Vias on key-board-lh, key-board-rh and matrix-carrier are 0.8 mm on 0.3 mm, a 0.25 mm ring. The KS-33 and mount pads were not changed and stay at 0.2 mm |
+| F6-1 | **closed; one half of it was wrong** | Vias on key-board-lh, key-board-rh and matrix-carrier are 0.8 mm on 0.3 mm, a 0.25 mm ring. At `6510e5f2` the KS-33 pin pads are 3.5 mm on 3.0 mm, a 0.25 mm ring, on both key boards and main-board. **The carrier's mount pads never had a 0.2 mm ring: the reviewer was wrong.** The footprint puts a 5.4 mm pad on F.Cu and on B.Cu over the 3.1 mm barrel pad, so the ring on each face of the 2-layer carrier is 1.35 mm `[calc: (5.4 − 2.7) / 2]`, and both apertures are in the carrier's `F_Cu` and `B_Cu` Gerbers `[repo]`. The first pass measured the 3.1 mm pad alone. It stands alone only on main-board's In1 and In2, where 0.2 mm is the multilayer recommended figure |
 | F7-1 | **closed** | J6 pin 6 and U5 pin 2 now have four spokes each |
 
-**Nothing regressed.** On all five boards: KiCad DRC 0 violations and 0
+**Run again at `6510e5f2`** (the KS-33 pads enlarged, this branch merged in): the only measurements that moved are the KS-33 rings above.
+
+**Nothing regressed.** On all five boards, at both revisions: KiCad DRC 0 violations and 0
 unconnected; smallest different-net clearance still 0.20 mm; smallest mask web
 0.20 mm; edge clearance 0.30 mm; no silk on pads or holes; no acute joins, no
 dangling ends, no plane feature under 0.2 mm; the committed `fab/` Gerbers and
