@@ -63,21 +63,26 @@ module fab_geom() {
     for (u = ubolt_legs()) hole("oak_bottom", "U-bolt leg", sh(u, o), ubolt_hole_d, "", "through", "MECH-UBOLT");
 
     stock("mouth_cap", ends_mouth_cap_t, [W, T], ["outer face", "inner face"]);
-    layer("mouth_cap", "mouth-cap", "", "through", "outline, breath inlet tap drill");
+    layer("mouth_cap", "mouth-cap", "", "through", "outline, breath inlet tap drill, closure screw hole, wood screw holes");
     hole("mouth_cap", "breath inlet insert, tap drill", tube_yz, inlet_tap_drill_d, "", "through", "INLET-INSERT");
+    hole("mouth_cap", "closure screw", cl_m, closure_screw_hole, "", "through", "MECH-CLOSE-SCREW");
+    hole("mouth_cap", "closure screw head pocket", cl_m, cl_pocket_d, "outer face", cl_mouth_pocket);
+    for (i = [0 : len(cl_pin) - 1]) hole("mouth_cap", str("wood screw ", i + 1, ", countersunk from the outer face"), cl_pin[i], closure_pin_hole, "", "through", "MECH-CLOSE-PIN");
 
     stock("tail_cap", ends_tail_cap_t, [W, T], ["inner face", "outer face"]);
-    layer("tail_cap", "tail-cap", "", "through", "outline, etherCON bore and screw holes, MIDI jack hole");
-    layer("tail_cap", "tail-cap-recess", "outer face", ec_recess_d, "etherCON recess: leaves the connector its panel");
+    layer("tail_cap", "tail-cap", "", "through", "outline, etherCON bore and screw holes, MIDI jack hole, closure and corner screw holes");
+    layer("tail_cap", "tail-cap-recess", "outer face", ec_recess_d, "etherCON recess: leaves the connector its panel, and takes the closure and corner screws' heads");
     layer("tail_cap", "tail-cap-jack", "outer face", midi_cbore_depth, "MIDI jack counterbore round its nut: leaves the jack its panel");
     hole("tail_cap", "etherCON bore", ec_c, ethercon_bore_d, "", "through", "J-UMBILICAL-INST");
     for (h = ec_holes) hole("tail_cap", "etherCON flange screw", h, ethercon_hole_d, "", "through", "MECH-ETHERCON-SCREW");
     hole("tail_cap", "MIDI jack", midi_c, midi_hole_d, "", "through", "J-MIDI-OUT");
     hole("tail_cap", "MIDI jack counterbore", midi_c, midi_cbore_d, "outer face", midi_cbore_depth);
+    hole("tail_cap", "closure screw", cl_t, closure_screw_hole, "", "through", "MECH-CLOSE-SCREW");
+    for (i = [0, 1]) hole("tail_cap", str("corner screw ", cl_corner_name[i]), cl_corner[i], closure_screw_hole, "", "through", "MECH-CLOSE-SCREW");
 
     po = [plate_x0, plate_y0];
     stock("plate_top", plate_thickness, [plate_x1 - x_in0, u_w], ["underside", "top face"]);
-    layer("plate_top", "plate-top", "", "through", "outline, switch cutouts, column screw holes");
+    layer("plate_top", "plate-top", "", "through", "outline, switch cutouts, column screw holes, closure nut's hole");
     for (m = columns()) hole("plate_top", "column screw clearance", sh(m, po), hardware_col_plate_hole, "", "through", "MECH-COL-SCREW");
     stock("plate_bottom", plate_thickness, [bplate_x1 - x_in0, u_w], ["underside", "top face"]);
     layer("plate_bottom", "plate-bottom", "", "through", "outline, thumb switch cutouts, stud and U-bolt holes, windows");

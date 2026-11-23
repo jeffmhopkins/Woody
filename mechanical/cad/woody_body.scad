@@ -41,7 +41,7 @@ ghost_shell = false;  // draw the shell translucent to see inside
 // 2D ones for anything dimensioned; OpenCSG loses part colours on 3D cuts.
 cut = "none";
 cut_at = 0;
-cut_key = "";         // or name a key (or "matrix", or "ribbon" for the left key board's, or "kb_mount" for its tail column): the cut goes through its centre
+cut_key = "";         // or name a key (or "closure_mouth" / "closure_tail" for a closure screw's axis, or "matrix", or "ribbon" for the left key board's, or "kb_mount" for its tail column): the cut goes through its centre
 cut_depth = 1000;     // "x" keeps a slab this deep beyond the cut
 figure = false;       // set true by a figure that includes this file
 // Where X = 0 sits in the rendered picture: "mouth" (the model's own frame),
@@ -258,6 +258,7 @@ matrix_xy = [matrix_x(L), W / 2];
 // Where an X section cuts: a number, a key id, or "matrix" for its centre.
 // A Y cut through a named key goes through its Y (its row along the body).
 function cut_pos() = cut_key == "" ? cut_at : cut_key == "matrix" ? matrix_xy[0] :
+        cut_key == "closure_mouth" ? cl_m[0] : cut_key == "closure_tail" ? cl_t[0] :
         cut_key == "kb_mount" ? kb_mounts("left_hand")[2][cut == "y" || cut == "y2d" ? 1 : 0] : cut_key == "ribbon" ? (cut == "y" || cut == "y2d" ? chain_y : chain_x("left_hand"))
         : key_xy(key_by_id(cut_key))[cut == "y" || cut == "y2d" ? 1 : 0];
 
@@ -382,6 +383,7 @@ module plate_top_2d() {
         translate([-plate_x0, -plate_y0]) {
             for (k = top_keys) cutout_at(key_xy(k), key_rot(k), plate_cutout);
             for (m = columns()) translate(m) circle(d = hardware_col_plate_hole);
+            translate(cl_nut_c) square(closure_nut_hole, center = true);   // the closure nut clinches in here (issue #58)
         }
     }
 }
@@ -477,6 +479,8 @@ module mouth_cap_2d() {
     difference() {
         rrect(W, T, stack_edge_r);
         translate(tube_yz) circle(d = inlet_tap_drill_d);   // tapped M8x1.25 for the inlet's insert (issue #36)
+        closure_mouth_hole_2d();                            // the mouth closure screw (issue #58)
+        closure_pin_holes_2d();                             // and the wood screws into the oak top
     }
 }
 // THE BREATH INLET'S AXIS: the mouth cap's centre, where the pass-through was.
@@ -524,6 +528,11 @@ module ec_recess_2d() {
         translate(ec_c) square(ec_fl, center = true);
         for (s = [-1, 1]) translate(ec_pt([s * ethercon_tab_w / 2, ethercon_tab_top])) circle(d = EPS * 10);
     }
+    // the tail closure screw's head (issue #58): the same pass, widened round
+    // it and joined to the recess, so no fin of oak stands between the two
+    hull() { closure_tail_pocket_2d(); translate([ec_c[0], cl_t[1]]) circle(d = cl_pocket_d); }
+    // and the two corner screws' heads, the same way
+    for (c = cl_corner) hull() { translate(c) circle(d = cl_pocket_d); translate([ec_c[0], c[1]]) circle(d = cl_pocket_d); }
 }
 // THE LANES BESIDE THE ETHERCON: from each flange edge to the side's inside
 // face, the adapter's front face to the tail cap. Since issue #45 the MIDI jack
@@ -547,12 +556,57 @@ midi_cbore_depth = ends_tail_cap_t - midi_panel;      // from the outer face, le
 midi_tab_x = x_in1 - midi_jack_collar[1] - midi_jack_body[1] - midi_jack_body[2];
 module midi_cbore_2d() { translate(midi_c) circle(d = midi_cbore_d); }
 
+// THE CLOSURE (issue #58; ADR 0031; config/body.yaml closure): two glued L's
+// - oak bottom + tail cap, oak top + mouth cap - held together by one screw
+// through each end cap. (Y, Z) on an end face, as the caps' own frames.
+// THE MOUTH SCREW: through the mouth cap into a PEM right-angle clinch nut
+// hanging from the key plate's mouth end; the nut's thread is closure.nut_f
+// below the plate's underside.
+cl_m = [closure_mouth_y, z_plate_bot - closure_nut_f];
+cl_nut_x0 = x_in0 + closure_nut_face_edge;            // the nut's threaded face
+cl_nut_c = [cl_nut_x0 + closure_nut_envelope[0] / 2, closure_mouth_y];   // its body's centre, in plan
+cl_pocket_d = hardware_col_pocket_d;                  // the head's flat pocket: the column pockets' Forstner
+cl_mouth_pocket = ends_mouth_cap_t - closure_panel;   // its depth, from the mouth cap's outer face
+// THE TAIL SCREW: through the tail cap into an insert in the end of an oak
+// block glued under the oak top, in the lane beside the etherCON the MIDI
+// jack is not in. Its head's pocket is the etherCON recess, widened round it.
+cl_lane = midi_far ? ec_lane_near : ec_lane;
+cl_blk_y = [cl_lane[0] + closure_block_clear, cl_lane[1] - closure_block_clear];
+cl_blk_x0 = x_in1 - closure_block_l;
+cl_blk_z0 = z_oak_top_bot - closure_block_h;          // the lid block's underside
+cl_t = [(cl_blk_y[0] + cl_blk_y[1]) / 2, z_oak_top_bot - closure_block_h / 2];
+cl_corner_z1 = z_floor + closure_corner_h;            // the back L's corner block's top
+cl_tail_panel = ends_tail_cap_t - ec_recess_d;        // oak under the tail screw's head
+// THE CORNER SCREWS (owner, 2026-11-22: more fasteners in each end piece):
+// through the tail cap into an insert in each of the back L's two corner
+// blocks, one in each lane, on the oak bottom. They stay in: they clamp the
+// tail cap to the back L while its glue sets and back the joint up after.
+cl_far_y = [(midi_far ? ec_lane : ec_lane_near)[0] + closure_block_clear, (midi_far ? ec_lane : ec_lane_near)[1] - closure_block_clear];
+cl_corner_blk_y = [cl_blk_y, cl_far_y];               // the lid screw's lane, then the MIDI jack's
+cl_corner = [for (y = cl_corner_blk_y) [(y[0] + y[1]) / 2, z_floor + closure_corner_h / 2]];
+cl_corner_name = ["near", "far"];
+module closure_corner_holes_2d() { for (c = cl_corner) translate(c) circle(d = closure_screw_hole); }
+// THE MOUTH CAP'S WOOD SCREWS (owner, 2026-11-22): countersunk, through the
+// cap into the oak top's end. They clamp the front L's corner while its glue
+// sets and stay in. Up the face: as high as keeps the head's rim on the
+// cap's flat, under where its roundover starts, and no higher than the
+// panel's mid-thickness.
+cl_pin_z = min(z_oak_top_bot + oak_top_t / 2, T - stack_edge_r - closure_pin_head_d / 2);
+cl_pin = [for (y = closure_pin_y) [y, cl_pin_z]];
+module closure_pin_holes_2d() { for (c = cl_pin) translate(c) circle(d = closure_pin_hole); }
+module closure_mouth_hole_2d() { translate(cl_m) circle(d = closure_screw_hole); }
+module closure_mouth_pocket_2d() { translate(cl_m) circle(d = cl_pocket_d); }
+module closure_tail_hole_2d() { translate(cl_t) circle(d = closure_screw_hole); }
+module closure_tail_pocket_2d() { translate(cl_t) circle(d = cl_pocket_d); }
+
 module tail_cap_2d() {
     difference() {
         rrect(W, T, stack_edge_r);
         translate(ec_c) circle(d = ethercon_bore_d);
         for (h = ec_holes) translate(h) circle(d = ethercon_hole_d);
         translate(midi_c) circle(d = midi_hole_d);   // the MIDI jack (issue #45)
+        closure_tail_hole_2d();                      // the tail closure screw (issue #58)
+        closure_corner_holes_2d();                   // and the back L's two corner screws
     }
 }
 // The matrix window: frosted acrylic, flush with the oak top, on an oak lip
@@ -766,7 +820,11 @@ module inlet_3d() translate([-explode / 3, 0, 0]) {
 // neither the bore nor the flange screw holes.
 module caps() {
     P(C_OAK_DARK, true, "mouth cap") translate([ends_mouth_cap_t - explode / 3, 0, 0]) rotate([90, 0, 90]) mirror([0, 0, 1])
-        render() intersection() { linear_extrude(ends_mouth_cap_t) mouth_cap_2d(); sanded_cap(ends_mouth_cap_t); }
+        render() difference() {
+            intersection() { linear_extrude(ends_mouth_cap_t) mouth_cap_2d(); sanded_cap(ends_mouth_cap_t); }
+            translate([0, 0, closure_panel]) linear_extrude(cl_mouth_pocket + EPS) closure_mouth_pocket_2d();   // the screw head's pocket, from outside
+            for (c = cl_pin) translate([c[0], c[1], ends_mouth_cap_t + EPS]) mirror([0, 0, 1]) closure_pin_head(closure_pin_hole - closure_pin_d);   // the wood screws' countersinks, from outside
+        }
     P(C_OAK_DARK, true, "tail cap") translate([x_in1 + explode / 3, 0, 0]) rotate([90, 0, 90])
         render() difference() {
             intersection() { linear_extrude(ends_tail_cap_t) tail_cap_2d(); sanded_cap(ends_tail_cap_t); }
@@ -1768,6 +1826,48 @@ module hardware_3d() {
             difference() { cylinder(d = hardware_ubolt_spacer_od, h = cb_z - z_bplate_top); translate([0, 0, -1]) cylinder(d = hardware_ubolt_rod_d + 0.2, h = 9); }
 }
 
+// THE CLOSURE'S HARDWARE (issue #58; ADR 0031). A screw is drawn head out:
+// +1 toward the tail. Exploded, each part moves with the L it belongs to.
+module closure_screw(x_head, dir, yz) translate([x_head, yz[0], yz[1]]) rotate([0, dir * 90, 0]) {
+    translate([0, 0, -closure_screw_head_h]) cylinder(d = closure_screw_head_d, h = closure_screw_head_h);
+    cylinder(d = closure_screw_d, h = closure_screw_l);
+}
+// A countersunk head, apex down -Z from its flat top at the origin: 90 degrees.
+// 'over' widens it by the clearance hole's margin, for the countersink.
+// The cone runs on down to the thread's diameter, inside the clearance hole,
+// so its small end shares no edge with the hole (CGAL fails on that).
+module closure_pin_head(over = 0) cylinder(d1 = closure_pin_head_d + over, d2 = closure_pin_d, h = (closure_pin_head_d + over - closure_pin_d) / 2);
+module closure_3d() {
+    for (i = [0 : len(cl_pin) - 1]) P([0.20, 0.20, 0.22], false, str("closure pin ", i + 1)) translate([-explode * 0.6, cl_pin[i][0], cl_pin[i][1]]) rotate([0, 90, 0]) {
+        hull() { cylinder(d = closure_pin_head_d, h = EPS); translate([0, 0, (closure_pin_head_d - closure_pin_d) / 2]) cylinder(d = closure_pin_d, h = EPS); }
+        cylinder(d = closure_pin_d, h = closure_pin_l);
+    }
+    // mouth: head on the pocket's floor in the mouth cap, thread into the nut
+    P([0.20, 0.20, 0.22], false, "closure screw mouth") translate([-explode * 0.6, 0, 0]) closure_screw(cl_mouth_pocket, 1, cl_m);
+    P(C_STEEL, false, "closure nut") translate([0, 0, explode * 1.5])
+        translate([cl_nut_x0, cl_m[0] - closure_nut_envelope[1] / 2, z_plate_bot - closure_nut_envelope[2]])
+            cube([closure_nut_envelope[0], closure_nut_envelope[1], closure_nut_envelope[2] + plate_thickness]);
+    // tail: head on the recess's floor in the tail cap, thread into the lid block's insert
+    P([0.20, 0.20, 0.22], false, "closure screw tail") translate([explode * 0.6, 0, 0]) closure_screw(L - ec_recess_d, -1, cl_t);
+    translate([0, 0, 2 * explode]) {
+        P(C_OAK_DARK, false, "closure block lid") difference() {
+            translate([cl_blk_x0, cl_blk_y[0], cl_blk_z0]) cube([closure_block_l, cl_blk_y[1] - cl_blk_y[0], closure_block_h]);
+            translate([x_in1 - closure_insert_l, cl_t[0], cl_t[1]]) rotate([0, 90, 0]) cylinder(d = closure_insert_hole, h = closure_insert_l + EPS);
+        }
+        P(C_BRASS, false, "closure insert") translate([x_in1 - closure_insert_l, cl_t[0], cl_t[1]]) rotate([0, 90, 0])
+            difference() { cylinder(d = closure_insert_hole, h = closure_insert_l); translate([0, 0, -EPS]) cylinder(d = closure_screw_d, h = closure_insert_l + 2 * EPS); }
+    }
+    for (i = [0, 1]) let(y = cl_corner_blk_y[i], c = cl_corner[i], n = cl_corner_name[i]) {
+        P(C_OAK, false, str("closure block corner ", n)) translate([0, 0, -explode]) difference() {
+            translate([cl_blk_x0, y[0], z_floor]) cube([closure_block_l, y[1] - y[0], closure_corner_h]);
+            translate([x_in1 - closure_insert_l, c[0], c[1]]) rotate([0, 90, 0]) cylinder(d = closure_insert_hole, h = closure_insert_l + EPS);
+        }
+        P(C_BRASS, false, str("closure insert corner ", n)) translate([x_in1 - closure_insert_l, c[0], c[1] - explode]) rotate([0, 90, 0])
+            difference() { cylinder(d = closure_insert_hole, h = closure_insert_l); translate([0, 0, -EPS]) cylinder(d = closure_screw_d, h = closure_insert_l + 2 * EPS); }
+        P([0.20, 0.20, 0.22], false, str("closure screw corner ", n)) translate([explode * 0.6, 0, 0]) closure_screw(L - ec_recess_d, -1, c);
+    }
+}
+
 // The shell is drawn LAST: a see-through (ghosted or faded) part drawn
 // before what is behind it hides it in the preview renderer, which is how
 // the ribbons went missing from the first renders of them.
@@ -1777,7 +1877,7 @@ module assembly() {
     if (show_leds) translate([0, 0, e_mb]) led_row();
     if (show_routing) routing_3d();
     if (show_boards) { parts_3d(); translate([0, 0, e_mb]) { sensor_3d(); centre_board_3d(); } ribbons_3d(); tail_wiring_3d(); }
-    if (show_hardware) hardware_3d();
+    if (show_hardware) { hardware_3d(); closure_3d(); }
     if (show_lid) lid(explode);
     if (show_caps) caps();
     if (show_u) u_channel();
@@ -2430,6 +2530,57 @@ module drc_report() {
                  gap < branding_mark_gap ? str("; under the mark's own ", branding_mark_gap, " at 100 % (branding/README.md, the laser guideline), so the etch test on an offcut (ROADMAP) confirms it holds and the two pours stay apart") : ""));
     drc(undef, "logo etch depth and fill", [logo_depth, logo_fill], "mm, and what fills it (branding/README.md 'Colour fill': deeper than a plain burn, so the epoxy keys in)");
 
+    // ---- THE CLOSURE (issue #58; ADR 0031; config/body.yaml closure) ----
+    echo("DRC", "INFO", "closure: the two end screws", [cl_m, cl_t, cl_mouth_pocket, ec_recess_d],
+         "(across, up) on the mouth face and on the tail face, mm from the near edge and the back face; then how deep each head's pocket is cut from outside (the tail's is the etherCON recess)");
+    let(span = cl_blk_x0 - (cl_nut_x0 + closure_nut_envelope[0]), off = [cl_m[0], cl_t[0]])
+        drc(undef, "closure: lid span between its two screws", [span, off, W],
+            "mm of lid between the key plate's nut and the lid's block with nothing holding it down; and each screw's distance from the near edge, against the body's width - both screws are toward one long edge, so the far edge is held by the caps' clamped faces and the lid's seat alone. The first assembly decides (ADR 0031, Open)");
+    let(free = closure_panel + closure_nut_face_edge, engage = closure_screw_l - free)
+        drc(engage >= hardware_thread_engage_min * closure_screw_d && closure_nut_l >= hardware_thread_engage_min * closure_screw_d,
+            "closure: mouth screw thread in the key plate's nut", [engage, closure_nut_l, hardware_thread_engage_min * closure_screw_d, engage - closure_nut_l],
+            "mm: the screw's length past the oak under its head and the gap to the nut's face; the nut's thread (closure.nut_l); what hardware.thread_engage_min diameters asks; and how far the screw's end stands past the nut (free air behind it)");
+    let(run = closure_screw_l - cl_tail_panel, engage = min(run, closure_insert_l))
+        drc(engage >= hardware_thread_engage_min * closure_screw_d && run <= closure_block_l - 1,
+            "closure: tail screw thread in the lid block's insert", [engage, run, closure_block_l, hardware_thread_engage_min * closure_screw_d],
+            "mm: thread in the insert; how far the screw runs into the block from the cap's inside face (its hole is drilled past the insert); the block's length; and what hardware.thread_engage_min diameters asks");
+    drc(min(closure_panel, cl_tail_panel) >= hardware_col_pocket_skin && cl_pocket_d >= closure_screw_head_d + hardware_col_pocket_clear,
+        "closure: oak under each screw's head", [closure_panel, cl_tail_panel, cl_pocket_d - closure_screw_head_d],
+        "mm of oak the mouth screw and the tail screw clamp, against hardware.col_pocket_skin; and the pocket's diameter over the head's, against hardware.col_pocket_clear");
+    let(web = norm(cl_m - tube_yz) - cl_pocket_d / 2 - inlet_insert_d / 2,
+        edge = min(cl_m[0], W - cl_m[0], cl_m[1], T - cl_m[1]) - cl_pocket_d / 2 - stack_edge_r)
+        drc(web >= tail_web_min && edge >= tail_web_min, "closure: mouth screw pocket clear of the breath inlet", [web, edge],
+            "mm of oak in the mouth cap between the screw head's pocket and the inlet insert's thread, and from the pocket to the cap's nearest edge inside its roundover, each against 2");
+    let(edge = min(cl_t[0], W - cl_t[0], cl_t[1], T - cl_t[1]) - cl_pocket_d / 2 - stack_edge_r,
+        scr = min([for (h = ec_holes) norm(h - cl_t)]) - cl_pocket_d / 2 - ethercon_hole_d / 2,
+        jack = norm(midi_c - cl_t) - cl_pocket_d / 2 - midi_cbore_d / 2)
+        drc(edge >= tail_web_min && scr >= tail_web_min && jack >= tail_web_min, "closure: tail screw pocket in the tail face", [edge, scr, jack],
+            "mm of oak from the tail screw head's pocket (joined to the etherCON recess) to the cap's nearest edge inside its roundover, to the nearer etherCON flange screw's hole, and to the MIDI jack's counterbore, each against 2");
+    let(edge = min([for (c = cl_corner) min(c[0], W - c[0], c[1], T - c[1])]) - cl_pocket_d / 2 - stack_edge_r,
+        scr = min([for (c = cl_corner, h = ec_holes) norm(h - c)]) - closure_screw_hole / 2 - ethercon_hole_d / 2,
+        jack = min([for (c = cl_corner) norm(midi_c - c)]) - cl_pocket_d / 2 - midi_cbore_d / 2,
+        wall_y = min([for (y = cl_corner_blk_y) y[1] - y[0]]) / 2 - closure_insert_od / 2, wall_z = (closure_corner_h - closure_insert_od) / 2)
+        drc(edge >= tail_web_min && scr >= tail_web_min && jack >= tail_web_min && min(wall_y, wall_z) >= closure_insert_wall_min,
+            "closure: corner screws in the tail face and their blocks", [cl_corner, edge, scr, jack, wall_y, wall_z],
+            "(Y, Z) of the two corner screws on the tail face; then mm: oak from a head's pocket to the cap's rounded edge; oak between a screw's hole and the nearest etherCON panel screw's (both heads sit in the one recess, so the holes are what must not meet); oak from a pocket to the MIDI jack's counterbore; and wood round each block's insert across and up, against closure.insert_wall_min. The thread's length is the lid screw's (the rule above): the same screw, insert and panel");
+    let(wall = min(cl_pin_z - z_oak_top_bot, T - cl_pin_z) - closure_pin_d / 2, in_top = closure_pin_l - ends_mouth_cap_t,
+        groove = min([for (c = cl_pin) min(c[0] - u_y0, W - u_y0 - c[0])]) - closure_pin_d / 2,
+        head = T - stack_edge_r - (cl_pin[0][1] + closure_pin_head_d / 2),
+        slot = min([for (k = top_keys) key_xy(k)[0]]) - switch_keycap / 2 - stack_cap_clear - (x_in0 + in_top))
+        drc(min(wall, groove) >= closure_pin_wall_min && head >= 0 && slot >= closure_pin_wall_min && in_top >= ends_mouth_cap_t,
+            "closure: mouth cap's wood screws into the oak top", [cl_pin, wall, groove, head, in_top, slot],
+            "(Y, Z) of each wood screw on the mouth face; then mm: the least oak above or below the thread in the panel's end, and from the thread to the nearer groove's inside wall, both against closure.pin_wall_min; the head's rim below where the cap's roundover starts (negative = the countersink breaks into the round); thread in the oak top; and from a screw's tip to the first cap slot (taken square to the body, so an angled slot's corner reads safe by less than this)");
+    let(w = cl_blk_y[1] - cl_blk_y[0], wall_y = (w - closure_insert_od) / 2, wall_z = (closure_block_h - closure_insert_od) / 2,
+        gap = cl_blk_z0 - cl_corner_z1, behind = ec_pcb_x1 - cl_blk_x0)
+        drc(min(wall_y, wall_z) >= closure_insert_wall_min && gap >= closure_block_gap_min && cl_blk_x0 >= ec_pcb_x1,
+            "closure: lid block in the lane beside the etherCON", [w, wall_y, wall_z, gap, -behind],
+            "mm: the block's width in its lane (closure.block_clear from the side and from the flange); wood round the insert across and up, against closure.insert_wall_min; air between the lid's block and the back L's corner block under it, against closure.block_gap_min; and the block's front face behind the umbilical adapter's (negative = beside the adapter)");
+    let(long_edge = cl_m[0] - (u_y0 + stack_plate_side_clear), far_edge = (W - u_y0 - stack_plate_side_clear) - cl_m[0],
+        web = min([for (k = top_keys) rect_gap(cl_nut_c, key_xy(k), [plate_cutout, plate_cutout], key_rot(k))]) - norm(closure_nut_hole) / 2,
+        col = min([for (m = columns()) norm(m - cl_nut_c)]) - norm(closure_nut_hole) / 2 - hardware_col_plate_hole / 2)
+        drc(min(long_edge, far_edge) >= closure_nut_edge_min && plate_thickness >= closure_nut_sheet_min && min(web, col) >= hardware_col_web_min,
+            "closure: key plate's nut and the plate round it", [min(long_edge, far_edge), closure_nut_edge_min, plate_thickness, web, col],
+            "mm: the nut's centreline to the key plate's nearer long edge, against closure.nut_edge_min (PEM's M, read as that edge - tbd); the plate against the nut's least sheet; and plate metal from the nut's hole (its diagonal) to the nearest switch cutout and column hole, against hardware.col_web_min");
 }
 
 // ============================================================ dispatch ====

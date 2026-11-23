@@ -72,6 +72,8 @@ sets:
         - ["umbilical adapter", "*"]
         - ["USB-C *", "*"]
         - ["logo fill *", "*"]
+        - ["closure block *", "*"]
+        - ["closure nut", "*"]
         - ["cap socket <same>", "cap <same>"]
         - ["travel <same>", "cap*<same>"]
     - class: coaxial
@@ -85,6 +87,10 @@ sets:
         - ["Matrix carrier screw <same>", "Matrix carrier spacer <same>"]
         - ["Matrix carrier screw *", "oak top"]
         - ["U-bolt", "U-bolt *"]
+        - ["closure screw mouth", "mouth cap"]
+        - ["closure screw tail", "tail cap"]
+        - ["closure pin *", "mouth cap"]
+        - ["closure screw corner *", "tail cap"]
     - class: through-hole
       min: {value: 0.2, status: nominal, source: "[calc] a rod through a hole it does not locate in: the hole's cut or drilled position +/-0.13 [from memory] on each of the two parts it passes = 0.18, held at 0.2 (config/body.yaml hardware.ubolt_hole_clear gives 0.25 a side)"}
       pairs:

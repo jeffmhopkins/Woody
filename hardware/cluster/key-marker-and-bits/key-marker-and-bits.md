@@ -157,6 +157,6 @@ and the only devices holding free bits (`left_thumb`, `left_hand`) have both.
 Three more straps would raise the single-bit-flip catch from 8 in 32 to 11 in
 32 and nothing else. A pulled-up free bit reads high on every good frame
 anyway, so firmware may check it as a high marker at no cost to the board,
-while the pull-up keeps it usable as an input: since ADR 0025 the body opens
-by cutting its silicone, so a free bit is no longer one that can never become
+while the pull-up keeps it usable as an input: the body opens (on two
+screws since ADR 0031), so a free bit is no longer one that can never become
 a switch. Both key boards are laid out with it (`R11`).

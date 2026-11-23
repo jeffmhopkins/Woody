@@ -182,6 +182,22 @@ renders:
     projection: o
     camera: [0, 22, 0, 0, 0, 0, 250]
     defines: {origin: "centre", cut: "y2d", cut_at: 28.5}
+  - name: section-closure-mouth
+    title: Section along the body through the mouth closure screw - mouth cap, screw, the key plate's right-angle nut (issue 58)
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/section-closure-mouth.png
+    imgsize: [1400, 1000]
+    projection: o
+    camera: [24, 20, 0, 0, 0, 0, 120]
+    defines: {origin: "mouth", cut: "y2d", cut_key: "closure_mouth"}
+  - name: section-closure-tail
+    title: Section along the body through the tail closure screw - tail cap, screw, the lid's oak block and its insert, the corner block under it (issue 58)
+    src: mechanical/cad/woody_body.scad
+    out: mechanical/renders/section-closure-tail.png
+    imgsize: [1400, 1000]
+    projection: o
+    camera: [-24, 20, 0, 0, 0, 0, 120]
+    defines: {origin: "tail", cut: "y2d", cut_key: "closure_tail"}
   - name: section-key
     title: Cross-section through RH3, seen from the tail
     src: mechanical/cad/fig_section_key.scad

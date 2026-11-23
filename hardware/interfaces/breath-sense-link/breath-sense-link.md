@@ -11,8 +11,8 @@ This circuit has a directory of its own because it crosses a board boundary.
 The differential pole, the effective gain and `inamp-full-scale` with it, the
 sensor span and pedestal, the CMRR term and the `R1` power argument are all
 derived at the module end from parts fitted at the instrument end, 2 m away,
-inside a body that opens only by cutting its silicone and lifting the key
-plate off the cassette's columns (ADR 0025).
+inside a body that opens by taking out its two closure screws and lifting the
+front L (ADR 0031), then the key plate off the cassette's columns (ADR 0025).
 
 **Neither schematic is redrawn here.** The instrument end is drawn in
 [`carrier.md`](../../carrier/carrier.md) §2, in one connected picture that also
@@ -640,8 +640,9 @@ I = (12 − 0.2) / 1 kΩ = 11.8 mA      P = 139 mW
 ```
 
 against an 0805's ~125 mW. **The part fails in the fault the design calls
-survivable**, and it is instrument-side, inside a body glued shut (ADR 0025)
-and reached only by cutting it open.
+survivable**, and it is instrument-side, on the main board, reached by
+opening the body (ADR 0031) and lifting the key plate off its columns
+(ADR 0025).
 `bom.csv` makes exactly this
 argument, in full, for the module-side `R-OUT-PROT` — and it was never carried
 across to the instrument-side twin.

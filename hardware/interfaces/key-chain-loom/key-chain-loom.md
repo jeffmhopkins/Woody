@@ -262,7 +262,7 @@ cassette's columns, which stand through the whole gap the ribbon lies in
 **Why it is as long as it is** (owner, 2026-09-27: long enough "to have the
 top off and still connect the ribbon before tightening down"). Since the
 cassette (ADR 0025), tightening down is screwing the key plate onto its
-columns, on the bench or, in service, once the oak top is cut free. The
+columns, on the bench or, in service, once the front L is lifted off (ADR 0031). The
 service position is the key plate, with both key boards on it, **held raised
 straight up off its columns** far enough for a hand to reach the main board's
 sockets (`routing.chain_service`, `routing.chain_raise`, plus
