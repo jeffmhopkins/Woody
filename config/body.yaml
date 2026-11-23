@@ -1672,6 +1672,11 @@ closure:
     status: nominal
     source: "divisions across the body's width, odd, so the cap keeps both outer ones - the body's corners stay the cap's and the sides' grooves end against it [design]"
     decided_by: "drc.echo 'closure: finger joints at all four corners'"
+  tail_centre_finger:
+    value: false
+    status: settled
+    source: "whether the oak top and the oak bottom keep their middle finger at the tail cap. No: the tail cap is whole across its middle at both edges, where the etherCON's bore leaves the least oak (owner, 2026-11-23: 'the bottom plate with the ethercon needs to not have the center finger cutout, to bolster the physical strength'). The mouth cap keeps every finger"
+    decided_by: "the owner"
   finger_fit:
     value: 0.05
     status: tbd

@@ -632,9 +632,10 @@ def cmd_drawing(a):
                 notes.append(f"THREADED INSERTS {', '.join(h['id'] for h in ins)}: {len(ins)} x {r['part']} "
                              f"({r['manufacturer']}, BOM {ref}) - {r['description']}")
         if part == "oak_top":
-            notes.append("TAIL END: the tail cap's etherCON recess is carried across the end of the finger it meets, cut "
-                         "from the underside (mechanical/drc.echo 'closure: finger joints at all four corners' prints "
-                         "how deep and how far in). Cut it with the lid dry-fitted to the tail cap, or by hand to match")
+            if body()["closure"]["tail_centre_finger"]["value"]:
+                notes.append("TAIL END: the tail cap's etherCON recess is carried across the end of the finger it meets, cut "
+                             "from the underside (mechanical/drc.echo 'closure: finger joints at all four corners' prints "
+                             "how deep and how far in). Cut it with the lid dry-fitted to the tail cap, or by hand to match")
             notes.append("MAGNETS: one glued to the floor of each magnet pocket (BOM MECH-LID-MAGNET), any pole down, "
                          "its face just inside the underside (config/body.yaml closure.magnet_recess)")
         if part == "oak_bottom":

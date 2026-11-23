@@ -9,7 +9,8 @@ joints); each carries a dated note pointing here.
 inside corners are square, cut on end (point 2); and each magnet pulls on
 the flush head of a stud in the key plate, the column screws having moved to
 the back ([ADR 0025](0025-the-cassette.md), *Amendment, 2026-11-23*; points
-5 and 6).
+5 and 6); and the tail cap is whole across its middle, the two panels
+joining it by their outer fingers only (point 2).
 
 ## Context
 
@@ -86,10 +87,18 @@ offered hidden magnets, a snug fit alone, or gluing the body shut:
    it would make them dovetails, small and fragile at this size (owner:
    *"Okay, keep finger"*). The
    MIDI jack sits low enough in the tail cap that its counterbore keeps oak
-   between itself and the lid's notches, so every corner has all its fingers
+   between itself and the lid's notches, so the jack costs no corner a finger
    (owner, 2026-11-23: *"Seems like we should be able to move the TRS midi
    Jack down lower to get that extra finger in?"*; *"MIDI jack in the tail
    cap"*).
+   **At the tail cap neither panel has its middle finger** (owner,
+   2026-11-23: *"the bottom plate with the ethercon needs to not have the
+   center finger cutout, to bolster the physical strength"*;
+   `closure.tail_centre_finger`). The etherCON's bore leaves the least oak
+   in the middle of the cap, so the cap stays whole there at both edges and
+   each panel joins it by its two outer fingers. The etherCON's recess then
+   lies wholly in the cap and no longer crosses the end of a finger of the
+   lid. The mouth cap keeps every finger.
 3. **Each L's own corner is glued; the two corners where the L's meet are
    dry.** Glued: oak bottom to tail cap, oak top to mouth cap. Dry: oak top
    into the tail cap, oak bottom into the mouth cap. The dry notches open the

@@ -7,7 +7,7 @@ Thickness: 6 mm (ends.tail_cap_t)
 999
 Quantity per instrument: 1
 999
-Units mm. Cut every closed outline. cad cd533bc7feb5; verify: python3 tools/cad.py explain fab-dxf-tail-cap
+Units mm. Cut every closed outline. cad 84988010c0ce; verify: python3 tools/cad.py explain fab-dxf-tail-cap
   0
 SECTION
   2
@@ -315,54 +315,6 @@ LINE
  20
 39
  11
-32.5714
- 21
-39
-  0
-LINE
-  8
-0
- 10
-32.5714
- 20
-39
- 11
-32.5714
- 21
-33
-  0
-LINE
-  8
-0
- 10
-32.5714
- 20
-33
- 11
-24.4286
- 21
-33
-  0
-LINE
-  8
-0
- 10
-24.4286
- 20
-33
- 11
-24.4286
- 21
-39
-  0
-LINE
-  8
-0
- 10
-24.4286
- 20
-39
- 11
 16.2857
  21
 39
@@ -720,54 +672,6 @@ LINE
 0
  10
 16.2857
- 20
-0
- 11
-24.4286
- 21
-0
-  0
-LINE
-  8
-0
- 10
-24.4286
- 20
-0
- 11
-24.4286
- 21
-6
-  0
-LINE
-  8
-0
- 10
-24.4286
- 20
-6
- 11
-32.5714
- 21
-6
-  0
-LINE
-  8
-0
- 10
-32.5714
- 20
-6
- 11
-32.5714
- 21
-0
-  0
-LINE
-  8
-0
- 10
-32.5714
  20
 0
  11

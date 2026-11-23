@@ -623,9 +623,12 @@ module midi_cbore_2d() { translate(midi_c) circle(d = midi_cbore_d); }
 // THE TAIL JOINTS' FINGERS: a division the MIDI jack's counterbore reaches
 // into, at that panel's height, would be left to the cap - a finger there
 // would stand in the jack's nut. The jack's height (midi_c) keeps it out of
-// both panels, so this drops none.
+// both panels, so this drops none for the jack.
+// The MIDDLE division is the cap's too unless closure.tail_centre_finger: the
+// etherCON's bore leaves the least oak there (owner, 2026-11-23).
 function cl_div_clear_of_jack(reaches) = [for (i = cl_div_all)
-    if (!(reaches && midi_c[0] + midi_cbore_d / 2 > i * cl_fp && midi_c[0] - midi_cbore_d / 2 < (i + 1) * cl_fp)) i];
+    if (!(reaches && midi_c[0] + midi_cbore_d / 2 > i * cl_fp && midi_c[0] - midi_cbore_d / 2 < (i + 1) * cl_fp)
+        && (closure_tail_centre_finger || i != (closure_finger_n - 1) / 2)) i];
 cl_div_top_tail = cl_div_clear_of_jack(midi_c[1] + midi_cbore_d / 2 > z_oak_top_bot);
 cl_div_bottom_tail = cl_div_clear_of_jack(midi_c[1] - midi_cbore_d / 2 < oak_bottom_t);
 
@@ -2570,7 +2573,7 @@ module drc_report() {
         drc(closure_finger_n % 2 == 1 && closure_finger_relief_d <= cl_fp / 2 && groove >= 0 && scr >= tail_web_min / 2 && rec >= 0 && inlet >= tail_web_min && oak_top_t - tab >= hardware_col_pocket_skin
             && min(len(cl_div_top_tail), len(cl_div_bottom_tail)) >= 2,
             "closure: finger joints at all four corners", [closure_finger_n, cl_fp, closure_finger_relief_d, [cl_div_all, cl_div_all, cl_div_top_tail, cl_div_bottom_tail], groove, scr, rec, jack, inlet, [tab, oak_top_t - tab, ec_recess_d]],
-            "divisions across the body and one division's width, mm; the corner relief's diameter (at most half a division); which divisions are the panel's fingers at the oak top's mouth end, the oak bottom's mouth end, the oak top's tail end and the oak bottom's tail end (a division the MIDI jack's counterbore reaches into is left to the cap: at least two fingers must remain); how far a side's groove ends inside the cap's outer division (negative = the groove would run out through a finger); oak in the tail cap between the lower etherCON panel screw's hole and the oak bottom's fingers; the etherCON flange's lower edge above those fingers (its recess stops at them); the MIDI jack's counterbore to the nearer panel's fingers (negative = it reaches in, and that division is the cap's); the breath inlet to the nearer panel's fingers; and how far the etherCON's recess, round its PUSH tab, reaches up into the oak top's fingers at the tail, the wood left over it, and how far in from the end face it goes - that corner is cut from the end of the finger it meets, from the underside (0 or less = it does not reach)");
+            "divisions across the body and one division's width, mm; the corner relief's diameter (at most half a division); which divisions are the panel's fingers at the oak top's mouth end, the oak bottom's mouth end, the oak top's tail end and the oak bottom's tail end (a division the MIDI jack's counterbore reaches into is left to the cap, and so is the middle one at the tail unless closure.tail_centre_finger: at least two fingers must remain); how far a side's groove ends inside the cap's outer division (negative = the groove would run out through a finger); oak in the tail cap between the lower etherCON panel screw's hole and the oak bottom's fingers; the etherCON flange's lower edge above those fingers (its recess stops at them); the MIDI jack's counterbore to the nearer panel's fingers (negative = it reaches in, and that division is the cap's); the breath inlet to the nearer panel's fingers; and how far the etherCON's recess, round its PUSH tab, reaches up into the oak top's fingers at the tail, the wood left over it, and how far in from the end face it goes - that corner is cut from the end of the finger it meets, from the underside (0 or less = it does not reach)");
 }
 
 // ============================================================ dispatch ====

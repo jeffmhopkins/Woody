@@ -133,7 +133,10 @@ magnets** (owner, 2026-11-22; ADR 0031; issue #58; `config/body.yaml`
   front L lowers straight onto the back L (*"closure: finger joints at all
   four corners"*, which also prints which divisions are fingers at each
   corner). The MIDI jack sits low enough in the tail cap for its counterbore
-  to keep oak below the lid's notches (*"MIDI jack in the tail cap"*).
+  to keep oak below the lid's notches (*"MIDI jack in the tail cap"*). The tail
+  cap is whole across its middle, where the etherCON's bore leaves the least
+  oak: the panels join it by their outer fingers only (owner, 2026-11-23;
+  `closure.tail_centre_finger`).
 - **The magnets.** A disc magnet glued to the floor of a pocket in the oak
   top's underside, over each column, pulls on the steel head of the key
   plate's stud there (*"closure: lid magnets over the key plate's studs"*).
