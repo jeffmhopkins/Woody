@@ -39,13 +39,16 @@ drawing.
   its top face, so the oak top lies flat on the plate; a spacer; the key
   board; an M2.5 female-female hex standoff threaded onto the stud and faced
   to the gap down to the main board (*"column standoff length (derived)"*);
-  the main board; a spacer; the bottom plate; and an M2.5 low-head screw up
-  into the standoff **from the back**. Where the oak bottom has wood enough
-  round it, the screw's head sits in a counterbore in the oak's outside face
-  and clamps the oak to the cassette (`export/oak-bottom-cbores.dxf`); where
-  a thumb slot stands too near, the head bears on the bottom plate through an
-  opening run into that slot (*"column screws: heads on the oak bottom or the
-  bottom plate"* says which, and how much oak is left). The columns are
+  the main board; a spacer; the bottom plate; and an M2.5 flat-head screw up
+  into the standoff **from the back**, its head flush in a countersink in the
+  oak bottom's outside face, clamping the oak to the cassette
+  (`export/oak-bottom-countersinks.dxf`). **Only the columns with oak enough
+  round that countersink have a screw** (owner, 2026-11-23: *"we really only need
+  four screws. Everything will be kind of sandwiched anyway"*); at the others
+  the standoff rests on the main board, with no spacer or hole beneath, and
+  the soldered thumb switches beside them hold the board off the bottom plate
+  (*"column screws: from the back, heads in the oak bottom"* says which
+  columns, and how much oak is left). The columns are
   vertical (*"columns vertical: the main board's mounts under the key
   boards'"*), and their threads, both ends of the standoff, are checked
   (*"column: stud thread in the standoff"*, *"column: screw thread in the
@@ -98,7 +101,7 @@ drawing.
 - **Thumb keys** mount upside down in the bottom plate on the oak bottom's
   inside face; the through-cut in the oak is the recess (ADR 0009). One plate
   serves both thumb clusters, the length of the main board (ADR 0025); a
-  column's screw passes up through it, and each of the main board's end
+  column's screw, where it has one, passes up through it, and each of the main board's end
   mounts has a stud pressed into it (*"column holes: plate web to the switch
   cutouts"*, *"studs clear of the
   plates' edges and cutouts"*, *"bottom-plate spacers clear

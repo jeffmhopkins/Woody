@@ -1,7 +1,7 @@
 // Cross-section through a column (ADR 0025): the left hand's tail corner,
 // seen from the tail. Every level of the stack is labelled from the values it
-// is computed from, bottom to top: the screw from the back, its head in a
-// counterbore in the oak bottom, the bottom plate, the spacer, the main board,
+// is computed from, bottom to top: the screw from the back, its flat head
+// flush in a countersink in the oak bottom, the bottom plate, the spacer, the main board,
 // the standoff faced to the gap, the key board, the spacer that sets its
 // depth, the key plate with the stud pressed in flush from its top face, and
 // the lid's magnet in its pocket in the oak top (ADR 0025, Amendment 2026-11-23).
@@ -17,8 +17,7 @@ m = kb_mounts("left_hand")[2];
 x0 = m[1] - 3.2;
 xr = -3;
 stud_in_nom = hardware_stud_l - (plate_thickness + kb_gap + boards_key_board_t);
-screw_oak = col_clamps_oak(m);
-screw_in_nom = (screw_oak ? hardware_col_screw_oak_l - (oak_bottom_t - hardware_col_cbore_depth) : hardware_col_screw_l) - (plate_thickness + hardware_kb_spacer_l + switch_pcb_t);
+screw_in_nom = hardware_col_screw_l - oak_bottom_t - (plate_thickness + hardware_kb_spacer_l + switch_pcb_t);
 // a leader from the level zv at the column to a label placed at zl
 module lv(zv, s, zl) {
     seg([x0, zv, 1], [xr, zl, 1], r = 0.04);
@@ -36,6 +35,6 @@ lv(cb_top + screw_in_nom, str("screw end, ", screw_in_nom, " into the standoff")
 lv(cb_z + switch_pcb_t / 2, str("main board ", switch_pcb_t, ", underside ", cb_z), 11.8);
 lv(z_bplate_top + hardware_kb_spacer_l / 2, str("spacer ", hardware_kb_spacer_l), 8.9);
 lv(z_floor + plate_thickness / 2, str("bottom plate ", plate_thickness), 6.0);
-lv(screw_oak ? hardware_col_cbore_depth : z_floor, screw_oak ? str("M2.5 x ", hardware_col_screw_oak_l, " in a ", hardware_col_cbore_depth, " counterbore") : str("M2.5 x ", hardware_col_screw_l, " low head on the plate"), 4.0);
+lv(col_csk_depth / 2, str("M2.5 x ", hardware_col_screw_l, " flat head, flush"), 4.0);
 lv(0, "bottom face 0", 2.0);
 label([m[1] + 6, T + 3.2, 1], str("column at X = ", cut_pos(), " (LH tail corner), from the tail"), size = 0.9, halign = "right");

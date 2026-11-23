@@ -12,7 +12,8 @@ written here; the bond to the oak top and the glued top grooves do not (the
 *Amendment, 2026-11-22* below).
 **Amended 2026-11-23**: each column is turned over. Its stud is pressed flush
 into the key plate and its screw comes in from the back, four of the eight
-clamping the oak bottom (the *Amendment, 2026-11-23* below).
+clamping the oak bottom, the only four screws there are (the *Amendment,
+2026-11-23* below).
 
 ## Context
 
@@ -469,27 +470,33 @@ to move to the other end of the column.
   the gap down to the main board (`MECH-COL-STANDOFF`, unchanged);
 - the main board, a spacer (`MECH-MB-SPACER`), the bottom plate, through a
   plain clearance hole;
-- an M2.5 low-head screw up into the standoff **from the back**.
+- an M2.5 flat-head screw up into the standoff **from the back**, its head
+  flush in a countersink in the oak bottom's outside face, clamping **the
+  oak bottom to the cassette** (`MECH-COL-SCREW`;
+  `mechanical/export/oak-bottom-countersinks.dxf`). It was first drawn as a
+  low head sunk in a counterbore; the owner, the same day: *"I want the
+  screws going through the oak to be flush set along the bottom. So just
+  chamfered or whatever. Not so much inset"*.
 
-**Where the screw's head sits** is decided column by column, by one rule
-(*"column screws: heads on the oak bottom or the bottom plate"*):
-
-- where a counterbore in the oak bottom's outside face leaves
-  `hardware.col_pocket_wall` of oak round it, the head sits in that
-  counterbore and **clamps the oak bottom to the cassette**
-  (`MECH-COL-SCREW-OAK`; `mechanical/export/oak-bottom-cbores.dxf`);
-- where a thumb slot stands too near for that, the head bears on the
-  **bottom plate**, reached through an opening in the oak run into the slot
-  (`MECH-COL-SCREW`).
-
-The owner chose this split on the decision card of 2026-11-23 (*"Four clamp
-the oak, four the plate"*) over all eight on the plate, and over lengthening
-the key boards so that all eight could clamp oak.
+**Only four of the eight columns have that screw.** A countersink needs
+`hardware.col_pocket_wall` of oak round it, and at the mouth end of each key
+board a thumb slot stands too near. The first answer, chosen by the owner on
+a decision card the same day (*"Four clamp the oak, four the plate"*), put
+those four heads on the bottom plate through openings run into the slots.
+The owner then dropped them: *"I think we really only need four screws.
+Everything will be kind of sandwiched anyway. So pick the four with the most
+clearance"*. So the rule decides it (*"column screws: from the back, heads
+in the oak bottom"*): a column with room for the countersink has a screw, a
+spacer and a hole in the bottom plate; a column without has none of the
+three, and its standoff rests on the main board, which the soldered thumb
+switches beside it hold off the bottom plate. Every column still has its
+stud and standoff, so the key plate is stood on all eight.
 
 **What it changes elsewhere in this ADR:**
 
 - **Point 2.** The bottom plate keeps a pressed stud at each of the main
-  board's end mounts only; at a column it has a clearance hole.
+  board's end mounts only; at a column that has a screw it has a clearance
+  hole, and at the others nothing.
 - **Point 3.** As above. The checks keep their names (*"column: stud thread
   in the standoff"*, *"column: screw thread in the standoff"*, *"column: stud
   and screw ends apart in the standoff"*).
@@ -497,32 +504,34 @@ the key boards so that all eight could clamp oak.
   lid's magnets only, each over a stud's steel head (ADR 0031), and leave
   more wood over them (*"magnet pockets leave wood over them"*).
 - **Consequences, *Service*.** The lid lifts off its magnets. To raise the
-  key plate, undo the eight column screws **from the back**; the key plate
+  key plate, undo the column screws **from the back**; the key plate
   comes up with both key boards and the standoffs. With the screws out the
   main board is held by its end mounts, the U-bolt and the bottom plate's
   bond.
-- **"Nothing screws into the wood but the U-bolt"** no longer holds: four
+- **"Nothing screws into the wood but the U-bolt"** no longer holds: the
   column screws clamp the oak bottom, by the owner's choice. Nothing screws
   into the oak top, the caps or the sides.
-- **The web round a column** (Amendment, 2026-10-05 (2)). The key plate's
-  holes are now stud holes and keep `hardware.col_web_min` with room to
-  spare. The bottom plate's column holes are plain clearance holes, wider
-  than the stud holes that figure was sized on, and fall just short of it;
-  they are held to `hardware.col_screw_web_min` instead, which is `tbd` and
-  the owner's to confirm (*"column holes: plate web to the switch cutouts"*
-  prints both).
+- **The web round a column** (Amendment, 2026-10-05 (2)) holds in both
+  plates: the key plate's holes are stud holes, and the bottom plate's
+  column holes, now plain clearance holes, are only at the columns far from
+  a thumb cutout (*"column holes: plate web to the switch cutouts"*).
+- **The end mount dropped beside a column** (Note, 2026-09-30) stays
+  dropped, though the column it stood beside no longer ties the main board
+  down. The board's mouth end is held by its other end mount and the
+  soldered thumb switches. Restoring that mount moves the main board's
+  holes, which is the board's to decide.
 - **The plates' ground bond** runs as before, through the stud's clinch, the
   spacers and the standoff; at the bottom it is the spacer's face on the
-  plate, and the screw's head where it bears on the plate.
+  plate. Four columns carry it from plate to plate, the four with a screw.
 
 ## Open, and what decides each
 
 | Item | Decided by |
 |---|---|
-| The web beside the bottom plate's column screw holes, `hardware.col_screw_web_min` | The owner: accept it, or lengthen the key boards' mouth ends to restore `hardware.col_web_min` |
-| The counterbore's depth in the oak bottom and the oak left under a clamping head (`hardware.col_cbore_depth`, `col_pocket_skin`) | M2 - counterbore a scrap of the chosen oak and clamp a screw in it |
+| Whether four screws and the thumb switches hold the main board flat at the mouth-end columns, where a standoff bears down on it with no spacer beneath | M4, on the first assembly: press the keys over those columns and watch the board |
+| The countersink in the oak bottom, and whether a flat head's cone bearing on oak holds its clamp (`hardware.col_csk_d`, `col_csk_angle`, `col_csk_head_d`) | M2 - countersink a scrap of the chosen oak and clamp a screw in it; M4, with the screw bought |
 | The column standoff: its material, and whether it is tapped through or deep enough from each end after facing (*"column standoff: thread it needs from each end"*); its size is settled (Amendment, 2026-10-05) | M4, with the standoff bought (`MECH-COL-STANDOFF`) |
-| The column screw: head and length tolerance (`hardware.col_screw_head_d`, `col_screw_head_h`, `col_screw_l_tol`) | M4, with the screw bought (`MECH-COL-SCREW`) |
+| The column screw's length tolerance (`hardware.col_screw_l_tol`) | M4, with the screw bought (`MECH-COL-SCREW`) |
 | `hardware.thread_engage_min`, 1.5 d from memory: an aluminium standoff wants more than brass or steel | M4, with the standoff's material known |
 | How the silicone is cut: a wire drawn along the plate-to-wood bead and the groove joints, and whether the bottom plate's bond ever needs cutting in ordinary service | M8, on the mule |
 | How the end caps are held. ADR 0009's table said "fasteners into the stack", which were never drawn, and the owner wants nothing screwed into the wood | Owner, with the caps cut (M4) |

@@ -76,7 +76,7 @@ plate_bottom,midi.hdr_at,nominal,"[288.9, 43.0]",the main board's layout,no,a wo
 plate_bottom,ethercon.floor_clear,nominal,0.55,,no,a working estimate the part can be cut to
 plate_bottom,hardware.kb_spacer_od,nominal,4.5,,no,a working estimate the part can be cut to
 plate_bottom,hardware.col_plate_hole,nominal,2.9,,no,a working estimate the part can be cut to
-plate_bottom,hardware.col_pocket_d,nominal,6.35,,no,a working estimate the part can be cut to
+plate_bottom,hardware.col_csk_d,tbd,5.0,M2 - countersink a scrap of the chosen oak and seat a screw in it,yes,M2 - countersink a scrap of the chosen oak and seat a screw in it
 plate_bottom,hardware.col_pocket_wall,tbd,1.5,M2 - pocket a scrap of the chosen wood beside a slot,yes,M2 - pocket a scrap of the chosen wood beside a slot
 plate_bottom,hardware.mb_nut_e,nominal,5.77,,no,a working estimate the part can be cut to
 plate_bottom,hardware.kb_mount_float,nominal,0.2,,no,a working estimate the part can be cut to
@@ -181,8 +181,8 @@ oak_bottom,midi.corner,nominal,upper far,,no,a working estimate the part can be 
 oak_bottom,midi.jack_clear,nominal,0.5,,no,a working estimate the part can be cut to
 oak_bottom,ethercon.floor_clear,nominal,0.55,,no,a working estimate the part can be cut to
 oak_bottom,hardware.col_plate_hole,nominal,2.9,,no,a working estimate the part can be cut to
-oak_bottom,hardware.col_pocket_d,nominal,6.35,,no,a working estimate the part can be cut to
-oak_bottom,hardware.col_cbore_depth,tbd,2.5,M2 - counterbore a scrap of the chosen oak and clamp a screw in it,yes,M2 - counterbore a scrap of the chosen oak and clamp a screw in it
+oak_bottom,hardware.col_csk_angle,tbd,90,as col_csk_head_d,yes,as col_csk_head_d
+oak_bottom,hardware.col_csk_d,tbd,5.0,M2 - countersink a scrap of the chosen oak and seat a screw in it,yes,M2 - countersink a scrap of the chosen oak and seat a screw in it
 oak_bottom,hardware.col_pocket_wall,tbd,1.5,M2 - pocket a scrap of the chosen wood beside a slot,yes,M2 - pocket a scrap of the chosen wood beside a slot
 oak_bottom,hardware.kb_mount_inset,tbd,3.6,"M4, with the board's first fit",yes,"M4, with the board's first fit"
 oak_bottom,hardware.ubolt_rod_d,tbd,3.0,"M4, from the strap hardware chosen - small M3 U-bolts are sold for model and tube clamps [from memory]; a bent M3 rod or a stainless M3 threaded rod does the same job",yes,"M4, from the strap hardware chosen - small M3 U-bolts are sold for model and tube clamps [from memory]; a bent M3 rod or a stainless M3 threaded rod does the same job"

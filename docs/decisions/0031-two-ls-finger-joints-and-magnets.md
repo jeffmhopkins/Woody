@@ -108,8 +108,8 @@ offered hidden magnets, a snug fit alone, or gluing the body shut:
    must be the steel part, not the stainless one** (`MECH-MB-STUD`).
 6. **No screw, nut, insert or block closes the lid.** The end caps carry no
    fastener. What ties the lid to the back L is the magnets' hold on the key
-   plate and the column screws from the back, four of which clamp the oak
-   bottom (ADR 0025, *Amendment, 2026-11-23*).
+   plate and the column screws from the back, which clamp the oak bottom
+   (ADR 0025, *Amendment, 2026-11-23*).
 7. **Between the L's there are two connections**, both made with the lid
    held raised: the Matrix ribbon at `J-MCU` (*"Matrix ribbon length"*,
    unchanged) and the breath tube onto the inlet's inner barb.

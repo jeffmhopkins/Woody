@@ -50,7 +50,7 @@ figure = false;       // set true by a figure that includes this file
 origin = "mouth";
 
 LAYERS = ["plate_top", "oak_top", "oak_bottom", "oak_grooves", "plate_bottom", "side",
-          "mouth_cap", "tail_cap", "matrix_window", "oak_rebates", "oak_pockets", "oak_bottom_cbores", "oak_inserts", "oak_relief", "oak_logo"];
+          "mouth_cap", "tail_cap", "matrix_window", "oak_rebates", "oak_pockets", "oak_bottom_csk", "oak_inserts", "oak_relief", "oak_logo"];
 
 $fn = 40;
 EPS = 0.01;           // drawing convention: coplanar-face nudge
@@ -460,33 +460,33 @@ module oak_bottom_2d() {
             for (s = spare_xy) round_hole() translate(s) square(switch_keycap + 2 * thumb_recess_clear, center = true);
             for (u = ubolt_legs()) translate(u) circle(d = ubolt_hole_d);
             // the column screws come in from the back (ADR 0025, Amendment
-            // 2026-11-23): a clearance hole where the head clamps the oak
-            // (its counterbore is oak_bottom_cbores_2d), and where a thumb
-            // slot stands too near for that, an opening the head passes
-            // through to bear on the bottom plate, run into the slot
+            // 2026-11-23): a clearance hole under each head that clamps the
+            // oak (its countersink is oak_bottom_csk_2d). A column whose
+            // countersink would stand too near a thumb slot has no screw.
             for (m = columns()) if (col_clamps_oak(m)) translate(m) circle(d = hardware_col_plate_hole);
-            for (m = columns()) if (!col_clamps_oak(m)) intersection() {
-                translate(m) circle(d = hardware_col_pocket_d + 2 * hardware_col_pocket_wall);
-                offset(delta = -hardware_col_pocket_wall / 2) offset(delta = hardware_col_pocket_wall / 2) {
-                    translate(m) circle(d = hardware_col_pocket_d);
-                    for (g = thumb_slots()) keys_2d(g, rc);
-                }
-            }
         }
     }
 }
-// THE COLUMN SCREWS' COUNTERBORES in the oak bottom's OUTSIDE face, blind, at
-// the columns whose head clamps the oak. Frame: as the oak panels.
-module oak_bottom_cbores_2d() { translate([-x_in0, 0]) for (m = columns()) if (col_clamps_oak(m)) translate(m) circle(d = hardware_col_pocket_d); }
+// THE COLUMN SCREWS' COUNTERSINKS in the oak bottom's OUTSIDE face, at the
+// columns that have a screw: a flat-head screw's cone, so the head lies
+// flush with the back (owner, 2026-11-23: "flush set along the bottom ...
+// Not so much inset"). The 2D is each countersink's mouth. Frame: as the oak
+// panels.
+col_csk_depth = (hardware_col_csk_d - hardware_col_plate_hole) / 2 / tan(hardware_col_csk_angle / 2);   // the cone, mouth to the clearance hole
+module oak_bottom_csk_2d() { translate([-x_in0, 0]) for (m = columns()) if (col_clamps_oak(m)) translate(m) circle(d = hardware_col_csk_d); }
+// the cones themselves, run 0.2 into the hole so no edge is shared with it
+module oak_bottom_csk_3d() { translate([-x_in0, 0, 0]) for (m = columns()) if (col_clamps_oak(m)) translate([m[0], m[1], -EPS])
+    cylinder(d1 = hardware_col_csk_d + 2 * EPS * tan(hardware_col_csk_angle / 2), d2 = hardware_col_plate_hole - 0.4, h = col_csk_depth + 0.2 / tan(hardware_col_csk_angle / 2) + EPS); }
 // From a point to the oak bottom's nearest cut: a thumb recess, a U-bolt
 // leg's hole or a side groove.
 function oak_bottom_gap(p) = min(concat([for (k = bottom_keys) rect_gap(p, key_xy(k), [rc, rc], key_rot(k))],
                                         [for (u = ubolt_legs()) norm(p - u) - ubolt_hole_d / 2],
                                         [p[1] - (u_y0 + stack_groove_clear), (W - u_y0 - stack_groove_clear) - p[1]]));
-// A column's screw clamps the oak where a counterbore leaves
-// hardware.col_pocket_wall of wood round it; elsewhere its head bears on the
-// bottom plate.
-function col_clamps_oak(m) = oak_bottom_gap(m) - hardware_col_pocket_d / 2 >= hardware_col_pocket_wall;
+// A column has a screw, clamping the oak, where its countersink leaves
+// hardware.col_pocket_wall of wood round it; elsewhere it has none, and its
+// standoff rests on the main board (owner, 2026-11-23: "we really only need
+// four screws. Everything will be kind of sandwiched anyway").
+function col_clamps_oak(m) = oak_bottom_gap(m) - hardware_col_csk_d / 2 >= hardware_col_pocket_wall;
 
 // Where a thumb cluster's switches are.
 function thumb_pts(cl) = [for (k = cluster_keys(cl)) key_xy(k)];
@@ -517,9 +517,10 @@ module plate_bottom_2d() {
         translate([-plate_x0, -plate_y0]) {
             for (k = bottom_keys) cutout_at(key_xy(k), key_rot(k), plate_cutout);
             for (u = ubolt_legs()) translate(u) circle(d = ubolt_hole_d);
-            // a column's screw passes through from below; an end mount's stud
-            // is pressed in from the plate's underside
-            for (i = [0 : len(cb_standoffs) - 1]) translate(cb_standoffs[i]) circle(d = i < n_cols ? hardware_col_plate_hole : hardware_stud_hole);
+            // a screwed column's screw passes through from below (a column
+            // with no screw has no hole here); an end mount's stud is pressed
+            // in from the plate's underside
+            for (i = [0 : len(cb_standoffs) - 1]) if (i >= n_cols || col_clamps_oak(cb_standoffs[i])) translate(cb_standoffs[i]) circle(d = i < n_cols ? hardware_col_plate_hole : hardware_stud_hole);
             // a window under each through-hole part whose tails would reach the plate
             for (w = bplate_windows) if (!bplate_notch(w)) bplate_win_2d(w);
         }
@@ -822,7 +823,7 @@ module u_channel() {
     P(C_OAK, true, "oak bottom") translate([x_in0, 0, -explode]) intersection() { union() { sanded_panel(x_in1 - x_in0, oak_bottom_t); translate([x_in1 - x_in0 - 1, 0, 0]) rotate([90, 0, 90]) sanded_cap(ends_tail_cap_t + 1); translate([1, 0, 0]) rotate([90, 0, 90]) mirror([0, 0, 1]) sanded_cap(ends_mouth_cap_t + 1); } difference() {
         difference() {
             linear_extrude(oak_bottom_t) oak_bottom_2d();
-            translate([0, 0, -EPS]) linear_extrude(hardware_col_cbore_depth + EPS) oak_bottom_cbores_2d();
+            oak_bottom_csk_3d();
         }
         translate([0, 0, oak_bottom_t - stack_groove_depth]) linear_extrude(stack_groove_depth + EPS) oak_grooves_2d();
     } }
@@ -1764,23 +1765,26 @@ module centre_board_3d() {
         translate([t[1][0], t[1][1], cb_z - t[2]]) cube([t[1][2] - t[1][0], t[1][3] - t[1][1], t[2]]);
     P([0.30, 0.30, 0.55], false, "tall parts main board")
         translate([tall_c[0][0] - tall_sz[0] / 2, tall_c[0][1] - tall_sz[1] / 2, cb_top]) cube([tall_sz[0], tall_sz[1], boards_tall_h]);
-    // THE MOUNTS (ADR 0022, ADR 0025), every one on the bottom plate: a spacer,
-    // the board. At a column, the standoff hanging from the key plate's stud
-    // stands on the board and a screw comes up into it from the back - its
-    // head in a counterbore in the oak bottom, or on the plate where a thumb
-    // slot is too near (Amendment 2026-11-23). At an end mount, a stud
-    // pressed into the plate, its head flush in the underside, and a nut.
-    for (i = [0 : 1 : len(cb_standoffs) - 1]) let(c = cb_standoffs[i], n = i + 1) {
-        if (i < n_cols) let(oak = col_clamps_oak(c), zh = oak ? hardware_col_cbore_depth : z_floor, l = oak ? hardware_col_screw_oak_l : hardware_col_screw_l)
-            P(C_STEEL, false, str("column screw ", n)) translate([c[0], c[1], zh - explode * 1.2]) {
-                translate([0, 0, -hardware_col_screw_head_h]) cylinder(d = hardware_col_screw_head_d, h = hardware_col_screw_head_h);
-                cylinder(d = 2.5, h = l);
+    // THE MOUNTS (ADR 0022, ADR 0025). At a column, the standoff hanging from
+    // the key plate's stud stands on the board. Where a countersink fits in
+    // the oak bottom, a screw comes up into it from the back, through the
+    // bottom plate and a spacer, and clamps the oak, the plate and the board
+    // (Amendment 2026-11-23); the other columns have no screw and no spacer,
+    // the soldered thumb switches beside them holding the board off the
+    // plate. At an end mount, a stud pressed into the plate, its head flush
+    // in the underside, a spacer and a nut.
+    for (i = [0 : 1 : len(cb_standoffs) - 1]) let(c = cb_standoffs[i], n = i + 1, screwed = i < n_cols && col_clamps_oak(c)) {
+        if (screwed)
+            // a flat head: its length is overall, its head's face flush with the oak's back
+            P(C_STEEL, false, str("column screw ", n)) translate([c[0], c[1], -explode * 1.2]) {
+                cylinder(d1 = hardware_col_csk_head_d, d2 = 2.5, h = (hardware_col_csk_head_d - 2.5) / 2 / tan(hardware_col_csk_angle / 2));
+                cylinder(d = 2.5, h = hardware_col_screw_l);
             }
-        else P(C_STEEL, false, str("main board stud ", n)) translate([c[0], c[1], z_floor]) {
+        if (i >= n_cols) P(C_STEEL, false, str("main board stud ", n)) translate([c[0], c[1], z_floor]) {
             cylinder(d = hardware_stud_head_d, h = 0.3);
             cylinder(d = 2.5, h = hardware_stud_l);
         }
-        P(C_STEEL, false, str("main board spacer ", n)) translate([c[0], c[1], z_bplate_top])
+        if (screwed || i >= n_cols) P(C_STEEL, false, str("main board spacer ", n)) translate([c[0], c[1], z_bplate_top])
             difference() { cylinder(d = hardware_kb_spacer_od, h = cb_z - z_bplate_top); translate([0, 0, -1]) cylinder(d = hardware_stud_attached_hole, h = 9); }
         if (i < n_cols)
             P(C_BRASS, false, str("column standoff ", n)) translate([c[0], c[1], cb_top])
@@ -2167,9 +2171,9 @@ module drc_report() {
     drc(len([for (c = cb_ends) if (c != undef) 1]) - len(cb_ends_dropped) == len(cb_standoffs) - n_cols,
         "end mounts dropped beside a column", [len(cb_ends_dropped), cb_ends_dropped, [for (c = cb_ends_dropped) near_col(c)]],
         str("end mounts dropped (count, where, mm to the nearest column) because a column's mount stands within hardware.end_mount_merge_d = ", hardware_end_mount_merge_d, " mm of them"));
-    drc(len(cb_standoffs) == n_cols + 4 - len(cb_ends_dropped), "main board mounts on the bottom plate", len(cb_standoffs),
-        str("mounts (ADR 0025): ", n_cols, " columns (stud, spacer, board, standoff) and ", len(cb_standoffs) - n_cols,
-            " end mounts (stud, spacer, board, nut), all on the bottom plate; the U-bolt's clamp holds the middle, and the soldered thumb switches carry the board between them"));
+    drc(len(cb_standoffs) == n_cols + 4 - len(cb_ends_dropped), "main board mounts on the bottom plate", [len(cb_standoffs), len([for (m = columns()) if (col_clamps_oak(m)) 1]) + len(cb_standoffs) - n_cols],
+        str("where the main board is stood on: ", n_cols, " columns (a standoff from the key plate above) and ", len(cb_standoffs) - n_cols,
+            " end mounts (stud, spacer, board, nut on the bottom plate); then how many of them tie it to the bottom plate with a spacer between - the columns that have a screw, and the end mounts; the U-bolt's clamp holds the middle, and the soldered thumb switches carry the board between them"));
     // THE MAIN BOARD'S DEPTH (ADR 0022): its mount on the bottom plate is the
     // key boards' mount under the key plate, so its face nearest the thumb
     // switches' seat sits the plate + the spacer below it, and it is as thin
@@ -2341,26 +2345,23 @@ module drc_report() {
     drc(hardware_col_standoff_stock_l >= col_standoff_l, "column standoff faced from its stock length", hardware_col_standoff_stock_l - col_standoff_l,
         str("mm faced off a stocked ", hardware_col_standoff_stock_l, " mm standoff (hardware.col_standoff_stock_l)"));
     eng_min = hardware_thread_engage_min * 2.5;
-    // the stud hangs from the key plate; the screw comes up from the back, its
-    // head on the bottom plate or, in a counterbore, on the oak bottom
+    // the stud hangs from the key plate; where a column has a screw it comes
+    // up from the back, its flat head in a countersink in the oak bottom
     stud_in = [for (t = hardware_stud_l_tol) hardware_stud_l + t - (plate_thickness + kb_gap + boards_key_board_t)];
     drc(stud_in[0] >= eng_min, "column: stud thread in the standoff", stud_in,
         str("mm of FHL-M2.5-", hardware_stud_l, " down from the key plate into the standoff, at the stud's shortest and longest, against ", eng_min, " (hardware.thread_engage_min diameters of M2.5)"));
     col_under = plate_thickness + hardware_kb_spacer_l + switch_pcb_t;   // bottom plate, spacer, main board
-    col_oak_under = oak_bottom_t - hardware_col_cbore_depth;             // oak left under a clamping head
-    screw_plate_in = [for (t = hardware_col_screw_l_tol) hardware_col_screw_l + t - col_under];
-    screw_oak_in = [for (t = hardware_col_screw_l_tol) hardware_col_screw_oak_l + t - col_oak_under - col_under];
-    screw_in = [min(screw_plate_in[0], screw_oak_in[0]), max(screw_plate_in[1], screw_oak_in[1])];
-    drc(screw_in[0] >= eng_min, "column: screw thread in the standoff", [screw_plate_in, screw_oak_in],
-        str("mm of screw up into the standoff, at its shortest and longest: the M2.5 x ", hardware_col_screw_l, " whose head bears on the bottom plate, then the M2.5 x ", hardware_col_screw_oak_l,
-            " whose head clamps the oak bottom; against ", eng_min));
-    let(oak = [for (m = mounts) if (col_clamps_oak(m)) m], pl = [for (m = mounts) if (!col_clamps_oak(m)) m],
-        wall = len(oak) == 0 ? undef : min([for (m = oak) oak_bottom_gap(m)]) - hardware_col_pocket_d / 2,
-        sunk = hardware_col_cbore_depth - hardware_col_screw_head_h,
-        hd = len(pl) == 0 ? undef : min([for (m = pl, k = bottom_keys) rect_gap(m, key_xy(k), [plate_cutout, plate_cutout], key_rot(k))]) - hardware_col_screw_head_d / 2 - hardware_kb_mount_float)
-        drc(len(oak) >= 2 && sunk >= 0 && col_oak_under >= hardware_col_pocket_skin && (hd == undef || hd >= 0.5) && hardware_col_pocket_d > hardware_col_screw_head_d,
-            "column screws: heads on the oak bottom or the bottom plate", [len(oak), len(pl), wall, hardware_col_cbore_depth, col_oak_under, sunk, hd],
-            str("how many column screws clamp the oak bottom, in a counterbore in its outside face, and how many bear on the bottom plate through an opening run into a thumb slot (a counterbore there would leave less than hardware.col_pocket_wall of oak); mm: the least oak round a counterbore, to a thumb recess, a U-bolt hole or a side groove; the counterbore's depth; the oak left under a clamping head (against hardware.col_pocket_skin); how far that head sits below the outside face; and from a plate-bearing head's edge, off its axis by hardware.kb_mount_float, to the nearest thumb switch cutout (against 0.5)"));
+    col_oak_under = oak_bottom_t - col_csk_depth;                        // oak left under the countersink
+    screw_in = [for (t = hardware_col_screw_l_tol) hardware_col_screw_l + t - oak_bottom_t - col_under];
+    drc(screw_in[0] >= eng_min, "column: screw thread in the standoff", screw_in,
+        str("mm of the M2.5 x ", hardware_col_screw_l, " flat-head screw (length overall) up into the standoff, through the oak bottom, the bottom plate, the spacer and the main board, at its shortest and longest, against ", eng_min));
+    let(oak = [for (m = mounts) if (col_clamps_oak(m)) m], bare = [for (m = mounts) if (!col_clamps_oak(m)) m],
+        wall = len(oak) == 0 ? undef : min([for (m = oak) oak_bottom_gap(m)]) - hardware_col_csk_d / 2,
+        sunk = (hardware_col_csk_d - hardware_col_csk_head_d) / 2 / tan(hardware_col_csk_angle / 2),
+        per = [for (cl = ["left_hand", "right_hand"]) len([for (m = kb_mounts(cl)) if (col_clamps_oak(m)) 1])])
+        drc(min(per) >= 2 && sunk >= 0 && col_oak_under >= hardware_col_pocket_skin,
+            "column screws: from the back, heads in the oak bottom", [len(oak), len(bare), per, [for (m = oak) m], wall, col_csk_depth, col_oak_under, sunk],
+            str("how many columns have a flat-head screw, its head flush in a countersink in the oak bottom's outside face, clamping the oak to the cassette, and how many have none (a countersink there would leave less than hardware.col_pocket_wall of oak beside a thumb slot; the standoff rests on the main board); screws per key board (left hand, right hand; at least 2); where they are; mm: the least oak round a countersink's mouth, to a thumb recess, a U-bolt hole or a side groove; the countersink's depth, mouth to the clearance hole; the oak left under it (against hardware.col_pocket_skin); and how far the head's face sits below the outside face (0 = flush; the countersink is cut hardware.col_csk_d against the head's col_csk_head_d)"));
     ends = col_standoff_l + hardware_col_standoff_l_tol[0] - stud_in[1] - screw_in[1];
     drc(ends >= 0.5, "column: stud and screw ends apart in the standoff", ends,
         "mm between the stud's end and the screw's inside the standoff, both at their longest and the standoff at its shortest: if they met, the screw would bottom on the stud before it clamped the main board");
@@ -2410,10 +2411,9 @@ module drc_report() {
     // end mounts')
     let(top = min([for (m = mounts, k = top_keys) cutout_gap_r(m, k)]) - hardware_stud_hole / 2,
         bot = n_cols >= len(cb_standoffs) ? undef : min([for (i = [n_cols : len(cb_standoffs) - 1], k = bottom_keys) cutout_gap_r(cb_standoffs[i], k)]) - hardware_stud_hole / 2,
-        scr = min([for (i = [0 : n_cols - 1], k = bottom_keys) cutout_gap_r(cb_standoffs[i], k)]) - hardware_col_plate_hole / 2)
-        drc(top >= hardware_col_web_min && (bot == undef || bot >= hardware_col_web_min) && scr >= hardware_col_screw_web_min, "column holes: plate web to the switch cutouts", [top, bot, scr],
-            str("mm of aluminium from a hole to the nearest switch cutout (corners rounded to switch.cutout_r), worst case: the key plate's column stud holes and the bottom plate's end-mount stud holes, against hardware.col_web_min = ", hardware_col_web_min,
-                "; then the bottom plate's column screw holes (hardware.col_plate_hole, a plain clearance hole with no clinch), against hardware.col_screw_web_min = ", hardware_col_screw_web_min));
+        scr = min([for (i = [0 : n_cols - 1], k = bottom_keys) if (col_clamps_oak(cb_standoffs[i])) cutout_gap_r(cb_standoffs[i], k)]) - hardware_col_plate_hole / 2)
+        drc(top >= hardware_col_web_min && (bot == undef || bot >= hardware_col_web_min) && scr >= hardware_col_web_min, "column holes: plate web to the switch cutouts", [top, bot, scr],
+            str("mm of aluminium from a hole to the nearest switch cutout (corners rounded to switch.cutout_r), worst case: the key plate's column stud holes; the bottom plate's end-mount stud holes; the bottom plate's column screw holes (hardware.col_plate_hole); each against hardware.col_web_min = ", hardware_col_web_min));
     // the oak top: a blind pocket over each head, wood left round it and over it
     function pocket_gap(m) = min(cap_gap(m), m[1] - (u_y0 + stack_groove_clear), (W - u_y0 - stack_groove_clear) - m[1],
                                  rect_gap(m, matrix_xy, [matrix_rebate, matrix_rebate], 0)) - hardware_col_pocket_d / 2;
@@ -2582,7 +2582,7 @@ module part_2d(p) {
     else if (p == "matrix_window") matrix_window_2d();
     else if (p == "oak_rebates") oak_rebates_2d();
     else if (p == "oak_pockets") oak_pockets_2d();
-    else if (p == "oak_bottom_cbores") oak_bottom_cbores_2d();
+    else if (p == "oak_bottom_csk") oak_bottom_csk_2d();
     else if (p == "oak_inserts") oak_inserts_2d();
     else if (p == "oak_relief") oak_relief_2d();
     else if (p == "matrix_carrier") matrix_carrier_2d();

@@ -614,8 +614,8 @@ def cmd_drawing(a):
                          f"(hardware.stud_hole), punched or drilled, NOT DEBURRED; >= hardware.stud_edge from any edge; "
                          f"squeezed flush on a flat anvil, never hammered (BOM MECH-MB-STUD)")
         if part == "plate_bottom":
-            notes.append("COLUMN SCREWS pass up through the plain clearance holes; where the oak bottom has an opening "
-                         "instead of a counterbore, the screw's head bears on this plate's underside (BOM MECH-COL-SCREW)")
+            notes.append("COLUMN SCREWS pass up through the plain clearance holes from the oak bottom's countersinks "
+                         "(BOM MECH-COL-SCREW); the columns without a screw have no hole in this plate")
         notes.append("COUNTERSINKS: none. Every hole is a plain through-hole")
         notes.append("GROUND: bare metal round every hole that carries a screw head or a stud (ADR 0025)")
     elif kind == "wood":
@@ -638,9 +638,10 @@ def cmd_drawing(a):
             notes.append("MAGNETS: one glued to the floor of each magnet pocket (BOM MECH-LID-MAGNET), any pole down, "
                          "its face just inside the underside (config/body.yaml closure.magnet_recess)")
         if part == "oak_bottom":
-            notes.append("COLUMN SCREWS come in from the outside face (ADR 0025): a flat-bottomed counterbore with a "
-                         "clearance hole where the head clamps the oak (oak-bottom-cbores.dxf; BOM MECH-COL-SCREW-OAK), "
-                         "and an opening run into the thumb slot where the head bears on the plate (in the outline)")
+            notes.append("COLUMN SCREWS come in from the outside face (ADR 0025): a countersink "
+                         "(oak-bottom-countersinks.dxf gives each one's mouth; config/body.yaml hardware.col_csk_*) "
+                         "over a clearance hole (in the outline), so the flat head lies flush with the back "
+                         "(BOM MECH-COL-SCREW). Cut one in an offcut first and try the screw")
         if part == "mouth_cap":
             notes.append("TAP the inlet hole to the insert's outside thread (BOM INLET-INSERT), square to the face, "
                          "before the insert is epoxied in flush with the outer face")
@@ -649,7 +650,8 @@ def cmd_drawing(a):
                          "connector its panel (config/body.yaml ethercon.panel_max)")
             notes.append("MIDI jack counterbore: a router pass from the outer face, tail-cap-jack.dxf, round the "
                          "jack's nut, leaving the jack its panel (config/body.yaml midi.jack_thread less midi.jack_nut_t)")
-        notes.append("COUNTERSINKS: none. Pockets and counterbores are flat-bottomed")
+        notes.append("COUNTERSINKS: only the column screws', in the outside face. Pockets and counterbores are flat-bottomed"
+                     if part == "oak_bottom" else "COUNTERSINKS: none. Pockets and counterbores are flat-bottomed")
         if part in ("oak_top", "oak_bottom", "mouth_cap", "tail_cap"):
             notes.append("FINGER JOINTS at both ends: fingers and notches are in the outline, drawn with SQUARE inside "
                          "corners. Cut them in a second setup with the part stood on end, a straight flat-ended bit "

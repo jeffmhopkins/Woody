@@ -683,7 +683,7 @@ to a bottom plate by a column at each key-board corner.
 > **Amended 2026-11-23 (ADR 0025, *Amendment, 2026-11-23*).** Each column is
 > turned over: the stud is pressed flush into the key plate again, as
 > Amendment 4 had it, the standoff threads onto it, and the screw comes up
-> from the back, four of the eight clamping the oak bottom. The oak top's
+> from the back at the columns that have one, clamping the oak bottom. The oak top's
 > pockets hold the lid's magnets, not screw heads. The table and the list
 > below are the stack as decided on 2026-09-29; the depth rules, the spacer,
 > the standoff's keep-out and the corners' positions stand, and PEM's edge
@@ -713,8 +713,8 @@ as amended by ADR 0025).
 - **The studs in the key plate are gone** (`MECH-KB-STUD`), and so is the nut
   under the board (`MECH-KB-NUT`). The key plate has a clearance hole at each
   corner, not a stud hole, so PEM's edge distance no longer applies there. The
-  screw's head must bear on plate metal (*"column screws: heads on the
-  oak bottom or the bottom plate"*).
+  screw's head must bear on plate metal (*"column screws: from the back,
+  heads in the oak bottom"*).
 - **Service goes through the screws.** Once the oak top is cut free
   (ADR 0025), the heads are reached from above. So there is no stud whose
   clinch holds it against turning, and no nut underneath. The key plate comes
