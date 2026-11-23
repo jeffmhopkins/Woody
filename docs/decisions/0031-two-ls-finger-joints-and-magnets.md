@@ -5,6 +5,11 @@ Tracked in #58. It amends [ADR 0025](0025-the-cassette.md) (how the shell
 closes round the cassette, and how it is opened) and
 [ADR 0009](0009-enclosure-construction.md) (the adhesives' table, the lid's
 joints); each carries a dated note pointing here.
+**Amended 2026-11-23** by the owner, in the working chat: the fingers'
+inside corners are square, cut on end (point 2); and each magnet pulls on
+the flush head of a stud in the key plate, the column screws having moved to
+the back ([ADR 0025](0025-the-cassette.md), *Amendment, 2026-11-23*; points
+5 and 6).
 
 ## Context
 
@@ -71,7 +76,15 @@ offered hidden magnets, a snug fit alone, or gluing the body shut:
    body's width is cut into divisions; each cap keeps the outer ones, so the
    body's corners stay the cap's and the sides' grooves end against it, and a
    panel's fingers run out through the cap's thickness. Every inside corner
-   has a round relief the router bit's size, so a square finger seats. The
+   is square: the fingers are cut in a second setup with the part stood on
+   end, a straight bit along the fingers and passing right through the
+   thickness, so the bit's flat end forms the corner (owner, 2026-11-23:
+   *"I'm not sure why the finger are not straight cut and they have the
+   little radiuses in the corners"*, *"I feel like you just need to re-clamp
+   it in another direction and the router should be able to do it?"*;
+   `closure.finger_relief_d`). A dovetail bit was asked about and not taken:
+   it would make them dovetails, small and fragile at this size (owner:
+   *"Okay, keep finger"*). The
    MIDI jack sits low enough in the tail cap that its counterbore keeps oak
    between itself and the lid's notches, so every corner has all its fingers
    (owner, 2026-11-23: *"Seems like we should be able to move the TRS midi
@@ -86,14 +99,17 @@ offered hidden magnets, a snug fit alone, or gluing the body shut:
    bonded to the oak top, and the oak top's grooves are not glued to the
    sides. The oak top rests on the key plate.
 5. **Magnets hold the lid down** (`closure.magnet_*`; `MECH-LID-MAGNET`;
-   *"closure: lid magnets over the column screws"*). Each column screw's
-   pocket in the oak top's underside is cut deeper by a magnet's height, and
-   a neodymium disc glued to its floor pulls on that screw's steel head. The
-   back L needs nothing added, the magnets are spread along the lid's length,
-   and nothing shows on any face. **The column screws must be steel, not
-   stainless** (`MECH-COL-SCREW`).
-6. **No screw, nut, insert or block.** The end caps carry no fastener for the
-   closure. ADR 0025's "nothing screws into the wood" holds for every face.
+   *"closure: lid magnets over the key plate's studs"*). A neodymium disc is
+   glued to the floor of a blind pocket in the oak top's underside over each
+   column, and pulls on the steel head of the stud pressed flush into the key
+   plate there (ADR 0025, *Amendment, 2026-11-23*; until then it pulled on a
+   column screw's head, across a gap, from a deeper pocket). The magnets are
+   spread along the lid's length and nothing shows on the lid. **The studs
+   must be the steel part, not the stainless one** (`MECH-MB-STUD`).
+6. **No screw, nut, insert or block closes the lid.** The end caps carry no
+   fastener. What ties the lid to the back L is the magnets' hold on the key
+   plate and the column screws from the back, four of which clamp the oak
+   bottom (ADR 0025, *Amendment, 2026-11-23*).
 7. **Between the L's there are two connections**, both made with the lid
    held raised: the Matrix ribbon at `J-MCU` (*"Matrix ribbon length"*,
    unchanged) and the breath tube onto the inlet's inner barb.
@@ -128,9 +144,12 @@ offered hidden magnets, a snug fit alone, or gluing the body shut:
   to its inserts. The ribbon and the tube are connected and the front L
   lowered over the sides and the switches. The keycaps go on last, through
   the oak's slots.
-- **The joints show.** Fingers and their round reliefs are visible on the
-  playing face, the back and both end faces.
-- **The wood over each magnet is thin.** The rule prints it against
+- **The joints show.** The fingers are visible on the playing face, the
+  back and both end faces; so are the column screws' heads on the back.
+- **The fingers want a second setup.** The two long panels are held on end
+  under the router, which the shop's machine must allow; the caps go in a
+  vise.
+- **The wood over each magnet** is printed by the rule against
   `hardware.col_pocket_skin`.
 - **The cassette's height against the shell's is no longer taken by a bead
   on top.** The oak top sits on the key plate, so the sides' height in their
@@ -144,8 +163,8 @@ offered hidden magnets, a snug fit alone, or gluing the body shut:
 
 | Item | Decided by |
 |---|---|
-| Whether the magnets hold enough. `closure.magnet_hold` is the maker's figure for direct contact with thick steel; here each pulls across an air gap onto a small socket head, and no sheet gives that | M4: one magnet glued into an offcut's pocket over a column screw, and the pull measured. If it is too little: a thicker disc, or a steel washer under each head |
+| Whether the magnets hold enough. `closure.magnet_hold` is the maker's figure for direct contact with thick steel; here each pulls across `closure.magnet_recess` onto a stud head smaller than itself, and no sheet gives that | M4: one magnet glued into an offcut's pocket over a stud pressed into a plate offcut, and the pull measured. If it is too little: a thicker disc |
 | The fit of a dry finger joint, `closure.finger_fit`: loose enough to lift after the oak has moved with the seasons, tight enough not to rattle | A test joint cut in the chosen oak on the shop's machine |
-| The reliefs' size, `closure.finger_relief_d`, or none and the corners squared by chisel | The shop's bit |
+| Whether the shop's machine can hold the two long panels on end for the fingers. If not, `closure.finger_relief_d` takes the bit's diameter and round reliefs return | The shop's fixture |
 | Whether the magnets disturb anything. No part in the body is known to sense a magnetic field - the keys are switches, the breath sensor is a pressure die - but no sheet was read for it | A read of each part's sheet at M4, and the breath zero watched with the lid on and off |
 | Whether the bottom plate stays bonded to the oak bottom, or is screwed to it so the main board comes out without cutting | Owner, after the first assembly (ADR 0025's open row) |

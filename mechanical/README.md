@@ -88,7 +88,7 @@ Where each number lives, so none is restated here:
   `logo`, each with its reasoning. The scale is `logo.scale` of the artwork's
   own size, which `branding/export/spec.json` owns.
 - **The band, the mark's size on the body, its margins, the oak left over
-  the column screws' pockets and its smallest gap once scaled**:
+  the lid's magnet pockets and its smallest gap once scaled**:
   [`drc.echo`](drc.echo), the rules starting "logo".
 - **The artwork and its colours** are read from `branding/` by `tools/cad.py`
   (`branding()`, into `cad/generated/params.scad`), never copied: the DXF is
@@ -244,4 +244,4 @@ the oak top has **one slot per hand** (`stack.cap_holes`).
 | | |
 |---|---|
 | ![Cross-section through RH3](renders/section-key.png) | ![Tail face](renders/tail-face.png) |
-| ![Cross-section through the LED matrix](renders/section-matrix.png) The frosted window, flush on its oak lip | ![Section through a key-board corner](renders/section-kb-mount.png) A column at a key board's corner (ADR 0025): the stud in the bottom plate, a spacer, the main board, the standoff faced to the gap, the key board, a spacer, the key plate, and the screw whose head sits in a blind pocket in the oak top |
+| ![Cross-section through the LED matrix](renders/section-matrix.png) The frosted window, flush on its oak lip | ![Section through a key-board corner](renders/section-kb-mount.png) A column at a key board's corner (ADR 0025): the screw from the back, its head in a counterbore in the oak bottom, the bottom plate, a spacer, the main board, the standoff faced to the gap, the key board, a spacer, the key plate with its stud pressed in flush, and the lid's magnet in its pocket in the oak top |

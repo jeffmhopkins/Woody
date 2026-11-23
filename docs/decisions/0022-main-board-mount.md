@@ -35,7 +35,9 @@ Two things were therefore unanswered:
 2. **Over a thumb plate it is held exactly as a key board is** (ADR 0020,
    Amendment 4), with the same parts *(since ADR 0025: on the bottom plate,
    which replaced the thumb plates, at every mount; at a column the nut is the
-   column's standoff)*:
+   column's standoff. Since 2026-11-23, ADR 0025's amendment of that date:
+   this stud-and-nut mount is the END MOUNTS' only - at a column a screw
+   comes up from the back through the plate, the spacer and the board)*:
    - the PEM FHL-M2.5 stud pressed into the thumb plate, its head flush in
      the plate's underside, so the plate still lies flat on the oak;
    - the key boards' spacer;

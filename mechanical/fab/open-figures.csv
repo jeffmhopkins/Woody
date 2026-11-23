@@ -22,7 +22,6 @@ plate_top,openings.matrix_window,nominal,22.0,,no,a working estimate the part ca
 plate_top,openings.usb_plug_l,tbd,15.0,the recovery cable kept with the instrument,yes,the recovery cable kept with the instrument
 plate_top,openings.usb_plug_turn,nominal,down,the recovery cable kept with the instrument,no,a working estimate the part can be cut to
 plate_top,openings.usb_overmold,tbd,"[15.0, 9.0]","M4, against the extension bought",yes,"M4, against the extension bought"
-plate_top,hardware.col_plate_hole,nominal,2.9,,no,a working estimate the part can be cut to
 plate_top,hardware.kb_mount_inset,tbd,3.6,"M4, with the board's first fit",yes,"M4, with the board's first fit"
 plate_top,fabrication.plate_alloy,nominal,"aluminium, 5052 or 6061",,no,a working estimate the part can be cut to
 plate_top,fabrication.plate_profile_tol,nominal,"[-0.13, 0.13]",,no,a working estimate the part can be cut to
@@ -30,6 +29,7 @@ plate_top,fabrication.corner_r_outer,nominal,1.0,"M4, on the first parts cut",no
 plate_bottom,stack.cap_clear,tbd,0.75,"M2 - the mule, with a real cap in a real oak hole",yes,"M2 - the mule, with a real cap in a real oak hole"
 plate_bottom,stack.side_t,nominal,4.0,,no,a working estimate the part can be cut to
 plate_bottom,stack.side_inset,tbd,2.0,M4 - the thinnest lip the oak and the saw will hold,yes,M4 - the thinnest lip the oak and the saw will hold
+plate_bottom,stack.groove_clear,tbd,0.2,"M4, against the sheet actually bought",yes,"M4, against the sheet actually bought"
 plate_bottom,stack.plate_side_clear,nominal,0.8,"M4, with the oak's grain direction and the plates as cut",no,a working estimate the part can be cut to
 plate_bottom,ends.mouth_cap_t,tbd,6.0,M4,yes,M4
 plate_bottom,ends.tail_cap_t,tbd,6.0,"M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md",yes,"M4, together with the etherCON panel-thickness question in mechanical/DESIGN.md"
@@ -75,6 +75,9 @@ plate_bottom,openings.matrix_window,nominal,22.0,,no,a working estimate the part
 plate_bottom,midi.hdr_at,nominal,"[288.9, 43.0]",the main board's layout,no,a working estimate the part can be cut to
 plate_bottom,ethercon.floor_clear,nominal,0.55,,no,a working estimate the part can be cut to
 plate_bottom,hardware.kb_spacer_od,nominal,4.5,,no,a working estimate the part can be cut to
+plate_bottom,hardware.col_plate_hole,nominal,2.9,,no,a working estimate the part can be cut to
+plate_bottom,hardware.col_pocket_d,nominal,6.35,,no,a working estimate the part can be cut to
+plate_bottom,hardware.col_pocket_wall,tbd,1.5,M2 - pocket a scrap of the chosen wood beside a slot,yes,M2 - pocket a scrap of the chosen wood beside a slot
 plate_bottom,hardware.mb_nut_e,nominal,5.77,,no,a working estimate the part can be cut to
 plate_bottom,hardware.kb_mount_float,nominal,0.2,,no,a working estimate the part can be cut to
 plate_bottom,hardware.kb_mount_inset,tbd,3.6,"M4, with the board's first fit",yes,"M4, with the board's first fit"
@@ -132,9 +135,7 @@ oak_top,midi.cbore_clear,tbd,1.0,"the part in hand, and the socket that turns it
 oak_top,midi.corner,nominal,upper far,,no,a working estimate the part can be cut to
 oak_top,midi.jack_clear,nominal,0.5,,no,a working estimate the part can be cut to
 oak_top,ethercon.floor_clear,nominal,0.55,,no,a working estimate the part can be cut to
-oak_top,hardware.col_screw_head_h,tbd,1.5,as col_screw_head_d,yes,as col_screw_head_d
 oak_top,hardware.col_pocket_d,nominal,6.35,,no,a working estimate the part can be cut to
-oak_top,hardware.col_pocket_clear,nominal,0.5,,no,a working estimate the part can be cut to
 oak_top,hardware.mx_insert_l,nominal,4.0,an insert set in a scrap of the chosen oak and pulled,no,a working estimate the part can be cut to
 oak_top,hardware.mx_insert_hole,nominal,4.0,an insert set in a scrap of the chosen oak,no,a working estimate the part can be cut to
 oak_top,hardware.kb_mount_inset,tbd,3.6,"M4, with the board's first fit",yes,"M4, with the board's first fit"
@@ -149,8 +150,9 @@ oak_top,logo.depth,nominal,1.0,"the etch test on an offcut (ROADMAP open item), 
 oak_top,logo.fill,nominal,epoxy,,no,a working estimate the part can be cut to
 oak_top,closure.finger_n,nominal,7,drc.echo 'closure: finger joints at all four corners',no,a working estimate the part can be cut to
 oak_top,closure.finger_fit,tbd,0.05,a test joint cut in the chosen oak on the shop's machine,yes,a test joint cut in the chosen oak on the shop's machine
-oak_top,closure.finger_relief_d,tbd,3.175,the shop's bit; or cut 0 and square the corners with a chisel,yes,the shop's bit; or cut 0 and square the corners with a chisel
+oak_top,closure.finger_relief_d,nominal,0,"the shop's fixture for holding the two long panels on end; if it cannot, the bit's diameter goes here and the reliefs return",no,a working estimate the part can be cut to
 oak_top,closure.magnet_h,nominal,2.0,as magnet_d,no,a working estimate the part can be cut to
+oak_top,closure.magnet_recess,tbd,0.1,as magnet_hold: the pull test sets how little it can be,yes,as magnet_hold: the pull test sets how little it can be
 oak_bottom,stack.cap_clear,tbd,0.75,"M2 - the mule, with a real cap in a real oak hole",yes,"M2 - the mule, with a real cap in a real oak hole"
 oak_bottom,stack.cap_holes,tbd,slot,"the pitch chosen - at 18 mm an individual-hole web is zero, so the tightened layout needs slots (drc.echo); revisit if M2 widens it",yes,"the pitch chosen - at 18 mm an individual-hole web is zero, so the tightened layout needs slots (drc.echo); revisit if M2 widens it"
 oak_bottom,stack.side_t,nominal,4.0,,no,a working estimate the part can be cut to
@@ -168,6 +170,7 @@ oak_bottom,switch.keycap_top_above_seat,nominal,9.0,"calipers on a cap on its sw
 oak_bottom,boards.sensor_lead_row,tbd,10.2,M4 footprint,yes,M4 footprint
 oak_bottom,boards.umb_adapter_t,tbd,1.6,"M4, with the board ordered",yes,"M4, with the board ordered"
 oak_bottom,boards.umb_socket_d,nominal,7.5,"the socket in hand on the first adapter: a drawing's height, not the part measured",no,a working estimate the part can be cut to
+oak_bottom,boards.kb_end_margin,tbd,8.8,"M4, with the boards laid out",yes,"M4, with the boards laid out"
 oak_bottom,boards.kb_tail_margin,nominal,10.3,"M3, with the key positions; hardware.col_pocket_wall, which sets it",no,a working estimate the part can be cut to
 oak_bottom,boards.board_clear,tbd,1.5,"M4, with the boards laid out",yes,"M4, with the boards laid out"
 oak_bottom,openings.matrix_window,nominal,22.0,,no,a working estimate the part can be cut to
@@ -177,6 +180,11 @@ oak_bottom,midi.cbore_clear,tbd,1.0,"the part in hand, and the socket that turns
 oak_bottom,midi.corner,nominal,upper far,,no,a working estimate the part can be cut to
 oak_bottom,midi.jack_clear,nominal,0.5,,no,a working estimate the part can be cut to
 oak_bottom,ethercon.floor_clear,nominal,0.55,,no,a working estimate the part can be cut to
+oak_bottom,hardware.col_plate_hole,nominal,2.9,,no,a working estimate the part can be cut to
+oak_bottom,hardware.col_pocket_d,nominal,6.35,,no,a working estimate the part can be cut to
+oak_bottom,hardware.col_cbore_depth,tbd,2.5,M2 - counterbore a scrap of the chosen oak and clamp a screw in it,yes,M2 - counterbore a scrap of the chosen oak and clamp a screw in it
+oak_bottom,hardware.col_pocket_wall,tbd,1.5,M2 - pocket a scrap of the chosen wood beside a slot,yes,M2 - pocket a scrap of the chosen wood beside a slot
+oak_bottom,hardware.kb_mount_inset,tbd,3.6,"M4, with the board's first fit",yes,"M4, with the board's first fit"
 oak_bottom,hardware.ubolt_rod_d,tbd,3.0,"M4, from the strap hardware chosen - small M3 U-bolts are sold for model and tube clamps [from memory]; a bent M3 rod or a stainless M3 threaded rod does the same job",yes,"M4, from the strap hardware chosen - small M3 U-bolts are sold for model and tube clamps [from memory]; a bent M3 rod or a stainless M3 threaded rod does the same job"
 oak_bottom,hardware.ubolt_hole_clear,tbd,0.5,"M4, with the U-bolt bought",yes,"M4, with the U-bolt bought"
 oak_bottom,hardware.ubolt_span,tbd,20.0,M4,yes,M4
@@ -187,7 +195,7 @@ oak_bottom,fabrication.corner_r_outer,nominal,1.0,"M4, on the first parts cut",n
 oak_bottom,fabrication.corner_r_inner,nominal,1.6,"M4, the oak shop's smallest bit",no,a working estimate the part can be cut to
 oak_bottom,closure.finger_n,nominal,7,drc.echo 'closure: finger joints at all four corners',no,a working estimate the part can be cut to
 oak_bottom,closure.finger_fit,tbd,0.05,a test joint cut in the chosen oak on the shop's machine,yes,a test joint cut in the chosen oak on the shop's machine
-oak_bottom,closure.finger_relief_d,tbd,3.175,the shop's bit; or cut 0 and square the corners with a chisel,yes,the shop's bit; or cut 0 and square the corners with a chisel
+oak_bottom,closure.finger_relief_d,nominal,0,"the shop's fixture for holding the two long panels on end; if it cannot, the bit's diameter goes here and the reliefs return",no,a working estimate the part can be cut to
 mouth_cap,stack.edge_r,tbd,1.5,"M5, on the first cut parts",no,"the sanded roundover: the STEP shows it, but it goes on by hand after the parts are cut (config/body.yaml), so a shop may leave the edges square"
 mouth_cap,ends.mouth_cap_t,tbd,6.0,M4,yes,M4
 mouth_cap,switch.keycap_top_above_seat,nominal,9.0,"calipers on a cap on its switch (M1) would make it settled; a visual match at scale cannot resolve a few tenths, which is the oak top's thickness tolerance. It SETS BOTH oak panel thicknesses (flush rule, stack above)",no,a working estimate the part can be cut to
@@ -195,7 +203,7 @@ mouth_cap,fabrication.wood_species,tbd,"hardwood, the owner's choice (the parts 
 mouth_cap,fabrication.wood_profile_tol,nominal,"[-0.2, 0.2]",,no,a working estimate the part can be cut to
 mouth_cap,fabrication.wood_depth_tol,nominal,"[-0.1, 0.1]",,no,a working estimate the part can be cut to
 mouth_cap,closure.finger_n,nominal,7,drc.echo 'closure: finger joints at all four corners',no,a working estimate the part can be cut to
-mouth_cap,closure.finger_relief_d,tbd,3.175,the shop's bit; or cut 0 and square the corners with a chisel,yes,the shop's bit; or cut 0 and square the corners with a chisel
+mouth_cap,closure.finger_relief_d,nominal,0,"the shop's fixture for holding the two long panels on end; if it cannot, the bit's diameter goes here and the reliefs return",no,a working estimate the part can be cut to
 tail_cap,stack.side_t,nominal,4.0,,no,a working estimate the part can be cut to
 tail_cap,stack.edge_r,tbd,1.5,"M5, on the first cut parts",no,"the sanded roundover: the STEP shows it, but it goes on by hand after the parts are cut (config/body.yaml), so a shop may leave the edges square"
 tail_cap,stack.side_inset,tbd,2.0,M4 - the thinnest lip the oak and the saw will hold,yes,M4 - the thinnest lip the oak and the saw will hold
@@ -215,7 +223,7 @@ tail_cap,fabrication.wood_species,tbd,"hardwood, the owner's choice (the parts a
 tail_cap,fabrication.wood_profile_tol,nominal,"[-0.2, 0.2]",,no,a working estimate the part can be cut to
 tail_cap,fabrication.wood_depth_tol,nominal,"[-0.1, 0.1]",,no,a working estimate the part can be cut to
 tail_cap,closure.finger_n,nominal,7,drc.echo 'closure: finger joints at all four corners',no,a working estimate the part can be cut to
-tail_cap,closure.finger_relief_d,tbd,3.175,the shop's bit; or cut 0 and square the corners with a chisel,yes,the shop's bit; or cut 0 and square the corners with a chisel
+tail_cap,closure.finger_relief_d,nominal,0,"the shop's fixture for holding the two long panels on end; if it cannot, the bit's diameter goes here and the reliefs return",no,a working estimate the part can be cut to
 side,stack.cap_clear,tbd,0.75,"M2 - the mule, with a real cap in a real oak hole",yes,"M2 - the mule, with a real cap in a real oak hole"
 side,stack.side_t,nominal,4.0,,no,a working estimate the part can be cut to
 side,stack.side_inset,tbd,2.0,M4 - the thinnest lip the oak and the saw will hold,yes,M4 - the thinnest lip the oak and the saw will hold

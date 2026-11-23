@@ -385,7 +385,8 @@ next amendment: no ESD protection is added.**
    old drawing hung the plug below the board and so did not show it. Now
    the key plate stops a millimetre in front of the plug, which also opens
    `J-MCU`'s side to a hand. The oak top has a pocket over the plug, cut
-   with the column-screw pockets to their depth (`oak-pockets.dxf`) and
+   with the lid's magnet pockets to their depth (`oak-pockets.dxf`; they were
+   the column screws' pockets until 2026-11-23, ADR 0025) and
    ending at the window's rebate. The receptacle is now among the Matrix's
    drawn parts, so the clash check sees it. The rule is drc.echo *"USB-C plug
    clear of the key plate and the oak top"*. The real plug, once

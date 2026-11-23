@@ -271,9 +271,10 @@ long folds into a hairpin that reaches one of the left-hand board's columns. The
 `mechanical/drc.echo` "key-chain ribbon length (derived)", in millimetres.
 **The ribbon is cut by a different line**: "key-chain ribbon to cut" is the
 flat cable end to end, a socket crimped flush at each end. **So the key plate comes off by
-undoing its column screws, raising it and unplugging the main board's
-sockets**; it goes back on by plugging them in with the plate held raised,
-then lowering it onto its columns and screwing it down.
+undoing the column screws from the back, raising it with its standoffs and
+unplugging the main board's sockets**; it goes back on by plugging them in
+with the plate held raised, then lowering it onto the main board and driving
+the column screws from the back (ADR 0025, Amendment 2026-11-23).
 
 **Pin numbering: key-board pin = main-board pin, and the cable sets it**
 (`key-board-chain-pinmap`). `[datasheet]`, both drawings banked:

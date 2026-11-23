@@ -713,7 +713,7 @@ boards:
   kb_end_margin:
     value: 8.8
     status: tbd
-    source: "a key board's MOUTH end past its first switch cutout, along the body. The mouth corners' columns stand over the first thumb row, and a column cannot lean (ADR 0025), so its stud hole in the bottom plate must keep hardware.col_web_min of metal from that thumb switch's cutout (owner, 2026-10-05, issue #43: 'make the keyboards longer so that the standoffs are further away') [calc: the column is hardware.kb_mount_inset in from the board's end and 0.4 outside the cutout's side across the body, so the web is hypot(m - 3.6 + 0.5, 0.4 + 0.5) - 0.5 - 1.25 for the cutout's R0.5 corner (switch.cutout_r) and the stud hole's radius: 8.8 gives hypot(5.7, 0.9) - 1.75 = 4.02]. The mouth margin claims none of the body's length (drc.echo 'overall length (derived)'). drc.echo 'column holes: plate web to the switch cutouts', 'columns vertical: the main board's mounts under the key boards'', 'bottom-plate studs clear of the plate's edges and cutouts'"
+    source: "a key board's MOUTH end past its first switch cutout, along the body. The mouth corners' columns stand over the first thumb row, and a column cannot lean (ADR 0025), so its stud hole in the bottom plate must keep hardware.col_web_min of metal from that thumb switch's cutout (owner, 2026-10-05, issue #43: 'make the keyboards longer so that the standoffs are further away') [calc: the column is hardware.kb_mount_inset in from the board's end and 0.4 outside the cutout's side across the body, so the web is hypot(m - 3.6 + 0.5, 0.4 + 0.5) - 0.5 - 1.25 for the cutout's R0.5 corner (switch.cutout_r) and the stud hole's radius: 8.8 gives hypot(5.7, 0.9) - 1.75 = 4.02]. The mouth margin claims none of the body's length (drc.echo 'overall length (derived)'). drc.echo 'column holes: plate web to the switch cutouts', 'columns vertical: the main board's mounts under the key boards'', 'studs clear of the plates' edges and cutouts'"
     decided_by: "M4, with the boards laid out"
   kb_tail_margin:
     value: 10.3
@@ -1084,34 +1084,41 @@ hardware:
   # two key boards and the main board between them. It is built and tested on
   # the bench with its ribbons plugged, set into the back L and bonded to the
   # oak bottom with silicone; the oak top rests on its key plate, held down by
-  # the lid's magnets (`closure`, ADR 0031). Nothing screws into the wood
-  # but the U-bolt. A COLUMN, from the bottom up:
-  #   a PEM FHL-M2.5 stud pressed into the bottom plate, its head flush in the
-  #   plate's underside (stud_*); a spacer (kb_spacer_*); the main board;
-  #   an M2.5 female-female hex standoff threaded onto the stud, clamping the
-  #   main board, faced to the gap up to the key board (col_standoff_*);
-  #   the key board; a spacer (kb_spacer_*); the key plate; an M2.5 low-head
-  #   screw down through the key plate into the standoff (col_screw_*), its head
-  #   in a blind pocket in the oak top's underside (col_pocket_*).
-  # The main board's END MOUNTS, at the mouth and a pair on the tongue: the
-  # same stud, spacer and board, and a nut (mb_nut_*). An end mount with a
+  # the lid's magnets (`closure`, ADR 0031). A COLUMN, from the top down
+  # (owner, 2026-11-23; ADR 0025, Amendment 2026-11-23):
+  #   a PEM FHL-M2.5 stud pressed into the key plate, its head flush in the
+  #   plate's top face (stud_*), so the oak top lies flat on the plate and a
+  #   lid magnet lands on the steel head; a spacer (kb_spacer_*); the key
+  #   board; an M2.5 female-female hex standoff threaded onto the stud,
+  #   clamping the key board, faced to the gap down to the main board
+  #   (col_standoff_*); the main board; a spacer (kb_spacer_*); the bottom
+  #   plate; and an M2.5 low-head screw up from the BACK into the standoff
+  #   (col_screw_*). Where there is oak enough round it, the screw's head sits
+  #   in a counterbore in the oak bottom's outside face and clamps the oak to
+  #   the cassette (col_cbore_depth, col_pocket_*); where a thumb slot is too
+  #   near, the head bears on the bottom plate through an opening run into
+  #   that slot. drc.echo 'column screws: heads on the oak bottom or the
+  #   bottom plate' says which.
+  # The main board's END MOUNTS, at the mouth and a pair on the tongue: a
+  # stud pressed into the bottom plate, its head flush in the underside, the
+  # spacer, the board, and a nut (mb_nut_*). An end mount with a
   # column within end_mount_merge_d is dropped; drc.echo gives the count.
   stud_hole:
     value: 2.5
     status: settled
-    source: "the bottom plate's hole for a PEM FHL-M2.5 stud, 2.50 +0.08, punched or drilled, NOT deburred [datasheets/mechanical/PEM-FHL-M2.5-10ZI-SALES-DRAWING.pdf; installation, datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-18]"
+    source: "a plate's hole for a PEM FHL-M2.5 stud, 2.50 +0.08, punched or drilled, NOT deburred: the key plate's at each column, the bottom plate's at each end mount [datasheets/mechanical/PEM-FHL-M2.5-10ZI-SALES-DRAWING.pdf; installation, datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-18]"
   stud_head_d:
     value: 3.15
     status: settled
-    source: "the FHL-M2.5 stud's head, 3.15 +/-0.40, flush in the bottom plate's underside, so the plate still lies flat on the oak [datasheets/mechanical/PEM-FHL-M2.5-10ZI-SALES-DRAWING.pdf]"
+    source: "the FHL-M2.5 stud's head, 3.15 +/-0.40, flush in the face it is pressed in from: the key plate's top face, so the oak top lies flat on it, and the bottom plate's underside, so that plate lies flat on the oak. Steel [datasheets/mechanical/PEM-FHL-M2.5-10ZI-SALES-DRAWING.pdf, 'MATERIAL: Steel'], which is what a lid magnet pulls on (closure.magnet_d): buy the ZI stud, not the stainless FHLS"
   stud_edge:
     value: 2.8
     status: settled
-    source: "the FHL-M2.5 stud's least distance from its hole's centre to an edge of the sheet [datasheets/mechanical/PEM-FHL-M2.5-10ZI-SALES-DRAWING.pdf, 'min centerline-to-edge']. A thumb switch's cutout, a U-bolt leg's hole and the plate's outline are all edges (drc.echo 'bottom-plate studs clear of the plate's edges and cutouts')"
+    source: "the FHL-M2.5 stud's least distance from its hole's centre to an edge of the sheet [datasheets/mechanical/PEM-FHL-M2.5-10ZI-SALES-DRAWING.pdf, 'min centerline-to-edge']. A switch's cutout, a U-bolt leg's hole and a plate's outline are all edges (drc.echo 'studs clear of the plates' edges and cutouts')"
   stud_s:
     value: 2.1
     status: settled
-    source: "the FHL-M2.5 stud's unthreaded length, max, from the head's face [datasheets/mechanical/PEM-FHL-M2.5-10ZI-SALES-DRAWING.pdf]. Below a 1.2 plate it ends inside the spacer, so the main board and the standoff meet thread (drc.echo 'bottom-plate studs: unthreaded shank ends inside the spacer')"
+    source: "the FHL-M2.5 stud's unthreaded length, max, from the head's face [datasheets/mechanical/PEM-FHL-M2.5-10ZI-SALES-DRAWING.pdf]. Below a 1.2 plate it ends inside the spacer, so the main board and the standoff meet thread (drc.echo 'studs: unthreaded shank ends inside the spacer')"
   stud_attached_hole:
     value: 2.9
     status: settled
@@ -1119,7 +1126,7 @@ hardware:
   stud_l:
     value: 10
     status: settled
-    source: "owner, 2026-10-05: 'I think our standoffs are solidified' (ADR 0025, Amendment 2026-10-05): the stud chosen is the FHL-M2.5-10ZI, length code 10 from the head's face (stocked 6, 8, 10, 12, 15, 18 [datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-7]): the bottom plate + spacer + main board, and thread_engage_min diameters into the column standoff, at the stud's shortest [calc: 1.2 + 1.3 + 1.6 + 1.5 x 2.5 + 0.4 = 8.25, so 10; 8 gives 3.5 of the 3.75 wanted]. One length for every mount: at an end mount it leaves thread past the nut. drc.echo 'column: stud thread in the standoff', 'end mounts: stud thread past the nut'. The part is datasheets/mechanical/PEM-FHL-M2.5-10ZI-SALES-DRAWING.pdf"
+    source: "owner, 2026-10-05: 'I think our standoffs are solidified' (ADR 0025, Amendment 2026-10-05): the stud chosen is the FHL-M2.5-10ZI, length code 10 from the head's face (stocked 6, 8, 10, 12, 15, 18 [datasheets/mechanical/PEM-FH-SELF-CLINCHING-STUDS.pdf p.FH-7]). Since 2026-11-23 the columns' studs hang from the key plate (ADR 0025, Amendment 2026-11-23) and the stack under the head is the same sum: the plate + spacer + board, and thread_engage_min diameters into the column standoff, at the stud's shortest [calc: 1.2 + 1.3 + 1.6 + 1.5 x 2.5 + 0.4 = 8.25, so 10; 8 gives 3.5 of the 3.75 wanted]. One length for every stud: at an end mount on the bottom plate it leaves thread past the nut. drc.echo 'column: stud thread in the standoff', 'end mounts: stud thread past the nut'. The part is datasheets/mechanical/PEM-FHL-M2.5-10ZI-SALES-DRAWING.pdf"
   stud_l_tol:
     value: [-0.4, 0.4]
     status: settled
@@ -1179,47 +1186,57 @@ hardware:
   col_screw_head_d:
     value: 4.5
     status: tbd
-    source: "an M2.5 low-head cap screw's head, DIN 7984 [from memory; ISO 7380 is 4.7]. It bears on the key plate's top face round col_plate_hole and sits in col_pocket_d"
+    source: "an M2.5 low-head cap screw's head, DIN 7984 [from memory; ISO 7380 is 4.7]. It comes in from the back: it bears on the floor of a counterbore in the oak bottom (col_pocket_d), or on the bottom plate's underside round col_plate_hole"
     decided_by: "M4, with the screw bought (MECH-COL-SCREW)"
   col_screw_head_h:
     value: 1.5
     status: tbd
-    source: "the same head's height [from memory: DIN 7984 M2.5, 1.5]. It sets the pocket's depth in the oak top (drc.echo 'column screw pockets leave wood over them')"
+    source: "the same head's height [from memory: DIN 7984 M2.5, 1.5]. It sits inside col_cbore_depth, or inside the oak bottom's thickness where it bears on the plate (drc.echo 'column screws: heads on the oak bottom or the bottom plate')"
     decided_by: "as col_screw_head_d"
   col_screw_l:
     value: 10
     status: settled
-    source: "owner, 2026-10-05: 'I think our standoffs are solidified' (ADR 0025, Amendment 2026-10-05): the column screw's length under its head, M2.5 x 10 (MECH-COL-SCREW): the key plate + spacer + key board, and thread_engage_min diameters into the standoff, at the screw's shortest [calc: 1.2 + 1.3 + 1.6 + 1.5 x 2.5 + 0.3 = 8.15, so 10; 8 gives 3.6 of the 3.75 wanted]. drc.echo 'column: screw thread in the standoff', and 'column: stud and screw ends apart in the standoff'"
+    source: "the length under its head of a column screw whose head bears on the BOTTOM PLATE, M2.5 x 10 (MECH-COL-SCREW; also the Matrix carrier's screw, mx_screw_l): the bottom plate + spacer + main board, and thread_engage_min diameters into the standoff, at the screw's shortest [calc: 1.2 + 1.3 + 1.6 + 1.5 x 2.5 + 0.3 = 8.15, so 10; 8 gives 3.6 of the 3.75 wanted]. Until 2026-11-23 it came down through the key plate, over the same sum (ADR 0025, Amendment 2026-11-23). drc.echo 'column: screw thread in the standoff', and 'column: stud and screw ends apart in the standoff'"
   col_screw_l_tol:
-    value: [-0.3, 0.3]
+    value: [-0.35, 0.35]
     status: tbd
-    source: "a 10 mm screw's length tolerance, js15 [from memory: ISO 4759-1, +/-0.29 over 6-10 mm]"
+    source: "a 10 or 12 mm screw's length tolerance, js15 [from memory: ISO 4759-1, +/-0.29 over 6-10 mm, +/-0.35 over 10-18; held at the wider of the two rounded]"
     decided_by: "as col_screw_head_d"
   col_plate_hole:
     value: 2.9
     status: nominal
-    source: "M2.5 clearance through the key plate, ISO 273 medium [from memory]: the key plate and the key boards are one part once the switches are soldered, and each board locates on its columns by the fine hole (kb_board_hole), so the plate takes the medium one; the screw's head (col_screw_head_d) bears on the plate round it"
+    source: "M2.5 clearance, ISO 273 medium [from memory]: the bottom plate's hole at each column, and the oak bottom's under a clamping head. The main board is located by its end mounts' studs and the key assembly by the lid, so these holes take the medium fit; a plate-bearing screw's head (col_screw_head_d) bears on the plate round it"
   col_web_min:
     value: 4.0
     status: settled
-    source: "the least aluminium between a column's hole and the nearest switch cutout, in both plates: the key plate's screw hole (col_plate_hole) and the bottom plate's stud holes (stud_hole), against the cutout as cut, its corners rounded (switch.cutout_r). Owner, 2026-10-05, on the plates' rigidity at the columns, approving 4.0: 'Go through recommendations. That sounds fine' (issue #43; ADR 0025, Amendment 2026-10-05 (2)). A third of a plate thickness over 3 (`plate-thickness`, config/figures.yaml), twice the usual sheet-metal rule of a hole at least two thicknesses from an edge [from memory - no banked figure]; on the bottom plate it keeps the spacer's bearing circle (kb_spacer_od, off its axis by kb_mount_float) more than two plate thicknesses inside the metal [calc: stud_hole / 2 + 4.0 - (kb_spacer_od / 2 + kb_mount_float) = 1.25 + 4.0 - 2.45 = 2.8]. drc.echo 'column holes: plate web to the switch cutouts'; boards.kb_end_margin is set by it"
+    source: "the least aluminium between a column's hole and the nearest switch cutout, at every stud hole (stud_hole): the key plate's at the columns and the bottom plate's at the end mounts (the bottom plate's column screw holes take col_screw_web_min), against the cutout as cut, its corners rounded (switch.cutout_r). Owner, 2026-10-05, on the plates' rigidity at the columns, approving 4.0: 'Go through recommendations. That sounds fine' (issue #43; ADR 0025, Amendment 2026-10-05 (2)). A third of a plate thickness over 3 (`plate-thickness`, config/figures.yaml), twice the usual sheet-metal rule of a hole at least two thicknesses from an edge [from memory - no banked figure]; it keeps the spacer's bearing circle (kb_spacer_od, off its axis by kb_mount_float) more than two plate thicknesses inside the metal [calc: stud_hole / 2 + 4.0 - (kb_spacer_od / 2 + kb_mount_float) = 1.25 + 4.0 - 2.45 = 2.8]. drc.echo 'column holes: plate web to the switch cutouts'; boards.kb_end_margin is set by it"
+  col_screw_web_min:
+    value: 3.8
+    status: tbd
+    source: "the least aluminium between a column screw's clearance hole in the bottom plate (col_plate_hole) and the nearest thumb switch cutout. Moving the studs to the key plate (ADR 0025, Amendment 2026-11-23) made these holes plain clearance holes, 0.4 wider than the stud holes col_web_min was sized on, so the web the key boards' length gives (boards.kb_end_margin) is 3.82 here, not 4.02 [calc: 4.02 - (2.9 - 2.5) / 2]. No stud is clinched in these holes, and the web is still over three plate thicknesses"
+    decided_by: "the owner: accept it, or lengthen the key boards' mouth ends by 0.2 (boards.kb_end_margin) to restore col_web_min"
   col_pocket_d:
     value: 6.35
     status: nominal
-    source: "the blind pocket in the oak top's underside over each column screw's head: 1/4 in, a stock Forstner size, which leaves a flat floor (the size ADR 0020 Amendment 3 chose for the same job). Clears the head (col_screw_head_d) with room to spare; the pocket only houses the head, which bears on the plate"
-  col_pocket_clear:
-    value: 0.5
+    source: "1/4 in, a stock Forstner size, which leaves a flat floor (the size ADR 0020 Amendment 3 chose for the same job), in two places: the blind pocket in the oak top's underside for each lid magnet (closure.magnet_d), and the counterbore in the oak bottom's outside face for each clamping column screw's head (col_screw_head_d), which it clears with room to spare. Where a screw's head bears on the bottom plate instead, the opening through the oak is the same size"
+  col_cbore_depth:
+    value: 2.5
+    status: tbd
+    source: "the counterbore's depth in the oak bottom's outside face under a clamping column screw's head: the head (col_screw_head_h) and 1.0 below the face, so nothing stands proud of the back [drawing convention]; it leaves the oak bottom less this under the head (against col_pocket_skin)"
+    decided_by: "M2 - counterbore a scrap of the chosen oak and clamp a screw in it"
+  col_screw_oak_l:
+    value: 12
     status: nominal
-    source: "the pocket's depth past the screw head's top [drawing convention]"
+    source: "the length under its head of a column screw whose head CLAMPS THE OAK BOTTOM, M2.5 x 12 (MECH-COL-SCREW-OAK), the next stock length: the oak left under the head + the bottom plate + spacer + main board, and thread_engage_min diameters into the standoff, at the screw's shortest [calc: (6.0 - 2.5) + 1.2 + 1.3 + 1.6 + 1.5 x 2.5 + 0.35 = 11.7, so 12]. owner, 2026-11-23: 'it would completely fasten the cartridge cassette to the bottom board' (ADR 0025, Amendment 2026-11-23). drc.echo 'column: screw thread in the standoff'"
   col_pocket_skin:
     value: 2.0
     status: tbd
-    source: "the least wood left over a pocket, between its floor and the playing face: enough not to telegraph or crack through in hardwood [from memory - no banked figure] (drc.echo 'column screw pockets leave wood over them')"
+    source: "the least wood left at the floor of a blind cut: over a magnet pocket, between its floor and the playing face, enough not to telegraph or crack through in hardwood; and under a clamping column screw's head in the oak bottom [from memory - no banked figure] (drc.echo 'magnet pockets leave wood over them', 'column screws: heads on the oak bottom or the bottom plate')"
     decided_by: "M2 - pocket a scrap of the chosen wood and sand its face"
   col_pocket_wall:
     value: 1.5
     status: tbd
-    source: "the least wood left between a pocket and a cap slot, a side groove or the window's rebate [from memory - no banked figure] (drc.echo 'column screw pockets clear of the wood top's cuts'; the tail corners set boards.kb_tail_margin, 'key-board tail margin, least')"
+    source: "the least wood left between a pocket or a counterbore and a cap slot, a thumb recess, a side groove or the window's rebate [from memory - no banked figure] (drc.echo 'magnet pockets clear of the wood top's cuts'; the tail corners set boards.kb_tail_margin, 'key-board tail margin, least'). In the oak bottom it decides which column screws clamp the oak: a counterbore that would leave less is not cut, and that screw's head bears on the bottom plate (drc.echo 'column screws: heads on the oak bottom or the bottom plate')"
     decided_by: "M2 - pocket a scrap of the chosen wood beside a slot"
   # THE MATRIX CARRIER HANGS FROM THE OAK TOP (owner, 2026-10-03: "Hang from the
   # lid"; ADR 0021 amendment 2026-10-03). At each of its three mounts, from the
@@ -1524,7 +1541,7 @@ fabrication:
   wood_depth_tol:
     value: [-0.1, 0.1]
     status: nominal
-    source: "the oak parts' pocket, groove and rebate depths from the face named [drawing convention]; drc.echo 'column screw pockets leave wood over them' has margin over it"
+    source: "the oak parts' pocket, groove and rebate depths from the face named [drawing convention]; drc.echo 'magnet pockets leave wood over them' has margin over it"
 
   # THE ACRYLIC (owner, 2026-10-05: "acrylic needs to have its own files when
   # cut"): the two sides (SIDE-ACRYLIC) and the Matrix window (MECH-WINDOW).
@@ -1620,7 +1637,7 @@ logo:
   depth:
     value: 1.0
     status: nominal
-    source: "etch depth into the oak top: branding/README.md 'Colour fill (dark woods)' - etched deeper than a plain burn (its 'Etching notes' range) so the epoxy has something to key into. drc.echo 'logo etch leaves wood over the column screw pockets' checks the oak left under it"
+    source: "etch depth into the oak top: branding/README.md 'Colour fill (dark woods)' - etched deeper than a plain burn (its 'Etching notes' range) so the epoxy has something to key into. drc.echo 'logo etch leaves wood over the magnet pockets' checks the oak left under it"
     decided_by: "the etch test on an offcut (ROADMAP open item), which sets the depth the shop's laser gives"
   fill:
     value: "epoxy"
@@ -1637,8 +1654,9 @@ logo:
 # corners are machined finger joints: "let's just remove all the fastener
 # nonsense. Let's just go into finger joints all around". Each L's own corner
 # is glued; the two corners where the L's meet are dry, and the top L lowers
-# onto the bottom one. Magnets in the oak top, over the column screws' steel
-# heads, keep it down (magnet_*).
+# onto the bottom one. Magnets in the oak top, over the steel heads of the key
+# plate's studs, keep it down (magnet_*); the column screws from the back tie
+# the cassette, and so the lid, to the oak bottom (hardware.col_*).
 closure:
   finger_n:
     value: 7
@@ -1651,22 +1669,27 @@ closure:
     source: "room each side of a panel's finger in the cap's notch: glue room in the two glued joints, sliding room in the two dry ones [design, a starting figure]"
     decided_by: "a test joint cut in the chosen oak on the shop's machine"
   finger_relief_d:
-    value: 3.175
-    status: tbd
-    source: "the round relief cut at each inside corner so a square finger seats: the router bit's diameter, taken as 1/8 inch [design]"
-    decided_by: "the shop's bit; or cut 0 and square the corners with a chisel"
+    value: 0
+    status: nominal
+    source: "the round relief cut at each inside corner so a square finger seats, when the fingers are cut with the part lying flat. 0: the fingers are cut in a second setup with the part stood on end, the bit along the fingers, so its flat end leaves each inside corner square (owner, 2026-11-23: 'you just need to re-clamp it in another direction and the router should be able to do it'; ADR 0031)"
+    decided_by: "the shop's fixture for holding the two long panels on end; if it cannot, the bit's diameter goes here and the reliefs return"
   magnet_d:
     value: 6.0
     status: nominal
-    source: "the lid's magnets (owner, 2026-11-22: 'I agree rare Earth magnets for the top plate'): a 6 x 2 mm neodymium disc, +/-0.1 [ds datasheets/mechanical/SUPERMAGNETE-S-06-02-N-DATASHEET.pdf]. One is glued into the floor of each column screw's pocket in the oak top's underside and pulls on that screw's steel head, so the bottom L needs nothing added. The size is a common one from many makers; the pocket is hardware.col_pocket_d"
+    source: "the lid's magnets (owner, 2026-11-22: 'I agree rare Earth magnets for the top plate'): a 6 x 2 mm neodymium disc, +/-0.1 [ds datasheets/mechanical/SUPERMAGNETE-S-06-02-N-DATASHEET.pdf]. One is glued into the floor of a pocket in the oak top's underside over each column and pulls on the steel head of the key plate's stud there (hardware.stud_head_d), so the bottom L needs nothing added. The size is a common one from many makers; the pocket is hardware.col_pocket_d"
     decided_by: "the magnets bought, measured"
   magnet_h:
     value: 2.0
     status: nominal
-    source: "the same disc's height [ds, the same sheet]. It deepens each column pocket by this much (drc.echo 'closure: lid magnets over the column screws')"
+    source: "the same disc's height [ds, the same sheet]. With magnet_recess it is each pocket's depth (drc.echo 'closure: lid magnets over the key plate's studs')"
     decided_by: "as magnet_d"
+  magnet_recess:
+    value: 0.1
+    status: tbd
+    source: "how far a magnet's face sits inside the oak top's underside, so the lid seats on wood and not on eight magnets, and the glue line under each has room [design, a starting figure]. It is the air between the magnet and the stud's head"
+    decided_by: "as magnet_hold: the pull test sets how little it can be"
   magnet_hold:
     value: 7.26
     status: tbd
-    source: "N, one magnet in direct contact with thick steel [ds, the same sheet: 'approx. 740 g']. An upper bound here: each pulls across hardware.col_pocket_clear of air onto a small socket-head, and no sheet gives that figure"
-    decided_by: "M4: one magnet glued into an offcut's pocket over a column screw, and the pull measured; if it is too little, a thicker disc or a steel washer under the head"
+    source: "N, one magnet in direct contact with thick steel [ds, the same sheet: 'approx. 740 g']. An upper bound here: each pulls across magnet_recess of air onto a stud head smaller than itself (hardware.stud_head_d), and no sheet gives that figure"
+    decided_by: "M4: one magnet glued into an offcut's pocket over a stud pressed into a plate offcut, and the pull measured; if it is too little, a thicker disc"

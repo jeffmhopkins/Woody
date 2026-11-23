@@ -34,13 +34,18 @@ drawing.
   corners. It is built and tested on the bench, set into the back L and
   bonded with RTV to the oak bottom; the oak top rests on its key plate and
   lifts off its magnets by hand (*How the body closes*, below).
-  Nothing screws into the wood but the U-bolt. A column, from the
-  bottom: a PEM FHL-M2.5 stud pressed into the bottom plate, head flush in its
-  underside; a spacer; the main board; an M2.5 female-female hex standoff
-  threaded onto the stud and faced to the gap up to the key board (*"column
-  standoff length (derived)"*); the key board; a spacer; the key plate; an
-  M2.5 low-head screw down into the standoff, its head in a blind pocket in
-  the oak top's underside (`export/oak-pockets.dxf`). The columns are
+  A column, from the top (owner, 2026-11-23; ADR 0025, *Amendment,
+  2026-11-23*): a PEM FHL-M2.5 stud pressed into the key plate, head flush in
+  its top face, so the oak top lies flat on the plate; a spacer; the key
+  board; an M2.5 female-female hex standoff threaded onto the stud and faced
+  to the gap down to the main board (*"column standoff length (derived)"*);
+  the main board; a spacer; the bottom plate; and an M2.5 low-head screw up
+  into the standoff **from the back**. Where the oak bottom has wood enough
+  round it, the screw's head sits in a counterbore in the oak's outside face
+  and clamps the oak to the cassette (`export/oak-bottom-cbores.dxf`); where
+  a thumb slot stands too near, the head bears on the bottom plate through an
+  opening run into that slot (*"column screws: heads on the oak bottom or the
+  bottom plate"* says which, and how much oak is left). The columns are
   vertical (*"columns vertical: the main board's mounts under the key
   boards'"*), and their threads, both ends of the standoff, are checked
   (*"column: stud thread in the standoff"*, *"column: screw thread in the
@@ -51,16 +56,16 @@ drawing.
   top face at full travel** (decided 2026-09-26, ADR 0009). The oak top's
   thickness is not a parameter: it is the cap's height above the seat less
   the travel, derived in the model and printed in `drc.echo`. The oak carries
-  one clearance hole per cap through it and, from below, a blind pocket over
-  each column screw's head; the playing face is unbroken (*"column screw
-  pockets clear of the wood top's cuts"*, *"column screw pockets leave wood
-  over them"*). Each key board is a rectangle across the cavity with a column
+  one clearance hole per cap through it and, from below, a blind pocket for
+  a lid magnet over each column; the playing face is unbroken (*"magnet pockets clear of
+  the wood top's cuts"*, *"magnet pockets leave
+  wood over them"*). Each key board is a rectangle across the cavity with a column
   in each corner, `hardware.kb_mount_inset` in from both edges for the
   standoff's keep-out; the mouth ends run `boards.kb_end_margin` past the
   first cutout, far enough that the mouth columns clear the first thumb row,
   and the tail ends `boards.kb_tail_margin` past the last (*"key-board tail
-  margin, least"* prints how short it may be). The screws' heads bear on
-  plate metal (*"column screw heads bear on the key plate"*) and the spacers
+  margin, least"* prints how short it may be). The studs keep their distance from the plate's edges and cutouts
+  (*"studs clear of the plates' edges and cutouts"*) and the spacers
   stay off the switch cutouts (*"key-board spacers clear of the switch
   cutouts"*). The plate + `hardware.kb_spacer_l` is the key boards' depth, at
   the depth the KS-33's pins allow (`docs/reference/ks33-geometry.md`;
@@ -92,9 +97,11 @@ drawing.
   the through-cut outlines stay clean. The plate sits between the sides.
 - **Thumb keys** mount upside down in the bottom plate on the oak bottom's
   inside face; the through-cut in the oak is the recess (ADR 0009). One plate
-  serves both thumb clusters, the length of the main board (ADR 0025); every
-  one of the main board's mounts has a stud pressed into it (*"bottom-plate
-  studs clear of the plate's edges and cutouts"*, *"bottom-plate spacers clear
+  serves both thumb clusters, the length of the main board (ADR 0025); a
+  column's screw passes up through it, and each of the main board's end
+  mounts has a stud pressed into it (*"column holes: plate web to the switch
+  cutouts"*, *"studs clear of the
+  plates' edges and cutouts"*, *"bottom-plate spacers clear
   of the thumb switch cutouts"*).
 - **Key positions**: a key with `x`/`y` in `config/key-layout.yaml` is placed
   there. A key without one is placed on the provisional layout in
@@ -115,21 +122,25 @@ magnets** (owner, 2026-11-22; ADR 0031; issue #58; `config/body.yaml`
 - **The front L** is the oak top and the mouth cap. It carries the Matrix on
   its carrier and the breath inlet.
 - **The joints.** Each cap keeps the outer divisions of the body's width and
-  a panel's fingers run out through the cap between them, with a round relief
-  at every inside corner. Each L's own corner is glued. The two corners where
+  a panel's fingers run out through the cap between them. Their inside
+  corners are square: the fingers are cut in a second setup with the part
+  stood on end, the bit along the fingers (owner, 2026-11-23;
+  `closure.finger_relief_d`). Each L's own corner is glued. The two corners where
   the L's meet are dry, their notches open the way the lid lifts, so the
   front L lowers straight onto the back L (*"closure: finger joints at all
   four corners"*, which also prints which divisions are fingers at each
   corner). The MIDI jack sits low enough in the tail cap for its counterbore
   to keep oak below the lid's notches (*"MIDI jack in the tail cap"*).
-- **The magnets.** Each column screw's pocket in the oak top's underside is
-  cut deeper, and a disc magnet glued to its floor pulls on that screw's
-  steel head (*"closure: lid magnets over the column screws"*). How hard
-  they pull across the gap is `tbd`; ADR 0031's *Open* table says what
-  decides it.
+- **The magnets.** A disc magnet glued to the floor of a pocket in the oak
+  top's underside, over each column, pulls on the steel head of the key
+  plate's stud there (*"closure: lid magnets over the key plate's studs"*).
+  How hard they pull is `tbd`; ADR 0031's *Open* table says what decides it.
+- **The column screws** tie it together: the lid's magnets hold it to the
+  key plate, and the columns' screws from the back hold the key plate, with
+  the whole cassette, to the oak bottom.
 
-No screw, nut or insert closes the body, and nothing shows on a face but the
-joints themselves.
+The lid lifts off by hand. The only fasteners that show are the column
+screws' heads on the back, with the joints themselves.
 
 ![Section through a finger at the mouth end](renders/section-closure-mouth.png)
 
@@ -327,7 +338,8 @@ decision, not a correction.
    the model (*"chain headers on the … boards clear of the switches"*).
 8. **M3 into a 1.20 mm plate** was about two threads, which ruled out
    tapping the key plate for the lid screws. Since ADR 0025 there are no lid
-   screws; the columns' threads are in their standoffs.
+   screws; the columns' threads are in their standoffs, and the key plate's
+   studs are pressed, not tapped.
 
 ## The interference check
 
@@ -359,8 +371,9 @@ only as good as those envelopes. Group the report's lines by these causes
    folds is `routing.chain_fold`, which says why. **Its length is the service
    position's** (owner: long enough "to have the top off and still connect
    the ribbon before tightening down"; since the cassette, ADR 0025,
-   tightening down is screwing the key plate onto its columns): the key
-   plate, with both key boards, held raised straight up off its columns while
+   tightening down is driving the column screws from the back): the key
+   plate, with both key boards and their standoffs, held raised straight up
+   off the main board while
    a hand plugs the main board's sockets (`routing.chain_service`,
    `routing.chain_raise`, `routing.chain_slack`; *"key-chain ribbon length
    (derived)"*). A ribbon long enough to lay the plate beside the body would

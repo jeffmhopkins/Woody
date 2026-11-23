@@ -49,16 +49,19 @@ module fab_geom() {
     stock("oak_top", oak_top_t, [x_in1 - x_in0 + ends_mouth_cap_t + ends_tail_cap_t, W], ["underside", "playing face"]);
     layer("oak_top", "oak-top", "", "through", "outline, end fingers, cap slots, matrix window");
     layer("oak_top", "oak-grooves", "underside", stack_groove_depth, "side grooves");
-    layer("oak_top", "oak-pockets", "underside", col_pocket_depth, str("column screw head pockets (magnets: see holes)", usb_pocket_need > 0 ? " and the recovery USB-C pocket" : ""));
+    layer("oak_top", "oak-pockets", "underside", col_pocket_depth, str("lid magnet pockets", usb_pocket_need > 0 ? " and the recovery USB-C pocket" : ""));
     layer("oak_top", "oak-inserts", "underside", hardware_mx_insert_l, "Matrix carrier insert holes");
     layer("oak_top", "oak-relief", "underside", openings_matrix_relief_d, "relief over the Matrix");
     layer("oak_top", "oak-rebates", "playing face", openings_matrix_acrylic_t, "matrix window rebate");
     layer("oak_top", "oak-logo", "playing face", logo_depth, str("maker's mark etch, filled: ", logo_fill));
-    for (m = columns()) hole("oak_top", "column pocket and magnet", sh(m, o), hardware_col_pocket_d, "underside", cl_mag_depth, "MECH-LID-MAGNET");
+    for (m = columns()) hole("oak_top", "magnet pocket", sh(m, o), hardware_col_pocket_d, "underside", cl_mag_depth, "MECH-LID-MAGNET");
     for (m = mx_mounts) hole("oak_top", "threaded insert hole", sh(m, o), hardware_mx_insert_hole, "underside", hardware_mx_insert_l, "MECH-MX-INSERT");
 
     stock("oak_bottom", oak_bottom_t, [x_in1 - x_in0 + ends_mouth_cap_t + ends_tail_cap_t, W], ["outside face", "inside face"]);
-    layer("oak_bottom", "oak-bottom", "", "through", "outline, end fingers, thumb recesses, U-bolt holes");
+    layer("oak_bottom", "oak-bottom", "", "through", "outline, end fingers, thumb recesses, U-bolt and column screw holes");
+    layer("oak_bottom", "oak-bottom-cbores", "outside face", hardware_col_cbore_depth, "column screw head counterbores");
+    for (m = columns()) if (col_clamps_oak(m)) hole("oak_bottom", "column screw, clamps the oak", sh(m, o), hardware_col_pocket_d, "outside face", hardware_col_cbore_depth, "MECH-COL-SCREW-OAK");
+    for (m = columns()) if (!col_clamps_oak(m)) hole("oak_bottom", "column screw, head on the plate", sh(m, o), hardware_col_pocket_d, "", "through", "MECH-COL-SCREW");
     layer("oak_bottom", "oak-grooves", "inside face", stack_groove_depth, "side grooves");
     for (u = ubolt_legs()) hole("oak_bottom", "U-bolt leg", sh(u, o), ubolt_hole_d, "", "through", "MECH-UBOLT");
 
@@ -77,12 +80,13 @@ module fab_geom() {
 
     po = [plate_x0, plate_y0];
     stock("plate_top", plate_thickness, [plate_x1 - x_in0, u_w], ["underside", "top face"]);
-    layer("plate_top", "plate-top", "", "through", "outline, switch cutouts, column screw holes");
-    for (m = columns()) hole("plate_top", "column screw clearance", sh(m, po), hardware_col_plate_hole, "", "through", "MECH-COL-SCREW");
+    layer("plate_top", "plate-top", "", "through", "outline, switch cutouts, column stud holes");
+    for (m = columns()) hole("plate_top", "stud, column", sh(m, po), hardware_stud_hole, "top face", "through", "MECH-MB-STUD");
     stock("plate_bottom", plate_thickness, [bplate_x1 - x_in0, u_w], ["underside", "top face"]);
-    layer("plate_bottom", "plate-bottom", "", "through", "outline, thumb switch cutouts, stud and U-bolt holes, windows");
-    for (i = [0 : len(cb_standoffs) - 1]) hole("plate_bottom", i < n_cols ? "stud, column" : "stud, end mount",
-                                               sh(cb_standoffs[i], po), hardware_stud_hole, "underside", "through", "MECH-MB-STUD");
+    layer("plate_bottom", "plate-bottom", "", "through", "outline, thumb switch cutouts, stud, screw and U-bolt holes, windows");
+    for (i = [0 : len(cb_standoffs) - 1])
+        if (i < n_cols) hole("plate_bottom", "column screw clearance", sh(cb_standoffs[i], po), hardware_col_plate_hole, "", "through", col_clamps_oak(cb_standoffs[i]) ? "MECH-COL-SCREW-OAK" : "MECH-COL-SCREW");
+        else hole("plate_bottom", "stud, end mount", sh(cb_standoffs[i], po), hardware_stud_hole, "underside", "through", "MECH-MB-STUD");
     for (u = ubolt_legs()) hole("plate_bottom", "U-bolt leg", sh(u, po), ubolt_hole_d, "", "through", "MECH-UBOLT");
     // the switch cutouts, every part that has them: count, and the square
     echo("FAB", "plate_top", "cutouts", len(top_keys), plate_cutout);

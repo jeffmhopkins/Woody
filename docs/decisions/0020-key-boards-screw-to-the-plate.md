@@ -680,6 +680,16 @@ pushed into the first board confirms the holes and the depth.
 bonded into the shell. Nothing screws into the wood, and the key plate is tied
 to a bottom plate by a column at each key-board corner.
 
+> **Amended 2026-11-23 (ADR 0025, *Amendment, 2026-11-23*).** Each column is
+> turned over: the stud is pressed flush into the key plate again, as
+> Amendment 4 had it, the standoff threads onto it, and the screw comes up
+> from the back, four of the eight clamping the oak bottom. The oak top's
+> pockets hold the lid's magnets, not screw heads. The table and the list
+> below are the stack as decided on 2026-09-29; the depth rules, the spacer,
+> the standoff's keep-out and the corners' positions stand, and PEM's edge
+> distance applies to the key plate again (*"studs clear of the plates'
+> edges and cutouts"*).
+
 ### The stack at each corner, from the top down
 
 | Part | Row | Size |
@@ -703,15 +713,15 @@ as amended by ADR 0025).
 - **The studs in the key plate are gone** (`MECH-KB-STUD`), and so is the nut
   under the board (`MECH-KB-NUT`). The key plate has a clearance hole at each
   corner, not a stud hole, so PEM's edge distance no longer applies there. The
-  screw's head must bear on plate metal (*"column screw heads bear on the key
-  plate"*).
+  screw's head must bear on plate metal (*"column screws: heads on the
+  oak bottom or the bottom plate"*).
 - **Service goes through the screws.** Once the oak top is cut free
   (ADR 0025), the heads are reached from above. So there is no stud whose
   clinch holds it against turning, and no nut underneath. The key plate comes
   off the columns with both key boards on it.
 - **The pockets are back**, as Amendment 3's were: one per corner, blind, their
-  wood checked (*"column screw pockets clear of the wood top's cuts"*,
-  *"column screw pockets leave wood over them"*). The tail corners' pockets
+  wood checked (*"magnet pockets clear of the wood top's cuts"*,
+  *"magnet pockets leave wood over them"*). The tail corners' pockets
   set the least tail margin (`boards.kb_tail_margin`), as they did then.
 - **The keep-out under the board is the standoff's hex**, across its corners,
   grown by `hardware.kb_mount_float`. It stands where the nut stood, the same

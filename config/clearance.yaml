@@ -79,9 +79,11 @@ sets:
       min: {value: 0.0, status: settled, source: "[design] a fastener in its own clearance hole or bore: the radial gap IS that hole's clearance (config/body.yaml hardware.kb_board_hole, stud_attached_hole, mx_insert_hole, the spacers' bores), which the hardware takes up as it is assembled"}
       pairs:
         - ["main board", "main board stud *"]
+        - ["main board", "column screw *"]
+        - ["column screw <same>", "main board spacer <same>"]
         - ["main board spacer <same>", "main board stud <same>"]
-        - ["board *", "column screw *"]
-        - ["column screw <same>", "key-board spacer <same>"]
+        - ["board *", "key plate stud *"]
+        - ["key plate stud <same>", "key-board spacer <same>"]
         - ["Matrix carrier", "Matrix carrier screw *"]
         - ["Matrix carrier screw <same>", "Matrix carrier spacer <same>"]
         - ["Matrix carrier screw *", "oak top"]

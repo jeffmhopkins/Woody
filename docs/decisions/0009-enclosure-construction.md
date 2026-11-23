@@ -47,7 +47,7 @@ feels right.
 > the ring's inside to the keycap - see `logo.scale`. Its scale, turn, depth
 > and fill are `config/body.yaml` `logo`, each
 > with its reasoning, and `mechanical/drc.echo` checks that it fits the band,
-> that the etch leaves wood over the column screws' pockets beneath it, and
+> that the etch leaves wood over the lid's magnet pockets beneath it, and
 > what its smallest gap comes to once scaled. The etch is its own cut file,
 > `mechanical/export/oak-logo.dxf`, in the oak panels' frame. **Open:** the
 > scaled mark's gaps are under the README's laser guideline, so an etch test
@@ -316,7 +316,9 @@ What changes, and what does not:
 - **The playing face is unbroken oak.** The six fasteners stop in the plate
   from below, so no hole in the oak top carries one. *(Since [ADR 0025](0025-the-cassette.md):
   there are no body fasteners. The column screws' heads sit in blind pockets in
-  the oak top's underside, so the face is still unbroken.)*
+  the oak top's underside, so the face is still unbroken. Since 2026-11-23
+  (ADR 0025's amendment of that date) those screws come in from the back and
+  the pockets hold the lid's magnets; the playing face is unbroken still.)*
   > **True, and simpler, 2026-09-28 ([ADR 0020](0020-key-boards-screw-to-the-plate.md),
   > Amendment 4).** The key boards hang on PEM self-clinching studs pressed
   > into the plate, their heads flush with its top face. Nothing stands above
@@ -968,7 +970,8 @@ ordering a ferrite bead and an electrolytic on one row.
 > **Amended 2026-09-29 ([ADR 0025](0025-the-cassette.md)).** The key plate is bonded to the
 > oak top with RTV, as the table says. But it is bonded as the top of the
 > cassette, after the cassette is assembled, with the column screws' heads
-> finding their pockets. The **bottom plate**, which replaced the thumb
+> finding their pockets *(no longer: ADR 0031 unbonded the oak top, and ADR
+> 0025's amendment of 2026-11-23 moved those screws to the back)*. The **bottom plate**, which replaced the thumb
 > plates, is bonded to the oak bottom's inside face with RTV too. The **oak
 > top to the U** at the side grooves is no longer a gasket clamped by six
 > fasteners. It is an RTV bond, fresh, not skinned, and cut to open. The

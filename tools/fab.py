@@ -605,15 +605,17 @@ def cmd_drawing(a):
         notes.append(f"PROFILE TOL {tol(fb['plate_profile_tol']['value'])}; SWITCH CUTOUTS "
                      f"{fmt(G['cutouts']['n'])} x {fmt(G['cutouts']['s'])} square {tol(fb['cutout_tol']['value'])} "
                      f"(fabrication.cutout_tol); sharp corners not required: the DXF's own")
-        if part == "plate_bottom":
-            studs = [h for h in holes if h["bom"] == "MECH-MB-STUD"]
-            notes.append(f"PEM STUDS: {len(studs)} x {B['MECH-MB-STUD']['part']} ({B['MECH-MB-STUD']['manufacturer']}), "
-                         f"pressed in from the UNDERSIDE, heads flush in it, shanks standing from the top face. "
+        studs = [h for h in holes if h["bom"] == "MECH-MB-STUD"]
+        if studs:
+            side = ("pressed in from the UNDERSIDE, heads flush in it, shanks standing from the top face. " if part == "plate_bottom"
+                    else "pressed in from the TOP FACE, heads flush in it, shanks standing from the underside. ")
+            notes.append(f"PEM STUDS: {len(studs)} x {B['MECH-MB-STUD']['part']} ({B['MECH-MB-STUD']['manufacturer']}), " + side +
                          f"Holes {', '.join(h['id'] for h in studs)}: {fmt(studs[0]['d'])} {tol(fb['stud_hole_tol']['value'])} "
                          f"(hardware.stud_hole), punched or drilled, NOT DEBURRED; >= hardware.stud_edge from any edge; "
                          f"squeezed flush on a flat anvil, never hammered (BOM MECH-MB-STUD)")
-        else:
-            notes.append("NO PRESSED HARDWARE in this plate. The column screws' heads bear on its top face (BOM MECH-COL-SCREW)")
+        if part == "plate_bottom":
+            notes.append("COLUMN SCREWS pass up through the plain clearance holes; where the oak bottom has an opening "
+                         "instead of a counterbore, the screw's head bears on this plate's underside (BOM MECH-COL-SCREW)")
         notes.append("COUNTERSINKS: none. Every hole is a plain through-hole")
         notes.append("GROUND: bare metal round every hole that carries a screw head or a stud (ADR 0025)")
     elif kind == "wood":
@@ -633,7 +635,12 @@ def cmd_drawing(a):
             notes.append("TAIL END: the tail cap's etherCON recess is carried across the end of the finger it meets, cut "
                          "from the underside (mechanical/drc.echo 'closure: finger joints at all four corners' prints "
                          "how deep and how far in). Cut it with the lid dry-fitted to the tail cap, or by hand to match")
-            notes.append("MAGNETS: one glued to the floor of each column pocket (BOM MECH-LID-MAGNET), any pole down")
+            notes.append("MAGNETS: one glued to the floor of each magnet pocket (BOM MECH-LID-MAGNET), any pole down, "
+                         "its face just inside the underside (config/body.yaml closure.magnet_recess)")
+        if part == "oak_bottom":
+            notes.append("COLUMN SCREWS come in from the outside face (ADR 0025): a flat-bottomed counterbore with a "
+                         "clearance hole where the head clamps the oak (oak-bottom-cbores.dxf; BOM MECH-COL-SCREW-OAK), "
+                         "and an opening run into the thumb slot where the head bears on the plate (in the outline)")
         if part == "mouth_cap":
             notes.append("TAP the inlet hole to the insert's outside thread (BOM INLET-INSERT), square to the face, "
                          "before the insert is epoxied in flush with the outer face")
@@ -644,9 +651,11 @@ def cmd_drawing(a):
                          "jack's nut, leaving the jack its panel (config/body.yaml midi.jack_thread less midi.jack_nut_t)")
         notes.append("COUNTERSINKS: none. Pockets and counterbores are flat-bottomed")
         if part in ("oak_top", "oak_bottom", "mouth_cap", "tail_cap"):
-            notes.append("FINGER JOINTS at both ends: fingers and notches are in the outline, with a round relief at "
-                         "each inside corner (config/body.yaml closure.finger_relief_d: the bit's diameter) and "
-                         "closure.finger_fit of room each side of a finger. Cut a test joint first (ADR 0031: which are glued)")
+            notes.append("FINGER JOINTS at both ends: fingers and notches are in the outline, drawn with SQUARE inside "
+                         "corners. Cut them in a second setup with the part stood on end, a straight flat-ended bit "
+                         "along the fingers and passing right through the thickness, so its end leaves each corner "
+                         "square (config/body.yaml closure.finger_relief_d). closure.finger_fit of room each side of a "
+                         "finger. Cut a test joint first (ADR 0031: which are glued)")
         notes.append(f"EDGES: the model's sanded roundover, stack.edge_r = {fmt(b['stack']['edge_r']['value'])} "
                      f"({b['stack']['edge_r']['status']}), is in the STEP; it may be left for sanding by hand")
     else:
