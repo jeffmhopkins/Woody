@@ -577,20 +577,25 @@ ec_lane_near = [u_y0, ec_c[0] - ec_fl[0] / 2];  // the near lane
 midi_far = len(search("far", midi_corner)) > 0;
 midi_upper = len(search("upper", midi_corner)) > 0;
 midi_lane = midi_far ? ec_lane : ec_lane_near;
-// THE JACK'S AXIS on the tail face, (Y, Z): the middle of its lane across, and
-// midi.jack_clear from the oak top's underside or the floor by its collar.
-midi_c = [(midi_lane[0] + midi_lane[1]) / 2,
-          midi_upper ? z_oak_top_bot - midi_jack_clear - midi_jack_collar[0] / 2 : z_floor + midi_jack_clear + midi_jack_collar[0] / 2];
 midi_panel = midi_jack_thread[1] - midi_jack_nut_t;   // the thickest panel the nut still clamps [calc from the drawing]
 midi_nut_e = midi_jack_nut_af / cos(30);              // the nut across its corners
 midi_cbore_d = midi_nut_e + 2 * midi_cbore_clear;     // from OUTSIDE, round the nut
+// THE JACK'S AXIS on the tail face, (Y, Z): the middle of its lane across. Up,
+// its counterbore keeps tail_web_min of oak from the nearer panel's finger
+// notches, so that panel keeps every finger (owner, 2026-11-23: "move the TRS
+// midi Jack down lower to get that extra finger in"), and its collar stays
+// midi.jack_clear from that panel's inside face, whichever asks more.
+midi_c = [(midi_lane[0] + midi_lane[1]) / 2,
+          midi_upper ? z_oak_top_bot - max(midi_jack_clear + midi_jack_collar[0] / 2, tail_web_min + midi_cbore_d / 2)
+                     : z_floor + max(midi_jack_clear + midi_jack_collar[0] / 2, tail_web_min + midi_cbore_d / 2)];
 midi_cbore_depth = ends_tail_cap_t - midi_panel;      // from the outer face, leaving midi_panel of oak
 // Along the body: the collar on the cap's inside face, the body and the tabs behind it.
 midi_tab_x = x_in1 - midi_jack_collar[1] - midi_jack_body[1] - midi_jack_body[2];
 module midi_cbore_2d() { translate(midi_c) circle(d = midi_cbore_d); }
 // THE TAIL JOINTS' FINGERS: a division the MIDI jack's counterbore reaches
-// into, at that panel's height, is left to the cap - a finger there would
-// stand in the jack's nut.
+// into, at that panel's height, would be left to the cap - a finger there
+// would stand in the jack's nut. The jack's height (midi_c) keeps it out of
+// both panels, so this drops none.
 function cl_div_clear_of_jack(reaches) = [for (i = cl_div_all)
     if (!(reaches && midi_c[0] + midi_cbore_d / 2 > i * cl_fp && midi_c[0] - midi_cbore_d / 2 < (i + 1) * cl_fp)) i];
 cl_div_top_tail = cl_div_clear_of_jack(midi_c[1] + midi_cbore_d / 2 > z_oak_top_bot);
@@ -2418,7 +2423,7 @@ module drc_report() {
     // the etherCON's bore and screw holes, and the counterbore's to the screws.
     let(panel = ends_tail_cap_t - midi_cbore_depth,
         rh = midi_hole_d / 2, rc = midi_cbore_d / 2,
-        w_edge = min(midi_c[0] - rc, W - (midi_c[0] + rc), midi_c[1] - rc, T - (midi_c[1] + rc)),
+        w_edge = min(midi_c[0] - rc, W - (midi_c[0] + rc), midi_c[1] - rc - oak_bottom_t, z_oak_top_bot - (midi_c[1] + rc)),
         w_bore = norm(midi_c - ec_c) - ethercon_bore_d / 2 - rh,
         w_hole = min([for (h = ec_holes) norm(midi_c - h)]) - ethercon_hole_d / 2 - rh,
         w_screw = min([for (h = ec_holes) norm(midi_c - h)]) - ethercon_hole_d / 2 - rc,
@@ -2426,7 +2431,7 @@ module drc_report() {
         drc(panel <= midi_panel + 0.01 && panel >= tail_web_min && min(w_edge, w_bore, w_hole, w_screw) >= tail_web_min,
             "MIDI jack in the tail cap", [midi_c, panel, midi_cbore_d, midi_cbore_depth, [w_edge, w_bore, w_hole, w_screw], sunk],
             str("mm: the jack's axis on the face (across, up; midi.corner \"", midi_corner, "\"); the oak the nut clamps (at most the thread past the collar less the nut, ",
-                midi_panel, " [ds SAMESKY-SJ5-43502PM.pdf p.2]; at least ", tail_web_min, "); the counterbore from outside round the nut's corners, across and deep; the oak from the counterbore to the face's nearest edge, from the hole to the etherCON's bore and to its nearest panel screw hole, and from the counterbore to that screw hole (each against ",
+                midi_panel, " [ds SAMESKY-SJ5-43502PM.pdf p.2]; at least ", tail_web_min, "); the counterbore from outside round the nut's corners, across and deep; the oak from the counterbore to the face's nearest side edge or panel finger notch, from the hole to the etherCON's bore and to its nearest panel screw hole, and from the counterbore to that screw hole (each against ",
                 tail_web_min, "); and how far the thread's end, and the nut on it, sit below the outer face"));
     drc(undef, "tail cap web between the etherCON bore and the MIDI jack", norm(midi_c - ec_c) - ethercon_bore_d / 2 - midi_hole_d / 2,
         str("mm of oak between the two through-holes (against ", tail_web_min, ", 'MIDI jack in the tail cap')"));

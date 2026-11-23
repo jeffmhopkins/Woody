@@ -32,8 +32,8 @@ ECHO: "FAB", "tail_cap", "layer", "tail-cap-jack", "outer face", 3.5, "MIDI jack
 ECHO: "FAB", "tail_cap", "hole", "etherCON bore", 28.5, 19.05, 22, "", "through", "J-UMBILICAL-INST"
 ECHO: "FAB", "tail_cap", "hole", "etherCON flange screw", 18.6, 28.95, 3.2, "", "through", "MECH-ETHERCON-SCREW"
 ECHO: "FAB", "tail_cap", "hole", "etherCON flange screw", 38.4, 9.15, 3.2, "", "through", "MECH-ETHERCON-SCREW"
-ECHO: "FAB", "tail_cap", "hole", "MIDI jack", 46, 28, 7.3, "", "through", "J-MIDI-OUT"
-ECHO: "FAB", "tail_cap", "hole", "MIDI jack counterbore", 46, 28, 13.547, "outer face", 3.5, ""
+ECHO: "FAB", "tail_cap", "hole", "MIDI jack", 46, 24.2265, 7.3, "", "through", "J-MIDI-OUT"
+ECHO: "FAB", "tail_cap", "hole", "MIDI jack counterbore", 46, 24.2265, 13.547, "outer face", 3.5, ""
 ECHO: "FAB", "plate_top", "stock", 1.2, 258.89, 45, ["underside", "top face"]
 ECHO: "FAB", "plate_top", "layer", "plate-top", "", "through", "outline, switch cutouts, column screw holes"
 ECHO: "FAB", "plate_top", "hole", "column screw clearance", 31.8, 5.1, 2.9, "", "through", "MECH-COL-SCREW"

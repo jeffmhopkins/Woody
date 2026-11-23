@@ -120,7 +120,8 @@ magnets** (owner, 2026-11-22; ADR 0031; issue #58; `config/body.yaml`
   the L's meet are dry, their notches open the way the lid lifts, so the
   front L lowers straight onto the back L (*"closure: finger joints at all
   four corners"*, which also prints which divisions are fingers at each
-  corner: one beside the MIDI jack is left to the cap).
+  corner). The MIDI jack sits low enough in the tail cap for its counterbore
+  to keep oak below the lid's notches (*"MIDI jack in the tail cap"*).
 - **The magnets.** Each column screw's pocket in the oak top's underside is
   cut deeper, and a disc magnet glued to its floor pulls on that screw's
   steel head (*"closure: lid magnets over the column screws"*). How hard

@@ -71,8 +71,12 @@ offered hidden magnets, a snug fit alone, or gluing the body shut:
    body's width is cut into divisions; each cap keeps the outer ones, so the
    body's corners stay the cap's and the sides' grooves end against it, and a
    panel's fingers run out through the cap's thickness. Every inside corner
-   has a round relief the router bit's size, so a square finger seats. A
-   division the MIDI jack's counterbore reaches into is left to the cap.
+   has a round relief the router bit's size, so a square finger seats. The
+   MIDI jack sits low enough in the tail cap that its counterbore keeps oak
+   between itself and the lid's notches, so every corner has all its fingers
+   (owner, 2026-11-23: *"Seems like we should be able to move the TRS midi
+   Jack down lower to get that extra finger in?"*; *"MIDI jack in the tail
+   cap"*).
 3. **Each L's own corner is glued; the two corners where the L's meet are
    dry.** Glued: oak bottom to tail cap, oak top to mouth cap. Dry: oak top
    into the tail cap, oak bottom into the mouth cap. The dry notches open the
