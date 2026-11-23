@@ -629,6 +629,11 @@ def cmd_drawing(a):
                 r = B[ref]
                 notes.append(f"THREADED INSERTS {', '.join(h['id'] for h in ins)}: {len(ins)} x {r['part']} "
                              f"({r['manufacturer']}, BOM {ref}) - {r['description']}")
+        if part == "oak_top":
+            notes.append("TAIL END: the tail cap's etherCON recess is carried across the end of the finger it meets, cut "
+                         "from the underside (mechanical/drc.echo 'closure: finger joints at all four corners' prints "
+                         "how deep and how far in). Cut it with the lid dry-fitted to the tail cap, or by hand to match")
+            notes.append("MAGNETS: one glued to the floor of each column pocket (BOM MECH-LID-MAGNET), any pole down")
         if part == "mouth_cap":
             notes.append("TAP the inlet hole to the insert's outside thread (BOM INLET-INSERT), square to the face, "
                          "before the insert is epoxied in flush with the outer face")
@@ -638,6 +643,10 @@ def cmd_drawing(a):
             notes.append("MIDI jack counterbore: a router pass from the outer face, tail-cap-jack.dxf, round the "
                          "jack's nut, leaving the jack its panel (config/body.yaml midi.jack_thread less midi.jack_nut_t)")
         notes.append("COUNTERSINKS: none. Pockets and counterbores are flat-bottomed")
+        if part in ("oak_top", "oak_bottom", "mouth_cap", "tail_cap"):
+            notes.append("FINGER JOINTS at both ends: fingers and notches are in the outline, with a round relief at "
+                         "each inside corner (config/body.yaml closure.finger_relief_d: the bit's diameter) and "
+                         "closure.finger_fit of room each side of a finger. Cut a test joint first (ADR 0031: which are glued)")
         notes.append(f"EDGES: the model's sanded roundover, stack.edge_r = {fmt(b['stack']['edge_r']['value'])} "
                      f"({b['stack']['edge_r']['status']}), is in the STEP; it may be left for sanding by hand")
     else:

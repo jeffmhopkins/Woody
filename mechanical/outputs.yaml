@@ -183,7 +183,7 @@ renders:
     camera: [0, 22, 0, 0, 0, 0, 250]
     defines: {origin: "centre", cut: "y2d", cut_at: 28.5}
   - name: section-closure-mouth
-    title: Section along the body through the mouth closure screw - mouth cap, screw, the key plate's right-angle nut (issue 58)
+    title: Section along the body through a finger of the mouth end's joints - mouth cap, oak top (glued), oak bottom (dry) (issue 58)
     src: mechanical/cad/woody_body.scad
     out: mechanical/renders/section-closure-mouth.png
     imgsize: [1400, 1000]
@@ -191,7 +191,7 @@ renders:
     camera: [24, 20, 0, 0, 0, 0, 120]
     defines: {origin: "mouth", cut: "y2d", cut_key: "closure_mouth"}
   - name: section-closure-tail
-    title: Section along the body through the tail closure screw - tail cap, screw, the lid's oak block and its insert, the corner block under it (issue 58)
+    title: Section along the body through a finger of the tail end's joints - tail cap, oak bottom (glued), oak top (dry) (issue 58)
     src: mechanical/cad/woody_body.scad
     out: mechanical/renders/section-closure-tail.png
     imgsize: [1400, 1000]

@@ -5,9 +5,9 @@
 [ADR 0020](0020-key-boards-screw-to-the-plate.md) (how the key boards are held,
 and Amendment 5's ground bond) and [ADR 0022](0022-main-board-mount.md) (how the
 main board is held); each carries a dated note pointing here.
-**Amended 2026-11-22 by [ADR 0031](0031-two-ls-and-two-screws.md)**: the shell
-is two glued L's held together by two screws, and it opens with a screwdriver
-again. The cassette, its columns and its bond to the oak bottom stand as
+**Amended 2026-11-22 by [ADR 0031](0031-two-ls-finger-joints-and-magnets.md)**: the shell
+is two glued L's, finger-jointed, the lid held down by magnets, and it opens
+by hand. The cassette, its columns and its bond to the oak bottom stand as
 written here; the bond to the oak top and the glued top grooves do not (the
 *Amendment, 2026-11-22* below).
 
@@ -416,23 +416,23 @@ The oak top's pockets over the columns are held by their own rule
 (`hardware.col_pocket_wall`; *"column screw pockets clear of the wood top's
 cuts"*), which the tail corners set, and this amendment does not change it.
 
-## Amendment, 2026-11-22 — the shell opens on two screws (ADR 0031)
+## Amendment, 2026-11-22 — the shell is two L's and the lid lifts off (ADR 0031)
 
 The owner, 2026-11-22, asked for the body to come apart and go back together
-as two L's screwed to each other ([ADR 0031](0031-two-ls-and-two-screws.md),
+as two L's ([ADR 0031](0031-two-ls-finger-joints-and-magnets.md),
 which quotes the request). What that changes here:
 
 - **Point 1.** The cassette is bonded to the oak bottom only. The key
   plate's top face is not bonded to the oak top, which rests on it.
 - **Consequences, *Service is by cutting silicone*.** Superseded for the lid:
-  steps 1 is two screws and a lift, not a cut. Steps 2 to 4 stand. Step 5,
+  step 1 is a lift off the lid's magnets, not a cut. Steps 2 to 4 stand. Step 5,
   cutting the bottom plate's bond to take the whole cassette out, stands.
 - **Consequences, *The Matrix is not in the cassette*.** "With the oak top
   cut free" reads "with the front L lifted off" from here on.
 - **Consequences, *Tolerance*.** No bead lies between the key plate and the
   oak top to take the difference; the bottom bead still takes its share.
-- **"Nothing screws into the wood but the U-bolt"** holds with one addition:
-  a screw passes through each end cap, and neither threads into wood.
+- **"Nothing screws into the wood but the U-bolt"** holds as written: the
+  closure has no screw.
 
 The rows of the table below that speak of cutting silicone at the oak top
 and of how the end caps are held are answered by ADR 0031; they stay as

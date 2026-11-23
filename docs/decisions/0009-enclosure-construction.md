@@ -6,9 +6,9 @@ internals are one bonded unit, the cassette, glued into the shell with RTV and
 opened by cutting it. Each passage that ADR 0025 changes is marked in place.
 **Amended 2026-10-01** (owner): the maker's mark goes on the oak top.
 **How the body closes is amended again 2026-11-22 by
-[ADR 0031](0031-two-ls-and-two-screws.md)**: the shell is two glued L's, the
-oak bottom with the tail cap and the oak top with the mouth cap, held together
-by one screw through each end cap. The cassette stays bonded to the oak
+[ADR 0031](0031-two-ls-finger-joints-and-magnets.md)**: the shell is two glued L's, the
+oak bottom with the tail cap and the oak top with the mouth cap, finger-jointed
+at all four corners, the lid held down by magnets. The cassette stays bonded to the oak
 bottom; nothing is bonded between the L's, so the oak top is no longer bonded
 to the key plate or glued at its grooves, and every passage here that says so
 is superseded by that record.

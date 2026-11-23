@@ -1083,8 +1083,8 @@ hardware:
   # plate, tied by a column at each of the key boards' eight corners, with the
   # two key boards and the main board between them. It is built and tested on
   # the bench with its ribbons plugged, set into the back L and bonded to the
-  # oak bottom with silicone; the oak top rests on its key plate, held by the
-  # closure's two screws (`closure`, ADR 0031). Nothing screws into the wood
+  # oak bottom with silicone; the oak top rests on its key plate, held down by
+  # the lid's magnets (`closure`, ADR 0031). Nothing screws into the wood
   # but the U-bolt. A COLUMN, from the bottom up:
   #   a PEM FHL-M2.5 stud pressed into the bottom plate, its head flush in the
   #   plate's underside (stud_*); a spacer (kb_spacer_*); the main board;
@@ -1632,165 +1632,41 @@ logo:
     source: "the narrowest wall of oak a raster etch leaves standing between two etched areas without burning through or chipping out in oak [from memory - no banked figure]. drc.echo 'logo: smallest gap in the etch' fails under it, and notes the gap if it is under the mark's own clearance at 100 % (branding/README.md 'Geometry', the laser guideline)"
     decided_by: "the etch test on an offcut (ROADMAP open item)"
 
-# ------------------------------------------------------------- closure ----
-# HOW THE BODY CLOSES AND COMES APART (issue #58; ADR 0031; owner, 2026-11-22).
-# Two glued L's. The BACK L is the oak bottom and the tail cap, and carries
-# the cassette, the etherCON and its adapter. The FRONT L is the oak top and
-# the mouth cap, and carries the Matrix on its carrier and the breath inlet.
-# The acrylic sides stand in the grooves between them. One screw through
-# each end cap holds the L's together:
-#   at the MOUTH, through the mouth cap (front L) into a PEM right-angle
-#   clinch nut pressed into the key plate's mouth end (back L, nut_*);
-#   at the TAIL, through the tail cap (back L) into a threaded insert in an
-#   oak block glued under the oak top (front L, block_*, insert_*), in the
-#   lane beside the etherCON that the MIDI jack does not use.
-# A second oak block glued into the back L's corner, under the first, carries
-# the cable's pull from the tail cap into the oak bottom (corner_h).
-# Nothing holds the lid down between the two screws: drc.echo 'closure: lid
-# span between its two screws' prints the span, and ADR 0031 says what
-# decides whether it needs more.
+# THE CLOSURE (issue #58; ADR 0031; owner, 2026-11-22). The body is two
+# glued L's - oak bottom + tail cap, oak top + mouth cap - and all four
+# corners are machined finger joints: "let's just remove all the fastener
+# nonsense. Let's just go into finger joints all around". Each L's own corner
+# is glued; the two corners where the L's meet are dry, and the top L lowers
+# onto the bottom one. Magnets in the oak top, over the column screws' steel
+# heads, keep it down (magnet_*).
 closure:
-  screw_d:
-    value: 3.0
+  finger_n:
+    value: 7
     status: nominal
-    source: "MECH-CLOSE-SCREW, an M3 low-head cap screw, the thread the PEM right-angle nut is made in (nut_*); one part at both ends"
-    decided_by: "the first assembly: whether M3 into the insert holds the lid's tail end"
-  screw_l:
-    value: 10
-    status: nominal
-    source: "M3 x 10, a stocked DIN 7984 length [from memory]: the oak left under the head (panel), the gap to the nut's face, and the nut's thread (drc.echo 'closure: mouth screw thread in the key plate's nut'); at the tail the same screw runs through the insert (drc.echo 'closure: tail screw thread in the lid block's insert')"
-    decided_by: "the screw bought"
-  screw_head_d:
-    value: 5.5
+    source: "divisions across the body's width, odd, so the cap keeps both outer ones - the body's corners stay the cap's and the sides' grooves end against it [design]"
+    decided_by: "drc.echo 'closure: finger joints at all four corners'"
+  finger_fit:
+    value: 0.05
     status: tbd
-    source: "DIN 7984 M3 low-head cap screw, head diameter [from memory]; it sits in a flat pocket of hardware.col_pocket_d, the column pockets' Forstner"
-    decided_by: "the screw bought, measured"
-  screw_head_h:
-    value: 2.0
+    source: "room each side of a panel's finger in the cap's notch: glue room in the two glued joints, sliding room in the two dry ones [design, a starting figure]"
+    decided_by: "a test joint cut in the chosen oak on the shop's machine"
+  finger_relief_d:
+    value: 3.175
     status: tbd
-    source: "the same screw's head height [from memory: DIN 7984 M3]"
-    decided_by: "as screw_head_d"
-  screw_hole:
-    value: 3.4
+    source: "the round relief cut at each inside corner so a square finger seats: the router bit's diameter, taken as 1/8 inch [design]"
+    decided_by: "the shop's bit; or cut 0 and square the corners with a chisel"
+  magnet_d:
+    value: 6.0
     status: nominal
-    source: "M3 clearance through each end cap, ISO 273 medium [from memory]"
-    decided_by: "M4, on the caps as cut"
-  panel:
-    value: 3.0
-    status: nominal
-    source: "the oak left under the mouth screw's head, the pocket's floor to the cap's inside face: the panel the etherCON's recess leaves in the tail cap (ethercon.panel_max), so both screws clamp the same thickness of oak. At the tail the head's pocket IS the etherCON recess, widened round the screw"
-    decided_by: "M4, with the caps cut: whether 3 mm of oak under a screw head takes repeated closing without a metal seat"
-  mouth_y:
-    value: 18.0
-    status: nominal
-    source: "the mouth screw's axis across the body, from the near edge: the nut's hole in the key plate keeps nut_edge_min from the plate's long edge [calc: the plate's edge is at 6.8, so 17.5 at least], and the screw's pocket keeps oak from the breath inlet's insert at the cap's centre (drc.echo 'closure: mouth screw pocket clear of the breath inlet'); the breath sensor has the far side"
-    decided_by: "PEM bulletin RA's drawing (nut_edge_min), not yet banked"
-  nut_f:
-    value: 7.0
-    status: tbd
-    source: "MECH-CLOSE-NUT, PEM RASM3-7-6ZI: 'F - Height' 7.0 +/-0.15 [web: datasheets/mechanical/PEM-RASM3-7-6ZI-CATALOG-PAGE.html]. READ HERE AS the sheet's face the body hangs from to the thread's axis - the page has no drawing, so that reading is an assumption; it sets the mouth screw's height in the cap"
-    decided_by: "PEM bulletin RA's drawing (datasheets/.manifest-R63-issue58-body-closure.csv, BLOCKED row); a different face moves the hole in mouth-cap.dxf"
-  nut_l:
-    value: 5.89
-    status: tbd
-    source: "the same part: 'L - Length' 5.89 +/-0.08, length code 6 [web: the same page], read as the length of thread along the screw"
-    decided_by: "as nut_f"
-  nut_envelope:
-    value: [9.78, 9.47, 10.18]
-    status: tbd
-    source: "the nut's body as the model draws it, [along the body, across, below the plate]: G 9.78 and E 9.47 [web: the same page], and F + D = 7.0 + 3.18 [calc]. An envelope from the table's largest figures, not the part's shape"
-    decided_by: "as nut_f - or PEM's 3D model of the part"
-  nut_hole:
-    value: [6.0, 8.0]
-    status: tbd
-    source: "the rectangular hole in the key plate the nut clinches into, [along the body, across]: 'Hole Size in Sheet' 8 x 6 mm +0.05 -0.03 [web: the same page]. Which side lies along the thread is not on the page"
-    decided_by: "as nut_f; the plate vendor installs it, as it does the FHL studs"
-  nut_face_edge:
-    value: 1.02
-    status: tbd
-    source: "the nut's threaded face in from the key plate's mouth edge: 'Min. Part Face to Edge K' 1.02 [web: the same page], at its least so the screw's free length is shortest"
-    decided_by: "as nut_f"
-  nut_edge_min:
-    value: 10.7
-    status: tbd
-    source: "'Min. Dist. Hole C/L to Edge M' 10.70 [web: the same page], held here from the nut's centreline to the key plate's LONG edge; if the drawing means the edge the thread faces, the nut moves in from the mouth edge and the screw grows by the difference"
-    decided_by: "as nut_f"
-  nut_sheet_min:
-    value: 1.0
-    status: settled
-    source: "'Min. Sheet Thickness' 1 mm [web: the same page]; the key plate is the register's plate-thickness"
-  block_l:
-    value: 14.0
-    status: nominal
-    source: "the lid's oak block along the body, from the tail cap's inside face: the insert's length, the screw's run past it, and wood behind [calc: 5.7 + 1.3 + 7]"
-    decided_by: "M4, a block glued to a scrap of the top's oak and pulled"
-  block_h:
-    value: 12.0
-    status: nominal
-    source: "the lid's block below the oak top's underside; the screw is at its middle, so the insert keeps insert_wall_min of wood above and below [calc: (12 - 4.6) / 2 = 3.7]"
-    decided_by: "as block_l"
-  block_clear:
-    value: 0.6
-    status: nominal
-    source: "the blocks' faces from the acrylic side and from the etherCON's flange: just over config/clearance.yaml's default minimum, since the lid comes down past both"
-    decided_by: "M4, with the lid fitted"
-  insert_l:
-    value: 5.7
-    status: nominal
-    source: "MECH-CLOSE-INSERT, CNC Kitchen M3 standard brass threaded insert: L 5.7 [web: datasheets/mechanical/CNCKITCHEN-M2.5x4-THREADED-INSERT-3DJAKE.html, the comparison table's M3 row]. Bedded in epoxy in the block's end, as the Matrix carrier's are in the oak top"
-    decided_by: "an insert set in a block of the chosen oak and pulled"
-  insert_od:
-    value: 4.6
-    status: nominal
-    source: "the same insert's knurl, D1 4.6 [web: the same table]"
-    decided_by: "as insert_l"
-  insert_hole:
-    value: 4.0
-    status: nominal
-    source: "the insert's hole in the block's end, the maker's D3 4.0 [web: the same table]"
-    decided_by: "as insert_l"
-  insert_wall_min:
-    value: 1.6
-    status: nominal
-    source: "the maker's least wall round the insert, W 1.6 [web: the same table] - given for printed plastic, held here for oak"
-    decided_by: "as insert_l"
-  corner_h:
-    value: 12.0
-    status: nominal
-    source: "the back L's corner block above the oak bottom's inside face, glued to the floor and to the tail cap in the same lane as the lid's block, under it: a 6 mm oak butt joint alone would carry the umbilical's pull"
-    decided_by: "M4, the back L glued up and the cable pulled"
-  block_gap_min:
+    source: "the lid's magnets (owner, 2026-11-22: 'I agree rare Earth magnets for the top plate'): a 6 x 2 mm neodymium disc, +/-0.1 [ds datasheets/mechanical/SUPERMAGNETE-S-06-02-N-DATASHEET.pdf]. One is glued into the floor of each column screw's pocket in the oak top's underside and pulls on that screw's steel head, so the bottom L needs nothing added. The size is a common one from many makers; the pocket is hardware.col_pocket_d"
+    decided_by: "the magnets bought, measured"
+  magnet_h:
     value: 2.0
     status: nominal
-    source: "air between the lid's block and the corner block under it, so glue squeezed out of either does not join the L's [design]"
-    decided_by: "M4, on the first glue-up"
-  pin_d:
-    value: 2.0
+    source: "the same disc's height [ds, the same sheet]. It deepens each column pocket by this much (drc.echo 'closure: lid magnets over the column screws')"
+    decided_by: "as magnet_d"
+  magnet_hold:
+    value: 7.26
     status: tbd
-    source: "the mouth cap's wood screws: countersunk, through the cap into the oak top's end, black-oxide stainless with brass as the alternate (owner, 2026-11-22: 'black oxide stainless would be better, brass as alternate'). The thread's diameter is a third of the panel's thickness, so the wood either side of it is what drc.echo prints [design]"
-    decided_by: "M4: a pilot drilled and a screw driven into the end of an offcut of the chosen oak without splitting it"
-  pin_l:
-    value: 12.0
-    status: tbd
-    source: "the screw's length under its head's top: the cap's thickness and as much again in the oak top [design]"
-    decided_by: "as pin_d"
-  pin_head_d:
-    value: 3.8
-    status: tbd
-    source: "a 2 mm countersunk wood screw's head [from memory: DIN 97 gives about 3.8 for 2 mm]"
-    decided_by: "the screw bought, measured"
-  pin_hole:
-    value: 2.2
-    status: nominal
-    source: "the cap's clearance hole for pin_d [design]"
-    decided_by: "as pin_head_d"
-  pin_y:
-    value: [12.0, 28.5, 45.0]
-    status: nominal
-    source: "the three screws across the body, from the near edge: the outer two clear of the grooves the sides stand in, the third on the centreline [design]"
-    decided_by: "drc.echo 'closure: mouth cap's wood screws into the oak top'"
-  pin_wall_min:
-    value: 1.5
-    status: nominal
-    source: "least oak either side of a wood screw in the panel's end, and least from its head to a face or groove [design]"
-    decided_by: "as pin_d"
+    source: "N, one magnet in direct contact with thick steel [ds, the same sheet: 'approx. 740 g']. An upper bound here: each pulls across hardware.col_pocket_clear of air onto a small socket-head, and no sheet gives that figure"
+    decided_by: "M4: one magnet glued into an offcut's pocket over a column screw, and the pull measured; if it is too little, a thicker disc or a steel washer under the head"

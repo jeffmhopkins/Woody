@@ -201,7 +201,7 @@ what each found is in the register, not here:
 
 > **The CMRR row's stated reason was refuted and the ranking survives on a
 > different one.** It read *"unretrofittable inside a bonded body"*. ADR 0009
-> retired the bonded body — it came apart on six fasteners, then by cutting its silicone (ADR 0025), and since ADR 0031 on two screws — and `R1b`, the
+> retired the bonded body — it came apart on six fasteners, then by cutting its silicone (ADR 0025), and since ADR 0031 by lifting its lid off magnets — and `R1b`, the
 > part the 60.2 dB term is entirely a statement about, is on the carrier inside
 > that body. So it *is* retrofittable, and the argument that put this sim first
 > is gone. It stayed first on weaker grounds: the thinnest claimed margin in

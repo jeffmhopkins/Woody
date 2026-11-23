@@ -33,7 +33,7 @@ drawing.
   the main board, tied by a **column** at each of the key boards' eight
   corners. It is built and tested on the bench, set into the back L and
   bonded with RTV to the oak bottom; the oak top rests on its key plate and
-  lifts off with the closure's two screws out (*How the body closes*, below).
+  lifts off its magnets by hand (*How the body closes*, below).
   Nothing screws into the wood but the U-bolt. A column, from the
   bottom: a PEM FHL-M2.5 stud pressed into the bottom plate, head flush in its
   underside; a spacer; the main board; an M2.5 female-female hex standoff
@@ -105,46 +105,34 @@ drawing.
 
 ## How the body closes
 
-**Two glued L's and two screws** (owner, 2026-11-22; ADR 0031; issue #58;
-`config/body.yaml` `closure`). Read with the instrument held upright:
+**Two glued L's, finger-jointed at all four corners, the lid held by
+magnets** (owner, 2026-11-22; ADR 0031; issue #58; `config/body.yaml`
+`closure`). Read with the instrument held upright:
 
-- **The back L** is the oak bottom and the tail cap, glued, with the sides
-  glued in its grooves. It carries the cassette, the etherCON on its adapter
-  and the MIDI jack. An oak block glued into its corner in each lane beside
-  the etherCON carries the umbilical's pull from the tail cap into the oak
-  bottom, and a screw through the tail cap into an insert in each block
-  clamps that joint while its glue sets and stays in after (*"closure: corner
-  screws in the tail face and their blocks"*). **Those two screws do not open
-  the body.**
-- **The front L** is the oak top and the mouth cap, glued, with three small
-  countersunk wood screws through the cap into the oak top's end that clamp
-  the joint while its glue sets and stay in (*"closure: mouth cap's wood
-  screws into the oak top"*). It carries the
-  Matrix on its carrier and the breath inlet, and under its tail end an oak
-  block with a threaded insert in its end, over the back L's near corner block
-  (*"closure: lid block in the lane beside the etherCON"*).
-- **The mouth screw** goes through the mouth cap into a PEM right-angle
-  clinch nut pressed into the key plate's mouth end. The main board fills the
-  bottom of the mouth end, so the key plate is what the back L offers there
-  (*"closure: mouth screw thread in the key plate's nut"*, *"closure: key
-  plate's nut and the plate round it"*, *"closure: mouth screw pocket clear
-  of the breath inlet"*).
-- **The tail screw** goes through the tail cap into the lid block's insert.
-  Its head sits in the etherCON's recess, widened round it (*"closure: tail
-  screw thread in the lid block's insert"*, *"closure: tail screw pocket in
-  the tail face"*, *"closure: oak under each screw's head"*).
+- **The back L** is the oak bottom and the tail cap, with the sides glued in
+  its grooves. It carries the cassette, the etherCON on its adapter and the
+  MIDI jack.
+- **The front L** is the oak top and the mouth cap. It carries the Matrix on
+  its carrier and the breath inlet.
+- **The joints.** Each cap keeps the outer divisions of the body's width and
+  a panel's fingers run out through the cap between them, with a round relief
+  at every inside corner. Each L's own corner is glued. The two corners where
+  the L's meet are dry, their notches open the way the lid lifts, so the
+  front L lowers straight onto the back L (*"closure: finger joints at all
+  four corners"*, which also prints which divisions are fingers at each
+  corner: one beside the MIDI jack is left to the cap).
+- **The magnets.** Each column screw's pocket in the oak top's underside is
+  cut deeper, and a disc magnet glued to its floor pulls on that screw's
+  steel head (*"closure: lid magnets over the column screws"*). How hard
+  they pull across the gap is `tbd`; ADR 0031's *Open* table says what
+  decides it.
 
-Where the two screws are on the end faces is *"closure: the two end
-screws"*. **Nothing holds the lid down between them**, and both are toward
-one long edge: *"closure: lid span between its two screws"* prints the span,
-and ADR 0031's *Open* table says what decides whether hidden column screws
-become lid screws. **The nut's figures are read off a catalogue page with no
-drawing**, so each is `tbd` and says how it was read; the bulletin's drawing
-is a `BLOCKED` manifest row.
+No screw, nut or insert closes the body, and nothing shows on a face but the
+joints themselves.
 
-![Section through the mouth closure screw](renders/section-closure-mouth.png)
+![Section through a finger at the mouth end](renders/section-closure-mouth.png)
 
-![Section through the tail closure screw](renders/section-closure-tail.png)
+![Section through a finger at the tail end](renders/section-closure-tail.png)
 
 ## The length is derived
 

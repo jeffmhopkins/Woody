@@ -273,7 +273,7 @@ Pins: `SCK` IO38, `SH/LD` IO7, chain-end `SER` IO33, `QH` IO40.
 
 ## The instrument must stay recoverable
 
-The body comes apart on its two closure screws (ADR 0031), and answering a
+The body comes apart by lifting the front L off its magnets (ADR 0031), and answering a
 failed flash that way means lifting the front L off, unscrewing the key plate
 from the cassette's columns, unplugging the Matrix's ribbon and the key
 boards' ribbons from the main board (ADR 0017), and bonding it all back with

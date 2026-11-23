@@ -11,8 +11,7 @@ This circuit has a directory of its own because it crosses a board boundary.
 The differential pole, the effective gain and `inamp-full-scale` with it, the
 sensor span and pedestal, the CMRR term and the `R1` power argument are all
 derived at the module end from parts fitted at the instrument end, 2 m away,
-inside a body that opens by taking out its two closure screws and lifting the
-front L (ADR 0031), then the key plate off the cassette's columns (ADR 0025).
+inside a body that opens by lifting the front L off its magnets (ADR 0031), then the key plate off the cassette's columns (ADR 0025).
 
 **Neither schematic is redrawn here.** The instrument end is drawn in
 [`carrier.md`](../../carrier/carrier.md) §2, in one connected picture that also
