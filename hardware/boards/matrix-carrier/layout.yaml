@@ -74,7 +74,7 @@ courtyard_overhang:
 # the Matrix, HDR-MATRIX's plastic (config/body.yaml boards.matrix_hdr_h). Its posts go on
 # through the Matrix and are cut flush; the plastic is what stands on this board.
 heights:
-  PinHeader_1x10: 2.5            # [ds connectors/HANXIA-HX-PZ2.54-1x10P-TP-YQ.pdf, the insulator]
+  PinHeader_1x10: 3.2            # [ds connectors/HANXIA-HX-PZ2.54-1x10P-TP-YQ.pdf, end view: the board to the top of the insulator, which stands on its feet]
 underside_rows: [J-MCU-C]
 
 # HDR-MATRIX, pin 1 at the Matrix's USB-C edge (pcb-geometry.echo 'matrix' 'pins'): the
@@ -82,8 +82,8 @@ underside_rows: [J-MCU-C]
 # SURFACE MOUNT (hanxia TP-YQ): nothing comes through to the underside, where J-MCU-C's
 # insulator lies under the 5V..IO1 row's first pins, and the bottom face is one whole plane.
 parts:
-  J2: [276.655, 17.07, 90]        # HDR-MATRIX, the 5V..IO1 row
-  J3: [276.655, 39.93, 90]        # HDR-MATRIX, the IO33..RX row
+  J2: [276.72, 17.07, 90]        # HDR-MATRIX, the 5V..IO1 row
+  J3: [276.72, 39.93, 90]        # HDR-MATRIX, the IO33..RX row
 
 # PWR_GND poured on the bottom face only, whole: J-MCU-C's grounds and the mounts join it
 # there, and the Matrix's pad-row GND reaches it through the board's one via. The top face

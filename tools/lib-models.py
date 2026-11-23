@@ -7,6 +7,7 @@ footprint in hardware/lib/woody.pretty names.
     python3 tools/lib-models.py            # (re)write every model
     python3 tools/lib-models.py --check    # exit 1 if a model file's solids or part colours differ from what this builds
     python3 tools/lib-models.py --assembly in.step out.step   # any model as an assembly of coloured parts (render-instrument.py)
+    python3 tools/lib-models.py --glb in.step out.glb         # any model meshed, with its own tree and colours (render-instrument.py: the Matrix)
 
 `--check` compares the solids (volume and bounding box of each), not the bytes:
 OpenCASCADE's STEP writer orders its colour records differently from one run to
@@ -50,6 +51,7 @@ GREY = (0.30, 0.30, 0.30)
 GOLD = (0.86, 0.74, 0.40)
 TIN = (0.80, 0.80, 0.78)
 WHITE = (0.92, 0.92, 0.90)
+PBT = (0.02, 0.02, 0.02)      # a black moulding as KiCad's own models colour one (BLACK, above, photographs as mid grey on a large face)
 
 
 def box(x0, x1, y0, y1, z0, z1):
@@ -163,11 +165,111 @@ def xkb_x1270wv_2x12():
     return box_header_vertical(12, 21.54)
 
 
+def neutrik_ne8fav():
+    """J-UMBILICAL-INST. Neutrik's own model, datasheets/connectors/NEUTRIK-NE8FAV-3D.stp,
+    CUT INTO ITS MATERIALS and stood on the board. The banked STEP is one solid with no
+    usable colour (a CAD system's default blue), and a model with no colour is drawn
+    white in the photographs; nothing of its shape is redrawn here. The data sheet
+    (NEUTRIK-NE8FAV-DATASHEET.pdf, Material): shell and insert PBTP, the locking element
+    nickel plated, the contacts gold over nickel. So:
+      - the PUSH tab, all of the solid above the flange's upper edge (ethercon.flange_h / 2
+        above the axis): nickel. Where the latch ends inside the shell the model does
+        not say, so only what stands clear of the flange is coloured [est];
+      - what stands behind the board's front face (ethercon.pcb_setback behind the
+        flange's front face, the model's z 0): the contacts' tails, gold, within a box
+        round the two contact rows (ethercon.pin_rows); the pegs and the G tab outside it
+        stay with the shell;
+      - the rest: black PBTP.
+    The model's frame is the footprint's (x across, y up from the axis, the flange's
+    front face at z 0), moved up ethercon.pcb_setback so the board's front face is z 0."""
+    from OCP.STEPControl import STEPControl_Reader
+    from OCP.BRepAlgoAPI import BRepAlgoAPI_Common
+    from OCP.BRepBuilderAPI import BRepBuilderAPI_Transform
+    from OCP.gp import gp_Trsf, gp_Vec
+    src = os.path.join(ROOT, "datasheets", "connectors", "NEUTRIK-NE8FAV-3D.stp")
+    r = STEPControl_Reader()
+    with quiet():
+        if r.ReadFile(src) != IFSelect_RetDone:
+            raise SystemExit(f"could not read {src}")
+        r.TransferRoots()
+    solid = r.OneShape()
+    setback, half = 18.3, 12.5
+    mbox = lambda x0, x1, y0, y1, z0, z1: BRepPrimAPI_MakeBox(gp_Pnt(x0, y0, z0), gp_Pnt(x1, y1, z1)).Shape()
+    tab_box = mbox(-13, 13, half, 20, -30, 10)
+    tail_box = mbox(-5.5, 5.5, 1.0, 5.8, -30, -setback)
+    tab = BRepAlgoAPI_Common(solid, tab_box).Shape()
+    tails = BRepAlgoAPI_Common(solid, tail_box).Shape()
+    shell = cut(solid, tab_box, tail_box)
+    t = gp_Trsf(); t.SetTranslation(gp_Vec(0, 0, setback))
+    up = lambda s: BRepBuilderAPI_Transform(s, t, True).Shape()
+    return [("shell", up(shell), PBT), ("latch", up(tab), TIN), ("contacts", up(tails), GOLD)]
+
+
+def banked_header(src, ins, turn, move):
+    """A banked library model of a pin header, RECOLOURED to the part's materials and
+    stood in its footprint's frame. The EasyEDA/LCSC library's models are the right
+    shape (bent feet, chamfered posts) and the wrong colours (a white or grey
+    moulding, grey posts); hanxia's drawings give black PA6T and gold flash. Every
+    face inside `ins` - the insulator's box in the model's own frame, (x0, x1, y0, y1,
+    z0, z1) - is the moulding, every other face a contact. Then the model is turned
+    `turn` degrees about z and moved `move`, which is what puts its feet on the
+    footprint's pads (checked against the board's pads when the footprint was given
+    the model, 2026-11-22). Faces, not solids: for pictures only."""
+    from OCP.TopExp import TopExp_Explorer
+    from OCP.TopAbs import TopAbs_FACE
+    from OCP.TopoDS import TopoDS_Compound
+    from OCP.BRep import BRep_Builder
+    from OCP.Bnd import Bnd_Box
+    from OCP.BRepBndLib import BRepBndLib
+    from OCP.BRepBuilderAPI import BRepBuilderAPI_Transform
+    from OCP.STEPControl import STEPControl_Reader
+    from OCP.gp import gp_Trsf, gp_Vec, gp_Ax1
+    import math
+    r = STEPControl_Reader()
+    with quiet():
+        if r.ReadFile(os.path.join(ROOT, src)) != IFSelect_RetDone:
+            raise SystemExit(f"could not read {src}")
+        r.TransferRoots()
+    b = BRep_Builder()
+    comp = {"insulator": TopoDS_Compound(), "contacts": TopoDS_Compound()}
+    for c in comp.values():
+        b.MakeCompound(c)
+    e, tol = TopExp_Explorer(r.OneShape(), TopAbs_FACE), 0.02
+    while e.More():
+        bb = Bnd_Box(); BRepBndLib.Add_s(e.Current(), bb, False)
+        lo, hi = bb.CornerMin(), bb.CornerMax()
+        inside = (lo.X() >= ins[0] - tol and hi.X() <= ins[1] + tol and lo.Y() >= ins[2] - tol and hi.Y() <= ins[3] + tol
+                  and lo.Z() >= ins[4] - tol and hi.Z() <= ins[5] + tol)
+        b.Add(comp["insulator" if inside else "contacts"], e.Current())
+        e.Next()
+    rot = gp_Trsf(); rot.SetRotation(gp_Ax1(gp_Pnt(0, 0, 0), gp_Dir(0, 0, 1)), math.radians(turn))
+    mv = gp_Trsf(); mv.SetTranslation(gp_Vec(*move))
+    place = lambda sh: BRepBuilderAPI_Transform(sh, mv.Multiplied(rot), True).Shape()
+    return [("insulator", place(comp["insulator"]), PBT), ("contacts", place(comp["contacts"]), GOLD)]
+
+
+def hanxia_pz254_1x3p_tp_yq():
+    """HDR-SERVICE. The library's model for C41417360, datasheets/connectors/HANXIA-HX-PZ2.54-1x3P-TP-YQ-3D.step:
+    insulator z 0..2.50 over y -0.837..1.663 (the row is 0.413 off the model's origin), feet's underside at z -0.70."""
+    return banked_header("datasheets/connectors/HANXIA-HX-PZ2.54-1x3P-TP-YQ-3D.step",
+                         (-1.27, 6.35, -0.837, 1.663, 0.0, 2.5), 90, (0.413, -5.08, 0.7))
+
+
+def hanxia_pz254_1x10p_tp_yq():
+    """HDR-MATRIX. The library's model for C41417367 (a generic staggered-foot header),
+    datasheets/connectors/HANXIA-HX-PZ2.54-1x10P-TP-YQ-3D.step: insulator z -2.50..0 over y +/-1.25, feet's underside at z -3.20."""
+    return banked_header("datasheets/connectors/HANXIA-HX-PZ2.54-1x10P-TP-YQ-3D.step",
+                         (-1.25, 24.111, -1.25, 1.25, -2.5, 0.0), -90, (0.0, 0.0, 3.2))
+
+
 MODELS = {
     "XKB_X1270WV-2x12": xkb_x1270wv_2x12,
     "CNCTech_3220-10-0100-00": cnctech_3220_10_0100_00,
     "Hanxia_HX_PZ2.54-1x8P_WZ": hanxia_pz254_1x8p_wz,
     "NXP_Case1351-01_MPXV4006DP": nxp_case_1351_01,
+    "Neutrik_NE8FAV": neutrik_ne8fav,
+    "Hanxia_HX_PZ2.54-1x3P_TP-YQ": hanxia_pz254_1x3p_tp_yq,
+    "Hanxia_HX_PZ2.54-1x10P_TP-YQ": hanxia_pz254_1x10p_tp_yq,
 }
 
 
@@ -364,9 +466,36 @@ def as_assembly(src, dst):
     return f"{len(groups)} colour(s)" + (", some faces uncoloured" if None in groups else "")
 
 
+def as_glb(src, dst):
+    """A STEP model meshed and written as binary glTF, its own tree, names and colours
+    kept (OpenCASCADE's writer; metres, y up, as the format has them) - for a model
+    no board file places: the Matrix, a bought board that stands on the carrier's
+    header. For pictures only."""
+    from OCP.BRepMesh import BRepMesh_IncrementalMesh
+    from OCP.RWGltf import RWGltf_CafWriter
+    from OCP.TCollection import TCollection_AsciiString
+    from OCP.collections import IndexedDataMap_TCollection_AsciiString_TCollection_AsciiString
+    from OCP.Message import Message_ProgressRange
+    doc = read_xcaf(src)
+    st = XCAFDoc_DocumentTool.ShapeTool_s(doc.Main())
+    for lab in children(st.BaseLabel()):
+        BRepMesh_IncrementalMesh(st.GetShape_s(lab), 0.03, False, 0.3, True)      # PICTURE CONVENTION: 0.03 mm, 0.3 rad
+    w = RWGltf_CafWriter(TCollection_AsciiString(dst), True)
+    from OCP.RWMesh import RWMesh_CoordinateSystem_Zup
+    w.ChangeCoordinateSystemConverter().SetInputCoordinateSystem(RWMesh_CoordinateSystem_Zup)     # STEP's z up, to glTF's y up
+    with quiet():
+        ok = w.Perform(doc, IndexedDataMap_TCollection_AsciiString_TCollection_AsciiString(), Message_ProgressRange())
+    if not ok or not os.path.exists(dst):
+        raise SystemExit(f"could not write {dst}")
+    return "written"
+
+
 def main():
     if len(sys.argv) == 4 and sys.argv[1] == "--assembly":
         print(as_assembly(sys.argv[2], sys.argv[3]))
+        return
+    if len(sys.argv) == 4 and sys.argv[1] == "--glb":
+        print(as_glb(sys.argv[2], sys.argv[3]))
         return
     check = "--check" in sys.argv
     os.makedirs(OUT, exist_ok=True)

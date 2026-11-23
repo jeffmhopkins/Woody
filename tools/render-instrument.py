@@ -23,15 +23,19 @@ WHERE THE GEOMETRY COMES FROM - nothing is modelled twice:
                                      keyed by the git blob id of every file OpenSCAD
                                      reads - the cache can be stale only if the
                                      fingerprint is
-  the main board, the key boards     their .kicad_pcb, exported by kicad-cli as GLB with
-                                     every component's 3D model, the copper, pads, mask
-                                     and silkscreen. The body CAD's frame and the PCB's
+  the five boards: the main board,   their .kicad_pcb, exported by kicad-cli as GLB with
+  the key boards, the Matrix         every component's 3D model, the copper, pads, mask
+  carrier, the umbilical adapter     and silkscreen. The body CAD's frame and the PCB's
                                      are tools/pcb.py's (pcb x = body x + OX, pcb y =
                                      OY - body y), so `--user-origin OX x OY` puts a
                                      board in body coordinates; its height is the body
                                      CAD's own solid for that board, and the two outlines
                                      must agree in plan (checked, below: a board in the
-                                     wrong place fails the render rather than shows it)
+                                     wrong place fails the render rather than shows it).
+                                     The umbilical adapter STANDS (BOARDS `stands`): its
+                                     file's x is the body's y and its y the body's z by
+                                     the same OX and OY (hardware/boards/umb-adapter/
+                                     layout.yaml), its front face toward the tail
   mask, silk and finish colours      each board's layout.yaml `fab:` (mask, silk, finish)
   the parts' colours                 each part's own 3D model, rewritten for the export by
                                      tools/lib-models.py --assembly (kicad-cli drops the
@@ -44,7 +48,8 @@ The CAD solids a board export REPLACES - its own envelope, the parts envelopes,
 the switches the boards carry, the connectors on them, the LED row's envelope -
 are not drawn (BOARD_OWNS). What remains of the CAD is everything no board
 file holds: oak, plates, columns, the U-bolt, keycaps, the IDC plugs and
-ribbons, the Matrix, the etherCON and its adapter, USB-C, the breath tube.
+ribbons, the Matrix's hardware, USB-C, the breath tube. The Matrix itself is
+Waveshare's own model (MATRIX_STEP), fitted to the CAD's solid for its board.
 
 WHAT IT READS (each printed as `READ:`, cross-checked by cad.py): config/render.yaml;
 mechanical/cad/woody_body.scad and every file it reads (also cross-checked against
@@ -80,14 +85,26 @@ BOARDS = {   # board directory -> the body CAD solid that is the same board
     "main-board": "main board",
     "key-board-lh": "board left_hand",
     "key-board-rh": "board right_hand",
+    "matrix-carrier": "Matrix carrier",
+    "umb-adapter": "umbilical adapter",
 }
+# A board that stands across the body, its front face toward the tail: its file's frame is
+# (body y, body z) by the same OX and OY, and its normal the body's +x.
+STANDS = {"umb-adapter"}
 OX, OY = 60.0, 150.0          # tools/pcb.py: pcb x = body x + OX, pcb y = OY - body y
 CACHE = os.path.expanduser("~/.cache/woody")
 EXPORT_RECIPE = "1"           # bump when how the solids or boards are exported changes
+# The Matrix (U-MCU-RT, Waveshare ESP32-S3-Matrix): Waveshare's own model of the whole
+# board. No board file places it - it stands on the carrier's header - so it is fitted
+# to the body CAD's solid for its board, turned so its USB-C is where the CAD has it.
+MATRIX_STEP = "datasheets/mechanical/WAVESHARE-ESP32-S3-MATRIX-3D.stp"
+MATRIX_OWNS = ["Matrix board", "Matrix LEDs", "Matrix underside parts", "Matrix USB-C receptacle"]   # the CAD solids it replaces
+MATRIX_FIT = ("Matrix board", "Matrix USB-C receptacle")      # the two it is placed by
 
 # The CAD solids a board's own export replaces (fnmatch patterns on the solid id).
 BOARD_OWNS = ["main board", "board left_hand", "board right_hand", "parts *", "tall parts main board",
-              "tails *", "LED row", "breath sensor", "switch *", "J-CHAIN *", "J-MCU", "J-UMB", "J-MIDI"]
+              "tails *", "LED row", "breath sensor", "switch *", "J-CHAIN *", "J-MCU", "J-UMB", "J-MIDI",
+              "Matrix carrier", "Matrix header *", "J-MCU-C", "umbilical adapter", "etherCON"]
 # Never drawn: a volume, not a part (the switch's travel envelope).
 NOT_PARTS = ["travel *"]
 
@@ -157,7 +174,7 @@ def export_solids(deps, jobs):
             if m and m.group(1) not in ids:
                 ids.append(m.group(1))
     # a solid a board's export replaces is exported only if it is the board itself (its outline and height place the export)
-    want = [s for s in ids if not fnm(s, NOT_PARTS) and (not fnm(s, BOARD_OWNS) or s in BOARDS.values())]
+    want = [s for s in ids if not fnm(s, NOT_PARTS) and (not fnm(s, BOARD_OWNS + MATRIX_OWNS) or s in BOARDS.values() or s in MATRIX_FIT)]
     print(f"render-instrument: {len(want)} solids to export into {d}", flush=True)
 
     def one(sid):
@@ -300,12 +317,29 @@ def export_board(name, ins):
     return out
 
 
+def export_matrix():
+    """Waveshare's model as a GLB, cached by the model's and the converter's blob ids."""
+    rd(MATRIX_STEP)
+    rd(LIB_MODELS)
+    h = hashlib.sha256(f"{EXPORT_RECIPE}\n{cad.blob_id(MATRIX_STEP)}\n{cad.blob_id(LIB_MODELS)}\n".encode()).hexdigest()[:16]
+    out = os.path.join(CACHE, "instrument-models", h, "matrix.glb")
+    if not os.path.exists(out):
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+        r = subprocess.run([sys.executable, os.path.join(ROOT, LIB_MODELS), "--glb", os.path.join(ROOT, MATRIX_STEP), out + ".part.glb"],
+                           capture_output=True, text=True)
+        if r.returncode or not os.path.exists(out + ".part.glb"):
+            raise SystemExit(f"render-instrument: could not convert {MATRIX_STEP}:\n{(r.stdout + r.stderr)[-1500:]}")
+        os.replace(out + ".part.glb", out)
+    return out
+
+
 def prepare(jobs):
     rd(CONFIG)
     deps = scad_inputs()
     boards = {}
     for name in BOARDS:
         boards[name] = export_board(name, board_inputs(name))
+    boards["@matrix"] = export_matrix()
     rd(HDRI)
     sdir, solids = export_solids(deps, jobs)
     return sdir, solids, boards
@@ -336,10 +370,8 @@ GROUPS = {
     "keycaps": ["cap LH*", "cap RH*", "cap socket LH*", "cap socket RH*"],
     "column screws": ["column screw *"],
     # the carrier hung from the oak top (#23): its board, HDR-MATRIX, its mounts
-    "Matrix": ["Matrix board", "Matrix LEDs", "Matrix underside parts", "Matrix USB-C receptacle", "Matrix harness *",
-               "USB-C plug", "Matrix carrier", "Matrix carrier *", "Matrix header *", "J-MCU-C",
-               "IDC plug Matrix carrier"],
-    "tail equipment": ["etherCON", "umbilical adapter"],
+    "Matrix": ["@matrix", "Matrix harness *", "USB-C plug", "@matrix-carrier", "Matrix carrier *", "IDC plug Matrix carrier"],
+    "tail equipment": ["@umb-adapter"],
     # flexible runs between groups: drawn assembled, left out of an explode
     "ribbons": ["ribbon *", "Matrix ribbon", "USB-C lead", "MIDI lead"],
 }
@@ -400,7 +432,7 @@ def group_of(sid):
 # ------------------------------------------------------------------ scene ----
 import bpy          # noqa: E402
 import bmesh        # noqa: E402
-from mathutils import Vector   # noqa: E402
+from mathutils import Matrix, Vector   # noqa: E402
 
 MM = 0.001
 
@@ -613,9 +645,6 @@ class Mats:
         self.black = principled("black plastic", "#151517", 0.42)
         self.ribbon = principled("ribbon PVC", "#9A9C9F", 0.5)
         self.silicone = principled("silicone tube", "#F2F0EA", 0.35, 0.0, **{"Transmission Weight": 0.6, "IOR": 1.41})
-        self.matrix_pcb = principled("Matrix PCB", "#101012", 0.45, 0.0, **{"Coat Weight": 0.4})
-        self.matrix_led = principled("5050 LED", "#B9B4A2", 0.3)
-        self.adapter = principled("adapter PCB", "#1E5B33", 0.4, 0.0, **{"Coat Weight": 0.4})
         self.floor = principled("floor", "#1d1d20", 0.9, 0.0, **{"Specular IOR Level": 0.25})
 
     def for_solid(self, sid):
@@ -629,13 +658,10 @@ class Mats:
             (["main board stud *", "key plate stud *", "lid magnet *", "main board spacer *", "main board nut *", "key-board spacer *", "column screw *",
               "U-bolt nut *", "U-bolt washer *", "U-bolt spacer *"], M.zinc),
             (["cap *", "cap socket *"], M.keycap),
-            (["IDC plug *", "etherCON", "USB-C plug", "USB-C receptacle", "Matrix USB-C receptacle", "Matrix harness *",
-              "Matrix header *", "J-MCU-C", "MIDI jack*"], M.black),
+            (["IDC plug *", "USB-C plug", "USB-C receptacle", "Matrix harness *", "MIDI jack*"], M.black),
             (["ribbon *", "Matrix ribbon", "USB-C lead", "MIDI lead"], M.ribbon),
             (["breath *"], M.silicone),
-            (["Matrix board", "Matrix underside parts", "Matrix carrier"], M.matrix_pcb), (["Matrix LEDs"], M.matrix_led),
             (["Matrix carrier *"], M.zinc),     # its spacers, washers, inserts and screws
-            (["umbilical adapter"], M.adapter),
         ]
         for pats, m in table:
             if fnm(sid, pats):
@@ -775,6 +801,53 @@ def import_board(name, glb):
     return root, body
 
 
+def import_matrix(glb, sdir, solids, bare):
+    """Waveshare's model, placed on the body CAD's solid for the Matrix's board: its own
+    board (the one mesh of that size) on the CAD's, in plan and in height, turned about
+    the vertical so that its USB-C overhangs the board's edge on the side the CAD's
+    receptacle is. LEDs up, as the model has them. A model whose board is not the CAD's
+    size fails the render."""
+    import trimesh
+    before = set(bpy.data.objects)
+    bpy.ops.import_scene.gltf(filepath=glb)
+    new = set(bpy.data.objects) - before
+    root = bpy.data.objects.new("@matrix", None)
+    bpy.context.collection.objects.link(root)
+    for o in new:
+        if o.parent is None:
+            o.parent = root
+    meshes = [o for o in new if o.type == "MESH"]
+    for o in meshes:
+        if not o.data.materials or any(m is None for m in o.data.materials):
+            o.data.materials.clear()
+            o.data.materials.append(bare)       # the few faces the model leaves uncoloured
+        for m in o.data.materials:
+            part_finish(m)
+    cad_b = trimesh.load(os.path.join(sdir, solids[MATRIX_FIT[0]]), force="mesh").bounds
+    cad_u = trimesh.load(os.path.join(sdir, solids[MATRIX_FIT[1]]), force="mesh").bounds
+    want = (Vector(cad_u[0]) + Vector(cad_u[1])) / 2 - (Vector(cad_b[0]) + Vector(cad_b[1])) / 2    # board centre to receptacle
+    size = sorted(cad_b[1] - cad_b[0])
+    best = None
+    for q in range(4):
+        root.matrix_world = Matrix.Rotation(q * math.pi / 2, 4, "Z")
+        bpy.context.view_layer.update()
+        pcb = [o for o in meshes if max(abs(a - b) for a, b in zip(sorted((world_bbox([o])[1] - world_bbox([o])[0]) / MM), size)) < 0.1]
+        if len(pcb) != 1:
+            raise SystemExit(f"render-instrument: {MATRIX_STEP} has {len(pcb)} solids the size of the body CAD's '{MATRIX_FIT[0]}' "
+                             f"({size[1]:.2f} x {size[2]:.2f} x {size[0]:.2f}) - the model and the CAD disagree")
+        blo, bhi = world_bbox(pcb)
+        alo, ahi = world_bbox(meshes)
+        over = (alo + ahi) / 2 - (blo + bhi) / 2          # which way the model overhangs its own board
+        score = over.x * want.x + over.y * want.y
+        if best is None or score > best[0]:
+            best = (score, q, (Vector(cad_b[0]) + Vector(cad_b[1])) / 2 * MM - (blo + bhi) / 2)
+    _, q, move = best
+    root.matrix_world = Matrix.Translation(move) @ Matrix.Rotation(q * math.pi / 2, 4, "Z")
+    bpy.context.view_layer.update()
+    print(f"render-instrument: the Matrix turned {q * 90} deg onto '{MATRIX_FIT[0]}', its USB-C toward the CAD's receptacle", flush=True)
+    return root
+
+
 def led_glow(root, name, lit, white=False, strength=7.0):
     """The WS2815s: each LED's lens is the yellowish material of its model. Lit,
     each glows its own colour along the row (PICTURE CONVENTION: a soft
@@ -819,9 +892,9 @@ def build(view, sdir, solids, boards):
         if fn is None:
             continue
         g = group_of(sid)
-        if g is None and not fnm(sid, BOARD_OWNS):
+        if g is None and not fnm(sid, BOARD_OWNS + MATRIX_OWNS):
             raise SystemExit(f"render-instrument: solid {sid!r} is in no group - add it to GROUPS (or BOARD_OWNS)")
-        if fnm(sid, BOARD_OWNS):
+        if fnm(sid, BOARD_OWNS + MATRIX_OWNS):
             continue
         if g in V["hide"]:
             continue
@@ -834,26 +907,35 @@ def build(view, sdir, solids, boards):
     # outlines must agree in plan, or this is the wrong board in the wrong place.
     import trimesh
     nleds = 0
+    if "Matrix" not in V["hide"]:
+        members["Matrix"].append(import_matrix(boards["@matrix"], sdir, solids, M.black))
     for name, glb in boards.items():
+        if name not in BOARDS:
+            continue
         g = group_of("@" + name)
         if g in V["hide"]:
             continue
         cad_board = trimesh.load(os.path.join(sdir, solids[BOARDS[name]]), force="mesh").bounds
         root, body = import_board(name, glb)
+        if name in STANDS:      # the file's (x, y, up from its front face) are the body's (y, z, x)
+            root.matrix_world = Matrix(((0, 0, 1, 0), (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 0, 1)))
+        n = 0 if name in STANDS else 2          # the body axis the board's faces are square to
+        plan = [i for i in range(3) if i != n]
         bpy.context.view_layer.update()
         lo, hi = world_bbox(body)
         lo, hi = lo / MM, hi / MM
-        off = [abs(lo[i] - cad_board[0][i]) for i in (0, 1)] + [abs(hi[i] - cad_board[1][i]) for i in (0, 1)]
+        off = [abs(lo[i] - cad_board[0][i]) for i in plan] + [abs(hi[i] - cad_board[1][i]) for i in plan]
         if max(off) > 0.05:
-            raise SystemExit(f"render-instrument: {name}'s outline in plan is [{lo[0]:.2f}..{hi[0]:.2f}] x [{lo[1]:.2f}..{hi[1]:.2f}] mm, "
-                             f"the body CAD's '{BOARDS[name]}' is [{cad_board[0][0]:.2f}..{cad_board[1][0]:.2f}] x "
-                             f"[{cad_board[0][1]:.2f}..{cad_board[1][1]:.2f}] - the board and the CAD disagree")
-        th_pcb, th_cad = hi[2] - lo[2], cad_board[1][2] - cad_board[0][2]
+            a, b = plan
+            raise SystemExit(f"render-instrument: {name}'s outline in plan is [{lo[a]:.2f}..{hi[a]:.2f}] x [{lo[b]:.2f}..{hi[b]:.2f}] mm, "
+                             f"the body CAD's '{BOARDS[name]}' is [{cad_board[0][a]:.2f}..{cad_board[1][a]:.2f}] x "
+                             f"[{cad_board[0][b]:.2f}..{cad_board[1][b]:.2f}] - the board and the CAD disagree")
+        th_pcb, th_cad = hi[n] - lo[n], cad_board[1][n] - cad_board[0][n]
         # kicad-cli lays the mask and silk as faces a few hundredths proud of the laminate
         if abs(th_pcb - th_cad) > 0.1:
             raise SystemExit(f"render-instrument: {name} is {th_pcb:.2f} mm thick, the body CAD's board {th_cad:.2f}")
-        root.location.z = ((cad_board[0][2] + cad_board[1][2]) - (lo[2] + hi[2])) / 2 * MM   # mid-planes together
-        print(f"render-instrument: {name} at z {cad_board[0][2]:.2f} mm, plan agrees with the body CAD to {max(off):.3f} mm", flush=True)
+        root.location[n] += ((cad_board[0][n] + cad_board[1][n]) - (lo[n] + hi[n])) / 2 * MM   # mid-planes together
+        print(f"render-instrument: {name} at {'xyz'[n]} {cad_board[0][n]:.2f} mm, plan agrees with the body CAD to {max(off):.3f} mm", flush=True)
         if name == "main-board":
             nleds = led_glow(root, name, V["leds"], V.get("led_white", False), V.get("led_strength", 7.0))
         members[g].append(root)

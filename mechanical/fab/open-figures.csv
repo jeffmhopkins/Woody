@@ -121,7 +121,6 @@ oak_top,boards.matrix_mount_corners,nominal,"[[1, -1], [-1, 1], [1, 1]]",,no,a w
 oak_top,boards.matrix_usb,nominal,"[0.76, 7.5, 9.5, 1.6]",calipers on the Matrix in hand,no,a working estimate the part can be cut to
 oak_top,openings.matrix_window,nominal,22.0,,no,a working estimate the part can be cut to
 oak_top,openings.matrix_lip,tbd,2.0,"M4, with the acrylic's cut size",yes,"M4, with the acrylic's cut size"
-oak_top,openings.matrix_relief_d,nominal,0.6,,no,a working estimate the part can be cut to
 oak_top,openings.matrix_acrylic_t,tbd,3.0,"M6, with the diffusion prototype",yes,"M6, with the diffusion prototype"
 oak_top,openings.usb_plug_l,tbd,15.0,the recovery cable kept with the instrument,yes,the recovery cable kept with the instrument
 oak_top,openings.usb_plug_turn,nominal,down,the recovery cable kept with the instrument,no,a working estimate the part can be cut to

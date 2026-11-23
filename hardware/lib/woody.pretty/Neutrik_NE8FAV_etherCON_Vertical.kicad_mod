@@ -359,4 +359,15 @@
 		(layers "*.Cu" "*.Mask")
 		(uuid "06e0b934-ed88-5c8f-904e-70be2bc9b748")
 	)
+	(model "${KIPRJMOD}/../../lib/woody.3dshapes/Neutrik_NE8FAV.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
 )

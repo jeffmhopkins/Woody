@@ -750,9 +750,9 @@ boards:
     status: settled
     source: "owner, 2026-10-03: option (c), 'SEPARATE SMALL MATRIX CARRIER', and 'Hang from the lid' (ADR 0021 amendment 2026-10-03). It replaces 'key_board_rh' (2026-10-02, option d), dropped because the owner wants the right-hand key board back at its original length"
   matrix_hdr_h:
-    value: 2.5
+    value: 3.2
     status: settled
-    source: "HDR-MATRIX's plastic, which the Matrix sits on and so sets the gap between the carrier's top face and the Matrix's underside: insulation height 2.5 [ds connectors/HANXIA-HX-PZ2.54-1x10P-TP-YQ.pdf]"
+    source: "the top of HDR-MATRIX's plastic above the carrier's top face, which the Matrix sits on and so sets the gap between the carrier and the Matrix's underside: 3.20 +/- 0.2, seating plane to the top of the insulator, in the drawing's end view - the insulator stands on its surface-mount feet, so this is more than the insulator's own height [ds connectors/HANXIA-HX-PZ2.54-1x10P-TP-YQ.pdf]"
   matrix_under_rest_h:
     value: 1.75
     status: nominal
@@ -844,9 +844,13 @@ openings:
     source: "oak lip the acrylic rests on, per side - the rebate is the opening plus twice this"
     decided_by: "M4, with the acrylic's cut size"
   matrix_relief_d:
-    value: 0.6
-    status: nominal
-    source: "a shallow pocket routed into the oak top's underside over the Matrix (its square and 0.5 round it), which its top face rises into: the Matrix carrier's stack (hardware.mx_spacer_l under the oak, boards.matrix_hdr_h) puts the Matrix's top just above the oak's underside, and the relief leaves it the air config/clearance.yaml body.against-oak asks (issue #34 C11) - drc.echo 'Matrix carrier hangs from the oak' gives the air, 'LED tops under the frosted window' the LEDs' room (drc.echo 'Matrix carrier hangs from the oak', 'LED tops under the frosted window'). It thins the window's lip by as much (drc.echo 'oak lip under the frosted window') [drawing convention]"
+    value: 1.3
+    status: settled
+    source: "a shallow pocket routed into the oak top's underside over the Matrix (its square and 0.5 round it), which its top face rises into: the Matrix carrier's stack (hardware.mx_spacer_l under the oak, boards.matrix_hdr_h) puts the Matrix's top above the oak's underside, and the relief leaves it the air config/clearance.yaml body.against-oak asks (issue #34 C11) - drc.echo 'Matrix carrier hangs from the oak' gives the air, 'LED tops under the frosted window' the LEDs' room. It thins the window's lip by as much (drc.echo 'oak lip under the frosted window', against matrix_lip_t_min). The owner's choice, 2026-11-22, of three: 'Deeper relief, keep 3 mm acrylic' - the carrier cannot come down instead, the Matrix ribbon's legs need the gap under it (drc.echo 'Matrix ribbon's headers: side by side, not mouth to mouth')"
+  matrix_lip_t_min:
+    value: 1.7
+    status: settled
+    source: "the least thickness of oak left under the frosted window, between its rebate and the relief over the Matrix. The owner, 2026-11-22, accepted this lip with the deeper relief ('Deeper relief, keep 3 mm acrylic'): it carries the acrylic pane, set flush, and nothing else [calc: the oak less matrix_acrylic_t less matrix_relief_d]"
   matrix_acrylic_t:
     value: 3.0
     status: tbd

@@ -385,8 +385,8 @@ next amendment: no ESD protection is added.**
    old drawing hung the plug below the board and so did not show it. Now
    the key plate stops a millimetre in front of the plug, which also opens
    `J-MCU`'s side to a hand. The oak top has a pocket over the plug, cut
-   with the lid's magnet pockets to their depth (`oak-pockets.dxf`; they were
-   the column screws' pockets until 2026-11-23, ADR 0025) and
+   to the depth the overmould needs (`oak-plug-pocket.dxf`; *Amendment,
+   2026-11-22 — the Matrix header's real height*, below) and
    ending at the window's rebate. The receptacle is now among the Matrix's
    drawn parts, so the clash check sees it. The rule is drc.echo *"USB-C plug
    clear of the key plate and the oak top"*. The real plug, once
@@ -736,3 +736,59 @@ standing on the main board (the tail re-laid).
 |---|---|
 | The socket stands a little taller off the adapter than `boards.umb_socket_d` says: the figure was read from the first part considered, and the part chosen for its hand is `J-UMB-SKT`'s row (`hardware/interfaces/spi-link/bom.csv`) | The next edit of `config/body.yaml`, with the rebuild it brings; until then the difference is inside the main board's mounting holes' play |
 | Whether the posts seat fully with the etherCON screwed to the tail cap | The first adapter and main board in the body |
+
+## Amendment, 2026-11-22 — the Matrix header's real height; a deeper relief in the oak
+
+Found while the parts' 3D models were drawn (issue #55), checked against the
+banked drawing, and put to the owner.
+
+### What was wrong
+
+`boards.matrix_hdr_h` was `HDR-MATRIX`'s insulator alone. The insulator
+stands on its surface-mount feet, and the drawing's end view dimensions the
+seating plane to the insulator's **top** `[ds
+connectors/HANXIA-HX-PZ2.54-1x10P-TP-YQ.pdf]`: that is what the Matrix sits
+on. With the true figure the Matrix's top face stood in the floor of the
+oak's relief.
+
+### What is decided
+
+The owner, 2026-11-22, of three options: ***"Deeper relief, keep 3 mm
+acrylic"***.
+
+1. **The relief over the Matrix is deeper** (`openings.matrix_relief_d`), by
+   what the header is taller, so the air over the Matrix's top is what it
+   was: drc.echo *"Matrix carrier hangs from the oak"*.
+2. **The window's lip is thinner by as much**, and the owner accepted it:
+   `openings.matrix_lip_t_min`, drc.echo *"oak lip under the frosted
+   window"*. The acrylic keeps its thickness.
+3. **The LEDs stand closer to the window** by the same amount: drc.echo
+   *"LED tops under the frosted window"*, *"LED tops to the frosted window's
+   top face"*.
+4. **The recovery plug's pocket in the oak has a depth of its own**
+   (`oak-plug-pocket.dxf`). The receptacle rose with the Matrix, a plug's
+   overmould with it, and the column-screw pockets' depth no longer covers
+   it. It is cut to what the overmould needs and leaves
+   `hardware.col_pocket_skin` over it: drc.echo *"recovery USB-C plug clear
+   of the oak top"*. Not put to the owner as a choice: it follows from 1.
+
+Nothing moves on any board. The Matrix's back-side parts gain the header's
+extra height over the carrier (*"Matrix's back-side parts clear the
+carrier"*).
+
+### Considered and set aside
+
+- **Lowering the carrier** (a washer over it, or a longer spacer): the
+  Matrix ribbon's leg passes under `J-MCU-C`'s socket with little to spare,
+  and the carrier coming down takes it under its minimum (drc.echo *"Matrix
+  ribbon's headers: side by side, not mouth to mouth"*). The next stock
+  spacer length also leaves no stock screw length that lands in the insert.
+- **A thinner acrylic**, which would have kept the lip: offered, not chosen.
+- **A lower surface-mount header**: offered, not chosen; none was identified.
+
+### Open, and what decides each
+
+| Open | What decides it |
+|---|---|
+| The header's height as fitted (the drawing's tolerance is in `boards.matrix_hdr_h`'s source) and the height of the solder joints on the Matrix's top face, posts cut flush, under the relief's floor | The first carrier with its Matrix soldered, measured |
+| Whether the thinner lip holds the acrylic in the chosen oak | M2, the oak top cut |

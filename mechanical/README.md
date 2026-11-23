@@ -27,12 +27,13 @@ proves each one still shows the model it names.
 ## Photographs
 
 Rendered in Blender (Cycles) by [`tools/render-instrument.py`](../tools/render-instrument.py),
-ledgered and stamped like every other output here. The shell, plates, columns,
-keycaps and tail equipment are the body CAD's own solids, one per named solid;
-**the boards are the real ones** - each `.kicad_pcb` exported with every part's
+ledgered and stamped like every other output here. The shell, plates, columns
+and keycaps are the body CAD's own solids, one per named solid;
+**the boards are the real ones**, all five - each `.kicad_pcb` exported with every part's
 3D model, its copper, mask and silk (colours from its `layout.yaml` `fab:`),
 placed in the CAD's frame, and refused if its outline disagrees with the CAD's
-by more than 0.05 mm. Explode distances are picture conventions in
+by more than 0.05 mm. The Matrix is Waveshare's own model of it, fitted to the
+CAD's solid for its board. Explode distances are picture conventions in
 [`config/render.yaml`](../config/render.yaml). The wood is ADR 0009's finish
 (dark stain, grain showing, satin) drawn procedurally - illustrative, not a
 photograph of a board. **Sides rendered clear to show the inside; the

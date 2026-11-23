@@ -7,7 +7,7 @@ Thickness: 4 mm (stack.side_t)
 999
 Quantity per instrument: 2
 999
-Units mm. Cut every closed outline. cad 8dfaa8f4aee4; verify: python3 tools/cad.py explain fab-dxf-side
+Units mm. Cut every closed outline. cad c1698532ab39; verify: python3 tools/cad.py explain fab-dxf-side
   0
 SECTION
   2

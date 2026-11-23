@@ -80,6 +80,8 @@ sets:
       pairs:
         - ["main board", "main board stud *"]
         - ["main board", "column screw *"]
+        - ["column screw *", "bottom plate"]
+        - ["column screw *", "oak bottom"]
         - ["column screw <same>", "main board spacer <same>"]
         - ["main board spacer <same>", "main board stud <same>"]
         - ["board *", "key plate stud *"]
@@ -88,6 +90,11 @@ sets:
         - ["Matrix carrier screw <same>", "Matrix carrier spacer <same>"]
         - ["Matrix carrier screw *", "oak top"]
         - ["U-bolt", "U-bolt *"]
+    - class: magnet-gap
+      min: {value: 0.1, status: tbd, source: "[design] a lid magnet stands off the steel it pulls on by config/body.yaml closure.magnet_recess, so the oak seats on the frame and not on the magnets (ADR 0031): the gap IS that recess. Decided by: the pull measured on the first lid (M2)"}
+      pairs:
+        - ["lid magnet *", "key plate"]
+        - ["lid magnet *", "key plate stud *"]
     - class: through-hole
       min: {value: 0.2, status: nominal, source: "[calc] a rod through a hole it does not locate in: the hole's cut or drilled position +/-0.13 [from memory] on each of the two parts it passes = 0.18, held at 0.2 (config/body.yaml hardware.ubolt_hole_clear gives 0.25 a side)"}
       pairs:
