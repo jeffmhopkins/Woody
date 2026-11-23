@@ -47,18 +47,18 @@ module hole(p, what, c, d, face, depth, bom = "") echo("FAB", p, "hole", what, c
 module fab_geom() {
     o = [x_in0, 0];
     stock("oak_top", oak_top_t, [x_in1 - x_in0 + ends_mouth_cap_t + ends_tail_cap_t, W], ["underside", "playing face"]);
-    layer("oak_top", "oak-top", "", "through", "outline with both ends' fingers (the mouth end's stand at negative X), cap slots, matrix window");
+    layer("oak_top", "oak-top", "", "through", "outline, end fingers, cap slots, matrix window");
     layer("oak_top", "oak-grooves", "underside", stack_groove_depth, "side grooves");
-    layer("oak_top", "oak-pockets", "underside", col_pocket_depth, str("column screw head pockets (each then cut deeper for its magnet: the holes table)", usb_pocket_need > 0 ? " and the recovery USB-C pocket" : ""));
+    layer("oak_top", "oak-pockets", "underside", col_pocket_depth, str("column screw head pockets (magnets: see holes)", usb_pocket_need > 0 ? " and the recovery USB-C pocket" : ""));
     layer("oak_top", "oak-inserts", "underside", hardware_mx_insert_l, "Matrix carrier insert holes");
     layer("oak_top", "oak-relief", "underside", openings_matrix_relief_d, "relief over the Matrix");
     layer("oak_top", "oak-rebates", "playing face", openings_matrix_acrylic_t, "matrix window rebate");
     layer("oak_top", "oak-logo", "playing face", logo_depth, str("maker's mark etch, filled: ", logo_fill));
-    for (m = columns()) hole("oak_top", "column screw head pocket, cut on down for its magnet", sh(m, o), hardware_col_pocket_d, "underside", cl_mag_depth, "MECH-LID-MAGNET");
+    for (m = columns()) hole("oak_top", "column pocket and magnet", sh(m, o), hardware_col_pocket_d, "underside", cl_mag_depth, "MECH-LID-MAGNET");
     for (m = mx_mounts) hole("oak_top", "threaded insert hole", sh(m, o), hardware_mx_insert_hole, "underside", hardware_mx_insert_l, "MECH-MX-INSERT");
 
     stock("oak_bottom", oak_bottom_t, [x_in1 - x_in0 + ends_mouth_cap_t + ends_tail_cap_t, W], ["outside face", "inside face"]);
-    layer("oak_bottom", "oak-bottom", "", "through", "outline with both ends' fingers (the mouth end's stand at negative X), thumb recesses, U-bolt holes");
+    layer("oak_bottom", "oak-bottom", "", "through", "outline, end fingers, thumb recesses, U-bolt holes");
     layer("oak_bottom", "oak-grooves", "inside face", stack_groove_depth, "side grooves");
     for (u = ubolt_legs()) hole("oak_bottom", "U-bolt leg", sh(u, o), ubolt_hole_d, "", "through", "MECH-UBOLT");
 
