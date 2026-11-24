@@ -7,46 +7,11 @@
 # mesh distances (manifold3d min_gap) on float32 meshes, so a gap within 0.005 of its minimum
 # meets it; 'at' is approximate. `cad.py check` fails on UNDER MINIMUM.
 
-CLASH 3
-        46.2 mm3  breath sensor  x  parts main board   [X 20.8-26.9  Y 40.0-43.3  Z 10.1-12.7]
-         6.6 mm3  MIDI lead  x  parts main board   [X 296.7-299.4  Y 41.5-44.5  Z 11.4-12.7]
-         1.9 mm3  breath sensor  x  main board   [X 8.6-26.9  Y 30.7-48.5  Z 9.9-10.1]
+CLASH 0 - none
 
-UNDER MINIMUM 31
-  gap    min  margin  class                pair
-   0.40   0.75   -0.35  moving-cap           cap RT1  x  oak bottom   [at 149.7, 10.0, 0.5]
-   0.40   0.75   -0.35  moving-cap           cap RT3  x  oak bottom   [at 206.3, 10.1, 0.1]
-   0.40   0.75   -0.35  moving-cap           oak bottom  x  travel RT1   [at 166.4, 10.1, 1.1]
-   0.40   0.75   -0.35  moving-cap           oak bottom  x  travel RT3   [at 189.6, 10.1, 2.8]
-   0.40   0.75   -0.35  moving-cap           cap LH5  x  oak top   [at 99.7, 45.8, 39.0]
-   0.40   0.75   -0.35  moving-cap           oak top  x  travel LH5   [at 116.2, 46.0, 38.2]
-   0.40   0.75   -0.35  moving-cap           cap LH4  x  oak top   [at 99.7, 11.1, 38.6]
-   0.40   0.75   -0.35  moving-cap           oak top  x  travel LH4   [at 99.5, 11.2, 35.5]
-   0.40   0.75   -0.35  moving-cap           cap RH1  x  oak top   [at 149.7, 20.1, 39.0]
-   0.40   0.75   -0.35  moving-cap           cap RH5  x  oak top   [at 207.7, 45.8, 39.0]
-   0.40   0.75   -0.35  moving-cap           cap RT2  x  oak bottom   [at 149.7, 46.9, 0.1]
-   0.40   0.75   -0.35  moving-cap           cap RT4  x  oak bottom   [at 206.4, 46.8, 0.5]
-   0.40   0.75   -0.35  moving-cap           oak bottom  x  travel RT2   [at 149.5, 46.8, 1.3]
-   0.40   0.75   -0.35  moving-cap           oak bottom  x  travel RT4   [at 206.4, 46.8, 2.4]
-   0.40   0.75   -0.35  moving-cap           oak top  x  travel RH1   [at 149.4, 20.4, 35.7]
-   0.40   0.75   -0.35  moving-cap           oak top  x  travel RH5   [at 207.5, 45.6, 38.1]
-   0.40   0.75   -0.35  moving-cap           cap RH4  x  oak top   [at 207.6, 11.1, 38.5]
-   0.40   0.75   -0.35  moving-cap           cap RH6  x  oak top   [at 242.4, 27.8, 38.5]
-   0.40   0.75   -0.35  moving-cap           oak top  x  travel RH4   [at 207.5, 11.2, 35.5]
-   0.40   0.75   -0.35  moving-cap           oak top  x  travel RH6   [at 242.4, 27.9, 35.9]
-   0.40   0.75   -0.35  moving-cap           cap LT1  x  oak bottom   [at 41.6, 10.2, 0.4]
-   0.40   0.75   -0.35  moving-cap           oak bottom  x  travel LT1   [at 41.5, 10.2, 0.5]
-   0.40   0.75   -0.35  moving-cap           cap LT3  x  oak bottom   [at 98.3, 10.1, 0.1]
-   0.40   0.75   -0.35  moving-cap           oak bottom  x  travel LT3   [at 98.4, 10.1, 2.9]
-   0.40   0.75   -0.35  moving-cap           cap LH1  x  oak top   [at 41.7, 20.1, 39.0]
-   0.40   0.75   -0.35  moving-cap           cap LT2  x  oak bottom   [at 41.7, 47.0, 0.6]
-   0.40   0.75   -0.35  moving-cap           oak bottom  x  travel LT2   [at 41.8, 47.0, 2.8]
-   0.40   0.75   -0.35  moving-cap           oak top  x  travel LH1   [at 41.5, 20.3, 37.8]
-   0.40   0.75   -0.35  moving-cap           cap LT4  x  oak bottom   [at 81.7, 46.9, 0.1]
-   0.40   0.75   -0.35  moving-cap           oak bottom  x  travel LT4   [at 98.5, 46.8, 3.6]
-   0.18   0.50   -0.32  against-oak          Matrix LEDs  x  oak top   [at 277.7, 39.0, 34.3]
+UNDER MINIMUM 0 - none
 
-ACCEPTED NEAR-MISSES 23 (by `near:` rule in mechanical/clash-allow.yaml)
+ACCEPTED NEAR-MISSES 54 (by `near:` rule in mechanical/clash-allow.yaml)
   near: IDC plug * key board  x  parts * - the plug stands in the key board's J-CHAIN shroud, wholly inside that header's courtyard, where tools/pcb.py check allows no other part: the rule that keeps parts off it is the courtyard check on the placed board, not this layer envelope's edge
      0.10   0.50   -0.40  parts-envelope       IDC plug left_hand key board  x  parts left_hand   [at 78.8, 34.8, 27.1]
      0.10   0.50   -0.40  parts-envelope       IDC plug right_hand key board  x  parts right_hand   [at 186.0, 34.7, 27.1]
@@ -74,6 +39,40 @@ ACCEPTED NEAR-MISSES 23 (by `near:` rule in mechanical/clash-allow.yaml)
      0.18   0.30   -0.12  cap-over-switch      switch RT3  x  travel RT3   [at 197.7, 21.4, 1.2]
   near: breath inlet barb  x  breath inner barb - issue #36: the two Clippard 12842 barbs' #10-32 threads meet end to end inside the E-Z LOK insert's bore, and the gap between their ends is set by inlet.inner_gap so that the two threads do not touch (config/body.yaml inlet). It is a gap along one bore, not a clearance between parts that move or are placed independently, so default's 0.5 does not apply
      0.07   0.50   -0.43  default              breath inlet barb  x  breath inner barb   [at 4.0, 29.6, 16.7]
+  near: cap *  x  oak * - accepted by the owner, 2026-11-24 ('can both be fixed with a file. Not concerned'). The sides of every cap keep stack.cap_clear; only a cap's corner, drawn square, comes nearer the slot's inside corner, which is milled round (drc.echo 'rounded inside corners clear the caps and the LED array' holds the figure). A real MT165's corner is rounded, so the real gap is larger, and a tight corner is eased with a file at fitting
+     0.40   0.75   -0.35  moving-cap           cap RT1  x  oak bottom   [at 149.7, 10.0, 0.5]
+     0.40   0.75   -0.35  moving-cap           cap RT3  x  oak bottom   [at 206.3, 10.1, 0.1]
+     0.40   0.75   -0.35  moving-cap           cap LH5  x  oak top   [at 99.7, 45.8, 39.0]
+     0.40   0.75   -0.35  moving-cap           cap LH4  x  oak top   [at 99.7, 11.1, 38.6]
+     0.40   0.75   -0.35  moving-cap           cap RH1  x  oak top   [at 149.7, 20.1, 39.0]
+     0.40   0.75   -0.35  moving-cap           cap RH5  x  oak top   [at 207.7, 45.8, 39.0]
+     0.40   0.75   -0.35  moving-cap           cap RT2  x  oak bottom   [at 149.7, 46.9, 0.1]
+     0.40   0.75   -0.35  moving-cap           cap RT4  x  oak bottom   [at 206.4, 46.8, 0.5]
+     0.40   0.75   -0.35  moving-cap           cap RH4  x  oak top   [at 207.6, 11.1, 38.5]
+     0.40   0.75   -0.35  moving-cap           cap RH6  x  oak top   [at 242.4, 27.8, 38.5]
+     0.40   0.75   -0.35  moving-cap           cap LT1  x  oak bottom   [at 41.6, 10.2, 0.4]
+     0.40   0.75   -0.35  moving-cap           cap LT3  x  oak bottom   [at 98.3, 10.1, 0.1]
+     0.40   0.75   -0.35  moving-cap           cap LH1  x  oak top   [at 41.7, 20.1, 39.0]
+     0.40   0.75   -0.35  moving-cap           cap LT2  x  oak bottom   [at 41.7, 47.0, 0.6]
+     0.40   0.75   -0.35  moving-cap           cap LT4  x  oak bottom   [at 81.7, 46.9, 0.1]
+  near: travel *  x  oak * - as 'cap *' x 'oak *': the same corner, swept through the cap's travel
+     0.40   0.75   -0.35  moving-cap           oak bottom  x  travel RT1   [at 166.4, 10.1, 1.1]
+     0.40   0.75   -0.35  moving-cap           oak bottom  x  travel RT3   [at 189.6, 10.1, 2.8]
+     0.40   0.75   -0.35  moving-cap           oak top  x  travel LH5   [at 116.2, 46.0, 38.2]
+     0.40   0.75   -0.35  moving-cap           oak top  x  travel LH4   [at 99.5, 11.2, 35.5]
+     0.40   0.75   -0.35  moving-cap           oak bottom  x  travel RT2   [at 149.5, 46.8, 1.3]
+     0.40   0.75   -0.35  moving-cap           oak bottom  x  travel RT4   [at 206.4, 46.8, 2.4]
+     0.40   0.75   -0.35  moving-cap           oak top  x  travel RH1   [at 149.4, 20.4, 35.7]
+     0.40   0.75   -0.35  moving-cap           oak top  x  travel RH5   [at 207.5, 45.6, 38.1]
+     0.40   0.75   -0.35  moving-cap           oak top  x  travel RH4   [at 207.5, 11.2, 35.5]
+     0.40   0.75   -0.35  moving-cap           oak top  x  travel RH6   [at 242.4, 27.9, 35.9]
+     0.40   0.75   -0.35  moving-cap           oak bottom  x  travel LT1   [at 41.5, 10.2, 0.5]
+     0.40   0.75   -0.35  moving-cap           oak bottom  x  travel LT3   [at 98.4, 10.1, 2.9]
+     0.40   0.75   -0.35  moving-cap           oak bottom  x  travel LT2   [at 41.8, 47.0, 2.8]
+     0.40   0.75   -0.35  moving-cap           oak top  x  travel LH1   [at 41.5, 20.3, 37.8]
+     0.40   0.75   -0.35  moving-cap           oak bottom  x  travel LT4   [at 98.5, 46.8, 3.6]
+  near: Matrix LEDs  x  oak top - accepted by the owner, 2026-11-24 ('can both be fixed with a file. Not concerned'). The LED array's corner against the rounded inside corner of the oak's window opening (drc.echo 'rounded inside corners clear the caps and the LED array' holds the figure); the array's sides keep against-oak's minimum. Not touching as drawn; if the carrier seats off-centre the oak corner is eased with a file at fitting
+     0.18   0.50   -0.32  against-oak          Matrix LEDs  x  oak top   [at 277.7, 39.0, 34.3]
 
 NEAR 166 (at or over the minimum, under 1 mm)
    0.05   0.00   +0.05  coaxial              Matrix carrier screw 1  x  Matrix carrier spacer 1   [at 294.3, 10.5, 30.0]
@@ -246,7 +245,7 @@ NEAR 166 (at or over the minimum, under 1 mm)
 SEATED 154 (touching, in a class whose minimum is 0)
   seated 154: J-CHAIN left_hand key board x board left_hand; J-CHAIN left_hand main board x main board; J-CHAIN right_hand key board x board right_hand; J-CHAIN right_hand main board x main board; J-MCU x main board; J-MCU-C x Matrix carrier; J-MIDI x main board; J-UMB x main board; LED row x main board; MIDI jack x tail cap; Matrix LEDs x Matrix board; Matrix USB-C receptacle x Matrix board; Matrix USB-C receptacle x Matrix underside parts; Matrix board x Matrix header 1; Matrix board x Matrix header 2; Matrix board x Matrix underside parts; Matrix carrier insert 1 x Matrix carrier screw 1; Matrix carrier insert 1 x Matrix carrier spacer 1; Matrix carrier insert 1 x oak top; Matrix carrier insert 2 x Matrix carrier screw 2; Matrix carrier insert 2 x Matrix carrier spacer 2; Matrix carrier insert 2 x oak top; Matrix carrier insert 3 x Matrix carrier screw 3; Matrix carrier insert 3 x Matrix carrier spacer 3; Matrix carrier insert 3 x oak top; Matrix carrier screw 1 x Matrix carrier washer 1; Matrix carrier screw 2 x Matrix carrier washer 2; Matrix carrier screw 3 x Matrix carrier washer 3; Matrix carrier spacer 1 x oak top; Matrix carrier spacer 2 x oak top; Matrix carrier spacer 3 x oak top; Matrix carrier x Matrix carrier spacer 1; Matrix carrier x Matrix carrier spacer 2; Matrix carrier x Matrix carrier spacer 3; Matrix carrier x Matrix carrier washer 1; Matrix carrier x Matrix carrier washer 2; Matrix carrier x Matrix carrier washer 3; Matrix carrier x Matrix header 1; Matrix carrier x Matrix header 2; U-bolt nut 1 x U-bolt washer 1; U-bolt nut 2 x U-bolt washer 2; U-bolt spacer 1 x bottom plate; U-bolt spacer 1 x main board; U-bolt spacer 2 x bottom plate; U-bolt spacer 2 x main board; U-bolt washer 1 x main board; U-bolt washer 2 x main board; board left_hand x column standoff 1; board left_hand x column standoff 2; board left_hand x column standoff 3; board left_hand x column standoff 4; board left_hand x key-board spacer left_hand 1; board left_hand x key-board spacer left_hand 2; board left_hand x key-board spacer left_hand 3; board left_hand x key-board spacer left_hand 4; board left_hand x parts left_hand; board right_hand x column standoff 5; board right_hand x column standoff 6; board right_hand x column standoff 7; board right_hand x column standoff 8; board right_hand x key-board spacer right_hand 1; board right_hand x key-board spacer right_hand 2; board right_hand x key-board spacer right_hand 3; board right_hand x key-board spacer right_hand 4; board right_hand x parts right_hand; bottom plate x main board spacer 10; bottom plate x main board spacer 11; bottom plate x main board spacer 3; bottom plate x main board spacer 4; bottom plate x main board spacer 7; bottom plate x main board spacer 8; bottom plate x main board spacer 9; bottom plate x mouth cap; bottom plate x oak bottom; breath inlet barb x breath inlet insert; breath inlet insert x breath inner barb; column screw 3 x column standoff 3; column screw 4 x column standoff 4; column screw 7 x column standoff 7; column screw 8 x column standoff 8; column standoff 1 x key plate stud left_hand 1; column standoff 1 x main board; column standoff 2 x key plate stud left_hand 2; column standoff 2 x main board; column standoff 3 x key plate stud left_hand 3; column standoff 3 x main board; column standoff 4 x key plate stud left_hand 4; column standoff 4 x main board; column standoff 5 x key plate stud right_hand 1; column standoff 5 x main board; column standoff 6 x key plate stud right_hand 2; column standoff 6 x main board; column standoff 7 x key plate stud right_hand 3; column standoff 7 x main board; column standoff 8 x key plate stud right_hand 4; column standoff 8 x main board; etherCON x tail cap; etherCON x umbilical adapter; key plate x key-board spacer left_hand 1; key plate x key-board spacer left_hand 2; key plate x key-board spacer left_hand 3; key plate x key-board spacer left_hand 4; key plate x key-board spacer right_hand 1; key plate x key-board spacer right_hand 2; key plate x key-board spacer right_hand 3; key plate x key-board spacer right_hand 4; key plate x mouth cap; key plate x oak top; lid magnet 1 x oak top; lid magnet 2 x oak top; lid magnet 3 x oak top; lid magnet 4 x oak top; lid magnet 5 x oak top; lid magnet 6 x oak top; lid magnet 7 x oak top; lid magnet 8 x oak top; logo fill ring x oak top; logo fill wave and moon x oak top; main board nut 10 x main board stud 10; main board nut 11 x main board stud 11; main board nut 9 x main board stud 9; main board stud 10 x oak bottom; main board stud 11 x oak bottom; main board stud 9 x oak bottom; main board x main board nut 10; main board x main board nut 11; main board x main board nut 9; main board x main board spacer 10; main board x main board spacer 11; main board x main board spacer 3; main board x main board spacer 4; main board x main board spacer 7; main board x main board spacer 8; main board x main board spacer 9; main board x parts main board; main board x tails J-CHAIN-LH; main board x tails J-CHAIN-RH; main board x tails J-MCU; main board x tails J-UMB; main board x tails U-BUCK; main board x tall parts main board; matrix window x oak top; mouth cap x oak bottom; mouth cap x oak top; mouth cap x side left; mouth cap x side right; oak bottom x side left; oak bottom x side right; oak bottom x tail cap; oak top x side left; oak top x side right; oak top x tail cap; side left x tail cap; side right x tail cap
 
-ALLOWED 147 (by rule in mechanical/clash-allow.yaml)
+ALLOWED 150 (by rule in mechanical/clash-allow.yaml)
        230.5 mm3  IDC plug Matrix carrier  x  J-MCU-C   - the socket sits in its header's shroud
        230.5 mm3  IDC plug Matrix main board  x  J-MCU   - the socket sits in its header's shroud
        223.1 mm3  J-MIDI  x  parts main board   - J-MIDI is one of the main board's surface-mount parts, drawn as its own solid where the board's parts layer envelope also stands; the envelope has no cut-out for it yet (add one at the next woody_body.scad edit). A layer envelope cannot follow the placement, as for switch x parts
@@ -256,6 +255,7 @@ ALLOWED 147 (by rule in mechanical/clash-allow.yaml)
        135.0 mm3  IDC plug right_hand key board  x  J-CHAIN right_hand key board   - each plug sits in its header's shroud (ADR 0017)
         76.7 mm3  breath inlet insert  x  mouth cap   - the insert's M8x1.25 thread is drawn at its major diameter in the cap's 6.9 mm tap-drill hole (config/body.yaml inlet): it cuts its thread into the oak and is bedded in epoxy
         54.5 mm3  breath inner barb  x  breath tube   - the clear breath tube pushes onto the inner barb
+        46.2 mm3  breath sensor  x  parts main board   - accepted by the owner, 2026-11-24 ('you are good to log those exceptions and the reasoning'). The sensor's lower port stands out over the board inside the height of the small-parts envelope, which is a layer slab and not a part. What keeps a part from under the port is the placed board: on main-board.kicad_pcb no footprint is within 4 mm of the port's plan area (measured 2026-11-24; the nearest is C38), and tools/pcb.py check holds the sensor's courtyard
         37.8 mm3  breath sensor  x  breath tube   - the clear tube pushes onto the sensor's P1 barb
         32.8 mm3  main board  x  switch LT3   - the thumb switches solder into the main board (ADR 0017): pins and centre pole pass through its holes, which are not modelled
         32.8 mm3  board left_hand  x  switch LH3   - the switch's pins and centre pole pass through holes in its cluster board; the holes are not modelled
@@ -341,7 +341,9 @@ ALLOWED 147 (by rule in mechanical/clash-allow.yaml)
          7.5 mm3  IDC plug left_hand key board  x  ribbon left_hand   - each ribbon's end is crimped into its IDC plug (ADR 0017)
          7.5 mm3  IDC plug right_hand main board  x  ribbon right_hand   - each ribbon's end is crimped into its IDC plug (ADR 0017)
          7.5 mm3  IDC plug right_hand key board  x  ribbon right_hand   - each ribbon's end is crimped into its IDC plug (ADR 0017)
+         6.6 mm3  MIDI lead  x  parts main board   - accepted by the owner, 2026-11-24 ('seems like a definite no issue'). CBL-MIDI is a flexible lead drawn straight between its bends; its end at J-MIDI's plug dips into the small-parts envelope, a layer slab, past the header's keep-out. On main-board.kicad_pcb no footprint is within 4 mm of that corner (measured 2026-11-24), and the lead lifts over anything that were
          3.2 mm3  MIDI jack  x  MIDI lead   - CBL-MIDI is soldered to the jack's tabs
+         1.9 mm3  breath sensor  x  main board   - accepted by the owner, 2026-11-24 ('The breath sensor is made to be mounted surface mount'). The lower port is drawn at boards.sensor_port_z, scaled off a drawing that does not dimension it, with the port at its largest diameter, and that pairing puts its underside just under the seating plane. A surface-mount case cannot reach below its own seating plane: the banked case model (datasheets/analog/MPXV7007-CASE-1351-01-HAXO-3D.step) has the port clear of it. No slot in the board (owner, 2026-10-05: 'No cutout, it'll be fine'); the lower port carries no tube
          1.5 mm3  IDC plug left_hand main board  x  parts main board   - the plug stands in J-CHAIN's shroud, wholly inside that header's courtyard, where tools/pcb.py check allows no other part; the board's parts layer envelope has no cut-out as large as the plug. A layer envelope cannot follow the placement
          1.5 mm3  IDC plug right_hand main board  x  parts main board   - the plug stands in J-CHAIN's shroud, wholly inside that header's courtyard, where tools/pcb.py check allows no other part; the board's parts layer envelope has no cut-out as large as the plug. A layer envelope cannot follow the placement
          1.0 mm3  key plate  x  switch RH5   - the KS-33 clips into the plate: its latch arms (14.70) grip the 14.00 cutout edges - Gateron sheet 3
