@@ -464,7 +464,7 @@
     (property "Manufacturer" "hanxia" (at 40.64 48.26 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "HX PZ2.54-1x3P TP-YQ" (at 40.64 48.26 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "C41417360" (at 40.64 48.26 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Assembly" "hand" (at 40.64 48.26 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 40.64 48.26 0) (effects (font (size 1.27 1.27)) hide))
     (pin "1" (uuid 08f7969a-8365-5572-9192-28bd57b904e9))
     (pin "2" (uuid 822d97c1-8907-58a9-b0f5-6d8b603fedbb))
     (pin "3" (uuid 8f742ae8-8b0c-5109-82ab-ed465ccef451))

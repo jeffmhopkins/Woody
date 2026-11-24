@@ -1183,7 +1183,7 @@
     (property "Manufacturer" "JST" (at 167.64 63.5 0) (effects (font (size 1.27 1.27)) hide))
     (property "MPN" "S3B-PH-SM4-TB(LF)(SN)" (at 167.64 63.5 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC" "C265101" (at 167.64 63.5 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Assembly" "hand" (at 167.64 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Assembly" "machine" (at 167.64 63.5 0) (effects (font (size 1.27 1.27)) hide))
     (property "Pins_source" "JST PH, surface mount, side entry: pin 1 at the end the drawing's 'Mark of No. 1 circuit' marks [ds datasheets/connectors/JST-PH-SERIES.pdf p.4, Header (SMT type), side entry]; JLC's library footprint for C265101 numbers them the same way, turned 180 degrees [ds datasheets/connectors/EASYEDA-C265101-S3B-PH-SM4-TB-FOOTPRINT.json]" (at 167.64 63.5 0) (effects (font (size 1.27 1.27)) hide))
     (instances (project "main-board" (path "/b12a49ac-ffa0-5078-b2ba-e15d161f1936/e02c6272-2aa9-4bec-ba9c-1e4212a18689" (reference "J7") (unit 1))) (project "midi-out" (path "/4b60816b-23dc-5f77-b39b-2d8620b1398e" (reference "J-MIDI") (unit 1))))
   )
