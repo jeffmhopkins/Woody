@@ -2566,8 +2566,22 @@ def assembly_files(bdir, name, fab):
                 rot = float(r["Rot"])
                 if r["Side"] == "bottom":
                     rot = 180.0 - rot
+                x, y = r["PosX"], r["PosY"]
+                # a row's dx, dy (issue #59): where JLC's footprint has its origin, in the KiCad
+                # footprint's own frame (mm, y down, as the .kicad_mod is written). The placement
+                # export carries the footprint's anchor and JLC puts its own origin there, so a
+                # footprint anchored off its pads' centre (a pin header on pin 1) is placed that
+                # far out without it. Turned by the part's own angle; the export's y is up.
+                if o and (o.get("dx") or o.get("dy")):
+                    if r["Side"] == "bottom":
+                        sys.exit(f"pcb: {ref} ({lcsc}) has a dx/dy in {os.path.relpath(JLC_ROTATION, ROOT)} and is on "
+                                 f"the bottom: the offset is only worked out for a top-side part")
+                    a = math.radians(float(r["Rot"]))
+                    dx, dy = float(o.get("dx") or 0), float(o.get("dy") or 0)
+                    x = f"{float(x) + dx * math.cos(a) + dy * math.sin(a):.6f}"
+                    y = f"{float(y) - (-dx * math.sin(a) + dy * math.cos(a)):.6f}"
                 rot = (rot + (float(o["rotation"]) if o else 0.0)) % 360.0
-                w.writerow([ref, r["PosX"], r["PosY"], "Bottom" if r["Side"] == "bottom" else "Top", f"{rot:.6f}"])
+                w.writerow([ref, x, y, "Bottom" if r["Side"] == "bottom" else "Top", f"{rot:.6f}"])
     if unchecked:
         print(f"pcb: no JLC rotation offset for {', '.join(sorted(unchecked))} - confirm them in JLC's preview")
     # layout.yaml hand_trim: a hand part's tails, cut after soldering to at most a length
